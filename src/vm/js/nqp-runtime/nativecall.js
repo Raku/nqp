@@ -2,7 +2,10 @@
 var op = {};
 var ffi = require('ffi');
 var ref = require('ref');
+const bignum = require('bignum-browserify');
+
 const Null = require('./null.js');
+const null_s = require('./null_s.js');
 exports.op = op;
 
 const ctypes = {
@@ -11,7 +14,10 @@ const ctypes = {
   utf8str: ref.types.CString,
 };
 
-for (let type of ['int', 'short', 'char', 'uint', 'ushort', 'uchar', 'double', 'float', 'longlong']) {
+const shortInts = {int: true, short: true, char: true, ushort: true, uchar: true};
+const longInts = {uint: true, longlong: true};
+const floats = {double: true, float: true};
+for (let type of Object.keys(floats).concat(Object.keys(shortInts), Object.keys(longInts))) {
   ctypes[type] = ref.types[type];
 }
 
@@ -30,6 +36,7 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
     symbols[symbol] = [mapType(returns), args.array.map(mapType)];
     target.$$lib = ffi.Library(libname === '' ? null : libname, symbols); // eslint-disable-line new-cap
     target.$$symbol = symbol;
+    target.$$ret = returns.content.get('type').$$getStr();
     target.$$args = args.array.map(arg => arg.content.get('type').$$getStr());
   } catch (e) {
     throw new NQPException("native call exception:" + e);
@@ -42,30 +49,55 @@ op.nativecall = function(returns, callObject, args) {
     const type = callObject.$$args[i];
     // HACK for cpointers not being done properly yet
     const arg = type === 'cpointer' ? args.array[i] : args.array[i].$$decont(null);
-    if (type === 'int' || type === 'short' || type === 'char' || type == 'ushort' || type == 'uchar') {
+    if (type in shortInts) {
       mangled[i] = arg.$$getInt();
-    } else if (type === 'longlong' || type == 'uint') {
+    } else if (type in longInts) {
       if (arg.$$getBignum) {
         mangled[i] = arg.$$getBignum().toString();
       } else {
         mangled[i] = arg.$$getInt();
       }
-    } else if (type === 'float' || type === 'double') {
+    } else if (type in floats) {
       mangled[i] = args.array[i].$$decont(null).$$getNum();
     } else if (type === 'utf8str') {
       mangled[i] = args.array[i].$$decont(null).$$getStr();
     } else if (type === 'cpointer') {
-      // TODO - do this properly
-      mangled[i] = args.array[i];
+      mangled[i] = args.array[i].$$decont(null).$$getPointer();
     } else {
       throw "can't mangle: " + callObject.$$args[i];
     }
   }
   const ret = callObject.$$lib[callObject.$$symbol].apply(callObject.$$lib, mangled);
-  if (ret === null) {
+
+  if (callObject.$$ret === 'void') {
     return Null;
+  } else if (callObject.$$ret === 'utf8str') {
+    if (ret === null) {
+      return returns;
+    } else {
+      const boxed = returns._STable.REPR.allocate(returns._STable);
+      boxed.$$setStr(ret);
+      return boxed;
+    }
+  } else if (callObject.$$ret === 'cpointer') {
+      const boxed = returns._STable.REPR.allocate(returns._STable);
+      boxed.$$setPointer(ret);
+      return boxed;
+  } else if (callObject.$$ret in shortInts) {
+      const boxed = returns._STable.REPR.allocate(returns._STable);
+      boxed.$$setInt(ret);
+      return boxed;
+  } else if (callObject.$$ret in longInts) {
+      const boxed = returns._STable.REPR.allocate(returns._STable);
+      boxed.$$setBignum(bignum(ret));
+      return boxed;
+  } else if (callObject.$$ret in floats) {
+      const boxed = returns._STable.REPR.allocate(returns._STable);
+      boxed.$$setNum(ret);
+      return boxed;
   } else {
-    return ret;
+    console.log('returning ', typeof callObject.$$ret, callObject.$$ret, shortInts, callObject.$$ret in shortInts);
+    return ret === null ? Null : ret;
   }
 };
 

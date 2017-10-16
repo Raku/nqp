@@ -1474,7 +1474,19 @@ class NativeCall extends REPR {
 };
 reprs.NativeCall = NativeCall;
 
-class CPointer extends REPR {};
+class CPointer extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$setPointer(value) {
+        this.$$pointer = value;
+      }
+
+      $$getPointer() {
+        return this.$$pointer;
+      }
+    });
+  }
+};
 reprs.CPointer = CPointer;
 
 class AsyncTask extends REPR {};
