@@ -449,40 +449,34 @@ class RegexCompiler {
         my str $loop := self.new_label;
         my str $done := self.new_label;
 
-        my str $rep := $*BLOCK.add_tmp();
-
-        # TODO - think about removing irep
 
         if $min == 0 && $max == 0 {
             # Nothing to do, and nothing to backtrack into.
             "";
         }
         elsif $node.backtrack eq 'f' {
-            my str $irep := $*BLOCK.add_tmp();
             my str $seplabel := self.new_label;
 
             Chunk.void(
-                "$rep = 0;\n",
-                 ($min < 1 ?? self.mark($loop,$!pos,$rep) ~ self.goto($done) !! ''),
+                "$!rep = 0;\n",
+                 ($min < 1 ?? self.mark($loop,$!pos,$!rep) ~ self.goto($done) !! ''),
                  ($sep ?? self.goto($seplabel) !! ''),
                  self.case($loop),
-                 "$irep = $rep;\n",
                  ($sep ?? self.compile_rx($sep) ~ self.case($seplabel) !! ''),
                  ($sep ?? self.case($seplabel) !! ''),
                  self.compile_rx($node[0]),
                  self.case($loop),
-                 "$rep = $irep;\n",
-                 "$rep++;\n",
-                 ($min > 1 ?? "if ($rep < $min) \{{self.goto($loop)}\}\n" !! ''),
-                 ($max > 1 ?? "if ($rep >= $max) \{{self.goto($done)}\}\n" !! ''),
-                 ($max != 1 ?? self.mark($loop, $!pos, $rep) !! ''),
+                 "$!rep++;\n",
+                 ($min > 1 ?? "if ($!rep < $min) \{{self.goto($loop)}\}\n" !! ''),
+                 ($max > 1 ?? "if ($!rep >= $max) \{{self.goto($done)}\}\n" !! ''),
+                 ($max != 1 ?? self.mark($loop, $!pos, $!rep) !! ''),
                  self.case($done)
            );
         }
         else {
             my @code;
 
-            @code.push("$rep = 0;\n");
+            @code.push("$!rep = 0;\n");
 
             if $min == 0 { @code.push(self.mark($done,$!pos,0)) }
             elsif $needmark { @code.push(self.mark($done,-1,0)) }
@@ -491,19 +485,19 @@ class RegexCompiler {
             @code.push(self.compile_rx($node[0]));
 
             if $needmark {
-                @code.push(self.peek($done, '*', $rep));
+                @code.push(self.peek($done, '*', $!rep));
                 @code.push($node.backtrack eq 'r' ?? self.commit($done)  !! '');
-                @code.push("$rep++;\n");
-                @code.push(($max > 1 ?? "if ($rep >= {$node.max}) \{{self.goto($done)}\}\n" !! ''));
+                @code.push("$!rep++;\n");
+                @code.push(($max > 1 ?? "if ($!rep >= {$node.max}) \{{self.goto($done)}\}\n" !! ''));
             }
             unless $max == 1 {
-                @code.push(self.mark($done, $!pos, $rep));
+                @code.push(self.mark($done, $!pos, $!rep));
                 @code.push($sep ?? self.compile_rx($sep) !! '');
                 @code.push(self.goto($loop));
             }
 
             @code.push(self.case($done));
-            @code.push($min > 1 ?? "if ($rep < {+$node.min}) \{{self.fail}\}" !! "");
+            @code.push($min > 1 ?? "if ($!rep < {+$node.min}) \{{self.fail}\}" !! "");
 
             Chunk.new($T_VOID, "", @code);
         }
