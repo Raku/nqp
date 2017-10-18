@@ -684,7 +684,7 @@ class P6int extends REPR {
       let bits = integer.content.get('bits');
       if (bits === undefined) {
       } else if (bits instanceof NQPInt) {
-        this.bits = bits < 0 ? cType(bits.value).size * 8 : bits;
+        this.bits = bits.value < 0 ? cType(bits.value).size * 8 : bits.value;
       } else {
         throw 'bits to P6int.compose must be a native int';
       }
@@ -745,6 +745,9 @@ class P6int extends REPR {
 
 
   serializeReprData(st, cursor) {
+    if (typeof this.bits != 'string' && typeof this.bits != 'number') {
+      console.log(this.bits);
+    }
     cursor.varint(this.bits);
     cursor.varint(this.isUnsigned);
   }
