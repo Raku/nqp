@@ -26,7 +26,7 @@ sub match ($text, $regex, :$global?) {
 
 
 =begin item subst
-Substitute an match of C<$regex> in C<$text> with C<$replacement>,
+Substitute a match of C<$regex> in C<$text> with C<$replacement>,
 returning the substituted string.  If C<$global> is given, then
 perform the replacement on all matches of C<$text>.
 =end item
