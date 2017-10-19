@@ -433,6 +433,7 @@ class QAST::OperationsJS {
     add_simple_op('eqat', $T_BOOL, [$T_STR, $T_STR, $T_INT], sub ($haystack, $needle, $offset) {
         "($haystack.substr($offset, $needle.length) === $needle)"
     });
+    add_simple_op('eqatic', $T_BOOL, [$T_STR, $T_STR, $T_INT]);
 
 
 

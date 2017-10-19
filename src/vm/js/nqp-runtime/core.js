@@ -1499,3 +1499,7 @@ op.getuniprop_str = function(codePoint, propCode) {
   const got = uniData.props[propCode][codePoint];
   return got === undefined ? 'NaN' : got;
 };
+
+op.eqatic = function(haystack, needle, offset) {
+  return (haystack.substr(offset, needle.length).toLowerCase() === needle.toLowerCase()) ? 1 : 0;
+};
