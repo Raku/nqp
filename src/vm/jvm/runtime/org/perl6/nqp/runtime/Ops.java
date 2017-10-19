@@ -4145,8 +4145,13 @@ public final class Ops {
         return val.substring((int)offset, end);
     }
 
-    // does haystack have needle as a substring at offset?
+    // keep this till we reboostrap
     public static long string_equal_at(String haystack, String needle, long offset) {
+        return string_equal_at(false, haystack, needle, offset);
+    }
+
+    // does haystack have needle as a substring at offset?
+    private static long string_equal_at(boolean ignoreCase, String haystack, String needle, long offset) {
         long haylen = haystack.length();
         long needlelen = needle.length();
 
@@ -4159,7 +4164,15 @@ public final class Ops {
         if (haylen - offset < needlelen) {
             return 0;
         }
-        return haystack.regionMatches((int)offset, needle, 0, (int)needlelen) ? 1 : 0;
+        return haystack.regionMatches(ignoreCase, (int)offset, needle, 0, (int)needlelen) ? 1 : 0;
+    }
+
+    public static long eqat(String haystack, String needle, long offset) {
+        return string_equal_at(false, haystack, needle, offset);
+    }
+
+    public static long eqatic(String haystack, String needle, long offset) {
+        return string_equal_at(true, haystack, needle, offset);
     }
 
     public static long ordfirst(String str) {
