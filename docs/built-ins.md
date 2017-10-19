@@ -12,7 +12,7 @@ Match ```$text``` against ```$regex```.  If the ```$global``` flag is
 given, then return an array of all non-overlapping matches.
 
 ## subst
-* `subst($text, $regex, $repl, :$global?)`
+* `subst($text, $regex, $replacement, :$global?)`
 
 Substitute a match of ```$regex``` in ```$text``` with ```$replacement```,
 returning the substituted string.  If ```$global``` is given, then
