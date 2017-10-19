@@ -144,7 +144,7 @@ class RegexCompiler {
         ~ self.goto($scan)
         ~ self.case($loop)
         ~ "$!pos++;\n"
-        ~ "if ($!pos >= $!target.length) \{{self.fail}\}\n"
+        ~ "if ($!pos > $!target.length) \{{self.fail}\}\n"
         ~ self.set_cursor_attr_int($!cursor, '$!from', $!pos)
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
