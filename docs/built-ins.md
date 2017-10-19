@@ -1,7 +1,7 @@
 # NQP Built-in Subs List
 
 The following subroutines are available to use in ```nqp``` programs.
-They are described in ```nqp/src/core`` modules.
+They are described in ```nqp/src/core``` modules.
 
 # From ```nqp/src/core/Regex.nqp```
 
