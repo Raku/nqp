@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(333);
+plan(345);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -262,6 +262,21 @@ ok(nqp::eqat("foobar","foo", 1) == 0, "eqat with needle argument that matches");
 ok(nqp::eqat("foobar","bar", -3) == 1, "eqat with a negative offset argument");
 ok(nqp::eqat("foobar","foo", -9001) == 1, "eqat with a gigantic offset argument");
 ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer than haystack");
+
+ok(nqp::eqat("Foobar","foO", 0) == 0, "eqat doesn't match with wrong case");
+ok(nqp::eqat("fOobar","oOb", 1) == 0, "eqat doesn't match with wrong case");
+ok(nqp::eqat("fooBar","baR", -3) == 0, "eqat doesn't match with wrong case");
+
+ok(nqp::eqatic("foobar","foo", 0) == 1, "eqatic with needle argument that matches at 0");
+ok(nqp::eqatic("foobar","oob", 1) == 1, "eqatic with needle argument that matches at 1");
+ok(nqp::eqatic("foobar","foo", 1) == 0, "eqatic with needle argument that matches");
+ok(nqp::eqatic("foobar","bar", -3) == 1, "eqatic with a negative offset argument");
+ok(nqp::eqatic("foobar","foo", -9001) == 1, "eqatic with a gigantic offset argument");
+ok(nqp::eqatic("foobar","foobarbaz", 0) == 0, "eqatic with needle argument longer than haystack");
+
+ok(nqp::eqatic("Foobar","foO", 0) == 1, "eqatic with needle argument that matches at 0");
+ok(nqp::eqatic("fOobar","oOb", 1) == 1, "eqatic with needle argument that matches at 1");
+ok(nqp::eqatic("fooBar","baR", -3) == 1, "eqatic with a negative offset argument");
 
 {
     my $source := nqp::list("100", "200", "300");
