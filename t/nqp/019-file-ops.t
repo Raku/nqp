@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(106);
+plan(107);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -27,6 +27,10 @@ ok( $credits.eof, 'At EOF after slurp');
 ok( nqp::chars($rest) > 100, 'slurp read a lot');
 ok( nqp::substr($rest,0,4) ne '=pod', 'slurp after get did not read line twice');
 ok( $credits.tell >= nqp::chars($line) + nqp::chars($rest), 'tell end of file');
+
+dies-ok({
+  open('file_does_not_exist_for_sure', :r);
+}, 'open dies on missing file');
 
 ok( nqp::chars($credits.get) == 0, 'get end of file');
 ok( nqp::chars($credits.get) == 0, 'get end of file repeat');
