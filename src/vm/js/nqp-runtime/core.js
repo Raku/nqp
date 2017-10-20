@@ -710,8 +710,10 @@ op.backendconfig = function() {
   return config;
 };
 
+// FIXME - we take a index in code units not in codepoints
 op.ordbaseat = function(str, index) {
-  throw 'ordbaseat NYI';
+  if (index < 0 || index > str.length) return -1;
+  return str.substr(index, 1).normalize('NFD').codePointAt(0);
 };
 
 op.getpid = function() {
