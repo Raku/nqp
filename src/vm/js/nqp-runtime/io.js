@@ -281,9 +281,17 @@ function modeToFlags(mode) {
 }
 
 op.open = function(name, mode) {
-  let fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
-  fh.encoding = 'utf8';
-  return fh;
+  try {
+    let fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
+    fh.encoding = 'utf8';
+    return fh;
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      throw new NQPException(`Failed to open file ${name}: No such file or director`);
+    } else {
+      throw e;
+    }
+  }
 };
 
 op.seekfh = function(ctx, fh, offset, whence) {
