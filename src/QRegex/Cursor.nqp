@@ -866,15 +866,7 @@ role NQPMatchRole is export {
             my int $litlen := nqp::chars($str);
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
             if $litlen < 1 ||
-#?if jvm
-                ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-#?endif
-#?if js
-                ($i ?? nqp::lc(nqp::substr($target, $!pos, $litlen)) eq nqp::lc($str)
-#?endif
-#?if moar
                 ($i ?? nqp::eqatic($target, $str, $!pos)
-#?endif
                     !! nqp::eqat($target, $str, $!pos)) {
                 my $cur := self."!cursor_start_cur"();
                 $cur."!cursor_pass"($!pos + $litlen);
