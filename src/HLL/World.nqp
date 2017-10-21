@@ -82,9 +82,6 @@ class HLL::World {
 
     has $!is_nested;
 
-    # List of any line number/filename directives in the file.
-    my @*comp_line_directives := nqp::hash();
-
     method BUILD(:$handle!, :$description = '<unknown>', :$context) {
         if $context {
             $!context   := $context;
@@ -186,9 +183,10 @@ class HLL::World {
     }
 
     method add_comp_line_directive(@directive) {
-        my int $elems := nqp::elems(@*comp_line_directives);
-        if $elems == 0 || !(@*comp_line_directives[$elems - 1][0] eq @directive[0]) {
-            nqp::push(@*comp_line_directives, @directive);
+        my @clds := @*comp_line_directives;
+        my int $elems := nqp::elems(@clds);
+        if $elems == 0 || !(@clds[$elems - 1][0] eq @directive[0]) {
+            nqp::push(@clds, @directive);
         }
     }
 }
