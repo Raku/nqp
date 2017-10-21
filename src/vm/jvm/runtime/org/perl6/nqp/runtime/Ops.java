@@ -4194,7 +4194,14 @@ public final class Ops {
     }
 
     public static long ordbaseat(String str, long offset) {
-        throw new RuntimeException("ordbaseat NYI");
+        if (offset < 0 || offset >= str.length()) {
+            return -1;
+        }
+	else {
+            int code = str.codePointAt((int)offset);
+            String letter = new String(new int[]{code}, 0, 1);
+            return Normalizer.normalize(letter, Normalizer.Form.NFD).codePointAt(0);
+        }
     }
 
     public static String sprintf(String format, SixModelObject arr, ThreadContext tc) {
