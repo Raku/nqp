@@ -68,7 +68,7 @@ class RegexCompiler {
             self.compile_rx($node),
             self.case($restart_label),
             "$!cstack = {self.get_cursor_attr($!cursor, '$!cstack')};",
-            "if ($!cstack && $!cstack.\$\$toArray) $!cstack = $!cstack.\$\$toArray;\n",
+            "if ($!cstack && $!cstack.\$\$toArray) $!cstack = $!cstack.\$\$toArray();\n",
             self.case($!fail_label),
             "if ($!bstack.length == 0) \{{self.goto($!done_label)}\}\n",
             "$cstack_top = $!bstack.pop();\n",
