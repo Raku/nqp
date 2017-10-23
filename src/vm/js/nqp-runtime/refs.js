@@ -1,5 +1,3 @@
-let hll = require('./hll.js');
-
 let helpers = exports.helpers = {};
 let op = exports.op = {};
 

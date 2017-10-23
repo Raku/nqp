@@ -5,7 +5,6 @@ var ref = require('ref');
 const bignum = require('bignum-browserify');
 
 const Null = require('./null.js');
-const null_s = require('./null_s.js');
 exports.op = op;
 
 const ctypes = {
