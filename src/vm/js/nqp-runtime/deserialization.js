@@ -194,7 +194,6 @@ class BinaryCursor {
   }
 
   locateThing(thingType) {
-    let packed;
     let scId;
     let index;
 
@@ -202,7 +201,7 @@ class BinaryCursor {
     const PACKED_SC_OVERFLOW = 0xfff;
     const PACKED_SC_IDX_MASK = 0x000fffff;
 
-    packed = this.varint();
+    const packed = this.varint();
     scId = packed >>> PACKED_SC_SHIFT;
     index = packed & PACKED_SC_IDX_MASK;
 
@@ -255,17 +254,15 @@ class BinaryCursor {
   // XXX TODO - length checks
   varint() {
     let result;
-    let first;
-    let need;
     const buffer = this.buffer;
 
-    first = buffer.readUInt8(this.offset++);
+    const first = buffer.readUInt8(this.offset++);
 
     if (first & 0x80) {
       return first - 129;
     }
 
-    need = first >> 4;
+    const need = first >> 4;
 
     if (!need) {
       // unrolled loop for optimization

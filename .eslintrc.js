@@ -13,6 +13,7 @@ module.exports = {
       "prefer-rest-params": "off",
       "prefer-spread": "off",
       "no-invalid-this": "off",
-      "no-throw-literal": "off"
+      "no-throw-literal": "off",
+      "prefer-const": "error"
     }
 };
