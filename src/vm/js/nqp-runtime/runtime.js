@@ -564,3 +564,14 @@ for (let name of Object.keys(chunkNamesToTypes)) {
 exports.coercion = function(got, expected) {
   throw new Error("Can't convert, got: " + chunkTypesToNames[got] + ' expected:' + chunkTypesToNames[expected]);
 };
+
+exports.charrange_i = function(char, lower, upper) {
+  return (
+    lower <= char.toLowerCase().charCodeAt(0)
+    && char.toLowerCase().charCodeAt(0) <= upper
+  ) || (
+    lower <= char.toUpperCase().charCodeAt(0)
+    && char.toUpperCase().charCodeAt(0) <= upper
+  );
+};
+

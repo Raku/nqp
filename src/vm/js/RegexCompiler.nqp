@@ -166,18 +166,29 @@ class RegexCompiler {
     }
 
     method charrange($node) {
+        my $condition;
+
+        my $lower := $node[1].value;
+        my $upper := $node[2].value;
+
         if $node[0] eq 'ignorecase' {
-            $!compiler.NYI("charrange with ignorecase");
+            $condition := "nqp.charrange_i($!target.substr($!pos, 1), $lower, $upper)";
+        }
+        elsif $node[0] eq 'ignoremark' {
+            $condition := "nqp.charrange_m($!target.substr($!pos, 1), $lower, $upper)";
+        }
+        elsif $node[0] eq 'ignorecase+ignoremark' {
+            $condition := "nqp.charrange_im($!target.substr($!pos, 1), $lower, $upper)";
         }
         else {
-            my $lower := $node[1].value;
-            my $upper := $node[2].value;
-
-            self.has_char 
-            ~ "if ({$node.negate ?? "" !! "!"} ($!target.charCodeAt($!pos) >= $lower && $!target.charCodeAt($!pos) <= $upper)) \{"
-            ~ self.fail ~ "\}\n"
-            ~ "$!pos++;\n"
+            $condition := "$!target.charCodeAt($!pos) >= $lower && $!target.charCodeAt($!pos) <= $upper";
         }
+
+
+        self.has_char
+        ~ "if ({$node.negate ?? "" !! "!"} ($condition)) \{"
+        ~ self.fail ~ "\}\n"
+        ~ "$!pos++;\n"
     }
 
     method cclass_check($cclass,:$pos=$!pos,:$negated=0) {
