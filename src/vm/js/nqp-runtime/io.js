@@ -428,7 +428,7 @@ op.getstdin = function() {
     let fd;
     try {
       fd = fs.openSync('/dev/stdin', 'rs');
-    } catch(e) {
+    } catch (e) {
       /* this should work on Windows, we need to test it tho */
       fd = 0;
     };

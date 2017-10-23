@@ -25,11 +25,11 @@ const EDGE_CHARRANGE_NEG = 13;
 const EDGE_CODEPOINT_LL = 14;
 const EDGE_CODEPOINT_I_LL = 15;
 const EDGE_CODEPOINT_M = 16;
-const EDGE_CODEPOINT_M_NEG  = 17;
-const EDGE_CODEPOINT_M_LL   = 18;
-const EDGE_CODEPOINT_IM     = 19;
+const EDGE_CODEPOINT_M_NEG = 17;
+const EDGE_CODEPOINT_M_LL = 18;
+const EDGE_CODEPOINT_IM = 19;
 const EDGE_CODEPOINT_IM_NEG = 20;
-const EDGE_CODEPOINT_IM_LL  = 21;
+const EDGE_CODEPOINT_IM_LL = 21;
 
 function convertState(thing) {
   if (thing.$$toArray) {

@@ -564,7 +564,7 @@ for (let name of Object.keys(chunkNamesToTypes)) {
 }
 
 exports.coercion = function(got, expected) {
-  throw new Error("Can't convert, got: " + chunkTypesToNames[got] + ' expected:' + chunkTypesToNames[expected]);
+  throw new Error('Can\'t convert, got: ' + chunkTypesToNames[got] + ' expected:' + chunkTypesToNames[expected]);
 };
 
 exports.charrange_i = function(char, lower, upper) {
@@ -595,7 +595,7 @@ exports.literal_m = function(target, pos, literal) {
   return result;
 };
 
-//TODO optimize and fold in a better manner
+// TODO optimize and fold in a better manner
 exports.literal_im = function(target, pos, literal) {
   let count = 0;
   let result = -1;

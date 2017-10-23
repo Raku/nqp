@@ -8,7 +8,7 @@ class NativeIntArg {
   }
 
   $$decont() {
-    throw new Error("deconting native int arg");
+    throw new Error('deconting native int arg');
   }
 };
 
@@ -24,7 +24,7 @@ class NativeNumArg {
   }
 
   $$decont() {
-    throw new Error("deconting native num arg");
+    throw new Error('deconting native num arg');
   }
 };
 
@@ -38,9 +38,9 @@ class NativeStrArg {
   $$getStr() {
     return this.value;
   }
-  
+
   $$decont() {
-    throw new Error("deconting native str arg");
+    throw new Error('deconting native str arg');
   }
 };
 

@@ -142,11 +142,9 @@ const strToObj = exports.strToObj = function(currentHLL, s) {
 const arg = exports.arg = function(currentHLL, arg) {
   if (arg instanceof NativeIntArg) {
     return intToObj(currentHLL, arg.value);
-  }
-  else if (arg instanceof NativeNumArg) {
+  } else if (arg instanceof NativeNumArg) {
     return numToObj(currentHLL, arg.value);
-  }
-  else if (arg instanceof NativeStrArg) {
+  } else if (arg instanceof NativeStrArg) {
     return strToObj(currentHLL, arg.value);
   } else {
     return arg;
@@ -573,13 +571,13 @@ function createSourceMap(js, p6, mapping, jsFile, p6File) {
     generator.addMapping({
       generated: {
         line: jsProps.lineAt(mapping[i+1])+1,
-        column: jsProps.columnAt(mapping[i+1])+1
+        column: jsProps.columnAt(mapping[i+1])+1,
       },
       original: {
         line: p6Props.lineAt(mapping[i])+1,
-        column: p6Props.columnAt(mapping[i])+1
+        column: p6Props.columnAt(mapping[i])+1,
       },
-      source: p6File
+      source: p6File,
     });
   }
 
@@ -588,7 +586,6 @@ function createSourceMap(js, p6, mapping, jsFile, p6File) {
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
-
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       return fromJS(eval(nqp.arg_s(ctx, code)));
     }
@@ -606,8 +603,8 @@ class JavaScriptCompiler extends NQPObject {
       sourceMaps[fakeFilename] = createSourceMap(codeStr, _NAMED['p6-source'], _NAMED.mapping.array, fakeFilename, nqp.toStr(_NAMED.file, ctx));
       const node = SourceNode.fromStringWithSourceMap(codeStr, sourceMaps[fakeFilename]);
 
-      //HACK
-      sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString())
+      // HACK
+      sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString());
 
       const jsProps = charProps(codeStr);
       const p6Props = charProps(_NAMED['p6-source']);
@@ -915,7 +912,7 @@ op.lcm_i = function(a, b) {
 
 op.div_i = function(a, b) {
   if (b == 0) {
-    throw new NQPException("Division by zero");
+    throw new NQPException('Division by zero');
   } else {
     return Math.floor(a/b);
   }
@@ -1362,7 +1359,7 @@ op.getstrfromname = function(name) {
 };
 
 op.codepointfromname = function(name) {
-  let codePoint
+  let codePoint;
 
   if (codePoint = ucd.nameToCodePoint(name)) {
     return codePoint;
@@ -1381,7 +1378,7 @@ function formatCodePoint(codePoint) {
 op.getuniname = function(codePoint) {
   if (codePoint <= 0x1F || (0x7F <= codePoint && codePoint <= 0x9F)) {
     return '<control-' + formatCodePoint(codePoint) + '>';
-  } else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE)  {
+  } else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE) {
     return '<noncharacter-' + formatCodePoint(codePoint) + '>';
   } else {
     return ucd.codePointToName(codePoint) || 'missing';
@@ -1415,7 +1412,7 @@ op.strtocodes = function(str, form, codes) {
 
 op.codes = function(str) {
   return str.normalize('NFC').length;
-}
+};
 
 op.islist = function(list) {
   return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;

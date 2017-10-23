@@ -391,7 +391,7 @@ class P6opaque {
             if (!this.unboxSlots) this.unboxSlots = [];
             this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
             if (!REPR.generateBoxingMethods) {
-              console.log("we do not have a generateBoxingMethods");
+              console.log('we do not have a generateBoxingMethods');
               console.log(REPR.name);
             }
             REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType._STable);
@@ -1472,7 +1472,7 @@ reprs.P6bigint = P6bigint;
 
 class NativeCall extends REPR {
   generateBoxingMethods(STable, name) {
-    //TODO - figure out what if anything needs to be here
+    // TODO - figure out what if anything needs to be here
   }
 };
 reprs.NativeCall = NativeCall;
@@ -2007,8 +2007,8 @@ class CArray extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setStr(str) {
-        //TODO
-        //console.log('CArray setting with str: ', str);
+        // TODO
+        // console.log('CArray setting with str: ', str);
       }
     });
   }
@@ -2018,7 +2018,6 @@ reprs.CArray = CArray;
 class CStr extends REPR {
 };
 reprs.CStr = CArray;
-
 
 
 var ID = 0;

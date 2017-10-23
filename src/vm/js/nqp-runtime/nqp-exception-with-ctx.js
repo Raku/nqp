@@ -3,7 +3,7 @@ class NQPExceptionWithCtx extends NQPException {
   constructor(message, ctx, stack) {
     super(message);
     this.$$ctx = ctx;
-    this.$$stack = stack
+    this.$$stack = stack;
   }
 
 };

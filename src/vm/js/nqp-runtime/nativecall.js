@@ -39,7 +39,7 @@ op.buildnativecall = function(ctx, target, libname, symbol, convention, args, re
     target.$$ret = returns.content.get('type').$$getStr();
     target.$$args = args.array.map(arg => arg.content.get('type').$$getStr());
   } catch (e) {
-    throw new NQPException("native call exception:" + e);
+    throw new NQPException('native call exception:' + e);
   }
 };
 
@@ -64,7 +64,7 @@ op.nativecall = function(returns, callObject, args) {
     } else if (type === 'cpointer') {
       mangled[i] = args.array[i].$$decont(null).$$getPointer();
     } else {
-      throw "can't mangle: " + callObject.$$args[i];
+      throw 'can\'t mangle: ' + callObject.$$args[i];
     }
   }
   const ret = callObject.$$lib[callObject.$$symbol].apply(callObject.$$lib, mangled);
@@ -105,7 +105,7 @@ op.nativecallsizeof = function(obj) {
   if (obj._STable.REPR.nativeCallSize) {
     return obj._STable.REPR.nativeCallSize();
   } else {
-    throw new NQPException("can't do nativecallsizeof");
+    throw new NQPException('can\'t do nativecallsizeof');
   }
 };
 

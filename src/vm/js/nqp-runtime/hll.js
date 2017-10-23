@@ -85,8 +85,8 @@ exports.hllConfigs = hllConfigs;
 function getHLL(language) {
   if (!hllConfigs[language]) {
     hllConfigs[language] = new Map;
-    hllConfigs[language].set('slurpy_array', BOOT.Array)
-    hllConfigs[language].set('list', BOOT.Array)
+    hllConfigs[language].set('slurpy_array', BOOT.Array);
+    hllConfigs[language].set('list', BOOT.Array);
 
     // For serialization purposes
     hllConfigs[language].set('name', language);

@@ -217,7 +217,7 @@ class STable {
     };
     obj.$$clone = function(ctx) {
       return this;
-    }
+    };
     return obj;
   }
 
