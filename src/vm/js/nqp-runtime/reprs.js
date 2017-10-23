@@ -11,7 +11,8 @@ var core = require('./core.js');
 var nqp = require('nqp-runtime');
 
 var bignum = require('bignum-browserify');
-var ZERO = bignum(0);
+// disable for eval
+var ZERO = bignum(0); // eslint-disable-line no-unused-vars
 
 var constants = require('./constants.js');
 

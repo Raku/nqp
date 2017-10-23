@@ -663,7 +663,7 @@ class BinaryCursor {
     // numRepos
     this.int32();
 
-    var paramInternsData = this.int32();
+    this.int32(); // paramInternsData
     var numParamInterns = this.int32();
 
     if (numParamInterns != 0) {

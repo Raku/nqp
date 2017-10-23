@@ -13,7 +13,6 @@ module.exports = {
       "prefer-rest-params": "off",
       "prefer-spread": "off",
       "no-invalid-this": "off",
-      "no-unused-vars": "off",
       "no-var": "off",
       "no-throw-literal": "off"
     }

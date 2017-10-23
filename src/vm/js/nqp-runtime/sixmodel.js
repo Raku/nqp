@@ -1,6 +1,10 @@
 'use strict';
 
-var nullStr = require('./null_s.js'); /* Used when evaling runtime compiled methods */
+/* Used when evaling runtime compiled methods */
+const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
+var bignum = require('bignum-browserify');
+const ZERO = bignum(0);  // eslint-disable-line no-unused-vars
+
 var Null = require('./null.js');
 
 var repossession = require('./repossession.js');
@@ -9,8 +13,6 @@ var compilingSCs = repossession.compilingSCs;
 var constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
-var bignum = require('bignum-browserify');
-var ZERO = bignum(0);
 
 /* Needed for throwing exceptions from generated code */
 const NQPException = require('./nqp-exception.js');
@@ -161,7 +163,7 @@ class STable {
         return this.$$elems() ? 1 : 0;
       };
     } else {
-      throw 'setboolspec with mode: ' + mode + ' NYI';
+      throw new NQPException('setboolspec with mode: ' + mode + ' NYI');
     }
   }
 
