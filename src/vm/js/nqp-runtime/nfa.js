@@ -24,6 +24,12 @@ const EDGE_CHARRANGE = 12;
 const EDGE_CHARRANGE_NEG = 13;
 const EDGE_CODEPOINT_LL = 14;
 const EDGE_CODEPOINT_I_LL = 15;
+const EDGE_CODEPOINT_M = 16;
+const EDGE_CODEPOINT_M_NEG  = 17;
+const EDGE_CODEPOINT_M_LL   = 18;
+const EDGE_CODEPOINT_IM     = 19;
+const EDGE_CODEPOINT_IM_NEG = 20;
+const EDGE_CODEPOINT_IM_LL  = 21;
 
 function convertState(thing) {
   if (thing.$$toArray) {
@@ -53,6 +59,9 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
         case EDGE_CODEPOINT:
         case EDGE_CODEPOINT_LL:
         case EDGE_CODEPOINT_NEG:
+        case EDGE_CODEPOINT_M:
+        case EDGE_CODEPOINT_M_LL:
+        case EDGE_CODEPOINT_M_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
           edge.argI = nqp.toInt(states[i][j + 1], ctx);
@@ -65,6 +74,9 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
         case EDGE_CODEPOINT_I:
         case EDGE_CODEPOINT_I_LL:
         case EDGE_CODEPOINT_I_NEG:
+        case EDGE_CODEPOINT_IM:
+        case EDGE_CODEPOINT_IM_LL:
+        case EDGE_CODEPOINT_IM_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
           edge.argLc = nqp.toInt(states[i][j + 1][0], ctx);
@@ -78,6 +90,11 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
   }
   return nfa;
 };
+
+function baseCodePoint(string, index) {
+  const codePoint = string.codePointAt(index);
+  return String.fromCodePoint(codePoint).normalize('NFD').codePointAt(0);
+}
 
 function runNFA(nfa, target, pos) {
   var origPos = pos;
@@ -208,11 +225,34 @@ function runNFA(nfa, target, pos) {
             nextst.push(to);
           }
         } else if (act == EDGE_CODEPOINT_I_LL) {
-          console.log('TODO CODEPOINT I LL');
+          const codePoint = target.codePointAt(pos);
+          if (codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc) {
+            var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            nextst.push(to);
+            while (usedlonglit <= fate) {
+              longlit[usedlonglit++] = 0;
+            }
+            longlit[fate] = pos - origPos;
+          }
         } else if (act == EDGE_CODEPOINT_I) {
-          console.log('TODO CODEPOINT I');
+          const codePoint = target.codePointAt(pos);
+          if (codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc) {
+            nextst.push(to);
+          }
         } else if (act == EDGE_CODEPOINT_I_NEG) {
-          console.log('TODO CODEPOINT NEG');
+          const codePoint = target.codePointAt(pos);
+          if (!(codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc)) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CODEPOINT_M) {
+          if (baseCodePoint(target, pos) === edgeInfo[i].argI) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CODEPOINT_IM) {
+          const base = baseCodePoint(target, pos);
+          if (base === edgeInfo[i].argLc || base == edgeInfo[i].argUc) {
+            nextst.push(to);
+          }
         } else if (act == EDGE_CHARRANGE) {
           var ucArg = edgeInfo[i].argUc;
           var lcArg = edgeInfo[i].argLc;
