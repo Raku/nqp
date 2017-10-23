@@ -67,8 +67,9 @@ public class AsyncProcessHandle implements IIOClosable {
 
                     int outcome = AsyncProcessHandle.this.proc.waitFor();
                     SixModelObject done = config.get("done");
+                    /* Return exit code left shifted by 8 for POSIX emulation. */
                     if (done != null)
-                        send(done, boxInt(outcome));
+                        send(done, boxInt(outcome << 8));
                 }
                 catch (Throwable t) {
                     SixModelObject message = boxError(t.getMessage());
