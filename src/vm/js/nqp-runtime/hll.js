@@ -54,20 +54,20 @@ op.hllizefor = function(ctx, obj, language) {
   // TODO handle already boxed ones
   } else if (obj instanceof NQPInt) {
     let foreignTypeInt = config.get('foreign_type_int');
-    var repr = foreignTypeInt._STable.REPR;
-    var boxed = repr.allocate(foreignTypeInt._STable);
+    const repr = foreignTypeInt._STable.REPR;
+    const boxed = repr.allocate(foreignTypeInt._STable);
     boxed.$$setInt(obj.value);
     return boxed;
   } else if (typeof obj == 'number') {
     let foreignTypeNum = config.get('foreign_type_num');
-    var repr = foreignTypeNum._STable.REPR;
-    var boxed = repr.allocate(foreignTypeNum._STable);
+    const repr = foreignTypeNum._STable.REPR;
+    const boxed = repr.allocate(foreignTypeNum._STable);
     boxed.$$setNum(obj);
     return boxed;
   } else if (typeof obj == 'string') {
     let foreignTypeStr = config.get('foreign_type_str');
-    var repr = foreignTypeStr._STable.REPR;
-    var boxed = repr.allocate(foreignTypeStr._STable);
+    const repr = foreignTypeStr._STable.REPR;
+    const boxed = repr.allocate(foreignTypeStr._STable);
     boxed.$$setStr(obj);
     return boxed;
   } else if (obj === Null) {

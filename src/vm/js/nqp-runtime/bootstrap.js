@@ -63,7 +63,7 @@ addToScWithSt(KnowHOW);
 
 let st = new STable(repr, null);
 
-var KnowHowHOW = repr.allocate(st);
+const KnowHowHOW = repr.allocate(st);
 KnowHowHOW.__name = 'KnowHOW';
 
 addToScWithSt(KnowHowHOW);

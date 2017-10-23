@@ -66,8 +66,7 @@ function radixHelper(radix, str, zpos, flags) {
   let regex = new RegExp(
       '^' + minus + digitclass + '(?:_' +
       digitclass + '|' + digitclass + ')*');
-  var str = str.slice(zpos);
-  let search = str.match(regex);
+  const search = str.slice(zpos).match(regex);
   if (search == null) {
     return null;
   }

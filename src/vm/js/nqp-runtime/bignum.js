@@ -38,13 +38,12 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
-  var orig = getBI(n);
+  const orig = getBI(n);
   if (orig.eq(0)) return '0';
 
   if (base == 16 || base == 10) {
     return orig.toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
   } else if (1 < base && base <= 36) {
-    var orig = getBI(n);
     let num = orig.abs();
     let string = '';
     let letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';

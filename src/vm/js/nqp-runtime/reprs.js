@@ -135,7 +135,7 @@ class P6opaque {
     this.deserialized = 1;
     let numAttributes = cursor.varint();
     this.flattenedSTables = [];
-    for (var i = 0; i < numAttributes; i++) {
+    for (let i = 0; i < numAttributes; i++) {
       let notNull = cursor.varint();
       this.flattenedSTables.push(notNull != 0 ? cursor.locateThing('rootSTables') : null);
     }
@@ -143,7 +143,7 @@ class P6opaque {
     let hasAutoVivValues = cursor.varint();
     if (hasAutoVivValues != 0) {
       this.autoVivValues = [];
-      for (var i = 0; i < numAttributes; i++) {
+      for (let i = 0; i < numAttributes; i++) {
         this.autoVivValues.push(cursor.variant());
       }
     }
@@ -155,9 +155,9 @@ class P6opaque {
     let hasUnboxSlots = cursor.varint();
     if (hasUnboxSlots != 0) {
       this.unboxSlots = [];
-      for (var i = 0; i < numAttributes; i++) {
+      for (let i = 0; i < numAttributes; i++) {
         let reprId = cursor.varint();
-        var slot = cursor.varint();
+        const slot = cursor.varint();
         if (reprId != 0) {
           this.unboxSlots.push({slot: slot, reprId: reprId});
         }
@@ -169,14 +169,14 @@ class P6opaque {
 
     let slots = [];
 
-    for (var i = 0; i < numClasses; i++) {
+    for (let i = 0; i < numClasses; i++) {
       this.nameToIndexMapping[i] = {slots: [], names: [], classKey: cursor.variant()};
 
       let numAttrs = cursor.varint();
 
       for (let j = 0; j < numAttrs; j++) {
         let name = cursor.str();
-        var slot = cursor.varint();
+        const slot = cursor.varint();
 
         this.nameToIndexMapping[i].names[j] = name;
         this.nameToIndexMapping[i].slots[j] = slot;
@@ -198,8 +198,8 @@ class P6opaque {
     }
 
     if (this.unboxSlots) {
-      for (var i = 0; i < this.unboxSlots.length; i++) {
-        var slot = this.unboxSlots[i].slot;
+      for (let i = 0; i < this.unboxSlots.length; i++) {
+        const slot = this.unboxSlots[i].slot;
         (new reprById[this.unboxSlots[i].reprId]).generateBoxingMethods(STable, slotToAttr(slot), this.flattenedSTables[slot]);
       }
     }
@@ -237,10 +237,10 @@ class P6opaque {
   }
 
   serializeReprData(st, cursor) {
-    var numAttrs = st.REPR.flattenedSTables.length;
+    const numAttrs = st.REPR.flattenedSTables.length;
     cursor.varint(numAttrs);
 
-    for (var i = 0; i < numAttrs; i++) {
+    for (let i = 0; i < numAttrs; i++) {
       if (st.REPR.flattenedSTables[i] == null) {
         cursor.varint(0);
       } else {
@@ -254,7 +254,7 @@ class P6opaque {
 
     if (st.REPR.autoVivValues) {
       cursor.varint(1);
-      for (var i = 0; i < numAttrs; i++) {
+      for (let i = 0; i < numAttrs; i++) {
         cursor.ref(st.REPR.autoVivValues[i]);
       }
     } else {
@@ -268,7 +268,7 @@ class P6opaque {
 
     if (this.unboxSlots) {
       cursor.varint(1);
-      for (var i = 0; i < numAttrs; i++) {
+      for (let i = 0; i < numAttrs; i++) {
         if (this.unboxSlots[i]) {
           cursor.varint(this.unboxSlots[i].reprId);
           cursor.varint(this.unboxSlots[i].slot);
@@ -283,10 +283,10 @@ class P6opaque {
 
 
     cursor.varint(this.nameToIndexMapping.length);
-    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+    for (let i = 0; i < this.nameToIndexMapping.length; i++) {
       cursor.ref(this.nameToIndexMapping[i].classKey);
 
-      var numAttrs = this.nameToIndexMapping[i].names.length;
+      const numAttrs = this.nameToIndexMapping[i].names.length;
 
       cursor.varint(numAttrs);
 
@@ -1793,13 +1793,13 @@ class MultiDimArray extends REPR {
           throw new NQPException('Cannot access ' + STable.dimensions + ' dimension array with ' + idx.length + ' indices');
         }
 
-        for (var i = 0; i < idx.length; i++) {
+        for (let i = 0; i < idx.length; i++) {
           if (idx[i] < 0 || idx[i] >= this.dimensions[i]) {
             throw new NQPException('Index ' + idx[i] + ' for dimension ' + (i + 1) + ' out of range (must be 0..' + this.dimensions[i] + ')');
           }
         }
         let calculatedIdx = 0;
-        for (var i = 0; i < idx.length; i++) {
+        for (let i = 0; i < idx.length; i++) {
           calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
         }
         return calculatedIdx;
@@ -1917,11 +1917,11 @@ class MultiDimArray extends REPR {
   }
 
   serialize(cursor, obj) {
-    for (var i = 0; i < obj._STable.dimensions; i++) {
+    for (let i = 0; i < obj._STable.dimensions; i++) {
       cursor.varint(obj.dimensions[i]);
     }
     let size = this.valuesSize(obj);
-    for (var i = 0; i < size; i++) {
+    for (let i = 0; i < size; i++) {
       switch (obj._STable.primType) {
         case 0:
           cursor.ref(obj.storage[i]);
@@ -1941,12 +1941,12 @@ class MultiDimArray extends REPR {
 
   deserializeFinish(obj, data) {
     obj.dimensions = [];
-    for (var i = 0; i < obj._STable.dimensions; i++) {
+    for (let i = 0; i < obj._STable.dimensions; i++) {
       obj.dimensions[i] = data.varint();
     }
     let size = this.valuesSize(obj);
     obj.storage = [];
-    for (var i = 0; i < size; i++) {
+    for (let i = 0; i < size; i++) {
       switch (obj._STable.primType) {
         case 0:
           obj.storage[i] = data.variant();

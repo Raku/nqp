@@ -205,10 +205,10 @@ class BinaryWriteCursor {
      context. */
   idIdx(scId, idx) {
     if (scId <= PACKED_SC_MAX && idx <= PACKED_SC_IDX_MAX) {
-      var packed = (scId << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
+      const packed = (scId << PACKED_SC_SHIFT) | (idx & PACKED_SC_IDX_MASK);
       this.varint(packed);
     } else {
-      var packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
+      const packed = PACKED_SC_OVERFLOW << PACKED_SC_SHIFT;
 
       this.varint(packed);
       this.varint(scId);
@@ -313,8 +313,8 @@ class BinaryWriteCursor {
         break;
       case REFVAR_STATIC_CODEREF:
       case REFVAR_CLONED_CODEREF:
-        var scId = this.writer.getSCId(ref._SC);
-        var idx = ref._SC.rootCodes.indexOf(ref);
+        const scId = this.writer.getSCId(ref._SC);
+        const idx = ref._SC.rootCodes.indexOf(ref);
         if (idx == -1) {
           throw `can't write code ref`;
         }
@@ -415,7 +415,7 @@ class SerializationWriter {
     /* Type check cache. */
     let tcl = !st.typeCheckCache ? 0 : st.typeCheckCache.length;
     this.stablesData.varint(tcl);
-    for (var i = 0; i < tcl; i++) {
+    for (let i = 0; i < tcl; i++) {
       this.stablesData.ref(st.typeCheckCache[i]);
     }
 
@@ -515,7 +515,7 @@ class SerializationWriter {
       this.stablesData.ref(st.parametricType);
       let params = st.parameters.array;
       this.stablesData.varint(params.length);
-      for (var i = 0; i < params.length; i++) {
+      for (let i = 0; i < params.length; i++) {
         this.stablesData.ref(params[i]);
       }
     }
@@ -560,11 +560,12 @@ class SerializationWriter {
     let lexicalsTypeInfo = staticCodeRef.lexicalsTypeInfo;
 
     let lexicals = 0;
-    for (var name in lexicalsTypeInfo) lexicals++;
+
+    for (let name in lexicalsTypeInfo) lexicals++; // eslint-disable-line no-unused-vars
 
     this.contextsData.varint(lexicals);
 
-    for (var name in lexicalsTypeInfo) {
+    for (let name in lexicalsTypeInfo) {
       this.contextsData.str(name);
       switch (lexicalsTypeInfo[name]) {
         case 0: // obj

@@ -89,11 +89,12 @@ function stat(file, code, lstat) {
   const PLATFORM_BLOCKS = -7;
 
   // we can't use fs.existsSync(file) as it follows symlinks
+  let stats;
   try {
     if (lstat || code == ISLNK) {
-      var stats = fs.lstatSync(file);
+      stats = fs.lstatSync(file);
     } else {
-      var stats = fs.statSync(file);
+      stats = fs.statSync(file);
     }
   } catch (err) {
     if (code == EXISTS && err.code === 'ENOENT') {

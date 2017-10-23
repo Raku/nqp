@@ -330,7 +330,7 @@ class BinaryCursor {
         return this.hashOfVariants(this);
       case REFVAR_STATIC_CODEREF:
       case REFVAR_CLONED_CODEREF:
-        var codeRef = this.locateThing('codeRefs');
+        const codeRef = this.locateThing('codeRefs');
         if (!codeRef) {
           console.log('missing code ref while deserializing');
           console.log(this.sc.codeRefs);
@@ -364,7 +364,7 @@ class BinaryCursor {
 
     let typeCheckCache = [];
     let typeCheckCacheLen = this.varint();
-    for (var i = 0; i < typeCheckCacheLen; i++) {
+    for (let i = 0; i < typeCheckCacheLen; i++) {
       typeCheckCache.push(this.variant());
     }
 
@@ -388,11 +388,15 @@ class BinaryCursor {
       STable.containerSpec.deserialize(this);
     }
 
+    let classHandle;
+    let attrName;
+    let invocationHandler;
+
     if (flags & STABLE_HAS_INVOCATION_SPEC) {
-      var classHandle = this.variant();
-      var attrName = this.str();
+      classHandle = this.variant();
+      attrName = this.str();
       this.varint(); // hint
-      var invocationHandler = this.variant();
+      invocationHandler = this.variant();
 
       this.variant(); // md_class_handle
       this.str(); // md_cache_attr_name
@@ -421,7 +425,7 @@ class BinaryCursor {
       STable.parametricType = this.variant();
       let count = this.varint();
       let params = [];
-      for (var i = 0; i < count; i++) {
+      for (let i = 0; i < count; i++) {
         params[i] = this.variant();
       }
 
@@ -542,7 +546,7 @@ class BinaryCursor {
     let deps = [sc];
     this.sc.deps = deps;
 
-    for (var i in dependencies) {
+    for (let i in dependencies) {
       let dep = serializationContexts[dependencies[i][0]];
       if (!dep) {
         console.log(
@@ -596,7 +600,7 @@ class BinaryCursor {
     });
 
     let closuresBase = sc.codeRefs.length;
-    for (var i = 0; i < closures.length; i++) {
+    for (let i = 0; i < closures.length; i++) {
       sc.codeRefs[closuresBase + i] = new CodeRef(closures[i].staticCode.name, undefined);
       sc.codeRefs[closuresBase + i].staticCode = closures[i].staticCode;
       if (closures[i].codeObj) sc.codeRefs[closuresBase + i].codeObj = closures[i].codeObj;
@@ -632,14 +636,14 @@ class BinaryCursor {
       return cursor.contextEntry(contextsData);
     });
 
-    for (var i = 0; i < contexts.length; i++) {
+    for (let i = 0; i < contexts.length; i++) {
       if (contexts[i].outer) contexts[contexts[i].outer - 1].inner.push(contexts[i]);
     }
 
     let noContextClosures = [];
 
 
-    for (var i = 0; i < closures.length; i++) {
+    for (let i = 0; i < closures.length; i++) {
       if (closures[i].context) {
         contexts[closures[i].context - 1].closures.push(closures[i]);
       } else {
@@ -651,7 +655,7 @@ class BinaryCursor {
       sc.codeRefs[closure.index].capture(closure.staticCode.freshBlock());
     }
 
-    for (var i = 0; i < contexts.length; i++) {
+    for (let i = 0; i < contexts.length; i++) {
       if (contexts[i].outer == 0) {
         this.deserializeCtx(contexts[i], null, currentHLL);
       }
@@ -672,7 +676,7 @@ class BinaryCursor {
 
 
     /* We set the method caches after everything else is ready */
-    for (var i = 0; i < STables.length; i++) {
+    for (let i = 0; i < STables.length; i++) {
       let STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
         STable.setLazyMethodCache(STable._methodCache.content);
