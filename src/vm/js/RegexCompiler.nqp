@@ -125,6 +125,14 @@ class RegexCompiler {
     method literal($node) {
         my str $const := $node.subtype eq 'ignorecase' ?? nqp::lc($node[0]) !! $node[0];
         my str $qconst := quote_string($const);
+
+        if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
+            my str $suffix := $node.subtype eq 'ignoremark' ?? 'm' !! 'im';
+            my str $offset := $*BLOCK.add_tmp;
+            return "$offset = nqp.literal_{$suffix}($!target, $!pos, $qconst);\n"
+                ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
+        }
+
         my int $constlen := nqp::chars($const);
         my str $cmpop := $node.negate ?? '==' !! '!=';
         my str $str := "{$!target}.substr({$!pos},$constlen)";

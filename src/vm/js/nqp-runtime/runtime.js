@@ -22,6 +22,8 @@ const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
 const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
+const strip = require('yads');
+
 const fs = require('fs');
 
 exports.NQPInt = NQPInt;
@@ -575,3 +577,38 @@ exports.charrange_i = function(char, lower, upper) {
   );
 };
 
+// TODO - optimize
+exports.literal_m = function(target, pos, literal) {
+  let count = 0;
+  let result = -1;
+  let matched = '';
+  let strippedLiteral = strip.combining(literal);
+
+  while (strippedLiteral.startsWith(matched)) {
+    if (matched === strippedLiteral) {
+      result = count;
+    }
+    count++;
+    matched = strip.combining(target.substr(pos, count));
+  }
+
+  return result;
+};
+
+//TODO optimize and fold in a better manner
+exports.literal_im = function(target, pos, literal) {
+  let count = 0;
+  let result = -1;
+  let matched = '';
+  let strippedLiteral = strip.combining(literal).toLowerCase();
+
+  while (strippedLiteral.startsWith(matched)) {
+    if (matched === strippedLiteral) {
+      result = count;
+    }
+    count++;
+    matched = strip.combining(target.substr(pos, count)).toLowerCase();
+  }
+
+  return result;
+};
