@@ -618,8 +618,7 @@ and 1 if $r is greater than $l.
 ## eqat
 * `eqat(str $haystack, str $needle, int $pos)`
 
-Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
-or 0 otherwise.
+Return 1 if the string `$haystack` has the string `$needle` at position `$pos`.
 
 ## eqatic `moar`
 * `eqatic(str haystack, str $needle, int $pos)`
