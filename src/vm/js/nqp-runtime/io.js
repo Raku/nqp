@@ -1,23 +1,23 @@
 'use strict';
-var fs = require('fs-ext');
-var os = require('os');
-var sleep = require('sleep');
+let fs = require('fs-ext');
+let os = require('os');
+let sleep = require('sleep');
 
-var tty = require('tty');
+let tty = require('tty');
 
-var Hash = require('./hash.js');
+let Hash = require('./hash.js');
 
-var core = require('./core.js');
+let core = require('./core.js');
 
-var child_process = require('child_process');
+let child_process = require('child_process');
 
-var NQPObject = require('./nqp-object.js');
+let NQPObject = require('./nqp-object.js');
 
-var mkdirp = require('mkdirp');
+let mkdirp = require('mkdirp');
 
 const NQPException = require('./nqp-exception.js');
 
-var nqp = require('nqp-runtime');
+let nqp = require('nqp-runtime');
 
 const Null = require('./null.js');
 
@@ -27,7 +27,7 @@ function boolish(bool) {
   return bool ? 1 : 0;
 }
 
-var op = {};
+let op = {};
 exports.op = op;
 
 op.print = function(arg) {
@@ -204,8 +204,8 @@ class FileHandle extends IOHandle {
 
   $$eoffh() {
     // I haven't found a way to implement this directly in node.js
-    var current = fs.seekSync(this.fd, 0, 1);
-    var end = fs.seekSync(this.fd, 0, 2);
+    let current = fs.seekSync(this.fd, 0, 1);
+    let end = fs.seekSync(this.fd, 0, 2);
     fs.seekSync(this.fd, current, 0);
     return current == end ? 1 : 0;
   }
@@ -230,7 +230,7 @@ class FileHandle extends IOHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    let buffer = core.toRawBuffer(buf);
     return fs.writeSync(this.fd, buffer, 0, buffer.length);
   }
 
@@ -362,8 +362,8 @@ op.cwd = function() {
 };
 
 op.getenvhash = function() {
-  var hash = new Hash();
-  for (var key in process.env) {
+  let hash = new Hash();
+  for (let key in process.env) {
     hash.content.set(key, process.env[key]);
   }
   return hash;
@@ -390,7 +390,7 @@ class Stderr extends StdHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    let buffer = core.toRawBuffer(buf);
     process.stderr.write(buffer);
   }
 };
@@ -412,7 +412,7 @@ class Stdout extends StdHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    let buffer = core.toRawBuffer(buf);
     process.stdout.write(buffer);
   }
 };

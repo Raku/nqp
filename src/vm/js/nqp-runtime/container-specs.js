@@ -2,7 +2,7 @@
 
 const coercions = require('./coercions');
 
-var NQPInt = require('./nqp-int.js');
+let NQPInt = require('./nqp-int.js');
 
 class CodePair {
   constructor(STable) {
@@ -17,8 +17,8 @@ class CodePair {
   }
 
   setupSTable() {
-    var fetch = this.fetch;
-    var store = this.store;
+    let fetch = this.fetch;
+    let store = this.store;
 
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
@@ -75,8 +75,8 @@ class NativeRef {
   }
 
   setupSTable() {
-    var primitiveType = this.STable.REPR.primitiveType;
-    var STable = this.STable;
+    let primitiveType = this.STable.REPR.primitiveType;
+    let STable = this.STable;
 
     /* TODO - take the hll in account when converting to object */
 
@@ -119,18 +119,18 @@ class NativeRef {
         }
 
         $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('int_box');
+          let type = hll.get('int_box');
           if (!type) {
             // HACK - nqp still uses NQPInt instead of the thing in the hll config
             return new NQPInt(this.get());
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            let repr = type._STable.REPR;
+            let obj = repr.allocate(type._STable);
             obj.$$setInt(this.get());
             return obj;
           }
@@ -171,18 +171,18 @@ class NativeRef {
         }
 
         $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('num_box');
+          let type = hll.get('num_box');
           if (!type) {
             // HACK - nqp still uses raw javascript numbers instead of the thing in the hll config
             return this.get();
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            let repr = type._STable.REPR;
+            let obj = repr.allocate(type._STable);
             obj.$$setNum(this.get());
             return obj;
           }
@@ -227,18 +227,18 @@ class NativeRef {
         }
 
         $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('str_box');
+          let type = hll.get('str_box');
           if (!type) {
             // HACK - nqp still uses raw javascript strings instead of the thing in the hll config
             return this.get();
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            let repr = type._STable.REPR;
+            let obj = repr.allocate(type._STable);
             obj.$$setStr(this.get());
             return obj;
           }

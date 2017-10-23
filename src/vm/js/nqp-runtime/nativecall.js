@@ -1,7 +1,7 @@
 'use strict';
-var op = {};
-var ffi = require('ffi');
-var ref = require('ref');
+let op = {};
+let ffi = require('ffi');
+let ref = require('ref');
 const bignum = require('bignum-browserify');
 
 const Null = require('./null.js');
@@ -21,7 +21,7 @@ for (let type of Object.keys(floats).concat(Object.keys(shortInts), Object.keys(
 }
 
 function mapType(typeHash) {
-  var nativeCallType = typeHash.content.get('type').$$getStr();
+  let nativeCallType = typeHash.content.get('type').$$getStr();
   if (nativeCallType in ctypes) {
     return ctypes[nativeCallType];
   } else {

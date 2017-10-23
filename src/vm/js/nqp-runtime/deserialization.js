@@ -1,23 +1,23 @@
 'use strict';
-var op = {};
+let op = {};
 module.exports.op = op;
 
-var reprs = require('./reprs.js');
-var sixmodel = require('./sixmodel.js');
-var SerializationContext = require('./serialization-context');
-var Hash = require('./hash.js');
-var CodeRef = require('./code-ref.js');
-var constants = require('./constants.js');
+let reprs = require('./reprs.js');
+let sixmodel = require('./sixmodel.js');
+let SerializationContext = require('./serialization-context');
+let Hash = require('./hash.js');
+let CodeRef = require('./code-ref.js');
+let constants = require('./constants.js');
 
-var Null = require('./null.js');
+let Null = require('./null.js');
 
-var Ctx = require('./ctx.js');
+let Ctx = require('./ctx.js');
 
-var containerSpecs = require('./container-specs.js');
+let containerSpecs = require('./container-specs.js');
 
-var hll = require('./hll.js');
+let hll = require('./hll.js');
 
-var BOOT = require('./BOOT.js');
+let BOOT = require('./BOOT.js');
 
 /* Possible reference types we can serialize. */
 const REFVAR_NULL = 1;
@@ -35,24 +35,24 @@ const REFVAR_CLONED_CODEREF = 12;
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
-var serializationContexts = SerializationContext.contexts;
+let serializationContexts = SerializationContext.contexts;
 
 module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
 op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
-  var buffer = new Buffer(blob, 'base64');
+  let buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
-  for (var i = 0; i < sc.codeRefs.length; i++) {
+  for (let i = 0; i < sc.codeRefs.length; i++) {
     sc.codeRefs[i].isStatic = true;
     sc.codeRefs[i]._SC = sc;
     sc.rootCodes.push(sc.codeRefs[i]);
   }
 
   sh = sh.array;
-  var cursor = new BinaryCursor(buffer, 0, sh, sc);
+  let cursor = new BinaryCursor(buffer, 0, sh, sc);
 
   cursor.deserialize(sc, cuids, setupWVals, currentHLL);
 };
@@ -135,8 +135,8 @@ class BinaryCursor {
   * @return {Array} - the read in objects
   */
   times(count, cb) {
-    var array = [];
-    for (var i = 0; i < count; i++) {
+    let array = [];
+    for (let i = 0; i < count; i++) {
       array.push(cb(this));
     }
     return array;
@@ -149,12 +149,12 @@ class BinaryCursor {
   * @return {Object} bootArray containing the elements
   */
   array(readElem) {
-    var elems = this.varint();
-    var array = [];
-    for (var i = 0; i < elems; i++) {
+    let elems = this.varint();
+    let array = [];
+    for (let i = 0; i < elems; i++) {
       array.push(readElem(this));
     }
-    var bootArray = BOOT.createArray(array);
+    let bootArray = BOOT.createArray(array);
     if (this.sc.currentObject) {
       bootArray._SC = this.sc;
       this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
@@ -174,11 +174,11 @@ class BinaryCursor {
     const OBJECTS_TABLE_ENTRY_SC_OVERFLOW = 0x7FF;
     const OBJECTS_TABLE_ENTRY_IS_CONCRETE = 0x80000000;
 
-    var packed = this.int32();
-    var offset = this.int32();
+    let packed = this.int32();
+    let offset = this.int32();
 
-    var sc = (packed >> OBJECTS_TABLE_ENTRY_SC_SHIFT) & OBJECTS_TABLE_ENTRY_SC_MASK;
-    var scIdx;
+    let sc = (packed >> OBJECTS_TABLE_ENTRY_SC_SHIFT) & OBJECTS_TABLE_ENTRY_SC_MASK;
+    let scIdx;
 
     if (sc == OBJECTS_TABLE_ENTRY_SC_OVERFLOW) {
       throw new Error('Objects Overflow NYI');
@@ -194,9 +194,9 @@ class BinaryCursor {
   }
 
   locateThing(thingType) {
-    var packed;
-    var scId;
-    var index;
+    let packed;
+    let scId;
+    let index;
 
     const PACKED_SC_SHIFT = 20;
     const PACKED_SC_OVERFLOW = 0xfff;
@@ -235,10 +235,10 @@ class BinaryCursor {
    * @return {Hash}
    */
   hashOfVariants() {
-    var elems = this.varint();
-    var hash = new Hash();
-    for (var i = 0; i < elems; i++) {
-      var str = this.str();
+    let elems = this.varint();
+    let hash = new Hash();
+    for (let i = 0; i < elems; i++) {
+      let str = this.str();
       hash.content.set(str, this.variant());
     }
 
@@ -254,10 +254,10 @@ class BinaryCursor {
   /* TODO - make it work correctly for values bigger than 32bit integers*/
   // XXX TODO - length checks
   varint() {
-    var result;
-    var first;
-    var need;
-    var buffer = this.buffer;
+    let result;
+    let first;
+    let need;
+    let buffer = this.buffer;
 
     first = buffer.readUInt8(this.offset++);
 
@@ -285,9 +285,9 @@ class BinaryCursor {
 
     result = (first & 0x0F) << 8 * need;
 
-    var shiftPlaces = 0;
-    for (var i = 0; i < need; i++) {
-      var byte = buffer.readUInt8(this.offset++);
+    let shiftPlaces = 0;
+    for (let i = 0; i < need; i++) {
+      let byte = buffer.readUInt8(this.offset++);
       result |= (byte << shiftPlaces);
       shiftPlaces += 8;
     }
@@ -305,7 +305,7 @@ class BinaryCursor {
    * @return {*}
    */
   variantWithUndefined() {
-    var type = this.int8();
+    let type = this.int8();
     switch (type) {
       case REFVAR_OBJECT:
         return this.objRef();
@@ -346,7 +346,7 @@ class BinaryCursor {
    * @return {*}
    */
   variant() {
-    var result = this.variantWithUndefined();
+    let result = this.variantWithUndefined();
     return result === undefined ? Null : result;
   }
 
@@ -358,12 +358,12 @@ class BinaryCursor {
     STable.WHAT = this.objRef();
     STable.WHO = this.variant();
 
-    var methodCache = this.variant();
+    let methodCache = this.variant();
 
     STable._methodCache = methodCache;
 
-    var typeCheckCache = [];
-    var typeCheckCacheLen = this.varint();
+    let typeCheckCache = [];
+    let typeCheckCacheLen = this.varint();
     for (var i = 0; i < typeCheckCacheLen; i++) {
       typeCheckCache.push(this.variant());
     }
@@ -374,16 +374,16 @@ class BinaryCursor {
 
     STable.modeFlags = this.uint8();
 
-    var flags = this.uint8();
-    var boolificationMode = flags & 0xF;
+    let flags = this.uint8();
+    let boolificationMode = flags & 0xF;
 
     if (boolificationMode != 0xF) {
-      var boolificationMethod = this.variant();
+      let boolificationMethod = this.variant();
       STable.setboolspec(boolificationMode, boolificationMethod);
     }
 
     if (flags & STABLE_HAS_CONTAINER_SPEC) {
-      var specType = this.str();
+      let specType = this.str();
       STable.containerSpec = new containerSpecs[specType](STable);
       STable.containerSpec.deserialize(this);
     }
@@ -419,13 +419,13 @@ class BinaryCursor {
 
     if (STable.modeFlags & constants.PARAMETERIZED_TYPE) {
       STable.parametricType = this.variant();
-      var count = this.varint();
-      var params = [];
+      let count = this.varint();
+      let params = [];
       for (var i = 0; i < count; i++) {
         params[i] = this.variant();
       }
 
-      var ptable = STable.parametricType._STable;
+      let ptable = STable.parametricType._STable;
 
       if (!ptable.parameterizerCache) {
         ptable.parameterizerCache = [];
@@ -450,7 +450,7 @@ class BinaryCursor {
   }
 
   staticCodeRef() {
-    var staticCode = this.locateThing('codeRefs');
+    let staticCode = this.locateThing('codeRefs');
     if (!staticCode) {
       console.log('Code ref has an invalid static code');
     }
@@ -458,15 +458,15 @@ class BinaryCursor {
   }
 
   closureEntry() {
-    var entry = {};
-    var staticScId = this.int32();
-    var staticIndex = this.int32();
+    let entry = {};
+    let staticScId = this.int32();
+    let staticIndex = this.int32();
     entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
     entry.context = this.int32();
-    var hasCodeObj = this.int32();
+    let hasCodeObj = this.int32();
     if (hasCodeObj) {
-      var objectScId = this.int32();
-      var objectIndex = this.int32();
+      let objectScId = this.int32();
+      let objectIndex = this.int32();
       entry.codeObj = this.sc.deps[objectScId].rootObjects[objectIndex];
     } else {
       // we're packed along a 24-byte alignment
@@ -477,22 +477,22 @@ class BinaryCursor {
   }
 
   contextEntry(contextsData) {
-    var entry = {};
-    var staticScId = this.int32();
-    var staticIndex = this.int32();
+    let entry = {};
+    let staticScId = this.int32();
+    let staticIndex = this.int32();
     entry.staticCode = this.sc.deps[staticScId].codeRefs[staticIndex];
-    var data = this.at(contextsData + this.int32());
+    let data = this.at(contextsData + this.int32());
     entry.outer = this.int32();
     entry.inner = [];
     entry.closures = [];
 
-    var count = data.varint();
-    var info = entry.staticCode.lexicalsTypeInfo;
+    let count = data.varint();
+    let info = entry.staticCode.lexicalsTypeInfo;
 
-    var lexicals = {};
+    let lexicals = {};
 
-    for (var i = 0; i < count; i++) {
-      var name = data.str();
+    for (let i = 0; i < count; i++) {
+      let name = data.str();
 
       if (!info.hasOwnProperty([name])) {
         throw 'no static info for: ', name;
@@ -525,7 +525,7 @@ class BinaryCursor {
    */
 
   deserialize(sc, cuids, setupWVals, currentHLL) {
-    var version = this.int32();
+    let version = this.int32();
 
     this.sc = sc;
 
@@ -533,17 +533,17 @@ class BinaryCursor {
       throw 'Unsupported serialization format version: ' + version;
     }
 
-    var depsOffset = this.int32();
-    var depsNumber = this.int32();
+    let depsOffset = this.int32();
+    let depsNumber = this.int32();
 
 
-    var dependencies = this.at(depsOffset).times(depsNumber, cursor => [cursor.str32(), cursor.str32()]);
+    let dependencies = this.at(depsOffset).times(depsNumber, cursor => [cursor.str32(), cursor.str32()]);
 
-    var deps = [sc];
+    let deps = [sc];
     this.sc.deps = deps;
 
     for (var i in dependencies) {
-      var dep = serializationContexts[dependencies[i][0]];
+      let dep = serializationContexts[dependencies[i][0]];
       if (!dep) {
         console.log(
             'Missing dependencie, can\'t find serialization context handle:',
@@ -555,28 +555,28 @@ class BinaryCursor {
     }
 
 
-    var STablesOffset = this.int32();
-    var STablesNumber = this.int32();
-    var STablesData = this.int32();
+    let STablesOffset = this.int32();
+    let STablesNumber = this.int32();
+    let STablesData = this.int32();
 
-    var STables = this.at(STablesOffset).times(STablesNumber,
+    let STables = this.at(STablesOffset).times(STablesNumber,
         function(cursor) {
           return [cursor.str32(), cursor.at(STablesData + cursor.int32()), cursor.at(STablesData + cursor.int32())];
         });
 
 
-    var objectsOffset = this.int32();
-    var objectsNumber = this.int32();
-    var objectsData = this.int32();
-    var objects = this.at(objectsOffset).times(objectsNumber, function(cursor) {
+    let objectsOffset = this.int32();
+    let objectsNumber = this.int32();
+    let objectsData = this.int32();
+    let objects = this.at(objectsOffset).times(objectsNumber, function(cursor) {
       return cursor.objectEntry(objectsData);
     });
 
 
-    var reposTable = this.at(4 * 14).int32();
-    var numRepos = this.at(4 * 15).int32();
+    let reposTable = this.at(4 * 14).int32();
+    let numRepos = this.at(4 * 15).int32();
 
-    var repossessed = this.at(reposTable).times(numRepos, function(cursor) {
+    let repossessed = this.at(reposTable).times(numRepos, function(cursor) {
       return {type: cursor.int32(), index: cursor.int32(), origSC: cursor.int32(), origIndex: cursor.int32()};
     });
 
@@ -589,13 +589,13 @@ class BinaryCursor {
     this.stubObjects(objects);
 
 
-    var closuresOffset = this.int32();
-    var closuresNumber = this.int32();
-    var closures = this.at(closuresOffset).times(closuresNumber, function(cursor) {
+    let closuresOffset = this.int32();
+    let closuresNumber = this.int32();
+    let closures = this.at(closuresOffset).times(closuresNumber, function(cursor) {
       return cursor.closureEntry();
     });
 
-    var closuresBase = sc.codeRefs.length;
+    let closuresBase = sc.codeRefs.length;
     for (var i = 0; i < closures.length; i++) {
       sc.codeRefs[closuresBase + i] = new CodeRef(closures[i].staticCode.name, undefined);
       sc.codeRefs[closuresBase + i].staticCode = closures[i].staticCode;
@@ -625,10 +625,10 @@ class BinaryCursor {
     }
     if (setupWVals) setupWVals();
 
-    var contextsOffset = this.int32();
-    var contextsNumber = this.int32();
-    var contextsData = this.int32();
-    var contexts = this.at(contextsOffset).times(contextsNumber, function(cursor) {
+    let contextsOffset = this.int32();
+    let contextsNumber = this.int32();
+    let contextsData = this.int32();
+    let contexts = this.at(contextsOffset).times(contextsNumber, function(cursor) {
       return cursor.contextEntry(contextsData);
     });
 
@@ -636,7 +636,7 @@ class BinaryCursor {
       if (contexts[i].outer) contexts[contexts[i].outer - 1].inner.push(contexts[i]);
     }
 
-    var noContextClosures = [];
+    let noContextClosures = [];
 
 
     for (var i = 0; i < closures.length; i++) {
@@ -647,7 +647,7 @@ class BinaryCursor {
       }
     }
 
-    for (var closure of noContextClosures) {
+    for (let closure of noContextClosures) {
       sc.codeRefs[closure.index].capture(closure.staticCode.freshBlock());
     }
 
@@ -664,7 +664,7 @@ class BinaryCursor {
     this.int32();
 
     this.int32(); // paramInternsData
-    var numParamInterns = this.int32();
+    let numParamInterns = this.int32();
 
     if (numParamInterns != 0) {
       // XXX do we need to care?
@@ -673,7 +673,7 @@ class BinaryCursor {
 
     /* We set the method caches after everything else is ready */
     for (var i = 0; i < STables.length; i++) {
-      var STable = sc.rootSTables[i];
+      let STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
         STable.setLazyMethodCache(STable._methodCache.content);
       }
@@ -681,16 +681,16 @@ class BinaryCursor {
   }
 
   stubSTables(STables) {
-    for (var i = 0; i < STables.length; i++) {
+    for (let i = 0; i < STables.length; i++) {
       // May already have it, due to repossession.
       if (!this.sc.rootSTables[i]) {
-        var repr = STables[i][0];
+        let repr = STables[i][0];
         if (!reprs[repr]) {
           throw 'Unknown REPR: ' + repr;
         }
-        var REPR = new reprs[repr]();
+        let REPR = new reprs[repr]();
         REPR.name = repr;
-        var HOW = null; /* We will fill that in later once objects are stubbed */
+        let HOW = null; /* We will fill that in later once objects are stubbed */
         this.sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
         this.sc.rootSTables[i]._SC = this.sc;
       }
@@ -698,15 +698,15 @@ class BinaryCursor {
   }
 
   deserializeSTables(STables) {
-    for (var i = 0; i < STables.length; i++) {
+    for (let i = 0; i < STables.length; i++) {
       STables[i][1].stable(this.sc.rootSTables[i]);
     }
   }
 
   stubObjects(objects) {
-    for (var i = 0; i < objects.length; i++) {
+    for (let i = 0; i < objects.length; i++) {
       if (!this.sc.rootObjects[i]) {
-        var STableForObj =
+        let STableForObj =
             this.sc.deps[objects[i].STable[0]].rootSTables[objects[i].STable[1]];
         if (!STableForObj) {
           console.log('Missing stable', objects[i].STable[0], objects[i].STable[1], deps[objects[i].STable[0]].rootSTables);
@@ -721,9 +721,9 @@ class BinaryCursor {
   }
 
   deserializeObjects(objects) {
-    for (var i = 0; i < objects.length; i++) {
+    for (let i = 0; i < objects.length; i++) {
       if (objects[i].isConcrete) {
-        var repr = this.sc.rootObjects[i]._STable.REPR;
+        let repr = this.sc.rootObjects[i]._STable.REPR;
         if (repr.deserializeFinish) {
           this.sc.currentObject = this.sc.rootObjects[i];
           repr.deserializeFinish(this.sc.rootObjects[i], objects[i].data);
@@ -750,7 +750,7 @@ class BinaryCursor {
         this.sc.rootObjects[entry.index] = origObj;
         origObj._SC = this.sc;
 
-        var STableForObj =
+        let STableForObj =
             this.sc.deps[objects[entry.index].STable[0]].rootSTables[objects[entry.index].STable[1]];
 
         /* The object's STable may have changed as a result of the
@@ -765,12 +765,12 @@ class BinaryCursor {
   }
 
   deserializeCtx(context, outerCtx, currentHLL) {
-    var callerCtx = null;
+    let callerCtx = null;
 
     // TODO - think if we should set codeObj
-    var ctx = new Ctx(callerCtx, outerCtx);
+    let ctx = new Ctx(callerCtx, outerCtx);
 
-    for (var name in context.lexicals) {
+    for (let name in context.lexicals) {
       if (context.lexicals[name] === undefined) {
         ctx[name] = context.staticCode.staticVars[name];
       } else {
@@ -778,12 +778,12 @@ class BinaryCursor {
       }
     }
 
-    for (var inner of context.inner) {
+    for (let inner of context.inner) {
       this.deserializeCtx(inner, ctx, currentHLL);
     }
 
-    for (var closure of context.closures) {
-      var codeRef = this.sc.codeRefs[closure.index];
+    for (let closure of context.closures) {
+      let codeRef = this.sc.codeRefs[closure.index];
 
       codeRef.capture(closure.staticCode.freshBlock());
 
@@ -796,31 +796,31 @@ class BinaryCursor {
    * @return {number}
    */
   int32() {
-    var ret = this.buffer.readInt32LE(this.offset);
+    let ret = this.buffer.readInt32LE(this.offset);
     this.offset += 4;
     return ret;
   }
 
   uint8() {
-    var ret = this.buffer.readUInt8(this.offset);
+    let ret = this.buffer.readUInt8(this.offset);
     this.offset += 1;
     return ret;
   }
 
   uint16() {
-    var ret = this.buffer.readUInt16LE(this.offset);
+    let ret = this.buffer.readUInt16LE(this.offset);
     this.offset += 2;
     return ret;
   }
 
   uint32() {
-    var ret = this.buffer.readUInt32LE(this.offset);
+    let ret = this.buffer.readUInt32LE(this.offset);
     this.offset += 4;
     return ret;
   }
 
   int8() {
-    var ret = this.buffer.readInt8(this.offset);
+    let ret = this.buffer.readInt8(this.offset);
     this.offset += 1;
     return ret;
   }
@@ -829,7 +829,7 @@ class BinaryCursor {
    * @return {number}
    */
   double() {
-    var ret = this.buffer.readDoubleLE(this.offset);
+    let ret = this.buffer.readDoubleLE(this.offset);
     this.offset += 8;
     return ret;
   }
@@ -839,7 +839,7 @@ class BinaryCursor {
    * @return {string} the string at current offset
    */
   str() {
-    var offset = this.uint16();
+    let offset = this.uint16();
     if (offset & STRING_HEAP_LOC_PACKED_OVERFLOW) {
       offset ^= STRING_HEAP_LOC_PACKED_OVERFLOW;
       offset <<= STRING_HEAP_LOC_PACKED_SHIFT;
@@ -856,8 +856,8 @@ class BinaryCursor {
    * @return {string} the string at current offset
    */
   cstr() {
-    var len = this.varint();
-    var str = this.buffer.slice(this.offset, len).toString('utf8');
+    let len = this.varint();
+    let str = this.buffer.slice(this.offset, len).toString('utf8');
     this.offset += len;
     return str;
   }

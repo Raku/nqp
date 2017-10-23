@@ -1,10 +1,10 @@
 'use strict';
-var NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
-var NQPObject = require('./nqp-object.js');
-var Null = require('./null.js');
-var exceptionsStack = require('./exceptions-stack.js');
+let NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
+let NQPObject = require('./nqp-object.js');
+let Null = require('./null.js');
+let exceptionsStack = require('./exceptions-stack.js');
 
-var BOOT = require('./BOOT.js');
+let BOOT = require('./BOOT.js');
 
 const NQPInt = require('./nqp-int.js');
 
@@ -103,7 +103,7 @@ class Ctx extends NQPObject {
     let handler = '$$' + categoryToName[exception.$$category & ~LABELED];
     let labeled = exception.$$category & LABELED;
 
-    var ctx = this;
+    let ctx = this;
 
     while (ctx) {
       if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || ctx.$$label === exception.$$payload)) {
@@ -141,7 +141,7 @@ class Ctx extends NQPObject {
       return;
     }
 
-    var ctx = this;
+    let ctx = this;
 
     while (ctx) {
       if (ctx.$$CATCH) {
@@ -251,7 +251,7 @@ class Ctx extends NQPObject {
   }
 
   lookupDynamic(name) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -264,7 +264,7 @@ class Ctx extends NQPObject {
   }
 
   lookupDynamicFromCaller(name) {
-    var ctx = this.$$caller;
+    let ctx = this.$$caller;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -277,9 +277,9 @@ class Ctx extends NQPObject {
   }
 
   lookupWithCallers(name) {
-    var currentCallerCtx = this;
+    let currentCallerCtx = this;
     while (currentCallerCtx) {
-      var currentCtx = currentCallerCtx;
+      let currentCtx = currentCallerCtx;
       while (currentCtx) {
         if (currentCtx.hasOwnProperty(name)) {
           return currentCtx[name];
@@ -292,7 +292,7 @@ class Ctx extends NQPObject {
   }
 
   lookup(name) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -308,7 +308,7 @@ class Ctx extends NQPObject {
   }
 
   $$getHLL() {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.$$hll) {
         return ctx.$$hll;
@@ -335,7 +335,7 @@ class Ctx extends NQPObject {
   }
 
   bind(name, value) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         ctx[name] = value;
@@ -347,7 +347,7 @@ class Ctx extends NQPObject {
   }
 
   bindDynamic(name, value) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         ctx[name] = value;

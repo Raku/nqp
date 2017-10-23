@@ -1,6 +1,6 @@
 'use strict';
-var NQPInt = require('./nqp-int.js');
-var Null = require('./null.js');
+let NQPInt = require('./nqp-int.js');
+let Null = require('./null.js');
 
 const nativeArgs = require('./native-args.js');
 
@@ -14,7 +14,7 @@ const NativeStrArg = nativeArgs.NativeStrArg;
 class MultiCache {
   constructor() {
     this.cache = [];
-    for (var i = 0; i < MAX_ARITY; i++) {
+    for (let i = 0; i < MAX_ARITY; i++) {
       this.cache[i] = [];
     }
   }
@@ -25,10 +25,10 @@ class MultiCache {
 };
 
 function posTypes(ctx, capture) {
-  var arity = capture.pos.length;
-  var types = new Array(arity);
-  for (var i = 0; i < arity; i++) {
-    var obj = capture.pos[i];
+  let arity = capture.pos.length;
+  let types = new Array(arity);
+  for (let i = 0; i < arity; i++) {
+    let obj = capture.pos[i];
     if (obj._STable) {
       let deconted = obj.$$decont(ctx);
 
@@ -65,11 +65,11 @@ function posTypes(ctx, capture) {
   return types;
 }
 
-var op = {};
+let op = {};
 
 op.multicachefind = function(ctx, cache, capture) {
   if (!(cache instanceof MultiCache)) return Null;
-  var arity = capture.pos.length;
+  let arity = capture.pos.length;
   if (capture.named) return Null;
 
   if (arity == 0) {
@@ -82,12 +82,12 @@ op.multicachefind = function(ctx, cache, capture) {
 
   if (arity > MAX_ARITY) return Null;
 
-  var types = posTypes(ctx, capture);
+  let types = posTypes(ctx, capture);
 
-  var arityCache = cache.cache[arity - 1];
+  let arityCache = cache.cache[arity - 1];
 
-  CANDIDATES: for (var i = 0; i < arityCache.length; i++) {
-    for (var j = 0; j < arityCache[i].types.length; j++) {
+  CANDIDATES: for (let i = 0; i < arityCache.length; i++) {
+    for (let j = 0; j < arityCache[i].types.length; j++) {
       if (arityCache[i].types[j] !== types[j]) continue CANDIDATES;
     }
     return arityCache[i].result;
@@ -97,9 +97,9 @@ op.multicachefind = function(ctx, cache, capture) {
 };
 
 op.multicacheadd = function(ctx, cache, capture, result) {
-  var c = cache instanceof MultiCache ? cache : new MultiCache();
+  let c = cache instanceof MultiCache ? cache : new MultiCache();
   if (c.named) return c;
-  var arity = capture.pos.length;
+  let arity = capture.pos.length;
 
   if (arity == 0) {
     c.zeroArity = result;

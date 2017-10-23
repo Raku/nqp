@@ -1,18 +1,18 @@
 'use strict';
-var op = {};
+let op = {};
 exports.op = op;
 
-var refs = require('./refs.js');
+let refs = require('./refs.js');
 
-var NQPInt = require('./nqp-int.js');
-var NQPException = require('./nqp-exception.js');
+let NQPInt = require('./nqp-int.js');
+let NQPException = require('./nqp-exception.js');
 
-var nullStr = require('./null_s.js');
-var Null = require('./null.js');
+let nullStr = require('./null_s.js');
+let Null = require('./null.js');
 
-var Capture = require('./capture.js');
+let Capture = require('./capture.js');
 
-var StaticCtx = require('./static-ctx.js');
+let StaticCtx = require('./static-ctx.js');
 
 const BOOT = require('./BOOT.js');
 
@@ -29,14 +29,14 @@ const fs = require('fs');
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
-  for (var name in module.op) {
+  for (let name in module.op) {
     op[name] = module.op[name];
   }
 }
 
 exports.loadOps = loadOps;
 
-var core = require('./core');
+let core = require('./core');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
@@ -51,47 +51,47 @@ exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
-var io = require('./io.js');
+let io = require('./io.js');
 loadOps(io);
 
-var bignum = require('./bignum.js');
+let bignum = require('./bignum.js');
 loadOps(bignum);
 
-var nfa = require('./nfa.js');
+let nfa = require('./nfa.js');
 loadOps(nfa);
 
-var cclass = require('./cclass.js');
+let cclass = require('./cclass.js');
 loadOps(cclass);
 
-var hll = require('./hll.js');
+let hll = require('./hll.js');
 loadOps(hll);
 
 loadOps(require('./multicache.js'));
 
-var deserialization = require('./deserialization.js');
+let deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 loadOps(deserialization);
 
-var serialization = require('./serialization.js');
+let serialization = require('./serialization.js');
 loadOps(serialization);
 
-var nativecall = require('./nativecall.js');
+let nativecall = require('./nativecall.js');
 loadOps(nativecall);
 
-var CodeRef = require('./code-ref.js');
+let CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
 
-var Ctx = require('./ctx.js');
+let Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
 module.exports.CtxWithStatic = require('./ctx-with-static.js');
 module.exports.CtxJustHandler = require('./ctx-just-handler.js');
 
-var bootstrap = require('./bootstrap.js');
+let bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
@@ -118,20 +118,20 @@ op.loadbytecode = function(ctx, file) {
     file = 'Perl6::BOOTSTRAP';
   }
 
-  var loadFrom;
+  let loadFrom;
   if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
   } else {
     loadFrom = module;
   }
 
-  var oldLoaderCtx = exports.loaderCtx;
+  let oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  var mangled = file.replace(/::/g, '-');
+  let mangled = file.replace(/::/g, '-');
 
-  var prefixes = libpath.slice();
+  let prefixes = libpath.slice();
   prefixes.push('./', './nqp-js-on-js/');
-  var found = false;
-  for (var prefix of prefixes) {
+  let found = false;
+  for (let prefix of prefixes) {
     try {
       loadFrom.require(prefix + mangled);
       found = true;
@@ -195,7 +195,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 };
 
 exports.toStr = function(arg_, ctx) {
-  var arg = arg_.$$decont(ctx);
+  let arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return coercions.numToStr(arg);
   } else if (typeof arg == 'string') {
@@ -231,7 +231,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (typeof arg == 'string') {
     return coercions.strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    var result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    let result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {
@@ -264,10 +264,10 @@ if (!Math.imul) {
   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
   */
   Math.imul = function(a, b) {
-    var ah = (a >>> 16) & 0xffff;
-    var al = a & 0xffff;
-    var bh = (b >>> 16) & 0xffff;
-    var bl = b & 0xffff;
+    let ah = (a >>> 16) & 0xffff;
+    let al = a & 0xffff;
+    let bh = (b >>> 16) & 0xffff;
+    let bl = b & 0xffff;
     // the shift by 0 fixes the sign on the high part
     // the final |0 converts the unsigned value into a signed value
     return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
@@ -281,7 +281,7 @@ exports.topContext = function() {
 
 // helper for regexs
 exports.regexPeek = function(bstack, mark) {
-  var ptr = bstack.length;
+  let ptr = bstack.length;
   while (ptr >= 0) {
     if (bstack[ptr] == mark) break;
     ptr -= 4;
@@ -290,8 +290,8 @@ exports.regexPeek = function(bstack, mark) {
 };
 
 exports.regexCommit = function(bstack, mark) {
-  var ptr = bstack.length;
-  var caps;
+  let ptr = bstack.length;
+  let caps;
   if (ptr > 0) {
     caps = bstack[ptr - 1];
   } else {
@@ -336,7 +336,7 @@ exports.wrapException = function(e) {
 };
 
 exports.setCodeRefHLL = function(codeRefs, currentHLL) {
-  for (var i = 0; i < codeRefs.length; i++) {
+  for (let i = 0; i < codeRefs.length; i++) {
     codeRefs[i].hll = currentHLL;
   }
 };

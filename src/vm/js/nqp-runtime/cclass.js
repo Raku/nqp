@@ -1,6 +1,6 @@
 'use strict';
-var xregexp = require('xregexp');
-var op = {};
+let xregexp = require('xregexp');
+let op = {};
 exports.op = op;
 
 function boolish(bool) {
@@ -65,10 +65,10 @@ op.iscclass = function(cclass, target, offset) {
 };
 
 op.findcclass = function(cclass, target, offset, count) {
-  var end = offset + count;
+  let end = offset + count;
   end = target.length < end ? target.length : end;
 
-  for (var pos = offset; pos < end; pos++) {
+  for (let pos = offset; pos < end; pos++) {
     if (iscclass(cclass, target, pos) > 0) {
       return pos;
     }
@@ -78,10 +78,10 @@ op.findcclass = function(cclass, target, offset, count) {
 };
 
 op.findnotcclass = function(cclass, target, offset, count) {
-  var end = offset + count;
+  let end = offset + count;
   end = target.length < end ? target.length : end;
 
-  for (var pos = offset; pos < end; pos++) {
+  for (let pos = offset; pos < end; pos++) {
     if (iscclass(cclass, target, pos) == 0) {
       return pos;
     }

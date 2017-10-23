@@ -2,15 +2,15 @@
 
 /* Used when evaling runtime compiled methods */
 const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
-var bignum = require('bignum-browserify');
+let bignum = require('bignum-browserify');
 const ZERO = bignum(0);  // eslint-disable-line no-unused-vars
 
-var Null = require('./null.js');
+let Null = require('./null.js');
 
-var repossession = require('./repossession.js');
-var compilingSCs = repossession.compilingSCs;
+let repossession = require('./repossession.js');
+let compilingSCs = repossession.compilingSCs;
 
-var constants = require('./constants.js');
+let constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
 
@@ -50,8 +50,8 @@ class STable {
 
     /* HACK - it's a bit hackish - think how correct it is */
     this.ObjConstructor.prototype.$$clone = function() {
-      var clone = new this._STable.ObjConstructor();
-      for (var i in this) {
+      let clone = new this._STable.ObjConstructor();
+      for (let i in this) {
         if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
         }
@@ -82,15 +82,15 @@ class STable {
       }
 
       if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-        var owned = this._SC.ownedObjects.get(this);
+        let owned = this._SC.ownedObjects.get(this);
         compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
       }
     };
 
     this.ObjConstructor.prototype.$$istype = function(ctx, type) {
-      var cache = this._STable.typeCheckCache;
+      let cache = this._STable.typeCheckCache;
       if (cache) {
-        for (var i = 0; i < cache.length; i++) {
+        for (let i = 0; i < cache.length; i++) {
           if (cache[i] === type) {
             return 1;
           }
@@ -99,7 +99,7 @@ class STable {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
 
-        var HOW = this._STable.HOW;
+        let HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
         if (!HOW.$$can(ctx, 'type_check')) {
           return 0;
@@ -147,7 +147,7 @@ class STable {
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        var str = this.$$getStr();
+        let str = this.$$getStr();
         return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
@@ -170,9 +170,9 @@ class STable {
   setinvokespec(classHandle, attrName, invocationHandler) {
     if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
-      var getter = this.REPR.getterForAttr(classHandle, attrName);
+      let getter = this.REPR.getterForAttr(classHandle, attrName);
       this.ObjConstructor.prototype.$$call = function() {
-        var value = this[getter]();
+        let value = this[getter]();
         return value.$$call.apply(value, arguments);
       };
       this.ObjConstructor.prototype.$$apply = function(args) {
@@ -180,22 +180,22 @@ class STable {
       };
     } else {
       this.ObjConstructor.prototype.$$call = function() {
-        var args = [];
+        let args = [];
         args.push(arguments[0]);
         args.push(arguments[1]);
         args.push(this);
-        for (var i = 2; i < arguments.length; i++) {
+        for (let i = 2; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
         return invocationHandler.$$apply(args);
       };
 
       this.ObjConstructor.prototype.$$apply = function(args) {
-        var newArgs = [];
+        let newArgs = [];
         newArgs.push(args[0]);
         newArgs.push(args[1]);
         newArgs.push(this);
-        for (var i = 2; i < args.length; i++) {
+        for (let i = 2; i < args.length; i++) {
           newArgs.push(args[i]);
         }
         return invocationHandler.$$apply(newArgs);
@@ -206,7 +206,7 @@ class STable {
 
 
   createTypeObject() {
-    var obj = new this.ObjConstructor();
+    let obj = new this.ObjConstructor();
     obj.typeObject_ = 1;
     obj.$$atkey = function(key) {
       return Null;
@@ -308,7 +308,7 @@ class STable {
 
   evalGatheredCode() {
     if (this.code) {
-      var STable = this; // eslint-disable-line no-unused-vars
+      let STable = this; // eslint-disable-line no-unused-vars
       eval(this.setup + this.code);
       this.code = '';
     }

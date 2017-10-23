@@ -1,7 +1,7 @@
 'use strict';
 
-var NQPObject = require('./nqp-object.js');
-var StaticCtx = require('./static-ctx.js');
+let NQPObject = require('./nqp-object.js');
+let StaticCtx = require('./static-ctx.js');
 
 class CodeRef extends NQPObject {
   freshBlock() {
@@ -63,7 +63,7 @@ class CodeRef extends NQPObject {
           fakeCtx.$$cuid = searched.outerCodeRef.cuid;
           let staticVars = outerCode.staticVars;
           if (staticVars) {
-            for (var staticVarName in staticVars) {
+            for (let staticVarName in staticVars) {
               fakeCtx[staticVarName] = staticVars[staticVarName];
             }
           }
@@ -88,7 +88,7 @@ class CodeRef extends NQPObject {
   }
 
   closure(block) {
-    var closure = new CodeRef(this.name, this.cuid);
+    let closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;
     closure.$$call = block;
     closure.staticCode = this;
@@ -96,7 +96,7 @@ class CodeRef extends NQPObject {
   }
 
   closureCtx(outerCtx) {
-    var closure = new CodeRef(this.name, this.cuid);
+    let closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;
     closure.$$call = this.freshBlock();
     closure.staticCode = this;
@@ -115,7 +115,7 @@ class CodeRef extends NQPObject {
 
   captureAndClosure(outer, block) {
     this.capture(block);
-    var closure = this.closure(block);
+    let closure = this.closure(block);
     if (outer !== null) {
       this.outerCtx = outer;
       closure.outerCtx = outer;
@@ -125,7 +125,7 @@ class CodeRef extends NQPObject {
 
   captureAndClosureCtx(outerCtx) {
     this.capture(this.freshBlock());
-    var closure = this.closure(this.freshBlock());
+    let closure = this.closure(this.freshBlock());
 
     if (outerCtx !== null) {
       this.outerCtx = outerCtx;
@@ -149,7 +149,7 @@ class CodeRef extends NQPObject {
   }
 
   $$clone() {
-    var clone = new CodeRef(this.name, undefined);
+    let clone = new CodeRef(this.name, undefined);
     clone.$$call = this.$$call;
     clone.codeObj = this.codeObj;
     clone.staticCode = this.staticCode;

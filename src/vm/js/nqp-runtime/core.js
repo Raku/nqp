@@ -1,39 +1,39 @@
-var op = {};
+let op = {};
 exports.op = op;
 
-var os = require('os');
+let os = require('os');
 
-var Hash = require('./hash.js');
-var CodeRef = require('./code-ref.js');
+let Hash = require('./hash.js');
+let CodeRef = require('./code-ref.js');
 
-var Ctx = require('./ctx.js');
+let Ctx = require('./ctx.js');
 
-var NQPInt = require('./nqp-int.js');
+let NQPInt = require('./nqp-int.js');
 
-var NQPException = require('./nqp-exception.js');
+let NQPException = require('./nqp-exception.js');
 
-var reprs = require('./reprs.js');
+let reprs = require('./reprs.js');
 
-var hll = require('./hll.js');
+let hll = require('./hll.js');
 
-var NQPObject = require('./nqp-object.js');
+let NQPObject = require('./nqp-object.js');
 
-var constants = require('./constants.js');
+let constants = require('./constants.js');
 
-var containerSpecs = require('./container-specs.js');
+let containerSpecs = require('./container-specs.js');
 
-var Null = require('./null.js');
+let Null = require('./null.js');
 const null_s = require('./null_s.js');
 
-var BOOT = require('./BOOT.js');
+let BOOT = require('./BOOT.js');
 
-var exceptionsStack = require('./exceptions-stack.js');
+let exceptionsStack = require('./exceptions-stack.js');
 
-var repossession = require('./repossession.js');
+let repossession = require('./repossession.js');
 
-var sixmodel = require('./sixmodel.js');
+let sixmodel = require('./sixmodel.js');
 
-var Capture = require('./capture.js');
+let Capture = require('./capture.js');
 
 const shortid = require('shortid');
 
@@ -56,36 +56,36 @@ op.escape = function(str) {
 };
 
 function radixHelper(radix, str, zpos, flags) {
-  var lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
-  var uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
+  let lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
+  let uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
-  var letters = radix >= 11 ? lowercase + uppercase : '';
+  let letters = radix >= 11 ? lowercase + uppercase : '';
 
-  var digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
-  var minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
-  var regex = new RegExp(
+  let digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
+  let minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
+  let regex = new RegExp(
       '^' + minus + digitclass + '(?:_' +
       digitclass + '|' + digitclass + ')*');
   var str = str.slice(zpos);
-  var search = str.match(regex);
+  let search = str.match(regex);
   if (search == null) {
     return null;
   }
-  var number = search[0].replace(/_/g, '').replace(/^\+/, '');
+  let number = search[0].replace(/_/g, '').replace(/^\+/, '');
   if (flags & 0x01) number = '-' + number;
   if (flags & 0x04) number = number.replace(/0+$/, '');
-  var power = number[0] == '-' ? number.length - 1 : number.length;
+  let power = number[0] == '-' ? number.length - 1 : number.length;
   return {power: power, offset: zpos + search[0].length, number: number};
 }
 
 exports.radixHelper = radixHelper;
 
 op.radix = function(currentHLL, radix, str, zpos, flags) {
-  var extracted = radixHelper(radix, str, zpos, flags);
+  let extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
     return hll.slurpyArray(currentHLL, [0, 1, -1]);
   }
-  var pow = Math.pow(radix, extracted.power);
+  let pow = Math.pow(radix, extracted.power);
   return hll.slurpyArray(currentHLL, [parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
@@ -108,8 +108,8 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
   if (!type) {
     return new NQPInt(i);
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
+    let repr = type._STable.REPR;
+    let obj = repr.allocate(type._STable);
     obj.$$setInt(i);
     return obj;
   }
@@ -120,8 +120,8 @@ const numToObj = exports.numToObj = function(currentHLL, n) {
   if (!type) {
     return n;
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
+    let repr = type._STable.REPR;
+    let obj = repr.allocate(type._STable);
     obj.$$setNum(n);
     return obj;
   }
@@ -132,8 +132,8 @@ const strToObj = exports.strToObj = function(currentHLL, s) {
   if (!type) {
     return s;
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
+    let repr = type._STable.REPR;
+    let obj = repr.allocate(type._STable);
     obj.$$setStr(s);
     return obj;
   }
@@ -175,10 +175,10 @@ exports.unwrapNamed = function(named) {
 };
 
 exports.named = function(parts) {
-  var all = {};
-  for (var i = 0; i < parts.length; i++) {
-    var part = parts[i];
-    for (var key in part) {
+  let all = {};
+  for (let i = 0; i < parts.length; i++) {
+    let part = parts[i];
+    for (let key in part) {
       all[key] = part[key];
     }
   }
@@ -251,7 +251,7 @@ op.captureexistsnamed = function(capture, arg) {
 };
 
 op.capturenamedshash = function(currentHLL, capture) {
-  var hash = new Hash();
+  let hash = new Hash();
   for (key in capture.named) {
     hash.content.set(key, arg(currentHLL, capture.named[key]));
   }
@@ -319,13 +319,13 @@ op.newtype = function(how, repr) {
   if (!reprs[repr]) {
     throw 'Unknown REPR: ' + repr;
   }
-  var REPR = new reprs[repr]();
+  let REPR = new reprs[repr]();
   REPR.name = repr;
   return REPR.typeObjectFor(how);
 };
 
 op.findmethod = function(ctx, obj, name) {
-  var method = sixmodel.findMethod(ctx, obj, name);
+  let method = sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
     throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
   }
@@ -351,7 +351,7 @@ op.composetype = function(obj, reprinfo) {
   obj._STable.REPR.compose(obj._STable, reprinfo);
 };
 
-var whereCounter = 0;
+let whereCounter = 0;
 op.where = function(obj) {
   if (obj._STable || obj instanceof CodeRef || obj === Null) { // HACK
     if (!obj._WHERE) {
@@ -368,7 +368,7 @@ op.objectid = op.where;
 /* HACK - take the current HLL settings into regard */
 
 
-var sha1 = require('sha1');
+let sha1 = require('sha1');
 
 op.sha1 = function(text) {
   return sha1(text).toUpperCase();
@@ -416,8 +416,8 @@ op.isrwcont = function(cont) {
 };
 
 op.box_n = function(n, type) {
-  var repr = type._STable.REPR;
-  var obj = repr.allocate(type._STable);
+  let repr = type._STable.REPR;
+  let obj = repr.allocate(type._STable);
   obj.$$setNum(n);
   return obj;
 };
@@ -428,8 +428,8 @@ op.unbox_n = function(obj) {
 };
 
 op.box_s = function(value, type) {
-  var repr = type._STable.REPR;
-  var obj = repr.allocate(type._STable);
+  let repr = type._STable.REPR;
+  let obj = repr.allocate(type._STable);
   obj.$$setStr(value);
   return obj;
 };
@@ -441,8 +441,8 @@ op.unbox_s = function(obj) {
 
 
 op.box_i = function(i, type) {
-  var repr = type._STable.REPR;
-  var obj = repr.allocate(type._STable);
+  let repr = type._STable.REPR;
+  let obj = repr.allocate(type._STable);
   obj.$$setInt(i);
   return obj;
 };
@@ -468,7 +468,7 @@ op.markcodestub = function(code) {
 };
 
 op.freshcoderef = function(code) {
-  var fresh = code.$$clone();
+  let fresh = code.$$clone();
   fresh.staticCode = fresh;
   return fresh;
 };
@@ -490,7 +490,7 @@ op.scwbdisable = function() {
   return ++repossession.scwbDisableDepth;
 };
 
-var compilerRegistry = new Map();
+let compilerRegistry = new Map();
 
 op.bindcomp = function(language, compiler) {
   compilerRegistry.set(language, compiler);
@@ -504,8 +504,8 @@ class WrappedFunction extends NQPObject {
   }
 
   $$apply(args) {
-    var converted = [];
-    for (var i = 2; i < args.length; i++) {
+    let converted = [];
+    for (let i = 2; i < args.length; i++) {
       converted.push(toJS(args[i]));
     }
     return fromJS(this.func.apply(null, converted));
@@ -537,8 +537,8 @@ function toJS(obj) {
     return obj.value;
   } else if (obj instanceof CodeRef) {
     return function() {
-      var converted = [null, {}];
-      for (var i = 0; i < arguments.length; i++) {
+      let converted = [null, {}];
+      for (let i = 0; i < arguments.length; i++) {
         converted.push(fromJS(arguments[i]));
       }
       return toJS(obj.$$apply(converted));
@@ -755,7 +755,7 @@ exports.isKnownEncoding = isKnownEncoding;
 
 
 function byteSize(buf) {
-  var bits = buf._STable.REPR.type._STable.REPR.bits;
+  let bits = buf._STable.REPR.type._STable.REPR.bits;
 
   if (bits % 8) {
     throw 'only buffer sizes that are a multiple of 8 are supported';
@@ -771,16 +771,16 @@ op.encode = function(str, encoding_, buf) {
     throw new NQPException('encode requires an empty array');
   }
 
-  var encoding = renameEncoding(encoding_);
+  let encoding = renameEncoding(encoding_);
 
-  var elementSize = byteSize(buf);
+  let elementSize = byteSize(buf);
 
-  var isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
-  var buffer = new Buffer(str, encoding);
+  let buffer = new Buffer(str, encoding);
 
-  var offset = 0;
-  for (var i = 0; i < buffer.length / elementSize; i++) {
+  let offset = 0;
+  for (let i = 0; i < buffer.length / elementSize; i++) {
     buf.array[i] = isUnsigned ? buffer.readUIntLE(offset, elementSize) : buffer.readIntLE(offset, elementSize);
     offset += elementSize;
   }
@@ -837,7 +837,7 @@ op.objprimbits = function(type) {
 
 /* Parametricity operations. */
 op.setparameterizer = function(ctx, type, parameterizer) {
-  var st = type._STable;
+  let st = type._STable;
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
     ctx.die('This type is already parametric');
@@ -858,18 +858,18 @@ op.setparameterizer = function(ctx, type, parameterizer) {
 
 op.parameterizetype = function(ctx, type, params) {
   /* Ensure we have a parametric type. */
-  var st = type._STable;
+  let st = type._STable;
   if (!st.parameterizer) {
     ctx.die('This type is not parametric');
   }
 
-  var unpackedParams = params.array;
+  let unpackedParams = params.array;
 
-  var lookup = st.parameterizerCache;
-  for (var i = 0; i < lookup.length; i++) {
+  let lookup = st.parameterizerCache;
+  for (let i = 0; i < lookup.length; i++) {
     if (unpackedParams.length == lookup[i].params.length) {
-      var match = true;
-      for (var j = 0; j < unpackedParams.length; j++) {
+      let match = true;
+      for (let j = 0; j < unpackedParams.length; j++) {
         /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
         if (unpackedParams[j] !== lookup[i].params[j]) {
           match = false;
@@ -883,9 +883,9 @@ op.parameterizetype = function(ctx, type, params) {
     }
   }
 
-  var result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
+  let result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
-  var newSTable = result._STable;
+  let newSTable = result._STable;
   newSTable.parametricType = type;
   newSTable.parameters = params;
   newSTable.modeFlags |= constants.PARAMETERIZED_TYPE;
@@ -896,7 +896,7 @@ op.parameterizetype = function(ctx, type, params) {
 };
 
 op.gcd_i = function(a, b) {
-  var c;
+  let c;
   while (a != 0) {
     c = a;
     a = b % a;
@@ -940,7 +940,7 @@ op.isnanorinf = function(n) {
 };
 
 function typeparameters(ctx, type) {
-  var st = type._STable;
+  let st = type._STable;
   if (!st.parametricType) {
     ctx.die('This type is not parameterized');
   }
@@ -955,7 +955,7 @@ op.typeparameterat = function(ctx, type, idx) {
 };
 
 op.typeparameterized = function(type) {
-  var st = type._STable;
+  let st = type._STable;
   return st.parametricType ? st.parametricType : Null;
 };
 
@@ -1012,18 +1012,18 @@ op.continuationcontrol = function(ctx, protect, tag, closure) {
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  var val = inject.$$call(ctx, null);
+  let val = inject.$$call(ctx, null);
   return runTagged(cont.tag, cont.fiber, val, ctx);
 };
 
-var generator = Math;
+let generator = Math;
 op.rand_n = function(limit) {
   return generator.random() * limit;
 };
 
 
 op.srand = function(seed) {
-  var XorShift = require('xorshift').constructor;
+  let XorShift = require('xorshift').constructor;
   generator = new XorShift([seed, 0, 0, 0]);
   return seed;
 };
@@ -1034,11 +1034,11 @@ op.getlexrel = function(pad, name) {
 
 
 op.bitand_s = function(a, b) {
-  var ret = '';
-  var i = 0;
+  let ret = '';
+  let i = 0;
   while (true) {
-    var codepointA = a.codePointAt(i);
-    var codepointB = b.codePointAt(i);
+    let codepointA = a.codePointAt(i);
+    let codepointB = b.codePointAt(i);
     if (codepointA === undefined || codepointB == undefined) {
       return ret;
     }
@@ -1048,11 +1048,11 @@ op.bitand_s = function(a, b) {
 };
 
 op.bitor_s = function(a, b) {
-  var ret = '';
-  var i = 0;
+  let ret = '';
+  let i = 0;
   while (true) {
-    var codepointA = a.codePointAt(i);
-    var codepointB = b.codePointAt(i);
+    let codepointA = a.codePointAt(i);
+    let codepointB = b.codePointAt(i);
     if (codepointA === undefined && codepointB == undefined) {
       return ret;
     }
@@ -1064,11 +1064,11 @@ op.bitor_s = function(a, b) {
 };
 
 op.bitxor_s = function(a, b) {
-  var ret = '';
-  var i = 0;
+  let ret = '';
+  let i = 0;
   while (true) {
-    var codepointA = a.codePointAt(i);
-    var codepointB = b.codePointAt(i);
+    let codepointA = a.codePointAt(i);
+    let codepointB = b.codePointAt(i);
     if (codepointA === undefined && codepointB == undefined) {
       return ret;
     }
@@ -1084,7 +1084,7 @@ op.replace = function(str, offset, count, repl) {
 };
 
 op.getcodelocation = function(code) {
-  var hash = new Hash();
+  let hash = new Hash();
   hash.content.set('file', 'unknown');
   hash.content.set('line', new NQPInt(-1));
   return hash;
@@ -1137,12 +1137,12 @@ op.setdimensions = function(array, dimensions) {
 
 /* TODO HLL support */
 op.newexception = function() {
-  var exType = BOOT.Exception;
+  let exType = BOOT.Exception;
   return exType._STable.REPR.allocate(exType._STable);
 };
 
 op.throwextype = function(ctx, category) {
-  var exType = BOOT.Exception;
+  let exType = BOOT.Exception;
   let ex = exType._STable.REPR.allocate(exType._STable);
   ex.$$category = category;
   ctx.throw(ex);
@@ -1267,7 +1267,7 @@ op.ctxcallerskipthunks = function(ctx) {
 };
 
 op.ctxouterskipthunks = function(ctx) {
-  var outer = ctx.$$skipHandlers().$$outer;
+  let outer = ctx.$$skipHandlers().$$outer;
 
   // FIXME - ctxs that don't have a codeRef
   while (outer && outer.codeRef().staticCode.isThunk) {
@@ -1311,13 +1311,13 @@ op.fc = function(string) {
 
 function tcChar(c) {
   if (c === 'ß') return 'Ss';
-  var unicharadata = require('unicharadata');
-  var titled = unicharadata.title(c);
+  let unicharadata = require('unicharadata');
+  let titled = unicharadata.title(c);
   return titled === '' ? c : titled;
 }
 
 op.tc = function(string) {
-  var ret = '';
+  let ret = '';
   for (let c of string) {
     ret += tcChar(c);
   }

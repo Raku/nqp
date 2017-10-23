@@ -1,12 +1,12 @@
 'use strict';
 
-var NQPObject = require('./nqp-object.js');
-var Null = require('./null.js');
+let NQPObject = require('./nqp-object.js');
+let Null = require('./null.js');
 
 let HashIter = require('./hash-iter.js');
 
-var repossession = require('./repossession.js');
-var compilingSCs = repossession.compilingSCs;
+let repossession = require('./repossession.js');
+let compilingSCs = repossession.compilingSCs;
 
 
 class Hash extends NQPObject {
@@ -37,7 +37,7 @@ class Hash extends NQPObject {
   }
 
   $$clone() {
-    var clone = new Hash();
+    let clone = new Hash();
     this.content.forEach(function(value, key, map) {
       clone.content.set(key, value);
     });
@@ -53,7 +53,7 @@ class Hash extends NQPObject {
   }
 
   $$toObject() {
-    var ret = {};
+    let ret = {};
     this.content.forEach(function(value, key, map) {
       ret[key] = value;
     });
@@ -75,7 +75,7 @@ class Hash extends NQPObject {
     }
 
     if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-      var owned = this._SC.ownedObjects.get(this);
+      let owned = this._SC.ownedObjects.get(this);
       compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
     }
   }

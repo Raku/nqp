@@ -1,20 +1,20 @@
 'use strict';
-var sixmodel = require('./sixmodel.js');
-var Hash = require('./hash.js');
-var NQPInt = require('./nqp-int.js');
-var NQPException = require('./nqp-exception.js');
-var Null = require('./null.js');
-var nullStr = require('./null_s.js');
-var Iter = require('./iter.js');
-var BOOT = require('./BOOT.js');
-var core = require('./core.js');
-var nqp = require('nqp-runtime');
+let sixmodel = require('./sixmodel.js');
+let Hash = require('./hash.js');
+let NQPInt = require('./nqp-int.js');
+let NQPException = require('./nqp-exception.js');
+let Null = require('./null.js');
+let nullStr = require('./null_s.js');
+let Iter = require('./iter.js');
+let BOOT = require('./BOOT.js');
+let core = require('./core.js');
+let nqp = require('nqp-runtime');
 
-var bignum = require('bignum-browserify');
+let bignum = require('bignum-browserify');
 // disable for eval
-var ZERO = bignum(0); // eslint-disable-line no-unused-vars
+let ZERO = bignum(0); // eslint-disable-line no-unused-vars
 
-var constants = require('./constants.js');
+let constants = require('./constants.js');
 
 const ref = require('ref');
 
@@ -33,14 +33,14 @@ const EDGE_CHARRANGE_NEG = 13;
 const EDGE_CODEPOINT_LL = 14;
 const EDGE_CODEPOINT_I_LL = 15;
 
-var reprs = {};
-var reprById = [];
+let reprs = {};
+let reprById = [];
 
 function basicTypeObjectFor(HOW) {
-  var st = new sixmodel.STable(this, HOW);
+  let st = new sixmodel.STable(this, HOW);
   this._STable = st;
 
-  var obj = st.createTypeObject();
+  let obj = st.createTypeObject();
   this._STable.WHAT = obj;
 
   return obj;
@@ -63,8 +63,8 @@ function methodNotFoundError(ctx, obj, name) {
 }
 
 function basicConstructor(STable) {
-  var ObjConstructor = function() {};
-  var handler = {};
+  let ObjConstructor = function() {};
+  let handler = {};
   handler.get = function(target, name) {
     if (STable.lazyMethodCache) {
       STable.setMethodCache(STable.methodCache);
@@ -89,14 +89,14 @@ function basicConstructor(STable) {
     return function() {
       let how = this._STable.HOW;
 
-      var method = how.find_method(null, null, how, this, name);
+      let method = how.find_method(null, null, how, this, name);
 
       if (method === Null) {
         methodNotFoundError(arguments[0], arguments[2], name);
       }
 
-      var args = [];
-      for (var i = 0; i < arguments.length; i++) {
+      let args = [];
+      for (let i = 0; i < arguments.length; i++) {
         args.push(arguments[i]);
       }
       return method.$$apply(args);
@@ -126,21 +126,21 @@ REPR.prototype.createObjConstructor = basicConstructor;
 
 class P6opaque {
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.$$setDefaults();
     return obj;
   }
 
   deserializeReprData(cursor, STable) {
     this.deserialized = 1;
-    var numAttributes = cursor.varint();
+    let numAttributes = cursor.varint();
     this.flattenedSTables = [];
     for (var i = 0; i < numAttributes; i++) {
-      var notNull = cursor.varint();
+      let notNull = cursor.varint();
       this.flattenedSTables.push(notNull != 0 ? cursor.locateThing('rootSTables') : null);
     }
     this.mi = cursor.varint();
-    var hasAutoVivValues = cursor.varint();
+    let hasAutoVivValues = cursor.varint();
     if (hasAutoVivValues != 0) {
       this.autoVivValues = [];
       for (var i = 0; i < numAttributes; i++) {
@@ -152,11 +152,11 @@ class P6opaque {
     this.unboxNumSlot = cursor.varint();
     this.unboxStrSlot = cursor.varint();
 
-    var hasUnboxSlots = cursor.varint();
+    let hasUnboxSlots = cursor.varint();
     if (hasUnboxSlots != 0) {
       this.unboxSlots = [];
       for (var i = 0; i < numAttributes; i++) {
-        var reprId = cursor.varint();
+        let reprId = cursor.varint();
         var slot = cursor.varint();
         if (reprId != 0) {
           this.unboxSlots.push({slot: slot, reprId: reprId});
@@ -164,18 +164,18 @@ class P6opaque {
       }
     }
 
-    var numClasses = cursor.varint();
+    let numClasses = cursor.varint();
     this.nameToIndexMapping = [];
 
-    var slots = [];
+    let slots = [];
 
     for (var i = 0; i < numClasses; i++) {
       this.nameToIndexMapping[i] = {slots: [], names: [], classKey: cursor.variant()};
 
-      var numAttrs = cursor.varint();
+      let numAttrs = cursor.varint();
 
-      for (var j = 0; j < numAttrs; j++) {
-        var name = cursor.str();
+      for (let j = 0; j < numAttrs; j++) {
+        let name = cursor.str();
         var slot = cursor.varint();
 
         this.nameToIndexMapping[i].names[j] = name;
@@ -211,9 +211,9 @@ class P6opaque {
     if (!this.nameToIndexMapping) {
       return -1;
     }
-    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+    for (let i = 0; i < this.nameToIndexMapping.length; i++) {
       if (this.nameToIndexMapping[i].classKey === classHandle) {
-        for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+        for (let j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
           if (this.nameToIndexMapping[i].names[j] === attrName) {
             return this.nameToIndexMapping[i].slots[j];
           }
@@ -224,7 +224,7 @@ class P6opaque {
   }
 
   getHint(classHandle, attrName) {
-    var hint = this.hintfor(classHandle, attrName);
+    let hint = this.hintfor(classHandle, attrName);
     if (hint == -1) {
       throw new NQPException(`Can't find: ${attrName}`);
     } else {
@@ -290,7 +290,7 @@ class P6opaque {
 
       cursor.varint(numAttrs);
 
-      for (var j = 0; j < numAttrs; j++) {
+      for (let j = 0; j < numAttrs; j++) {
         cursor.str(this.nameToIndexMapping[i].names[j]);
         cursor.varint(this.nameToIndexMapping[i].slots[j]);
       }
@@ -301,20 +301,20 @@ class P6opaque {
   }
 
   deserializeFinish(obj, data) {
-    for (var i = 0; i < this.flattenedSTables.length; i++) {
+    for (let i = 0; i < this.flattenedSTables.length; i++) {
       let attr = this.flattenedSTables[i] ? this.flattenedSTables[i].REPR.deserializeInline(data) : data.variantWithUndefined();
       obj[slotToAttr(i)] = attr;
     }
   }
 
   serialize(cursor, obj) {
-    var flattened = obj._STable.REPR.flattenedSTables;
+    let flattened = obj._STable.REPR.flattenedSTables;
     if (!flattened) {
       throw 'Representation must be composed before it can be serialized';
     }
 
-    for (var i = 0; i < flattened.length; i++) {
-      var value = obj[slotToAttr(i)];
+    for (let i = 0; i < flattened.length; i++) {
+      let value = obj[slotToAttr(i)];
 
       if (flattened[i] == null) {
         cursor.ref(value);
@@ -329,8 +329,8 @@ class P6opaque {
 
     let newREPR = newType._STable.REPR;
 
-    for (var i = 0; i < newREPR.nameToIndexMapping.length; i++) {
-      for (var j = 0; j < newREPR.nameToIndexMapping[i].slots.length; j++) {
+    for (let i = 0; i < newREPR.nameToIndexMapping.length; i++) {
+      for (let j = 0; j < newREPR.nameToIndexMapping[i].slots.length; j++) {
         let slot = newREPR.nameToIndexMapping[i].slots[j];
         let defaultValue = newREPR.flattenedSTables[slot] ?
             newREPR.flattenedSTables[slot].REPR.flattenedDefaultObj :
@@ -347,7 +347,7 @@ class P6opaque {
 
   compose(STable, reprInfoHash) {
     /* Get attribute part of the protocol from the hash. */
-    var reprInfo = reprInfoHash.content.get('attribute').array;
+    let reprInfo = reprInfoHash.content.get('attribute').array;
 
     /* Go through MRO and find all classes with attributes and build up
      * mapping info hashes. Note, reverse order so indexes will match
@@ -360,33 +360,33 @@ class P6opaque {
     this.positionalDelegateSlot = -1;
     this.associativeDelegateSlot = -1;
 
-    var curAttr = 0;
+    let curAttr = 0;
     this.nameToIndexMapping = [];
     this.flattenedSTables = [];
-    var mi = false;
+    let mi = false;
 
     this.autoVivValues = [];
 
-    for (var i = reprInfo.length - 1; i >= 0; i--) {
-      var entry = reprInfo[i].array;
-      var type = entry[0];
-      var attrs = entry[1].array;
-      var parents = entry[2].array;
+    for (let i = reprInfo.length - 1; i >= 0; i--) {
+      let entry = reprInfo[i].array;
+      let type = entry[0];
+      let attrs = entry[1].array;
+      let parents = entry[2].array;
 
       /* If it has any attributes, give them each indexes and put them
          * in the list to add to the layout. */
-      var numAttrs = attrs.length;
+      let numAttrs = attrs.length;
       if (numAttrs > 0) {
-        var names = [];
-        var slots = [];
+        let names = [];
+        let slots = [];
 
-        for (var j = 0; j < numAttrs; j++) {
-          var attr = attrs[j].content;
+        for (let j = 0; j < numAttrs; j++) {
+          let attr = attrs[j].content;
 
-          var attrType = attr.get('type');
+          let attrType = attr.get('type');
           /* old boxing method generation */
           if (attr.get('box_target')) {
-            var REPR = attrType._STable.REPR;
+            let REPR = attrType._STable.REPR;
             if (!this.unboxSlots) this.unboxSlots = [];
             this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
             if (!REPR.generateBoxingMethods) {
@@ -439,7 +439,7 @@ class P6opaque {
   }
 
   generateNormalAccessors(STable, slot) {
-    var attr = slotToAttr(slot);
+    let attr = slotToAttr(slot);
 
     STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n' +
         'this.' + attr + ' = value;\n' +
@@ -448,7 +448,7 @@ class P6opaque {
         '}\n');
 
     if (this.autoVivValues && this.autoVivValues[slot] !== Null) {
-      var isTypeObject = this.autoVivValues[slot].typeObject_;
+      let isTypeObject = this.autoVivValues[slot].typeObject_;
 
       STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
           'var value = this.' + attr + ';\n' +
@@ -497,7 +497,7 @@ class P6opaque {
       return 'return this.$$bindattr$' + slot + '(value)';
     }, ', value', false, 'bind a value');
 
-    var suffixes = ['_s', '_i', '_n'];
+    let suffixes = ['_s', '_i', '_n'];
     for (let suffix of suffixes) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
@@ -511,17 +511,17 @@ class P6opaque {
   }
 
   generateUniversalAccessor(STable, name, action, extraSig, scwb, actionDescription) {
-    var code = 'function(classHandle, attrName' + extraSig + ') {\n' +
+    let code = 'function(classHandle, attrName' + extraSig + ') {\n' +
         (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
         'switch (classHandle) {\n';
-    var classKeyIndex = 0;
-    var setup = '';
+    let classKeyIndex = 0;
+    let setup = '';
     if (this.nameToIndexMapping) {
-      for (var i = 0; i < this.nameToIndexMapping.length; i++) {
+      for (let i = 0; i < this.nameToIndexMapping.length; i++) {
         let classKey = 'classKey' + classKeyIndex;
         setup += 'var ' + classKey + ' = STable.REPR.nameToIndexMapping[' + i + '].classKey;\n';
         code += 'case ' + classKey + ': switch (attrName) {\n';
-        for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+        for (let j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
           let slot = this.nameToIndexMapping[i].slots[j];
           code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ';\n';
         }
@@ -535,8 +535,8 @@ class P6opaque {
   }
 
   generateAccessors(STable) {
-    for (var i = 0; i < this.nameToIndexMapping.length; i++) {
-      for (var j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+    for (let i = 0; i < this.nameToIndexMapping.length; i++) {
+      for (let j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
         let slot = this.nameToIndexMapping[i].slots[j];
         if (this.flattenedSTables[slot]) {
           this.flattenedSTables[slot].REPR.generateFlattenedAccessors(STable, this.flattenedSTables[slot], slot);
@@ -554,10 +554,10 @@ class P6opaque {
   }
 
   setupSTable(STable) {
-    var repr = this;
+    let repr = this;
     STable.addInternalMethods(class {
       $$attrinited(classHandle, attrName) {
-        var attr = slotToAttr(repr.getHint(classHandle, attrName));
+        let attr = slotToAttr(repr.getHint(classHandle, attrName));
         return (this[attr] == undefined) ? 0 : 1;
       }
     });
@@ -584,7 +584,7 @@ class KnowHOWREPR {
   }
 
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.__methods = new Hash();
     obj.__attributes = [];
     obj.__name = '<anon>';
@@ -735,7 +735,7 @@ class P6int extends REPR {
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
-    var attr = slotToAttr(slot);
+    let attr = slotToAttr(slot);
     /* TODO - use actual type instead of NQPInt */
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return new NQPInt(this[attr]);
@@ -816,7 +816,7 @@ class P6num extends REPR {
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
-    var attr = slotToAttr(slot);
+    let attr = slotToAttr(slot);
 
     /* TODO wrap object more correctly */
 
@@ -882,7 +882,7 @@ class P6str extends REPR {
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
-    var attr = slotToAttr(slot);
+    let attr = slotToAttr(slot);
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       return this[attr];
     });
@@ -919,7 +919,7 @@ class NFA extends REPR {
     for (let i = 0; i < numStates; i++) {
       obj.states[i] = [];
       for (let j = 0; j < edgeCount[i]; j++) {
-        var edge = {act: data.varint(), to: data.varint()};
+        let edge = {act: data.varint(), to: data.varint()};
         switch (edge.act & 0xff) {
           case EDGE_EPSILON:
             break;
@@ -1013,13 +1013,13 @@ reprs.NFA = NFA;
 class VMArray extends REPR {
 
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.array = [];
     return obj;
   }
 
   allocateFromArray(STable, array) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.array = array;
     return obj;
   }
@@ -1038,7 +1038,7 @@ class VMArray extends REPR {
       }
 
       $$atpos(index) {
-        var value = this.array[index < 0 ? this.array.length + index : index];
+        let value = this.array[index < 0 ? this.array.length + index : index];
         if (value === undefined) return Null;
         return value;
       }
@@ -1046,19 +1046,19 @@ class VMArray extends REPR {
       /* TODO test how things should be converted */
 
       $$atpos_s(index) {
-        var value = this.array[index < 0 ? this.array.length + index : index];
+        let value = this.array[index < 0 ? this.array.length + index : index];
         if (value === undefined) return nullStr;
         return value;
       }
 
       $$atpos_n(index) {
-        var value = this.array[index < 0 ? this.array.length + index : index];
+        let value = this.array[index < 0 ? this.array.length + index : index];
         if (value === undefined) return 0.0;
         return value;
       }
 
       $$atpos_i(index) {
-        var value = this.array[index < 0 ? this.array.length + index : index];
+        let value = this.array[index < 0 ? this.array.length + index : index];
         if (value === undefined) return 0;
         return value;
       }
@@ -1084,7 +1084,7 @@ class VMArray extends REPR {
       }
 
       $$join(delim) {
-        var stringified = [];
+        let stringified = [];
         for (let i = 0; i < this.array.length; i++) {
           stringified.push(typeof this.array[i] == 'string' ? this.array[i] : this.array[i].$$getStr());
         }
@@ -1093,13 +1093,13 @@ class VMArray extends REPR {
 
 
       $$pop() {
-        var value = this.array.pop();
+        let value = this.array.pop();
         if (value === undefined) return Null;
         return value;
       }
 
       $$shift() {
-        var value = this.array.shift();
+        let value = this.array.shift();
         if (value === undefined) return Null;
         return value;
       }
@@ -1170,32 +1170,32 @@ class VMArray extends REPR {
       }
 
       $$clone() {
-        var cloned = new STable.ObjConstructor();
+        let cloned = new STable.ObjConstructor();
         cloned.array = this.array.slice();
         return cloned;
       }
     });
 
 
-    var $$atposnd = function(idx) {
+    let $$atposnd = function(idx) {
       if (idx.array.length != 1) {
         throw new NQPException('A dynamic array can only be indexed with a single dimension');
       }
-      var index = idx.array[0];
-      var value = this.array[index < 0 ? this.array.length + index : index];
+      let index = idx.array[0];
+      let value = this.array[index < 0 ? this.array.length + index : index];
       if (value === undefined) return Null;
       return value;
     };
 
-    var $$bindposnd = function(idx, value) {
+    let $$bindposnd = function(idx, value) {
       if (idx.array.length != 1) {
         throw new NQPException('A dynamic array can only be indexed with a single dimension');
       }
-      var index = idx.array[0];
+      let index = idx.array[0];
       return (this.array[index] = value);
     };
 
-    var suffixes = ['', '_s', '_i', '_n'];
+    let suffixes = ['', '_s', '_i', '_n'];
     for (let suffix of suffixes) {
       STable.addInternalMethod('$$atposnd' + suffix, $$atposnd);
       STable.addInternalMethod('$$bindposnd' + suffix, $$bindposnd);
@@ -1208,8 +1208,8 @@ class VMArray extends REPR {
     }
 
     obj.array = [];
-    var size = data.varint();
-    for (var i = 0; i < size; i++) {
+    let size = data.varint();
+    for (let i = 0; i < size; i++) {
       obj.array[i] = data.variant();
     }
   }
@@ -1221,7 +1221,7 @@ class VMArray extends REPR {
     }
 
     cursor.varint(obj.array.length);
-    for (var i = 0; i < obj.array.length; i++) {
+    for (let i = 0; i < obj.array.length; i++) {
       cursor.ref(obj.array[i] === undefined ? Null : obj.array[i]);
     }
   }
@@ -1249,7 +1249,7 @@ let HashIter = require('./hash-iter.js');
 
 class VMHash extends REPR {
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.content = new Map();
     return obj;
   }
@@ -1257,7 +1257,7 @@ class VMHash extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$clone() {
-        var cloned = new STable.ObjConstructor();
+        let cloned = new STable.ObjConstructor();
         cloned.content = new Map();
         this.content.forEach(function(value, key, map) {
           cloned.content.set(key, value);
@@ -1298,7 +1298,7 @@ class VMHash extends REPR {
       }
 
       $$toObject() {
-        var ret = {};
+        let ret = {};
         this.content.forEach(function(value, key, map) {
           ret[key] = value;
         });
@@ -1310,7 +1310,7 @@ class VMHash extends REPR {
   deserializeFinish(obj, data) {
     obj.content = new Map();
     let elems = data.varint();
-    for (var i = 0; i < elems; i++) {
+    for (let i = 0; i < elems; i++) {
       let str = data.str();
       obj.content.set(str, data.variant());
     }
@@ -1340,7 +1340,7 @@ reprs.VMIter = VMIter;
 
 
 function makeBI(STable, num) {
-  var instance = STable.REPR.allocate(STable);
+  let instance = STable.REPR.allocate(STable);
   instance.$$setBignum(num);
   return instance;
 }
@@ -1384,10 +1384,10 @@ class P6bigint extends REPR {
   }
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
-    var attr = slotToAttr(slot);
+    let attr = slotToAttr(slot);
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      var value = this[attr] || bignum(0);
+      let value = this[attr] || bignum(0);
       return makeBI(attrContentSTable, value);
     });
 
@@ -1414,7 +1414,7 @@ class P6bigint extends REPR {
   }
 
   serialize(cursor, obj) {
-    var isSmall = 0; /* TODO - check */
+    let isSmall = 0; /* TODO - check */
 
     cursor.varint(isSmall);
     if (isSmall) {
@@ -1425,7 +1425,7 @@ class P6bigint extends REPR {
   }
 
   serializeInline(data, value) {
-    var isSmall = 0; /* TODO - check */
+    let isSmall = 0; /* TODO - check */
 
     data.varint(isSmall);
     if (isSmall) {
@@ -1527,7 +1527,7 @@ reprs.Semaphore = Semaphore;
 
 class ConcBlockingQueue extends REPR {
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.data = [];
     return obj;
   }
@@ -1691,7 +1691,7 @@ class Decoder extends REPR {
 
 
         let offset = 0;
-        for (var i = 0; i < bytes / elementSize; i++) {
+        for (let i = 0; i < bytes / elementSize; i++) {
           buf.array[i] = isUnsigned ? this.$$buffer.readUIntLE(offset, elementSize) : this.$$buffer.readIntLE(offset, elementSize);
           offset += elementSize;
         }
@@ -1707,16 +1707,16 @@ reprs.Decoder = Decoder;
 
 class MultiDimArray extends REPR {
   allocate(STable) {
-    var obj = new STable.ObjConstructor();
+    let obj = new STable.ObjConstructor();
     obj.dimensions = undefined;
     return obj;
   }
 
   compose(STable, reprInfoHash) {
-    var array = reprInfoHash.content.get('array');
-    var dimensions = array.content.get('dimensions');
+    let array = reprInfoHash.content.get('array');
+    let dimensions = array.content.get('dimensions');
 
-    var type = reprInfoHash.content.get('array').content.get('type');
+    let type = reprInfoHash.content.get('array').content.get('type');
 
     if (type) {
       STable.primType = type._STable.REPR.boxedPrimitive || 0;
@@ -1744,7 +1744,7 @@ class MultiDimArray extends REPR {
       }
 
       $$clone() {
-        var clone = new this._STable.ObjConstructor();
+        let clone = new this._STable.ObjConstructor();
         clone.storage = this.storage.slice();
         clone.dimensions = this.dimensions;
         return clone;
@@ -1798,7 +1798,7 @@ class MultiDimArray extends REPR {
             throw new NQPException('Index ' + idx[i] + ' for dimension ' + (i + 1) + ' out of range (must be 0..' + this.dimensions[i] + ')');
           }
         }
-        var calculatedIdx = 0;
+        let calculatedIdx = 0;
         for (var i = 0; i < idx.length; i++) {
           calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
         }
@@ -1900,7 +1900,7 @@ class MultiDimArray extends REPR {
   }
 
   deserializeReprData(cursor, STable) {
-    var dims = cursor.varint();
+    let dims = cursor.varint();
     if (dims > 0) {
       STable.dimensions = dims;
       STable.type = cursor.variant();
@@ -1909,8 +1909,8 @@ class MultiDimArray extends REPR {
   }
 
   valuesSize(obj) {
-    var size = 1;
-    for (var i = 0; i < obj.dimensions.length; i++) {
+    let size = 1;
+    for (let i = 0; i < obj.dimensions.length; i++) {
       size = size * obj.dimensions[i];
     }
     return size;
@@ -1920,7 +1920,7 @@ class MultiDimArray extends REPR {
     for (var i = 0; i < obj._STable.dimensions; i++) {
       cursor.varint(obj.dimensions[i]);
     }
-    var size = this.valuesSize(obj);
+    let size = this.valuesSize(obj);
     for (var i = 0; i < size; i++) {
       switch (obj._STable.primType) {
         case 0:
@@ -1944,7 +1944,7 @@ class MultiDimArray extends REPR {
     for (var i = 0; i < obj._STable.dimensions; i++) {
       obj.dimensions[i] = data.varint();
     }
-    var size = this.valuesSize(obj);
+    let size = this.valuesSize(obj);
     obj.storage = [];
     for (var i = 0; i < size; i++) {
       switch (obj._STable.primType) {
@@ -1984,8 +1984,8 @@ reprs.VMException = VMException;
 
 class NativeRef extends REPR {
   compose(STable, reprInfoHash) {
-    var nativeref = reprInfoHash.content.get('nativeref').content;
-    var type = nativeref.get('type');
+    let nativeref = reprInfoHash.content.get('nativeref').content;
+    let type = nativeref.get('type');
     this.primitiveType = type._STable.REPR.boxedPrimitive;
     this.refkind = nativeref.get('refkind');
   }
@@ -2019,8 +2019,8 @@ class CStr extends REPR {
 reprs.CStr = CStr;
 
 
-var ID = 0;
-for (var name in reprs) {
+let ID = 0;
+for (let name in reprs) {
   module.exports[name] = reprs[name];
   reprs[name].prototype.ID = ID;
   reprs[name].prototype.name = name;
