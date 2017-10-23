@@ -1,5 +1,5 @@
 'use strict';
-let Ctx = require('./ctx.js');
+const Ctx = require('./ctx.js');
 
 class CtxJustHandler extends Ctx {
 

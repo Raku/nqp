@@ -1,6 +1,6 @@
 'use strict';
-let NQPInt = require('./nqp-int.js');
-let Null = require('./null.js');
+const NQPInt = require('./nqp-int.js');
+const Null = require('./null.js');
 
 const nativeArgs = require('./native-args.js');
 
@@ -25,12 +25,12 @@ class MultiCache {
 };
 
 function posTypes(ctx, capture) {
-  let arity = capture.pos.length;
-  let types = new Array(arity);
+  const arity = capture.pos.length;
+  const types = new Array(arity);
   for (let i = 0; i < arity; i++) {
-    let obj = capture.pos[i];
+    const obj = capture.pos[i];
     if (obj._STable) {
-      let deconted = obj.$$decont(ctx);
+      const deconted = obj.$$decont(ctx);
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
@@ -65,11 +65,11 @@ function posTypes(ctx, capture) {
   return types;
 }
 
-let op = {};
+const op = {};
 
 op.multicachefind = function(ctx, cache, capture) {
   if (!(cache instanceof MultiCache)) return Null;
-  let arity = capture.pos.length;
+  const arity = capture.pos.length;
   if (capture.named) return Null;
 
   if (arity == 0) {
@@ -82,9 +82,9 @@ op.multicachefind = function(ctx, cache, capture) {
 
   if (arity > MAX_ARITY) return Null;
 
-  let types = posTypes(ctx, capture);
+  const types = posTypes(ctx, capture);
 
-  let arityCache = cache.cache[arity - 1];
+  const arityCache = cache.cache[arity - 1];
 
   CANDIDATES: for (let i = 0; i < arityCache.length; i++) {
     for (let j = 0; j < arityCache[i].types.length; j++) {
@@ -97,9 +97,9 @@ op.multicachefind = function(ctx, cache, capture) {
 };
 
 op.multicacheadd = function(ctx, cache, capture, result) {
-  let c = cache instanceof MultiCache ? cache : new MultiCache();
+  const c = cache instanceof MultiCache ? cache : new MultiCache();
   if (c.named) return c;
-  let arity = capture.pos.length;
+  const arity = capture.pos.length;
 
   if (arity == 0) {
     c.zeroArity = result;

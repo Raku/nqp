@@ -2,7 +2,7 @@
 
 const coercions = require('./coercions');
 
-let NQPInt = require('./nqp-int.js');
+const NQPInt = require('./nqp-int.js');
 
 class CodePair {
   constructor(STable) {
@@ -17,8 +17,8 @@ class CodePair {
   }
 
   setupSTable() {
-    let fetch = this.fetch;
-    let store = this.store;
+    const fetch = this.fetch;
+    const store = this.store;
 
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
@@ -75,8 +75,8 @@ class NativeRef {
   }
 
   setupSTable() {
-    let primitiveType = this.STable.REPR.primitiveType;
-    let STable = this.STable;
+    const primitiveType = this.STable.REPR.primitiveType;
+    const STable = this.STable;
 
     /* TODO - take the hll in account when converting to object */
 
@@ -124,13 +124,13 @@ class NativeRef {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          let type = hll.get('int_box');
+          const type = hll.get('int_box');
           if (!type) {
             // HACK - nqp still uses NQPInt instead of the thing in the hll config
             return new NQPInt(this.get());
           } else {
-            let repr = type._STable.REPR;
-            let obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setInt(this.get());
             return obj;
           }
@@ -176,13 +176,13 @@ class NativeRef {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          let type = hll.get('num_box');
+          const type = hll.get('num_box');
           if (!type) {
             // HACK - nqp still uses raw javascript numbers instead of the thing in the hll config
             return this.get();
           } else {
-            let repr = type._STable.REPR;
-            let obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setNum(this.get());
             return obj;
           }
@@ -232,13 +232,13 @@ class NativeRef {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          let type = hll.get('str_box');
+          const type = hll.get('str_box');
           if (!type) {
             // HACK - nqp still uses raw javascript strings instead of the thing in the hll config
             return this.get();
           } else {
-            let repr = type._STable.REPR;
-            let obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setStr(this.get());
             return obj;
           }

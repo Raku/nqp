@@ -25,7 +25,7 @@ class NQPException extends Error {
   }
 };
 
-let proto = NQPException.prototype; /* Avoid gjslint warning */
+const proto = NQPException.prototype; /* Avoid gjslint warning */
 proto._STable = {
   HOW: {
     name: function(ctx, _NAMED, how, obj) {

@@ -1,39 +1,39 @@
-let op = {};
+const op = {};
 exports.op = op;
 
-let os = require('os');
+const os = require('os');
 
-let Hash = require('./hash.js');
-let CodeRef = require('./code-ref.js');
+const Hash = require('./hash.js');
+const CodeRef = require('./code-ref.js');
 
-let Ctx = require('./ctx.js');
+const Ctx = require('./ctx.js');
 
-let NQPInt = require('./nqp-int.js');
+const NQPInt = require('./nqp-int.js');
 
-let NQPException = require('./nqp-exception.js');
+const NQPException = require('./nqp-exception.js');
 
-let reprs = require('./reprs.js');
+const reprs = require('./reprs.js');
 
-let hll = require('./hll.js');
+const hll = require('./hll.js');
 
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 
-let constants = require('./constants.js');
+const constants = require('./constants.js');
 
-let containerSpecs = require('./container-specs.js');
+const containerSpecs = require('./container-specs.js');
 
-let Null = require('./null.js');
+const Null = require('./null.js');
 const null_s = require('./null_s.js');
 
-let BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
 
-let exceptionsStack = require('./exceptions-stack.js');
+const exceptionsStack = require('./exceptions-stack.js');
 
-let repossession = require('./repossession.js');
+const repossession = require('./repossession.js');
 
-let sixmodel = require('./sixmodel.js');
+const sixmodel = require('./sixmodel.js');
 
-let Capture = require('./capture.js');
+const Capture = require('./capture.js');
 
 const shortid = require('shortid');
 
@@ -56,14 +56,14 @@ op.escape = function(str) {
 };
 
 function radixHelper(radix, str, zpos, flags) {
-  let lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
-  let uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
+  const lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
+  const uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
-  let letters = radix >= 11 ? lowercase + uppercase : '';
+  const letters = radix >= 11 ? lowercase + uppercase : '';
 
-  let digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
-  let minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
-  let regex = new RegExp(
+  const digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
+  const minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
+  const regex = new RegExp(
       '^' + minus + digitclass + '(?:_' +
       digitclass + '|' + digitclass + ')*');
   const search = str.slice(zpos).match(regex);
@@ -73,18 +73,18 @@ function radixHelper(radix, str, zpos, flags) {
   let number = search[0].replace(/_/g, '').replace(/^\+/, '');
   if (flags & 0x01) number = '-' + number;
   if (flags & 0x04) number = number.replace(/0+$/, '');
-  let power = number[0] == '-' ? number.length - 1 : number.length;
+  const power = number[0] == '-' ? number.length - 1 : number.length;
   return {power: power, offset: zpos + search[0].length, number: number};
 }
 
 exports.radixHelper = radixHelper;
 
 op.radix = function(currentHLL, radix, str, zpos, flags) {
-  let extracted = radixHelper(radix, str, zpos, flags);
+  const extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
     return hll.slurpyArray(currentHLL, [0, 1, -1]);
   }
-  let pow = Math.pow(radix, extracted.power);
+  const pow = Math.pow(radix, extracted.power);
   return hll.slurpyArray(currentHLL, [parseInt(extracted.number, radix), pow, extracted.offset]);
 };
 
@@ -107,8 +107,8 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
   if (!type) {
     return new NQPInt(i);
   } else {
-    let repr = type._STable.REPR;
-    let obj = repr.allocate(type._STable);
+    const repr = type._STable.REPR;
+    const obj = repr.allocate(type._STable);
     obj.$$setInt(i);
     return obj;
   }
@@ -119,8 +119,8 @@ const numToObj = exports.numToObj = function(currentHLL, n) {
   if (!type) {
     return n;
   } else {
-    let repr = type._STable.REPR;
-    let obj = repr.allocate(type._STable);
+    const repr = type._STable.REPR;
+    const obj = repr.allocate(type._STable);
     obj.$$setNum(n);
     return obj;
   }
@@ -131,8 +131,8 @@ const strToObj = exports.strToObj = function(currentHLL, s) {
   if (!type) {
     return s;
   } else {
-    let repr = type._STable.REPR;
-    let obj = repr.allocate(type._STable);
+    const repr = type._STable.REPR;
+    const obj = repr.allocate(type._STable);
     obj.$$setStr(s);
     return obj;
   }
@@ -174,10 +174,10 @@ exports.unwrapNamed = function(named) {
 };
 
 exports.named = function(parts) {
-  let all = {};
+  const all = {};
   for (let i = 0; i < parts.length; i++) {
-    let part = parts[i];
-    for (let key in part) {
+    const part = parts[i];
+    for (const key in part) {
       all[key] = part[key];
     }
   }
@@ -250,7 +250,7 @@ op.captureexistsnamed = function(capture, arg) {
 };
 
 op.capturenamedshash = function(currentHLL, capture) {
-  let hash = new Hash();
+  const hash = new Hash();
   for (key in capture.named) {
     hash.content.set(key, arg(currentHLL, capture.named[key]));
   }
@@ -318,13 +318,13 @@ op.newtype = function(how, repr) {
   if (!reprs[repr]) {
     throw 'Unknown REPR: ' + repr;
   }
-  let REPR = new reprs[repr]();
+  const REPR = new reprs[repr]();
   REPR.name = repr;
   return REPR.typeObjectFor(how);
 };
 
 op.findmethod = function(ctx, obj, name) {
-  let method = sixmodel.findMethod(ctx, obj, name);
+  const method = sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
     throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
   }
@@ -367,7 +367,7 @@ op.objectid = op.where;
 /* HACK - take the current HLL settings into regard */
 
 
-let sha1 = require('sha1');
+const sha1 = require('sha1');
 
 op.sha1 = function(text) {
   return sha1(text).toUpperCase();
@@ -415,8 +415,8 @@ op.isrwcont = function(cont) {
 };
 
 op.box_n = function(n, type) {
-  let repr = type._STable.REPR;
-  let obj = repr.allocate(type._STable);
+  const repr = type._STable.REPR;
+  const obj = repr.allocate(type._STable);
   obj.$$setNum(n);
   return obj;
 };
@@ -427,8 +427,8 @@ op.unbox_n = function(obj) {
 };
 
 op.box_s = function(value, type) {
-  let repr = type._STable.REPR;
-  let obj = repr.allocate(type._STable);
+  const repr = type._STable.REPR;
+  const obj = repr.allocate(type._STable);
   obj.$$setStr(value);
   return obj;
 };
@@ -440,8 +440,8 @@ op.unbox_s = function(obj) {
 
 
 op.box_i = function(i, type) {
-  let repr = type._STable.REPR;
-  let obj = repr.allocate(type._STable);
+  const repr = type._STable.REPR;
+  const obj = repr.allocate(type._STable);
   obj.$$setInt(i);
   return obj;
 };
@@ -467,7 +467,7 @@ op.markcodestub = function(code) {
 };
 
 op.freshcoderef = function(code) {
-  let fresh = code.$$clone();
+  const fresh = code.$$clone();
   fresh.staticCode = fresh;
   return fresh;
 };
@@ -489,7 +489,7 @@ op.scwbdisable = function() {
   return ++repossession.scwbDisableDepth;
 };
 
-let compilerRegistry = new Map();
+const compilerRegistry = new Map();
 
 op.bindcomp = function(language, compiler) {
   compilerRegistry.set(language, compiler);
@@ -503,7 +503,7 @@ class WrappedFunction extends NQPObject {
   }
 
   $$apply(args) {
-    let converted = [];
+    const converted = [];
     for (let i = 2; i < args.length; i++) {
       converted.push(toJS(args[i]));
     }
@@ -536,7 +536,7 @@ function toJS(obj) {
     return obj.value;
   } else if (obj instanceof CodeRef) {
     return function() {
-      let converted = [null, {}];
+      const converted = [null, {}];
       for (let i = 0; i < arguments.length; i++) {
         converted.push(fromJS(arguments[i]));
       }
@@ -562,8 +562,8 @@ const charProps = require('char-props');
 function createSourceMap(js, p6, mapping, jsFile, p6File) {
   const generator = new SourceMapGenerator({file: jsFile});
 
-  let jsProps = charProps(js);
-  let p6Props = charProps(p6);
+  const jsProps = charProps(js);
+  const p6Props = charProps(p6);
 
 
   for (let i=0; i < mapping.length; i += 2) {
@@ -700,7 +700,7 @@ op.backendconfig = function() {
   config.content.set('intvalsize', 4);
   config.content.set('osname', os.platform());
   const nativecallConfig = getConfigFromPerl();
-  for (let key of Object.keys(nativecallConfig)) {
+  for (const key of Object.keys(nativecallConfig)) {
     config.content.set(key, nativecallConfig[key]);
   }
   return config;
@@ -746,7 +746,7 @@ function renameEncoding(encoding) {
 }
 exports.renameEncoding = renameEncoding;
 
-let encodings = ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'latin1', 'binary', 'hex'];
+const encodings = ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'latin1', 'binary', 'hex'];
 function isKnownEncoding(encoding) {
   return encodings.indexOf(encoding) == -1 ? false : true;
 }
@@ -754,7 +754,7 @@ exports.isKnownEncoding = isKnownEncoding;
 
 
 function byteSize(buf) {
-  let bits = buf._STable.REPR.type._STable.REPR.bits;
+  const bits = buf._STable.REPR.type._STable.REPR.bits;
 
   if (bits % 8) {
     throw 'only buffer sizes that are a multiple of 8 are supported';
@@ -770,13 +770,13 @@ op.encode = function(str, encoding_, buf) {
     throw new NQPException('encode requires an empty array');
   }
 
-  let encoding = renameEncoding(encoding_);
+  const encoding = renameEncoding(encoding_);
 
-  let elementSize = byteSize(buf);
+  const elementSize = byteSize(buf);
 
-  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+  const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
 
-  let buffer = new Buffer(str, encoding);
+  const buffer = new Buffer(str, encoding);
 
   let offset = 0;
   for (let i = 0; i < buffer.length / elementSize; i++) {
@@ -788,11 +788,11 @@ op.encode = function(str, encoding_, buf) {
 };
 
 function toRawBuffer(buf) {
-  let elementSize = byteSize(buf);
-  let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-  let array = buf.array;
+  const elementSize = byteSize(buf);
+  const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+  const array = buf.array;
 
-  let buffer = new Buffer(array.length * elementSize);
+  const buffer = new Buffer(array.length * elementSize);
 
   let offset = 0;
   for (let i = 0; i < array.length; i++) {
@@ -836,7 +836,7 @@ op.objprimbits = function(type) {
 
 /* Parametricity operations. */
 op.setparameterizer = function(ctx, type, parameterizer) {
-  let st = type._STable;
+  const st = type._STable;
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
     ctx.die('This type is already parametric');
@@ -857,14 +857,14 @@ op.setparameterizer = function(ctx, type, parameterizer) {
 
 op.parameterizetype = function(ctx, type, params) {
   /* Ensure we have a parametric type. */
-  let st = type._STable;
+  const st = type._STable;
   if (!st.parameterizer) {
     ctx.die('This type is not parametric');
   }
 
-  let unpackedParams = params.array;
+  const unpackedParams = params.array;
 
-  let lookup = st.parameterizerCache;
+  const lookup = st.parameterizerCache;
   for (let i = 0; i < lookup.length; i++) {
     if (unpackedParams.length == lookup[i].params.length) {
       let match = true;
@@ -882,9 +882,9 @@ op.parameterizetype = function(ctx, type, params) {
     }
   }
 
-  let result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
+  const result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
-  let newSTable = result._STable;
+  const newSTable = result._STable;
   newSTable.parametricType = type;
   newSTable.parameters = params;
   newSTable.modeFlags |= constants.PARAMETERIZED_TYPE;
@@ -939,7 +939,7 @@ op.isnanorinf = function(n) {
 };
 
 function typeparameters(ctx, type) {
-  let st = type._STable;
+  const st = type._STable;
   if (!st.parametricType) {
     ctx.die('This type is not parameterized');
   }
@@ -954,22 +954,22 @@ op.typeparameterat = function(ctx, type, idx) {
 };
 
 op.typeparameterized = function(type) {
-  let st = type._STable;
+  const st = type._STable;
   return st.parametricType ? st.parametricType : Null;
 };
 
-let fibers = require('fibers');
+const fibers = require('fibers');
 
 function runTagged(tag, fiber, val, ctx) {
   let arg = val;
   while (1) {
-    let control = fiber.run(arg);
+    const control = fiber.run(arg);
     if (control.tag == tag || control.tag === Null) {
       if (control.value) {
         return control.value;
       } else {
         const cont = new Cont(tag, fiber);
-        let value = control.closure.$$call(ctx, null, cont);
+        const value = control.closure.$$call(ctx, null, cont);
         return value;
       }
     } else {
@@ -1011,7 +1011,7 @@ op.continuationcontrol = function(ctx, protect, tag, closure) {
 };
 
 op.continuationinvoke = function(ctx, cont, inject) {
-  let val = inject.$$call(ctx, null);
+  const val = inject.$$call(ctx, null);
   return runTagged(cont.tag, cont.fiber, val, ctx);
 };
 
@@ -1022,7 +1022,7 @@ op.rand_n = function(limit) {
 
 
 op.srand = function(seed) {
-  let XorShift = require('xorshift').constructor;
+  const XorShift = require('xorshift').constructor;
   generator = new XorShift([seed, 0, 0, 0]);
   return seed;
 };
@@ -1036,8 +1036,8 @@ op.bitand_s = function(a, b) {
   let ret = '';
   let i = 0;
   while (true) {
-    let codepointA = a.codePointAt(i);
-    let codepointB = b.codePointAt(i);
+    const codepointA = a.codePointAt(i);
+    const codepointB = b.codePointAt(i);
     if (codepointA === undefined || codepointB == undefined) {
       return ret;
     }
@@ -1083,7 +1083,7 @@ op.replace = function(str, offset, count, repl) {
 };
 
 op.getcodelocation = function(code) {
-  let hash = new Hash();
+  const hash = new Hash();
   hash.content.set('file', 'unknown');
   hash.content.set('line', new NQPInt(-1));
   return hash;
@@ -1136,13 +1136,13 @@ op.setdimensions = function(array, dimensions) {
 
 /* TODO HLL support */
 op.newexception = function() {
-  let exType = BOOT.Exception;
+  const exType = BOOT.Exception;
   return exType._STable.REPR.allocate(exType._STable);
 };
 
 op.throwextype = function(ctx, category) {
-  let exType = BOOT.Exception;
-  let ex = exType._STable.REPR.allocate(exType._STable);
+  const exType = BOOT.Exception;
+  const ex = exType._STable.REPR.allocate(exType._STable);
   ex.$$category = category;
   ctx.throw(ex);
 };
@@ -1200,7 +1200,7 @@ function backtrace(exception) {
             let column = stack[stackIndex].getColumnNumber();
 
             if (sourceMaps.hasOwnProperty(file)) {
-              let original = sourceMaps[file].originalPositionFor({line: line, column: column});
+              const original = sourceMaps[file].originalPositionFor({line: line, column: column});
               if (original.source) {
                 file = original.source;
                 line = original.line;
@@ -1235,9 +1235,9 @@ op.backtrace = function(currentHLL, exception) {
 op.backtracestrings = function(currentHLL, exception) {
   const lines = [];
   let first = true;
-  for (let row of backtrace(exception)) {
-    let annotations = row.$$atkey('annotations');
-    let sub = row.$$atkey('sub');
+  for (const row of backtrace(exception)) {
+    const annotations = row.$$atkey('annotations');
+    const sub = row.$$atkey('sub');
     lines.push((first ? '  at ' : ' from ') + 'cuid' + sub.cuid + ' ' + annotations.$$atkey('file')+ ':'+ annotations.$$atkey('line'));
     first = false;
   }
@@ -1310,14 +1310,14 @@ op.fc = function(string) {
 
 function tcChar(c) {
   if (c === 'ß') return 'Ss';
-  let unicharadata = require('unicharadata');
-  let titled = unicharadata.title(c);
+  const unicharadata = require('unicharadata');
+  const titled = unicharadata.title(c);
   return titled === '' ? c : titled;
 }
 
 op.tc = function(string) {
   let ret = '';
-  for (let c of string) {
+  for (const c of string) {
     ret += tcChar(c);
   }
   return ret;
@@ -1327,7 +1327,7 @@ op.tclc = function(string) {
   let isFirst = true;
   let lower = '';
   let first = '';
-  for (let c of string) {
+  for (const c of string) {
     if (isFirst) {
       isFirst = false;
       first = tcChar(c);
@@ -1338,7 +1338,7 @@ op.tclc = function(string) {
   return first + lower.toLowerCase();
 };
 
-let ucd = require('nqp-js-ucd');
+const ucd = require('nqp-js-ucd');
 
 op.getstrfromname = function(name) {
   const uppercased = name.toUpperCase();
@@ -1370,7 +1370,7 @@ op.codepointfromname = function(name) {
 };
 
 function formatCodePoint(codePoint) {
-  let string = codePoint.toString(16).toUpperCase();
+  const string = codePoint.toString(16).toUpperCase();
   return '0'.repeat(Math.max(0, 4 - string.length)) + string;
 }
 
@@ -1389,7 +1389,7 @@ op.normalizecodes = function(input, form, output) {
   const stringified = input.array.map(codePoint => String.fromCodePoint(codePoint)).join('');
   const normalized = form == 0 ? stringified : stringified.normalize(forms[form]);
 
-  for (let c of normalized) {
+  for (const c of normalized) {
     output.array.push(c.codePointAt(0));
   }
 
@@ -1403,7 +1403,7 @@ op.strfromcodes = function(codes) {
 op.strtocodes = function(str, form, codes) {
   const normalized = form == 0 ? str : str.normalize(forms[form]);
 
-  for (let c of normalized) {
+  for (const c of normalized) {
     codes.array.push(c.codePointAt(0));
   }
   return codes;

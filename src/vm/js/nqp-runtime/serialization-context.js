@@ -1,6 +1,6 @@
 'use strict';
 
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 
 /**
  * A serialization context holds a list of objects and code references that live
@@ -53,7 +53,7 @@ class SerializationContext extends NQPObject {
   }
 
   repossessSTable(STable) {
-    let newSlot = this.rootSTables.length;
+    const newSlot = this.rootSTables.length;
     this.rootSTables.push(STable);
 
     this.repIndexes.push((newSlot << 1) | 1);
@@ -63,7 +63,7 @@ class SerializationContext extends NQPObject {
   }
 
   repossessObject(obj) {
-    let newSlot = this.rootObjects.length;
+    const newSlot = this.rootObjects.length;
     this.rootObjects.push(obj);
 
     this.repIndexes.push((newSlot << 1));

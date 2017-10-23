@@ -1,18 +1,18 @@
 'use strict';
-let op = {};
+const op = {};
 exports.op = op;
 
-let refs = require('./refs.js');
+const refs = require('./refs.js');
 
-let NQPInt = require('./nqp-int.js');
-let NQPException = require('./nqp-exception.js');
+const NQPInt = require('./nqp-int.js');
+const NQPException = require('./nqp-exception.js');
 
-let nullStr = require('./null_s.js');
-let Null = require('./null.js');
+const nullStr = require('./null_s.js');
+const Null = require('./null.js');
 
-let Capture = require('./capture.js');
+const Capture = require('./capture.js');
 
-let StaticCtx = require('./static-ctx.js');
+const StaticCtx = require('./static-ctx.js');
 
 const BOOT = require('./BOOT.js');
 
@@ -29,14 +29,14 @@ const fs = require('fs');
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
-  for (let name in module.op) {
+  for (const name in module.op) {
     op[name] = module.op[name];
   }
 }
 
 exports.loadOps = loadOps;
 
-let core = require('./core');
+const core = require('./core');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
@@ -51,52 +51,52 @@ exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
-let io = require('./io.js');
+const io = require('./io.js');
 loadOps(io);
 
-let bignum = require('./bignum.js');
+const bignum = require('./bignum.js');
 loadOps(bignum);
 
-let nfa = require('./nfa.js');
+const nfa = require('./nfa.js');
 loadOps(nfa);
 
-let cclass = require('./cclass.js');
+const cclass = require('./cclass.js');
 loadOps(cclass);
 
-let hll = require('./hll.js');
+const hll = require('./hll.js');
 loadOps(hll);
 
 loadOps(require('./multicache.js'));
 
-let deserialization = require('./deserialization.js');
+const deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 loadOps(deserialization);
 
-let serialization = require('./serialization.js');
+const serialization = require('./serialization.js');
 loadOps(serialization);
 
-let nativecall = require('./nativecall.js');
+const nativecall = require('./nativecall.js');
 loadOps(nativecall);
 
-let CodeRef = require('./code-ref.js');
+const CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
 
-let Ctx = require('./ctx.js');
+const Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
 module.exports.CtxWithStatic = require('./ctx-with-static.js');
 module.exports.CtxJustHandler = require('./ctx-just-handler.js');
 
-let bootstrap = require('./bootstrap.js');
+const bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
 loadOps(refs);
-for (let name in refs.helpers) {
+for (const name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
@@ -124,14 +124,14 @@ op.loadbytecode = function(ctx, file) {
     loadFrom = module;
   }
 
-  let oldLoaderCtx = exports.loaderCtx;
+  const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  let mangled = file.replace(/::/g, '-');
+  const mangled = file.replace(/::/g, '-');
 
-  let prefixes = libpath.slice();
+  const prefixes = libpath.slice();
   prefixes.push('./', './nqp-js-on-js/');
   let found = false;
-  for (let prefix of prefixes) {
+  for (const prefix of prefixes) {
     try {
       loadFrom.require(prefix + mangled);
       found = true;
@@ -149,9 +149,9 @@ op.loadbytecode = function(ctx, file) {
 };
 
 op.loadbytecodefh = function(ctx, fh, file) {
-  let oldLoaderCtx = exports.loaderCtx;
+  const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  let js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
+  const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
   eval(js);
   exports.loaderCtx = oldLoaderCtx;
 };
@@ -195,7 +195,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 };
 
 exports.toStr = function(arg_, ctx) {
-  let arg = arg_.$$decont(ctx);
+  const arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return coercions.numToStr(arg);
   } else if (typeof arg == 'string') {
@@ -209,7 +209,7 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
+    const ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
@@ -223,7 +223,7 @@ exports.toStr = function(arg_, ctx) {
 
 
 exports.toNum = function(arg_, ctx) {
-  let arg = arg_.$$decont(ctx);
+  const arg = arg_.$$decont(ctx);
   if (typeof arg == 'number') {
     return arg;
   } else if (arg === Null) {
@@ -231,7 +231,7 @@ exports.toNum = function(arg_, ctx) {
   } else if (typeof arg == 'string') {
     return coercions.strToNum(arg);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    let result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    const result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {
@@ -264,10 +264,10 @@ if (!Math.imul) {
   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
   */
   Math.imul = function(a, b) {
-    let ah = (a >>> 16) & 0xffff;
-    let al = a & 0xffff;
-    let bh = (b >>> 16) & 0xffff;
-    let bl = b & 0xffff;
+    const ah = (a >>> 16) & 0xffff;
+    const al = a & 0xffff;
+    const bh = (b >>> 16) & 0xffff;
+    const bl = b & 0xffff;
     // the shift by 0 fixes the sign on the high part
     // the final |0 converts the unsigned value into a signed value
     return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
@@ -409,17 +409,17 @@ exports.list = hll.list;
 
 
 exports.list_i = function lowlevelList(array) {
-  let stable = BOOT.IntArray._STable;
+  const stable = BOOT.IntArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_n = function lowlevelList(array) {
-  let stable = BOOT.NumArray._STable;
+  const stable = BOOT.NumArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_s = function lowlevelList(array) {
-  let stable = BOOT.StrArray._STable;
+  const stable = BOOT.StrArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
@@ -440,10 +440,10 @@ exports.dumpObj = function(obj) {
   }
 };
 
-let containerSpecs = require('./container-specs.js');
+const containerSpecs = require('./container-specs.js');
 exports.extraRuntime = function(lang, path) {
   if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
-  let runtime = require(path);
+  const runtime = require(path);
   if (!runtime.loaded) {
     runtime.loaded = true;
     runtime.load(exports, CodeRef, Capture, containerSpecs);
@@ -451,7 +451,7 @@ exports.extraRuntime = function(lang, path) {
 };
 
 exports.paramcheckfailed = function(currentHLL, ctx, args) {
-  let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
+  const capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
   return currentHLL.get('bind_error').$$call(ctx, null, capture);
 };
 
@@ -559,7 +559,7 @@ const chunkNamesToTypes = {
 };
 
 const chunkTypesToNames = {};
-for (let name of Object.keys(chunkNamesToTypes)) {
+for (const name of Object.keys(chunkNamesToTypes)) {
   chunkTypesToNames[chunkNamesToTypes[name]] = name;
 }
 
@@ -582,7 +582,7 @@ exports.literal_m = function(target, pos, literal) {
   let count = 0;
   let result = -1;
   let matched = '';
-  let strippedLiteral = strip.combining(literal);
+  const strippedLiteral = strip.combining(literal);
 
   while (strippedLiteral.startsWith(matched)) {
     if (matched === strippedLiteral) {
@@ -600,7 +600,7 @@ exports.literal_im = function(target, pos, literal) {
   let count = 0;
   let result = -1;
   let matched = '';
-  let strippedLiteral = strip.combining(literal).toLowerCase();
+  const strippedLiteral = strip.combining(literal).toLowerCase();
 
   while (strippedLiteral.startsWith(matched)) {
     if (matched === strippedLiteral) {

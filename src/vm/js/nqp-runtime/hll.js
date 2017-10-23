@@ -1,14 +1,14 @@
 'use strict';
-let Hash = require('./hash.js');
-let CodeRef = require('./code-ref.js');
-let NQPInt = require('./nqp-int.js');
-let Null = require('./null.js');
-let BOOT = require('./BOOT.js');
+const Hash = require('./hash.js');
+const CodeRef = require('./code-ref.js');
+const NQPInt = require('./nqp-int.js');
+const Null = require('./null.js');
+const BOOT = require('./BOOT.js');
 
-let op = {};
+const op = {};
 exports.op = op;
 
-let hllSyms = new Map();
+const hllSyms = new Map();
 
 op.gethllsym = function(hllName, name, value) {
   if (hllSyms.has(hllName) && hllSyms.get(hllName).has(name)) {
@@ -27,8 +27,8 @@ op.bindhllsym = function(hllName, name, value) {
 };
 
 op.hllizefor = function(ctx, obj, language) {
-  let languageHash = getHLL(language);
-  let config = languageHash;
+  const languageHash = getHLL(language);
+  const config = languageHash;
   let role;
   if (obj !== null && obj._STable) {
     if (obj._STable.hllOwner === languageHash) {
@@ -40,38 +40,38 @@ op.hllizefor = function(ctx, obj, language) {
   }
 
   if (obj instanceof Hash || role == 5) {
-    let foreignTransformHash = config.get('foreign_transform_hash');
+    const foreignTransformHash = config.get('foreign_transform_hash');
     if (foreignTransformHash === undefined) return obj;
     return foreignTransformHash.$$call(ctx, {}, obj);
   } else if (role == 4) {
-    let foreignTransformArray = config.get('foreign_transform_array');
+    const foreignTransformArray = config.get('foreign_transform_array');
     if (foreignTransformArray === undefined) return obj;
     return foreignTransformArray.$$call(ctx, {}, obj);
   } else if (obj instanceof CodeRef || role == 6) {
-    let foreignTransformCode = config.get('foreign_transform_code');
+    const foreignTransformCode = config.get('foreign_transform_code');
     if (foreignTransformCode === undefined) return obj;
     return foreignTransformCode.$$call(ctx, {}, obj);
   // TODO handle already boxed ones
   } else if (obj instanceof NQPInt) {
-    let foreignTypeInt = config.get('foreign_type_int');
+    const foreignTypeInt = config.get('foreign_type_int');
     const repr = foreignTypeInt._STable.REPR;
     const boxed = repr.allocate(foreignTypeInt._STable);
     boxed.$$setInt(obj.value);
     return boxed;
   } else if (typeof obj == 'number') {
-    let foreignTypeNum = config.get('foreign_type_num');
+    const foreignTypeNum = config.get('foreign_type_num');
     const repr = foreignTypeNum._STable.REPR;
     const boxed = repr.allocate(foreignTypeNum._STable);
     boxed.$$setNum(obj);
     return boxed;
   } else if (typeof obj == 'string') {
-    let foreignTypeStr = config.get('foreign_type_str');
+    const foreignTypeStr = config.get('foreign_type_str');
     const repr = foreignTypeStr._STable.REPR;
     const boxed = repr.allocate(foreignTypeStr._STable);
     boxed.$$setStr(obj);
     return boxed;
   } else if (obj === Null) {
-    let nullValue = config.get('null_value');
+    const nullValue = config.get('null_value');
     if (nullValue === undefined) return obj;
     return nullValue;
   } else {
@@ -79,7 +79,7 @@ op.hllizefor = function(ctx, obj, language) {
   }
 };
 
-let hllConfigs = {};
+const hllConfigs = {};
 exports.hllConfigs = hllConfigs;
 
 function getHLL(language) {
@@ -97,7 +97,7 @@ function getHLL(language) {
 exports.getHLL = getHLL;
 
 op.sethllconfig = function(language, configHash) {
-  let hll = getHLL(language);
+  const hll = getHLL(language);
 
   configHash.content.forEach(function(value, key, map) {
     hll.set(key, value);

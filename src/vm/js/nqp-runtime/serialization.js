@@ -1,22 +1,22 @@
 'use strict';
-let Hash = require('./hash.js');
-let CodeRef = require('./code-ref.js');
-let NQPInt = require('./nqp-int.js');
-let Int64 = require('node-int64');
-let nullStr = require('./null_s.js');
-let Null = require('./null.js');
+const Hash = require('./hash.js');
+const CodeRef = require('./code-ref.js');
+const NQPInt = require('./nqp-int.js');
+const Int64 = require('node-int64');
+const nullStr = require('./null_s.js');
+const Null = require('./null.js');
 
 const NQPException = require('./nqp-exception.js');
 
-let StaticCtx = require('./static-ctx.js');
+const StaticCtx = require('./static-ctx.js');
 
-let repossession = require('./repossession.js');
+const repossession = require('./repossession.js');
 
-let BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
 
-let constants = require('./constants.js');
+const constants = require('./constants.js');
 
-let op = {};
+const op = {};
 exports.op = op;
 
 const CURRENT_VERSION = 20;
@@ -68,7 +68,7 @@ class BinaryWriteCursor {
 
   growToHold(space) {
     if (this.offset + space > this.buffer.length) {
-      let old = this.buffer;
+      const old = this.buffer;
       this.buffer = new Buffer(old.length * 2);
       old.copy(this.buffer);
     }
@@ -80,7 +80,7 @@ class BinaryWriteCursor {
       str = '?';
     }
 
-    let heapLoc = this.writer.stringIndex(str);
+    const heapLoc = this.writer.stringIndex(str);
 
     if (!(heapLoc >= 0 && heapLoc <= STRING_HEAP_LOC_MAX)) {
       throw `Serialization error: string offset ${heapLoc} can't be serialized`;
@@ -103,10 +103,10 @@ class BinaryWriteCursor {
     if (string === undefined) {
       this.varint(0);
     } else {
-      let expected = Buffer.byteLength(string);
+      const expected = Buffer.byteLength(string);
       this.varint(expected);
       this.growToHold(expected);
-      let wrote = this.buffer.write(string, this.offset);
+      const wrote = this.buffer.write(string, this.offset);
       if (expected != wrote) {
         throw 'Problem with writing cstr, wrote: ' + wrote + ', expected to write:' + expected;
       }
@@ -126,7 +126,7 @@ class BinaryWriteCursor {
     if (value >= -1 && value <= 126) {
       storageNeeded = 1;
     } else {
-      let absVal = value < 0 ? -value - 1 : value;
+      const absVal = value < 0 ? -value - 1 : value;
 
       if (absVal <= 0x7FF) {
         storageNeeded = 2;
@@ -142,8 +142,8 @@ class BinaryWriteCursor {
     if (storageNeeded == 1) {
       this.uint8(0x80 | (value + 129));
     } else {
-      let rest = storageNeeded - 1;
-      let nybble = rest == 4 ? 0 : value >> 8 * rest;
+      const rest = storageNeeded - 1;
+      const nybble = rest == 4 ? 0 : value >> 8 * rest;
 
       /* All the other high bits should be the same as the top bit of the
              nybble we keep. Or we have a bug.  */
@@ -152,7 +152,7 @@ class BinaryWriteCursor {
 
       this.int8((rest << 4) | (nybble & 0xF));
 
-      let tmp = new Int64(value).toBuffer();
+      const tmp = new Int64(value).toBuffer();
       this.growToHold(rest);
       for (let i = 0; i < rest; i++) {
         this.buffer[this.offset + i] = tmp[8 - (i + 1)];
@@ -217,7 +217,7 @@ class BinaryWriteCursor {
   }
 
   objRef(ref) {
-    let writerSc = this.writer.sc;
+    const writerSc = this.writer.sc;
     if (!ref._STable) {
       throw new NQPException('trying to serialize an object without an STable');
     }
@@ -234,7 +234,7 @@ class BinaryWriteCursor {
   }
 
   stableRef(STable) {
-    let ref = this.writer.getSTableRefInfo(STable);
+    const ref = this.writer.getSTableRefInfo(STable);
     this.idIdx(ref[0], ref[1]);
   }
 
@@ -353,9 +353,9 @@ class SerializationWriter {
     if (!obj._STable) {
       throw new NQPException(`Can't serialize an object without an STable`);
     }
-    let ref = this.getSTableRefInfo(obj._STable);
-    let sc = ref[0];
-    let scIdx = ref[1];
+    const ref = this.getSTableRefInfo(obj._STable);
+    const sc = ref[0];
+    const scIdx = ref[1];
 
     let packed = !obj.typeObject_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
@@ -405,7 +405,7 @@ class SerializationWriter {
 
     /* Method cache*/
     if (st.methodCache) {
-      let hash = new Hash();
+      const hash = new Hash();
       hash.content = st.methodCache;
       this.stablesData.ref(hash);
     } else {
@@ -413,7 +413,7 @@ class SerializationWriter {
     }
 
     /* Type check cache. */
-    let tcl = !st.typeCheckCache ? 0 : st.typeCheckCache.length;
+    const tcl = !st.typeCheckCache ? 0 : st.typeCheckCache.length;
     this.stablesData.varint(tcl);
     for (let i = 0; i < tcl; i++) {
       this.stablesData.ref(st.typeCheckCache[i]);
@@ -439,7 +439,7 @@ class SerializationWriter {
     let flags;
 
     if (st.boolificationSpec) {
-      let mode = st.boolificationSpec.mode;
+      const mode = st.boolificationSpec.mode;
       if (mode >= 0xF) {
         throw `Serialization error: boolification spec mode ${mode} out of range and can't be serialized`;
       }
@@ -513,7 +513,7 @@ class SerializationWriter {
     if (st.modeFlags & constants.PARAMETERIZED_TYPE) {
       /* TODO - figure out the intern table */
       this.stablesData.ref(st.parametricType);
-      let params = st.parameters.array;
+      const params = st.parameters.array;
       this.stablesData.varint(params.length);
       for (let i = 0; i < params.length; i++) {
         this.stablesData.ref(params[i]);
@@ -534,13 +534,13 @@ class SerializationWriter {
 
   serializeContext(ctx) {
     /* Locate the static code ref this context points to. */
-    let staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef(), true);
-    let staticCodeSC = staticCodeRef._SC;
+    const staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef(), true);
+    const staticCodeSC = staticCodeRef._SC;
     if (staticCodeSC == null) {
       throw 'Serialization Error: closure outer is a code object not in an SC';
     }
-    let staticSCId = this.getSCId(staticCodeSC);
-    let staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
+    const staticSCId = this.getSCId(staticCodeSC);
+    const staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
 
 
     /* Make contexts table entry. */
@@ -557,15 +557,15 @@ class SerializationWriter {
     }
 
 
-    let lexicalsTypeInfo = staticCodeRef.lexicalsTypeInfo;
+    const lexicalsTypeInfo = staticCodeRef.lexicalsTypeInfo;
 
     let lexicals = 0;
 
-    for (let name in lexicalsTypeInfo) lexicals++; // eslint-disable-line no-unused-vars
+    for (const name in lexicalsTypeInfo) lexicals++; // eslint-disable-line no-unused-vars
 
     this.contextsData.varint(lexicals);
 
-    for (let name in lexicalsTypeInfo) {
+    for (const name in lexicalsTypeInfo) {
       this.contextsData.str(name);
       switch (lexicalsTypeInfo[name]) {
         case 0: // obj
@@ -604,7 +604,7 @@ class SerializationWriter {
       if (ctx._SC != this.sc) {
         throw 'Serialization Error: reference to context outside of SC';
       }
-      let idx = this.contexts.indexOf(ctx);
+      const idx = this.contexts.indexOf(ctx);
       if (idx < 0) {
         throw 'Serialization Error: could not locate outer context in current SC';
       }
@@ -623,7 +623,7 @@ class SerializationWriter {
   }
 
   closureToStaticCodeRef(closure, fatal) {
-    let staticCode = closure.staticCode;
+    const staticCode = closure.staticCode;
     if (!staticCode) {
       if (fatal) {
         throw 'Serialization Error: missing static code ref for closure';
@@ -645,16 +645,16 @@ class SerializationWriter {
 
   serializeClosure(closure) {
     /* Locate the static code object. */
-    let staticCodeRef = this.closureToStaticCodeRef(closure, true);
-    let staticCodeSC = staticCodeRef._SC;
+    const staticCodeRef = this.closureToStaticCodeRef(closure, true);
+    const staticCodeSC = staticCodeRef._SC;
 
     /* Add an entry to the closures table. */
-    let staticSCId = this.getSCId(staticCodeSC);
-    let staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
+    const staticSCId = this.getSCId(staticCodeSC);
+    const staticIdx = staticCodeSC.getCodeIndex(staticCodeRef);
 
     /* Get the index of the context (which will add it to the todo list if
      * needed). */
-    let contextIdx = this.getSerializedOuterContextIdx(closure);
+    const contextIdx = this.getSerializedOuterContextIdx(closure);
 
     this.closures.int32(staticSCId);
     this.closures.int32(staticIdx);
@@ -663,7 +663,7 @@ class SerializationWriter {
 
     /* Check if it has a static code object. */
     if (closure.codeObj) {
-      let codeObj = closure.codeObj;
+      const codeObj = closure.codeObj;
       this.closures.int32(1);
 
       if (!codeObj._SC) {
@@ -701,9 +701,9 @@ class SerializationWriter {
     let contextsListPos = 0;
     while (workTodo) {
       /* Current work list sizes. */
-      let sTablesTodo = this.sc.rootSTables.length;
-      let objectsTodo = this.sc.rootObjects.length;
-      let contextsTodo = this.contexts.length;
+      const sTablesTodo = this.sc.rootSTables.length;
+      const objectsTodo = this.sc.rootObjects.length;
+      const contextsTodo = this.contexts.length;
 
       /* Reset todo flag - if we do some work we'll go round again as it
          * may have generated more. */
@@ -740,14 +740,14 @@ class SerializationWriter {
   serializeRepossessions() {
     /* Make entries. */
     for (let i = 0; i < this.sc.repIndexes.length; i++) {
-      let objIdx = this.sc.repIndexes[i] >> 1;
-      let isST = this.sc.repIndexes[i] & 1;
+      const objIdx = this.sc.repIndexes[i] >> 1;
+      const isST = this.sc.repIndexes[i] & 1;
 
-      let origSC = this.sc.repScs[i];
+      const origSC = this.sc.repScs[i];
 
       /* Work out original object's SC location. */
-      let origSCIdx = this.getSCId(origSC);
-      let origIdx = isST != 0 ?
+      const origSCIdx = this.getSCId(origSC);
+      const origIdx = isST != 0 ?
           origSC.rootSTables.indexOf(this.sc.rootSTables[objIdx]) :
           origSC.rootObjects.indexOf(this.sc.rootObjects[objIdx]);
 
@@ -799,7 +799,7 @@ class SerializationWriter {
     }
 
     /* If not, try to find it in our dependencies list. */
-    let found = this.dependentSCs.indexOf(sc);
+    const found = this.dependentSCs.indexOf(sc);
     if (found >= 0) {
       return found + 1;
     }
@@ -916,7 +916,7 @@ class SerializationWriter {
 };
 
 op.serialize = function(sc, sh) {
-  let writer = new SerializationWriter(sc, sh.array);
+  const writer = new SerializationWriter(sc, sh.array);
   return writer.serialize();
 };
 
@@ -934,7 +934,7 @@ op.getobjsc = function(obj) {
 };
 
 op.scgetobjidx = function(sc, obj) {
-  let idx = sc.rootObjects.indexOf(obj);
+  const idx = sc.rootObjects.indexOf(obj);
   if (idx < 0) {
     throw 'Object does not exist in this SC';
   }

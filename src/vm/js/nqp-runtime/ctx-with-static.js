@@ -1,6 +1,6 @@
 'use strict';
-let Ctx = require('./ctx.js');
-let Iter = require('./iter.js');
+const Ctx = require('./ctx.js');
+const Iter = require('./iter.js');
 
 class CtxWithStatic extends Ctx {
   constructor(callerCtx, outerCtx, callThis, statics) {

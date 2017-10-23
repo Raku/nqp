@@ -1,4 +1,4 @@
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 
 class Capture extends NQPObject {
   constructor(named, pos) {

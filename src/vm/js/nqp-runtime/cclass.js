@@ -1,6 +1,6 @@
 'use strict';
-let xregexp = require('xregexp');
-let op = {};
+const xregexp = require('xregexp');
+const op = {};
 exports.op = op;
 
 function boolish(bool) {
@@ -40,12 +40,12 @@ function iscclass(cclass, target, offset) {
     case 256: return boolish(BLANK.test(target[offset]));
     // PRINTING
     case 64: {
-      let cp = target.codePointAt(offset);
+      const cp = target.codePointAt(offset);
       return boolish(!((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160)));
     }
     // CONTROL
     case 512: {
-      let cp = target.codePointAt(offset);
+      const cp = target.codePointAt(offset);
       return boolish((cp >= 0 && cp < 32) || (cp >= 127 && cp < 160));
     }
     // PUNCTUATION

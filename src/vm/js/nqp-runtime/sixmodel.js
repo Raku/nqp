@@ -2,15 +2,15 @@
 
 /* Used when evaling runtime compiled methods */
 const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
-let bignum = require('bignum-browserify');
+const bignum = require('bignum-browserify');
 const ZERO = bignum(0);  // eslint-disable-line no-unused-vars
 
-let Null = require('./null.js');
+const Null = require('./null.js');
 
-let repossession = require('./repossession.js');
-let compilingSCs = repossession.compilingSCs;
+const repossession = require('./repossession.js');
+const compilingSCs = repossession.compilingSCs;
 
-let constants = require('./constants.js');
+const constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
 
@@ -19,7 +19,7 @@ const NQPException = require('./nqp-exception.js');
 
 function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
-    let method = obj._STable.methodCache.get(name);
+    const method = obj._STable.methodCache.get(name);
     if (method !== undefined) {
       return method;
     }
@@ -50,8 +50,8 @@ class STable {
 
     /* HACK - it's a bit hackish - think how correct it is */
     this.ObjConstructor.prototype.$$clone = function() {
-      let clone = new this._STable.ObjConstructor();
-      for (let i in this) {
+      const clone = new this._STable.ObjConstructor();
+      for (const i in this) {
         if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
         }
@@ -82,13 +82,13 @@ class STable {
       }
 
       if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-        let owned = this._SC.ownedObjects.get(this);
+        const owned = this._SC.ownedObjects.get(this);
         compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
       }
     };
 
     this.ObjConstructor.prototype.$$istype = function(ctx, type) {
-      let cache = this._STable.typeCheckCache;
+      const cache = this._STable.typeCheckCache;
       if (cache) {
         for (let i = 0; i < cache.length; i++) {
           if (cache[i] === type) {
@@ -99,7 +99,7 @@ class STable {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
 
-        let HOW = this._STable.HOW;
+        const HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
         if (!HOW.$$can(ctx, 'type_check')) {
           return 0;
@@ -147,7 +147,7 @@ class STable {
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        let str = this.$$getStr();
+        const str = this.$$getStr();
         return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
@@ -170,9 +170,9 @@ class STable {
   setinvokespec(classHandle, attrName, invocationHandler) {
     if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
-      let getter = this.REPR.getterForAttr(classHandle, attrName);
+      const getter = this.REPR.getterForAttr(classHandle, attrName);
       this.ObjConstructor.prototype.$$call = function() {
-        let value = this[getter]();
+        const value = this[getter]();
         return value.$$call.apply(value, arguments);
       };
       this.ObjConstructor.prototype.$$apply = function(args) {
@@ -180,7 +180,7 @@ class STable {
       };
     } else {
       this.ObjConstructor.prototype.$$call = function() {
-        let args = [];
+        const args = [];
         args.push(arguments[0]);
         args.push(arguments[1]);
         args.push(this);
@@ -191,7 +191,7 @@ class STable {
       };
 
       this.ObjConstructor.prototype.$$apply = function(args) {
-        let newArgs = [];
+        const newArgs = [];
         newArgs.push(args[0]);
         newArgs.push(args[1]);
         newArgs.push(this);
@@ -206,7 +206,7 @@ class STable {
 
 
   createTypeObject() {
-    let obj = new this.ObjConstructor();
+    const obj = new this.ObjConstructor();
     obj.typeObject_ = 1;
     obj.$$atkey = function(key) {
       return Null;
@@ -235,7 +235,7 @@ class STable {
 
     this.lazyMethodCache = false;
 
-    let proto = this.ObjConstructor.prototype;
+    const proto = this.ObjConstructor.prototype;
 
     methodCache.forEach(function(method, name, map) {
       proto[name] = function() {
@@ -294,7 +294,7 @@ class STable {
   }
 
   addInternalMethods(klass) {
-    for (let methodName of Object.getOwnPropertyNames(klass.prototype)) {
+    for (const methodName of Object.getOwnPropertyNames(klass.prototype)) {
       this.addInternalMethod(methodName, klass.prototype[methodName]);
     }
   }
@@ -308,7 +308,7 @@ class STable {
 
   evalGatheredCode() {
     if (this.code) {
-      let STable = this; // eslint-disable-line no-unused-vars
+      const STable = this; // eslint-disable-line no-unused-vars
       eval(this.setup + this.code);
       this.code = '';
     }

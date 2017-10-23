@@ -1,21 +1,21 @@
 'use strict';
-let SerializationContext = require('./serialization-context.js');
-let reprs = require('./reprs.js');
+const SerializationContext = require('./serialization-context.js');
+const reprs = require('./reprs.js');
 
-let Hash = require('./hash.js');
-let STable = require('./sixmodel.js').STable;
+const Hash = require('./hash.js');
+const STable = require('./sixmodel.js').STable;
 
-let repr = new reprs.KnowHOWREPR();
+const repr = new reprs.KnowHOWREPR();
 
-let CodeRef = require('./code-ref.js');
+const CodeRef = require('./code-ref.js');
 
-let constants = require('./constants.js');
+const constants = require('./constants.js');
 
-let BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
 
-let Null = require('./null.js');
+const Null = require('./null.js');
 
-let core = new SerializationContext('__6MODEL_CORE__');
+const core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
 function addToScWithSt(obj) {
@@ -27,17 +27,17 @@ function addToScWithSt(obj) {
 
 /* Creates and installs the KnowHOWAttribute type. */
 function createKnowHOWAttribute() {
-  let metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
 
-  let r = new reprs.KnowHOWAttribute();
-  let typeObj = r.typeObjectFor(metaObj);
+  const r = new reprs.KnowHOWAttribute();
+  const typeObj = r.typeObjectFor(metaObj);
 
-  let methods = {};
+  const methods = {};
   methods.name = function(ctx, _NAMED, self) {
     return self.__name;
   };
   methods['new'] = function(ctx, _NAMED, self) {
-    let attr = r.allocate(self._STable);
+    const attr = r.allocate(self._STable);
     attr.__name = _NAMED.name.$$getStr();
     attr.__type = _NAMED.type;
     attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target.$$getInt() : 0;
@@ -47,7 +47,7 @@ function createKnowHOWAttribute() {
   typeObj._STable.methodCache = new Map();
   typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
-  for (let method of Object.keys(methods)) {
+  for (const method of Object.keys(methods)) {
     typeObj._STable.ObjConstructor.prototype[method] = methods[method];
     typeObj._STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
@@ -57,11 +57,11 @@ function createKnowHOWAttribute() {
 
 /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
  * pass in null. */
-let KnowHOW = repr.typeObjectFor(null);
+const KnowHOW = repr.typeObjectFor(null);
 
 addToScWithSt(KnowHOW);
 
-let st = new STable(repr, null);
+const st = new STable(repr, null);
 
 const KnowHowHOW = repr.allocate(st);
 KnowHowHOW.__name = 'KnowHOW';
@@ -76,7 +76,7 @@ KnowHowHOW._STable.methodCache = new Map();
 KnowHowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
-  let codeRef = new CodeRef(name, undefined);
+  const codeRef = new CodeRef(name, undefined);
   codeRef.$$call = method;
   return codeRef;
 }
@@ -86,7 +86,7 @@ function addKnowhowHowMethod(name, method) {
   KnowHowHOW._STable.ObjConstructor.prototype[name] = method;
   KnowHOW._STable.ObjConstructor.prototype[name] = method;
 
-  let wrapped = wrapMethod(name, method);
+  const wrapped = wrapMethod(name, method);
   KnowHOW._STable.methodCache.set(name, wrapped);
   KnowHowHOW._STable.methodCache.set(name, wrapped);
 }
@@ -105,15 +105,15 @@ addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
 
 addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
   /* We first create a new HOW instance. */
-  let HOW = self._STable.REPR.allocate(self._STable);
+  const HOW = self._STable.REPR.allocate(self._STable);
 
   /* See if we have a representation name; if not default to P6opaque. */
-  let reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr.$$getStr() : 'P6opaque';
+  const reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr.$$getStr() : 'P6opaque';
 
   /* Create a new type object of the desired REPR. (Note that we can't
      * default to KnowHOWREPR here, since it doesn't know how to actually
      * store attributes, it's just for bootstrapping knowhow's. */
-  let typeObject = (new reprs[reprName]).typeObjectFor(HOW);
+  const typeObject = (new reprs[reprName]).typeObjectFor(HOW);
 
   /* See if we were given a name; put it into the meta-object if so. */
   if (_NAMED && _NAMED.name) {
@@ -147,23 +147,23 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 
   /* Use any attribute information to produce attribute protocol
      * data. The protocol consists of an array... */
-  let reprInfo = [];
+  const reprInfo = [];
 
   /* ...which contains an array per MRO entry... */
-  let typeInfo = [];
+  const typeInfo = [];
   reprInfo.push(BOOT.createArray(typeInfo));
 
   /* ...which in turn contains this type... */
   typeInfo.push(typeObject);
 
   /* ...then an array of hashes per attribute... */
-  let attrInfoList = [];
+  const attrInfoList = [];
   typeInfo.push(BOOT.createArray(attrInfoList));
 
   /* ...then an array of hashes per attribute... */
   for (let i = 0; i < self.__attributes.length; i++) {
-    let attrInfo = new Hash();
-    let attr = self.__attributes[i];
+    const attrInfo = new Hash();
+    const attr = self.__attributes[i];
     attrInfo.content.set('name', attr.__name);
     attrInfo.content.set('type', attr.__type);
     if (attr.__boxTarget) {
@@ -173,11 +173,11 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   }
 
   /* ...followed by a list of parents (none). */
-  let parentInfo = [];
+  const parentInfo = [];
   typeInfo.push(BOOT.createArray(parentInfo));
 
   /* All of this goes in a hash. */
-  let reprInfoHash = new Hash();
+  const reprInfoHash = new Hash();
   reprInfoHash.content.set('attribute', BOOT.createArray(reprInfo));
 
 
@@ -191,7 +191,7 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 module.exports.knowhow = KnowHOW;
 
 
-let KnowHOWAttribute = createKnowHOWAttribute();
+const KnowHOWAttribute = createKnowHOWAttribute();
 
 module.exports.knowhowattr = KnowHOWAttribute;
 
@@ -199,10 +199,10 @@ module.exports.knowhowattr = KnowHOWAttribute;
 addToScWithSt(KnowHOWAttribute);
 
 function bootType(typeName, reprName) {
-  let metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
   metaObj.__name = typeName;
 
-  let typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
+  const typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
   core.rootObjects.push(metaObj);
   metaObj._SC = core;

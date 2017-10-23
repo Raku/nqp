@@ -1,12 +1,12 @@
 'use strict';
-let op = {};
+const op = {};
 exports.op = op;
 
-let iscclass = require('./cclass.js').op.iscclass;
-let nqp = require('nqp-runtime');
+const iscclass = require('./cclass.js').op.iscclass;
+const nqp = require('nqp-runtime');
 
-let Null = require('./null.js');
-let BOOT = require('./BOOT.js');
+const Null = require('./null.js');
+const BOOT = require('./BOOT.js');
 
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
@@ -39,17 +39,17 @@ function convertState(thing) {
 
 // TODO think about type conversions of the stuff inside the array
 op.nfafromstatelist = function(ctx, rawStates, type) {
-  let nfa = type._STable.REPR.allocate(type._STable);
+  const nfa = type._STable.REPR.allocate(type._STable);
 
   nfa.fates = rawStates.$$toArray()[0];
 
-  let states = convertState(rawStates);
+  const states = convertState(rawStates);
 
   nfa.states = [];
   for (let i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];
     for (let j = 0; j < states[i].length; j += 3) {
-      let edge = {act: nqp.toInt(states[i][j], ctx), to: nqp.toInt(states[i][j + 2], ctx)};
+      const edge = {act: nqp.toInt(states[i][j], ctx), to: nqp.toInt(states[i][j + 2], ctx)};
       switch (edge.act & 0xff) {
         case EDGE_EPSILON:
           break;
@@ -95,23 +95,23 @@ function baseCodePoint(string, index) {
 }
 
 function runNFA(nfa, target, pos) {
-  let origPos = pos;
+  const origPos = pos;
 
-  let longlit = [];
+  const longlit = [];
   for (let i = 0; i < 200; i++) longlit[i] = 0;
 
 
-  let eos = target.length;
+  const eos = target.length;
   let gen = 1;
 
   /* Allocate a "done states" array. */
-  let done = [];
+  const done = [];
 
   /* JVM clears out arrays here, we allocate new ones for simplicity */
   let fates = [];
   let curst = [];
   let nextst = [];
-  let numStates = nfa.states.length;
+  const numStates = nfa.states.length;
 
   nextst.push(1);
 
@@ -133,7 +133,7 @@ function runNFA(nfa, target, pos) {
     let prevFates = fates.length;
 
     while (curst.length) {
-      let st = curst.pop();
+      const st = curst.pop();
       if (st <= numStates) {
         if (done[st] == gen) {
           continue;
@@ -141,10 +141,10 @@ function runNFA(nfa, target, pos) {
         done[st] = gen;
       }
 
-      let edgeInfo = nfa.states[st - 1];
+      const edgeInfo = nfa.states[st - 1];
       for (let i = 0; i < edgeInfo.length; i++) {
         let act = edgeInfo[i].act;
-        let to = edgeInfo[i].to;
+        const to = edgeInfo[i].to;
 
         if (act <= EDGE_EPSILON) {
           if (act < 0) {
@@ -252,9 +252,9 @@ function runNFA(nfa, target, pos) {
             nextst.push(to);
           }
         } else if (act == EDGE_CHARRANGE) {
-          let ucArg = edgeInfo[i].argUc;
-          let lcArg = edgeInfo[i].argLc;
-          let ord = target.charCodeAt(pos);
+          const ucArg = edgeInfo[i].argUc;
+          const lcArg = edgeInfo[i].argLc;
+          const ord = target.charCodeAt(pos);
           if (ord >= lcArg && ord <= ucArg) {
             nextst.push(to);
           }
@@ -273,10 +273,10 @@ function runNFA(nfa, target, pos) {
     /* If we got multiple fates at this offset, sort them by the
        * declaration order (represented by the fate number). In the
        * future, we'll want to factor in longest literal prefix too. */
-    let charFates = fates.length - prevFates;
+    const charFates = fates.length - prevFates;
     if (charFates > 1) {
       // TODO do it more efficiently
-      let charFateList = fates.slice(prevFates);
+      const charFateList = fates.slice(prevFates);
       charFateList.sort((a, b) => b - a);
       fates = fates.slice(0, prevFates).concat(charFateList);
     }
@@ -302,14 +302,14 @@ op.nfarunalt = function(nfa, target, pos, bstackWrapped, cstackWrapped, marksWra
   if (cstackWrapped !== Null && !cstackWrapped.typeObject_) {
     cstack = cstackWrapped.$$toArray();
   }
-  let bstack = bstackWrapped.$$toArray();
-  let marks = marksWrapped.$$toArray();
+  const bstack = bstackWrapped.$$toArray();
+  const marks = marksWrapped.$$toArray();
 
   /* Run the NFA. */
-  let fates = runNFA(nfa, target, pos).array;
+  const fates = runNFA(nfa, target, pos).array;
 
   /* Push the results onto the bstack. */
-  let caps = cstack instanceof Array ? cstack.length : 0;
+  const caps = cstack instanceof Array ? cstack.length : 0;
 
   for (let i = 0; i < fates.length; i++) {
     bstack.push(marks[fates[i]], pos, 0, caps);

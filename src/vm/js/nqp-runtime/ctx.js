@@ -1,10 +1,10 @@
 'use strict';
-let NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
-let NQPObject = require('./nqp-object.js');
-let Null = require('./null.js');
-let exceptionsStack = require('./exceptions-stack.js');
+const NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
+const NQPObject = require('./nqp-object.js');
+const Null = require('./null.js');
+const exceptionsStack = require('./exceptions-stack.js');
 
-let BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
 
 const NQPInt = require('./nqp-int.js');
 
@@ -23,7 +23,7 @@ const AWAIT = 8192;
 const EMIT = 16384;
 const DONE = 32768;
 
-let categoryIDs = {
+const categoryIDs = {
   NEXT: NEXT,
   REDO: REDO,
   LAST: LAST,
@@ -37,8 +37,8 @@ let categoryIDs = {
   DONE: DONE,
 };
 
-let categoryToName = {};
-for (let name of Object.keys(categoryIDs)) {
+const categoryToName = {};
+for (const name of Object.keys(categoryIDs)) {
   categoryToName[categoryIDs[name]] = name;
 }
 
@@ -85,23 +85,23 @@ class Ctx extends NQPObject {
   }
 
   controlException(category) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
     this.propagateControlException(exception);
   }
 
   controlExceptionLabeled(label, category) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category | LABELED;
     exception.$$payload = label;
     this.propagateControlException(exception);
   }
 
   propagateControlException(exception) {
-    let handler = '$$' + categoryToName[exception.$$category & ~LABELED];
-    let labeled = exception.$$category & LABELED;
+    const handler = '$$' + categoryToName[exception.$$category & ~LABELED];
+    const labeled = exception.$$category & LABELED;
 
     let ctx = this;
 
@@ -199,7 +199,7 @@ class Ctx extends NQPObject {
 
   throwpayloadlexcaller(category, payload) {
     let ctx = this.$$skipHandlers().$$caller;
-    let isThunkOrCompilerStub = code => code.staticCode.isThunk || code.isCompilerStub;
+    const isThunkOrCompilerStub = code => code.staticCode.isThunk || code.isCompilerStub;
     while (ctx && isThunkOrCompilerStub(ctx.codeRef())) {
       ctx = ctx.$$caller;
     }
@@ -212,11 +212,11 @@ class Ctx extends NQPObject {
   }
 
   $$throwLexicalException(lookFrom, category, payload) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
     exception.$$payload = payload;
-    let handler = '$$' + categoryToName[category];
+    const handler = '$$' + categoryToName[category];
 
     let ctx = lookFrom;
 

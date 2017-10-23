@@ -1,26 +1,26 @@
 'use strict';
-let bignum = require('bignum-browserify');
+const bignum = require('bignum-browserify');
 
-let sslBignum = require('bignum');
+const sslBignum = require('bignum');
 
-let core = require('./core.js');
+const core = require('./core.js');
 
-let hll = require('./hll.js');
+const hll = require('./hll.js');
 
-let op = {};
+const op = {};
 exports.op = op;
 function intishBool(b) {
   return b ? 1 : 0;
 }
 
 function makeNum(type, num) {
-  let instance = type._STable.REPR.allocate(type._STable);
+  const instance = type._STable.REPR.allocate(type._STable);
   instance.$$setNum(num);
   return instance;
 }
 
 function makeBI(type, num) {
-  let instance = type._STable.REPR.allocate(type._STable);
+  const instance = type._STable.REPR.allocate(type._STable);
   instance.$$setBignum(num);
   return instance;
 }
@@ -46,7 +46,7 @@ op.base_I = function(n, base) {
   } else if (1 < base && base <= 36) {
     let num = orig.abs();
     let string = '';
-    let letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     while (num.gt(0)) {
       string = letters[num.mod(base).toNumber()] + string;
@@ -83,8 +83,8 @@ op.sub_I = function(a, b, type) {
 };
 
 op.div_I = function(a, b, type) {
-  let divident = getBI(a);
-  let divisor = getBI(b);
+  const divident = getBI(a);
+  const divisor = getBI(b);
   // workaround for .div rounding to zero not down
   if (divisor.lt(0) != divident.lt(0) && divident.mod(divisor).ne(0)) {
     return makeBI(type, divident.div(divisor).sub(1));
@@ -93,8 +93,8 @@ op.div_I = function(a, b, type) {
 };
 
 op.pow_I = function(a, b, numType, biType) {
-  let base = getBI(a);
-  let exponent = getBI(b);
+  const base = getBI(a);
+  const exponent = getBI(b);
   if (exponent.lt(0)) {
     return makeNum(numType, Math.pow(base.toNumber(), exponent.toNumber()));
   } else {
@@ -114,11 +114,11 @@ op.mod_I = function(n, m, type) {
   /* TODO - think if this can be optimized. */
   /* We are doing this in complicated way because,
      bignum returns the module with the sign equal to the dividend not the divisor. */
-  let a = getBI(n);
-  let b = getBI(m);
+  const a = getBI(n);
+  const b = getBI(m);
   if ((a.lt(0) && b.gt(0)) || (a.gt(0) && b.lt(0))) {
-    let x = a.div(b).sub(1);
-    let ret = a.sub(b.mul(x));
+    const x = a.div(b).sub(1);
+    const ret = a.sub(b.mul(x));
     return makeBI(type, (ret.eq(b) ? bignum(0) : ret));
   }
   return makeBI(type, a.mod(b));
@@ -140,8 +140,8 @@ op.expmod_I = function(a, b, c, type) {
 };
 
 op.div_In = function(a, b) {
-  let digits = 1e+20;
-  let divisor = getBI(b);
+  const digits = 1e+20;
+  const divisor = getBI(b);
   if (divisor.eq(0)) {
     return getBI(a).toNumber() / 0;
   }
@@ -169,7 +169,7 @@ op.isgt_I = function(a, b) {
 };
 
 op.cmp_I = function(a, b) {
-  let result = getBI(a).cmp(getBI(b));
+  const result = getBI(a).cmp(getBI(b));
   return result == 0 ? 0 : (result < 0 ? -1 : 1);
 };
 
@@ -202,8 +202,8 @@ op.bitneg_I = function(a, type) {
 };
 
 op.lcm_I = function(n, m, type) {
-  let a = getBI(n);
-  let b = getBI(m);
+  const a = getBI(n);
+  const b = getBI(m);
   return makeBI(type, (a.abs().div(a.gcd(b)).mul(b.abs())));
 };
 
@@ -233,16 +233,16 @@ op.bool_I = function(n) {
 };
 
 op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
-  let extracted = core.radixHelper(radix, str, zpos, flags);
+  const extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
     return hll.slurpyArray(currentHLL, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
   }
 
   if (radix == 10 || radix == 16) {
-    let pow = bignum(radix).pow(extracted.power);
+    const pow = bignum(radix).pow(extracted.power);
     return hll.slurpyArray(currentHLL, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
   } else {
-    let n = extracted.number;
+    const n = extracted.number;
     let base = bignum(1);
     let result = bignum(0);
 

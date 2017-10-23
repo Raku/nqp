@@ -1,7 +1,7 @@
 'use strict';
 
-let NQPObject = require('./nqp-object.js');
-let StaticCtx = require('./static-ctx.js');
+const NQPObject = require('./nqp-object.js');
+const StaticCtx = require('./static-ctx.js');
 
 class CodeRef extends NQPObject {
   freshBlock() {
@@ -32,7 +32,7 @@ class CodeRef extends NQPObject {
 
   // HACK - do this properly
   $$call() {
-    let staticCode = this.staticCode;
+    const staticCode = this.staticCode;
     if (staticCode.closureTemplate) {
       /* HACK */
       let searched = staticCode;
@@ -40,7 +40,7 @@ class CodeRef extends NQPObject {
       let fakeCtx;
       let fakeOuterCtx;
 
-      let setOuter = outer => {
+      const setOuter = outer => {
         if (fakeCtx) {
           fakeCtx.$$outer = outer;
         } else {
@@ -53,17 +53,17 @@ class CodeRef extends NQPObject {
           setOuter(searched.outerCtx);
           break;
         } else if (searched.outerCodeRef) {
-          let newFakeCtx = new StaticCtx();
+          const newFakeCtx = new StaticCtx();
 
           setOuter(newFakeCtx);
 
           fakeCtx = newFakeCtx;
 
-          let outerCode = searched.outerCodeRef;
+          const outerCode = searched.outerCodeRef;
           fakeCtx.$$cuid = searched.outerCodeRef.cuid;
-          let staticVars = outerCode.staticVars;
+          const staticVars = outerCode.staticVars;
           if (staticVars) {
-            for (let staticVarName in staticVars) {
+            for (const staticVarName in staticVars) {
               fakeCtx[staticVarName] = staticVars[staticVarName];
             }
           }
@@ -88,7 +88,7 @@ class CodeRef extends NQPObject {
   }
 
   closure(block) {
-    let closure = new CodeRef(this.name, this.cuid);
+    const closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;
     closure.$$call = block;
     closure.staticCode = this;
@@ -96,7 +96,7 @@ class CodeRef extends NQPObject {
   }
 
   closureCtx(outerCtx) {
-    let closure = new CodeRef(this.name, this.cuid);
+    const closure = new CodeRef(this.name, this.cuid);
     closure.codeObj = this.codeObj;
     closure.$$call = this.freshBlock();
     closure.staticCode = this;
@@ -115,7 +115,7 @@ class CodeRef extends NQPObject {
 
   captureAndClosure(outer, block) {
     this.capture(block);
-    let closure = this.closure(block);
+    const closure = this.closure(block);
     if (outer !== null) {
       this.outerCtx = outer;
       closure.outerCtx = outer;
@@ -125,7 +125,7 @@ class CodeRef extends NQPObject {
 
   captureAndClosureCtx(outerCtx) {
     this.capture(this.freshBlock());
-    let closure = this.closure(this.freshBlock());
+    const closure = this.closure(this.freshBlock());
 
     if (outerCtx !== null) {
       this.outerCtx = outerCtx;
@@ -149,7 +149,7 @@ class CodeRef extends NQPObject {
   }
 
   $$clone() {
-    let clone = new CodeRef(this.name, undefined);
+    const clone = new CodeRef(this.name, undefined);
     clone.$$call = this.$$call;
     clone.codeObj = this.codeObj;
     clone.staticCode = this.staticCode;

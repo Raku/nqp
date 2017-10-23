@@ -4,7 +4,7 @@ exports.strToNum = function(str) {
   if (str === 'Inf') return Infinity;
   if (str === '-Inf') return -Infinity;
   if (str === '+Inf') return Infinity;
-  let parsed = parseFloat(str);
+  const parsed = parseFloat(str);
   if (isNaN(parsed)) {
     return 0;
   }

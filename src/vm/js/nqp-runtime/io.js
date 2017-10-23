@@ -1,23 +1,23 @@
 'use strict';
-let fs = require('fs-ext');
-let os = require('os');
-let sleep = require('sleep');
+const fs = require('fs-ext');
+const os = require('os');
+const sleep = require('sleep');
 
-let tty = require('tty');
+const tty = require('tty');
 
-let Hash = require('./hash.js');
+const Hash = require('./hash.js');
 
-let core = require('./core.js');
+const core = require('./core.js');
 
-let child_process = require('child_process');
+const child_process = require('child_process');
 
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 
-let mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp');
 
 const NQPException = require('./nqp-exception.js');
 
-let nqp = require('nqp-runtime');
+const nqp = require('nqp-runtime');
 
 const Null = require('./null.js');
 
@@ -27,7 +27,7 @@ function boolish(bool) {
   return bool ? 1 : 0;
 }
 
-let op = {};
+const op = {};
 exports.op = op;
 
 op.print = function(arg) {
@@ -205,8 +205,8 @@ class FileHandle extends IOHandle {
 
   $$eoffh() {
     // I haven't found a way to implement this directly in node.js
-    let current = fs.seekSync(this.fd, 0, 1);
-    let end = fs.seekSync(this.fd, 0, 2);
+    const current = fs.seekSync(this.fd, 0, 1);
+    const end = fs.seekSync(this.fd, 0, 2);
     fs.seekSync(this.fd, current, 0);
     return current == end ? 1 : 0;
   }
@@ -231,7 +231,7 @@ class FileHandle extends IOHandle {
   }
 
   $$writefh(buf) {
-    let buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     return fs.writeSync(this.fd, buffer, 0, buffer.length);
   }
 
@@ -240,9 +240,9 @@ class FileHandle extends IOHandle {
   }
 
   $$readfh(buf, bytes) {
-    let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-    let buffer = Buffer.allocUnsafe(bytes);
-    let read = fs.readSync(this.fd, buffer, 0, bytes, null);
+    const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+    const buffer = Buffer.allocUnsafe(bytes);
+    const read = fs.readSync(this.fd, buffer, 0, bytes, null);
     buf.array.length = read;
     for (let i = 0; i < read; i++) {
       if (isUnsigned) {
@@ -270,7 +270,7 @@ function modeToFlags(mode) {
     else throw 'unknown mode to open: ' + mode;
   }
 
-  for (let c of mode.substr(1)) {
+  for (const c of mode.substr(1)) {
     if (c === 'a') flags |= fs.constants.O_APPEND;
     else if (c === 'c') flags |= fs.constants.O_CREAT;
     else if (c === 't') flags |= fs.constants.O_TRUNC;
@@ -283,7 +283,7 @@ function modeToFlags(mode) {
 
 op.open = function(name, mode) {
   try {
-    let fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
+    const fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
     fh.encoding = 'utf8';
     return fh;
   } catch (e) {
@@ -363,8 +363,8 @@ op.cwd = function() {
 };
 
 op.getenvhash = function() {
-  let hash = new Hash();
-  for (let key in process.env) {
+  const hash = new Hash();
+  for (const key in process.env) {
     hash.content.set(key, process.env[key]);
   }
   return hash;
@@ -391,7 +391,7 @@ class Stderr extends StdHandle {
   }
 
   $$writefh(buf) {
-    let buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     process.stderr.write(buffer);
   }
 };
@@ -413,7 +413,7 @@ class Stdout extends StdHandle {
   }
 
   $$writefh(buf) {
-    let buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     process.stdout.write(buffer);
   }
 };
@@ -485,7 +485,7 @@ function wrapBuffer(buffer, type) {
 }
 
 function stringifyEnv(ctx, hash) {
-  let stringifed = {};
+  const stringifed = {};
 
   hash.content.forEach(function(value, key, map) {
     stringifed[key] = nqp.toStr(value, ctx);
@@ -495,8 +495,8 @@ function stringifyEnv(ctx, hash) {
 }
 
 function stringifyArray(ctx, array) {
-  let stringified = [];
-  for (let element of array.array) {
+  const stringified = [];
+  for (const element of array.array) {
     stringified.push(nqp.toStr(element, ctx));
   }
   return stringified;

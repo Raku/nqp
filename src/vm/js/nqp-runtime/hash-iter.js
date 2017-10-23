@@ -1,4 +1,4 @@
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 class HashIter extends NQPObject {
   constructor(hash) {
     super();
