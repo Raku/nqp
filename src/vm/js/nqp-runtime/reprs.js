@@ -2017,7 +2017,7 @@ reprs.CArray = CArray;
 
 class CStr extends REPR {
 };
-reprs.CStr = CArray;
+reprs.CStr = CStr;
 
 
 var ID = 0;
