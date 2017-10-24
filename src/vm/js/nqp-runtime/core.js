@@ -1422,11 +1422,13 @@ op.split = function(currentHLL, separator, string) {
 };
 
 op.exception = function() {
-  return exceptionsStack[exceptionsStack.length - 1];
+  const stack = exceptionsStack();
+  return stack[stack.length - 1];
 };
 
 op.lastexpayload = function() {
-  return exceptionsStack[exceptionsStack.length - 1].$$payload;
+  const stack = exceptionsStack();
+  return stack[stack.length - 1].$$payload;
 };
 
 op.setextype = function(exception, category) {

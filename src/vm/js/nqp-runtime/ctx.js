@@ -110,7 +110,7 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler]();
@@ -124,7 +124,7 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
         throw ctx.unwind;
@@ -148,7 +148,7 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
           ctx.unwind.ret = ctx.$$CATCH();
         } catch (e) {
@@ -158,7 +158,7 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
         throw ctx.unwind;
@@ -171,11 +171,11 @@ class Ctx extends NQPObject {
 
   catchException(exception) {
     this.exception = exception;
-    exceptionsStack.push(exception);
+    exceptionsStack().push(exception);
     try {
       return this.$$CATCH();
     } finally {
-      exceptionsStack.pop();
+      exceptionsStack().pop();
     }
   }
 
@@ -225,7 +225,7 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler]();
@@ -239,7 +239,7 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
         throw ctx.unwind;
