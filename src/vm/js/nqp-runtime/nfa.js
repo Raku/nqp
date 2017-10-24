@@ -28,6 +28,8 @@ const EDGE_CODEPOINT_M_LL = 18;
 const EDGE_CODEPOINT_IM = 19;
 const EDGE_CODEPOINT_IM_NEG = 20;
 const EDGE_CODEPOINT_IM_LL = 21;
+const EDGE_CHARRANGE_M = 22;
+const EDGE_CHARRANGE_M_NEG = 23;
 
 function convertState(thing) {
   if (thing.$$toArray) {
@@ -77,6 +79,8 @@ op.nfafromstatelist = function(ctx, rawStates, type) {
         case EDGE_CODEPOINT_IM_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
+        case EDGE_CHARRANGE_M:
+        case EDGE_CHARRANGE_M_NEG:
           edge.argLc = nqp.toInt(states[i][j + 1][0], ctx);
           edge.argUc = nqp.toInt(states[i][j + 1][1], ctx);
           break;
