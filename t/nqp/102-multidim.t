@@ -546,7 +546,7 @@ dies-ok({ nqp::dimensions($array_type_2d) }, "Can't use dimensions on a type obj
         nqp::hash('dimensions', 1, 'type', num)));
     my $array := nqp::create($array_type);
     nqp::setdimensions($array, nqp::list_i(1));
-    ok(nqp::iseq_n(nqp::atpos_n($array, 0), 0), 'atpos_s on MultiDimArray - uninitialized');
+    ok(nqp::iseq_n(nqp::atpos_n($array, 0), 0), 'atpos_n on MultiDimArray - uninitialized');
 }
 
 {
