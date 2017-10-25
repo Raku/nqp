@@ -1181,7 +1181,7 @@ class VMArray extends REPR {
       if (idx.array.length != 1) {
         throw new NQPException('A dynamic array can only be indexed with a single dimension');
       }
-      const index = idx.array[0];
+      const index = idx.array[0] || 0;
       const value = this.array[index < 0 ? this.array.length + index : index];
       if (value === undefined) return Null;
       return value;
@@ -1191,7 +1191,7 @@ class VMArray extends REPR {
       if (idx.array.length != 1) {
         throw new NQPException('A dynamic array can only be indexed with a single dimension');
       }
-      const index = idx.array[0];
+      const index = idx.array[0] || 0;
       return (this.array[index] = value);
     };
 
@@ -1800,7 +1800,7 @@ class MultiDimArray extends REPR {
         }
         let calculatedIdx = 0;
         for (let i = 0; i < idx.length; i++) {
-          calculatedIdx = calculatedIdx * this.dimensions[i] + idx[i];
+          calculatedIdx = calculatedIdx * this.dimensions[i] + (idx[i] || 0);
         }
         return calculatedIdx;
       }
