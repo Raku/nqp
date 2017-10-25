@@ -1,6 +1,6 @@
 #! nqp
 
-plan(198);
+plan(201);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -41,6 +41,10 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
 {
     my @normal_a := ('a', 'b');
     is(nqp::atposnd(@normal_a, nqp::list_i(0)), 'a', 'normal object array can be read with multi-dim op (1)');
+    my $default := nqp::list_i();
+    nqp::setelems($default, 1);
+    is(nqp::atposnd(@normal_a, $default), 'a', 'normal object array can be read with multi-dim op with defaults');
+
     is(nqp::atposnd(@normal_a, nqp::list_i(1)), 'b', 'normal object array can be read with multi-dim op (2)');
     my @normal_b := nqp::list_i(41, 42);
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(0)) == 41, 'normal int array can be read with multi-dim op (1)');
@@ -62,6 +66,13 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     nqp::bindposnd(@normal_a, nqp::list_i(1), 'b');
     is(@normal_a[0], 'a', 'normal object array can be bound with multi-dim op (1)');
     is(@normal_a[1], 'b', 'normal object array can be bound with multi-dim op (2)');
+
+    my $defaults := nqp::list_i();
+    nqp::setelems($defaults, 1);
+    nqp::bindposnd(@normal_a, $defaults, 'c');
+
+    is(@normal_a[0], 'c', 'normal object array can be bound with multi-dim op with default indexes (1)');
+
     my @normal_b := nqp::list_i();
     nqp::bindposnd_i(@normal_b, nqp::list_i(0), 41);
     nqp::bindposnd_i(@normal_b, nqp::list_i(1), 42);
@@ -229,6 +240,12 @@ dies-ok({
         'Bind to 2D array with out-of-range index dies (1)');
     dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0, 3), 69) },
         'Bind to 2D array with out-of-range index dies (2)');
+
+    my $default_indexed := nqp::list_i();
+    nqp::setelems($default_indexed, 2);
+
+    ok(nqp::atposnd($test_2d, $default_indexed) == 101, 'Access to 2D array works with list_i with defaults');
+
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 0)) == 101, 'Access to 2D array works (1)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 1)) == 102, 'Access to 2D array works (2)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 2)) == 103, 'Access to 2D array works (3)');
