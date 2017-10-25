@@ -351,6 +351,7 @@ class QAST::OperationsJS {
     for ['_i', '_n', '_s'] -> $suffix {
         add_simple_op('getattrref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR], :takes_hll);
         add_simple_op('atposref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_INT], :takes_hll);
+        add_simple_op('multidimref' ~ $suffix, $T_OBJ, [$T_OBJ, $T_OBJ], :takes_hll);
     }
 
     add_simple_op('attrinited', $T_INT, [$T_OBJ, $T_OBJ, $T_STR], :decont(1), :method_call);
