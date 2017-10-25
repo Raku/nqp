@@ -105,6 +105,7 @@ import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstancePositional;
+import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceMultidim;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceStrLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefREPRData;
 import org.perl6.nqp.sixmodel.reprs.P6bigintInstance;
@@ -3335,6 +3336,40 @@ public final class Ops {
         return ref;
     }
 
+    /* Positional multidim reference operations. */
+    public static SixModelObject multidimref_i(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intMultidimRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int multidim positional reference type registered for current HLL");
+        NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.indices = smoToLongArray(tc, indices);
+        return ref;
+    }
+
+    public static SixModelObject multidimref_n(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numMultidimRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No num multidim positional reference type registered for current HLL");
+        NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.indices = smoToLongArray(tc, indices);
+        return ref;
+    }
+
+    public static SixModelObject multidimref_s(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strMultidimRef;
+        if (refType == null)
+            throw ExceptionHandling.dieInternal(tc,
+                "No str multidim positional reference type registered for current HLL");
+        NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.indices = smoToLongArray(tc, indices);
+        return ref;
+    }
+
     /* Associative operations. */
     public static SixModelObject atkey(SixModelObject hash, String key, ThreadContext tc) {
         return hash.at_key_boxed(tc, key);
@@ -6045,6 +6080,12 @@ public final class Ops {
             config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
         if (configHash.exists_key(tc, "str_pos_ref") != 0)
             config.strPosRef = configHash.at_key_boxed(tc, "str_pos_ref");
+        if (configHash.exists_key(tc, "int_multidim_ref") != 0)
+            config.intMultidimRef = configHash.at_key_boxed(tc, "int_multidim_ref");
+        if (configHash.exists_key(tc, "num_multidim_ref") != 0)
+            config.numMultidimRef = configHash.at_key_boxed(tc, "num_multidim_ref");
+        if (configHash.exists_key(tc, "str_multidim_ref") != 0)
+            config.strMultidimRef = configHash.at_key_boxed(tc, "str_multidim_ref");
         if (configHash.exists_key(tc, "lexical_handler_not_found_error") != 0)
             config.lexicalHandlerNotFoundError = configHash.at_key_boxed(tc, "lexical_handler_not_found_error");
         return configHash;

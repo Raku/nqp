@@ -2504,6 +2504,9 @@ QAST::OperationsJAST.map_classlib_core_op('bindpos3d_i', $TYPE_OPS, 'bindpos3d_i
 QAST::OperationsJAST.map_classlib_core_op('bindpos3d_n', $TYPE_OPS, 'bindpos3d_n', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos3d_s', $TYPE_OPS, 'bindpos3d_s', [$RT_OBJ, $RT_INT, $RT_INT, $RT_INT, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindposnd', $TYPE_OPS, 'bindposnd_o', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('multidimref_i', $TYPE_OPS, 'multidimref_i', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('multidimref_n', $TYPE_OPS, 'multidimref_n', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('multidimref_s', $TYPE_OPS, 'multidimref_s', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindposnd_i', $TYPE_OPS, 'bindposnd_i', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindposnd_n', $TYPE_OPS, 'bindposnd_n', [$RT_OBJ, $RT_OBJ, $RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindposnd_s', $TYPE_OPS, 'bindposnd_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);

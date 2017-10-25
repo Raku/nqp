@@ -108,4 +108,7 @@ public class HLLConfig {
     public SixModelObject intPosRef;
     public SixModelObject numPosRef;
     public SixModelObject strPosRef;
+    public SixModelObject intMultidimRef;
+    public SixModelObject numMultidimRef;
+    public SixModelObject strMultidimRef;
 }
