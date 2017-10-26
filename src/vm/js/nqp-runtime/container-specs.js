@@ -167,7 +167,7 @@ class NativeRef {
         }
 
         $$getStr() {
-          return this.get().toString();
+          return coercions.numToStr(this.get());
         }
 
         $$decont(ctx, value) {
