@@ -1102,9 +1102,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my int $wrap_in_try := 0;
             my str $exit_handler;
             my str $result_for_exit_handler;
+            my $result_for_exit_handler_chunk;
 
             if $node.has_exit_handler {
               $result_for_exit_handler := $*BLOCK.add_tmp;
+              $result_for_exit_handler_chunk := self.coerce(Chunk.new($stmts.type, $stmts.expr), $T_OBJ);
               $wrap_in_try := 1;
               $exit_handler := "\} finally \{nqp.exitHandler($*CTX, HLL, $result_for_exit_handler);\n";
             }
@@ -1135,7 +1137,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.capture_inners($*BLOCK),
                 $wrap_in_try ?? "try \{\n" !! '',
                 $stmts,
-                $result_for_exit_handler ?? "$result_for_exit_handler = {$stmts.expr};\n" !! '',
+                $result_for_exit_handler ?? "$result_for_exit_handler = {$result_for_exit_handler_chunk.expr};\n" !! '',
                 "return {$stmts.expr};\n",
                 $pass_exceptions,
                 $exit_handler,
