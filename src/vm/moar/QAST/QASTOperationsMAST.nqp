@@ -1459,6 +1459,7 @@ my $call_gen := sub ($qastcomp, $op) {
 QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('nativeinvoke', $call_gen, :!inlinable);
+QAST::MASTOperations.add_core_moarop_mapping('getarg_i', 'getarg_i');
 
 QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my @args := nqp::clone($op.list);
