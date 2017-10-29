@@ -37,6 +37,8 @@ const Capture = require('./capture.js');
 
 const shortid = require('shortid');
 
+const strip = require('yads');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -1502,4 +1504,12 @@ op.getuniprop_str = function(codePoint, propCode) {
 
 op.eqatic = function(haystack, needle, offset) {
   return (haystack.substr(offset, needle.length).toLowerCase() === needle.toLowerCase()) ? 1 : 0;
+};
+
+op.eqaticim = function(haystack, needle, offset) {
+  return strip.combining(haystack.substr(offset)).toLowerCase().startsWith(strip.combining(needle).toLowerCase());
+};
+
+op.eqatim = function(haystack, needle, offset) {
+  return strip.combining(haystack.substr(offset)).startsWith(strip.combining(needle));
 };
