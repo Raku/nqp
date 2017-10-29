@@ -584,7 +584,7 @@ exports.literal_m = function(target, pos, literal) {
   let matched = '';
   const strippedLiteral = strip.combining(literal);
 
-  while (strippedLiteral.startsWith(matched)) {
+  while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
     if (matched === strippedLiteral) {
       result = count;
     }
@@ -602,7 +602,7 @@ exports.literal_im = function(target, pos, literal) {
   let matched = '';
   const strippedLiteral = strip.combining(literal).toLowerCase();
 
-  while (strippedLiteral.startsWith(matched)) {
+  while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
     if (matched === strippedLiteral) {
       result = count;
     }
