@@ -459,6 +459,105 @@ class RegexCompiler {
         );
     }
 
+    method dynquant($node) {
+        my $backtrack  := $node.backtrack || 'g';
+        my $sep        := $node[2];
+
+        my str $min := $*BLOCK.add_tmp;
+        my str $max := $*BLOCK.add_tmp;
+
+        my str $tmp_rep := $*BLOCK.add_tmp;
+
+        my str $skip_entire := self.new_label;
+        my str $sep_label := self.new_label;
+        my str $loop_label := self.new_label;
+        my str $done_label := self.new_label;
+
+        my @chunks;
+
+        my $minmax := $!compiler.as_js($node[1], :want($T_OBJ));
+        @chunks.push($minmax);
+        @chunks.push(
+            "$min = {$minmax.expr}.array[0];\n"
+            ~ "$max = {$minmax.expr}.array[1];\n");
+
+        @chunks.push("if ($min === 0 && $max === 0) \{{self.goto($skip_entire)}\}\n");
+
+        my str $needmark;
+        if $backtrack eq 'r' {
+            $needmark := 'true';
+        } else {
+            $needmark := $*BLOCK.add_tmp;
+            @chunks.push("$needmark = $min > 1 || $max > 1;\n");
+        }
+
+        if $backtrack eq 'f' {
+            @chunks.push("$!rep = 0;\n");
+
+            @chunks.push(
+              "if ($min < 1) \{\n"
+              ~ self.mark($loop_label, $!pos, $!rep)
+              ~ self.goto($done_label)
+              ~ "\}\n"
+            );
+
+            @chunks.push(self.goto($sep_label)) if $sep;
+
+            @chunks.push(self.case($loop_label));
+
+            @chunks.push("$tmp_rep = $!rep;\n");
+
+            if $sep {
+                @chunks.push(self.compile_rx($sep));
+                @chunks.push(self.case($sep_label));
+            }
+
+            @chunks.push(self.compile_rx($node[0]));
+
+            @chunks.push("$!rep = $tmp_rep+1;\n");
+
+            @chunks.push("if ($min > 1 && $!rep < $min) \{{self.goto($loop_label)}\}\n");
+
+
+            @chunks.push("if ($max > 1 && $!rep > $max) \{{self.goto($done_label)}\}\n");
+
+            @chunks.push("if ($max !== 1) \{{self.mark($loop_label, $!pos, $!rep)}\}\n");
+            @chunks.push(self.case($done_label));
+        }
+        else {
+            @chunks.push("if ($min === 0) \{{self.mark($done_label, $!pos, 0)}\}");
+            @chunks.push("else if ($needmark) \{{self.mark($done_label, -1, 0)}\}\n");
+
+            @chunks.push(self.case($loop_label));
+
+            @chunks.push(self.compile_rx($node[0]));
+
+            @chunks.push("if ($needmark) \{\n"
+                ~ self.peek($done_label, '*', $!rep)
+                ~ ($backtrack eq 'r' ?? self.commit($done_label) !! '')
+                ~ "$!rep++;\n"
+                ~ "if ($max > 1 && $!rep >= $max) \{" ~ self.goto($done_label) ~ "\}\n"
+                ~ "\}\n");
+
+
+            @chunks.push("if ($max === 1) \{{self.goto($done_label)}\}");
+
+            @chunks.push(self.mark($done_label, $!pos, $!rep));
+
+            @chunks.push(self.compile_rx($sep)) if $sep;
+
+            @chunks.push(self.goto($loop_label));
+
+            @chunks.push(self.case($done_label));
+
+            @chunks.push("if ($min > 1 && $!rep < $min) \{{self.fail}\}");
+        }
+
+        @chunks.push(self.case($skip_entire));
+
+        Chunk.new($T_VOID, '', @chunks);
+    }
+
     method quant($node) {
         my int $min       := $node.min;
         my int $max       := $node.max;
