@@ -473,11 +473,11 @@ exports.NativeRef = require('./reprs.js').NativeRef;
 exports.getHLL = hll.getHLL;
 
 exports.tooFewPos = function(got, expected) {
-  throw new NQPException(`Too few positionals passed; expected ${expected} arguments but got ${got-2}`);
+  throw new NQPException(`Too few positionals passed; expected ${expected-2} arguments but got ${got-2}`);
 };
 
 exports.tooManyPos = function(got, expected) {
-  throw new NQPException(`Too many positionals passed; expected ${expected} arguments but got ${got-2}`);
+  throw new NQPException(`Too many positionals passed; expected ${expected-2} arguments but got ${got-2}`);
 };
 
 

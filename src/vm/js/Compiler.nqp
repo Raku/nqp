@@ -491,7 +491,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if ($pos_required) {
-            @setup.unshift("if (arguments.length < {$pos_required+2}) nqp.tooFewPos(arguments.length, $pos_required);");
+            @setup.unshift("if (arguments.length < {$pos_required+2}) nqp.tooFewPos(arguments.length, {$pos_required+2});");
         }
 
         if (!$pos_slurpy) {
