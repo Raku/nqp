@@ -22,7 +22,8 @@ const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
 const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
-const strip = require('yads');
+const stripMarks = require('./strip-marks.js');
+const foldCase = require('fold-case');
 
 const fs = require('fs');
 
@@ -577,19 +578,54 @@ exports.charrange_i = function(char, lower, upper) {
   );
 };
 
+exports.charrange_m = function(char, lower, upper) {
+  const codePoint = stripMarks(char).codePointAt(0);
+  return (lower <= codePoint && codePoint <= upper);
+};
+
+exports.charrange_im = function(char, lower, upper) {
+  const stripped = stripMarks(char);
+  return (
+    lower <= stripped.toLowerCase().codePointAt(0)
+    && stripped.toLowerCase().codePointAt(0) <= upper
+  ) || (
+    lower <= stripped.toUpperCase().codePointAt(0)
+    && stripped.toUpperCase().codePointAt(0) <= upper
+  );
+};
+
+
+// TODO - optimize
+exports.literal_i = function(target, pos, literal) {
+  let count = 0;
+  let result = -1;
+  let matched = '';
+  const foldedLiteral = foldCase(literal);
+
+  while (foldedLiteral.startsWith(matched) && pos + count <= target.length) {
+    if (matched === foldedLiteral) {
+      result = count;
+    }
+    count++;
+    matched = foldCase(target.substr(pos, count));
+  }
+
+  return result;
+};
+
 // TODO - optimize
 exports.literal_m = function(target, pos, literal) {
   let count = 0;
   let result = -1;
   let matched = '';
-  const strippedLiteral = strip.combining(literal);
+  const strippedLiteral = stripMarks(literal);
 
   while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
     if (matched === strippedLiteral) {
       result = count;
     }
     count++;
-    matched = strip.combining(target.substr(pos, count));
+    matched = foldCase(stripMarks(target.substr(pos, count)));
   }
 
   return result;
@@ -600,15 +636,26 @@ exports.literal_im = function(target, pos, literal) {
   let count = 0;
   let result = -1;
   let matched = '';
-  const strippedLiteral = strip.combining(literal).toLowerCase();
+  const strippedLiteral = stripMarks(literal).toLowerCase();
 
   while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
     if (matched === strippedLiteral) {
       result = count;
     }
     count++;
-    matched = strip.combining(target.substr(pos, count)).toLowerCase();
+    matched = foldCase(stripMarks(target.substr(pos, count)));
   }
 
   return result;
 };
+
+// TODO astral characters, multi character graphemes
+exports.enumcharlist_m = function(negate, target, pos, charlist) {
+  if (pos >= target.length) return -1;
+  const found = charlist.indexOf(stripMarks(target.substr(pos,1))) != -1;
+  if (negate) {
+    return found ? -1 : 1;
+  } else {
+    return found ? 1 : -1;
+  }
+}

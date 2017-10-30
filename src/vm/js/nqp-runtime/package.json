@@ -27,7 +27,7 @@
     "stack-trace": "0.0.10",
     "shortid": "2.2.8",
     "source-map": "0.5.7",
-    "char-props": "0.1.5",
-    "yads": "^1.0.6"
+    "char-props": "0.1.5"
+    "fold-case": "^1.0.0"
   }
 }

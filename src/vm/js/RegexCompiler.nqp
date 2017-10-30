@@ -122,12 +122,18 @@ class RegexCompiler {
         Chunk.new($T_VOID, "", @setup);
     }
 
+    method ignore_suffix(str $subtype) {
+        return 'i' if $subtype eq 'ignorecase';
+        return 'm' if $subtype eq 'ignoremark';
+        return 'im' if $subtype eq 'ignorecase+ignoremark';
+        return '';
+    }
+
     method literal($node) {
-        my str $const := $node.subtype eq 'ignorecase' ?? nqp::lc($node[0]) !! $node[0];
+        my str $const := $node[0];
         my str $qconst := quote_string($const);
 
-        if $node.subtype eq 'ignoremark' || $node.subtype eq 'ignorecase+ignoremark' {
-            my str $suffix := $node.subtype eq 'ignoremark' ?? 'm' !! 'im';
+        if self.ignore_suffix($node.subtype) -> str $suffix {
             my str $offset := $*BLOCK.add_tmp;
             return "$offset = nqp.literal_{$suffix}($!target, $!pos, $qconst);\n"
                 ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
@@ -136,9 +142,6 @@ class RegexCompiler {
         my int $constlen := nqp::chars($const);
         my str $cmpop := $node.negate ?? '==' !! '!=';
         my str $str := "{$!target}.substr({$!pos},$constlen)";
-        if $node.subtype eq 'ignorecase' {
-            $str := "$str.toLowerCase()";
-        }
         "if ($str $cmpop $qconst) \{{self.fail}\}" ~
             ($node.subtype eq 'zerowidth' ?? "\n" !! " else \{{$!pos}+=$constlen\}\n");
     }
@@ -165,6 +168,14 @@ class RegexCompiler {
 
     method enumcharlist($node) {
         my str $charlist := quote_string($node[0]);
+
+        if self.ignore_suffix($node.subtype) -> str $suffix {
+            my str $offset := $*BLOCK.add_tmp;
+            my str $negate := $node.negate ?? 'true' !! 'false';
+            return "$offset = nqp.enumcharlist_{$suffix}($negate, $!target, $!pos, $charlist);\n"
+                ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
+        }
+
         my str $testop := $node.negate ?? '!=' !! '==';
 
         my str $end_of_string := ($node.negate && $node.subtype eq 'zerowidth') ?? "$!pos < $!target.length &&" !! "$!pos >= $!target.length ||";

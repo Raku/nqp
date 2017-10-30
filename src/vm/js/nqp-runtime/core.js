@@ -37,7 +37,9 @@ const Capture = require('./capture.js');
 
 const shortid = require('shortid');
 
-const strip = require('yads');
+const stripMarks = require('./strip-marks.js');
+
+const foldCase = require('fold-case');
 
 exports.CodeRef = CodeRef;
 
@@ -1503,13 +1505,14 @@ op.getuniprop_str = function(codePoint, propCode) {
 };
 
 op.eqatic = function(haystack, needle, offset) {
-  return (haystack.substr(offset, needle.length).toLowerCase() === needle.toLowerCase()) ? 1 : 0;
+  return foldCase(haystack.substr(offset)).startsWith(foldCase(needle)) ? 1 : 0;
 };
 
 op.eqaticim = function(haystack, needle, offset) {
-  return strip.combining(haystack.substr(offset)).toLowerCase().startsWith(strip.combining(needle).toLowerCase());
+  return foldCase(stripMarks(haystack.substr(offset))).startsWith(foldCase(stripMarks(needle)));
 };
 
 op.eqatim = function(haystack, needle, offset) {
-  return strip.combining(haystack.substr(offset)).startsWith(strip.combining(needle));
+  return stripMarks(haystack.substr(offset)).startsWith(stripMarks(needle));
+};
 };
