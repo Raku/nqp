@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(55);
+plan(57);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -464,3 +464,52 @@ sub scope2() {
 }
 
 scope2();
+
+sub catch_with_control($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+         $throws(),
+        'CONTROL', caught('control')
+    );
+    $caught;
+};
+
+sub catch_labeled($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    my $ret := nqp::handle(
+         $caught := $throws(),
+        'LABELED', Label2,
+        'TAKE', caught('labeled')
+    );
+    $caught;
+};
+
+sub catch_unlabeled($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+         $caught := $throws(),
+        'TAKE', caught('unlabeled')
+    );
+    $caught;
+};
+
+is(catch_unlabeled({
+    catch_with_control({
+        THROW(nqp::const::CONTROL_TAKE, nqp::null())
+    });
+}), 'control', 'an unlabeled exception is caught by CONTROL');
+
+is(catch_labeled({
+    catch_with_control({
+        THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)
+    });
+}), 'control', 'a labeled exception is caught by CONTROL');
