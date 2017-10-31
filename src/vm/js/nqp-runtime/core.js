@@ -633,7 +633,6 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   compile(ctx, _NAMED, self, code) {
-    console.log('compiling');
     const script = new Script(code);
 
     const codeRef = new CodeRef();
