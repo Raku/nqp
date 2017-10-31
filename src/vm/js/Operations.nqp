@@ -1492,6 +1492,8 @@ class QAST::OperationsJS {
     add_simple_op('getlexrelcaller', $T_OBJ, [$T_OBJ, $T_STR], sub ($ctx, $name) {"$ctx.lookupWithCallers($name)"});
     add_simple_op('getlexrel', $T_OBJ, [$T_OBJ, $T_STR]);
 
+    add_simple_op('getlex', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupOrNull($name)"});
+
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('capturehasnameds', $T_INT, [$T_OBJ]);
     add_simple_op('captureposelems', $T_INT, [$T_OBJ]);
@@ -1502,6 +1504,8 @@ class QAST::OperationsJS {
     add_simple_op('capturenamedshash', $T_OBJ, [$T_OBJ], :takes_hll);
 
     add_simple_op('captureposprimspec', $T_INT, [$T_OBJ, $T_INT]);
+
+    add_simple_op('captureinnerlex', $T_OBJ, [$T_OBJ], :!inlinable, :side_effects);
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
         "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"

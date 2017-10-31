@@ -1514,4 +1514,8 @@ op.eqaticim = function(haystack, needle, offset) {
 op.eqatim = function(haystack, needle, offset) {
   return stripMarks(haystack.substr(offset)).startsWith(stripMarks(needle));
 };
+
+// STUB
+op.captureinnerlex = function(codeRef) {
+  return codeRef;
 };
