@@ -106,7 +106,7 @@ class Ctx extends NQPObject {
     let ctx = this;
 
     while (ctx) {
-      if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || ctx.$$label === exception.$$payload)) {
+      if (ctx.$$CONTROL || (ctx[handler]  && (!labeled || ctx.$$label === exception.$$payload))) {
         exception.caught = ctx;
         ctx.exception = exception;
 
