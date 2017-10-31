@@ -1081,7 +1081,7 @@ class QAST::OperationsJS {
             }
 
             my $check_cond := $is_withy
-                ?? Chunk.new($T_INT, "{$cond.expr}.defined($*CTX, null, {$cond.expr}).\$\$toBool($*CTX)", $cond)
+                ?? Chunk.new($T_INT, "{$cond.expr}.\$\$decont($*CTX).defined($*CTX, null, {$cond.expr}.\$\$decont($*CTX)).\$\$toBool($*CTX)", $cond)
                 !! $comp.coerce($cond, $T_BOOL);
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
