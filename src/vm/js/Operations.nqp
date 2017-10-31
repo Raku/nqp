@@ -1273,6 +1273,11 @@ class QAST::OperationsJS {
 
             my $control_ctx := $handler ?? $*BLOCK.add_tmp !! $*CTX;
 
+            my int $repeat_variant := ($op eq 'repeat_while' || $op eq 'repeat_until');
+
+            my str $setup_previous_cond := '';
+            my str $store_previous_cond := '';
+
             my $check_cond;
             my $body;
             {
@@ -1285,7 +1290,16 @@ class QAST::OperationsJS {
                 if needs_cond_passed(@operands[1]) {
                     my $block := try $*BLOCK;
                     my $loop := try $*LOOP;
-                    $body := $comp.compile_block(@operands[1], $block, $loop, :want($T_VOID), :extra_args([$cond.expr]));
+                    my str $pass_cond;
+                    if $repeat_variant {
+                        $pass_cond := $*BLOCK.add_tmp;
+                        $store_previous_cond := "$pass_cond = {$cond.expr};\n";
+                        $setup_previous_cond := "$pass_cond = nqp.Null;\n";
+                    }
+                    else {
+                        $pass_cond := $cond.expr;
+                    }
+                    $body := $comp.compile_block(@operands[1], $block, $loop, :want($T_VOID), :extra_args([$pass_cond]));
                 }
                 else {
                     $body := $comp.as_js(@operands[1], :want($T_VOID));
@@ -1299,15 +1313,17 @@ class QAST::OperationsJS {
                 $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
             }
 
-            my int $repeat_variant := ($op eq 'repeat_while' || $op eq 'repeat_until');
 
             if $handler {
 
                 my str $neg := ($op eq 'while' || $op eq 'repeat_while') ?? '!' !! '';
-                my $has_redo := $loop.has_redo || $repeat_variant; # we don't use 'my int' due to NQP bug
+
+                # With perl6 we always emit all handlers
+                my $has_redo := $*HLL ne 'nqp' || $loop.has_redo || $repeat_variant; # we don't use 'my int' due to NQP bug
 
                 Chunk.void(
                     $repeat_variant ?? "{$loop.redo} = true;\n" !! '',
+                    $setup_previous_cond,
                     "{$loop.js_label}: for (;;", $post, ") \{\n",
                     $comp.handle_control($loop, $control_ctx, Chunk.void(
                         ($has_redo
@@ -1316,6 +1332,7 @@ class QAST::OperationsJS {
                                 ~  "\} else \{\n"
                             !! ''),
                         $check_cond,
+                        $store_previous_cond,
                         "if ($neg {$check_cond.expr}) \{break;\}\n",
                         ($has_redo ?? "\}\n" !! ''),
                         $body,
@@ -1325,9 +1342,11 @@ class QAST::OperationsJS {
             } elsif $repeat_variant {
                 my str $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.void(
+                    $setup_previous_cond,
                     "do \{\n",
                     $body,
                     $check_cond,
+                    $store_previous_cond,
                     "\} while ($neg {$check_cond.expr});"
                 );
             } else {
