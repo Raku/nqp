@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(54);
+plan(55);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -445,3 +445,22 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
         "a nqp::handle without label doesn't catch  labeled exceptions"
     );
 }
+
+my $*SCOPE := 'outer';
+sub scope0() {
+    my $*SCOPE := 'scope0';
+    nqp::die('foo');
+}
+sub scope1() {
+    my $*SCOPE := 'scope1';
+    scope0();
+}
+sub scope2() {
+    my $*SCOPE := 'scope2';
+    CATCH {
+        is($*SCOPE, 'scope0', 'we get the contextual from the correct scope');
+    }
+    scope1();
+}
+
+scope2();
