@@ -1,6 +1,6 @@
 # while, until statements
 
-plan(16);
+plan(20);
 
 my $a; my $sum;
 
@@ -104,4 +104,27 @@ my $str := 'hello there';
 while $str -> $got {
     is($got, 'hello there', 'regression test for a bug in type conversion');
     $str := '';
+}
+
+my $x := 0;
+repeat until $x >= 2 -> $another_x {
+  if $x == 0 {
+    ok(nqp::isnull($another_x), 'repeat until -> get null before condition');
+  } else {
+    is($another_x, 0, 'repeat until -> gets condition');
+  }
+  $x := $x + 1;
+}
+
+sub cond($y) {
+  $y == 1 ?? 100 !! 0;
+}
+my $y := 0;
+repeat while cond($y) -> $cond {
+  if $y == 0 {
+    ok(nqp::isnull($cond), 'repeat while -> get null before condition');
+  } else {
+    is($cond, 100, 'repeat while -> gets condition');
+  }
+  $y := $y + 1;
 }
