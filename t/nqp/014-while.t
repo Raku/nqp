@@ -1,6 +1,6 @@
 # while, until statements
 
-plan(20);
+plan(21);
 
 my $a; my $sum;
 
@@ -127,4 +127,16 @@ repeat while cond($y) -> $cond {
     is($cond, 100, 'repeat while -> gets condition');
   }
   $y := $y + 1;
+}
+
+{
+    my int $i := 10;
+    my $log := '';
+    nqp::while($i >= 0, nqp::stmts(
+        $log := $log ~ "|$i",
+        $i := $i-1,
+        nqp::if($i % 2 == 0, redo),
+        $log := $log ~ ":ev",
+    ), $log := $log ~ 'en');
+    is($log,'|10:even|9|8:even|7|6:even|5|4:even|3|2:even|1|0:even', 'redo works correctly with 3 argument while');
 }
