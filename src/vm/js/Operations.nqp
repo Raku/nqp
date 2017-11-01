@@ -1324,7 +1324,7 @@ class QAST::OperationsJS {
                 Chunk.void(
                     $repeat_variant ?? "{$loop.redo} = true;\n" !! '',
                     $setup_previous_cond,
-                    "{$loop.js_label}: for (;;", $post, ") \{\n",
+                    "{$loop.js_label}: for (;;", ($post && $has_redo ?? "{$loop.redo} || " !! '') , $post, ") \{\n",
                     $comp.handle_control($loop, $control_ctx, Chunk.void(
                         ($has_redo
                             ?? "if ({$loop.redo}) \{;\n"
