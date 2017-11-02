@@ -11,6 +11,8 @@ const NativeIntArg = nativeArgs.NativeIntArg;
 const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
+const reprs = require('./reprs.js');
+
 class MultiCache {
   constructor() {
     this.cache = [];
@@ -34,16 +36,20 @@ function posTypes(ctx, capture) {
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
-        if (deconted.typeObject_) {
-          if (deconted._STable.typeObjectCachedAsRW === undefined) {
-            deconted._STable.typeObjectCachedAsRW = {};
-          }
-          types[i] = deconted._STable.typeObjectCachedAsRW;
+        if (obj._STable.REPR instanceof reprs.NativeRef) {
+          types[i] = obj._STable;
         } else {
-          if (deconted._STable.cachedAsRW === undefined) {
-            deconted._STable.cachedAsRW = {};
+          if (deconted.typeObject_) {
+            if (deconted._STable.typeObjectCachedAsRW === undefined) {
+              deconted._STable.typeObjectCachedAsRW = {};
+            }
+            types[i] = deconted._STable.typeObjectCachedAsRW;
+          } else {
+            if (deconted._STable.cachedAsRW === undefined) {
+              deconted._STable.cachedAsRW = {};
+            }
+            types[i] = deconted._STable.cachedAsRW;
           }
-          types[i] = deconted._STable.cachedAsRW;
         }
       } else {
         types[i] = deconted.typeObject_ ? deconted : deconted._STable;
