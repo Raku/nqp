@@ -4305,6 +4305,8 @@ public final class Ops {
             for (int i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
+            names.put("ALERT",            (int)7);
+            names.put("BEL",              (int)7);
             names.put("LF",               (int)10);
             names.put("LINE FEED",        (int)10);
             names.put("FF",               (int)12);
@@ -4313,6 +4315,7 @@ public final class Ops {
             names.put("CARRIAGE RETURN",  (int)13);
             names.put("NEL",              (int)133);
             names.put("NEXT LINE",        (int)133);
+            names.remove("BELL"); // added below as 0x1F514, cmp. RT #130542
             cpNameMap = names;
             cpNameMapAboveBMP = false;
         }
