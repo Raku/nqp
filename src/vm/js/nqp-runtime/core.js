@@ -155,7 +155,8 @@ const arg = exports.arg = function(currentHLL, arg) {
 };
 
 exports.slurpyPos = function(currentHLL, args, from) {
-  const unpacked = new Array(args.length - from);
+  const count = args.length - from;
+  const unpacked = new Array(count >= 0 ? count : 0);
   for (let i=from; i < args.length; i++) {
     unpacked[i-from] = arg(currentHLL, args[i]);
   }
