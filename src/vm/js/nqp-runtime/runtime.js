@@ -659,3 +659,17 @@ exports.enumcharlist_m = function(negate, target, pos, charlist) {
     return found ? 1 : -1;
   }
 }
+
+exports.noNamed = function(_NAMED) {
+  if (Object.keys(_NAMED) != 0) {
+    throw new NQPException(`Unexpected named argument ${Object.keys(_NAMED)[0]} passed`);
+  }
+};
+
+exports.checkNamed = function(known, _NAMED) {
+  for (let named in _NAMED) {
+    if (!known[named]) {
+      throw new NQPException(`Unexpected named argument ${named} passed`);
+    }
+  }
+};

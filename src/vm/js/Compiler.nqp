@@ -405,11 +405,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my int $pos_required := 0;
         my int $pos_optional := 0;
 
+        my int $named_slurpy := 0;
+
         my @known_named;
 
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
+                    $named_slurpy := 1;
                     set_variable($param, "nqp.slurpyNamed(HLL, _NAMED, {known_named(@known_named)})");
                 }
                 else {
@@ -499,6 +502,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if (!$pos_slurpy) {
             my $max := $pos_required + $pos_optional + 2;
             @setup.unshift("if (arguments.length > $max) nqp.tooManyPos(arguments.length, $max);");
+        }
+
+        if !$named_slurpy {
+            if +@known_named {
+                @setup.unshift("if (_NAMED !== null) \{nqp.checkNamed({known_named(@known_named)}, _NAMED)\}\n");
+            } else {
+                @setup.unshift("if (_NAMED !== null) \{nqp.noNamed(_NAMED)\}\n");
+            }
         }
 
         Chunk.new($T_NONVAL, nqp::join(',', @sig), @setup);
