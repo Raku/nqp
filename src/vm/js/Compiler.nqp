@@ -401,9 +401,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
         }
 
-        my $pos_slurpy := 0;
-        my $pos_required := 0;
-        my $pos_optional := 0;
+        my int $pos_slurpy := 0;
+        my int $pos_required := 0;
+        my int $pos_optional := 0;
 
         for @params -> $param {
             if $param.slurpy {
