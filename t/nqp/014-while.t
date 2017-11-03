@@ -107,7 +107,7 @@ while $str -> $got {
 }
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('repeat until seems to have a bug on the jvm');
+    skip('repeat until seems to have a bug on the jvm', 2);
 } else {
     my $x := 0;
     repeat until $x >= 2 -> $another_x {
