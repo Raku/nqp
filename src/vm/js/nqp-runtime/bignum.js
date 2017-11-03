@@ -219,6 +219,10 @@ op.tonum_I = function(n) {
   return getBI(n).toNumber();
 };
 
+op.fromI_I = function(value, type) {
+  return makeBI(type, getBI(value));
+};
+
 op.fromnum_I = function(num, type) {
   // node-bignum bug workaround, when a negative number is too big it gets turned into 0
   if (num < 0) {

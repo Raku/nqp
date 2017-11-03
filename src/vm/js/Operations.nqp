@@ -1587,6 +1587,8 @@ class QAST::OperationsJS {
 
     add_simple_op('base_I', $T_STR, [$T_OBJ, $T_INT]);
 
+    add_simple_op('fromI_I', $T_OBJ, [$T_OBJ, $T_OBJ]);
+
 
     add_simple_op('div_In', $T_NUM, [$T_OBJ, $T_OBJ]);
     add_simple_op('isle_I', $T_INT, [$T_OBJ, $T_OBJ]);
