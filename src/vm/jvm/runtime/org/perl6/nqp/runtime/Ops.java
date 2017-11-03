@@ -6750,6 +6750,10 @@ public final class Ops {
         return makeBI(tc, type, new BigInteger(str));
     }
 
+    public static SixModelObject fromI_I(SixModelObject value, SixModelObject type, ThreadContext tc) {
+        return makeBI(tc, type, new BigInteger(getBI(tc, value).toByteArray()));
+    }
+
     public static String tostr_I(SixModelObject value, ThreadContext tc) {
         return getBI(tc, value).toString();
     }

@@ -2463,6 +2463,7 @@ QAST::OperationsJAST.map_classlib_core_op('base_I', $TYPE_OPS, 'base_I', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('isbig_I', $TYPE_OPS, 'isbig_I', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('fromnum_I', $TYPE_OPS, 'fromnum_I', [$RT_NUM, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('tonum_I', $TYPE_OPS, 'tonum_I', [$RT_OBJ], $RT_NUM, :tc);
+QAST::OperationsJAST.map_classlib_core_op('fromI_I', $TYPE_OPS, 'fromI_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
 # boolean opcodes
 QAST::OperationsJAST.map_classlib_core_op('not_i', $TYPE_OPS, 'not_i', [$RT_INT], $RT_INT);
