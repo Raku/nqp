@@ -405,10 +405,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my int $pos_required := 0;
         my int $pos_optional := 0;
 
+        my @known_named;
+
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
-                    set_variable($param, "nqp.slurpyNamed(HLL, _NAMED, {known_named(@*KNOWN_NAMED)})");
+                    set_variable($param, "nqp.slurpyNamed(HLL, _NAMED, {known_named(@known_named)})");
                 }
                 else {
                     $pos_slurpy := 1;
@@ -431,7 +433,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                     for @names -> $name {
                         my str $quoted := quote_string($name);
-                        @*KNOWN_NAMED.push($quoted);
+                        @known_named.push($quoted);
 
                         @setup.push("if (_NAMED !== null && _NAMED.hasOwnProperty($quoted)) \{\n");
 
@@ -1065,7 +1067,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         else {
             self.register_cuid($node);
 
-            my @*KNOWN_NAMED;
             my $*BINDVAL := 0;
             my $*BLOCK := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu));
 
