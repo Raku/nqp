@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(127);
+plan(130);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -265,3 +265,16 @@ ok(isnan(nqp::div_In(box(0), box(0))), 'nqp::div_In 0/0 == NaN');
 is(nqp::decont_i(nqp::fromstr_I('2147483647', $bi_type)), '2147483647',  'nqp::decont_i works on bignums');
 dies-ok({nqp::unbox_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t nqp::unbox_i a too big bignum');
 dies-ok({nqp::decont_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t unqp::decont_i a too big bignum');
+
+
+
+my $other_bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
+$other_bi_type.HOW.compose($other_bi_type);
+
+my $to_be_casted := nqp::box_i(100, $bi_type);
+
+my $casted := nqp::fromI_I($to_be_casted, $other_bi_type);
+
+ok(nqp::istype($to_be_casted, $bi_type), 'fromI_I result has correct type');
+ok(nqp::unbox_i($to_be_casted) == 100, 'fromI_I result has correct value');
+ok(nqp::istype($to_be_casted, $bi_type) && nqp::unbox_i($to_be_casted) == 100, 'fromI_I argument doesn\'t change');
