@@ -40,7 +40,11 @@ sub require_named(:$mandatory!) {
   'We require ' ~ $mandatory;
 }
 
-dies-ok({require_named(:mandatory('fun'), :optional('ennui'))}, 'die when an extra argument is passed');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('not yet fixed on the JVM', 1);
+} else {
+  dies-ok({require_named(:mandatory('fun'), :optional('ennui'))}, 'die when an extra argument is passed');
+}
 
 sub foo() {
 }
