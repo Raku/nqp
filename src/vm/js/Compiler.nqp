@@ -1591,7 +1591,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         return 0;
     }
 
-    multi method as_js(QAST::ParamTypeCheck $node) {
+    multi method as_js(QAST::ParamTypeCheck $node, :$want) {
         my $check := self.as_js($node[0], :want($T_BOOL));
         Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed(HLL, $*CTX, Array.prototype.slice.call(arguments));\n");
     }
