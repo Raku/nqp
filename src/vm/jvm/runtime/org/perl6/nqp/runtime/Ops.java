@@ -441,6 +441,17 @@ public final class Ops {
         return null;
     }
 
+    public static long getport(SixModelObject obj, ThreadContext tc) {
+        IOHandleInstance h = (IOHandleInstance)obj;
+        if (h.handle instanceof ServerSocketHandle) {
+            return ((ServerSocketHandle)h.handle).listenPort;
+        } else {
+            ExceptionHandling.dieInternal(tc,
+                "This handle does not support getport");
+        }
+        return -1;
+    }
+
     public static long filereadable(String path, ThreadContext tc) {
         Path path_o;
         long res;

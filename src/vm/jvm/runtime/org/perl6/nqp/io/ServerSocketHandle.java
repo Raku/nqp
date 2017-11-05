@@ -11,6 +11,7 @@ import org.perl6.nqp.runtime.ThreadContext;
 public class ServerSocketHandle implements IIOBindable {
     
     ServerSocketChannel listenChan;
+    public int listenPort;
 
     public ServerSocketHandle(ThreadContext tc) {
         try {
@@ -24,6 +25,7 @@ public class ServerSocketHandle implements IIOBindable {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
             listenChan.bind(addr, backlog);
+            listenPort = listenChan.socket().getLocalPort();
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
