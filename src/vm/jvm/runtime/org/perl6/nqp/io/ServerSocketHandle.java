@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class ServerSocketHandle implements IIOBindable {
+public class ServerSocketHandle implements IIOBindable, IIOClosable {
     
     ServerSocketChannel listenChan;
     public int listenPort;
@@ -35,6 +35,14 @@ public class ServerSocketHandle implements IIOBindable {
         try {
             SocketChannel chan = listenChan.accept();
             return chan == null ? null : new SocketHandle(tc, chan);
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public void close(ThreadContext tc) {
+        try {
+            listenChan.close();
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
