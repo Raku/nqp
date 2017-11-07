@@ -1072,7 +1072,7 @@ class QAST::OperationsJS {
             $cond_type := $T_OBJ if $cond_type == $T_CALL_ARG;
 
             # The 2 operand form of if in a non-void context also uses the cond as the return value
-            my $cond := $comp.as_js($node[0], :want($cond_type));
+            my $cond := $comp.as_js($node[0], :want($T_OBJ));
             my $then;
             my $else;
 
