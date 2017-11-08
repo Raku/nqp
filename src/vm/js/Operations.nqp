@@ -1760,6 +1760,8 @@ class QAST::OperationsJS {
     add_simple_op('unipvalcode', $T_INT, [$T_INT, $T_STR]);
     add_simple_op('getuniname', $T_STR, [$T_INT]);
 
+    add_simple_op('cpucores', $T_INT, []);
+
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {
             %hll_unbox{$hll} := nqp::hash();

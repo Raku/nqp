@@ -1520,3 +1520,7 @@ op.eqatim = function(haystack, needle, offset) {
 op.captureinnerlex = function(codeRef) {
   return codeRef;
 };
+
+op.cpucores = function() {
+  return 1;
+};
