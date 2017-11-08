@@ -137,7 +137,7 @@ is(nqp::sprintf('%#3.3b', [0]), '000', '%b, width and precision but zero value')
 is(nqp::sprintf('%#3.4b', [0]), '0000', '%b, width and precision but zero value, overlong');
 is(nqp::sprintf('%.0b', [1]), '1', '%b, precision zero and value');
 is(nqp::sprintf('%+.0b', [1]), '+1', '%b, precision zero, plus sign and value');
-is(nqp::sprintf('% .0b', [1]), '1', '%b, precision zero, space char and value');
+is(nqp::sprintf('% .0b', [1]), ' 1', '%b, precision zero, space char and value');
 is(nqp::sprintf('%-.0b', [1]), '1', '%b, precision zero, hash and value');
 is(nqp::sprintf('%#.0b', [1]), '0b1', '%b, width, zero precision, no value');
 is(nqp::sprintf('%#3.0b', [1]), '0b1', '%b, width, zero precision but value');
