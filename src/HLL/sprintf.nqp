@@ -158,6 +158,7 @@ my module sprintf {
             elsif $<escape> { $st := $<escape> }
             else { $st := $<literal> }
             my @pieces;
+            # Adds padding chars on in certain cases
             @pieces.push: infix_x(padding_char($st), $st<size>.made - nqp::chars($st.made)) if $st<size>;
             has_flag($st, 'minus')
                 ?? @pieces.unshift: $st.made
@@ -171,6 +172,7 @@ my module sprintf {
                 bad-type-for-directive($next, 'b');
             }
             my $int := intify($next);
+            my $positive := has_flag($/, 'plus') && nqp::isgt_I($int, $zero) ?? 1 !! 0;
             $int := nqp::base_I($int, 2);
             my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int ne '0' && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
@@ -180,6 +182,10 @@ my module sprintf {
             else {
                 $int := $pre ~ $int
             }
+            if $positive {
+                $int := '+' ~ $int;
+            }
+
             make $int;
         }
         method directive:sym<c>($/) {
