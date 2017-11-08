@@ -2003,18 +2003,17 @@ class NativeRef extends REPR {
 reprs.NativeRef = NativeRef;
 
 class CArray extends REPR {
-  setupSTable(STable) {
-    STable.addInternalMethods(class {
-      $$setStr(str) {
-        // TODO
-        // console.log('CArray setting with str: ', str);
-      }
-    });
-  }
 };
 reprs.CArray = CArray;
 
 class CStr extends REPR {
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$setStr(str) {
+        // TODO
+      }
+    });
+  }
 };
 reprs.CStr = CStr;
 
