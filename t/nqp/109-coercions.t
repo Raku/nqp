@@ -1,4 +1,4 @@
-plan(10);
+plan(11);
 
 my sub isnan($n) {
     nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
@@ -15,3 +15,4 @@ is(~nqp::neginf(), '-Inf', 'stringifing nqp::neginf');
 
 is(~(1/nqp::neginf()), '-0', 'stringifing -0');
 is(~(1/nqp::inf()), '0', 'stringifing -0');
+is(~1.01e100, '1.01e+100', 'stringifing 1.01e100');
