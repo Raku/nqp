@@ -1511,7 +1511,26 @@ class QAST::OperationsJS {
     add_simple_op('getlexrelcaller', $T_OBJ, [$T_OBJ, $T_STR], sub ($ctx, $name) {"$ctx.lookupWithCallers($name)"});
     add_simple_op('getlexrel', $T_OBJ, [$T_OBJ, $T_STR]);
 
-    add_simple_op('getlex', $T_OBJ, [$T_STR], sub ($name) {"{$*CTX}.lookupOrNull($name)"});
+    add_op('getlex', sub ($comp, $node, :$want) {
+        if +@($node) != 1 || !nqp::istype($node[0], QAST::SVal) {
+            nqp::die('getlex requires one string literal operand');
+        }
+        my str $name := $node[0].value;
+
+        if $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($name), :scope<lexical>)) {
+            return Chunk.new($T_OBJ, "{$*BLOCK.ctx}.lookupOrNull({quote_string($name)})");
+        }
+        else {
+            my $info := $*BLOCK;
+            while $info {
+                if $info.mangle_own_lexical($name) -> $mangled {
+                    return Chunk.new($T_OBJ, $mangled);
+                }
+                $info := $info.outer;
+            }
+            return Chunk.new($T_OBJ, 'nqp.Null');
+        }
+    });
 
     add_simple_op('captureexistsnamed', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('capturehasnameds', $T_INT, [$T_OBJ]);

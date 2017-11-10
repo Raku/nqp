@@ -268,6 +268,14 @@ class Ctx extends NQPObject {
        nqp code usually fallbacks to looking up of global */
   }
 
+  lookupOrNull(name) {
+    if (this.hasOwnProperty(name)) {
+      return this[name];
+    } else {
+      return Null;
+    }
+  }
+
   lookupDynamicFromCaller(name) {
     let ctx = this.$$caller;
     while (ctx) {
