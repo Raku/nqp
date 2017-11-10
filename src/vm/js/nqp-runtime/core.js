@@ -1526,3 +1526,36 @@ op.captureinnerlex = function(codeRef) {
 op.cpucores = function() {
   return 1;
 };
+
+
+const getrusage = require('qrusage');
+op.getrusage = function() {
+  const usage = getrusage();
+  const stable = BOOT.IntArray._STable;
+  const utime_sec = Math.floor(usage.utime);
+  const utime_usec = (usage.utime - Math.floor(usage.utime)) * 1000000;
+
+  const stime_sec = Math.floor(usage.stime);
+  const stime_usec = (usage.stime - Math.floor(usage.stime)) * 1000000;
+
+  return stable.REPR.allocateFromArray(stable, [
+    utime_sec,
+    utime_usec,
+    stime_sec,
+    stime_usec,
+    usage.maxrss,
+    usage.ixrss,
+    usage.idrss,
+    usage.isrss,
+    usage.minflt,
+    usage.majflt,
+    usage.nswap,
+    usage.inblock,
+    usage.oublock,
+    usage.msgsnd,
+    usage.msgrcv,
+    usage.nsignals,
+    usage.nvcsw,
+    usage.nivcsw
+  ]);
+};
