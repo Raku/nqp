@@ -8,6 +8,8 @@ const nqp = require('nqp-runtime');
 const Null = require('./null.js');
 const BOOT = require('./BOOT.js');
 
+const stripMarks = require('./strip-marks.js');
+
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
 const EDGE_CODEPOINT = 2;
@@ -259,6 +261,13 @@ function runNFA(nfa, target, pos) {
           const ucArg = edgeInfo[i].argUc;
           const lcArg = edgeInfo[i].argLc;
           const ord = target.charCodeAt(pos);
+          if (ord >= lcArg && ord <= ucArg) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CHARRANGE_M) {
+          const ucArg = edgeInfo[i].argUc;
+          const lcArg = edgeInfo[i].argLc;
+          const ord = stripMarks(target.substr(pos, 1)).charCodeAt(0);
           if (ord >= lcArg && ord <= ucArg) {
             nextst.push(to);
           }
