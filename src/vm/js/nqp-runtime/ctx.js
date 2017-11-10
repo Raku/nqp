@@ -113,7 +113,7 @@ class Ctx extends NQPObject {
         exceptionsStack().push(exception);
         try {
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler]();
+            ctx.unwind.ret = ctx[handler](this);
           } else {
             ctx.unwind.ret = ctx.$$CONTROL(this);
           }
@@ -233,7 +233,7 @@ class Ctx extends NQPObject {
         exceptionsStack().push(exception);
         try {
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler]();
+            ctx.unwind.ret = ctx[handler](this);
           } else {
             ctx.unwind.ret = ctx.$$CONTROL(this);
           }
