@@ -625,7 +625,7 @@ exports.literal_m = function(target, pos, literal) {
       result = count;
     }
     count++;
-    matched = foldCase(stripMarks(target.substr(pos, count)));
+    matched = stripMarks(target.substr(pos, count));
   }
 
   return result;
