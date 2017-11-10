@@ -1196,27 +1196,29 @@ function backtrace(exception) {
       if (ctx instanceof Ctx) {
         ctx = ctx.$$skipHandlers();
         const codeRef = ctx.codeRef();
-        const wanted = codeRef.$$call.name;
-        while (stackIndex < stack.length) {
-          if (stack[stackIndex].getFunctionName() == wanted) {
-            file = stack[stackIndex].getFileName();
-            line = stack[stackIndex].getLineNumber();
-            let column = stack[stackIndex].getColumnNumber();
+        if (codeRef !== null) {
+          const wanted = codeRef.$$call.name;
+          while (stackIndex < stack.length) {
+            if (stack[stackIndex].getFunctionName() == wanted) {
+              file = stack[stackIndex].getFileName();
+              line = stack[stackIndex].getLineNumber();
+              let column = stack[stackIndex].getColumnNumber();
 
-            if (sourceMaps.hasOwnProperty(file)) {
-              const original = sourceMaps[file].originalPositionFor({line: line, column: column});
-              if (original.source) {
-                file = original.source;
-                line = original.line;
-                column = original.column;
+              if (sourceMaps.hasOwnProperty(file)) {
+                const original = sourceMaps[file].originalPositionFor({line: line, column: column});
+                if (original.source) {
+                  file = original.source;
+                  line = original.line;
+                  column = original.column;
+                }
               }
+              if (file === undefined) file = '?';
+              break;
             }
-            if (file === undefined) file = '?';
-            break;
+            stackIndex++;
           }
-          stackIndex++;
+          row.content.set('sub', codeRef);
         }
-        row.content.set('sub', codeRef);
       }
 
       annotations.content.set('file', file);
