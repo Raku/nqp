@@ -585,15 +585,17 @@ class RegexCompiler {
         }
         elsif $node.backtrack eq 'f' {
             my str $skip_sep := self.new_label;
+            my str $tmp_rep := $*BLOCK.add_tmp;
 
             Chunk.void(
                 "$!rep = 0;\n",
                  ($min < 1 ?? self.mark($loop,$!pos,$!rep) ~ self.goto($done) !! ''),
-                 ($sep ?? self.goto($skip_sep) !! ''),
+                 ($sep ?? "$tmp_rep = 0;\n" ~ self.goto($skip_sep) !! ''),
                  self.case($loop),
+                 "$tmp_rep = $!rep;\n",
                  ($sep ?? self.compile_rx($sep) ~ self.case($skip_sep) !! ''),
                  self.compile_rx($node[0]),
-                 "$!rep++;\n",
+                 "$!rep = $tmp_rep+1;\n",
                  ($min > 1 ?? "if ($!rep < $min) \{{self.goto($loop)}\}\n" !! ''),
                  ($max > 1 ?? "if ($!rep >= $max) \{{self.goto($done)}\}\n" !! ''),
                  ($max != 1 ?? self.mark($loop, $!pos, $!rep) !! ''),
