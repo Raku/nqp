@@ -640,12 +640,14 @@ class RegexCompiler {
         my str $altlabel := self.new_label;
         my $acode    := self.compile_rx(nqp::shift($iter));
 
+        @code.push(self.mark($endlabel, -1, 0)) if $node.backtrack eq 'r';
         while $iter {
             @code.push(self.case($altlabel));
             $altlabel := self.new_label;
 
             @code.push(self.mark($altlabel, $!pos, 0));
             @code.push($acode);
+            @code.push(self.commit($endlabel)) if $node.backtrack eq 'r';
             @code.push(self.goto($endlabel));
 
             $acode := self.compile_rx(nqp::shift($iter));
