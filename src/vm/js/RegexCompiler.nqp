@@ -242,7 +242,7 @@ class RegexCompiler {
         elsif $node.subtype eq 'eol' {
             my str $done_label := self.new_label;
 
-            "if (nqp.op.iscclass({%const_map<CCLASS_NEWLINE>},$!target,$!pos)) \{{self.goto($done_label)}\}\n"
+            "if (nqp.op.iscclass({%const_map<CCLASS_NEWLINE>},$!target,$!pos) && !($!pos >= 1 && $!target.substr($!pos-1, 2) == '\\r\\n')) \{{self.goto($done_label)}\}\n"
             ~ "if ($!pos != $!target.length) \{{self.fail}\}\n"
             ~ "if ($!pos == 0) \{{self.goto($done_label)}\}\n"
             ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
