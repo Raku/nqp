@@ -323,6 +323,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $arg.named {
                     my $arg_chunk := self.as_js($arg, :want($T_OBJ));
                     @setup.push($arg_chunk);
+
+                    if @named_exprs != 0 {
+                        @named_groups.push('{' ~ nqp::join(',',@named_exprs) ~ '}');
+                        nqp::setelems(@named_exprs, 0);
+                    }
+
                     @named_groups.push("nqp.unwrapNamed({$arg_chunk.expr})");
                 }
                 else {
