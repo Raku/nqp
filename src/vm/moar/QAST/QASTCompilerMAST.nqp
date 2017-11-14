@@ -944,12 +944,15 @@ my class MASTCompilerInstance {
             $frame.set_outer($outer_frame)
                 if $outer_frame && $outer_frame ~~ MAST::Frame;
 
-            # Set exit handler and thunk flags if needed.
+            # Set exit handler, thunk, and no-inline flags if needed.
             if $node.has_exit_handler {
                 $frame.has_exit_handler(1);
             }
             if $node.is_thunk {
                 $frame.is_thunk(1);
+            }
+            if $node.no_inline {
+                $frame.no_inline(1);
             }
 
             # Set code object, if any.

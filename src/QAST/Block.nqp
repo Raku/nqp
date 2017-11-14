@@ -4,6 +4,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     has int $!custom_args;
     has int $!has_exit_handler;
     has int $!is_thunk;
+    has int $!no_inline;
     has str $!cuid;
     has int $!arity;
     has $!code_object;
@@ -30,6 +31,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     method custom_args($value = NO_VALUE)      { $!custom_args := $value unless $value =:= NO_VALUE; $!custom_args }
     method has_exit_handler($value = NO_VALUE) { $!has_exit_handler := $value unless $value =:= NO_VALUE; $!has_exit_handler }
     method is_thunk($value = NO_VALUE)         { $!is_thunk := $value unless $value =:= NO_VALUE; $!is_thunk }
+    method no_inline($value = NO_VALUE)         { $!no_inline := $value unless $value =:= NO_VALUE; $!no_inline }
     method arity($value = NO_VALUE)            { $!arity := $value unless $value =:= NO_VALUE; $!arity }
 
     method code_object($value = NO_VALUE) {
