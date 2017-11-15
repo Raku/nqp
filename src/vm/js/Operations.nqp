@@ -717,7 +717,7 @@ class QAST::OperationsJS {
 
         my $compiled_args := $comp.args(@args, :invocant($invocant.expr));
 
-        my str $call := $compiled_args.is_args_array ?? ".apply({$invocant.expr}," !! '(';
+        my str $call := $compiled_args.is_args_array ?? ".apply({$invocant.expr}.\$\$decont($*CTX)," !! '(';
 
         @setup.push($compiled_args);
 
