@@ -1779,6 +1779,15 @@ class QAST::OperationsJS {
     add_simple_op('unipvalcode', $T_INT, [$T_INT, $T_STR]);
     add_simple_op('getuniname', $T_STR, [$T_INT]);
 
+    add_simple_op('atomicinc_i', $T_INT, [$T_OBJ], :ctx, :side_effects);
+    add_simple_op('atomicdec_i', $T_INT, [$T_OBJ], :ctx);
+    add_simple_op('atomicload', $T_OBJ, [$T_OBJ], :ctx);
+    add_simple_op('atomicload_i', $T_INT, [$T_OBJ], :ctx);
+    add_simple_op('atomicstore', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('atomicstore_i', $T_OBJ, [$T_OBJ, $T_INT], :ctx, :side_effects);
+    add_simple_op('cas', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('cas_i', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
+
     add_simple_op('getrusage', $T_OBJ, [], :side_effects);
 
     add_simple_op('cpucores', $T_INT, []);
