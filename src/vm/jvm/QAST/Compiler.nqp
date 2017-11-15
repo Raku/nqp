@@ -6030,7 +6030,8 @@ class QAST::CompilerJAST {
         elsif $backtrack eq 'f' {
             my $seplabel := JAST::Label.new( :name($prefix ~ '_sep') );
             my $mark     := &*REGISTER_MARK($looplabel);
-            
+            my $tmp_rep  := $*TA.fresh_i();
+
             $il.append($IVAL_ZERO);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
             if $min < 1 {
@@ -6039,14 +6040,18 @@ class QAST::CompilerJAST {
                     JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append(JAST::Instruction.new( :op('goto'), $donelabel ));
             }
-            $il.append(JAST::Instruction.new( :op('goto'), $seplabel )) if $sep;
+            if $sep {
+                $il.append($IVAL_ZERO);
+                $il.append(JAST::Instruction.new( :op('lstore'), $tmp_rep ));
+                $il.append(JAST::Instruction.new( :op('goto'), $seplabel ));
+            }
             $il.append($looplabel);
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
-            $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
+            $il.append(JAST::Instruction.new( :op('lstore'), $tmp_rep ));
             $il.append(self.regex_jast($sep)) if $sep;
             $il.append($seplabel) if $sep;
             $il.append(self.regex_jast($node[0]));
-            $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
+            $il.append(JAST::Instruction.new( :op('lload'), $tmp_rep ));
             $il.append($IVAL_ONE);
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
