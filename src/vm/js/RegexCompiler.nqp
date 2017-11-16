@@ -262,7 +262,7 @@ class RegexCompiler {
 
     method uniprop($node) {
         if +@($node) == 1 {
-            my str $try_prop := "nqp.uniprop_{~$node[0]}($!target, $!pos)";
+            my str $try_prop := "nqp.uniprop_{$node.negate ?? 'not_' !! ''}{~$node[0]}($!target, $!pos)";
             if $node.subtype eq 'zerowidth' {
                 "if ($try_prop === -1) \{{self.fail}\}\n";
             }

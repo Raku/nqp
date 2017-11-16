@@ -676,8 +676,8 @@ exports.checkNamed = function(known, _NAMED) {
   }
 };
 
-function matchClass(category) {
-  let regexp = xregexp('\\p{' + category + '}', 'y');
+function matchClass(category, negated) {
+  let regexp = xregexp('\\' + (negated ? 'P' : 'p') + '{' + category + '}', 'y');
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
@@ -688,7 +688,14 @@ function matchClass(category) {
   };
 }
 
-exports.uniprop_No = matchClass('No');
-exports.uniprop_Nl = matchClass('Nl');
-exports.uniprop_lower = matchClass('Lowercase');
-exports.uniprop_upper = matchClass('Uppercase');
+let props = {
+  No: 'No',
+  Nl: 'Nl',
+  lower: 'Lowercase',
+  Letter: 'Letter',
+}
+
+for (let prop in props) {
+  exports['uniprop_' + prop] = matchClass(props[prop], false);
+  exports['uniprop_not_' + prop] = matchClass(props[prop], true);
+}
