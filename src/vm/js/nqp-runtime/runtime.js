@@ -27,6 +27,8 @@ const foldCase = require('fold-case');
 
 const fs = require('fs');
 
+const xregexp = require('xregexp');
+
 exports.NQPInt = NQPInt;
 
 function loadOps(module) {
@@ -673,3 +675,20 @@ exports.checkNamed = function(known, _NAMED) {
     }
   }
 };
+
+function matchClass(category) {
+  let regexp = xregexp('\\p{' + category + '}', 'y');
+  return function(target, pos) {
+    regexp.lastIndex = pos;
+    if (regexp.test(target)) {
+      return regexp.lastIndex - pos;
+    } else {
+      return -1;
+    }
+  };
+}
+
+exports.uniprop_No = matchClass('No');
+exports.uniprop_Nl = matchClass('Nl');
+exports.uniprop_lower = matchClass('Lowercase');
+exports.uniprop_upper = matchClass('Uppercase');

@@ -259,6 +259,21 @@ class RegexCompiler {
         }
     }
 
+    method uniprop($node) {
+        if +@($node) == 1 {
+            my str $try_prop := "nqp.uniprop_{~$node[0]}($!target, $!pos)";
+            if $node.subtype eq 'zerowidth' {
+                "if ($try_prop === -1) \{{self.fail}\}\n";
+            }
+            else {
+                my str $offset := $*BLOCK.add_tmp;
+                "$offset = $try_prop;\n"
+                ~ "if ($offset === -1) \{{self.fail}\} else \{$!pos += $offset\}\n";
+            }
+        } else {
+            $!compiler.NYI("NYI uniprop with more arguments");
+        }
+    }
 
     method pass($node) {
         my @setup;
