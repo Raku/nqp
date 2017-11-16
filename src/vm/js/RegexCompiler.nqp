@@ -248,7 +248,8 @@ class RegexCompiler {
             ~ self.cclass_check('CCLASS_NEWLINE', :negated(1), :pos("$!pos-1"))
             ~ self.case($done_label);
         }
-        elsif $node.subtype eq 'pass' || $node.subtype eq '' {
+        elsif $node.subtype eq 'pass' || $node.subtype eq '' || $node.subtype eq 'zerowidth' {
+            # Nothing to do. Zerowidth gets generated for <???>, for example
             '';
         }
         elsif $node.subtype eq 'fail' {
