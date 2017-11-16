@@ -422,6 +422,13 @@ class RegexCompiler {
                         ~ "$!cstack = " 
                         ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ".array;\n";
                     $captured := 1;
+
+                    # Record a mark on the bstack saying how many captures we
+                    # had before pushing this one, so we can remove it upon
+                    # backtracking (otherwise we end up keeping backtracked
+                    # over subrule captures around).
+                    $capture_code := $capture_code ~  "$!bstack.push($back_label, -1, -1, $!cstack.length-1);\n";
+
                 }
                 else {
                     $capture_code := $capture_code
