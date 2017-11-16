@@ -2,7 +2,7 @@
 
 # Test grammars and regexes
 
-plan(10);
+plan(14);
 
 grammar ABC {
     token TOP { ok ' ' <integer> }
@@ -50,3 +50,20 @@ grammar G {
     }
 }
 G.parse('foo');
+
+grammar Uniprop {
+    token TOP {
+      <unum=:No+:Nl>
+    }
+}
+
+grammar NotUniprop {
+    token TOP {
+      <unum=:!No>
+    }
+}
+
+is(Uniprop.parse('½')<unum>, '½', 'uniprop');
+is(Uniprop.parse('1')<unum>, '', "uniprop - doesn't match");
+is(NotUniprop.parse('12')<unum>, '1', 'negated uniprop - matches');
+is(NotUniprop.parse('½')<unum>, '', "negated uniprop - doesn't match");
