@@ -102,7 +102,7 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_i(ctx, value) {
+        $$decont_i(ctx) {
           return this.get();
         }
 
@@ -118,7 +118,7 @@ class NativeRef {
           return this.get().toString();
         }
 
-        $$decont(ctx, value) {
+        $$decont(ctx) {
           let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
@@ -154,7 +154,7 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_n(ctx, value) {
+        $$decont_n(ctx) {
           return this.get();
         }
 
@@ -170,7 +170,7 @@ class NativeRef {
           return coercions.numToStr(this.get());
         }
 
-        $$decont(ctx, value) {
+        $$decont(ctx) {
           let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
@@ -210,7 +210,7 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_s(ctx, value) {
+        $$decont_s(ctx) {
           return this.get();
         }
 
@@ -226,7 +226,7 @@ class NativeRef {
           return coercions.strToNum(this.get());
         }
 
-        $$decont(ctx, value) {
+        $$decont(ctx) {
           let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
