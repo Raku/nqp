@@ -1799,7 +1799,7 @@ class QAST::OperationsJS {
         %hll_unbox{$hll}{$type} := $method_name;
     }
 
-    method unbox($hll, $desired, $chunk) {
+    method unbox($comp, $hll, $desired, $chunk) {
         if nqp::existskey(%hll_unbox, $hll) && nqp::existskey(%hll_unbox{$hll}, $desired) {
             return Chunk.new($desired, '(' ~ $chunk.expr ~ ").\$\${%hll_unbox{$hll}{$desired}}()", $chunk);
         }
@@ -1807,7 +1807,16 @@ class QAST::OperationsJS {
         %convert{$T_STR} := 'toStr';
         %convert{$T_NUM} := 'toNum';
         %convert{$T_INT} := 'toInt';
-        return Chunk.new($desired, 'nqp.' ~ %convert{$desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})", $chunk);
+        my int $is_fancy_int := $desired == $T_INT8 || $desired == $T_INT16;
+
+        nqp::die("Can't coerce OBJ to $desired") unless nqp::existskey(%convert, $desired) || $is_fancy_int;
+
+        my str $rough_convert := 'nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})";
+        my str $convert := $is_fancy_int
+            ?? $comp.int_to_fancy_int($desired, $rough_convert)
+            !! $rough_convert;
+
+        return Chunk.new($desired, $convert, $chunk);
     }
 }
 

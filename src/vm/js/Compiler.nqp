@@ -597,7 +597,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     return Chunk.new($desired, "{$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)", $chunk);
                 }
 
-                return QAST::OperationsJS.unbox($*HLL, $desired, $chunk);
+                return QAST::OperationsJS.unbox(self, $*HLL, $desired, $chunk);
             }
 
             if $desired == $T_STR {
@@ -637,6 +637,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT16} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
+                    nqp::die("Can't coerce $got to OBJ") unless nqp::existskey(%convert, $got);
                     return Chunk.new($T_OBJ, "nqp.{%convert{$got}}(HLL, {$chunk.expr})", $chunk);
                 }
             }
@@ -653,7 +654,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $desired == $T_INT8 || $desired == $T_INT16 {
                 my $int_chunk := $got == $T_INT ?? $chunk !! self.coerce($chunk, $T_INT);
-                return Chunk.new($T_INT16, self.int_to_fancy_int($desired, $int_chunk.expr) , $int_chunk);
+                return Chunk.new($desired, self.int_to_fancy_int($desired, $int_chunk.expr) , $int_chunk);
             }
 
             return Chunk.new($desired, "nqp.coercion($got, $desired, {$chunk.expr})") #TODO
