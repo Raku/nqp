@@ -1153,19 +1153,20 @@ class VMArray extends REPR {
       }
 
       $$splice(source, offset, count) {
+        const removing = this.array.length - offset > count ? count : this.array.length - offset;
         // TODO think about the case when the source is not VMArray
-        if (count < source.array.length) {
-           this.array.length = this.array.length + source.array.length - count;
+        if (removing < source.array.length) {
+           this.array.length = this.array.length + source.array.length - removing;
         }
 
-        this.array.copyWithin(offset + source.array.length, offset + count);
+        this.array.copyWithin(offset + source.array.length, offset + removing);
 
         for (let i = 0; i < source.array.length; i++) {
           this.array[offset + i] = source.array[i];
         }
 
-        if (count > source.array.length) {
-           this.array.length = this.array.length + source.array.length - count;
+        if (removing > source.array.length) {
+           this.array.length = this.array.length + source.array.length - removing;
         }
 
         return this;
