@@ -1527,6 +1527,11 @@ op.cpucores = function() {
   return 1;
 };
 
+op.atomicinc_i = function(ctx, ref) {
+  const value = ref.$$getInt();
+  ref.$$assign_i(ctx, value+1);
+  return value;
+};
 
 const getrusage = require('qrusage');
 op.getrusage = function() {
