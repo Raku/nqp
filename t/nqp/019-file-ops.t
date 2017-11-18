@@ -289,10 +289,7 @@ nqp::unlink($test-file ~ '-linked');
 
 # symlink
 
-my $tmp-file := "tmp";
-spew($tmp-file, "\n");
-my $is-windows := nqp::stat($tmp-file, nqp::const::STAT_FILESIZE) == 2;
-nqp::unlink($tmp-file);
+my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
 
 if $is-windows {
     skip("symlink not tested on Windows", 9);

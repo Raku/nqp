@@ -1,11 +1,8 @@
 plan(2);
 
-my $tmp-file := "tmp";
-spew($tmp-file, "\n");
-my $is-windows := nqp::stat($tmp-file, nqp::const::STAT_FILESIZE) == 2;
-nqp::unlink($tmp-file);
+my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
 
-my $args := $is-windows ?? nqp::list(nqp::getenvhash()<CompSpec>, '/c', 'echo aardvarks') !! nqp::list('/bin/sh', '-c', 'echo aardvarks');
+my $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', 'echo aardvarks') !! nqp::list('/bin/sh', '-c', 'echo aardvarks');
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
