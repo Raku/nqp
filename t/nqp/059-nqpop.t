@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(345);
+plan(346);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -287,6 +287,12 @@ ok(nqp::eqatic("fooBar","baR", -3) == 1, "eqatic with a negative offset argument
     my $b := nqp::list("1", "2", "3", "4");
     nqp::splice($b, $source, 1, 2);
     is(nqp::join(",", $b), '1,100,200,300,4', "splice");
+
+    my $c := nqp::list("1", "2", "3", "4");
+
+    nqp::splice($c, $source, 1, 200);
+
+    is(nqp::join(",", $c), '1,100,200,300', "splice with removing past the end of array");
 }
 
 {
