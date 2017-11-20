@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(57);
+plan(60);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -516,4 +516,64 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
             THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)
         });
     }), 'control', 'a labeled exception is caught by CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CONTROL {$log := $log ~ "#1"; $ex := $!; }
+              }
+              CONTROL { $log := $log ~ "#2" }
+          }
+          nqp::rethrow($ex);
+          CONTROL { $log := $log ~ "#3" }
+      }
+      CONTROL { $log := $log ~ "#4" }
+  }
+  is($log, '#1#3', 'rethrow works from a scope higher then CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CONTROL {$log := $log ~ "#1"; nqp::rethrow($!);$log := $log ~ "!1" }
+              }
+              CONTROL { $log := $log ~ "#2";nqp::rethrow($!);$log := $log ~ "!2" }
+          }
+          nqp::rethrow($ex);
+          CONTROL { $log := $log ~ "#3";nqp::rethrow($!);$log := $log ~ "!3" }
+      }
+      CONTROL { $log := $log ~ "#4" }
+  }
+  is($log, '#1#2#3#4', 'rethrow works from a scope higher then CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CATCH { $log := $log ~ "!1" }
+              }
+          }
+          CONTROL { $log := $log ~ "#1"; nqp::die("exception") }
+          CATCH { $log := $log ~ "!2" }
+      }
+      CATCH { $log := $log ~ "!3" }
+  }
+  is($log, '#1!1', 'CATCH and CONTROL interaction');
+  CONTROL { $log := $log ~ "#4"; nqp::die("exception") }
 }
