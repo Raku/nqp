@@ -766,7 +766,7 @@ class QAST::OperationsJS {
                     my $*CTX := '$$sourceCtx';
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
                     @setup.push("$handler_ctx.\$\${$type} = function(\$\$sourceCtx) \{\n");
-                    @setup.push("\$\$sourceCtx.\$\$handlerOuter = $outer_ctx;\n") if $type eq 'CATCH';
+                    @setup.push("\$\$sourceCtx.\$\${$type eq 'CATCH' ?? 'catch' !! 'control'}HandlerOuter = $outer_ctx;\n");
                     @setup.push($catch_body);
                     @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
                     $has_catch := 1 if $type eq 'CATCH';

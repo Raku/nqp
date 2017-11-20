@@ -112,10 +112,11 @@ class Ctx extends NQPObject {
 
         exceptionsStack().push(exception);
         try {
+          let wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler](this);
+            ctx.unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL(this);
+            ctx.unwind.ret = ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -130,6 +131,9 @@ class Ctx extends NQPObject {
         throw ctx.unwind;
       }
       ctx = ctx.$$caller;
+      if (ctx && ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
     }
 
     throw exception;
@@ -165,8 +169,8 @@ class Ctx extends NQPObject {
         throw ctx.unwind;
       }
       ctx = ctx.$$caller;
-      if (ctx && ctx.$$handlerOuter) {
-        ctx = ctx.$$handlerOuter;
+      if (ctx && ctx.$$catchHandlerOuter) {
+        ctx = ctx.$$catchHandlerOuter;
       }
     }
 
@@ -226,16 +230,18 @@ class Ctx extends NQPObject {
     let ctx = lookFrom;
 
     while (ctx) {
+      //TODO - think about checking the label
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
         ctx.exception = exception;
 
         exceptionsStack().push(exception);
         try {
+          let wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler](this);
+            ctx.unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL(this);
+            ctx.unwind.ret = ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -249,7 +255,11 @@ class Ctx extends NQPObject {
 
         throw ctx.unwind;
       }
+
       ctx = ctx.$$outer;
+      if (ctx && ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
     }
 
     this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
