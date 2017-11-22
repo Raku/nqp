@@ -1055,8 +1055,8 @@ at that position). If it is a degenerate, and contains no base character,
 it then returns the first codepoint in that grapheme.
 
 ## radix
-* `radix(int $radix, String $str, int $pos, int $flags --> Mu)`
-* `radix_I(int $radix, String $str, int $pos, int $flags, Mu:T $type --> Mu)`
+* `radix(int $radix, str $str, int $pos, int $flags --> Mu)`
+* `radix_I(int $radix, str $str, int $pos, int $flags, Mu:T $type --> Mu)`
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -2049,7 +2049,7 @@ where the attribute was declared in type `$type`. The notes in the
 `getattr` documentation also apply to `bindattr`.
 
 ## bindcomp
-* `bindcomp(Str $base-class, Mu $compiler)`
+* `bindcomp(str $base-class, Mu $compiler --> Mu)`
 
 Registers `$compiler` as the compiler for the language named `$base-class`, as in:
 
@@ -2062,7 +2062,7 @@ will be achieved via:
     $lang.language('My::Lang');
 
 ## callmethod
-* `callmethod(Mu $obj, str $methodname, *@pos, *%named)`
+* `callmethod(Mu $obj, str $methodname, *@pos, *%named --> Mu)`
 
 Uses `findmethod` to locate method `$methodname` on object `$obj`, and `call`
 to invoke the method with positional arguments `*@pos` and named arguments
@@ -2076,39 +2076,39 @@ Example:
     # same as: A.x(4, 2, c => 'foo')
 
 ## can
-* `can(Mu $obj, str $method)`
+* `can(Mu $obj, str $method --> int)`
 
 If the object has a method of the given name, return 1. Otherwise, return 0.
 
 Returns 1 if ``$obj`` object has FALLBACK method.
 
 ## clone
-* `clone(Mu $obj)`
+* `clone(Mu $obj --> Mu)`
 
 Return a clone of the passed in object.
 
 ## create
-* `create(Mu:T $type)`
+* `create(Mu:T $type --> Mu)`
 
 Returns a newly allocated instance of type `$type`.
 
 ## eqaddr
-* `eqaddr(Mu $l, Mu $r)`
+* `eqaddr(Mu $l, Mu $r --> int)`
 
 Returns 1 if the objects are the same object in the underlying VM,
 0 otherwise.
 
 ## findmethod
-* `findmethod(Mu $obj, str $method)`
+* `findmethod(Mu $obj, str $method --> Mu)`
 
 If the object has a method of the given name, return it. Otherwise,
 throw an exception.
 
 ## getattr
-* `getattr(Mu $obj, Mu:T $type, str $attributename)`
-* `getattr_i(Mu $obj, Mu:T $type, str $attributename)`
-* `getattr_n(Mu $obj, Mu:T $type, str $attributename)`
-* `getattr_s(Mu $obj, Mu:T $type, str $attributename)`
+* `getattr(Mu $obj, Mu:T $type, str $attributename --> Mu)`
+* `getattr_i(Mu $obj, Mu:T $type, str $attributename --> int)`
+* `getattr_n(Mu $obj, Mu:T $type, str $attributename --> num)`
+* `getattr_s(Mu $obj, Mu:T $type, str $attributename --> str)`
 
 Returns the attribute of name `$attributename` of object `$obj`, where the
 object was declared in class `$type`. The `_n`, `_i`, and `_s` variants are
@@ -2135,43 +2135,43 @@ need to decontainerize `$obj` before passing it to `getattr`, unless you
 actually want to access an attribute of the container.
 
 ## getcomp
-* `getcomp(Str $base-class)`
+* `getcomp(str $base-class --> Mu)`
 
 Returns the compiler class registered for that `$base-class`.
 See `bindcomp` for more information.
 
 ## how
-* `how(Mu $obj)`
+* `how(Mu $obj --> Mu)`
 
 NQP equivalent for Perl 6's `$obj.HOW`.
 
 ## rebless
-* `rebless(Mu $obj, Mu:T $type)`
+* `rebless(Mu $obj, Mu:T $type --> Mu)`
 
 Convert `$obj` to be an object of the new `$type`.
 
 ## reprname
-* `reprname(Mu $obj)`
+* `reprname(Mu $obj --> str)`
 
 Return the name of the REPR for the given object.
 
 ## setwho
-* `setwho(Mu $obj, Mu $who)`
+* `setwho(Mu $obj, Mu $who --> Mu)`
 
 Replace `$obj`'s WHO. Return `$obj`.
 
 ## who
-* `who(Mu $obj)`
+* `who(Mu $obj --> Mu)`
 
 NQP equivalent for Perl 6's `$obj.WHO`.
 
 ## what
-* `what(Mu $obj)`
+* `what(Mu $obj --> Mu)`
 
 NQP equivalent for Perl 6's `$obj.WHAT`.
 
 ## where
-* `where(Mu $obj)`
+* `where(Mu $obj --> int)`
 
 Return a unique ID for this `$obj`.
 
@@ -2179,45 +2179,45 @@ Return a unique ID for this `$obj`.
 
 ## bitand
 * `bitand_i(int $l, int $r)`
-* `bitand_s(str $l, str $r)`
-* `bitand_I(Mu $l, Mu $r, Mu:T $type)`
+* `bitand_s(str $l, str $r --> str)`
+* `bitand_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 AND the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
 ## bitneg
-* `bitneg_i(int $bits)`
-* `bitneg_I(Mu $bits, Mu:T $type)`
+* `bitneg_i(int $bits --> int)`
+* `bitneg_I(Int $bits, Mu:T $type --> Int)`
 
 Negate the bits in `$bits`.
 `_I` variant returns an object of the given type.
 
 ## bitor
 * `bitor_i(int $l, int $r)`
-* `bitor_s(str $l, str $r)`
-* `bitor_I(Mu $l, Mu $r, Mu:T $type)`
+* `bitor_s(str $l, str $r --> str)`
+* `bitor_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 OR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
 ## bitshiftl
-* `bitshiftl_i(int $bits, int $count)`
-* `bitshiftl_I(Mu $bits, int $count, Mu:T $type)`
+* `bitshiftl_i(int $bits, int $count --> int)`
+* `bitshiftl_I(Int $bits, int $count, Mu:T $type --> INt)`
 
 Signed left shift of `$bits` by `$count`.
 `_I` variant returns an object of the given type.
 
 ## bitshiftr
-* `bitshiftr_i(int $bits, int $count)`
-* `bitshiftr_I(Mu $bits, int $count, Mu:T $type)`
+* `bitshiftr_i(int $bits, int $count --> int)`
+* `bitshiftr_I(Int $bits, int $count, Mu:T $type --> Int)`
 
 Signed right shift of `$bits` by `$count`.
 `_I` variant returns an object of the given type.
 
 ## bitxor
-* `bitxor_i(int $l, int $r)`
-* `bitxor_s(str $l, str $r)`
-* `bitxor_I(Mu $l, Mu $r, Mu:T $type)`
+* `bitxor_i(int $l, int $r --> int)`
+* `bitxor_s(str $l, str $r --> str)`
+* `bitxor_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
@@ -2497,7 +2497,7 @@ for the specific purpose of hashing source code for dependency management
 purposes, and isn't intended to be used more widely.
 
 ## sleep
-* `sleep(num $seconds)`
+* `sleep(num $seconds --> num)`
 
 Sleep for the given number of seconds (no guarantee is made how exact the
 time sleeping is spent.) Returns the passed in number.
@@ -2508,8 +2508,8 @@ time sleeping is spent.) Returns the passed in number.
 Creates a lexical closure from the block's outer scope.
 
 ## time
-* `time_i()`
-* `time_n()`
+* `time_i(--> int)`
+* `time_n(--> num)`
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
@@ -2645,7 +2645,7 @@ Cancel to stop reading.
 # <a id="atomic"></a> Atomic Operations
 
 ## cas `moar`
-* `cas(ObjectContainer $cont, Mu $expected, Mu $new)`
+* `cas(ObjectContainer $cont, Mu $expected, Mu $new --> Mu)`
 
 Takes an object which has a container spec set on it that knows how to do an
 atomic compare and swap, and performs an atomic compare and swap operation.
@@ -2657,7 +2657,7 @@ same as the `$expected` object. The container may perform type checks on the
 `$new` object before it attempts the operation.
 
 ## cas_i `moar`
-* `cas_i(NativeIntRef $i, int64 $expected, int64 $new)`
+* `cas_i(NativeIntRef $i, int64 $expected, int64 $new --> int)`
 
 Takes an object with the `NativeRef` representation, which must point to an
 integer of the machine's atomic operation size. Casts the expected and new
