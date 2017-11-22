@@ -551,7 +551,7 @@ given number.
 `_I` variant returns an object of the given type.
 
 ## srand
-* `srand(num $n)`
+* `srand(int $n)`
 
 Sets and returns seed number for `nqp::rand_*` variants. Decimal numbers will be silently
 truncated, `nqp::srand(1)` and `nqp::srand(1.1)` are the same so always pass `nqp::srand`
