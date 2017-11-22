@@ -106,6 +106,10 @@ class Ctx extends NQPObject {
     let ctx = this;
 
     while (ctx) {
+      if (ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
+
       if (ctx.$$CONTROL || (ctx[handler]  && (!labeled || ctx.$$label === exception.$$payload))) {
         exception.caught = ctx;
         ctx.exception = exception;
@@ -131,9 +135,6 @@ class Ctx extends NQPObject {
         throw ctx.unwind;
       }
       ctx = ctx.$$caller;
-      if (ctx && ctx.$$controlHandlerOuter) {
-        ctx = ctx.$$controlHandlerOuter;
-      }
     }
 
     throw exception;
@@ -148,6 +149,10 @@ class Ctx extends NQPObject {
     let ctx = this;
 
     while (ctx) {
+      if (ctx.$$catchHandlerOuter) {
+        ctx = ctx.$$catchHandlerOuter;
+      }
+
       if (ctx.$$CATCH) {
         exception.caught = ctx;
         ctx.exception = exception;
@@ -169,9 +174,6 @@ class Ctx extends NQPObject {
         throw ctx.unwind;
       }
       ctx = ctx.$$caller;
-      if (ctx && ctx.$$catchHandlerOuter) {
-        ctx = ctx.$$catchHandlerOuter;
-      }
     }
 
     throw exception;
@@ -230,6 +232,10 @@ class Ctx extends NQPObject {
     let ctx = lookFrom;
 
     while (ctx) {
+      if (ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
+
       //TODO - think about checking the label
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
@@ -257,9 +263,6 @@ class Ctx extends NQPObject {
       }
 
       ctx = ctx.$$outer;
-      if (ctx && ctx.$$controlHandlerOuter) {
-        ctx = ctx.$$controlHandlerOuter;
-      }
     }
 
     this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
