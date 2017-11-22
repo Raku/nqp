@@ -414,26 +414,26 @@ The opcodes are grouped into the following categories:
 # <a id="arithmetic"></a> Arithmetic Opcodes
 
 ## abs
-* `abs_i(int $i)`
-* `abs_n(num $n)`
-* `abs_I(Int $i, Mu:T $type)`
+* `abs_i(int $i --> int)`
+* `abs_n(num $n --> num)`
+* `abs_I(Int $i, Mu:T $type --> Int)`
 
 Return the absolute value of a number.
 `_I` variant returns an object of the given type.
 
 ## add
-* `add_i(int $l, int $r)`
-* `add_n(num $l, num $r)`
-* `add_I(Int $l, Int $r, Mu:T $type)`
+* `add_i(int $l, int $r --> int)`
+* `add_n(num $l, num $r --> num)`
+* `add_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Add two numbers together, returning the result.
 `_I` variant returns an object of the given type.
 
 ## div
-* `div_i(int $l, int $r)`
-* `div_n(num $l, num $r)`
-* `div_I(Int $l, Int $r, Mu:T $type)`
-* `div_In(Int $l, Int $r)`
+* `div_i(int $l, int $r --> int)`
+* `div_n(num $l, num $r --> num)`
+* `div_I(Int $l, Int $r, Mu:T $type --> Int)`
+* `div_In(Int $l, Int $r --> num)`
 
 Divide $l by $r, returning the result.
 `_I` variant returns an object of the given type. The `_In` variant returns
@@ -441,47 +441,47 @@ a native num, using a scale of 309, and a rounding mode equivalent to Java's
 `ROUND_HALF_UP`.
 
 ## gcd
-* `gcd_i(int $l, int $r)`
-* `gcd_I(Int $l, Int $r, Mu:T $type)`
+* `gcd_i(int $l, int $r --> int)`
+* `gcd_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Return the greatest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## lcm
-* `lcm_i(int $l, int $r)`
-* `lcm_I(Int $l, Int $r, Mu:T $type)`
+* `lcm_i(int $l, int $r --> int)`
+* `lcm_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Return the lowest common multiple of two numbers.
 `_I` variant returns an object of the given type.
 
 ## mod
-* `mod_i(int $l, int $r)`
-* `mod_n(num $l, num $r)`
-* `mod_I(Int $l, Int $r, Mu:T $type)`
+* `mod_i(int $l, int $r --> int)`
+* `mod_n(num $l, num $r --> num)`
+* `mod_I(Int $l, Int $r, Mu:T $type --> INt)`
 
 Return the modulus of $l by $r.
 `_I` variant returns an object of the given type.
 
 ## mul
-* `mul_i(int $l, int $r)`
-* `mul_n(num $l, num $r)`
-* `mul_I(Int $l, Int $r, Mu:T $type)`
+* `mul_i(int $l, int $r --> int)`
+* `mul_n(num $l, num $r --> num)`
+* `mul_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Multiply two numbers, returning the result.
 `_I` variant returns an object of the given type.
 
 ## neg
-* `neg_i(int $i)`
-* `neg_n(num $n)`
-* `neg_I(Int $i, Mu:T $type)`
+* `neg_i(int $i --> int)`
+* `neg_n(num $n --> num)`
+* `neg_I(Int $i, Mu:T $type --> Int)`
 
 Return the negative of a number.
 `_I` variant returns an object of the given type.
 
 ## sub
-* `sub_i(int $l, int $r)`
-* `sub_n(num $l, num $r)`
-* `sub_I(Int $l, Int $r, Mu:T $type)`
+* `sub_i(int $l, int $r --> int)`
+* `sub_n(num $l, num $r --> num)`
+* `sub_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Subtract $r from $l, returning the result.
 `_I` variant returns an object of the given type.
@@ -489,62 +489,62 @@ Subtract $r from $l, returning the result.
 # <a id="numeric"></a> Numeric Opcodes
 
 ## base
-* `base_I(Int $i, int $radix)`
+* `base_I(Int $i, int $radix --> str)`
 
 Returns a string representing the integer `$i` in base `$radix`
 
 ## ceil
-* `ceil_n(num $n)`
+* `ceil_n(num $n --> num)`
 
 Return the ceiling of a number.
 
 ## exp
-* `exp_n(num $exponent)`
+* `exp_n(num $exponent --> num)`
 
 Return the value of `e` raised to $exponent.
 
 ## floor
-* `floor_n(num $n)`
+* `floor_n(num $n --> num)`
 
 Return the floor of a number.
 
 ## inf
-* `inf()`
+* `inf(--> num)`
 
 Return infinity.
 
 ## log_n
-* `log_n(num $n)`
+* `log_n(num $n --> num)`
 
 Return the natural logarithm (base 𝑒) of a number.
 
 ## expmod
-* `expmod_I(Int $base, Int $exponent, Int $modulus, Mu:T $type)`
+* `expmod_I(Int $base, Int $exponent, Int $modulus, Mu:T $type --> Int)`
 
 Return a bigint that is `$base` raised to `$exponent` modulus `$modulus`.
 `_I` variant returns an object of the given type.
 
 ## nan
-* `nan()`
+* `nan(--> num)`
 
 Return NaN.
 
 ## neginf
-* `neginf()`
+* `neginf(--> num)`
 
 Return negative infinity.
 
 ## pow
-* `pow_n(num $base, num $exponent)`
-* `pow_I(Int $base, Int $exponent, Mu:T $type_num, Mu:T $type_bigint)`
+* `pow_n(num $base, num $exponent --> num)`
+* `pow_I(Int $base, Int $exponent, Mu:T $type_num, Mu:T $type_bigint --> Int)`
 
 Return the value of $base raised to $exponent;
 `_I` variant returns an object of `$type_num` for negative exponents,
 and of type `$type_bigint` for positive exponents.
 
 ## rand
-* `rand_n(num $n)`
-* `rand_I(Int $i, Mu:T $type)`
+* `rand_n(num $n --> num)`
+* `rand_I(Int $i, Mu:T $type --> Int)`
 
 Returns a psuedo-random bigint up to the value of the
 given number.
@@ -558,7 +558,7 @@ truncated, `nqp::srand(1)` and `nqp::srand(1.1)` are the same so always pass `nq
 an integer.
 
 ## sqrt
-* `sqrt_n(num $l, num $r)`
+* `sqrt_n(num $n--> num)`
 
 # <a id="trig"></a> Trigonometric Opcodes
 
@@ -566,181 +566,181 @@ Each opcode corresponds directly to the trigonometric function of the same
 name. `h` indicates a hyperbolic variant.
 
 ## asec
-* `asec_n(num $n)`
+* `asec_n(num $n --> num)`
 
 ## asin
-* `asin_n(num $n)`
+* `asin_n(num $n --> num)`
 
 ## acos
-* `acos_n(num $n)`
+* `acos_n(num $n --> num)`
 
 ## atan
-* `atan_n(num $n)`
+* `atan_n(num $n --> num)`
 
 ## atan2
-* `atan2_n(num $l, num $r)`
+* `atan2_n(num $l, num $r --> num))`
 
 ## cos
-* `cos_n(num $n)`
+* `cos_n(num $n --> num))`
 
 ## cosh
-* `cosh_n(num $n)`
+* `cosh_n(num $n --> num))`
 
 ## sin
-* `sin_n(num $n)`
+* `sin_n(num $n --> num))`
 
 ## sinh
-* `sinh_n(num $n)`
+* `sinh_n(num $n --> num))`
 
 ## sec
-* `sec_n(num $n)`
+* `sec_n(num $n --> num))`
 
 ## sech
-* `sech_n(num $n)`
+* `sech_n(num $n --> num))`
 
 ## tan
-* `tan_n(num $n)`
+* `tan_n(num $n --> num))`
 
 ## tanh
-* `tanh_n(num $n)`
+* `tanh_n(num $n --> num))`
 
 # <a id="logic"></a> Relational / Logic Opcodes
 
 ## cmp
-* `cmp_i(int $l, int $r)`
-* `cmp_n(num $l, num $r)`
-* `cmp_s(str $l, str $r)`
-* `cmp_I(Int $l, Int $r)`
+* `cmp_i(int $l, int $r --> int)`
+* `cmp_n(num $l, num $r --> int)`
+* `cmp_s(str $l, str $r --> int)`
+* `cmp_I(Int $l, Int $r --> int)`
 
 Compare two values, returns -1 if $l is greater than $r, 0 if they are equal,
 and 1 if $r is greater than $l.
 
 ## eqat
-* `eqat(str $haystack, str $needle, int $pos)`
+* `eqat(str $haystack, str $needle, int $pos --> int)`
 
 Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
 otherwise return 0.
 
 ## eqatic `moar`
-* `eqatic(str haystack, str $needle, int $pos)`
+* `eqatic(str haystack, str $needle, int $pos --> int)`
 Case-insensitive `eqat`
 
 ## eqatim `moar`
-* `eqatim(str haystack, str $needle, int $pos)`
+* `eqatim(str haystack, str $needle, int $pos --> int)`
 Ignore-mark `eqat`, NFD decomposes and matches the base codepoint
 
 Example: `eqat("á", "a", 0) → 1`
 
 ## eqaticim `moar`
-* `eqaticim(str haystack, str $needle, int $pos)`
+* `eqaticim(str haystack, str $needle, int $pos --> int)`
 Case-insensitive and ignore-mark `eqat`
 
 ## iseq
-* `iseq_i(int $l, int $r)`
-* `iseq_n(num $l, num $r)`
-* `iseq_s(str $l, str $r)`
-* `iseq_I(Int $l, Int $r)`
+* `iseq_i(int $l, int $r --> int)`
+* `iseq_n(num $l, num $r --> int)`
+* `iseq_s(str $l, str $r --> int)`
+* `iseq_I(Int $l, Int $r --> int)`
 
-Return non-zero if the two parameters are equal.
+Return 1 if the two parameters are equal, 0 otherwise.
 
 ## isgt
-* `isgt_i(int $l, int $r)`
-* `isgt_n(num $l, num $r)`
-* `isgt_s(str $l, str $r)`
-* `isgt_I(Int $l, Int $r)`
+* `isgt_i(int $l, int $r --> int)`
+* `isgt_n(num $l, num $r --> int)`
+* `isgt_s(str $l, str $r --> int)`
+* `isgt_I(Int $l, Int $r --> int)`
 
-Return non-zero if $l is greater than $r.
+Return 1 if the two parameters are equal if $l is greater than $r, otherwise 0.
 
 ## isge
-* `isge_i(int $l, int $r)`
-* `isge_n(num $l, num $r)`
-* `isge_s(str $l, str $r)`
-* `isge_I(Int $l, Int $r)`
+* `isge_i(int $l, int $r --> int)`
+* `isge_n(num $l, num $r --> int)`
+* `isge_s(str $l, str $r --> int)`
+* `isge_I(Int $l, Int $r --> int)`
 
-Return non-zero if $l is greater than or equal to $r.
+Return 1 if $l is greater than or equal to $r, otherwise 0.
 
 ## islt
-* `islt_i(int $l, int $r)`
-* `islt_n(num $l, num $r)`
-* `islt_s(str $l, str $r)`
-* `islt_I(Int $l, Int $r)`
+* `islt_i(int $l, int $r --> int)`
+* `islt_n(num $l, num $r --> int)`
+* `islt_s(str $l, str $r --> int)`
+* `islt_I(Int $l, Int $r --> int)`
 
-Return non-zero if $l is less than $r.
+Return 1 if $l is less than $r, otherwise 0.
 
 ## isle
-* `isle_i(int $l, int $r)`
-* `isle_n(num $l, num $r)`
-* `isle_s(str $l, str $r)`
-* `isle_I(Int $l, Int $r)`
+* `isle_i(int $l, int $r --> int)`
+* `isle_n(num $l, num $r --> int)`
+* `isle_s(str $l, str $r --> int)`
+* `isle_I(Int $l, Int $r --> int)`
 
-Return non-zero if $l is less than or equal to $r.
+Return 1 if $l is less than or equal to $r, otherwise 0.
 
 ## isne
-* `isne_i(int $l, int $r)`
-* `isne_n(num $l, num $r)`
-* `isne_s(str $l, str $r)`
-* `isne_I(Int $l, Int $r)`
+* `isne_i(int $l, int $r --> int)`
+* `isne_n(num $l, num $r --> int)`
+* `isne_s(str $l, str $r --> int)`
+* `isne_I(Int $l, Int $r --> int)`
 
-Return non-zero if the two parameters are not equal.
+Return 1 if the two parameters are not equal, otherwise 0.
 
 ## not_i
-* `not_i(int $val)`
+* `not_i(int $val --> int)`
 
 Return 1 if `$val` is 0, 0 otherwise.
 
 # <a id="array"></a> Array Opcodes
 
 ## atpos
-* `atpos(@arr, int $i)`
-* `atpos_i(@arr, int $i)`
-* `atpos_n(@arr, int $i)`
-* `atpos_s(@arr, int $i)`
+* `atpos(@arr, int $i --> Mu)`
+* `atpos_i(@arr, int $i --> int)`
+* `atpos_n(@arr, int $i --> num)`
+* `atpos_s(@arr, int $i --> str)`
 
 Return whatever is bound to @arr at position $i.
 
 ## bindpos
-* `bindpos(@arr, int $i, Mu $v)`
-* `bindpos_i(@arr, int $i, int $v)`
-* `bindpos_n(@arr, int $i, num $v)`
-* `bindpos_s(@arr, int $i, str $v)`
+* `bindpos(@arr, int $i, Mu $v --> Mu)`
+* `bindpos_i(@arr, int $i, int $v --> int)`
+* `bindpos_n(@arr, int $i, num $v --> num)`
+* `bindpos_s(@arr, int $i, str $v --> str)`
 
 Bind $v to @arr at position $i and return $v.
 
 ## atposref
-* atposref_i(@arr, int $idx)
-* atposref_n(@arr, int $idx)
-* atposref_s(@arr, int $idx)
+* atposref_i(@arr, int $idx --> int)
+* atposref_n(@arr, int $idx --> num)
+* atposref_s(@arr, int $idx --> str)
 
 Returns a container (of type `IntPosRef`, `NumPosRef`, or `StrPosRef`) that you can assign to or read from which will directly access `@arr` at index `$idx`.
 
 ## elems
-* `elems(@arr)`
-* `elems(%hash)`
+* `elems(@arr --> int)`
+* `elems(%hash --> int)`
 
 Return the number of elements in `@arr`, or the number of keys in `%hash`.
 
 ## existspos
-* `existspos(@arr, int $i)`
+* `existspos(@arr, int $i --> int)`
 
 Return 1 if anything is bound to `@arr` at position `$i`,
 0 otherwise.
 
 ## list
-* `list(...)`
-* `list_i(...)`
-* `list_n(...)`
-* `list_s(...)`
-* `list_b(...)`
+* `list(... --> Mu)`
+* `list_i(... --> Mu)`
+* `list_n(... --> Mu)`
+* `list_s(... --> Mu)`
+* `list_b(... --> Mu)`
 
 Create a list of the given parameters. If no arguments are passed,
 an empty list is created. If a typed variant is used, the parameters
 are coerced to the appropriate type.
 
 ## push
-* `push(@arr, Mu $v)`
-* `push_i(Array int @arr, int $v)`
-* `push_n(Array num @arr, num $v)`
-* `push_s(Array str @arr, str $v)`
+* `push(@arr, Mu $v --> Mu)`
+* `push_i(Array int @arr, int $v --> int)`
+* `push_n(Array num @arr, num $v --> num)`
+* `push_s(Array str @arr, str $v --> str)`
 
 "Push $v onto the end of @arr."
 Bind $v to @arr at the position at the end of @arr, i.e., the position that
@@ -749,27 +749,27 @@ is just after the last position of @arr that has been bound to.
 Return value is not currently defined.
 
 ## pop
-* `pop(@arr)`
-* `pop_i(@arr)`
-* `pop_n(@arr)`
-* `pop_s(@arr)`
+* `pop(@arr --> Mu)`
+* `pop_i(@arr --> int)`
+* `pop_n(@arr --> num)`
+* `pop_s(@arr --> str)`
 
 "Pop the last value off the end of @arr."
 Return the value of @arr at its last bound position, and unbind @arr at that
 position.
 
 ## setelems
-* `setelems(@arr, int $i)`
+* `setelems(@arr, int $i --> @arr)`
 
 Set the size of `@arr` to `$i` elements. If less than the current size,
 any elements after the new last position are unbound. If greater, the empty
 elements at the end are bound with potentially VM specific null entries.
 
 ## shift
-* `shift(@arr)`
-* `shift_i(@arr)`
-* `shift_n(@arr)`
-* `shift_s(@arr)`
+* `shift(@arr --> Mu)`
+* `shift_i(@arr --> int)`
+* `shift_n(@arr --> num)`
+* `shift_s(@arr --> str)`
 
 "Shift the last value from the beginning of @arr."
 Return the value of @arr at index 0, unbind @arr at index 0, and move all
@@ -777,16 +777,16 @@ other binding of @arr to the index one below what they were previously bound
 to.
 
 ## splice
-* `splice(@arr, @from, int $offset, int $count)`
+* `splice(@arr, @from, int $offset, int $count --> @arr)`
 
 Remove the elements in `@arr` starting at `$offset`, for `$count` positions.
 Replace them with all the elements from `@from`.
 
 ## unshift
-* `unshift(@arr, Mu $v)`
-* `unshift_i(@arr, int $v)`
-* `unshift_n(@arr, num $v)`
-* `unshift_s(@arr, str $v)`
+* `unshift(@arr, Mu $v --> $v)`
+* `unshift_i(@arr, int $v --> $v)`
+* `unshift_n(@arr, num $v --> $v)`
+* `unshift_s(@arr, str $v --> $v)`
 
 "Shift $v into the beginning of @arr."
 Bind $v to @arr at index 0, move all other bindings of @arr to the index one
@@ -814,33 +814,33 @@ You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 # <a id="hash"></a> Hash Opcodes
 
 ## atkey
-* `atkey(%hash, String $key)`
-* `atkey_i(%hash, String $key)`
-* `atkey_n(%hash, String $key)`
-* `atkey_s(%hash, String $key)`
+* `atkey(%hash, str $key --> Mu)`
+* `atkey_i(%hash, str $key --> int)`
+* `atkey_n(%hash, str $key --> num)`
+* `atkey_s(%hash, str $key --> str)`
 
 Return the value of %hash at key $key.
 
 ## bindkey
-* `bindkey(%hash, String $key, Mu $v)`
-* `bindkey_i(%hash, String $key, int $v)`
-* `bindkey_n(%hash, String $key, num $v)`
-* `bindkey_s(%hash, String $key, str $v)`
+* `bindkey(%hash, str $key, Mu $v --> $v)`
+* `bindkey_i(%hash, str $key, int $v --> $v)`
+* `bindkey_n(%hash, str $key, num $v --> $v)`
+* `bindkey_s(%hash, str $key, str $v --> $v)`
 
 Bind key $key of %hash to $v and return $v.
 
 ## existskey
-* `existskey(%hash, String $key)`
+* `existskey(%hash, str $key --> int)`
 
-Return non-zero if %hash has key $key bound to something.
+Return 1 if %hash has key $key bound to something, otherwise 0.
 
 ## deletekey
-* `deletekey(%hash, String $key)`
+* `deletekey(%hash, str $key --> %hash)`
 
 Delete the given key from %hash.
 
 ## iterkey
-* `iterkey_s($pair)`
+* `iterkey_s($pair --> str)`
 
 Returns the key associated with the given key-value pair.
 For example:
@@ -854,31 +854,31 @@ for %hash {
 ```
 
 ## iterval
-* `iterval($pair)`
+* `iterval($pair --> Mu)`
 
 Returns the value associated with the given key-value pair.
 
 # <a id="string"></a> String Opcodes
 
 ## chars
-* `chars(str $str)`
+* `chars(str $str --> int)`
 
 Return the number of characters in the string.
 
 ## chr
-* `chr(int $codepoint)`
+* `chr(int $codepoint --> str)`
 
 Given a unicode codepoint, return a str containing its character. Will
 throw an exception on invalid codepoints.
 
 ## codepointfromname
-* `codepointfromname(str $name)`
+* `codepointfromname(str $name --> int)`
 
 Returns the codepoint for the given unicode character name, or -1 if no
 match was found.
 
 ## getstrfromname
-* `getstrfromname(str $name)` (Currently only on MoarVM)
+* `getstrfromname(str $name --> str)` (Currently only on MoarVM)
 
 Like `codepointfromname` except it returns a string instead of a codepoint.
 This function is able to return not just Unicode codepoints by name, but also
@@ -897,12 +897,12 @@ and [Name Aliases][Name-Aliases].
 [Name-Aliases]: http://www.unicode.org/Public/UCD/latest/ucd/NameAliases.txt
 
 ## concat
-* `concat(str $l, str $r)`
+* `concat(str $l, str $r --> str)`
 
 Return a string that is the concatenation of the two passed in strings.
 
 ## decode
-* `decode($buffer, str $encoding)`
+* `decode($buffer, str $encoding --> str)`
 
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
@@ -936,20 +936,20 @@ passed (which must be one of the nqp::const::NORMALIZE_* values). Specifying
 NORMALIZE_NONE is equivalent to NFC.
 
 ## escape
-* `escape(str $str)`
+* `escape(str $str --> str)`
 
 Given a string, return an escaped version that replaces the following
 characters with their escaped equivalents: "\\", "\b", "\n", "\r",
 "\t", "\f", "\"", "\a", and "\e".
 
 ## fc
-* `fc(str $str)`
+* `fc(str $str --> str)`
 
 Returns a Unicode "fold case" operation copy of string, suitable for doing
 caseless string comparisons.
 
 ## findcclass
-* `findcclass(int $class, str $str, int $i, int $count)`
+* `findcclass(int $class, str $str, int $i, int $count --> int)`
 
 Search the string starting at the `$i`th character, for `$count` characters.
 Return the position of the first character that is of the specified class
@@ -958,7 +958,7 @@ first character after the given range, or the length of the string, whichever
 is smaller.
 
 ## findnotcclass
-* `findnotcclass(int $class, str $str, int $i, int $count)`
+* `findnotcclass(int $class, str $str, int $i, int $count --> int)`
 
 Search the string starting at the `$i`th character, for `$count` characters.
 Return the position of the first character that is not of the specified class
@@ -967,20 +967,20 @@ first character after the given range, or the length of the string, whichever
 is smaller.
 
 ## flip
-* `flip(str $str)`
+* `flip(str $str --> str)`
 
 Return a string with the characters of `$string` in reverse order.
 
 ## hash
-* `hash(...)`
+* `hash(... --> Mu)`
 
 Return a hash. The first argument is a key, the second its value, and so on.
 Be sure to pass an even number of arguments, a VM specific error may occur
 otherwise.
 
 ## index
-* `index(str $haystack, str $needle)`
-* `index(str $haystack, str $needle, int $pos)`
+* `index(str $haystack, str $needle --> int)`
+* `index(str $haystack, str $needle, int $pos --> int)`
 
 Return the position in `$haystack` at which `$needle` appears, or -1
 if `$needle` does not appear. Begin searching at position `$pos` if specified,
@@ -991,7 +991,7 @@ or at 0, otherwise.
 `index` is converted to this internal opcode by the compiler.
 
 ## indexic
-* `indexic(str $haystack, str $needle, int $pos)`
+* `indexic(str $haystack, str $needle, int $pos --> int)`
 
 This op has the same arguments and functionality as nqp::index,
 except it is case-insensitive. For now we only have it under MoarVM,
@@ -1000,7 +1000,7 @@ but the plan is to support it on other platforms as well.
 On MoarVM uses proper Unicode foldcase type comparison.
 
 ## indexim `moar`
-* `indexim(str $haystack, str $needle, int $pos)`
+* `indexim(str $haystack, str $needle, int $pos --> int)`
 
 Like index but decomposes and matches against the base character.
 
@@ -1012,19 +1012,19 @@ Example: `indexim("bcá", "a", 0) → 2`
 Ignorecase and ignoremark `index`
 
 ## iscclass
-* `iscclass(int $class, str $str, int $i)`
+* `iscclass(int $class, str $str, int $i --> int)`
 
 Return 1 if the `$i`th character of $str is of the specified class,
 (`nqp::const::CCLASS_*`), 0 otherwise.
 
 ## join
-* `join(str $delim, @arr)`
+* `join(str $delim, @arr --> str)`
 
 Joins the separate strings of `@arr` into a single string with
 fields separated by the value of EXPR, and returns that new string.
 
 ## lc
-* `lc(str $str)`
+* `lc(str $str --> str)`
 
 Return lowercase copy of string.
 
@@ -1036,27 +1036,27 @@ places the result into the $codes-out array. Both arrays of codepoints must
 be 32-bit integer arrays.
 
 ## ord
-* `ord(str $str)`
-* `ord(str $str, int $i)`
+* `ord(str $str --> int)`
+* `ord(str $str, int $i --> int)`
 
 Return the unicode codepoint of the first character in `$str`, or
 at the `$i`th character, if it's specified.
 
-* `ordat(str $str, int $i)` _Internal_
-* `ordfirst(str $str)` _Internal_
+* `ordat(str $str, int $i --> int)` _Internal_
+* `ordfirst(str $str --> int)` _Internal_
 
 `ord` is converted to these internal opcodes by the compiler.
 
 ## ordbaseat
-`ordbaseat(str $str, int $pos)`
+`ordbaseat(str $str, int $pos --> int)`
 
 Returns the Unicode codepoint which is the base (non extend/prepend character
 at that position). If it is a degenerate, and contains no base character,
 it then returns the first codepoint in that grapheme.
 
 ## radix
-* `radix(int $radix, String $str, int $pos, int $flags)`
-* `radix_I(int $radix, String $str, int $pos, int $flags, Mu:T $type)`
+* `radix(int $radix, String $str, int $pos, int $flags --> Mu)`
+* `radix_I(int $radix, String $str, int $pos, int $flags, Mu:T $type --> Mu)`
 
 Convert string $str into a number starting at offset $pos and using radix $radix.
 The result of the conversion returns an array with
@@ -1076,14 +1076,14 @@ The $flags is a bitmask that modifies the parse and/or result:
           (for parsing values after a decimal point)
 
 ## replace
-* `replace(str $str, int $offset, int $count, str $replacement)`
+* `replace(str $str, int $offset, int $count, str $replacement --> str)`
 
 Return a copy of `$str` where the characters starting at `$offset` for `$count`
 characters have been replaced with the `$replacement` string.
 
 ## rindex
-* `rindex(str $haystack, str $needle)`
-* `rindex(str $haystack, str $needle, int $pos)`
+* `rindex(str $haystack, str $needle --> int)`
+* `rindex(str $haystack, str $needle, int $pos --> int)`
 
 Searching backwards through the `$haystack`, return the position at which
 `$needle` appears, or -1 if it does not. Begin searching at `$pos` if
@@ -1099,7 +1099,7 @@ specified, otherwise start from the last position.
 `rindex` is converted to this internal opcode by the compiler.
 
 ## split
-* `split(str $delimiter, str $string)`
+* `split(str $delimiter, str $string --> Mu)`
 
 Splits the string `$string` into an array of elements; these elements are
 the substrings between delimiters in the original string.
@@ -1108,7 +1108,7 @@ If the original string begins or ends with the delimiter, the resulting
 array will begin or end with an empty element.
 
 ## sprintf
-* `sprintf(str $pattern, @values)`
+* `sprintf(str $pattern, @values --> str)`
 
 Returns a string formatted by the printf conventions similar to Perl 5 / C.
 Machine sized numeric types, their limits and therefore overflows are not
@@ -1137,7 +1137,7 @@ my class MyHandler {
 ```
 
 ## strfromcodes
-* `strfromcodes($codes)`
+* `strfromcodes($codes --> str)`
 
 Returns an (NFG) string built from the specified codepoints, which must be
 provided as a 32-bit integer array.
@@ -1151,8 +1151,8 @@ specified as one of the nqp::const::NORMALIZE_* values; NORMALIZE_NONE is
 not allowed.
 
 ## substr
-* `substr(str $str, int $position)`
-* `substr(str $str, int $position, int $length)`
+* `substr(str $str, int $position --> str)`
+* `substr(str $str, int $position, int $length --> str)`
 
 Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
@@ -1170,17 +1170,17 @@ A JVM specific internal opcode for `substr`.
 A JVM specific internal opcode for `substr`.
 
 ## tc
-* `tc(str $str)`
+* `tc(str $str --> str)`
 
 Return titlecase copy of string.
 
 ## uc
-* `uc(str $str)`
+* `uc(str $str --> str)`
 
 Return uppercase copy of string.
 
 ## unicmp_s
-* `unicmp_s(str, str, int, int, int)`
+* `unicmp_s(str, str, int, int, int --> int)`
 (Currently only on MoarVM)
 
 Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
@@ -1237,19 +1237,19 @@ For more information see [Unicode TR10][UCA].
 [UCA]: http://unicode.org/reports/tr10/
 
 ## x
-* `x(str $str, int $count)`
+* `x(str $str, int $count --> str)`
 
 Return a new string containing `$count` copies of `$str`.
 
 # <a id="unicode"></a> Unicode Property Opcodes
 
 ## getuniname
-* `getuniname(int $codepoint)`
+* `getuniname(int $codepoint --> str)`
 
 Translate a codepoint to its Unicode name.
 
 ## getuniprop_int `moar`
-* `getuniprop_int(int $codepoint, int $propcode)`
+* `getuniprop_int(int $codepoint, int $propcode --> int)`
 
 Uses the table found by unipropcode to look up an integer property value
 for a given codepoint.  Note that many properties that are officially
@@ -1258,17 +1258,17 @@ on such a property, you'll get a meaningless position in an enum table
 instead of the value you want.
 
 ## getuniprop_str
-* `getuniprop_str(int $codepoint, int $propcode)`
+* `getuniprop_str(int $codepoint, int $propcode --> str)`
 
 Same thing, but fetches a string property value.
 
 ## getuniprop_bool `moar`
-* `getuniprop_bool(int $codepoint, int $propcode)`
+* `getuniprop_bool(int $codepoint, int $propcode --> int)`
 
 Same thing, but fetches a boolean property value.
 
 ## matchuniprop `moar`
-* `matchuniprop(int $codepoint, int $propcode, int $pvalcode)`
+* `matchuniprop(int $codepoint, int $propcode, int $pvalcode --> int)`
 
 Looks up a codepoint property and return 1 if it matches the pval, 0
 otherwise.  The propcode and pvalcode may be looked up with the opcodes
@@ -1276,7 +1276,7 @@ above.  (Note that you can use the property value name (e.g. Nd) for both
 lookups.)
 
 ## unipropcode
-* `unipropcode(str $propname)`
+* `unipropcode(str $propname --> int)`
 
 Translates a property name to the backend's property code. This is not distinct
 across backends and is expected to change over time. For the most part only
@@ -1286,13 +1286,13 @@ example 'Alpha', 'alpha', 'alphabetic' and 'Alphabetic' should return the same
 property code.
 
 ## unipvalcode `moar`
-* `unipvalcode(int $propcode, str $propname)`
+* `unipvalcode(int $propcode, str $propname --> int)`
 
 Looks up a property name in its property category, and returns which
 table within that category to use.
 
 ## hasuniprop `moar`
-* `hasuniprop(str $string, int offset, int propcode, int pvalcode)`
+* `hasuniprop(str $string, int offset, int propcode, int pvalcode --> int)`
 
 Checks if the string has a specific property value at a specific offset.
 Requires both the propcode and the pvalcode to work.
@@ -1318,7 +1318,7 @@ Adds bytes to the decoder's internal buffer. Must have VMArray REPR, and
 must have elements of type `int8` or `uint8`.
 
 ## decodertakechars
-* `decodertakechars(Decoder $dec, int $num-chars)`
+* `decodertakechars(Decoder $dec, int $num-chars --> str)`
 
 Returns an NFG string consisting of `$num-chars` graphemes, provided that
 many are available after decoding. If less than `$num-chars` characters
@@ -1328,7 +1328,7 @@ character if the encoding allows the next character to be a combining
 character.
 
 ## decodertakeallchars
-* `decodertakeallchars(Decoder $dec)`
+* `decodertakeallchars(Decoder $dec --> str)`
 
 Decodes all remaining undecoded bytes, and flushes the normalization buffer.
 Returns an NFG string consisting of the decoded characters. This is suitable
@@ -1336,7 +1336,7 @@ to use when the end of a stream of bytes to decode has been reached (for
 example, EOF when reading a file).
 
 ## decodertakeavailablechars
-* `decodertakeavailablechars(Decoder $dec)`
+* `decodertakeavailablechars(Decoder $dec -->int)`
 
 Decodes all remaining undecoded bytes. Returns an NFG string consisting of the
 decoded characters. Does not flush the normalization buffer. This is suitable
@@ -1344,7 +1344,7 @@ when performing streaming decoding, and a later byte buffer may provide a
 combining character.
 
 ## decodertakeline
-* `decodertakeline(Decoder $dec, int $chomp, int $incomplete-ok)`
+* `decodertakeline(Decoder $dec, int $chomp, int $incomplete-ok --> str)`
 
 Decodes bytes until a line separator is reached, or all bytes have been
 decoded. If `$incomplete-ok` is zero and the separator was not found, then
@@ -1354,7 +1354,7 @@ non-zero, then the separator - if present - will not be included in the
 resulting string.
 
 ## decoderbytesavailable
-* `decoderbytesavailable(Decoder $dec)`
+* `decoderbytesavailable(Decoder $dec --> int)`
 
 Returns the number of undecoded bytes available inside of the decoder. This is
 useful in the case that chunks of the input should also be pulled out as bytes,
@@ -1373,11 +1373,11 @@ instance of the `$blob_type`, and places the bytes in it. The same set of
 caveats about decoded-but-untaken bytes in `decoderbytesavailable` apply.
 
 ## decoderempty
-* `decoderempty(Decoder $dec)`
+* `decoderempty(Decoder $dec --> int)`
 
-Returns zero if the decoder is empty (this means that there are no undecoded
+Returns 0 if the decoder is empty (this means that there are no undecoded
 bytes, no decoded but untaken chars, and nothing in the normalization buffer).
-Otherwise returns non-zero.
+Otherwise returns 1.
 
 # <a id="conditional"></a> Conditional Opcodes
 
@@ -1553,12 +1553,12 @@ Throw the exception.
 Close the filehandle.
 
 ## eoffh
-* `eoffh(Handle $fh)`
+* `eoffh(Handle $fh --> int)`
 
 Return 1 if this filehandle is at the end of the file, otherwise 0.
 
 ## filenofh
-* `filenofh(Handle $fh)`
+* `filenofh(Handle $fh --> int)`
 Returns the filehandle number.
 
 ## flushfh
@@ -1669,30 +1669,30 @@ Copy file `$from` to file `$to`. Return 0 on success, throw an exception
 on failure.
 
 ## cwd
-* `cwd()`
+* `cwd(--> str)`
 
 Return a string containing the current working directory.
 
 ## fileexecutable
-* `fileexecutable(str $str)`
+* `fileexecutable(str $str --> int)`
 
 If the specified filename refers to an executable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## fileislink
-* `fileislink(str $str)`
+* `fileislink(str $str --> int)`
 
 If the specified filename refers to a symbolic link, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## filereadable
-* `filereadable(str $str)`
+* `filereadable(str $str --> int)`
 
 If the specified filename refers to a readable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## filewritable
-* `filewritable(str $str)`
+* `filewritable(str $str --> int)`
 
 If the specified filename refers to a writeable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
@@ -1901,53 +1901,53 @@ Given a native value, return a perl 6 object of the given type
 with the same value.
 
 ## defined
-* `defined(Mu $obj)`
+* `defined(Mu $obj --> int)`
 
 Returns 1 if the object is not null and is not a Type object, 0 otherwise.
 
 ## fromnum
-* `fromnum_I(num $val, Mu:T $type)`
+* `fromnum_I(num $val, Mu:T $type --> Int)`
 
 Convert float value to a Big Integer of the given type,
 discarding any decimal portion.
 
 ## fromstr
-* `fromstr_I(str $val, Mu:T $type)`
+* `fromstr_I(str $val, Mu:T $type --> Int)`
 
 Convert string value to a Big Integer of the given type.
 
 ## isbig
-* `isbig_I(Int $obj)`
+* `isbig_I(Int $obj --> int)`
 
 Returns a 1 if the object's numerical representation requires a big int, 0 otherwise.
 
 ## isconcrete
-* `isconcrete(Mu $obj)`
+* `isconcrete(Mu $obj --> int)`
 
 Returns a 1 if the object is not a type object, 0 otherwise.
 
 ## iscont
-* `iscont(Mu $obj)`
+* `iscont(Mu $obj --> int)`
 
 Returns a 1 if the object is a container type, 0 otherwise.
 
 ## isfalse
-* `isfalse(Mu $obj)`
+* `isfalse(Mu $obj --> int)`
 
 Returns a 0 if the object has a truthy value, 1 otherwise.
 
 ## ishash
-* `ishash(Mu $obj)`
+* `ishash(Mu $obj --> int)`
 
 Returns a 1 if the object is a Hash, 0 otherwise.
 
 ## isint
-* `isint(Mu $obj)`
+* `isint(Mu $obj --> int)`
 
 Returns a 1 if the object is an int type, 0 otherwise.
 
 ## isinvokable
-* `isinvokable(Mu $obj)`
+* `isinvokable(Mu $obj --> int)`
 
 Returns a 1 if the object represents something executable, 0 otherwise.
 
@@ -1957,46 +1957,46 @@ Returns a 1 if the object represents something executable, 0 otherwise.
 Returns a 1 if the object is an Array, 0 otherwise.
 
 ## isnanorinf
-* `isnanorinf(num $n)`
+* `isnanorinf(num $n --> int)`
 
 Return truth value indicating if this number represents any of the special
 values, positive infinity, negative infinity, or NaN.
 
 ## isnull
-* `isnull(Mu $obj)`
-* `isnull_s(str $obj)`
+* `isnull(Mu $obj --> int)`
+* `isnull_s(str $obj --> int)`
 
 Returns a 1 if the object is a null, 0 otherwise.
 
 ## isnum
-* `isnum(Mu $obj)`
+* `isnum(Mu $obj --> int)`
 
 Returns a 1 if the object is a float type, 0 otherwise.
 
 ## isprime
-* `isprime_I(Int $obj, Int $rounds)`
+* `isprime_I(Int $obj, Int $rounds --> int)`
 
 Returns a 1 if the integer value of the object is prime, 0 otherwise. Performs
 up to `$rounds` of Miller-Rabin tests if necessary.
 
 ## isstr
-* `isstr(Mu $obj)`
+* `isstr(Mu $obj --> int)`
 
 Returns a 1 if the object is a str type, 0 otherwise.
 
 ## istrue
-* `istrue(Mu $obj)`
+* `istrue(Mu $obj --> int)`
 
 Returns a 1 if the object has a truthy value, 0 otherwise.
 
 ## istype
-* `istype(Mu $obj, Mu:T $obj)`
+* `istype(Mu $obj, Mu:T $obj --> int)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
 
 ## null
-* `null()`
-* `null_s()`
+* `null(--> Mu)`
+* `null_s(--> str)`
 
 Generate a null value.
 
@@ -2012,19 +2012,19 @@ Returns a 1 if the object is an NQP Type object *or*  the underlying
 JVM object is null. Returns 0 otherwise.
 
 ## tostr
-* `tostr_I(Int $val)`
+* `tostr_I(Int $val --> str)`
 
 Convert Big Integer value to a native string.
 
 ## tonum
-* `tonum_I(Int $val)`
+* `tonum_I(Int $val --> num)`
 
 Convert Big Integer value to a native number.
 
 ## unbox
-* `unbox_i(Mu $val)`
-* `unbox_n(Mu $val)`
-* `unbox_s(Mu $val)`
+* `unbox_i(Mu $val --> int)`
+* `unbox_n(Mu $val --> num)`
+* `unbox_s(Mu $val --> str)`
 
 Given a Perl 6 object, return a native with the same value,
 of the type indicated by the opcode suffix.
@@ -2032,7 +2032,7 @@ of the type indicated by the opcode suffix.
 # <a id="sixmodel"></a> OO/SixModel Opcodes
 
 ## attrinited
-* `attrinited(Mu $obj. Mu:T $type, str $attributename)`
+* `attrinited(Mu $obj. Mu:T $type, str $attributename --> int)`
 
 Test if the attribute of name `$attributename` of object `$obj`
 has been binded, see `bindattr`. Note that any access to the atribute
@@ -2480,7 +2480,7 @@ Returns a hash containing backend-specific information, like backend-version,
 configure and build flags.
 
 ## getpid
-* `getpid()`
+* `getpid(--> int)`
 
 Return the current process id, an int.
 
@@ -2490,7 +2490,7 @@ Return the current process id, an int.
 Converts the JVM property `java.class.path` into a list of paths, returns it.
 
 ## sha1
-* `sha1(str $str)`
+* `sha1(str $str -> str)`
 
 Given a UTF-8 string, return the SHA-1 digest for that string. This op is built
 for the specific purpose of hashing source code for dependency management
