@@ -1533,6 +1533,19 @@ op.atomicinc_i = function(ctx, ref) {
   return value;
 };
 
+op.unicmp_s = function(a, b, collationMode, language, code) {
+  if (language != 0 || code != 0) {
+    throw new NQPException('collation with a set language NYI');
+  }
+
+  if (collationMode != 85) {
+    throw new NQPException('collationMode NYI');
+  }
+
+  const result = a.localeCompare(b, 'ducet');
+  return (result < 0 ? -1 : (result > 0 ? 1 : 0));
+};
+
 const getrusage = require('qrusage');
 op.getrusage = function() {
   const usage = getrusage();

@@ -1792,6 +1792,8 @@ class QAST::OperationsJS {
 
     add_simple_op('cpucores', $T_INT, []);
 
+    add_simple_op('unicmp_s', $T_INT, [$T_STR, $T_STR, $T_INT, $T_INT, $T_INT]);
+
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {
             %hll_unbox{$hll} := nqp::hash();
