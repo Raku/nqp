@@ -771,9 +771,9 @@ elements at the end are bound with potentially VM specific null entries.
 * `shift_n(@arr --> num)`
 * `shift_s(@arr --> str)`
 
-"Shift the last value from the beginning of @arr."
+"Shift the first value from the beginning of @arr."
 Return the value of @arr at index 0, unbind @arr at index 0, and move all
-other binding of @arr to the index one below what they were previously bound
+other bindings of @arr to the index one below what they were previously bound
 to.
 
 ## splice
