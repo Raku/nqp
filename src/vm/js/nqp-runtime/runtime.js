@@ -677,7 +677,7 @@ exports.checkNamed = function(known, _NAMED) {
 };
 
 function matchClass(category, negated) {
-  let regexp = xregexp('\\' + (negated ? 'P' : 'p') + '{' + category + '}', 'y');
+  let regexp = xregexp('\\' + (negated ? 'P' : 'p') + '{' + category + '}', 'Ay');
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
