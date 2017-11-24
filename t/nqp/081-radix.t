@@ -1,10 +1,10 @@
-plan(20*3*2 + 3);
+plan(24*3*2 + 3);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
-    ok($result[0] == $value,"radix: $desc - correct converted value");
-    ok($result[1] == $mult,"radix: $desc - correct radix ** (number of digits converted)");
-    ok($result[2] == $offset,"radix: $desc - correct offset");
+    is($result[0], $value,"radix: $desc - correct converted value");
+    is($result[1], $mult,"radix: $desc - correct radix ** (number of digits converted)");
+    is($result[2], $offset,"radix: $desc - correct offset");
 }
 
 my $knowhow := nqp::knowhow();
@@ -52,4 +52,9 @@ test_radix_I(10,"9883481620585741369158_914214988194663201633129_269524237910230
         "988348162058574136915891421498819466320163312926952423791023078876139",
         "1000000000000000000000000000000000000000000000000000000000000000000000",
         71,  "converting a huge number with radix_I");
+
+test_radix_both(3,"3",0,2, 0,1,-1, "no digits consumed with unicode digit outside radix");
+test_radix_both(3,"۳",0,2, 0,1,-1, "no digits consumed with unicode digit outside radix");
+test_radix_both(10,"۳",0,2, 3,10,1, "extended arabic-indic digit three");
+test_radix_both(10,"۳۳",0,2, 33,100,2, "extended arabic-indic digit three");
 
