@@ -78,8 +78,10 @@ function radixHelper(radix, str, zpos, flags) {
   const lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   const uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
-  const letters = radix >= 11 ? lowercase + uppercase : '';
+  const uppercaseTitle = '\uFF21-' + String.fromCodePoint(0xFF21 + radix - 11);
+  const lowercaseTitle = '\uFF41-' + String.fromCodePoint(0xFF41 + radix - 11);
 
+  const letters = radix >= 11 ? lowercase + uppercase + uppercaseTitle + lowercaseTitle : '';
 
   const digitClass = '[\\pN' + letters + ']';
   const minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
@@ -92,6 +94,16 @@ function radixHelper(radix, str, zpos, flags) {
     return null;
   }
   let number = search[0].replace(/_/g, '').replace(/^\+/, '');
+
+  if (radix >= 11) {
+    number = number.replace(new RegExp('['+uppercaseTitle+']', 'g'), function(match, offset, string) {
+      return String.fromCharCode('A'.charCodeAt(0) + match.codePointAt(0) - 0xFF21);
+    });
+
+    number = number.replace(new RegExp('['+lowercaseTitle+']', 'g'), function(match, offset, string) {
+      return String.fromCharCode('A'.charCodeAt(0) + match.codePointAt(0) - 0xFF41);
+    });
+  }
 
   const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + '+-]', 'g');
 
