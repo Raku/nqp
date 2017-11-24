@@ -41,6 +41,8 @@ const stripMarks = require('./strip-marks.js');
 
 const foldCase = require('fold-case');
 
+const xregexp = require('xregexp');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -59,24 +61,55 @@ op.escape = function(str) {
       .replace(/"/g, '\\"');
 };
 
+const uniData = require('./unicode-data.js');
+op.unipropcode = function(name) {
+  const mangled = name.toLowerCase().replace(/_/g, '');
+  return uniData.propcodes[mangled];
+};
+
+op.getuniprop_str = function(codePoint, propCode) {
+  const got = uniData.props[propCode][codePoint];
+  return got === undefined ? 'NaN' : got;
+};
+
+const numericValueProp = op.unipropcode("Numeric_Value");
+
 function radixHelper(radix, str, zpos, flags) {
   const lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   const uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
 
   const letters = radix >= 11 ? lowercase + uppercase : '';
 
-  const digitclass = '[0-' + Math.min(radix - 1, 9) + letters + ']';
+
+  const digitClass = '[\\pN' + letters + ']';
   const minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
-  const regex = new RegExp(
-      '^' + minus + digitclass + '(?:_' +
-      digitclass + '|' + digitclass + ')*');
+  const regex = xregexp(
+      '^' + minus + digitClass + '(?:_' + digitClass + '|' + digitClass + ')*');
+
+
   const search = str.slice(zpos).match(regex);
   if (search == null) {
     return null;
   }
   let number = search[0].replace(/_/g, '').replace(/^\+/, '');
+
+  const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + ']', 'g');
+
+  let error = false;
+  number = number.replace(notSimpleDigit, function(match, offset, string) {
+    const value = op.getuniprop_str(match.codePointAt(0), numericValueProp);
+    const digit = parseInt(value);
+    if (digit >= radix) {
+      error = true;
+    }
+    return digit.toString();
+  });
+
+  if (error) return null;
+
   if (flags & 0x01) number = '-' + number;
   if (flags & 0x04) number = number.replace(/0+$/, '');
+
   const power = number[0] == '-' ? number.length - 1 : number.length;
   return {power: power, offset: zpos + search[0].length, number: number};
 }
@@ -1495,16 +1528,6 @@ op.semrelease = function(semaphore) {
   return semaphore;
 };
 
-const uniData = require('./unicode-data.js');
-op.unipropcode = function(name) {
-  const mangled = name.toLowerCase().replace(/_/g, '');
-  return uniData.propcodes[mangled];
-};
-
-op.getuniprop_str = function(codePoint, propCode) {
-  const got = uniData.props[propCode][codePoint];
-  return got === undefined ? 'NaN' : got;
-};
 
 op.eqatic = function(haystack, needle, offset) {
   return foldCase(haystack.substr(offset)).startsWith(foldCase(needle)) ? 1 : 0;
