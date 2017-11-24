@@ -297,6 +297,7 @@
   * [getenvhash](#getenvhash)
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
+  * [getppid `moar`](#getppid)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [sha1](#sha1)
   * [sleep](#sleep)
@@ -2483,6 +2484,11 @@ configure and build flags.
 * `getpid(--> int)`
 
 Return the current process id, an int.
+
+## getppid `moar`
+* `getppid()`
+
+Return the process id of the parent process, an int.
 
 ## jvmclasspaths `jvm`
 * `jvmclasspaths()`
