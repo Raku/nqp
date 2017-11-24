@@ -220,6 +220,19 @@ class STable {
     obj.$$clone = function(ctx) {
       return this;
     };
+
+    obj.$$getInt = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an int.`);
+    };
+
+    obj.$$getNum = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an num.`);
+    };
+
+    obj.$$getStr = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an str.`);
+    };
+
     return obj;
   }
 
