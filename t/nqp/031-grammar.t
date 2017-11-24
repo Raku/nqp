@@ -68,4 +68,8 @@ is(Uniprop.parse('1')<unum>, '', "uniprop - doesn't match");
 is(NotUniprop.parse('12')<unum>, '1', 'negated uniprop - matches');
 is(NotUniprop.parse('½')<unum>, '', "negated uniprop - doesn't match");
 
-is(Uniprop.parse("\c[CUNEIFORM NUMERIC SIGN TWO ASH]")<unum>, "\c[CUNEIFORM NUMERIC SIGN TWO ASH]", 'astral unicode number');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('not yet fixed on the JVM', 1);
+} else {
+    is(Uniprop.parse("\c[CUNEIFORM NUMERIC SIGN TWO ASH]")<unum>, "\c[CUNEIFORM NUMERIC SIGN TWO ASH]", 'astral unicode number');
+}
