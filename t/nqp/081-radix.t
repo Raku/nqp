@@ -1,4 +1,4 @@
-plan(24*3*2 + 3);
+plan(26*3*2 + 3);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -58,3 +58,9 @@ test_radix_both(3,"۳",0,2, 0,1,-1, "no digits consumed with unicode digit outsi
 test_radix_both(10,"۳",0,2, 3,10,1, "extended arabic-indic digit three");
 test_radix_both(10,"۳۳",0,2, 33,100,2, "extended arabic-indic digit three");
 
+my $full_width_capital := "\c[FULLWIDTH LATIN CAPITAL LETTER C]\c[FULLWIDTH LATIN CAPITAL LETTER A]\c[FULLWIDTH LATIN CAPITAL LETTER F]\c[FULLWIDTH LATIN CAPITAL LETTER E]";
+
+my $full_width_small := "\c[FULLWIDTH LATIN SMALL LETTER C]\c[FULLWIDTH LATIN SMALL LETTER A]\c[FULLWIDTH LATIN SMALL LETTER F]\c[FULLWIDTH LATIN SMALL LETTER E]";
+
+test_radix_both(16,$full_width_capital,0,2, 51966,65536,4, "fullwidth capital letters");
+test_radix_both(16,$full_width_small,0,2, 51966,65536,4, "fullwidth small letters");
