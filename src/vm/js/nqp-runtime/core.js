@@ -93,7 +93,7 @@ function radixHelper(radix, str, zpos, flags) {
   }
   let number = search[0].replace(/_/g, '').replace(/^\+/, '');
 
-  const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + ']', 'g');
+  const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + '+-]', 'g');
 
   let error = false;
   number = number.replace(notSimpleDigit, function(match, offset, string) {
