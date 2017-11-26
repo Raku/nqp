@@ -1397,9 +1397,9 @@ op.getstrfromname = function(name) {
   let codePoint;
   let codePoints;
 
-  if (codePoint = ucd.nameToCodePoint(uppercased)) {
+  if ((codePoint = ucd.nameToCodePoint(uppercased)) !== undefined) {
     return String.fromCodePoint(codePoint);
-  } else if (codePoint = ucd.aliasToCodePoint(uppercased)) {
+  } else if ((codePoint = ucd.aliasToCodePoint(uppercased)) !== undefined) {
     return String.fromCodePoint(codePoint);
   } else if (codePoints = ucd.sequenceToCodePoints(uppercased)) {
     return codePoints.map(codePoint => String.fromCodePoint(codePoint)).join('');
@@ -1411,9 +1411,9 @@ op.getstrfromname = function(name) {
 op.codepointfromname = function(name) {
   let codePoint;
 
-  if (codePoint = ucd.nameToCodePoint(name)) {
+  if ((codePoint = ucd.nameToCodePoint(name)) !== undefined) {
     return codePoint;
-  } else if (codePoint = ucd.aliasToCodePoint(name)) {
+  } else if ((codePoint = ucd.aliasToCodePoint(name)) !== undefined) {
     return codePoint;
   } else {
     return -1;
