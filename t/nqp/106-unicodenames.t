@@ -1,4 +1,4 @@
-plan(29);
+plan(31);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '', 'getstrfromname returns empty string for nonexistant codepoint names');
@@ -34,6 +34,9 @@ else {
   is(nqp::getstrfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB), 'nqp::getstrfromaname wih an Emoji Sequences');
 
 }
+
+is(nqp::codepointfromname('NULL'), 0, 'nqp::codepointfromname with NULL');
+is(nqp::getstrfromname('NULL'), "\0", 'nqp::getstrfromname with NULL');
 
 is(nqp::codepointfromname('LATIN CAPITAL LETTER A'), 65, 'nqp::codepointfromname');
 
