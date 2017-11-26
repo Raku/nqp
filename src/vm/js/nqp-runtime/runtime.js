@@ -27,7 +27,6 @@ const foldCase = require('fold-case');
 
 const fs = require('fs');
 
-const xregexp = require('xregexp');
 
 exports.NQPInt = NQPInt;
 
@@ -676,26 +675,9 @@ exports.checkNamed = function(known, _NAMED) {
   }
 };
 
-function matchClass(category, negated) {
-  let regexp = xregexp('\\' + (negated ? 'P' : 'p') + '{' + category + '}', 'Ay');
-  return function(target, pos) {
-    regexp.lastIndex = pos;
-    if (regexp.test(target)) {
-      return regexp.lastIndex - pos;
-    } else {
-      return -1;
-    }
-  };
-}
 
-let props = {
-  No: 'No',
-  Nl: 'Nl',
-  lower: 'Lowercase',
-  Letter: 'Letter',
-}
+const props = require('./unicode-props.js');
 
 for (let prop in props) {
-  exports['uniprop_' + prop] = matchClass(props[prop], false);
-  exports['uniprop_not_' + prop] = matchClass(props[prop], true);
+  exports[prop] = props[prop];
 }
