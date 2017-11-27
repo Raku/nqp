@@ -1,3 +1,4 @@
+const propVals = require('./propVals.js');
 const xregexp = require('xregexp');
 
 function matchClass(category, negated) {
@@ -25,9 +26,34 @@ for (let prop in props) {
   exports['uniprop_not_' + prop] = matchClass(props[prop], true);
 }
 
-const inProps = "InAlphabeticPresentationForms InArabic InArabicPresentationFormsA InArabicPresentationFormsB InArmenian InArrows InBasicLatin InBengali InBlockElements InBopomofo InBopomofoExtended InBoxDrawing InBraillePatterns InBuhid InByzantineMusicalSymbols InCherokee InCJKCompatibility InCJKCompatibilityForms InCJKCompatibilityIdeographs InCJKCompatibilityIdeographsSupplement InCJKRadicalsSupplement InCJKSymbolsAndPunctuation InCJKUnifiedIdeographs InCJKUnifiedIdeographsExtensionA InCJKUnifiedIdeographsExtensionB InCombiningDiacriticalMarks InCombiningDiacriticalMarksforSymbols InCombiningHalfMarks InControlPictures InCurrencySymbols InCyrillic InDeseret InDevanagari InDingbats InEnclosedAlphanumerics InEnclosedCJKLettersAndMonths InEthiopic InGeneralPunctuation InGeometricShapes InGeorgian InGothic InGreekAndCoptic InGreekExtended InGujarati InGurmukhi InHalfwidthAndFullwidthForms InHangulCompatibilityJamo InHangulJamo InHangulSyllables InHanunoo InHebrew InHighPrivateUseSurrogates InHighSurrogates InHiragana InIdeographicDescriptionCharacters InIPAExtensions InKanbun InKangxiRadicals InKannada InKatakana InKatakanaPhoneticExtensions InKhmer InLao InLatin1Supplement InLatinExtendedA InLatinExtendedAdditional InLatinExtendedB InLetterlikeSymbols InLowSurrogates InMalayalam InMathematicalAlphanumericSymbols InMathematicalOperators InMiscellaneousMathematicalSymbolsA InMiscellaneousMathematicalSymbolsB InMiscellaneousSymbols InMiscellaneousTechnical InMongolian InMusicalSymbols InMyanmar InNumberForms InOgham InOldItalic InOpticalCharacterRecognition InOriya InPrivateUseArea InRunic InSinhala InSmallFormVariants InSpacingModifierLetters InSpecials InSuperscriptsAndSubscripts InSupplementalArrowsA InSupplementalArrowsB InSupplementalMathematicalOperators InSupplementaryPrivateUseAreaA InSupplementaryPrivateUseAreaB InSyriac InTagalog InTagbanwa InTags InTamil InTelugu InThaana InThai InTibetan InUnifiedCanadianAboriginalSyllabics InVariationSelectors InYiRadicals InYiSyllables".split(" ");
 
-for (let prop of inProps) {
-  exports['uniprop_' + prop] = matchClass(prop, false);
-  exports['uniprop_not_' + prop] = matchClass(prop, true);
+for (let key in propVals.blk) {
+  if (key === 'NB') {
+    continue;
+  }
+  let alias = 'In' + key;
+  let long = 'In' + propVals.blk[key];
+
+  exports['uniprop_' + alias] = matchClass(long, false);
+  exports['uniprop_not_' + alias] = matchClass(long, true);
+
+  if (!(('uniprop_' + long) in exports)) {
+    exports['uniprop_' + long] = matchClass(long, false);
+    exports['uniprop_not_' + long] = matchClass(long, true);
+  }
+}
+
+for (let alias in propVals.sc) {
+  if (alias === 'Hrkt' || alias === 'Zzzz') {
+    continue;
+  }
+  let long = propVals.sc[alias];
+
+  exports['uniprop_' + alias] = matchClass(long, false);
+  exports['uniprop_not_' + alias] = matchClass(long, true);
+
+  if (!(('uniprop_' + long) in exports)) {
+    exports['uniprop_' + long] = matchClass(long, false);
+    exports['uniprop_not_' + long] = matchClass(long, true);
+  }
 }
