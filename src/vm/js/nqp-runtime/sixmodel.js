@@ -147,8 +147,9 @@ class STable {
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
+        if (this.typeObject_) return 0;
         const str = this.$$getStr();
-        return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
+        return (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
     // this is the default - do nothing
