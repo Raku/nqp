@@ -6357,6 +6357,7 @@ class QAST::CompilerJAST {
                 $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
                 
+                my $mark := &*REGISTER_MARK($backlabel);
                 $il.append($passlabel);
                 if $subtype eq 'capture' {
                     my $capres := self.as_jast(QAST::Op.new(
@@ -6369,6 +6370,39 @@ class QAST::CompilerJAST {
                     $*STACK.obtain($il, $capres);
                     $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
                     $captured := 1;
+
+                    # Record a mark on the bstack saying how many captures we
+                    # had before pushing this one, so we can remove it upon
+                    # backtracking (otherwise we end up keeping backtracked
+                    # over subrule captures around).
+                    $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
+                    $il.append($DUP);
+                    $il.append($DUP2);
+                    $il.append(JAST::PushIVal.new( :value($mark) ));
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
+                        'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+                    $il.append($POP2);
+                    $il.append($IVAL_MINUSONE);
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
+                        'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+                    $il.append($POP2);
+                    $il.append($IVAL_MINUSONE);
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
+                        'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+                    $il.append($POP2);
+                    $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'elems',
+                        'Long', $TYPE_SMO, $TYPE_TC ));
+                    $il.append($IVAL_MINUSONE);
+                    $il.append($LADD);
+                    $il.append($ALOAD_1);
+                    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS, 'push_i',
+                        'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
+                    $il.append($POP2);
                 }
                 else {
                     my $pushres := self.as_jast(QAST::Op.new(
@@ -6381,7 +6415,6 @@ class QAST::CompilerJAST {
                     $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
                 }
                 
-                my $mark := &*REGISTER_MARK($backlabel);
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
                 $il.append($DUP);
                 $il.append($DUP2);
