@@ -216,21 +216,20 @@ module.exports.bootType = bootType;
 
 module.exports.core = core;
 
-BOOT.Array = bootType('BOOTArray', 'VMArray');
-BOOT.Array._STable.REPR.type = Null;
-BOOT.Array._STable.setboolspec(8, Null);
+function bootArray(type) {
+  const array = bootType('BOOTArray', 'VMArray')
+  array._STable.REPR.type = Null;
+  array._STable.REPR.primType = type;
+  array._STable.REPR.setupSTableWhenComposed(array._STable);
+  array._STable.setboolspec(8, Null);
+  return array;
+}
+
+BOOT.Array = bootArray(0);
 BOOT.Array._STable.hllRole = 4;
 
-BOOT.IntArray = bootType('BOOTIntArray', 'VMArray');
-BOOT.IntArray._STable.REPR.type = Null; // TODO correct type
-BOOT.IntArray._STable.setboolspec(8, Null);
-
-BOOT.NumArray = bootType('BOOTNumArray', 'VMArray');
-BOOT.NumArray._STable.REPR.type = Null; // TODO correct type
-BOOT.NumArray._STable.setboolspec(8, Null);
-
-BOOT.StrArray = bootType('BOOTStrArray', 'VMArray');
-BOOT.StrArray._STable.REPR.type = Null; // TODO correct type
-BOOT.StrArray._STable.setboolspec(8, Null);
+BOOT.IntArray = bootArray(1);
+BOOT.NumArray = bootArray(2);
+BOOT.StrArray = bootArray(3);
 
 BOOT.Exception = bootType('BOOTException', 'VMException');

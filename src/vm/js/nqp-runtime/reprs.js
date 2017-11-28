@@ -753,7 +753,7 @@ class P6int extends REPR {
     cursor.varint(this.isUnsigned);
   }
 
-  deserializeReprData(cursor) {
+  deserializeReprData(cursor, STable) {
     this.bits = cursor.varint();
     this.isUnsigned = cursor.varint();
   }
@@ -1011,6 +1011,10 @@ class NFA extends REPR {
 
 reprs.NFA = NFA;
 
+function primType(type) {
+  return type !== Null ? (type._STable.REPR.boxedPrimitive || 0): 0;
+}
+
 // TODO rework VMArray to be more correct
 class VMArray extends REPR {
 
@@ -1026,7 +1030,7 @@ class VMArray extends REPR {
     return obj;
   }
 
-  setupSTable(STable) {
+  setupSTableWhenComposed(STable) {
     STable.addInternalMethods(class {
       $$push(value) {
         if (this._SC !== undefined) this.$$scwb();
@@ -1039,51 +1043,6 @@ class VMArray extends REPR {
         return value;
       }
 
-      $$atpos(index) {
-        const value = this.array[index < 0 ? this.array.length + index : index];
-        if (value === undefined) return Null;
-        return value;
-      }
-
-      /* TODO test how things should be converted */
-
-      $$atpos_s(index) {
-        const value = this.array[index < 0 ? this.array.length + index : index];
-        if (value === undefined) return nullStr;
-        return value;
-      }
-
-      $$atpos_n(index) {
-        const value = this.array[index < 0 ? this.array.length + index : index];
-        if (value === undefined) return 0.0;
-        return value;
-      }
-
-      $$atpos_i(index) {
-        const value = this.array[index < 0 ? this.array.length + index : index];
-        if (value === undefined) return 0;
-        return value;
-      }
-
-      $$bindpos(index, value) {
-        if (this._SC !== undefined) this.$$scwb();
-        return this.array[index < 0 ? this.array.length + index : index] = value;
-      }
-
-      $$bindpos_i(index, value) {
-        if (this._SC !== undefined) this.$$scwb();
-        return this.array[index < 0 ? this.array.length + index : index] = value;
-      }
-
-      $$bindpos_n(index, value) {
-        if (this._SC !== undefined) this.$$scwb();
-        return this.array[index < 0 ? this.array.length + index : index] = value;
-      }
-
-      $$bindpos_s(index, value) {
-        if (this._SC !== undefined) this.$$scwb();
-        return this.array[index < 0 ? this.array.length + index : index] = value;
-      }
 
       $$join(delim) {
         const stringified = [];
@@ -1137,7 +1096,7 @@ class VMArray extends REPR {
       }
 
       $$dimensions(dimensions) {
-        return BOOT.createArray([this.array.length]);
+        return BOOT.createIntArray([this.array.length]);
       }
 
       $$toArray() {
@@ -1156,7 +1115,7 @@ class VMArray extends REPR {
         const removing = this.array.length - offset > count ? count : this.array.length - offset;
         // TODO think about the case when the source is not VMArray
         if (removing < source.array.length) {
-           this.array.length = this.array.length + source.array.length - removing;
+          this.array.length = this.array.length + source.array.length - removing;
         }
 
         this.array.copyWithin(offset + source.array.length, offset + removing);
@@ -1166,7 +1125,7 @@ class VMArray extends REPR {
         }
 
         if (removing > source.array.length) {
-           this.array.length = this.array.length + source.array.length - removing;
+          this.array.length = this.array.length + source.array.length - removing;
         }
 
         return this;
@@ -1178,6 +1137,62 @@ class VMArray extends REPR {
         return cloned;
       }
     });
+
+    if (this.primType === 0) {
+      STable.addInternalMethods(class {
+        $$atpos(index) {
+          const value = this.array[index < 0 ? this.array.length + index : index];
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$bindpos(index, value) {
+          if (this._SC !== undefined) this.$$scwb();
+          return this.array[index < 0 ? this.array.length + index : index] = value;
+        }
+      });
+    } else if (this.primType === 1) {
+      STable.addInternalMethods(class {
+          $$atpos_i(index) {
+          const value = this.array[index < 0 ? this.array.length + index : index];
+          if (value === undefined) return 0;
+          return value;
+          }
+
+          $$bindpos_i(index, value) {
+          if (this._SC !== undefined) this.$$scwb();
+          return this.array[index < 0 ? this.array.length + index : index] = value;
+          }
+          });
+    } else if (this.primType === 2) {
+      STable.addInternalMethods(class {
+        $$atpos_n(index) {
+          const value = this.array[index < 0 ? this.array.length + index : index];
+          if (value === undefined) return 0.0;
+          return value;
+        }
+
+        $$bindpos_n(index, value) {
+          if (this._SC !== undefined) this.$$scwb();
+          return this.array[index < 0 ? this.array.length + index : index] = value;
+        }
+      });
+    } else if (this.primType === 3) {
+      STable.addInternalMethods(class {
+        $$atpos_s(index) {
+          const value = this.array[index < 0 ? this.array.length + index : index];
+          if (value === undefined) return nullStr;
+          return value;
+        }
+
+        $$bindpos_s(index, value) {
+          if (this._SC !== undefined) this.$$scwb();
+          return this.array[index < 0 ? this.array.length + index : index] = value;
+        }
+      });
+    } else {
+      console.trace('wrong type to VMArray', this.primType);
+    }
 
 
     const $$atposnd = function(idx) {
@@ -1229,8 +1244,10 @@ class VMArray extends REPR {
     }
   }
 
-  deserializeReprData(cursor) {
+  deserializeReprData(cursor, STable) {
     this.type = cursor.variant();
+    this.primType = primType(this.type);
+    this.setupSTableWhenComposed(STable);
   }
 
   serializeReprData(st, cursor) {
@@ -1243,6 +1260,8 @@ class VMArray extends REPR {
     } else {
       this.type = Null;
     }
+    this.primType = primType(this.type);
+    this.setupSTableWhenComposed(STable);
   }
 };
 
@@ -1721,13 +1740,8 @@ class MultiDimArray extends REPR {
 
     const type = reprInfoHash.content.get('array').content.get('type');
 
-    if (type) {
-      STable.primType = type._STable.REPR.boxedPrimitive || 0;
-    } else {
-      STable.primType = 0;
-    }
-
     STable.type = type || Null;
+    STable.primType = primType(STable.type);
 
     STable.dimensions = dimensions.$$getInt();
 
@@ -1757,7 +1771,7 @@ class MultiDimArray extends REPR {
         if (this.typeObject_) {
           throw new NQPException('Cannot get dimensions of a type object');
         }
-        return BOOT.createArray(this.dimensions);
+        return BOOT.createIntArray(this.dimensions);
       }
 
       $$setdimensions(value) {
@@ -1855,20 +1869,20 @@ class MultiDimArray extends REPR {
 
       // TODO optimize and avoid creating a temporary array
       $$bindpos(index, value) {
-        return this.$$bindposnd(BOOT.createArray([index]), value);
+        return this.$$bindposnd(BOOT.createIntArray([index]), value);
       }
       $$bindpos_i(index, value) {
-        return this.$$bindposnd_i(BOOT.createArray([index]), value);
+        return this.$$bindposnd_i(BOOT.createIntArray([index]), value);
       }
       $$bindpos_s(index, value) {
-        return this.$$bindposnd_s(BOOT.createArray([index]), value);
+        return this.$$bindposnd_s(BOOT.createIntArray([index]), value);
       }
       $$bindpos_n(index, value) {
-        return this.$$bindposnd_n(BOOT.createArray([index]), value);
+        return this.$$bindposnd_n(BOOT.createIntArray([index]), value);
       }
 
       $$setelems(elems) {
-        this.$$setdimensions(BOOT.createArray([elems]));
+        this.$$setdimensions(BOOT.createIntArray([elems]));
       }
 
       $$elems(elems) {
@@ -1876,19 +1890,19 @@ class MultiDimArray extends REPR {
       }
 
       $$atpos(index) {
-        return this.$$atposnd(BOOT.createArray([index]));
+        return this.$$atposnd(BOOT.createIntArray([index]));
       }
 
       $$atpos_i(index) {
-        return this.$$atposnd_i(BOOT.createArray([index]));
+        return this.$$atposnd_i(BOOT.createIntArray([index]));
       }
 
       $$atpos_n(index) {
-        return this.$$atposnd_n(BOOT.createArray([index]));
+        return this.$$atposnd_n(BOOT.createIntArray([index]));
       }
 
       $$atpos_s(index) {
-        return this.$$atposnd_s(BOOT.createArray([index]));
+        return this.$$atposnd_s(BOOT.createIntArray([index]));
       }
     });
   }
@@ -1907,7 +1921,7 @@ class MultiDimArray extends REPR {
     if (dims > 0) {
       STable.dimensions = dims;
       STable.type = cursor.variant();
-      STable.primType = STable.type !== Null ? (STable.type._STable.REPR.boxedPrimitive || 0): 0;
+      STable.primType = primType(STable.type);
     }
   }
 

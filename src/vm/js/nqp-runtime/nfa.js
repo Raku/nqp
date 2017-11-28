@@ -302,7 +302,7 @@ function runNFA(nfa, target, pos) {
     }
   }
 
-  return BOOT.createArray(fates);
+  return BOOT.createIntArray(fates);
 }
 
 op.nfarunproto = function(nfa, target, pos) {
