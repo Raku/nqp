@@ -220,6 +220,7 @@
   * [bootstr `jvm` `moar`](#bootstr-jvm-moar)
   * [bootstrarray `jvm` `moar`](#bootstrarray-jvm-moar)
   * [box](#box)
+  * [decont](#decont)
   * [defined](#defined)
   * [fromnum](#fromnum)
   * [fromstr](#fromstr)
@@ -1899,6 +1900,17 @@ Returns a VM specific type object for a native array of str.
 
 Given a native value, return a perl 6 object of the given type
 with the same value.
+
+## decont
+
+`decont($val)`
+
+Extract, or **de**-**cont**ainerize, a value from a `Scalar` container:
+
+    use nqp;
+    my $a = (1, 2, 3);
+    .say for $a;              # OUTPUT: «(1, 2, 3)␤»
+    .say for nqp::decont($a); # OUTPUT: «1␤2␤3␤»
 
 ## defined
 * `defined(Mu $obj --> int)`
