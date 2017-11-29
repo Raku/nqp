@@ -1148,17 +1148,17 @@ class VMArray extends REPR {
       });
     } else if (this.primType === 1) {
       STable.addInternalMethods(class {
-          $$atpos_i(index) {
+        $$atpos_i(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return 0;
           return value;
-          }
+        }
 
-          $$bindpos_i(index, value) {
+        $$bindpos_i(index, value) {
           if (this._SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
-          }
-          });
+        }
+      });
     } else if (this.primType === 2) {
       STable.addInternalMethods(class {
         $$atpos_n(index) {
