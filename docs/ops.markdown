@@ -2262,7 +2262,7 @@ Return the current lexpad.
 Given a context, return the outer context, or null.
 
 ## lexprimspec
-* `lexprimspec(LexPad $pad, str $name)`
+* `lexprimspec(LexPad $pad, str $name --> int)`
 
 Given a lexpad and a name, return the name's primitive type.
 
@@ -2480,13 +2480,13 @@ for debugging.
 Exit nqp, using the given status as the compiler's exit value.
 
 ## getenvhash
-* `getenvhash()`
+* `getenvhash(--> Mu)`
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
 
 ## backendconfig
-* `backendconfig()`
+* `backendconfig(--> Mu)`
 
 Returns a hash containing backend-specific information, like backend-version,
 configure and build flags.
@@ -2497,7 +2497,7 @@ configure and build flags.
 Return the current process id, an int.
 
 ## jvmclasspaths `jvm`
-* `jvmclasspaths()`
+* `jvmclasspaths(--> Mu)`
 
 Converts the JVM property `java.class.path` into a list of paths, returns it.
 
@@ -2682,21 +2682,21 @@ value originally at the location (which can be compared with `$expected` to
 see if the operation was a success).
 
 ## atomicinc_i `moar`
-* `atomicinc_i(NativeIntRef $i)`
+* `atomicinc_i(NativeIntRef $i --> int)`
 
 Takes an object with the `NativeRef` representation, which must point to an
 integer of the machine's atomic operation size. Performs an atomic increment
 of the referenced integer. Returns the value **before** it was incremented.
 
 ## atomicdec_i `moar`
-* `atomicdec_i(NativeIntRef $i)`
+* `atomicdec_i(NativeIntRef $i --> int)`
 
 Takes an object with the `NativeRef` representation, which must point to an
 integer of the machine's atomic operation size. Performs an atomic decrement
 of the referenced integer. Returns the value **before** it was decremented.
 
 ## atomicadd_i `moar`
-* `atomicadd_i(NativeIntRef $i, int $value)`
+* `atomicadd_i(NativeIntRef $i, int $value --> int)`
 
 Takes an object with the `NativeRef` representation, which must point to an
 integer of the machine's atomic operation size. Performs an atomic addition of
@@ -2712,7 +2712,7 @@ atomic load (that is, with appropriate barriering to ensure the latest value
 is read). Performs the atomic load, and returns the loaded object.
 
 ## atomicload_i `moar`
-* `atomicload_i(NativeIntRef $i)`
+* `atomicload_i(NativeIntRef $i --> int)`
 
 Takes an object with the `NativeRef` representation, which must point to an
 integer of the machine's atomic operation size. Performs an atomic load (that
