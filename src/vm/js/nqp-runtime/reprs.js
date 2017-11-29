@@ -1038,11 +1038,6 @@ class VMArray extends REPR {
         return value;
       }
 
-      $$push(value) {
-        this.array.push(value);
-        return value;
-      }
-
 
       $$join(delim) {
         const stringified = [];
