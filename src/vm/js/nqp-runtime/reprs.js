@@ -1030,7 +1030,7 @@ class VMArray extends REPR {
     return obj;
   }
 
-  setupSTableWhenComposed(STable) {
+  setupSTable(STable) {
     STable.addInternalMethods(class {
       $$push(value) {
         if (this._SC !== undefined) this.$$scwb();
@@ -1137,7 +1137,9 @@ class VMArray extends REPR {
         return cloned;
       }
     });
+  }
 
+  setupSTableWhenComposed(STable) {
     if (this.primType === 0) {
       STable.addInternalMethods(class {
         $$atpos(index) {
