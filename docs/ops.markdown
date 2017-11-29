@@ -1903,7 +1903,7 @@ with the same value.
 
 ## decont
 
-`decont($val)`
+`decont(Mu $val --> Mu)`
 
 Extract, or **de**-**cont**ainerize, a value from a `Scalar` container:
 
