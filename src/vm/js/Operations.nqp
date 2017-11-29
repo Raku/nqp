@@ -599,11 +599,10 @@ class QAST::OperationsJS {
         add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], :side_effects, :method_call);
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], :method_call);
         
-        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$pop()"}, :side_effects);
-        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$push($elem)"}, :side_effects);
-        add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], sub ($array, $elem) {"$array.\$\$unshift($elem)"}, :side_effects);
-        add_simple_op('shift' ~ $suffix, $type, [$T_OBJ], sub ($array) {"$array.\$\$shift()"}, :side_effects);
- 
+        add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], :side_effects, :method_call);
+        add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], :side_effects, :method_call);
+        add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], :side_effects, :method_call);
+        add_simple_op('shift' ~ $suffix, $type, [$T_OBJ], :side_effects, :method_call);
 
         add_simple_op('atposnd' ~ $suffix, $type, [$T_OBJ, $T_OBJ]);
         add_simple_op('atpos2d' ~ $suffix, $type, [$T_OBJ, $T_INT, $T_INT, $type],  :side_effects);

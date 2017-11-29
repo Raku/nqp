@@ -1032,37 +1032,12 @@ class VMArray extends REPR {
 
   setupSTableWhenComposed(STable) {
     STable.addInternalMethods(class {
-      $$push(value) {
-        if (this._SC !== undefined) this.$$scwb();
-        this.array.push(value);
-        return value;
-      }
-
-
       $$join(delim) {
         const stringified = [];
         for (let i = 0; i < this.array.length; i++) {
           stringified.push(typeof this.array[i] == 'string' ? this.array[i] : this.array[i].$$getStr());
         }
         return stringified.join(delim);
-      }
-
-
-      $$pop() {
-        const value = this.array.pop();
-        if (value === undefined) return Null;
-        return value;
-      }
-
-      $$shift() {
-        const value = this.array.shift();
-        if (value === undefined) return Null;
-        return value;
-      }
-
-      $$unshift(value) {
-        this.array.unshift(value);
-        return value;
       }
 
       $$elems() {
@@ -1145,9 +1120,38 @@ class VMArray extends REPR {
           if (this._SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
         }
+
+        $$push(value) {
+          if (this._SC !== undefined) this.$$scwb();
+          this.array.push(value);
+          return value;
+        }
+
+        $$pop() {
+          const value = this.array.pop();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$shift() {
+          const value = this.array.shift();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$unshift(value) {
+          this.array.unshift(value);
+          return value;
+        }
       });
     } else if (this.primType === 1) {
       STable.addInternalMethods(class {
+        $$push_i(value) {
+          if (this._SC !== undefined) this.$$scwb();
+          this.array.push(value);
+          return value;
+        }
+
         $$atpos_i(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return 0;
@@ -1157,6 +1161,23 @@ class VMArray extends REPR {
         $$bindpos_i(index, value) {
           if (this._SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
+        }
+
+        $$pop_i() {
+          const value = this.array.pop();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$shift_i() {
+          const value = this.array.shift();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$unshift_i(value) {
+          this.array.unshift(value);
+          return value;
         }
       });
     } else if (this.primType === 2) {
@@ -1171,6 +1192,29 @@ class VMArray extends REPR {
           if (this._SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
         }
+
+        $$push_n(value) {
+          if (this._SC !== undefined) this.$$scwb();
+          this.array.push(value);
+          return value;
+        }
+
+        $$pop_n() {
+          const value = this.array.pop();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$shift_n() {
+          const value = this.array.shift();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$unshift_n(value) {
+          this.array.unshift(value);
+          return value;
+        }
       });
     } else if (this.primType === 3) {
       STable.addInternalMethods(class {
@@ -1183,6 +1227,29 @@ class VMArray extends REPR {
         $$bindpos_s(index, value) {
           if (this._SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
+        }
+
+        $$push_s(value) {
+          if (this._SC !== undefined) this.$$scwb();
+          this.array.push(value);
+          return value;
+        }
+
+        $$pop_s() {
+          const value = this.array.pop();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$shift_s() {
+          const value = this.array.shift();
+          if (value === undefined) return Null;
+          return value;
+        }
+
+        $$unshift_s(value) {
+          this.array.unshift(value);
+          return value;
         }
       });
     } else {
