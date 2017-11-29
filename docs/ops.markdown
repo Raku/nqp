@@ -458,7 +458,7 @@ Return the lowest common multiple of two numbers.
 ## mod
 * `mod_i(int $l, int $r --> int)`
 * `mod_n(num $l, num $r --> num)`
-* `mod_I(Int $l, Int $r, Mu:T $type --> INt)`
+* `mod_I(Int $l, Int $r, Mu:T $type --> Int)`
 
 Return the modulus of $l by $r.
 `_I` variant returns an object of the given type.
@@ -2214,7 +2214,7 @@ OR the bits in `$l` and `$r`.
 
 ## bitshiftl
 * `bitshiftl_i(int $bits, int $count --> int)`
-* `bitshiftl_I(Int $bits, int $count, Mu:T $type --> INt)`
+* `bitshiftl_I(Int $bits, int $count, Mu:T $type --> Int)`
 
 Signed left shift of `$bits` by `$count`.
 `_I` variant returns an object of the given type.
@@ -2237,7 +2237,7 @@ XOR the bits in `$l` and `$r`.
 # <a id="context"></a> Context Introspection Opcodes
 
 ## ctx
-* `ctx()`
+* `ctx(--> Context)`
 
 Return the object representing the current context.
 
