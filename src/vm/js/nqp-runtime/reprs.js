@@ -1145,10 +1145,33 @@ class VMArray extends REPR {
         }
       });
     } else if (this.primType === 1) {
+      let mangle;
+      if (this.type !== Null) {
+        const repr = this.type._STable.REPR;
+        if (repr instanceof P6int) {
+          const bits = this.type._STable.REPR.bits;
+          const shift = 32 - bits;
+
+          if (this.type._STable.REPR.isUnsigned) {
+            mangle = function(value) {
+              const trimmed = (value << shift >> shift);
+              const ret = trimmed < 0 ? (1 << bits) + trimmed  : trimmed;
+              return ret;
+            }
+          } else {
+            if (bits < 32) {
+              mangle = value => (value<< shift >> shift);
+            }
+          }
+        }
+      }
+
+      STable.addInternalMethod('$$mangle', mangle || (value => value));
+
       STable.addInternalMethods(class {
         $$push_i(value) {
           if (this._SC !== undefined) this.$$scwb();
-          this.array.push(value);
+          this.array.push(this.$$mangle(value));
           return value;
         }
 
@@ -1160,7 +1183,7 @@ class VMArray extends REPR {
 
         $$bindpos_i(index, value) {
           if (this._SC !== undefined) this.$$scwb();
-          return this.array[index < 0 ? this.array.length + index : index] = value;
+          return this.array[index < 0 ? this.array.length + index : index] = this.$$mangle(value);
         }
 
         $$pop_i() {
@@ -1176,7 +1199,7 @@ class VMArray extends REPR {
         }
 
         $$unshift_i(value) {
-          this.array.unshift(value);
+          this.array.unshift(this.$$mangle(value));
           return value;
         }
       });
