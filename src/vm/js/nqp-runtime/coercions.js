@@ -12,12 +12,27 @@ exports.strToNum = function(str) {
 };
 
 exports.numToStr = function(num) {
+  if (Number.isNaN(num)) return 'NaN';
   if (num === Infinity) return 'Inf';
   if (num === -Infinity) return '-Inf';
   if (num === 0 && 1/num === -Infinity) return '-0';
 
-  const parts = num.toPrecision(15).split(/e/);
-  return parts[0].replace(/\.?0+$/, '') + (parts.length === 1 ? '' : 'e' + parts[1]);
+  let needed = 17;
+  let attempt;
+  let correct;
+  do {
+    correct = attempt;
+    if (needed === 0) break;
+    attempt = num.toPrecision(needed);
+    needed--;
+    if (correct !== undefined && /e/.test(attempt) && !/e/.test(correct)) {
+      break;
+    }
+  } while (parseFloat(attempt) === num);
+
+  const parts = correct.split(/e/);
+
+  return parts[0] + (parts.length === 1 ? '' : 'e' + parts[1]);
 };
 
 /* TODO - more error checking */
