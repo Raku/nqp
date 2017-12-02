@@ -145,7 +145,13 @@ op.div_In = function(a, b) {
   if (divisor.eq(0)) {
     return getBI(a).toNumber() / 0;
   }
-  return getBI(a).mul(bignum(digits)).div(divisor).toNumber() / digits;
+
+  const big = getBI(a).mul(bignum(digits)).div(divisor).toString();
+  if (big.length <= 20) {
+    return parseFloat('0.' + '0'.repeat(20 - big.length) + big);
+  } else {
+    return parseFloat(big.substr(0, big.length - 20) + '.' + big.substr(big.length - 20));
+  }
 };
 
 op.rand_I = function(max, type) {
