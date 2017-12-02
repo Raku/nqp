@@ -7,20 +7,20 @@ function boolish(bool) {
   return bool ? 1 : 0;
 }
 
-const UPPERCASE = xregexp('^\\p{Lu}');
-const LOWERCASE = xregexp('^\\p{Ll}');
-const ALPHABETIC = xregexp('^\\pL');
-const NUMERIC = xregexp('^\\p{Nd}');
-const HEXADECIMAL = xregexp('^[0-9A-Fa-f]');
-const WHITESPACE = xregexp('^\\p{White_Space}');
-const PRINTING = xregexp('^[^\u0000-\u001F\u007F-\u009F]');
-const BLANK = xregexp('^[\t\\p{Zs}]');
-const CONTROL = xregexp('^[\u0000-\u001F\u007F-\u009F]');
-const PUNCTUATION = xregexp('^\\pP');
-const ALPHANUMERIC = xregexp('^[\\pL\\p{Nd}]');
-const NEWLINE = xregexp('[\n\r\u0085\u2029\f\u000b\u2028]');
-const WORD = xregexp('^[\\pL_\\p{Nd}]');
-const ANY = xregexp('^\\p{Any}');
+const UPPERCASE = xregexp('\\p{Lu}', 'yA');
+const LOWERCASE = xregexp('\\p{Ll}', 'yA');
+const ALPHABETIC = xregexp('\\pL', 'yA');
+const NUMERIC = xregexp('\\p{Nd}', 'yA');
+const HEXADECIMAL = xregexp('[0-9A-Fa-f]', 'y');
+const WHITESPACE = xregexp('\\p{White_Space}', 'yA');
+const PRINTING = xregexp('[^\u0000-\u001F\u007F-\u009F]', 'y');
+const BLANK = xregexp('\t|\\p{Zs}', 'yA');
+const CONTROL = xregexp('[\u0000-\u001F\u007F-\u009F]', 'y');
+const PUNCTUATION = xregexp('\\pP', 'yA');
+const ALPHANUMERIC = xregexp('\\pL|\\p{Nd}', 'yA');
+const NEWLINE = xregexp('[\n\r\u0085\u2029\f\u000b\u2028]', 'y');
+const WORD = xregexp('\\pL|_|\\p{Nd}', 'yA');
+const ANY = xregexp('\\p{Any}', 'yA');
 
 const cclassToRegex = [];
 cclassToRegex[1] = UPPERCASE;
@@ -43,8 +43,9 @@ function iscclass(cclass, target, offset) {
   const regex = cclassToRegex[cclass];
   if (regex === undefined) {
     throw 'cclass ' + cclass + ' not yet implemented';
-  } else if (typeof regex !== 'string') {
-    return boolish(regex.test(target[offset]));
+  } else {
+    regex.lastIndex = offset;
+    return boolish(regex.test(target));
   }
 }
 
@@ -69,8 +70,15 @@ op.findnotcclass = function(cclass, target, offset, count) {
   let end = offset + count;
   end = target.length < end ? target.length : end;
 
-  for (let pos = offset; pos < end; pos++) {
-    if (iscclass(cclass, target, pos) == 0) {
+  const regex = cclassToRegex[cclass];
+
+  let pos = offset;
+
+  regex.lastIndex = pos;
+  while (pos < end) {
+    if (regex.test(target)) {
+      pos = regex.lastIndex;
+    } else {
       return pos;
     }
   }
