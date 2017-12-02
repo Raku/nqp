@@ -427,6 +427,7 @@ exports.list_s = function lowlevelList(array) {
 
 exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT').createArray;
+exports.createIntArray = require('./BOOT').createIntArray;
 
 exports.dumpObj = function(obj) {
   console.log(typeof obj);
