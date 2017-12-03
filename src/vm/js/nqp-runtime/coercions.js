@@ -30,9 +30,7 @@ exports.numToStr = function(num) {
     }
   } while (parseFloat(attempt) === num);
 
-  const parts = correct.split(/e/);
-
-  return parts[0] + (parts.length === 1 ? '' : 'e' + parts[1]);
+  return correct;
 };
 
 /* TODO - more error checking */
