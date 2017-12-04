@@ -40,8 +40,3 @@ sub known_named(@known_named) {
     }
     '{' ~ nqp::join(',', @pairs) ~ '}'
 }
-
-
-
-
-
