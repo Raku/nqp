@@ -810,13 +810,9 @@ for <if unless with without> -> $op_name {
         # Emit the then, stash the result
         push_ilist(@ins, @comp_ops[1]);
         if (!$is_void && @comp_ops[1].result_kind != $res_kind) {
-            my $coercion := $qastcomp.coercion(@comp_ops[1],
-                (nqp::defined($*WANT) ?? $*WANT !! $MVM_reg_obj));
+            my $coercion := $qastcomp.coercion(@comp_ops[1], $res_kind);
             push_ilist(@ins, $coercion);
-            $regalloc.release_register($res_reg, $res_kind);
-            $res_reg := $regalloc.fresh_register($coercion.result_kind);
             push_op(@ins, 'set', $res_reg, $coercion.result_reg);
-            $res_kind := $coercion.result_kind;
         }
         elsif !$is_void {
             push_op(@ins, 'set', $res_reg, @comp_ops[1].result_reg);
