@@ -2,7 +2,7 @@
 
 # check '||', '&&', and '//'
 
-plan(16);
+plan(17);
 
 my $or_no_branch := 1;
 $or_no_branch || ( $or_no_branch := 0 );
@@ -44,6 +44,14 @@ ok(nqp::islist(nqp::xor(0, 0.0, :false("150"), nqp::list())), "when all the argu
 
 is(nqp::xor('', 'hi', :false("150")), 'hi', 'xor returns the only true argument even if there is a :false pased');
 
-my $foo := 42;
-my int $bar := $foo || 200;
-is($bar, 42, '|| when expecting an int');
+{
+    my $foo := 42;
+    my int $bar := $foo || 200;
+    is($bar, 42, '|| when expecting an int');
+}
+
+{
+    my $foo := 0;
+    my int $bar := $foo || 200;
+    is($bar, 200, '|| when expecting an int');
+}
