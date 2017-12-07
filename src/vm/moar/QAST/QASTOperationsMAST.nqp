@@ -773,13 +773,8 @@ for <if unless with without> -> $op_name {
 
         my @ins;
 
-        # Evaluate the condition first; store result if needed.
+        # Evaluate the condition first
         push_ilist(@ins, @comp_ops[0]);
-        if $operands == 2 && !$is_void {
-            my $il := MAST::InstructionList.new(@ins, @comp_ops[0].result_reg, @comp_ops[0].result_kind);
-            $qastcomp.coerce($il, $res_kind);
-            push_op(@ins, 'set', $res_reg, $il.result_reg);
-        }
 
         # Emit the jump.
         if @comp_ops[0].result_kind == $MVM_reg_obj {
@@ -795,7 +790,7 @@ for <if unless with without> -> $op_name {
             push_op(@ins,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if' || $op_name eq 'with'),
                 $decont_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
             $regalloc.release_register($decont_reg, $MVM_reg_obj);
         }
@@ -803,7 +798,7 @@ for <if unless with without> -> $op_name {
             push_op(@ins,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
                 @comp_ops[0].result_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
         }
 
@@ -819,12 +814,12 @@ for <if unless with without> -> $op_name {
         }
         $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
 
-        # Handle else branch (coercion of condition result if 2-arg).
-        if $operands == 3 {
-            # Terminate the then branch first.
-            push_op(@ins, 'goto', $end_lbl);
-            nqp::push(@ins, $else_lbl);
+        # Terminate the then branch first.
+        push_op(@ins, 'goto', $end_lbl);
+        nqp::push(@ins, $else_lbl);
 
+        # Handle else branch
+        if $operands == 3 {
             push_ilist(@ins, @comp_ops[2]);
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
@@ -838,7 +833,14 @@ for <if unless with without> -> $op_name {
             }
             $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
         }
+        # coercion of condition result if 2-arg
+        elsif !$is_void && $operands == 2 {
+            my $il := MAST::InstructionList.new(@ins, @comp_ops[0].result_reg, @comp_ops[0].result_kind);
+            $qastcomp.coerce($il, $res_kind);
+            push_op(@ins, 'set', $res_reg, $il.result_reg);
+        }
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
+
         nqp::push(@ins, $end_lbl);
 
         MAST::InstructionList.new(@ins, $res_reg, $res_kind)
