@@ -807,6 +807,7 @@ for <if unless with without> -> $op_name {
             );
         }
 
+        my $fix_coercion;
         # Emit the then, stash the result
         push_ilist(@ins, @comp_ops[1]);
         if (!$is_void && @comp_ops[1].result_kind != $res_kind) {
@@ -817,6 +818,14 @@ for <if unless with without> -> $op_name {
             $res_reg := $regalloc.fresh_register($coercion.result_kind);
             push_op(@ins, 'set', $res_reg, $coercion.result_reg);
             $res_kind := $coercion.result_kind;
+            if ($op_name eq 'unless' && $operands == 2 && @comp_ops[0].result_kind != $res_kind) {
+                my $coercion := $qastcomp.coercion(@comp_ops[0],
+                    (nqp::defined($*WANT) ?? $*WANT !! $MVM_reg_obj));
+                $fix_coercion := $coercion;
+                $regalloc.release_register($res_reg, $res_kind);
+                $res_reg := $regalloc.fresh_register($coercion.result_kind);
+                $res_kind := $coercion.result_kind;
+            }
         }
         elsif !$is_void {
             push_op(@ins, 'set', $res_reg, @comp_ops[1].result_reg);
@@ -844,6 +853,11 @@ for <if unless with without> -> $op_name {
         }
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
         nqp::push(@ins, $end_lbl);
+
+        if $fix_coercion {
+          push_ilist(@ins, $fix_coercion);
+          push_op(@ins, 'set', $res_reg, $fix_coercion.result_reg);
+        }
 
         MAST::InstructionList.new(@ins, $res_reg, $res_kind)
     });
