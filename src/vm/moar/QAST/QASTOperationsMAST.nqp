@@ -795,7 +795,7 @@ for <if unless with without> -> $op_name {
             push_op(@ins,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if' || $op_name eq 'with'),
                 $decont_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
             $regalloc.release_register($decont_reg, $MVM_reg_obj);
         }
@@ -803,7 +803,7 @@ for <if unless with without> -> $op_name {
             push_op(@ins,
                 resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
                 @comp_ops[0].result_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
         }
 
@@ -818,7 +818,7 @@ for <if unless with without> -> $op_name {
             $res_reg := $regalloc.fresh_register($coercion.result_kind);
             push_op(@ins, 'set', $res_reg, $coercion.result_reg);
             $res_kind := $coercion.result_kind;
-            if ($op_name eq 'unless' && $operands == 2 && @comp_ops[0].result_kind != $res_kind) {
+            if ($operands == 2 && @comp_ops[0].result_kind != $res_kind) {
                 my $coercion := $qastcomp.coercion(@comp_ops[0],
                     (nqp::defined($*WANT) ?? $*WANT !! $MVM_reg_obj));
                 $fix_coercion := $coercion;
@@ -832,12 +832,12 @@ for <if unless with without> -> $op_name {
         }
         $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
 
+        # Terminate the then branch first.
+        push_op(@ins, 'goto', $end_lbl);
+        nqp::push(@ins, $else_lbl);
+
         # Handle else branch (coercion of condition result if 2-arg).
         if $operands == 3 {
-            # Terminate the then branch first.
-            push_op(@ins, 'goto', $end_lbl);
-            nqp::push(@ins, $else_lbl);
-
             push_ilist(@ins, @comp_ops[2]);
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
@@ -850,14 +850,15 @@ for <if unless with without> -> $op_name {
                 }
             }
             $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
+        } else {
+            if $fix_coercion {
+              push_ilist(@ins, $fix_coercion);
+              push_op(@ins, 'set', $res_reg, $fix_coercion.result_reg);
+            }
         }
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
-        nqp::push(@ins, $end_lbl);
 
-        if $fix_coercion {
-          push_ilist(@ins, $fix_coercion);
-          push_op(@ins, 'set', $res_reg, $fix_coercion.result_reg);
-        }
+        nqp::push(@ins, $end_lbl);
 
         MAST::InstructionList.new(@ins, $res_reg, $res_kind)
     });
