@@ -40,9 +40,9 @@ public class MultiCacheInstance extends SixModelObject {
         /* If there's flattenings, we can't cache. */
         if (capture.descriptor.hasFlattening)
             return;
-        /* If it's zero arity, just stick it in that slot. */
 
         Object[] args = capture.args;
+        /* If it's zero arity, just stick it in that slot. */
         if (args.length == 0) {
             this.zeroArity = result;
             return;
@@ -86,6 +86,13 @@ public class MultiCacheInstance extends SixModelObject {
             }
         }
 
+        /* Again, if it's zero arity, just stick it in that slot. */
+        if (numArgs == 0) {
+            this.zeroArity = result;
+            return;
+        }
+
+        /* If number of positional args exeeds arity limit, don't do anything. */
         if (numArgs >= MD_CACHE_MAX_ARITY)
             return;
 
