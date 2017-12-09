@@ -92,7 +92,7 @@ public class MultiCacheInstance extends SixModelObject {
             return;
         }
 
-        /* If number of positional args exeeds arity limit, don't do anything. */
+        /* If number of positional args exceeds arity limit, don't do anything. */
         if (numArgs >= MD_CACHE_MAX_ARITY)
             return;
 
