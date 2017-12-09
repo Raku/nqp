@@ -12,19 +12,19 @@ public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_INT = 1;
     private static final int MD_CACHE_NUM = 2;
     private static final int MD_CACHE_STR = 3;
-    
+
     private SixModelObject zeroArity;
     private ArityCache[] arityCaches = new ArityCache[MD_CACHE_MAX_ARITY];
-    
+
     private class ArityCache
     {
         /* The number of entries we have in the cache. */
         public int numEntries;
-        
+
         /* This is a bunch of ST hashes, with natives special-cased. We allocate
          * it arity * MAX_ENTRIES big and go through it in arity sized chunks. */
         public long typeIds[];
-        
+
         /* Whether the entry is allowed to have named arguments. Doesn't say
          * anything about which ones, though. Something that is ambivalent
          * about named arguments to the degree it doesn't care about them 
@@ -35,19 +35,19 @@ public class MultiCacheInstance extends SixModelObject {
         /* The results we return from the cache. */
         public SixModelObject[] results;
     }
-    
+
     public void add(CallCaptureInstance capture, SixModelObject result, ThreadContext tc) {
         /* If there's flattenings, we can't cache. */
         if (capture.descriptor.hasFlattening)
             return;
-        
         /* If it's zero arity, just stick it in that slot. */
+
         Object[] args = capture.args;
         if (args.length == 0) {
             this.zeroArity = result;
             return;
         }
-        
+
         /* Count number of positional args and build type tuple. */
         int numArgs = 0;
         byte[] argFlags = capture.descriptor.argFlags;
@@ -85,7 +85,7 @@ public class MultiCacheInstance extends SixModelObject {
                 hasNamed = true;
             }
         }
-        
+
         if (numArgs >= MD_CACHE_MAX_ARITY)
             return;
 
@@ -94,7 +94,7 @@ public class MultiCacheInstance extends SixModelObject {
         ArityCache ac = this.arityCaches[numArgs];
         if (ac != null && ac.numEntries == MD_CACHE_MAX_ENTRIES)
             return;
-        
+
         /* If there's no entries yet, need to do some allocation. */
         if (ac == null) {
             ac = new ArityCache();
@@ -117,7 +117,7 @@ public class MultiCacheInstance extends SixModelObject {
         /* If there's flattenings, we can't use the cache. */
         if (capture.descriptor.hasFlattening)
             return null;
-        
+
         /* Count number of positional args and build type tuple. */
         int numArgs = 0;
         Object[] args = capture.args;
@@ -156,7 +156,7 @@ public class MultiCacheInstance extends SixModelObject {
                 hasNamed = true;
             }
         }
-        
+
         /* If it's zero-arity, return result right off. */
         if (numArgs == 0)
             return hasNamed ? null : this.zeroArity;
