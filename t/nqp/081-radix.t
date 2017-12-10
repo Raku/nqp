@@ -1,4 +1,4 @@
-plan(26*3*2 + 3);
+plan(31*3*2 + 3);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -69,3 +69,10 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     test_radix_both(16,$full_width_capital,0,2, 51966,65536,4, "fullwidth capital letters");
     test_radix_both(16,$full_width_small,0,2, 51966,65536,4, "fullwidth small letters");
 }
+
+test_radix_both(8,"8238321",0,2, 0,1,-1, "all digits outside of radix");
+test_radix_both(8,"1838321",0,2, 1,8,1, "all but one digits outside of radix");
+
+test_radix_both(10,"123foobar",0,2, 123,1000,3, "no digits consumed with digit outside radix");
+test_radix_both(8,"1238321",0,2, 83,512,3, "no digits consumed with digit outside radix");
+test_radix_both(8,"-1238321",1,2, 83,512,4, "no digits consumed with digit outside radix");
