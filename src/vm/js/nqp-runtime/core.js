@@ -95,6 +95,19 @@ function radixHelper(radix, str, zpos, flags) {
   }
   let number = search[0].replace(/_/g, '').replace(/^\+/, '');
 
+
+  const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + '+-]', 'g');
+
+  let error;
+  number = number.replace(notSimpleDigit, function(match, offset, string) {
+    const value = op.getuniprop_str(match.codePointAt(0), numericValueProp);
+    const digit = parseInt(value);
+    if (digit >= radix) {
+      if (error === undefined) error = offset;
+    }
+    return digit.toString();
+  });
+
   if (radix >= 11) {
     number = number.replace(new RegExp('['+uppercaseTitle+']', 'g'), function(match, offset, string) {
       return String.fromCharCode('A'.charCodeAt(0) + match.codePointAt(0) - 0xFF21);
@@ -105,25 +118,18 @@ function radixHelper(radix, str, zpos, flags) {
     });
   }
 
-  const notSimpleDigit = new RegExp('[^0-' + Math.min(radix - 1, 9) + letters + '+-]', 'g');
 
-  let error = false;
-  number = number.replace(notSimpleDigit, function(match, offset, string) {
-    const value = op.getuniprop_str(match.codePointAt(0), numericValueProp);
-    const digit = parseInt(value);
-    if (digit >= radix) {
-      error = true;
-    }
-    return digit.toString();
-  });
+  if (error === 0) return null;
+  if (error !== undefined) {
+    number = number.substr(0, error);
+  }
 
-  if (error) return null;
 
   if (flags & 0x01) number = '-' + number;
   if (flags & 0x04) number = number.replace(/0+$/, '');
 
   const power = number[0] == '-' ? number.length - 1 : number.length;
-  return {power: power, offset: zpos + search[0].length, number: number};
+  return {power: power, offset: zpos + (error == undefined ? search[0].length : error), number: number};
 }
 
 exports.radixHelper = radixHelper;
