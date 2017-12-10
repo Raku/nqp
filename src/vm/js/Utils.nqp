@@ -40,3 +40,13 @@ sub known_named(@known_named) {
     }
     '{' ~ nqp::join(',', @pairs) ~ '}'
 }
+
+my sub literal_subst(str $source, str $pattern, str $replacement) {
+    my int $where := 0;
+    my str $result := $source;
+    while (my int $found := nqp::index($result, $pattern, $where)) != -1 {
+        $where := $found + nqp::chars($replacement);
+        $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
+    };
+    $result;
+}

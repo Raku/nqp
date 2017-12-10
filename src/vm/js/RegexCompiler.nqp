@@ -261,16 +261,34 @@ class RegexCompiler {
     }
 
     method uniprop($node) {
-        if +@($node) == 1 {
-            my str $try_prop := "nqp.uniprop_{$node.negate ?? 'not_' !! ''}{~$node[0]}($!target, $!pos)";
+        if +@($node) == 1 || +@($node) == 2 {
+            my $arg;
+            if +@($node) == 2 {
+                $arg := $!compiler.as_js($node[1], :want($T_OBJ));
+            }
+
+            my str $mangled := nqp::lc(~$node[0]);
+            $mangled := literal_subst($mangled, '_', '');
+
+            # TODO remove whitespace and all medial hyphens
+            # except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
+
+            my str $prop := "nqp.uniprop_{$node.negate ?? 'not_' !! ''}{$mangled}";
+            my str $try_prop := +@($node) == 1
+                ?? "$prop($!target, $!pos)"
+                !! "$prop($*CTX, $!cursor, $!target, $!pos, {$arg.expr})";
+
+            my str $check;
             if $node.subtype eq 'zerowidth' {
-                "if ($try_prop === -1) \{{self.fail}\}\n";
+                $check := "if ($try_prop === -1) \{{self.fail}\}\n";
             }
             else {
                 my str $offset := $*BLOCK.add_tmp;
-                "$offset = $try_prop;\n"
+                $check := "$offset = $try_prop;\n"
                 ~ "if ($offset === -1) \{{self.fail}\} else \{$!pos += $offset\}\n";
             }
+
+            +@($node) == 1 ?? $check !! Chunk.void($arg, $check);
         } else {
             $!compiler.NYI("NYI uniprop with more arguments");
         }

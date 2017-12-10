@@ -1,16 +1,6 @@
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has $!nyi;
 
-    my sub literal_subst(str $source, str $pattern, str $replacement) {
-        my int $where := 0;
-        my str $result := $source;
-        while (my int $found := nqp::index($result, $pattern, $where)) != -1 {
-            $where := $found + nqp::chars($replacement);
-            $result := nqp::replace($result, $found, nqp::chars($pattern), $replacement);
-        };
-        $result;
-    }
-
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
         my %env := nqp::getenvhash();
