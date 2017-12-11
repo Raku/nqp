@@ -8,6 +8,31 @@ function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
 }
 
+const propIdToNames = {};
+for (const propName in names.props) {
+  const propId = names.props[propName];
+  if (!propIdToNames[propId]) propIdToNames[propId] = propIdToNames[propId] || [];
+  propIdToNames[propId].push(propName);
+}
+
+
+function addProp(propName, builder) {
+  const propId = names.props[propName];
+  const match = builder(true);
+  const do_not_match = builder(false);
+  for (const alias of propIdToNames[propId]) {
+    exports['uniprop_' + mangled(alias)] = match;
+    exports['uniprop_not_' + mangled(alias)] = do_not_match;
+  }
+}
+
+function addExtraProp(propName, builder) {
+  if (!exports['uniprop_' + mangled(propName)]) {
+    exports['uniprop_' + mangled(propName)] = builder(true);
+    exports['uniprop_not_' + mangled(propName)] = builder(false);
+  }
+}
+
 function matchClass(shouldMatch, category, negated) {
   let regexp = xregexp('\\' + (shouldMatch ? 'p' : 'P') + '{' + category + '}', 'Ay');
   return function(target, pos) {
@@ -20,59 +45,35 @@ function matchClass(shouldMatch, category, negated) {
   };
 }
 
-let props = {
-  lower: 'Lowercase',
-  upper: 'Uppercase',
-  Lowercase: 'Lowercase',
-  Uppercase: 'Uppercase',
-  'White_Space': 'White_Space',
-  'space': 'White_Space',
-  'ASCII': 'ASCII',
-  'Alpha': 'Alphabetic',
-  'Alphabetic': 'Alphabetic',
-  Any: 'Any'
-};
-
-for (let prop in props) {
-  exports['uniprop_' + mangled(prop)] = matchClass(true, props[prop]);
-  exports['uniprop_not_' + mangled(prop)] = matchClass(false, props[prop]);
+for (const prop of ['Lowercase', 'Uppercase', 'White_Space', 'Alphabetic']) {
+  addProp(prop, match => matchClass(match, prop));
 }
 
+addExtraProp('ascii', match => matchClass(match, 'ASCII'));
+addExtraProp('any', match => matchClass(match, 'Any'));
 
-for (let key in propVals.blk) {
+
+
+for (const key in propVals.blk) {
   if (key === 'NB') {
     continue;
   }
-  let alias = mangled('In' + key);
 
-  let forXregexp = 'In' + propVals.blk[key];
-  let long = mangled('In' + propVals.blk[key]);
+  const matchBlock = match => matchClass(match, 'In' + propVals.blk[key]);
 
-  exports['uniprop_' + mangled(alias)] = matchClass(true, forXregexp );
-  exports['uniprop_not_' + mangled(alias)] = matchClass(false, forXregexp);
-
-  if (!(('uniprop_' + long) in exports)) {
-    exports['uniprop_' + long] = matchClass(true, forXregexp);
-    exports['uniprop_not_' + long] = matchClass(false, forXregexp);
-  }
+  addExtraProp('In' + key, matchBlock);
+  addExtraProp('In' + propVals.blk[key], matchBlock);
 }
 
-for (let alias in propVals.sc) {
+for (const alias in propVals.sc) {
   if (alias === 'Hrkt' || alias === 'Zzzz') {
     continue;
   }
 
-  let forXregexp = propVals.sc[alias];
-  let long = mangled(propVals.sc[alias]);
+  const matchScript = match => matchClass(match, propVals.sc[alias]);
 
-
-  exports['uniprop_' + mangled(alias)] = matchClass(true, forXregexp );
-  exports['uniprop_not_' + mangled(alias)] = matchClass(false, forXregexp);
-
-  if (!(('uniprop_' + long) in exports)) {
-    exports['uniprop_' + long] = matchClass(true, forXregexp);
-    exports['uniprop_not_' + long] = matchClass(false, forXregexp);
-  }
+  addExtraProp(alias, matchScript);
+  addExtraProp(propVals.sc[alias], matchScript);
 }
 
 for (let alias in propVals.gc) {
@@ -80,17 +81,10 @@ for (let alias in propVals.gc) {
     continue;
   }
 
-  const long = mangled(propVals.gc[alias]);
-  const forXregexp = propVals.gc[alias].replace(/_/g, '');
+  const matchAlias = match => matchClass(match, propVals.gc[alias].replace(/_/g, ''));
 
-  exports['uniprop_' + mangled(alias)] = matchClass(true, forXregexp);
-  exports['uniprop_not_' + mangled(alias)] = matchClass(false, forXregexp);
-
-
-  if (!(('uniprop_' + long) in exports)) {
-    exports['uniprop_' + long] = matchClass(true, forXregexp);
-    exports['uniprop_not_' + long] = matchClass(false, forXregexp);
-  }
+  addExtraProp(alias, matchAlias);
+  addExtraProp(propVals.gc[alias], matchAlias);
 }
 
 function categoriesToRegex(categories) {
@@ -113,18 +107,9 @@ function matchDerived(shouldMatch, match, avoid) {
 }
 
 
-const derivedRecipes = {
-  LC: ['Ll', 'Lu', 'Lt']
-};
-
-const derived = {LC: 'Cased_Letter'};
-
-for (let short in derived) {
-  const long = mangled(derived[short]);
-  exports['uniprop_' + mangled(short)] = exports['uniprop_' + long] = matchDerived(true, derivedRecipes[short]);
-  exports['uniprop_not_' + mangled(short)] = exports['uniprop_not_' + long] = matchDerived(false, derivedRecipes[short]);
-}
-
+const matchLC = match => matchDerived(match, ['Ll', 'Lu', 'Lt']);
+addExtraProp('LC', matchLC);
+addExtraProp('Cased_Letter', matchLC);
 
 const UnicodeTrie = require('unicode-trie')
 const fs = require('fs')
@@ -196,13 +181,6 @@ function matchRegex(shouldMatch, regexString) {
   };
 }
 
-const propIdToNames = {};
-for (const propName in names.props) {
-  const propId = names.props[propName];
-  if (!propIdToNames[propId]) propIdToNames[propId] = propIdToNames[propId] || [];
-  propIdToNames[propId].push(propName);
-}
-
 for (const propId in names.regexes) {
   const match = matchRegex(true, names.regexes[propId]);
   const negatedMatch = matchRegex(false, names.regexes[propId]);
@@ -214,20 +192,16 @@ for (const propId in names.regexes) {
 
 
 const mathRegex = names.regexes[names.props.Other_Math] + '|\\p{Sm}';
+addProp('Math', match => matchRegex(match, mathRegex));
 
-exports.uniprop_math = matchRegex(true, mathRegex);
-exports.uniprop_not_math = matchRegex(false, mathRegex);
+addExtraProp('Assigned', match => matchRegex(true, match ? '\\P{Cn}' : '\\p{Cn}'));
 
-exports.uniprop_assigned = matchRegex(true, '\\P{Cn}');
-exports.uniprop_not_assigned = matchRegex(true, '\\p{Cn}');
+addExtraProp('Unassigned', match => matchRegex(true, match ? '\\p{Cn}' : '\\P{Cn}'));
 
-exports.uniprop_unassigned = matchRegex(true, '\\p{Cn}');
-exports.uniprop_not_unassigned = matchRegex(true, '\\P{Cn}');
+addProp('ID_Start', match => matchDerived(match,
+  ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Other_ID_Start'],
+  ['Pattern_Syntax', 'Pattern_White_Space']));
 
-exports.uniprop_idstart = matchDerived(true, ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Other_ID_Start'],  ['Pattern_Syntax', 'Pattern_White_Space']);
-
-exports.uniprop_not_idstart = matchDerived(false, ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Other_ID_Start'],  ['Pattern_Syntax', 'Pattern_White_Space']);
-
-exports.uniprop_idcontinue = matchDerived(true, ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Mn', 'Mc', 'Nd', 'Pc', 'Other_ID_Continue', 'Other_ID_Start'],  ['Pattern_Syntax', 'Pattern_White_Space']);
-
-exports.uniprop_not_idcontinue = matchDerived(false, ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Mn', 'Mc', 'Nd', 'Pc', 'Other_ID_Continue', 'Other_ID_Start'],  ['Pattern_Syntax', 'Pattern_White_Space']);
+addProp('ID_Continue', match => matchDerived(match,
+  ['Lu', 'Ll', 'Lt', 'Lm', 'Lo', 'Nl', 'Mn', 'Mc', 'Nd', 'Pc', 'Other_ID_Continue', 'Other_ID_Start'],
+  ['Pattern_Syntax', 'Pattern_White_Space']));
