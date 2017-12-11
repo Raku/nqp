@@ -107,6 +107,7 @@ const NativeStrArg = nativeArgs.NativeStrArg;
 
 const numericTypeData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericType.trie'));
 const bidiClassData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/BidiClass.trie'));
+const numericValueData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericValue.trie'));
 
 
 function propWithArgs(negated, trie, propName, longNames) {
@@ -134,12 +135,16 @@ function propWithArgs(negated, trie, propName, longNames) {
 };
 
 exports.uniprop_numerictype = propWithArgs(false, numericTypeData, 'nt', true);
-exports.uniprop_nt = propWithArgs(false, numericTypeData, 'nt', false);
-exports.uniprop_bc = propWithArgs(false, bidiClassData, 'bc', false);
-
 exports.uniprop_not_numerictype = propWithArgs(true, numericTypeData, 'nt', true);
+
+exports.uniprop_nt = propWithArgs(false, numericTypeData, 'nt', false);
 exports.uniprop_not_nt = propWithArgs(true, numericTypeData, 'nt', false);
+
+exports.uniprop_bc = propWithArgs(false, bidiClassData, 'bc', false);
 exports.uniprop_not_bc = propWithArgs(true, bidiClassData, 'bc', false);
+
+exports.uniprop_numericvalue = propWithArgs(false, numericValueData, 'nv', false);
+exports.uniprop_not_numerictype = propWithArgs(true, numericValueData, 'nv', false);
 
 function maybeNegated(shouldMatch, main, exclude) {
   let regex;
