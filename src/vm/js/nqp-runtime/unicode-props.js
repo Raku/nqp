@@ -1,5 +1,3 @@
-
-const propVals = require('./propVals.js');
 const xregexp = require('xregexp');
 
 const names = require('./unicode-data/names.js');
@@ -52,40 +50,30 @@ for (const prop of ['Lowercase', 'Uppercase', 'White_Space', 'Alphabetic']) {
 addExtraProp('ascii', match => matchClass(match, 'ASCII'));
 addExtraProp('any', match => matchClass(match, 'Any'));
 
-
-
-for (const key in propVals.blk) {
-  if (key === 'NB') {
-    continue;
+function addPropValueProps(propName, builder, filter, extraMangle) {
+  for (const propValue of names.propValues[names.props[propName]]) {
+    if (!filter(propValue[0])) continue;
+    for (const alias of propValue) {
+      const mangledAlias = mangled(extraMangle ? extraMangle(alias) : alias);
+      exports['uniprop_' + mangledAlias] = builder(true, propValue[1]);
+      exports['uniprop_not_' + mangledAlias] = builder(false, propValue[1]);
+    }
   }
-
-  const matchBlock = match => matchClass(match, 'In' + propVals.blk[key]);
-
-  addExtraProp('In' + key, matchBlock);
-  addExtraProp('In' + propVals.blk[key], matchBlock);
 }
 
-for (const alias in propVals.sc) {
-  if (alias === 'Hrkt' || alias === 'Zzzz') {
-    continue;
-  }
+addPropValueProps('Block',
+  (match, long) => matchClass(match, 'In' + long),
+  short => short !== 'NB',
+  alias => 'In' + alias
+);
 
-  const matchScript = match => matchClass(match, propVals.sc[alias]);
+addPropValueProps('Script',
+  (match, long) => matchClass(match, long),
+  short => short !== 'Hrkt' && short !== 'Zzzz');
 
-  addExtraProp(alias, matchScript);
-  addExtraProp(propVals.sc[alias], matchScript);
-}
-
-for (let alias in propVals.gc) {
-  if (alias === 'LC') {
-    continue;
-  }
-
-  const matchAlias = match => matchClass(match, propVals.gc[alias].replace(/_/g, ''));
-
-  addExtraProp(alias, matchAlias);
-  addExtraProp(propVals.gc[alias], matchAlias);
-}
+addPropValueProps('General_Category',
+  (match, long) => matchClass(match, long.replace(/_/g, '')),
+  short => short !== 'LC');
 
 function categoriesToRegex(categories) {
  return categories ? categories.map(
@@ -129,10 +117,7 @@ function propWithArgs(negated, trie, propName, longNames) {
     const propValueId = trie.get(code);
 
 
-    let valueName = longNames
-      ? names.propLongValues[propId][propValueId-1]
-      : names.propShortValues[propId][propValueId-1];
-
+    let valueName = names.propValues[propId][propValueId-1][longNames ? 1 : 0];
 
     const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(valueName)).$$getInt();
 
