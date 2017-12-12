@@ -1,6 +1,7 @@
 const xregexp = require('xregexp');
 
 const names = require('./unicode-data/names.js');
+const core = require('./core.js');
 
 function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
@@ -110,6 +111,16 @@ const bidiClassData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data
 const numericValueData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericValue.trie'));
 
 
+function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
+    const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value)).$$getInt();
+    if (result === (shouldMatch ? 0 : 1)) {
+      return -1;
+    } else {
+      let isPair = 0; // TODO codes that take two bytes
+      return isPair ? 2 : 1;
+    }
+}
+
 function propWithArgs(shouldMatch, trie, propName, longNames) {
   const propId = names.props[propName];
   return function(ctx, cursor, target, offset, obj) {
@@ -119,16 +130,7 @@ function propWithArgs(shouldMatch, trie, propName, longNames) {
 
     let valueName = names.propValues[propId][propValueId-1][longNames ? 1 : 0];
 
-    const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(valueName)).$$getInt();
-
-    if (result === (shouldMatch ? 0 : 1)) {
-      return -1;
-    } else {
-      let isPair = 0; // TODO codes that take two bytes
-      return isPair ? 2 : 1;
-    }
-
-    return -1;
+    return delegateAccepts(shouldMatch, ctx, cursor, obj, code, valueName);
   };
 };
 
@@ -136,6 +138,19 @@ function addPropWithArgs(alias, trie, propName, longNames) {
   exports['uniprop_' + alias] = propWithArgs(true, trie, propName, longNames);
   exports['uniprop_not_' + alias] = propWithArgs(false, trie, propName, longNames);
 }
+
+function matchName(shouldMatch) {
+  return function(ctx, cursor, target, offset, obj) {
+    const code = target.codePointAt(offset);
+    if (code === undefined) return -1;
+    const name = core.op.getuniname(code);
+
+    return delegateAccepts(shouldMatch, ctx, cursor, obj, code, name);
+  };
+}
+
+exports.uniprop_name = matchName(true);
+exports.uniprop_not_name = matchName(false);
 
 addPropWithArgs('numerictype', numericTypeData, 'nt', true)
 addPropWithArgs('nt', numericTypeData, 'nt', false)
