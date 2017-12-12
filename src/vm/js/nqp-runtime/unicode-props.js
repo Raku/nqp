@@ -144,7 +144,7 @@ exports.uniprop_bc = propWithArgs(false, bidiClassData, 'bc', false);
 exports.uniprop_not_bc = propWithArgs(true, bidiClassData, 'bc', false);
 
 exports.uniprop_numericvalue = propWithArgs(false, numericValueData, 'nv', false);
-exports.uniprop_not_numerictype = propWithArgs(true, numericValueData, 'nv', false);
+exports.uniprop_not_numericvalue = propWithArgs(true, numericValueData, 'nv', false);
 
 function maybeNegated(shouldMatch, main, exclude) {
   let regex;
