@@ -110,41 +110,37 @@ const bidiClassData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data
 const numericValueData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericValue.trie'));
 
 
-function propWithArgs(negated, trie, propName, longNames) {
+function propWithArgs(shouldMatch, trie, propName, longNames) {
   const propId = names.props[propName];
   return function(ctx, cursor, target, offset, obj) {
     const code = target.codePointAt(offset);
     if (code === undefined) return -1;
     const propValueId = trie.get(code);
 
-
     let valueName = names.propValues[propId][propValueId-1][longNames ? 1 : 0];
 
     const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(valueName)).$$getInt();
 
-    if (result === (negated ? 1 : 0)) {
+    if (result === (shouldMatch ? 0 : 1)) {
       return -1;
     } else {
       let isPair = 0; // TODO codes that take two bytes
       return isPair ? 2 : 1;
     }
 
-
     return -1;
   };
 };
 
-exports.uniprop_numerictype = propWithArgs(false, numericTypeData, 'nt', true);
-exports.uniprop_not_numerictype = propWithArgs(true, numericTypeData, 'nt', true);
+function addPropWithArgs(alias, trie, propName, longNames) {
+  exports['uniprop_' + alias] = propWithArgs(true, trie, propName, longNames);
+  exports['uniprop_not_' + alias] = propWithArgs(false, trie, propName, longNames);
+}
 
-exports.uniprop_nt = propWithArgs(false, numericTypeData, 'nt', false);
-exports.uniprop_not_nt = propWithArgs(true, numericTypeData, 'nt', false);
-
-exports.uniprop_bc = propWithArgs(false, bidiClassData, 'bc', false);
-exports.uniprop_not_bc = propWithArgs(true, bidiClassData, 'bc', false);
-
-exports.uniprop_numericvalue = propWithArgs(false, numericValueData, 'nv', false);
-exports.uniprop_not_numericvalue = propWithArgs(true, numericValueData, 'nv', false);
+addPropWithArgs('numerictype', numericTypeData, 'nt', true)
+addPropWithArgs('nt', numericTypeData, 'nt', false)
+addPropWithArgs('bc', bidiClassData, 'bc', false)
+addPropWithArgs('numericvalue', numericValueData, 'nv', false)
 
 function maybeNegated(shouldMatch, main, exclude) {
   let regex;
