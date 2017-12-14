@@ -1691,7 +1691,7 @@ class QAST::OperationsJS {
             ~ "\}\n"
         );
     });
-    add_simple_op('cleardispatcher', $T_VOID, [], sub () {"nqp.currentDispatcher = undefined"}, :side_effects);
+    add_simple_op('cleardispatcher', $T_VOID, [], :ctx, :side_effects);
     add_simple_op('setdispatcher', $T_VOID, [$T_OBJ], sub ($value) {"nqp.currentDispatcher = $value"}, :side_effects);
     add_simple_op('setdispatcherfor', $T_VOID, [$T_OBJ, $T_OBJ], :side_effects);
 

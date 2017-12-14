@@ -1587,6 +1587,12 @@ op.unicmp_s = function(a, b, collationMode, language, code) {
   return (result < 0 ? -1 : (result > 0 ? 1 : 0));
 };
 
+op.cleardispatcher = function(ctx) {
+  if (nqp.currentDispatcherFor === ctx.codeRef() || nqp.currentDispatcherFor === undefined) {
+    nqp.currentDispatcher = undefined
+  }
+};
+
 const getrusage = require('qrusage');
 op.getrusage = function() {
   const usage = getrusage();
