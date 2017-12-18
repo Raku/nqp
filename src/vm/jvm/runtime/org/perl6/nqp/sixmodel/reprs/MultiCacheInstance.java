@@ -73,8 +73,15 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
-                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
+                SixModelObject cont = (SixModelObject)args[i];
+                SixModelObject decont = Ops.decont(cont, tc);
+                long flag = ((long)decont.st.hashCode()) << 3;
+                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                    flag |= 4;    /* Native ref vs. non-native ref */
+                    flag |= 2;    /* Native refs are always writable. */
+                }
+                else if (Ops.isrwcont(cont, tc) == 1)
+                    flag |= 2;
                 if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
@@ -154,8 +161,15 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
-                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
+                SixModelObject cont = (SixModelObject)args[i];
+                SixModelObject decont = Ops.decont(cont, tc);
+                long flag = ((long)decont.st.hashCode()) << 3;
+                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                    flag |= 4;    /* Native ref vs. non-native ref */
+                    flag |= 2;    /* Native refs are always writable. */
+                }
+                else if (Ops.isrwcont(cont, tc) == 1)
+                    flag |= 2;
                 if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
