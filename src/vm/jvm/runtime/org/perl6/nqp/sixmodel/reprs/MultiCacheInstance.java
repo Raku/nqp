@@ -8,7 +8,7 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_MAX_ARITY = 4;
-    private static final int MD_CACHE_MAX_ENTRIES = 16;
+    private static final int MD_CACHE_MAX_ENTRIES = 32;
     private static final int MD_CACHE_INT = 1;
     private static final int MD_CACHE_NUM = 2;
     private static final int MD_CACHE_STR = 3;
