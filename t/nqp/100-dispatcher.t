@@ -1,4 +1,4 @@
-plan(10);
+plan(7);
 my $closure;
 {
     nqp::setdispatcher(100);
@@ -60,22 +60,3 @@ nqp::setdispatcherfor(400, $wraped2);
 $wraped1();
 $wraped2();
 
-sub take_or_clear($take) {
-    my $foo := 100;
-    if $take {
-      nqp::takedispatcher('$foo');
-    } else {
-      nqp::cleardispatcher();
-    }
-    $foo;
-}
-
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    nqp::setdispatcherfor(400, &take_or_clear);
-    is(take_or_clear(1), 400);
-    nqp::setdispatcherfor(400, &take_or_clear);
-    is(take_or_clear(0), 100);
-    is(take_or_clear(1), 100);
-} else {
-    skip('skip broken tests on the jvm', 3);
-}
