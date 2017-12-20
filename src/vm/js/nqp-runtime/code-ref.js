@@ -77,7 +77,7 @@ class CodeRef extends NQPObject {
       this.outerCtx = fakeOuterCtx;
 
       this.$$call = staticCode.freshBlock();
-      return staticCode.$$call.apply(staticCode, arguments);
+      return this.$$call.apply(this, arguments);
     } else {
       console.log('can\'t autoclose - BAD');
     }
