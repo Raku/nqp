@@ -70,12 +70,8 @@ sub take_or_clear($take) {
     $foo;
 }
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    nqp::setdispatcherfor(400, &take_or_clear);
-    is(take_or_clear(1), 400);
-    nqp::setdispatcherfor(400, &take_or_clear);
-    is(take_or_clear(0), 100);
-    is(take_or_clear(1), 100);
-} else {
-    skip('skip broken tests on the jvm', 3);
-}
+nqp::setdispatcherfor(400, &take_or_clear);
+is(take_or_clear(1), 400);
+nqp::setdispatcherfor(400, &take_or_clear);
+is(take_or_clear(0), 100);
+is(take_or_clear(1), 100);
