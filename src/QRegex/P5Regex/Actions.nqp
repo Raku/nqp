@@ -417,7 +417,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             if $name eq '' { $name := $count; $ast.name($name); }
             my @names := nqp::split('=', $name);
             for @names {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                $count := $_ + 1
+                    if $_ eq '0' # check for named capture before numifying
+                    || nqp::iscclass(nqp::const::CCLASS_NUMERIC, $_, 0)
+                    && $_ > 0;
                 %capnames{$_} := 1;
             }
         }
@@ -425,7 +428,10 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             my $name := $ast.name;
             if $name eq '' { $name := $count; $ast.name($name); }
             for nqp::split(' ', $name) {
-                if $_ eq '0' || $_ > 0 { $count := $_ + 1; }
+                $count := $_ + 1
+                    if $_ eq '0' # check for named capture before numifying
+                    || nqp::iscclass(nqp::const::CCLASS_NUMERIC, $_, 0)
+                    && $_ > 0;
                 %capnames{$_} := 1;
             }
             my %x := capnames($ast[0], $count);
