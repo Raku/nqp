@@ -49,9 +49,9 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
         if (n == elems)
             return;
 
-        /* if there aren't enough slots at the end, shift off empty slots 
-         * from the beginning first */
         if (start > 0 && n + start > ssize) {
+            /* if there aren't enough slots at the end, shift off empty slots
+             * from the beginning first */
             if (elems > 0) 
                 memmove(slots, 0, start, elems);
             this.start = 0;
@@ -59,6 +59,13 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
             while (elems < ssize) {
                 slots[(int)elems] = 0;
                 elems++;
+            }
+        }
+        else if (n < elems) {
+            /* we're downsizing; clear off extra slots */
+            while (n < elems) {
+                elems--;
+                slots[(int)(start + elems)] = 0;
             }
         }
 
