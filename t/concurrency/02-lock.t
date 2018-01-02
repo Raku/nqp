@@ -198,6 +198,7 @@ my class CondVar is repr('ConditionVariable') { }
     nqp::threadrun($t3);
     nqp::threadrun($t4);
     nqp::threadrun($t5);
+    nqp::sleep(1.0);
 
     # Start signaling thread
     nqp::threadrun($t1);
