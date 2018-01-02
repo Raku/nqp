@@ -92,9 +92,9 @@ plan(24);
 {
     my @a;
     my $t := nqp::newthread({
-        nqp::threadyield() until @a;
+        nqp::threadyield() until nqp::elems(@a) == 1;
         nqp::push(@a, '1');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 3;
         nqp::push(@a, '2');
     }, 0);
 
@@ -104,9 +104,9 @@ plan(24);
 
     {
         nqp::push(@a, 'a');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 2;
         nqp::push(@a, 'b');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 4;
         nqp::push(@a, 'c');
     }
 
@@ -115,8 +115,6 @@ plan(24);
     ok(@a[0] eq 'a',
        'Looped threadyield() can force parent thread to act first');
 
-    # XXXX: This test goes wrong on nqp-j, always giving a,b,c,1,2;
-    #       It appears the threadyield() ops get ignored.
     my $order := nqp::join(',', @a);
     my $ok    := $order eq 'a,1,b,2,c';
     ok($ok, 'threadyield() properly interleaved parent and child threads');
@@ -131,15 +129,15 @@ plan(24);
     my @a;
     my $t1 := nqp::newthread({
         nqp::push(@a, 'a');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 2;
         nqp::push(@a, 'b');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 4;
         nqp::push(@a, 'c');
     }, 0);
     my $t2 := nqp::newthread({
-        nqp::threadyield() until @a;
+        nqp::threadyield() until nqp::elems(@a) == 1;
         nqp::push(@a, '1');
-        nqp::threadyield();
+        nqp::threadyield() until nqp::elems(@a) == 3;
         nqp::push(@a, '2');
     }, 0);
 
@@ -155,9 +153,6 @@ plan(24);
     ok(@a[0] eq 'a',
        'Looped threadyield() can force other thread to act first');
 
-    # XXXX: This test is flaky on nqp-j, often giving a,1,2,b,c
-    #       or more rarely a,1,b,c,2; in either case, one of the
-    #       threadyield() ops get ignored.
     my $order := nqp::join(',', @a);
     my $ok    := $order eq 'a,1,b,2,c';
     ok($ok, 'threadyield() properly interleaved two child threads');
