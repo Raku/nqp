@@ -31,7 +31,7 @@ public class NFA extends REPR {
     public static final int EDGE_CODEPOINT_IM     = 19;
     public static final int EDGE_CODEPOINT_IM_NEG = 20;
     public static final int EDGE_CODEPOINT_IM_LL  = 21;
-    
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -55,19 +55,19 @@ public class NFA extends REPR {
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         NFAInstance body = (NFAInstance)obj;
-        
+
         /* Read fates. */
         body.fates = reader.readRef();
-        
+
         /* Read number of states. */
         body.numStates = (int)reader.readLong();
-        
+
         if (body.numStates > 0) {
             /* Read state edge list counts. */
             int[] numStateEdges = new int[body.numStates];
             for (int i = 0; i < body.numStates; i++)
                 numStateEdges[i] = (int)reader.readLong();
-                
+
             /* Read state graph. */
             body.states = new NFAStateInfo[body.numStates][];
             for (int i = 0; i < body.numStates; i++) {
@@ -104,16 +104,16 @@ public class NFA extends REPR {
             }
         }
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         NFAInstance body = (NFAInstance)obj;
-        
+
         /* Write fates. */
         writer.writeRef(body.fates);
-        
+
         /* Write number of states. */
         writer.writeInt(body.numStates);
-        
+
         /* Write state edge list counts. */
         for (int i = 0; i < body.numStates; i++)
             writer.writeInt(body.states[i].length);

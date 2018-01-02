@@ -22,11 +22,11 @@ public class VMException extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "VMException does not participate in serialization");
     }
-    
+
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "VMException does not participate in serialization");

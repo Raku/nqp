@@ -27,7 +27,7 @@ public class STable {
      * This flag is set if we consider the method cache authoritative.
      */
     public static final int METHOD_CACHE_AUTHORITATIVE = 4;
-    
+
     /**
      * HLL type roles.
      */
@@ -38,12 +38,12 @@ public class STable {
     private static final int HLL_ROLE_ARRAY = 4;
     private static final int HLL_ROLE_HASH = 5;
     private static final int HLL_ROLE_CODE = 6;
-    
+
     /**
      * Indicates that there's no attribute access hint.
      */
     public static final long NO_HINT = -1;
-    
+
     /**
      * Initializes a new STable.
      */
@@ -56,7 +56,7 @@ public class STable {
      * The representation operation table.
      */
     public REPR REPR;
-    
+
     /**
      * Any data specific to this type that the REPR wants to keep.
      */
@@ -76,7 +76,7 @@ public class STable {
      * Info for types that are parametric or parameterized.
      */
     public AbstractParametricity parametricity;
-    
+
     /**
      * By-name method dispatch cache.
      */
@@ -86,14 +86,14 @@ public class STable {
      * The computed v-table for static dispatch.
      */
     public SixModelObject[] VTable;
-    
+
     /**
      * Array of type objects. If this is set, then it is expected to contain
      * the type objects of all types that this type is equivalent to (e.g.
      * all the things it isa and all the things it does).
      */
     public SixModelObject[] TypeCheckCache;
-    
+
     /**
      * The type checking mode and method cache mode.
      */
@@ -106,41 +106,41 @@ public class STable {
      * leaks for anonymous types, and other such screwups.
      */
     public int TypeCacheId;
-    
+
     /**
      * If this is a container, then this contains information needed in
      * order to fetch the value in it. If not, it'll be null, which can
      * be taken as a "not a container" indication.
      */
     public ContainerSpec ContainerSpec;
-    
+
     /**
      * If this is invokable, then this contains information needed to
      * figure out how to invoke it. If not, it'll be null.
      */
     public InvocationSpec InvocationSpec;
-    
+
     /**
      * Information - if any - about how we can turn something of this type
      * into a boolean.
      */
     public BoolificationSpec BoolificationSpec;
-    
+
     /**
      * The underlying package stash.
      */
     public SixModelObject WHO;
-    
+
     /**
      * Serialization context that this s-table belongs to.
      */
     public SerializationContext sc;
-    
+
     /**
      * The HLL that this type is owned by, if any.
      */
     public HLLConfig hllOwner;
-    
+
     /**
      * The role that the type plays in the HLL, if any.
      */

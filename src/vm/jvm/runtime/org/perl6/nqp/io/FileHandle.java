@@ -16,11 +16,11 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
-    
+
     FileChannel fc;
     FileLock lock;
     protected boolean eof = false;
-    
+
     public static OpenOption[] resolveOpenMode(String mode) {
         if(mode.length() == 0)
             return null;
@@ -54,7 +54,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
         return opts.toArray(new OpenOption[opts.size()]);
     }
-    
+
     public FileHandle(ThreadContext tc, String filename, String mode) {
         try {
             Path p = new File(filename).toPath();
@@ -70,7 +70,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void seek(ThreadContext tc, long offset, long whence) {
         try {
             switch ((int)whence) {
@@ -94,7 +94,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         /* Reset readBuffer since content is out of sync after fc.position. */
         readBuffer = null;
     }
-    
+
     public long tell(ThreadContext tc) {
         try {
             long position = fc.position();
@@ -137,7 +137,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void flush(ThreadContext tc) {
         try {
             fc.force(false);

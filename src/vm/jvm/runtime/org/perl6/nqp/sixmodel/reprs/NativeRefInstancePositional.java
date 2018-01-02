@@ -9,7 +9,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class NativeRefInstancePositional extends NativeRefInstance {
     public SixModelObject obj;
     public long idx;
-    
+
     public long fetch_i(ThreadContext tc) {
         obj.at_pos_native(tc, idx);
         if (tc.native_type == ThreadContext.NATIVE_INT)

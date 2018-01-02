@@ -28,7 +28,7 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6Opaque extends REPR {
     private static long typeId = 0;
-    
+
     private static class AttrInfo {
         public STable st;
         public boolean boxTarget;
@@ -72,7 +72,7 @@ public class P6Opaque extends REPR {
         st.WHAT = obj;
         return st.WHAT;
     }
-    
+
     @SuppressWarnings("unchecked") // Because Java implemented generics stupidly
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info_hash) {
         /* Get attribute part of the protocol from the hash. */
@@ -94,7 +94,7 @@ public class P6Opaque extends REPR {
             SixModelObject type = entry.at_pos_boxed(tc, 0);
             SixModelObject attrs = entry.at_pos_boxed(tc, 1);
             SixModelObject parents = entry.at_pos_boxed(tc, 2);
-            
+
             /* If it has any attributes, give them each indexes and put them
              * in the list to add to the layout. */
             long numAttrs = attrs.elems(tc);
@@ -121,7 +121,7 @@ public class P6Opaque extends REPR {
                     info.posDelegate = attrHash.exists_key(tc, "positional_delegate") != 0;
                     info.assDelegate = attrHash.exists_key(tc, "associative_delegate") != 0;
                     attrInfoList.add(info);
-                    
+
                     if (info.boxTarget) {
                         switch (info.st.REPR.get_storage_spec(tc, info.st).boxed_primitive) {
                         case StorageSpec.BP_INT:
@@ -142,25 +142,25 @@ public class P6Opaque extends REPR {
                         ((P6OpaqueREPRData)st.REPRData).posDelSlot = curAttr;
                     if (info.assDelegate)
                         ((P6OpaqueREPRData)st.REPRData).assDelSlot = curAttr;
-                    
+
                     curAttr++;
                 }
                 classHandles.add(type);
                 attrIndexes.add(indexes);
             }
-            
+
             /* Multiple parents means it's multiple inheritance. */
             if (parents.elems(tc) > 1)
                 mi = true;
         }
-        
+
         /* Populate some REPR data. */
         ((P6OpaqueREPRData)st.REPRData).classHandles = classHandles.toArray(new SixModelObject[0]);
         ((P6OpaqueREPRData)st.REPRData).nameToHintMap = attrIndexes.toArray(new HashMap[0]);
         ((P6OpaqueREPRData)st.REPRData).autoVivContainers = autoVivs.toArray(new SixModelObject[0]);
         ((P6OpaqueREPRData)st.REPRData).flattenedSTables = flattenedSTables.toArray(new STable[0]);
         ((P6OpaqueREPRData)st.REPRData).mi = mi;
-        
+
         /* Provided we have attributes, generate the JVM backing type. If not,
          * P6OpaqueBaseInstance will do. */
         if (attrInfoList.size() > 0) {
@@ -172,30 +172,30 @@ public class P6Opaque extends REPR {
             ((P6OpaqueREPRData)st.REPRData).instance.st = st;
         }
     }
-    
+
     /* Adds delegation, needed for mixin support. */
     private void addDelegation(MethodVisitor mv, String methodName,
             Type retType, Type[] argTypes, boolean hasValue) {
 
         mv.visitVarInsn(Opcodes.ALOAD, 0); // this
-        mv.visitFieldInsn(Opcodes.GETFIELD, "org/perl6/nqp/sixmodel/reprs/P6OpaqueBaseInstance", "delegate", 
+        mv.visitFieldInsn(Opcodes.GETFIELD, "org/perl6/nqp/sixmodel/reprs/P6OpaqueBaseInstance", "delegate",
                 "Lorg/perl6/nqp/sixmodel/SixModelObject;");
         mv.visitInsn(Opcodes.DUP);
-        
+
         Label label = new Label();
         mv.visitJumpInsn(Opcodes.IFNULL, label);
-        
+
         mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
         mv.visitVarInsn(Opcodes.ALOAD, 2); // class_handle
         mv.visitVarInsn(Opcodes.ALOAD, 3); // name
         mv.visitVarInsn(Opcodes.LLOAD, 4); // hint
         if (hasValue)
             mv.visitVarInsn(Opcodes.ALOAD, 6); // value
-        
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SixModelObject", methodName, 
+
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/perl6/nqp/sixmodel/SixModelObject", methodName,
                 Type.getMethodDescriptor(retType, argTypes));
-        
-        mv.visitInsn(retType == Type.VOID_TYPE ? Opcodes.RETURN : 
+
+        mv.visitInsn(retType == Type.VOID_TYPE ? Opcodes.RETURN :
                      retType == Type.LONG_TYPE ? Opcodes.LRETURN :
                                                  Opcodes.ARETURN);
         mv.visitLabel(label);
@@ -262,21 +262,21 @@ public class P6Opaque extends REPR {
         String className = "__P6opaque__" + typeId++;
 
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null, 
+        cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null,
                 "org/perl6/nqp/sixmodel/reprs/P6OpaqueBaseInstance", null);
-        
+
         Type tcType = Type.getType("Lorg/perl6/nqp/runtime/ThreadContext;");
         Type smoType = Type.getType("Lorg/perl6/nqp/sixmodel/SixModelObject;");
         Type srType = Type.getType("Lorg/perl6/nqp/sixmodel/SerializationReader;");
         Type stType = Type.getType("Lorg/perl6/nqp/sixmodel/STable;");
-        
+
         /* bind_attribute_boxed */
         MethodVisitor bindBoxedVisitor;
         Label bindBoxedSwitch = null;
         Label[] bindBoxedLabels = null;
         Label bindBoxedDefault = new Label();
         {
-            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE, 
+            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE,
                     new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE, smoType });
             bindBoxedVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "bind_attribute_boxed", descriptor, null, null);
             bindBoxedVisitor.visitCode();
@@ -303,7 +303,7 @@ public class P6Opaque extends REPR {
         Label[] bindNativeLabels = null;
         Label bindNativeDefault = new Label();
         {
-            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE, 
+            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE,
                     new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE });
             bindNativeVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "bind_attribute_native", descriptor, null, null);
             bindNativeVisitor.visitCode();
@@ -323,14 +323,14 @@ public class P6Opaque extends REPR {
                 bindNativeVisitor.visitTableSwitchInsn(0, attrInfoList.size() - 1, bindNativeDefault, bindNativeLabels);
             }
         }
-        
+
         /* get_attribute_boxed */
         MethodVisitor getBoxedVisitor;
         Label getBoxedSwitch = null;
         Label[] getBoxedLabels = null;
         Label getBoxedDefault = new Label();
         {
-            String descriptor = Type.getMethodDescriptor(smoType, 
+            String descriptor = Type.getMethodDescriptor(smoType,
                     new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE });
             getBoxedVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_attribute_boxed", descriptor, null, null);
             getBoxedVisitor.visitCode();
@@ -357,7 +357,7 @@ public class P6Opaque extends REPR {
         Label[] getNativeLabels = null;
         Label getNativeDefault = new Label();
         {
-            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE, 
+            String descriptor = Type.getMethodDescriptor(Type.VOID_TYPE,
                     new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE });
             getNativeVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_attribute_native", descriptor, null, null);
             getNativeVisitor.visitCode();
@@ -377,7 +377,7 @@ public class P6Opaque extends REPR {
                 getNativeVisitor.visitTableSwitchInsn(0, attrInfoList.size() - 1, getNativeDefault, getNativeLabels);
             }
         }
-        
+
         /* is_attribute_initialized */
         MethodVisitor isInitVisitor;
         Label isInitSwitch = null;
@@ -385,7 +385,7 @@ public class P6Opaque extends REPR {
         Label isInitDefault = new Label();
         Label isInitNull = new Label();
         {
-            String descriptor = Type.getMethodDescriptor(Type.LONG_TYPE, 
+            String descriptor = Type.getMethodDescriptor(Type.LONG_TYPE,
                     new Type[] { tcType, smoType, Type.getType(String.class), Type.LONG_TYPE });
             isInitVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "is_attribute_initialized", descriptor, null, null);
             isInitVisitor.visitCode();
@@ -405,7 +405,7 @@ public class P6Opaque extends REPR {
                 isInitVisitor.visitTableSwitchInsn(0, attrInfoList.size() - 1, isInitDefault, isInitLabels);
             }
         }
-        
+
         /* deserializeFields */
         MethodVisitor deserVisitor;
         {
@@ -414,7 +414,7 @@ public class P6Opaque extends REPR {
             deserVisitor = cw.visitMethod(Opcodes.ACC_PUBLIC, "deserializeFields", descriptor, null, null);
             deserVisitor.visitCode();
         }
-        
+
         /* Now add all of the required fields and fill out the methods. */
         for (int i = 0; i < attrInfoList.size(); i++) {
             AttrInfo attr = attrInfoList.get(i);
@@ -426,14 +426,14 @@ public class P6Opaque extends REPR {
                 String field = "field_" + i;
                 String desc = "Lorg/perl6/nqp/sixmodel/SixModelObject;";
                 cw.visitField(Opcodes.ACC_PUBLIC, field, desc, null, null);
-                
+
                 /* Add bind code. */
                 bindBoxedVisitor.visitLabel(bindBoxedLabels[i]);
                 bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 6);
                 bindBoxedVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, field, desc);
                 bindBoxedVisitor.visitInsn(Opcodes.RETURN);
-                
+
                 /* Add get code. */
                 getBoxedVisitor.visitLabel(getBoxedLabels[i]);
                 getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -459,7 +459,7 @@ public class P6Opaque extends REPR {
                 else {
                     getBoxedVisitor.visitInsn(Opcodes.ARETURN);
                 }
-                
+
                 /* Add is init code. */
                 isInitVisitor.visitLabel(isInitLabels[i]);
                 isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -468,12 +468,12 @@ public class P6Opaque extends REPR {
                 isInitVisitor.visitInsn(Opcodes.ICONST_1);
                 isInitVisitor.visitInsn(Opcodes.I2L);
                 isInitVisitor.visitInsn(Opcodes.LRETURN);
-                
+
                 /* Native variants should just throw. */
                 bindNativeVisitor.visitLabel(bindNativeLabels[i]);
                 bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 bindNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "badNative", "()V");
-                
+
                 getNativeVisitor.visitLabel(getNativeLabels[i]);
                 getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 getNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "badNative", "()V");
@@ -488,7 +488,7 @@ public class P6Opaque extends REPR {
                 /* Generate field prefix and have target REPR install the field. */
                 String prefix = "field_" + i;
                 attr.st.REPR.inlineStorage(tc, attr.st, cw, prefix);
-                
+
                 /* Install bind/get instructions. */
                 bindNativeVisitor.visitLabel(bindNativeLabels[i]);
                 attr.st.REPR.inlineBind(tc, attr.st, bindNativeVisitor, className, prefix);
@@ -497,14 +497,14 @@ public class P6Opaque extends REPR {
 
                 /* Deserialization */
                 attr.st.REPR.inlineDeserialize(tc, attr.st, deserVisitor, className, prefix);
-                
+
                 /* Add is init code. */
                 isInitVisitor.visitLabel(isInitLabels[i]);
                 isInitVisitor.visitInsn(Opcodes.ICONST_1);
                 isInitVisitor.visitInsn(Opcodes.I2L);
                 isInitVisitor.visitInsn(Opcodes.LRETURN);
-                
-                /* Reference variants should just throw. */                
+
+                /* Reference variants should just throw. */
                 bindBoxedVisitor.visitLabel(bindBoxedLabels[i]);
                 bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 bindBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "badReference", "()V");
@@ -512,8 +512,8 @@ public class P6Opaque extends REPR {
                 getBoxedVisitor.visitLabel(getBoxedLabels[i]);
                 getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "badReference", "()V");
-            }            
-            
+            }
+
             /* If this is a box/unbox target, make sure it gets the appropriate
              * methods.
              */
@@ -522,7 +522,7 @@ public class P6Opaque extends REPR {
                     throw ExceptionHandling.dieInternal(tc, "A box_target must not have a reference type attribute");
                 attr.st.REPR.generateBoxingMethods(tc, attr.st, cw, className, "field_" + i);
             }
-            
+
             /* If it's a positional or associative delegate, give it the methods
              * for that.
              */
@@ -531,13 +531,13 @@ public class P6Opaque extends REPR {
             if (attr.assDelegate)
                 generateDelegateMethod(tc, cw, className, "field_" + i, "assDelegate");
         }
-        
+
         /* Finish bind_boxed_attribute. */
         bindBoxedVisitor.visitLabel(bindBoxedDefault);
         bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-        bindBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+        bindBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
                 "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             bindBoxedVisitor.visitJumpInsn(Opcodes.GOTO, bindBoxedSwitch);
@@ -545,13 +545,13 @@ public class P6Opaque extends REPR {
             bindBoxedVisitor.visitInsn(Opcodes.RETURN);
         bindBoxedVisitor.visitMaxs(0, 0);
         bindBoxedVisitor.visitEnd();
-        
+
         /* Finish bind_native_attribute. */
         bindNativeVisitor.visitLabel(bindNativeDefault);
         bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-        bindNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+        bindNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
                 "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             bindNativeVisitor.visitJumpInsn(Opcodes.GOTO, bindNativeSwitch);
@@ -559,13 +559,13 @@ public class P6Opaque extends REPR {
             bindNativeVisitor.visitInsn(Opcodes.RETURN);
         bindNativeVisitor.visitMaxs(0, 0);
         bindNativeVisitor.visitEnd();
-        
+
         /* Finish get_boxed_attribute. */
         getBoxedVisitor.visitLabel(getBoxedDefault);
         getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-        getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+        getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
                 "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             getBoxedVisitor.visitJumpInsn(Opcodes.GOTO, getBoxedSwitch);
@@ -573,14 +573,14 @@ public class P6Opaque extends REPR {
             getBoxedVisitor.visitInsn(Opcodes.ACONST_NULL);
         getBoxedVisitor.visitInsn(Opcodes.ARETURN);
         getBoxedVisitor.visitMaxs(0, 0);
-        getBoxedVisitor.visitEnd();    
-        
+        getBoxedVisitor.visitEnd();
+
         /* Finish get_native_attribute. */
         getNativeVisitor.visitLabel(getNativeDefault);
         getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-        getNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+        getNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
                 "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             getNativeVisitor.visitJumpInsn(Opcodes.GOTO, getNativeSwitch);
@@ -588,13 +588,13 @@ public class P6Opaque extends REPR {
             getNativeVisitor.visitInsn(Opcodes.RETURN);
         getNativeVisitor.visitMaxs(6, 6);
         getNativeVisitor.visitEnd();
-        
+
         /* Finish is_attribute_initialized. */
         isInitVisitor.visitLabel(isInitDefault);
         isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
         isInitVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         isInitVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-        isInitVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute", 
+        isInitVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
                 "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             isInitVisitor.visitJumpInsn(Opcodes.GOTO, isInitSwitch);
@@ -604,7 +604,7 @@ public class P6Opaque extends REPR {
         isInitVisitor.visitInsn(Opcodes.LRETURN);
         isInitVisitor.visitMaxs(0, 0);
         isInitVisitor.visitEnd();
-        
+
         /* Finish deserializeFields. */
         deserVisitor.visitInsn(Opcodes.RETURN);
         deserVisitor.visitMaxs(0, 0);
@@ -614,14 +614,14 @@ public class P6Opaque extends REPR {
         MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
         constructor.visitCode();
         constructor.visitVarInsn(Opcodes.ALOAD, 0);
-        constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, 
+        constructor.visitMethodInsn(Opcodes.INVOKESPECIAL,
                 "org/perl6/nqp/sixmodel/reprs/P6OpaqueBaseInstance", "<init>", "()V");
         constructor.visitInsn(Opcodes.RETURN);
         constructor.visitMaxs(1, 1);
         constructor.visitEnd();
 
         cw.visitEnd();
-        
+
         byte[] classCompiled = cw.toByteArray();
         // Uncomment the following line to help debug the code-gen.
         if (System.getenv("NQP_DEBUG_DUMP_CLASSFILES") != null) {
@@ -638,7 +638,7 @@ public class P6Opaque extends REPR {
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
         String desc = "Lorg/perl6/nqp/sixmodel/SixModelObject;";
 
-        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, methodName, "()"+desc, null, null);        
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, methodName, "()"+desc, null, null);
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, className, field, desc);
         mv.visitInsn(Opcodes.ARETURN);
@@ -648,12 +648,12 @@ public class P6Opaque extends REPR {
     public SixModelObject allocate(ThreadContext tc, STable st) {
         return ((P6OpaqueREPRData)st.REPRData).instance.instClone();
     }
-    
+
     public void change_type(ThreadContext tc, SixModelObject obj, SixModelObject newType) {
         // Ensure target type is also P6opaque-based.
         if (!(newType.st.REPR instanceof P6Opaque))
             throw ExceptionHandling.dieInternal(tc, "P6opaque can only rebless to another P6opaque-based type");
-        
+
         // Ensure that the MROs overlap properly.
         P6OpaqueREPRData ourREPRData = (P6OpaqueREPRData)obj.st.REPRData;
         P6OpaqueREPRData targetREPRData = (P6OpaqueREPRData)newType.st.REPRData;
@@ -663,7 +663,7 @@ public class P6Opaque extends REPR {
             if (ourREPRData.classHandles[i] != targetREPRData.classHandles[i])
                 throw ExceptionHandling.dieInternal(tc, "Incompatible MROs in P6opaque rebless");
         }
-        
+
         // If there's a different number of attributes, need to set up delegate.
         // Note the condition below works because we don't make an entry in the
         // class handles list for a type with no attributes.
@@ -671,14 +671,14 @@ public class P6Opaque extends REPR {
         if (ourREPRData.classHandles.length != targetREPRData.classHandles.length) {
             // Create delegate.
             SixModelObject delegate = newType.st.REPR.allocate(tc, newType.st);
-            
+
             // Find original object.
             SixModelObject orig;
             if (instance.delegate != null)
                 orig = instance.delegate;
             else
                 orig = obj;
-            
+
             // Copy over current attribute values.
             Field[] fromFields = orig.getClass().getFields();
             Field[] toFields = delegate.getClass().getFields();
@@ -697,11 +697,11 @@ public class P6Opaque extends REPR {
         else if(instance.delegate != null) {
             instance.delegate.st = newType.st;
         }
-        
+
         // Switch STable over to the new type.
         obj.st = newType.st;
     }
-    
+
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
         StorageSpec ss = new StorageSpec();
@@ -713,7 +713,7 @@ public class P6Opaque extends REPR {
             ss.can_box += StorageSpec.CAN_BOX_STR;
         return ss;
     }
-    
+
     public long hint_for(ThreadContext tc, STable st, SixModelObject classHandle, String name) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
         for (int i = 0; i < rd.classHandles.length; i++) {
@@ -727,16 +727,16 @@ public class P6Opaque extends REPR {
         }
         return STable.NO_HINT;
     }
-    
+
     @SuppressWarnings("unchecked")
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader) {
         // Instantiate REPR data.
         P6OpaqueREPRData REPRData = new P6OpaqueREPRData();
         st.REPRData = REPRData;
-        
+
         // Get attribute count.
         int numAttributes = (int)reader.readLong();
-        
+
         // Get list of any flattened in STables.
         STable[] flattenedSTables = new STable[numAttributes];
         for (int i = 0; i < numAttributes; i++)
@@ -746,28 +746,28 @@ public class P6Opaque extends REPR {
 
         // Read "is multiple inheritance" flag; can go straight into data.
         REPRData.mi = reader.readLong() != 0;
-        
+
         // Read any auto-viv values, if we have them.
         REPRData.autoVivContainers = new SixModelObject[numAttributes];
         if (reader.readLong() != 0) {
             for (int i = 0; i < numAttributes; i++)
                 REPRData.autoVivContainers[i] = reader.readRef();
         }
-        
+
         // Read unbox slot locations.
         REPRData.unboxIntSlot = (int)reader.readLong();
         REPRData.unboxNumSlot = (int)reader.readLong();
         REPRData.unboxStrSlot = (int)reader.readLong();
-        
+
         // Read unbox object slot, if there is one.
         if (reader.readLong() != 0) {
             REPRData.unboxObjSlot = (int)reader.readLong();
         }
-        
+
         // Read in the name to index mapping.
         int numClasses = (int)reader.readLong();
         ArrayList<SixModelObject> classHandles = new ArrayList<SixModelObject>();
-        ArrayList<HashMap<String, Integer>> nameToHintMaps = new ArrayList<HashMap<String, Integer>>(); 
+        ArrayList<HashMap<String, Integer>> nameToHintMaps = new ArrayList<HashMap<String, Integer>>();
         for (int i = 0; i < numClasses; i++) {
             SixModelObject classHandle = reader.readRef();
             SixModelObject nameToHintObject = reader.readRef();
@@ -790,11 +790,11 @@ public class P6Opaque extends REPR {
         }
         REPRData.classHandles = classHandles.toArray(new SixModelObject[0]);
         REPRData.nameToHintMap = nameToHintMaps.toArray(new HashMap[0]);
-        
+
         // Read delegate slots.
         REPRData.posDelSlot = (int)reader.readLong();
         REPRData.assDelSlot = (int)reader.readLong();
-        
+
         // Finally, reassemble the Java backing type.
         ArrayList<AttrInfo> attrInfoList = new ArrayList<AttrInfo>();
         for (int i = 0; i < numAttributes; i++) {
@@ -819,13 +819,13 @@ public class P6Opaque extends REPR {
             ((P6OpaqueREPRData)st.REPRData).instance.st = st;
         }
     }
-    
+
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
         P6OpaqueREPRData REPRData = (P6OpaqueREPRData)st.REPRData;
-        
+
         int numAttrs = REPRData.flattenedSTables.length;
         writer.writeInt(numAttrs);
-        
+
         for (int i = 0; i < numAttrs; i++) {
             if (REPRData.flattenedSTables[i] == null) {
                 writer.writeInt(0);
@@ -835,9 +835,9 @@ public class P6Opaque extends REPR {
                 writer.writeSTableRef(REPRData.flattenedSTables[i]);
             }
         }
-        
+
         writer.writeInt(REPRData.mi ? 1 : 0);
-        
+
         if (REPRData.autoVivContainers != null) {
             writer.writeInt(1);
             for (int i = 0; i < numAttrs; i++)
@@ -846,11 +846,11 @@ public class P6Opaque extends REPR {
         else {
             writer.writeInt(0);
         }
-        
+
         writer.writeInt(REPRData.unboxIntSlot);
         writer.writeInt(REPRData.unboxNumSlot);
         writer.writeInt(REPRData.unboxStrSlot);
-        
+
         // Unbox slots
         if (REPRData.unboxObjSlot != -1) {
             writer.writeInt(1);
@@ -859,14 +859,14 @@ public class P6Opaque extends REPR {
         else {
             writer.writeInt(0);
         }
-        
+
         int numClasses = REPRData.classHandles.length;
         writer.writeInt(numClasses);
         for (int i = 0; i < numClasses; i++) {
             writer.writeRef(REPRData.classHandles[i]);
             writer.writeIntHash(REPRData.nameToHintMap[i]);
         }
-        
+
         writer.writeInt(REPRData.posDelSlot);
         writer.writeInt(REPRData.assDelSlot);
     }
@@ -888,7 +888,7 @@ public class P6Opaque extends REPR {
         // Now deserialize all the fields.
         obj.deserializeFields(tc, st, reader);
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject origObj) {
         try {
             P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)origObj;

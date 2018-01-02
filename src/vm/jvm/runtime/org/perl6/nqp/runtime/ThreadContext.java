@@ -16,27 +16,27 @@ public class ThreadContext {
      * The global context for the NQP runtime support.
      */
     public GlobalContext gc;
-    
+
     /**
      * The current call frame.
      */
     public CallFrame curFrame;
-    
+
     /**
      * When we wish to access optional parameters, we need to convey
      * if there was a value as well as to supply it. However, the JVM
      * gives no good way to do that (no ref parameters, for example)
      * short of allocating an object, which is overkill. So we use
      * this field to convey if the last optional parameter fetched is
-     * valid or not. 
+     * valid or not.
      */
     public int lastParameterExisted;
-    
+
     /**
-     * Holds just-processed args in the case we have a flattening. 
+     * Holds just-processed args in the case we have a flattening.
      */
     public Object[] flatArgs;
-    
+
     /**
      * When we wish to look up or bind native or inlined things in an
      * object, we need a way to pass around some native value. The
@@ -52,7 +52,7 @@ public class ThreadContext {
     public static final int NATIVE_NUM = 2;
     public static final int NATIVE_STR = 3;
     public static final int NATIVE_JVM_OBJ = 4;
-    
+
     /**
      * The current unwind exception.
      */
@@ -62,30 +62,30 @@ public class ThreadContext {
      * The last exception payload.
      */
     public SixModelObject lastPayload;
-    
+
     /**
      * Stack of handlers we're currently in.
      */
     public ArrayList<HandlerInfo> handlers;
-    
+
     /**
      * The currently saved capture for custom processing.
      */
     public CallCaptureInstance savedCC;
-    
+
     /**
      * The currently set dispatcher, for the next interested call (or the
      * one matching currentDispatcherFor, if set) to take.
      */
     public SixModelObject currentDispatcher;
     public SixModelObject currentDispatcherFor;
-    
+
     /**
      * Serialization context write barrier disabled depth (anything non-zero
      * means disabled).
      */
     public int scwbDisableDepth;
-    
+
     /**
      * Any serialization contexts we are compiling; null if none.
      */

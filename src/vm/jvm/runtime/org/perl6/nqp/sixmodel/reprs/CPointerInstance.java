@@ -13,10 +13,10 @@ public class CPointerInstance extends SixModelObject {
             ? Pointer.createConstant(value)
             : null;
     }
-    
+
     public long get_int(ThreadContext tc) {
         return this.pointer == null
-            ? 0 
+            ? 0
             : Pointer.nativeValue(this.pointer);
     }
 }

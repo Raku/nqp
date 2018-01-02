@@ -12,38 +12,38 @@ public class CodeRef extends SixModelObject {
      * The static data about this code reference.
      */
     public StaticCodeInfo staticInfo;
-    
+
     /**
      * The captured outer frame, if any.
      */
     public CallFrame outer;
-    
+
     /**
      * High level code object, if any.
      */
     public SixModelObject codeObject;
-    
+
     /**
      * Is this flagged as a static code ref?
      */
     public boolean isStaticCodeRef;
-    
+
     /**
      * Is this flagged as a compiler stub?
      */
     public boolean isCompilerStub;
-    
+
     /**
      * State variable storage, if needed.
      */
     public SixModelObject[] oLexState;
-    
+
     /**
      * The (human-readable) name of the code-ref (not in staticInfo as a
      * number of places want to tweak it per closure clone).
      */
     public String name;
-    
+
     /**
      * Sets up the code-ref data structure.
      */
@@ -57,7 +57,7 @@ public class CodeRef extends SixModelObject {
                 handlers, this, argsExpectation);
         this.name = name;
     }
-    
+
     /**
      * Clones the object.
      */
@@ -72,7 +72,7 @@ public class CodeRef extends SixModelObject {
         clone.name = this.name;
         return clone;
     }
-    
+
     /**
      * Private constructor for the sake of clone.
      */

@@ -8,11 +8,11 @@ import org.perl6.nqp.runtime.ThreadContext;
  * container semantics.
  */
 public class CodePairContainerConfigurer extends ContainerConfigurer {
-    /* Sets this container spec in place for the specified STable. */ 
+    /* Sets this container spec in place for the specified STable. */
     public void setContainerSpec(ThreadContext tc, STable st) {
         st.ContainerSpec = new CodePairContainerSpec();
     }
-    
+
     /* Configures the container spec with the specified info. */
     public void configureContainerSpec(ThreadContext tc, STable st, SixModelObject config) {
         CodePairContainerSpec cs = (CodePairContainerSpec)st.ContainerSpec;

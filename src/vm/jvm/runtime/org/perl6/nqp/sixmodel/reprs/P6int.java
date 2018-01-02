@@ -32,14 +32,14 @@ public class P6int extends REPR {
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
-        
+
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_INT;
         ss.bits = 64;
         ss.can_box = StorageSpec.CAN_BOX_INT;
         st.REPRData = ss;
-        
+
         return st.WHAT;
     }
 
@@ -91,15 +91,15 @@ public class P6int extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         return (StorageSpec)st.REPRData;
     }
-    
+
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, "J", null, null);
     }
-    
+
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_INT);
@@ -110,7 +110,7 @@ public class P6int extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "J");
         mv.visitInsn(Opcodes.RETURN);
     }
-    
+
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -164,11 +164,11 @@ public class P6int extends REPR {
             SerializationReader reader, SixModelObject obj) {
         ((P6intInstance)obj).value = reader.readLong();
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         writer.writeInt(((P6intInstance)obj).value);
     }
-    
+
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
             String prefix, SixModelObject obj) {
         try {
@@ -177,7 +177,7 @@ public class P6int extends REPR {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
@@ -187,7 +187,7 @@ public class P6int extends REPR {
         writer.writeInt(((StorageSpec)st.REPRData).bits);
         writer.writeInt(((StorageSpec)st.REPRData).is_unsigned);
     }
-    
+
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.

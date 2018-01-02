@@ -13,7 +13,7 @@ public class NativeCallBody {
     public static final byte ARG_NO_FREE_STR   = 0;
     public static final byte ARG_FREE_STR      = 1;
     public static final byte ARG_FREE_STR_MASK = 1;
-    
+
     public Function  entry_point;
     public ArgType[] arg_types;
     public SixModelObject[] arg_info;

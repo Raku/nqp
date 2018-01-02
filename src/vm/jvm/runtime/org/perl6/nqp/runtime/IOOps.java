@@ -22,7 +22,7 @@ public final class IOOps {
         }
 
         public void run() {
-            Ops.invokeDirect(tc, schedulee, Ops.invocantCallSite, 
+            Ops.invokeDirect(tc, schedulee, Ops.invocantCallSite,
                 new Object[] { Ops.box_i(signum, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc) });
         }
     }

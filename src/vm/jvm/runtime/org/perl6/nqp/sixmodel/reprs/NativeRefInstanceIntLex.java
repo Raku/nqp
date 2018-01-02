@@ -8,7 +8,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class NativeRefInstanceIntLex extends NativeRefInstance {
     public long[] lexicals;
     public int idx;
-    
+
     public long fetch_i(ThreadContext tc) {
         return lexicals[idx];
     }

@@ -23,7 +23,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         }
         throw new RuntimeException("No such attribute '" + name + "' for this object");
     }
-    
+
     public final SixModelObject autoViv(int slot, ThreadContext tc) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)this.st.REPRData;
         SixModelObject av = rd.autoVivContainers[slot];
@@ -32,7 +32,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         else
             return av.clone(tc);
     }
-    
+
     public SixModelObject clone(ThreadContext tc) {
         try {
             SixModelObject cloned;
@@ -46,7 +46,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             throw new RuntimeException(e);
         }
     }
-    
+
     public SixModelObject instClone() {
         try {
             return (SixModelObject)this.clone();
@@ -64,14 +64,14 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public void badNative() {
         throw new BadNativeRuntimeException("Cannot access a reference attribute as a native attribute");
     }
-    
+
     public class BadReferenceRuntimeException extends RuntimeException {
         public BadReferenceRuntimeException(String msg) { super(msg); }
     }
     public void badReference() {
         throw new BadReferenceRuntimeException("Cannot access a native attribute as a reference attribute");
     }
-    
+
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, long hint) {
         if (this.delegate != null)
@@ -105,19 +105,19 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         else
             return super.is_attribute_initialized(tc, class_handle, name, hint);
     }
-    
+
     public SixModelObject posDelegate() {
         if (this.delegate != null)
             return ((P6OpaqueBaseInstance)this.delegate).posDelegate();
         throw new RuntimeException("This type does not support positional operations");
     }
-    
+
     public SixModelObject assDelegate() {
         if (this.delegate != null)
             return ((P6OpaqueBaseInstance)this.delegate).assDelegate();
         throw new RuntimeException("This type does not support associative operations");
     }
-    
+
     public long elems(ThreadContext tc) {
         return posDelegate().elems(tc);
     }
@@ -163,7 +163,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         posDelegate().splice(tc, from, offset, count);
     }
-    
+
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         return assDelegate().at_key_boxed(tc, key);
     }

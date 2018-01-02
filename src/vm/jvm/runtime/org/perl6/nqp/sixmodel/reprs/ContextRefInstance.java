@@ -8,12 +8,12 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class ContextRefInstance extends SixModelObject {
     public CallFrame context;
-    
+
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
         return idx == null ? null : context.oLex[idx];
     }
-    
+
     public void at_key_native(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
@@ -35,14 +35,14 @@ public class ContextRefInstance extends SixModelObject {
         }
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
-    
+
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
         if (idx == null)
             throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
         context.oLex[idx] = value;
     }
-    
+
     public void bind_key_native(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
@@ -72,7 +72,7 @@ public class ContextRefInstance extends SixModelObject {
                (info.nLexicalNames != null ? info.nLexicalNames.length : 0) +
                (info.sLexicalNames != null ? info.sLexicalNames.length : 0);
     }
-    
+
     public long exists_key(ThreadContext tc, String key) {
         StaticCodeInfo sci = context.codeRef.staticInfo;
         return sci.oTryGetLexicalIdx(key) != null ||

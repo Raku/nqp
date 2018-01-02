@@ -24,12 +24,12 @@ public class ExceptionHandling {
     public static final int EX_CAT_AWAIT = 8192;
     public static final int EX_CAT_EMIT = 16384;
     public static final int EX_CAT_DONE = 32768;
-    
+
     /* Exception handler kinds. */
     public static final int EX_UNWIND_SIMPLE = 0;
     public static final int EX_UNWIND_OBJECT = 1;
     public static final int EX_BLOCK = 2;
-    
+
     /* Throws a simple string exception for some internal error, using our own
      * handler model. Note the exception is not resumable. */
     private static RuntimeException stooge = new RuntimeException("Stooge exception leaked");
@@ -66,7 +66,7 @@ public class ExceptionHandling {
     public static RuntimeException dieInternal(ThreadContext tc, String msg) {
         return dieInternal(tc, msg, null);
     }
-    
+
     /* Finds and executes a handler, using dynamic scope to find it. */
     /* die_s_return causes handlerDynamic to return the exception message instead of the exception object. */
     public static void handlerDynamic(ThreadContext tc, long category,
@@ -79,7 +79,7 @@ public class ExceptionHandling {
 all:
         while (f != null) {
             if (f.curHandler != 0) {
-                long tryHandler = f.curHandler;                
+                long tryHandler = f.curHandler;
                 long[][] handlers = f.codeRef.staticInfo.handlers;
                 while (tryHandler != 0) {
                     for (int i = 0; i < handlers.length; i++) {
@@ -99,7 +99,7 @@ all:
                                     break all;
                                 }
                             }
-                            
+
                             // If not, try outer one.
                             tryHandler = handlers[i][1];
                             break;
@@ -131,7 +131,7 @@ all:
     all:
         while (f != null) {
             if (f.curHandler != 0) {
-                long tryHandler = f.curHandler;                
+                long tryHandler = f.curHandler;
                 long[][] handlers = f.codeRef.staticInfo.handlers;
                 while (tryHandler != 0) {
                     for (int i = 0; i < handlers.length; i++) {
@@ -151,7 +151,7 @@ all:
                                     break all;
                                 }
                             }
-                            
+
                             // If not, try outer one.
                             tryHandler = handlers[i][1];
                             break;
@@ -164,7 +164,7 @@ all:
         if (handler != null)
             invokeHandler(tc, handler, category, f, false, exObj, null);
         else if (tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.lexicalHandlerNotFoundError != null) {
-            Ops.invokeDirect(tc, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.lexicalHandlerNotFoundError, 
+            Ops.invokeDirect(tc, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.lexicalHandlerNotFoundError,
                 Ops.intIntCallSite, false, new Object[] { category, 0L });
         }
         else
@@ -268,12 +268,12 @@ all:
             message.append(line);
             message.append("\n");
         }
-        
+
         tc.gc.err.println(message.toString());
         tc.gc.exit(1);
         return exObj;
     }
-    
+
     public static List<String> backtraceStrings(VMExceptionInstance ex) {
         List<String> result = new ArrayList<String>();
         for (TraceElement e : backtrace(ex)) {

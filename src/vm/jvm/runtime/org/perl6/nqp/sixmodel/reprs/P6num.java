@@ -25,17 +25,17 @@ public class P6num extends REPR {
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
-        
+
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_NUM;
         ss.bits = 64;
         ss.can_box = StorageSpec.CAN_BOX_NUM;
         st.REPRData = ss;
-        
+
         return st.WHAT;
     }
-    
+
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject floatInfo = repr_info.at_key_boxed(tc, "float");
         if (floatInfo != null) {
@@ -67,15 +67,15 @@ public class P6num extends REPR {
         obj.value = Double.NaN;
         return obj;
     }
-    
+
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         return (StorageSpec)st.REPRData;
     }
-    
+
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, "D", null, null);
     }
-    
+
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_NUM);
@@ -86,7 +86,7 @@ public class P6num extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "D");
         mv.visitInsn(Opcodes.RETURN);
     }
-    
+
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -95,9 +95,9 @@ public class P6num extends REPR {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "D");
         mv.visitFieldInsn(Opcodes.PUTFIELD, "org/perl6/nqp/runtime/ThreadContext", "native_n", "D");
-        mv.visitInsn(Opcodes.RETURN);        
+        mv.visitInsn(Opcodes.RETURN);
     }
-    
+
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 3);
@@ -106,14 +106,14 @@ public class P6num extends REPR {
     }
 
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
-        MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_num", 
+        MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_num",
                 "(Lorg/perl6/nqp/runtime/ThreadContext;)D", null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "D");
         getMeth.visitInsn(Opcodes.DRETURN);
         getMeth.visitMaxs(0, 0);
 
-        MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_num", 
+        MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_num",
                 "(Lorg/perl6/nqp/runtime/ThreadContext;D)V", null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.DLOAD, 2);
@@ -140,11 +140,11 @@ public class P6num extends REPR {
             SerializationReader reader, SixModelObject obj) {
         ((P6numInstance)obj).value = reader.readDouble();
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         writer.writeNum(((P6numInstance)obj).value);
     }
-    
+
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
             String prefix, SixModelObject obj) {
         try {
@@ -153,7 +153,7 @@ public class P6num extends REPR {
             throw new RuntimeException(e);
         }
     }
-    
+
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
@@ -162,7 +162,7 @@ public class P6num extends REPR {
     {
         writer.writeInt(((StorageSpec)st.REPRData).bits);
     }
-    
+
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.

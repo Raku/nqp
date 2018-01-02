@@ -27,7 +27,7 @@ public class MultiCacheInstance extends SixModelObject {
 
         /* Whether the entry is allowed to have named arguments. Doesn't say
          * anything about which ones, though. Something that is ambivalent
-         * about named arguments to the degree it doesn't care about them 
+         * about named arguments to the degree it doesn't care about them
          * even tie-breaking (like NQP) can just throw such entries into the
          * cache. Things that do care should not make such cache entries. */
         public boolean namedOK[];

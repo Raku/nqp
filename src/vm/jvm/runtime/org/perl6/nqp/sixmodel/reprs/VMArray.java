@@ -58,7 +58,7 @@ public class VMArray extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject arrayInfo = repr_info.at_key_boxed(tc, "array");
         if (arrayInfo != null) {
@@ -117,7 +117,7 @@ public class VMArray extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         int elems = reader.readInt32();
@@ -146,7 +146,7 @@ public class VMArray extends REPR {
             }
         }
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         int elems = (int)obj.elems(tc);
         writer.writeInt32(elems);
@@ -178,7 +178,7 @@ public class VMArray extends REPR {
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         return st.REPRData == null ? StorageSpec.BOXED : ((VMArrayREPRData)st.REPRData).ss;
     }
-    
+
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
@@ -189,7 +189,7 @@ public class VMArray extends REPR {
             ? null
             : ((VMArrayREPRData)st.REPRData).type);
     }
-    
+
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.

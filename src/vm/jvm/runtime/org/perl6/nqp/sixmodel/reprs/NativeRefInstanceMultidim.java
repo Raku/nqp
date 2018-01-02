@@ -9,7 +9,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class NativeRefInstanceMultidim extends NativeRefInstance {
     public SixModelObject obj;
     public long[] indices;
-    
+
     public long fetch_i(ThreadContext tc) {
         obj.at_pos_multidim_native(tc, indices);
         if (tc.native_type == ThreadContext.NATIVE_INT)

@@ -11,7 +11,7 @@ public class NativeRefInstanceAttribute extends NativeRefInstance {
     public SixModelObject classHandle;
     public String name;
     public long hint;
-    
+
     public long fetch_i(ThreadContext tc) {
         obj.get_attribute_native(tc, classHandle, name, hint);
         if (tc.native_type == ThreadContext.NATIVE_INT)

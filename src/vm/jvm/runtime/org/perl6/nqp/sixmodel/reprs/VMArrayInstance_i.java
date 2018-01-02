@@ -10,7 +10,7 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
     public int elems;
     public int start;
     public long[] slots;
-    
+
     public void at_pos_native(ThreadContext tc, long index) {
         if (index < 0) {
             index += elems;
@@ -52,7 +52,7 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
         if (start > 0 && n + start > ssize) {
             /* if there aren't enough slots at the end, shift off empty slots
              * from the beginning first */
-            if (elems > 0) 
+            if (elems > 0)
                 memmove(slots, 0, start, elems);
             this.start = 0;
             /* fill out any unused slots with zeros */
@@ -70,7 +70,7 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
         }
 
         this.elems = (int)n;
-        if (n <= ssize) { 
+        if (n <= ssize) {
             /* we already have n slots available, we can just return */
             return;
         }
@@ -97,7 +97,7 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
             System.arraycopy(slots, 0, new_slots, 0, slots.length);
             slots = new_slots;
         }
-        
+
         this.slots = slots;
     }
 
@@ -142,16 +142,16 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
         if (start < 1) {
             int n = 8;
             int i;
-    
+
             /* grow the array */
             int origElems = elems;
             set_size_internal(tc, elems + n);
-    
+
             /* move elements and set start */
             memmove(slots, n, 0, origElems);
             start = n;
             elems = origElems;
-            
+
             /* clear out beginning elements */
             for (i = 0; i < n; i++)
                 slots[i] = 0;
@@ -181,15 +181,15 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
         long start;
         long tail;
         long[] slots = null;
-    
+
         /* start from end? */
         if (offset < 0) {
             offset += elems0;
-    
+
             if (offset < 0)
                 throw ExceptionHandling.dieInternal(tc, "VMArray: Illegal splice offset");
         }
-    
+
         /* When offset == 0, then we may be able to reduce the memmove
          * calls and reallocs by adjusting SELF's start, elems0, and
          * count to better match the incoming splice.  In particular,
@@ -213,34 +213,34 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
                 this.elems = (int)elems0;
             }
         }
-    
+
         /* if count == 0 and elems1 == 0, there's nothing left
          * to copy or remove, so the splice is done! */
         if (count == 0 && elems1 == 0)
             return;
-    
+
         /* number of elements to right of splice (the "tail") */
         tail = elems0 - offset - count;
         if (tail < 0)
             tail = 0;
-    
+
         else if (tail > 0 && count > elems1) {
             /* We're shrinking the array, so first move the tail left */
             slots = this.slots;
             start = this.start;
             memmove(slots, start + offset + elems1, start + offset + count, tail);
         }
-    
+
         /* now resize the array */
         set_size_internal(tc, offset + elems1 + tail);
-    
+
         slots = this.slots;
         start = this.start;
         if (tail > 0 && count < elems1) {
             /* The array grew, so move the tail to the right */
             memmove(slots, start + offset + elems1, start + offset + count, tail);
         }
-    
+
         /* now copy C<from>'s elements into SELF */
         if (elems1 > 0) {
             int i;
@@ -255,7 +255,7 @@ public class VMArrayInstance_i extends VMArrayInstanceBase {
     private void memmove(long[] slots, long dest_start, long src_start, long l_n) {
         System.arraycopy(slots, (int)src_start, slots, (int)dest_start, (int)l_n);
     }
-    
+
     public SixModelObject clone(ThreadContext tc) {
         try {
             VMArrayInstance_i clone = (VMArrayInstance_i)this.clone();

@@ -35,7 +35,7 @@ public class KnowHOWAttribute extends REPR {
         data.name = reader.readStr();
         data.type = tc.gc.KnowHOW; // Not serialized yet
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         KnowHOWAttributeInstance data = (KnowHOWAttributeInstance)obj;
         writer.writeStr(data.name);

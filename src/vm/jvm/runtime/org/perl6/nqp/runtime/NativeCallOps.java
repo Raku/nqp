@@ -75,9 +75,9 @@ public final class NativeCallOps {
                     : NativeLibrary.getInstance(libname);
                 call.entry_point = library.getFunction(symbol);
             }
-    
+
             /* TODO: Set the calling convention. */
-    
+
             /* Set up the argument types. */
             int n = (int) arguments.elems(tc);
             call.arg_types = new ArgType[n];
@@ -89,9 +89,9 @@ public final class NativeCallOps {
                 if (call.arg_types[i] == ArgType.CALLBACK)
                     call.arg_info[i] = info.at_key_boxed(tc, "callback_args");
             }
-    
+
             call.ret_type = getArgType(tc, returns, true);
-    
+
             return 1L;
         }
         catch (Throwable t) {

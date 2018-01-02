@@ -12,25 +12,25 @@ public class VMIterInstance extends SixModelObject {
      * Target of the iteration.
      */
     public SixModelObject target;
-    
+
     /**
      * State for array iteration.
      */
     public long idx;
     public long limit;
-    
+
     /**
      * State for hash iteration.
      */
     public Iterator<String> hashKeyIter;
     public String curKey;
     public SixModelObject curValue;
-    
+
     /**
      * Iteration mode.
      */
     public byte iterMode;
-    
+
     /**
      * Possible modes.
      */
@@ -39,7 +39,7 @@ public class VMIterInstance extends SixModelObject {
     public final static byte MODE_ARRAY_NUM = 3;
     public final static byte MODE_ARRAY_STR = 4;
     public final static byte MODE_HASH = 5;
-    
+
     /**
      * Iterators work like things you can shift from. This is mostly because
      * Parrot did it that way, and we have a load of code that expect them to
@@ -78,7 +78,7 @@ public class VMIterInstance extends SixModelObject {
             throw ExceptionHandling.dieInternal(tc, "Unknown iteration mode");
         }
     }
-    
+
     /**
      * Not part of the 6model API, just keeps some code in here.
      */

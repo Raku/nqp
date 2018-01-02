@@ -965,7 +965,7 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
-    // loosely based on the codesizeevaluator; 
+    // loosely based on the codesizeevaluator;
     private void getBaselineSize() {
         baselineSize = new int[insnList.length+1];
 

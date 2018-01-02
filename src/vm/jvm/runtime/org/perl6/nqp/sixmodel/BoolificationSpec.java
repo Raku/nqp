@@ -16,12 +16,12 @@ public class BoolificationSpec {
     public static final int MODE_BIGINT = 6;
     public static final int MODE_ITER = 7;
     public static final int MODE_HAS_ELEMS = 8;
-    
+
     /**
      * Boolification mode.
      */
     public int Mode;
-    
+
     /**
      * A method to call to boolify, if applicable.
      */

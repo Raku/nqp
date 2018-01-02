@@ -9,7 +9,7 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public class ServerSocketHandle implements IIOBindable, IIOClosable {
-    
+
     ServerSocketChannel listenChan;
     public int listenPort;
 
@@ -20,7 +20,7 @@ public class ServerSocketHandle implements IIOBindable, IIOClosable {
             ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void bind(ThreadContext tc, String host, int port, int backlog) {
         try {
             InetSocketAddress addr = new InetSocketAddress(host, port);
@@ -30,7 +30,7 @@ public class ServerSocketHandle implements IIOBindable, IIOClosable {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public SocketHandle accept(ThreadContext tc) {
         try {
             SocketChannel chan = listenChan.accept();

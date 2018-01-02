@@ -18,12 +18,12 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
     private ConsoleReader cr;
     private boolean eof = false;
     private Charset cs;
-    
+
     public StandardReadHandle(ThreadContext tc, InputStream is) {
         this.is = is;
         setEncoding(tc, Charset.forName("UTF-8"));
     }
-    
+
     public void close(ThreadContext tc) {
         try {
             is.close();
@@ -31,11 +31,11 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void setEncoding(ThreadContext tc, Charset cs) {
         this.cs = cs;
     }
-    
+
     public byte[] read(ThreadContext tc, int bytes) {
         try {
             byte[] array = new byte[bytes];
@@ -67,7 +67,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public synchronized String readline(ThreadContext tc) {
         try {
             if (br == null)
@@ -102,7 +102,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public synchronized String readlineInteractive(ThreadContext tc, String prompt) {
         try {
             if (cr == null)
@@ -117,7 +117,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public boolean eof(ThreadContext tc) {
         return eof;
     }

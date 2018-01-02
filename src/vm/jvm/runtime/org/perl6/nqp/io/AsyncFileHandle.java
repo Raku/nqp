@@ -26,7 +26,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
     private AsynchronousFileChannel chan;
     private CharsetEncoder enc;
     private CharsetDecoder dec;
-    
+
     public AsyncFileHandle(ThreadContext tc, String filename, String mode) {
         try {
             Path p = new File(filename).toPath();
@@ -50,7 +50,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void close(ThreadContext tc) {
         try {
             chan.close();
@@ -58,12 +58,12 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
     }
-    
+
     private class SlurpState {
         public ByteBuffer bb;
         public long expected;
@@ -76,7 +76,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
             SlurpState ss = new SlurpState();
             ss.expected = chan.size();
             ss.bb = ByteBuffer.allocate((int)ss.expected);
-            
+
             final CompletionHandler<Integer, SlurpState> ch = new CompletionHandler<Integer, SlurpState>() {
                 public void completed(Integer bytes, SlurpState ss) {
                     if (ss.bb.position() == ss.expected) {
@@ -86,7 +86,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                             ss.bb.flip();
                             String decoded = dec.decode(ss.bb).toString();
                             SixModelObject boxed = Ops.box_s(decoded, Str, curTC);
-                            
+
                             /* Call done handler. */
                             Ops.invokeDirect(curTC, done, slurpResultCSD, new Object[] { boxed });
                         } catch (IOException e) {
@@ -98,23 +98,23 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                         chan.read(ss.bb, ss.bb.position(), ss, this);
                     }
                 }
-                
+
                 public void failed(Throwable exc, SlurpState ss) {
                     /* Box error. */
                     ThreadContext curTC = tc.gc.getCurrentThreadContext();
                     SixModelObject boxed = Ops.box_s(exc.toString(), Str, curTC);
-                    
+
                     /* Call error handler. */
                     Ops.invokeDirect(curTC, error, slurpResultCSD, new Object[] { boxed });
                 }
             };
-            
+
             chan.read(ss.bb, 0, ss, ch);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
-    
+
     private class SpurtState {
         public ByteBuffer bb;
         public long expected;
@@ -183,12 +183,12 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         ls.readBuffer = ByteBuffer.allocate(32768);
         ls.total = 0;
         ls.position = 0;
-        
+
         final CompletionHandler<Integer, LinesState> ch = new CompletionHandler<Integer, LinesState>() {
             public void completed(Integer bytes, LinesState ss) {
                 try {
                     ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                    
+
                     /* If we're read all, send done notification. */
                     if (bytes == -1) {
                         /* we may have a bit of non-linebreak-terminated data to spit out */
@@ -203,10 +203,10 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                         Ops.invokeDirect(curTC, done, linesDoneCSD, new Object[] { });
                         return;
                     }
-                    
+
                     /* Flip the just-read buffer. */
                     ss.readBuffer.flip();
-                    
+
                     /* Look for lines. */
                     while (true) {
                         /* Hunt a line boundary. */
@@ -218,20 +218,20 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                                 foundLine = true;
                             end++;
                         }
-                        
+
                         /* Copy what we found into the results. */
                         byte[] lineBytes = new byte[end - start];
                         ss.readBuffer.get(lineBytes);
                         ss.lineChunks.add(ByteBuffer.wrap(lineBytes));
                         ss.total += lineBytes.length;
-                        
+
                         /* If we found a line... */
                         if (foundLine) {
                             /* Decode. */
                             String decoded = ss.lineChunks.size() == 1
                                 ? dec.decode(ss.lineChunks.get(0)).toString()
                                 : decodeBuffers(ss.lineChunks, ss.total);
-                            
+
                             /* Chomp if needed. */
                             if (chomp) {
                                 int decLen = decoded.length();
@@ -244,10 +244,10 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                                 if (cutChars > 0)
                                     decoded = decoded.substring(0, decLen - cutChars);
                             }
-                            
+
                             /* Box and enqueue. */
                             queue.put(Ops.box_s(decoded, Str, curTC));
-                            
+
                             /* Reset for next line. */
                             ss.lineChunks.clear();
                             ss.total = 0;
@@ -257,7 +257,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                             break;
                         }
                     }
-                    
+
                     /* Read more. */
                     ls.position += bytes;
                     ls.readBuffer = ByteBuffer.allocate(32768);
@@ -268,7 +268,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                     failed(e, ls);
                 }
             }
-    
+
             private String decodeBuffers(ArrayList<ByteBuffer> buffers, int total) throws IOException {
                 // Copy to a single buffer and decode (could be smarter, but need
                 // to be wary as UTF-8 chars may span a buffer boundary).
@@ -278,17 +278,17 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                 allBytes.rewind();
                 return dec.decode(allBytes).toString();
             }
-            
+
             public void failed(Throwable exc, LinesState ss) {
                 /* Box error. */
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
                 SixModelObject boxed = Ops.box_s(exc.toString(), Str, curTC);
-                
+
                 /* Call error handler. */
                 Ops.invokeDirect(curTC, error, linesErrorCSD, new Object[] { boxed });
             }
         };
-        
+
         chan.read(ls.readBuffer, 0, ls, ch);
     }
 }

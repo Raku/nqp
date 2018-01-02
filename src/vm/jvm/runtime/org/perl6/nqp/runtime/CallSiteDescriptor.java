@@ -19,26 +19,26 @@ public class CallSiteDescriptor {
     public static final byte ARG_STR = 4;
     public static final byte ARG_NAMED = 8;
     public static final byte ARG_FLAT = 16;
-    
+
     /* Flags, one per argument that is being passed. */
     public byte[] argFlags;
-    
+
     /* Maps string names for named params do an Integer that has
      * arg index << 3 + type flag. */
     public HashMap<String, Integer> nameMap;
-    
+
     /* Singleton empty name map. */
     private static HashMap<String, Integer> emptyNameMap = new HashMap<String, Integer>();
-    
+
     /* Number of normal positional arguments. */
     public int numPositionals = 0;
-    
+
     /* Are the any flattening things? */
     public boolean hasFlattening = false;
-    
+
     /* Original names list. */
     public String[] names;
-    
+
     public CallSiteDescriptor(byte[] flags, String[] names) {
         argFlags = flags;
         if (names != null)
@@ -46,7 +46,7 @@ public class CallSiteDescriptor {
         else
             nameMap = emptyNameMap;
         this.names = names;
-        
+
         int pos = 0, name = 0;
         for (byte af : argFlags) {
             switch (af) {
@@ -101,7 +101,7 @@ public class CallSiteDescriptor {
         ArrayList<String> newNames = new ArrayList<String>();
         int oldArgsIdx = 0;
         int oldNameIdx = 0;
-        
+
         for (byte af : argFlags) {
             switch (af) {
             case ARG_OBJ | ARG_FLAT:
@@ -160,7 +160,7 @@ public class CallSiteDescriptor {
                 newFlags.add(af);
             }
         }
-        
+
         byte[] newFlagsArr = new byte[newFlags.size()];
         for (int i = 0; i < newFlagsArr.length; i++)
             newFlagsArr[i] = newFlags.get(i);
@@ -168,12 +168,12 @@ public class CallSiteDescriptor {
         for (int i = 0; i < newNamesArr.length; i++)
             newNamesArr[i] = newNames.get(i);
         CallSiteDescriptor exploded = new CallSiteDescriptor(newFlagsArr, newNamesArr);
-        
+
         Object[] args = new Object[newArgs.size()];
         for (int i = 0; i < newArgs.size(); i++)
             args[i] = newArgs.get(i);
         cf.tc.flatArgs = args;
-        
+
         return exploded;
     }
 

@@ -3572,7 +3572,7 @@ public final class Ops {
     public static SixModelObject typeparameterat(SixModelObject type, long idx, ThreadContext tc) {
         return typeparameters(type, tc).at_pos_boxed(tc, idx);
     }
-    
+
     public static SixModelObject setdebugtypename(SixModelObject type, String debugName, ThreadContext tc) {
         type.st.debugName = debugName;
         return type;
@@ -6892,7 +6892,7 @@ public final class Ops {
         }
         return makeBI(tc, type, random);
     }
-    
+
     public static long pow_i(long a, long b) {
         return (long)Math.pow(a, b);
     }

@@ -38,7 +38,7 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc,
             "MultiDimArray: can only set dimensions once");
     }
-    
+
     protected int indicesToFlatIndex(ThreadContext tc, long[] indices) {
         if (indices.length == dimensions.length) {
             long multiplier = 1;
