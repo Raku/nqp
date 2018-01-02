@@ -286,9 +286,11 @@ class QAST::OperationsJS {
 
     my sub static_hint($node) {
         my int $hint := -1;
-        if $node[1].has_compile_time_value && nqp::istype($node[2], QAST::SVal) {
-            $hint := nqp::hintfor($node[1].compile_time_value, $node[2].value);
-        }
+
+        # disabled till we handle hints with multi-inheritance correctly
+        #if $node[1].has_compile_time_value && nqp::istype($node[2], QAST::SVal) {
+        #    $hint := nqp::hintfor($node[1].compile_time_value, $node[2].value);
+        #}
 
         $hint != -1 ?? $hint !! NQPMu;
     }

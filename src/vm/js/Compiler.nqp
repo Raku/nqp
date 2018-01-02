@@ -1973,7 +1973,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             # Get lookup hint if possible.
             my int $hint := -1;
             if $var[1].has_compile_time_value {
-                $hint := nqp::hintfor($var[1].compile_time_value, $var.name);
+                #disabled till we handle hints with multi-inheritance correctly
+                #$hint := nqp::hintfor($var[1].compile_time_value, $var.name);
             }
 
             my $suffix := self.suffix_from_type($type);
