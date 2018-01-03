@@ -513,8 +513,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     #= Convert a 32bit integer which is a result of js expr $expr into integer type $type for storage
     method int_to_fancy_int(int $type, str $expr) {
-        my int $shift := 32 - self.bits($type);
-        "($expr << $shift >> $shift)";
+        if $type == $T_INT8 || $type == $T_INT16 {
+            my int $shift := 32 - self.bits($type);
+            "($expr << $shift >> $shift)";
+        } else {
+            $expr;
+        }
     }
 
     method bits(int $type) {
@@ -1495,7 +1499,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     my @suffix := ['', '_i', '_n', '_s'];
 
     method suffix_from_type($type) {
-        @suffix[$type];
+        $type == $T_INT8 || $type == $T_INT16 ?? '_i' !! @suffix[$type];
     }
 
     multi method as_js(QAST::CompUnit $node, :$want) {
@@ -1886,10 +1890,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
 
                     my int $is_fancy_int := $type == $T_INT8 || $type == $T_INT16;
-                    my $suffix := $is_fancy_int ?? '_i' !! self.suffix_from_type($type);
+                    my $suffix := self.suffix_from_type($type);
                     my $get := self.get_var($var);
-                    my $set := self.set_var($var,
-                        $is_fancy_int ?? self.int_to_fancy_int($type, 'value') !! 'value');
+                    my $set := self.set_var($var, self.int_to_fancy_int($type, 'value'));
 
                     Chunk.new($T_OBJ, "nqp.lexRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
@@ -1958,10 +1961,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 my $class_handle := self.as_js($var[1], :want($T_OBJ));
                 @setup.push($class_handle);
-                my $name := quote_string($var.name);
+
+                my str $name := quote_string($var.name);
+                my str $value := self.int_to_fancy_int($type, 'value');
 
                 $get := "{$self.expr}.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
-                $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, value)";
+                $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
             }
 
 
