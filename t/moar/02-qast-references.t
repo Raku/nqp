@@ -1,7 +1,7 @@
 use QAST;
 use nqpmo;
 
-plan(48);
+plan(53);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -483,6 +483,8 @@ class E {
     has int $!x;
     has num $!y;
     has str $!z;
+
+    has int8 $!int8;
 }
 
 test_qast_result(
@@ -524,6 +526,15 @@ test_qast_result(
                 )
             ),
             QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('ref_to_int8'), :scope('local'), :decl('var') ),
+                QAST::Var.new(
+                    :scope('attributeref'), :name('$!int8'), :returns(int8),
+                    QAST::Var.new( :name('foo'), :scope('local') ),
+                    QAST::WVal.new( :value(E) )
+                )
+            ),
+            QAST::Op.new(
                 :op('assign_i'),
                 QAST::Var.new(
                     :scope('local'), :name('ref_to_x')
@@ -549,7 +560,8 @@ test_qast_result(
                 QAST::Var.new( :name('foo'), :scope('local') ),
                 QAST::Var.new( :name('ref_to_x'), :scope('local') ),
                 QAST::Var.new( :name('ref_to_y'), :scope('local') ),
-                QAST::Var.new( :name('ref_to_z'), :scope('local') )
+                QAST::Var.new( :name('ref_to_z'), :scope('local') ),
+                QAST::Var.new( :name('ref_to_int8'), :scope('local') )
             )
         )
     ),
@@ -574,4 +586,16 @@ test_qast_result(
         ok(nqp::iscont_i(nqp::atpos($r, 3)) == 0, 'iscont_i on str attributref');
         ok(nqp::iscont_n(nqp::atpos($r, 3)) == 0, 'iscont_n on str attributref');
         ok(nqp::iscont_s(nqp::atpos($r, 3)) == 1, 'iscont_s on str attributref');
+
+        is(nqp::iscont(nqp::atpos($r, 4)), 1, 'iscont on int8 attributref');
+        is(nqp::iscont_i(nqp::atpos($r, 4)), 1, 'iscont_i on int8 attributref');
+        is(nqp::iscont_n(nqp::atpos($r, 4)), 0, 'iscont_n on int8 attributref');
+        is(nqp::iscont_s(nqp::atpos($r, 4)), 0, 'iscont_s on int8 attributref');
+
+        nqp::assign_i(nqp::atpos($r, 4), 5);
+
+        is(nqp::getattr_i($foo, E, '$!int8'), 5, 'attributeref works (int8)');
+
+        nqp::assign_i(nqp::atpos($r, 4), 30 + 256);
+        is(nqp::getattr_i($foo, E, '$!int8'), 30, 'attributref (int8) is really 8 bits');
     });
