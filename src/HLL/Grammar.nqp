@@ -290,11 +290,6 @@ position C<pos>.
             }
         }
         else {
-            if $start eq "\x[FD3E]" || $start eq "\x[FD3F]" {
-                self.panic("Ornate parentheses U+FD3E '﴾' + U+FD3F '﴿', have been removed.\n" ~
-                    "Please use another type of bracket.\n" ~
-                    "See https://github.com/perl6/nqp/commit/02a426e0e for removal reasons.");
-            }
             # If we ended up here it's not a bracket, so make sure it's not a colon just to be sure
             # Colon, word and whitespace characters aren't valid delimiters
             if $start eq ':' {
