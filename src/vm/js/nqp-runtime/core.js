@@ -1467,7 +1467,11 @@ op.strtocodes = function(str, form, codes) {
 };
 
 op.codes = function(str) {
-  return str.normalize('NFC').length;
+  let count = 0;
+  for (let c of str.normalize('NFC')) {
+    count++;
+  }
+  return count;
 };
 
 op.islist = function(list) {
