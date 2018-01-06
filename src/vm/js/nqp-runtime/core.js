@@ -1360,10 +1360,7 @@ op.forceouterctx = function(code, ctx) {
   return code;
 };
 
-// TODO: replace it with a fully correct implementation
-op.fc = function(string) {
-  return string.toLowerCase();
-};
+op.fc = foldCase;
 
 function tcChar(c) {
   if (c === 'ß') return 'Ss';
