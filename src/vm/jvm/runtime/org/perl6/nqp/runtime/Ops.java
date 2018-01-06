@@ -3558,12 +3558,16 @@ public final class Ops {
         return result;
     }
     public static SixModelObject typeparameterized(SixModelObject type, ThreadContext tc) {
+        if (iscont(type) != 0)
+            type = decont(type, tc);
         STable st = type.st;
         return st.parametricity instanceof ParameterizedType
              ? ((ParameterizedType)st.parametricity).parametricType
              : null;
     }
     public static SixModelObject typeparameters(SixModelObject type, ThreadContext tc) {
+        if (iscont(type) != 0)
+            type = decont(type, tc);
         STable st = type.st;
         if (!(st.parametricity instanceof ParameterizedType))
             ExceptionHandling.dieInternal(tc, "This type is not parameterized");
