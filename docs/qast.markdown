@@ -398,7 +398,7 @@ would not create a sub-node for string context, or else
 
 would work without complaining.
 
-##QAST::ParamTypeCheck
+## QAST::ParamTypeCheck
 
 Used by rakudo to enforce signatures at runtime.
 
