@@ -777,7 +777,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method mod_internal($/) {
         if $<quote_EXPR> {
-            if $<quote_EXPR>[0].ast ~~ QAST::SVal {
+            if nqp::istype($<quote_EXPR>[0].ast, QAST::SVal) {
                 my $key := ~$<mod_ident><sym>;
                 my $val := $<quote_EXPR>[0].ast.value;
                 %*RX{$key} := $val;

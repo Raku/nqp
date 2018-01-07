@@ -34,7 +34,7 @@ class QAST::OperationsJS {
 
         if $node.list > @argument_types {
             nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
-        } 
+        }
 
         my int $i := 0;
         for $node.list -> $arg {
@@ -252,7 +252,7 @@ class QAST::OperationsJS {
         my str $ret := $*BLOCK.add_tmp;
 
         my sub is_chain($part) {
-            $part ~~ QAST::Op && $part.op eq 'chain';
+            nqp::istype($part, QAST::Op) && $part.op eq 'chain';
         }
 
         my sub chain_part($part) {
@@ -598,7 +598,7 @@ class QAST::OperationsJS {
 
         add_simple_op('bindpos' ~ $suffix, $type, [$T_OBJ, $T_INT, $type], :side_effects, :method_call);
         add_simple_op('atpos' ~ $suffix, $type, [$T_OBJ, $T_INT], :method_call);
-        
+
         add_simple_op('pop' ~ $suffix, $type, [$T_OBJ], :side_effects, :method_call);
         add_simple_op('push' ~ $suffix, $type, [$T_OBJ, $type], :side_effects, :method_call);
         add_simple_op('unshift' ~ $suffix, $type, [$T_OBJ, $type], :side_effects, :method_call);
@@ -689,7 +689,7 @@ class QAST::OperationsJS {
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :side_effects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
-    # TODO 
+    # TODO
     # add_simple_op('nfatostatelist', $T_OBJ, [$T_OBJ]);
 
     add_op('callmethod', sub ($comp, $node, :$want) {
@@ -740,7 +740,7 @@ class QAST::OperationsJS {
         unless @children {
             return $comp.as_js($protected, :$want);
         }
-        
+
         my $*RETURN_FROM_HANDLER; # needed to implement nqp::p6return
 
         my str $outer_ctx := $*CTX;
@@ -906,7 +906,7 @@ class QAST::OperationsJS {
             $block := $block.outer;
         }
 
-        # TODO type 
+        # TODO type
 
         my $var := QAST::Var.new(:name($var_name), :scope<lexical>);
 
@@ -1192,14 +1192,14 @@ class QAST::OperationsJS {
             elsif $_.named eq 'label' { $label := $_; }
             else { @operands.push($_) }
         }
-        
+
         if +@operands != 2 {
             nqp::die("Operation 'for' needs 2 operands");
         }
         unless nqp::istype(@operands[1], QAST::Block) {
             nqp::die("Operation 'for' expects a block as its second operand");
         }
-        
+
         unless @operands[1].blocktype eq 'immediate' {
             nqp::die("Operation 'for' expects the block to have blocktype to be immediate, is: {@operands[1].blocktype}");
         }
@@ -1384,7 +1384,8 @@ class QAST::OperationsJS {
         }
         my str $type := $node[1];
 
-        my int $is_return := $type eq 'RETURN' && $node[2] ~~ QAST::Op && $node[2].op eq 'lastexpayload';
+        my int $is_return := $type eq 'RETURN'
+        && nqp::istype($node[2], QAST::Op) && $node[2].op eq 'lastexpayload';
 
         my @toplevels := $*BLOCK.qast.list;
         my $is_last_toplevel;
@@ -1436,8 +1437,11 @@ class QAST::OperationsJS {
     });
 
     my sub is_CONTROL_RETURN($category) {
-        $category ~~ QAST::IVal && $category.value == nqp::const::CONTROL_RETURN
-            || $category ~~ QAST::Op && $category.op eq 'const' && $category.name eq 'CONTROL_RETURN';
+        nqp::istype($category, QAST::IVal)
+        && $category.value == nqp::const::CONTROL_RETURN
+            || nqp::istype($category, QAST::Op)
+            && $category.op   eq 'const' 
+            && $category.name eq 'CONTROL_RETURN';
     }
 
     add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
@@ -1681,7 +1685,7 @@ class QAST::OperationsJS {
         my str $var := $node[0].value;
 
         my $set_var := $comp.is_dynamic_var($*BLOCK, QAST::Var.new(:name($var), :scope<lexical>))
-            ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n" 
+            ?? "{$*CTX}.bind({quote_string($var)}, nqp.currentDispatcher);\n"
             !! $*BLOCK.mangle_lexical($var) ~ " = nqp.currentDispatcher;\n";
 
         Chunk.void(
@@ -1820,4 +1824,3 @@ class QAST::OperationsJS {
         return Chunk.new($desired, $convert, $chunk);
     }
 }
-

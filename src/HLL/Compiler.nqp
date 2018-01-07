@@ -538,7 +538,7 @@ class HLL::Compiler does HLL::Backend::Default {
     method ast($source, *%adverbs) {
         my $ast := $source.ast();
         self.panic("Unable to obtain AST from " ~ $source.HOW.name($source))
-            unless $ast ~~ QAST::Node;
+            unless nqp::istype($ast, QAST::Node);
         $ast;
     }
 

@@ -632,7 +632,7 @@ QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $cqast := $op;
-    while $cqast ~~ QAST::Op && $cqast.op eq 'chain' {
+    while nqp::istype($cqast, QAST::Op) && $cqast.op eq 'chain' {
         nqp::push(@clist, $cqast);
         $cqast := $cqast[0];
     }

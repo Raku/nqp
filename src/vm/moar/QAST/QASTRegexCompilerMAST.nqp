@@ -1339,7 +1339,7 @@ class QAST::MASTRegexCompiler {
     }
 
     method regex_mast($node) {
-        unless $node ~~ QAST::Regex {
+        unless nqp::istype($node, QAST::Regex) {
             my $mast := $!qastcomp.as_mast($node);
             $!regalloc.release_register($mast.result_reg, $mast.result_kind);
             return $mast.instructions;
