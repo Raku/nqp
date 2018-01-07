@@ -43,6 +43,8 @@ const foldCase = require('fold-case');
 
 const xregexp = require('xregexp');
 
+const graphemeBreaker = require('grapheme-breaker');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -1476,7 +1478,9 @@ op.islist = function(list) {
 };
 
 op.split = function(currentHLL, separator, string) {
-  return hll.slurpyArray(currentHLL, string !== '' ? string.split(separator) : []);
+  return hll.slurpyArray(currentHLL, string !== ''
+    ? (separator === '' ? graphemeBreaker.break(string) : string.split(separator))
+    : []);
 };
 
 op.exception = function() {
