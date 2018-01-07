@@ -1630,6 +1630,45 @@ op.getrusage = function() {
   ]);
 };
 
+
 op.flip = function(str) {
   return graphemeBreaker.break(str).reverse().join('');
+};
+
+op.charsnfg = function(str) {
+  return graphemeBreaker.countBreaks(str);
+};
+
+op.substr3nfg = function(str, start, length) {
+  let startGraphemes = start;
+  let startChars = 0;
+  while (startGraphemes--) {
+    startChars = graphemeBreaker.nextBreak(str, startChars);
+  }
+
+  let lengthGraphemes = length;
+  let substringEnd = startChars;
+  while (lengthGraphemes--) {
+     substringEnd = graphemeBreaker.nextBreak(str, substringEnd);
+  }
+
+  return str.substring(startChars, substringEnd);
+};
+
+op.substr2nfg = function(str, start) {
+  let startGraphemes = start;
+  let startChars = 0;
+  while (startGraphemes--) {
+    startChars = graphemeBreaker.nextBreak(str, startChars);
+  }
+
+  return str.substr(startChars);
+};
+
+op.iseq_snfg = function(a, b) {
+  return (a.normalize('NFC') === b.normalize('NFC')) ? 1 : 0;
+};
+
+op.isne_snfg = function(a, b) {
+  return (a.normalize('NFC') === b.normalize('NFC')) ? 0 : 1;
 };

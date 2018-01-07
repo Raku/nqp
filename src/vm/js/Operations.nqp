@@ -1801,6 +1801,19 @@ class QAST::OperationsJS {
 
     add_simple_op('unicmp_s', $T_INT, [$T_STR, $T_STR, $T_INT, $T_INT, $T_INT]);
 
+    # JS specific NFG variants
+
+    add_simple_op('charsnfg', $T_INT, [$T_STR]);
+    add_simple_op('substrnfg', $T_STR, [$T_STR, $T_INT, $T_INT], sub ($string, $start, $length?) {
+        nqp::defined($length) ?? "nqp.op.substr3nfg($string,$start,$length)" !! "nqp.op.substr2nfg($string,$start)";
+    });
+
+    add_simple_op('iscclassnfg', $T_INT, [$T_INT, $T_STR, $T_INT]);
+
+    add_simple_op('iseq_snfg', $T_INT, [$T_STR, $T_STR]);
+    add_simple_op('isne_snfg', $T_INT, [$T_STR, $T_STR]);
+
+
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {
             %hll_unbox{$hll} := nqp::hash();

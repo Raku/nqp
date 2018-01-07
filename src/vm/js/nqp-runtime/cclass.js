@@ -53,6 +53,18 @@ op.iscclass = function(cclass, target, offset) {
   return iscclass(cclass, target, offset);
 };
 
+const graphemeBreaker = require('grapheme-breaker');
+
+op.iscclassnfg = function(cclass, target, offset) {
+  let offsetGraphemes = offset;
+  let offsetChars = 0;
+  while (offsetGraphemes--) {
+    offsetChars = graphemeBreaker.nextBreak(target, offsetChars);
+  }
+
+  return iscclass(cclass, target, offsetChars);
+};
+
 op.findcclass = function(cclass, target, offset, count) {
   let end = offset + count;
   end = target.length < end ? target.length : end;
