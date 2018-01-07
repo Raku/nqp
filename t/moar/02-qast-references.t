@@ -1,7 +1,7 @@
 use QAST;
 use nqpmo;
 
-plan(53);
+plan(54);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
