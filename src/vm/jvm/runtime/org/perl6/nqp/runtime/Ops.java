@@ -18,7 +18,12 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.BufferUnderflowException;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CoderResult;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -88,6 +93,7 @@ import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
+import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
@@ -4424,6 +4430,48 @@ public final class Ops {
         return null;
     }
 
+    private static void encodeUTF16(String str, SixModelObject res, ThreadContext tc) {
+        short[] buffer = new short[str.length()];
+        for (int i = 0; i < str.length(); i++)
+            buffer[i] = (short)str.charAt(i);
+        if (res instanceof VMArrayInstance_i16) {
+            VMArrayInstance_i16 arr = (VMArrayInstance_i16)res;
+            arr.elems = buffer.length;
+            arr.start = 0;
+            arr.slots = buffer;
+        }
+        else {
+            res.set_elems(tc, buffer.length);
+            for (int i = 0; i < buffer.length; i++) {
+                tc.native_i = buffer[i];
+                res.bind_pos_native(tc, i);
+            }
+        }
+    }
+
+    private static void encodeUTF32(String str, SixModelObject res, ThreadContext tc) {
+        int[] buffer = new int[str.length()]; /* Can be an overestimate. */
+        int bufPos = 0;
+        for (int i = 0; i < str.length(); ) {
+            int cp = str.codePointAt(i);
+            buffer[bufPos++] = cp;
+            i += Character.charCount(cp);
+        }
+        if (res instanceof VMArrayInstance_i32) {
+            VMArrayInstance_i32 arr = (VMArrayInstance_i32)res;
+            arr.elems = bufPos;
+            arr.start = 0;
+            arr.slots = buffer;
+        }
+        else {
+            res.set_elems(tc, buffer.length);
+            for (int i = 0; i < bufPos; i++) {
+                tc.native_i = buffer[i];
+                res.bind_pos_native(tc, i);
+            }
+        }
+    }
+
     public static SixModelObject encode(String str, String encoding, SixModelObject res, ThreadContext tc) {
         try {
             String mangledEncoding = javaEncodingName(encoding);
@@ -4431,44 +4479,10 @@ public final class Ops {
                 Buffers.stashBytes(tc, res, str.getBytes(mangledEncoding));
             }
             else if (encoding.equals("utf16")) {
-                short[] buffer = new short[str.length()];
-                for (int i = 0; i < str.length(); i++)
-                    buffer[i] = (short)str.charAt(i);
-                if (res instanceof VMArrayInstance_i16) {
-                    VMArrayInstance_i16 arr = (VMArrayInstance_i16)res;
-                    arr.elems = buffer.length;
-                    arr.start = 0;
-                    arr.slots = buffer;
-                }
-                else {
-                    res.set_elems(tc, buffer.length);
-                    for (int i = 0; i < buffer.length; i++) {
-                        tc.native_i = buffer[i];
-                        res.bind_pos_native(tc, i);
-                    }
-                }
+                encodeUTF16(str, res, tc);
             }
             else if (encoding.equals("utf32")) {
-                int[] buffer = new int[str.length()]; /* Can be an overestimate. */
-                int bufPos = 0;
-                for (int i = 0; i < str.length(); ) {
-                    int cp = str.codePointAt(i);
-                    buffer[bufPos++] = cp;
-                    i += Character.charCount(cp);
-                }
-                if (res instanceof VMArrayInstance_i32) {
-                    VMArrayInstance_i32 arr = (VMArrayInstance_i32)res;
-                    arr.elems = bufPos;
-                    arr.start = 0;
-                    arr.slots = buffer;
-                }
-                else {
-                    res.set_elems(tc, buffer.length);
-                    for (int i = 0; i < bufPos; i++) {
-                        tc.native_i = buffer[i];
-                        res.bind_pos_native(tc, i);
-                    }
-                }
+                encodeUTF32(str, res, tc);
             }
             else {
                 throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
@@ -4476,6 +4490,76 @@ public final class Ops {
             return res;
         }
         catch (UnsupportedEncodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    private static ByteBuffer growBuffer(ByteBuffer tooSmall) {
+        ByteBuffer biggerBuffer = ByteBuffer.allocate(tooSmall.capacity() * 2);
+        tooSmall.flip();
+        biggerBuffer.put(tooSmall);
+        return biggerBuffer;
+    }
+
+    public static SixModelObject encoderep(String str, String encoding, String replacement, SixModelObject res, ThreadContext tc) {
+        try {
+            String mangledEncoding = javaEncodingName(encoding);
+            if (mangledEncoding != null) {
+                CharsetEncoder encoder = Charset.forName(encoding).newEncoder();
+                CharBuffer input = CharBuffer.wrap(str);
+                ByteBuffer outputBuffer = ByteBuffer.allocate((int)Math.ceil(
+                  encoder.maxBytesPerChar() * input.remaining()));
+
+                while (true) {
+                    CoderResult result = encoder.encode(input, outputBuffer, true);
+
+                    if (result.isUnderflow()) {
+                        break;
+                    } else if (result.isOverflow()) {
+                        outputBuffer = growBuffer(outputBuffer);
+                    } else if (result.isUnmappable()) {
+                        char unmappableChar = input.get();
+
+                        if (Character.isHighSurrogate(unmappableChar)) {
+                            if (!Character.isSurrogatePair(unmappableChar, input.get())) {
+                                throw ExceptionHandling.dieInternal(tc, "Encode with string with malformed unicode");
+                            }
+                        }
+
+                        CharBuffer replacementBuffer = CharBuffer.wrap(replacement);
+                        while (true) {
+                            CoderResult replacementResult = encoder.encode(replacementBuffer, outputBuffer, true);
+                            if (replacementResult.isOverflow()) {
+                                outputBuffer = growBuffer(outputBuffer);
+                            } else if (replacementResult.isUnderflow()) {
+                                break;
+                            } else {
+                                replacementResult.throwException();
+                            }
+                        }
+                    } else {
+                        result.throwException();
+                    }
+                }
+                Buffers.stashBytes(tc, res, outputBuffer.array(), outputBuffer.position());
+            }
+            else if (encoding.equals("utf16")) {
+                encodeUTF16(str, res, tc);
+            }
+            else if (encoding.equals("utf32")) {
+                encodeUTF32(str, res, tc);
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Unknown encoding '" + encoding + "'");
+            }
+
+            return res;
+        }
+        catch (CharacterCodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+        catch (BufferUnderflowException e) {
+            /* If this happens we got a string with malformed UTF-16 */
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }

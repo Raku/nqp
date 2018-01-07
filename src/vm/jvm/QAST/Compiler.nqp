@@ -2378,6 +2378,7 @@ QAST::OperationsJAST.map_classlib_core_op('codes', $TYPE_OPS, 'codes', [$RT_STR]
 QAST::OperationsJAST.map_classlib_core_op('codepointfromname', $TYPE_OPS, 'codepointfromname', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('getstrfromname', $TYPE_OPS, 'getstrfromname', [$RT_STR], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('encode', $TYPE_OPS, 'encode', [$RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('encoderep', $TYPE_OPS, 'encoderep', [$RT_STR, $RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decode', $TYPE_OPS, 'decode', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decoderconfigure', $TYPE_OPS, 'decoderconfigure', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decodersetlineseps', $TYPE_OPS, 'decodersetlineseps', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
