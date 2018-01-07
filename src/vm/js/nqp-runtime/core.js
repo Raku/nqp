@@ -1629,3 +1629,7 @@ op.getrusage = function() {
     usage.nivcsw
   ]);
 };
+
+op.flip = function(str) {
+  return graphemeBreaker.break(str).reverse().join('');
+};
