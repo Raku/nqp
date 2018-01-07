@@ -628,11 +628,12 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
 });
 
 # Chaining.
-QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
+my $chain_gen := sub ($qastcomp, $op) {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $cqast := $op;
-    while nqp::istype($cqast, QAST::Op) && $cqast.op eq 'chain' {
+    while nqp::istype($cqast, QAST::Op)
+    && ($cqast.op eq 'chain' || $cqast.op eq 'chainstatic') {
         nqp::push(@clist, $cqast);
         $cqast := $cqast[0];
     }
@@ -653,9 +654,12 @@ QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
         my $bcomp := $qastcomp.as_mast($bqast, :want($MVM_reg_obj));
         push_ilist(@ops, $bcomp);
 
-        my $callee := $qastcomp.as_mast(
-            QAST::Var.new( :name($cqast.name), :scope('lexical') ),
-            :want($MVM_reg_obj));
+        my $callee := $qastcomp.as_mast: :want($MVM_reg_obj),
+            $cqast.op eq 'chainstatic'
+                ?? QAST::VM.new:   :moarop<getlexstatic_o>,
+                   QAST::SVal.new: :value($cqast.name)
+                !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
+
         push_ilist(@ops, $callee);
         nqp::push(@ops, MAST::Call.new(
             :target($callee.result_reg),
@@ -679,7 +683,9 @@ QAST::MASTOperations.add_core_op('chain', -> $qastcomp, $op {
 
     nqp::push(@ops, $endlabel);
     MAST::InstructionList.new(@ops, $res_reg, $MVM_reg_obj)
-});
+}
+QAST::MASTOperations.add_core_op: 'chain',       $chain_gen;
+QAST::MASTOperations.add_core_op: 'chainstatic', $chain_gen;
 
 # Conditionals.
 sub needs_cond_passed($n) {

@@ -449,11 +449,12 @@ sub savesite($il) {
 }
 
 # Chaining.
-QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
+my $chain_codegen := sub ($qastcomp, $op) {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $c_ast := $op;
-    while nqp::istype($c_ast, QAST::Op) && $c_ast.op eq 'chain' {
+    while nqp::istype($c_ast, QAST::Op)
+    && ($c_ast.op eq 'chain' || $c_ast.op eq 'chainstatic') {
         nqp::push(@clist, $c_ast);
         $c_ast := $c_ast[0];
     }
@@ -486,9 +487,11 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
         $il.append(JAST::Instruction.new( :op('aload'), $btmp ));
+        my $indy_meth := $c_ast.op eq 'chainstatic'
+            ?? 'subcallstatic_noa' !! 'subcall_noa';
         $il.append(savesite(JAST::InvokeDynamic.new(
-            'subcall_noa', 'V', [$TYPE_STR, 'I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'subcall_noa',
+            $indy_meth, 'V', [$TYPE_STR, 'I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO],
+            'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth,
         )));
         $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -515,6 +518,8 @@ QAST::OperationsJAST.add_core_op('chain', -> $qastcomp, $op {
     $il.append(JAST::Instruction.new( :op('aload'), $result ));
     result($il, $RT_OBJ)
 });
+QAST::OperationsJAST.add_core_op: 'chain',       $chain_codegen;
+QAST::OperationsJAST.add_core_op: 'chainstatic', $chain_codegen;
 
 # Set of sequential statements
 QAST::OperationsJAST.add_core_op('stmts', -> $qastcomp, $op {

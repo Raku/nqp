@@ -252,7 +252,8 @@ class QAST::OperationsJS {
         my str $ret := $*BLOCK.add_tmp;
 
         my sub is_chain($part) {
-            nqp::istype($part, QAST::Op) && $part.op eq 'chain';
+            nqp::istype($part, QAST::Op)
+                && ($part.op eq 'chain' || $part.op eq 'chainstatic');
         }
 
         my sub chain_part($part) {
@@ -279,6 +280,7 @@ class QAST::OperationsJS {
 
         Chunk.new($T_OBJ, $ret, [chain_part($node)]);
     });
+    %ops<chainstatic> := %ops<chain>;
 
     add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0), :method_call, :side_effects);
 
