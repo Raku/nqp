@@ -2445,13 +2445,6 @@ public final class Ops {
             return null;
     }
 
-    public static long where(SixModelObject o) {
-        return o.hashCode();
-    }
-    public static SixModelObject setwho(SixModelObject o, SixModelObject who) {
-        o.st.WHO = who;
-        return o;
-    }
     public static SixModelObject what(SixModelObject o, ThreadContext tc) {
         return decont(o, tc).st.WHAT;
     }
@@ -2583,9 +2576,6 @@ public final class Ops {
     }
     public static long isnull_s(String str) {
         return str == null ? 1 : 0;
-    }
-    public static String reprname(SixModelObject obj) {
-        return obj.st.REPR.name;
     }
     public static String reprname(SixModelObject obj, ThreadContext tc) {
         return decont(obj, tc).st.REPR.name;
