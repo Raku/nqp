@@ -517,7 +517,7 @@ my $chain_codegen := sub ($qastcomp, $op) {
     $il.append($endlabel);
     $il.append(JAST::Instruction.new( :op('aload'), $result ));
     result($il, $RT_OBJ)
-});
+};
 QAST::OperationsJAST.add_core_op: 'chain',       $chain_codegen;
 QAST::OperationsJAST.add_core_op: 'chainstatic', $chain_codegen;
 
