@@ -1440,7 +1440,7 @@ class QAST::OperationsJS {
         nqp::istype($category, QAST::IVal)
         && $category.value == nqp::const::CONTROL_RETURN
             || nqp::istype($category, QAST::Op)
-            && $category.op   eq 'const' 
+            && $category.op   eq 'const'
             && $category.name eq 'CONTROL_RETURN';
     }
 

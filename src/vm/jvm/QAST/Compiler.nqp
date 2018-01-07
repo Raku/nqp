@@ -104,11 +104,11 @@ my class Result {
     has $!jast;         # The JAST
     has int $!type;     # Result type (obj/int/num/str)
     has str $!local;    # Local where the result is; if empty, it's on the stack
-    
+
     method jast()  { $!jast }
     method type()  { $!type }
     method local() { $!local }
-    
+
     method set_local($local) { $!local := $local }
 }
 sub result($jast, int $type) {
@@ -204,23 +204,23 @@ sub arg_type($t) { @arg_types[$t] }
 class QAST::OperationsJAST {
     # Maps operations to code that will handle them. Hash of code.
     my %core_ops;
-    
+
     # Maps HLL-specific operations to code that will handle them.
     # Hash of hash of code.
     my %hll_ops;
-    
+
     # Mapping of how to box/unbox by HLL.
     my %hll_box;
     my %hll_unbox;
-    
+
     # What we know about inlinability.
     my %core_inlinability;
     my %hll_inlinability;
-    
+
     # What we know about op native results types.
     my %core_result_type;
     my %hll_result_type;
-    
+
     # Compiles an operation.
     method compile_op($qastcomp, $hll, $op) {
         my $name := $op.op;
@@ -236,32 +236,32 @@ class QAST::OperationsJAST {
         my $source := $qastcomp.source_for_node($op);
         nqp::die("Error while compiling op $name$source, no registered operation handler");
     }
-    
+
     # Adds a core op handler.
     method add_core_op($op, $handler, :$inlinable = 1) {
         %core_ops{$op} := $handler;
         self.set_core_op_inlinability($op, $inlinable);
     }
-    
+
     # Adds a HLL op handler.
     method add_hll_op($hll, $op, $handler, :$inlinable = 1) {
         %hll_ops{$hll} := {} unless nqp::existskey(%hll_ops, $hll);
         %hll_ops{$hll}{$op} := $handler;
         self.set_hll_op_inlinability($hll, $op, $inlinable);
     }
-    
+
     # Sets op inlinability at a core level.
     method set_core_op_inlinability($op, $inlinable) {
         %core_inlinability{$op} := $inlinable;
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_inlinability($hll, $op, $inlinable) {
         %hll_inlinability{$hll} := {} unless nqp::existskey(%hll_inlinability, $hll);
         %hll_inlinability{$hll}{$op} := $inlinable;
     }
-    
+
     # Checks if an op is considered inlinable.
     method is_inlinable($hll, $op) {
         if nqp::existskey(%hll_inlinability, $hll) {
@@ -271,21 +271,21 @@ class QAST::OperationsJAST {
         }
         return %core_inlinability{$op} // 0;
     }
-    
+
     # Adds a core nqp:: op provided directly by a JVM op.
     method map_jvm_core_op($op, $jvm_op, @stack_in, $stack_out) {
         my $ins := JAST::Instruction.new( :op($jvm_op) );
         self.add_core_op($op, op_mapper($op, $ins, @stack_in, $stack_out));
         self.set_core_op_result_type($op, $stack_out);
     }
-    
+
     # Adds a HLL nqp:: op provided directly by a JVM op.
     method map_jvm_hll_op($hll, $op, $jvm_op, @stack_in, $stack_out) {
         my $ins := JAST::Instruction.new( :op($jvm_op) );
         self.add_hll_op($hll, $op, op_mapper($op, $ins, @stack_in, $stack_out));
         self.set_hll_op_result_type($hll, $op, $stack_out);
     }
-    
+
     # Adds a core nqp:: op provided by a static method in the
     # class library.
     method map_classlib_core_op($op, $class, $method, @stack_in, $stack_out, :$tc, :$cont, :$inlinable = 1) {
@@ -300,7 +300,7 @@ class QAST::OperationsJAST {
         self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, $stack_out);
     }
-    
+
     # Adds a core nqp:: op provided by a static method in the
     # class library.
     method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc, :$cont, :$inlinable = 1) {
@@ -315,7 +315,7 @@ class QAST::OperationsJAST {
         self.set_core_op_inlinability($op, $inlinable);
         self.set_hll_op_result_type($hll, $op, $stack_out);
     }
-    
+
     # Generates an operation mapper. Covers a range of operations,
     # including those provided by calling a method and those that are
     # just JVM op invocations.
@@ -338,7 +338,7 @@ class QAST::OperationsJAST {
                 $i++;
                 nqp::push(@arg_res, $operand_res);
             }
-            
+
             # Emit operation.
             $*STACK.spill_to_locals($il) if $cont;
             $*STACK.obtain($il, |@arg_res) if @arg_res;
@@ -354,7 +354,7 @@ class QAST::OperationsJAST {
             }
         }
     }
-    
+
     # Sets op native result type at a core level.
     method set_core_op_result_type($op, $type) {
         if $type == $RT_INT {
@@ -367,7 +367,7 @@ class QAST::OperationsJAST {
             %core_result_type{$op} := str;
         }
     }
-    
+
     # Sets op inlinability at a HLL level. (Can override at HLL level whether
     # or not the HLL overrides the op itself.)
     method set_hll_op_result_type($hll, $op, $type) {
@@ -382,7 +382,7 @@ class QAST::OperationsJAST {
             %hll_result_type{$hll}{$op} := str;
         }
     }
-    
+
     # Sets returns on an op node if we it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
@@ -424,7 +424,7 @@ class QAST::OperationsJAST {
     method unbox($qastcomp, $hll, $type) {
         (%hll_unbox{$hll} // %hll_unbox{''}){$type}($qastcomp)
     }
-    
+
     # Builds a result; helper method for extensions to the ops from outside
     # of this file.
     method result($jast, int $type) {
@@ -535,7 +535,7 @@ QAST::OperationsJAST.add_core_op('list', -> $qastcomp, $op {
         $*STACK.obtain($il, $arr);
         my $list_tmp := $*TA.fresh_o();
         $il.append(JAST::Instruction.new( :op('astore'), $list_tmp ));
-        
+
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_jast($_, :want($RT_OBJ));
@@ -548,7 +548,7 @@ QAST::OperationsJAST.add_core_op('list', -> $qastcomp, $op {
                 $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
             $il.append($POP);
         }
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
         result($il, $RT_OBJ);
     }
@@ -569,7 +569,7 @@ QAST::OperationsJAST.add_core_op('list_i', -> $qastcomp, $op {
         $*STACK.obtain($il, $arr);
         my $list_tmp := $*TA.fresh_o();
         $il.append(JAST::Instruction.new( :op('astore'), $list_tmp ));
-        
+
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_jast($_, :want($RT_INT));
@@ -583,7 +583,7 @@ QAST::OperationsJAST.add_core_op('list_i', -> $qastcomp, $op {
                 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append($POP2);
         }
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
         result($il, $RT_OBJ);
     }
@@ -604,7 +604,7 @@ QAST::OperationsJAST.add_core_op('list_n', -> $qastcomp, $op {
         $*STACK.obtain($il, $arr);
         my $list_tmp := $*TA.fresh_o();
         $il.append(JAST::Instruction.new( :op('astore'), $list_tmp ));
-        
+
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_jast($_, :want($RT_NUM));
@@ -618,7 +618,7 @@ QAST::OperationsJAST.add_core_op('list_n', -> $qastcomp, $op {
                 'Double', $TYPE_SMO, 'Double', $TYPE_TC ));
             $il.append($POP2);
         }
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
         result($il, $RT_OBJ);
     }
@@ -639,7 +639,7 @@ QAST::OperationsJAST.add_core_op('list_s', -> $qastcomp, $op {
         $*STACK.obtain($il, $arr);
         my $list_tmp := $*TA.fresh_o();
         $il.append(JAST::Instruction.new( :op('astore'), $list_tmp ));
-        
+
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_jast($_, :want($RT_STR));
@@ -652,7 +652,7 @@ QAST::OperationsJAST.add_core_op('list_s', -> $qastcomp, $op {
                 $TYPE_STR, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
             $il.append($POP);
         }
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), $list_tmp ));
         result($il, $RT_OBJ);
     }
@@ -676,7 +676,7 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
         $*STACK.obtain($il, $hash);
         my $hash_tmp := $*TA.fresh_o();
         $il.append(JAST::Instruction.new( :op('astore'), $hash_tmp ));
-        
+
         my $key_tmp := $*TA.fresh_s();
         my $val_tmp := $*TA.fresh_o();
         for $op.list -> $key, $val {
@@ -684,12 +684,12 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
             $il.append($key_res.jast);
             $*STACK.obtain($il, $key_res);
             $il.append(JAST::Instruction.new( :op('astore'), $key_tmp ));
-            
+
             my $val_res := $qastcomp.as_jast($val, :want($RT_OBJ));
             $il.append($val_res.jast);
             $*STACK.obtain($il, $val_res);
             $il.append(JAST::Instruction.new( :op('astore'), $val_tmp ));
-            
+
             $il.append(JAST::Instruction.new( :op('aload'), $hash_tmp ));
             $il.append(JAST::Instruction.new( :op('aload'), $key_tmp ));
             $il.append(JAST::Instruction.new( :op('aload'), $val_tmp ));
@@ -698,7 +698,7 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
                 $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC ));
             $il.append($POP);
         }
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), $hash_tmp ));
         result($il, $RT_OBJ);
     }
@@ -738,23 +738,23 @@ for <if unless with without> -> $op_name {
         my $operands := +$op.list;
         nqp::die("Operation '$op_name' needs either 2 or 3 operands")
             if $operands < 2 || $operands > 3;
-            
+
         # See if any immediate block wants to be passed the condition.
-        my $im_then := nqp::istype($op[1], QAST::Block) && 
+        my $im_then := nqp::istype($op[1], QAST::Block) &&
                        ($op[1].blocktype eq 'immediate' || $op[1].blocktype eq 'immediate_static') &&
                        $op[1].arity > 0;
         my $im_else := $operands == 3 &&
-                       nqp::istype($op[2], QAST::Block) && 
+                       nqp::istype($op[2], QAST::Block) &&
                        ($op[2].blocktype eq 'immediate' || $op[2].blocktype eq 'immediate_static') &&
                        $op[2].arity > 0;
-        
+
         # Create labels and a place to store the overall result.
         my $if_id    := $qastcomp.unique($op_name);
         my $else_lbl := JAST::Label.new(:name($if_id ~ '_else'));
         my $end_lbl  := JAST::Label.new(:name($if_id ~ '_end'));
         my $res_temp;
         my $res_type;
-        
+
         # Compile conditional expression and saving of it if we need to.
         my $il := JAST::InstructionList.new();
         $*STACK.spill_to_locals($il);
@@ -796,7 +796,7 @@ for <if unless with without> -> $op_name {
             $res_temp := fresh($res_type);
             $il.append(JAST::Instruction.new( :op(store_ins($res_type)), $res_temp ));
         }
-        
+
         # Emit test.
         if $is_withy {
             $il.append($ALOAD_1);
@@ -810,7 +810,7 @@ for <if unless with without> -> $op_name {
         }
         $il.append(JAST::Instruction.new($else_lbl,
             :op($op_name eq 'if' || $op_name eq 'with' ?? 'ifeq' !! 'ifne')));
-        
+
         # Compile the "then".
         my $then;
         if $im_then {
@@ -821,7 +821,7 @@ for <if unless with without> -> $op_name {
             $then := $qastcomp.as_jast($op[1]);
         }
         $il.append($then.jast);
-        
+
         # What comes next depends on whether there's an else.
         if $operands == 3 {
             # A little care needed here; we make sure we obtain the
@@ -847,10 +847,10 @@ for <if unless with without> -> $op_name {
                 $il.append($qastcomp.coercion($then, $res_type));
                 $il.append(JAST::Instruction.new( :op(store_ins($res_type)), $res_temp ));
             }
-            
+
             # Then branch needs to go to the loop end.
             $il.append(JAST::Instruction.new( :op('goto'), $end_lbl ));
-            
+
             # Emit the else branch.
             $il.append($else_lbl);
             $il.append($else.jast);
@@ -894,7 +894,7 @@ for <if unless with without> -> $op_name {
                 $il.append(JAST::Instruction.new( :op(store_ins($res_type)), $res_temp ));
             }
         }
-        
+
         # Add final label and load result if needed.
         $il.append($end_lbl);
         if $res_temp {
@@ -1027,26 +1027,26 @@ QAST::OperationsJAST.add_core_op('ifnull', -> $qastcomp, $op {
     if +$op.list != 2 {
         nqp::die("The 'ifnull' op expects two children");
     }
-    
+
     # Compile the expression.
     my $il   := JAST::InstructionList.new();
     $*STACK.spill_to_locals($il);
     my $expr := $qastcomp.as_jast($op[0], :want($RT_OBJ));
     $il.append($expr.jast);
-    
+
     # Emit null check.
     my $lbl := JAST::Label.new( :name($qastcomp.unique('ifnull_')) );
     $*STACK.obtain($il, $expr);
     $il.append($DUP);
     $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
-    
+
     # Emit "then" part.
     $il.append($POP);
     my $then := $qastcomp.as_jast($op[1], :want($RT_OBJ));
     $il.append($then.jast);
     $*STACK.obtain($il, $then);
     $il.append($lbl);
-    
+
     result($il, $RT_OBJ);
 });
 
@@ -1067,19 +1067,19 @@ for ('', 'repeat_') -> $repness {
             if +@operands != 2 && +@operands != 3 {
                 nqp::die("Operation '$repness$op_name' needs 2 or 3 operands");
             }
-            
+
             # See if there's an immediate block wanting to be passed the condition.
-            my $has_im := nqp::istype(@operands[1], QAST::Block) && 
+            my $has_im := nqp::istype(@operands[1], QAST::Block) &&
                           (@operands[1].blocktype eq 'immediate' || @operands[1].blocktype eq 'immediate_static') &&
                           @operands[1].arity > 0;
-            
+
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
             my $test_lbl := JAST::Label.new( :name($while_id ~ '_test') );
             my $next_lbl := JAST::Label.new( :name($while_id ~ '_next') );
             my $redo_lbl := JAST::Label.new( :name($while_id ~ '_redo') );
             my $done_lbl := JAST::Label.new( :name($while_id ~ '_done') );
-            
+
             # If we need handlers, produce them.
             my $l_handler_id;
             my $nr_handler_id;
@@ -1087,8 +1087,8 @@ for ('', 'repeat_') -> $repness {
                 $l_handler_id  := &*REGISTER_UNWIND_HANDLER($*HANDLER_IDX, $EX_CAT_LAST,                 :ex_obj(1));
                 $nr_handler_id := &*REGISTER_UNWIND_HANDLER($l_handler_id, $EX_CAT_NEXT +| $EX_CAT_REDO, :ex_obj(1));
             }
-            
-            # Emit loop prelude, evaluating condition. 
+
+            # Emit loop prelude, evaluating condition.
             my $testil := JAST::InstructionList.new();
             $*STACK.spill_to_locals($testil);
             if $repness {
@@ -1121,7 +1121,7 @@ for ('', 'repeat_') -> $repness {
                 $res_type := $cond_res.type;
                 $res := $*TA."fresh_{typechar($res_type)}"();
             }
-            
+
             # If we're non-void, store the condition's evaluation as a
             # result.
             if $res {
@@ -1129,7 +1129,7 @@ for ('', 'repeat_') -> $repness {
                 $testil.append($qastcomp.coercion($cond_res, $res_type));
                 $testil.append(JAST::Instruction.new( :op(store_ins($res_type)), $res ));
             }
-            
+
             # Emit test.
             boolify_instructions($testil, $cond_res.type);
             $testil.append(JAST::Instruction.new($done_lbl,
@@ -1144,7 +1144,7 @@ for ('', 'repeat_') -> $repness {
             $body_il.append($body_res.jast);
             $*STACK.obtain($body_il, $body_res);
             $body_il.append(pop_ins($body_res.type));
-            
+
             # Add redo and next handler if needed.
             if $handler {
                 my $catch := JAST::InstructionList.new();
@@ -1160,7 +1160,7 @@ for ('', 'repeat_') -> $repness {
                     $l_handler_id, $nr_handler_id);
             }
             $il.append($body_il);
-            
+
             # If there's a third child, evaluate it as part of the
             # "next".
             if +@operands == 3 {
@@ -1169,11 +1169,11 @@ for ('', 'repeat_') -> $repness {
                 $il.append($next_res.jast);
                 $*STACK.obtain($il, $next_res);
             }
-            
+
             # Emit the iteration jump and end label.
             $il.append(JAST::Instruction.new( :op('goto'), $test_lbl ));
             $il.append($done_lbl);
-            
+
             # If needed, wrap the whole thing in a last exception handler.
             if $handler {
                 my $catch := JAST::InstructionList.new();
@@ -1207,7 +1207,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         elsif $_.named eq 'label' { $label := $_; }
         else { @operands.push($_) }
     }
-    
+
     if +@operands != 2 {
         nqp::die("Operation 'for' needs 2 operands");
     }
@@ -1220,10 +1220,10 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     elsif @operands[1].blocktype eq 'immediate_static' {
         @operands[1].blocktype('declaration_static');
     }
-    
+
     # Create result temporary if we'll need one.
     my $res := $*WANT == $RT_VOID ?? 0 !! $*TA.fresh_o();
-    
+
     # If we need handlers, produce them.
     my $l_handler_id;
     my $n_handler_id;
@@ -1233,7 +1233,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         $n_handler_id := &*REGISTER_UNWIND_HANDLER($l_handler_id, $EX_CAT_NEXT, :ex_obj(1));
         $r_handler_id := &*REGISTER_UNWIND_HANDLER($n_handler_id, $EX_CAT_REDO, :ex_obj(1));
     }
-    
+
     # Evaluate the thing we'll iterate over, get the iterator and
     # store it in a temporary.
     my $il := JAST::InstructionList.new();
@@ -1250,7 +1250,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'iter', $TYPE_SMO, $TYPE_SMO, $TYPE_TC ));
     $il.append(JAST::Instruction.new( :op('astore'), $iter_tmp ));
-    
+
     # Do similar for the block.
     my $block_res := $qastcomp.as_jast(@operands[1], :want($RT_OBJ));
     my $block_tmp := $op.unique('iterblock');
@@ -1258,13 +1258,13 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     $il.append($block_res.jast);
     $*STACK.obtain($il, $block_res);
     $il.append(JAST::Instruction.new( :op('astore'), $block_tmp ));
-    
+
     # Some labels we'll need.
     my $for_id := $qastcomp.unique('for');
     my $lbl_next := JAST::Label.new( :name($for_id ~ 'next') );
     my $lbl_redo := JAST::Label.new( :name($for_id ~ 'redo') );
     my $lbl_done := JAST::Label.new( :name($for_id ~ 'done') );
-    
+
     # Emit loop test.
     my $loop_il := JAST::InstructionList.new();
     $loop_il.append($lbl_next);
@@ -1274,7 +1274,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         $TYPE_OPS, 'istrue', 'Long', $TYPE_SMO, $TYPE_TC ));
     $loop_il.append($L2I);
     $loop_il.append(JAST::Instruction.new( :op('ifeq'), $lbl_done ));
-    
+
     # Fetch values into temporaries (on the stack ain't enough in case
     # of redo).
     my $val_il := JAST::InstructionList.new();
@@ -1292,7 +1292,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         $arity := $arity - 1;
     }
     $val_il.append($lbl_redo);
-    
+
     # Now do block invocation.
     my $inv_ast := QAST::Op.new(
         :op('call'),
@@ -1317,7 +1317,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
             $n_handler_id, $r_handler_id);
     }
     $val_il.append($inv_il);
-    
+
     # Wrap value fetching and call in "next" handler if needed.
     if $handler {
         my $catch := JAST::InstructionList.new();
@@ -1329,7 +1329,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     }
     $loop_il.append($val_il);
     $loop_il.append(JAST::Instruction.new( :op('goto'), $lbl_next ));
-    
+
     # Emit postlude, wrapping in last handler if needed.
     if $handler {
         my $catch := JAST::InstructionList.new();
@@ -1342,7 +1342,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
     }
     $il.append($loop_il);
     $il.append($lbl_done);
-    
+
     # Result, as needed.
     if $res {
         $il.append(JAST::Instruction.new( :op('aload'), $res ));
@@ -1363,7 +1363,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
     }
     my @order := @pos;
     for @named { nqp::push(@order, $_) }
-    
+
     # Process the arguments, computing each of them and putting them onto the
     # stack.
     my @arg_results;
@@ -1384,7 +1384,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
         }
         $il.append($arg_res.jast);
         nqp::push(@arg_results, $arg_res);
-        
+
         my int $type := $arg_res.type;
         if $type == $RT_INT {
             nqp::push(@arg_jtypes, 'J');
@@ -1395,7 +1395,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
         else {
             nqp::push(@arg_jtypes, jtype($arg_res.type));
         }
-        
+
         unless $i == 0 && ($inv_first || $name_first) {
             my int $flags := 0;
             if @order[$i].flat {
@@ -1407,7 +1407,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
             }
             nqp::push(@callsite, arg_type($type) + $flags);
         }
-        
+
         $i++;
     }
 
@@ -1416,7 +1416,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
 }
 my $call_codegen := sub ($qastcomp, $node) {
     my $il := JAST::InstructionList.new();
-    
+
     # If it's a direct call, then use invokedynamic to resolve the name in
     # the current lexical scope.
     if $node.name ne "" {
@@ -1424,7 +1424,7 @@ my $call_codegen := sub ($qastcomp, $node) {
         my @argstuff := process_args_onto_stack($qastcomp, @($node), $il);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
-        
+
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
@@ -1440,12 +1440,12 @@ my $call_codegen := sub ($qastcomp, $node) {
             'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth
         )));
     }
-    
+
     # Otherwise, it's an indirect call.
     else {
         # Ensure we have a thing to invoke.
         nqp::die("A 'call' node must have a name or at least one child") unless +@($node) >= 1;
-        
+
         # Process arguments, making sure first one is an object (since that is
         # the thing to invoke).
         my @argstuff := process_args_onto_stack($qastcomp, @($node), $il, :inv_first);
@@ -1470,13 +1470,13 @@ QAST::OperationsJAST.add_core_op('call', :!inlinable, $call_codegen);
 QAST::OperationsJAST.add_core_op('callstatic', :!inlinable, $call_codegen);
 QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     my $il := JAST::InstructionList.new();
-    
+
     # Ensure we have an invocant.
     if +@($node) == 0 {
         nqp::die("A 'callmethod' node must have at least one child");
     }
     my @children := nqp::clone(@($node));
-    
+
     # If it's a direct call, we can get invokedynamic to do something smart
     # with guard clauses for us.
     if $node.name ne '' {
@@ -1484,7 +1484,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         my @argstuff := process_args_onto_stack($qastcomp, @children, $il, :obj_first);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
-        
+
         # Emit the call. Note, name passed as extra arg as some valid names in
         # Perl 6 are not valid method names on the JVM. We use the fact that
         # the stack was spilled to sneak the ThreadContext arg in.
@@ -1499,7 +1499,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
             'org/perl6/nqp/runtime/IndyBootstrap', 'methcall_noa',
         )));
     }
-    
+
     # Otherwise, it's indirect, and we need to resolve the method each and
     # every call. Still wire it through invokedynamic, but it can't do quite
     # so much for us.
@@ -1512,12 +1512,12 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         my $name := nqp::shift(@children);
         nqp::unshift(@children, $inv);
         nqp::unshift(@children, $name);
-        
+
         # Process arguments and force them into locals.
         my @argstuff := process_args_onto_stack($qastcomp, @children, $il, :name_first, :obj_second);
         my $cs_idx := @argstuff[0];
         $*STACK.spill_to_locals($il);
-        
+
         # Emit the call.
         nqp::unshift(@argstuff[2], 'I');
         $il.append(JAST::PushIndex.new( :value($cs_idx) ));
@@ -1542,7 +1542,7 @@ QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
     unless nqp::istype(@children[0], QAST::Var) {
         nqp::die("First child of a 'bind' op must be a QAST::Var");
     }
-    
+
     # Set the QAST of the think we're to bind, then delegate to
     # the compilation of the QAST::Var to handle the rest.
     my $*BINDVAL := @children[1];
@@ -1589,14 +1589,14 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     if @children == 0 {
         nqp::die("The 'handle' op requires at least one child");
     }
-    
+
     # If there's exactly one child, then there's nothing protecting
     # it; just compile it and we're done.
     my $protected := @children.shift();
     unless @children {
         return $qastcomp.as_jast($protected);
     }
-    
+
     # Otherwise, we need to generate an install a handler block, which will
     # decide that to do by category.
     my $mask := 0;
@@ -1642,7 +1642,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
                 nqp::die("Invalid handler type '$type'");
             }
             my $cat_mask := %handler_names{$type};
-            
+
             # Chain in this handler.
             my $check := QAST::Op.new(
                 :op('if'),
@@ -1655,12 +1655,12 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
             );
             $push_target.push($check);
             $push_target := $check;
-            
+
             # Add to mask.
             $mask := nqp::bitor_i($mask, $cat_mask);
         }
     }
-    
+
     # Compile, create a lexical to put the handler in, and add it. Should
     # also force the stack to empty.
     my $name   := QAST::Node.unique('!HANDLER_');
@@ -1676,10 +1676,10 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
         'bindlex_o', $TYPE_SMO, $TYPE_SMO, $TYPE_CF, 'Integer' ));
     $il.append($POP);
-    
+
     # Register a handler.
     my $handler := &*REGISTER_BLOCK_HANDLER($*HANDLER_IDX, $mask, $lexidx);
-    
+
     # Evaluate the protected code and stash it in a temporary.
     my $result := $*TA.fresh_o();
     my $prores := $qastcomp.as_jast_in_handler($protected, $handler, :want($RT_OBJ));
@@ -1725,7 +1725,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
         $TYPE_CF, 'leave', 'Void' ));
     $catchil.append($RETURN);
     $catchil.append($exitlbl);
-    
+
     # Wrap it all up in try/catch etc.
     $il.append($qastcomp.delimit_handler(
         JAST::TryCatch.new( :try($inner), :catch($catchil), :type($TYPE_EX_UNWIND) ),
@@ -1995,7 +1995,7 @@ my %const_map := nqp::hash(
     'CCLASS_ALPHANUMERIC',  2048,
     'CCLASS_NEWLINE',       4096,
     'CCLASS_WORD',          8192,
-    
+
     'HLL_ROLE_NONE',        0,
     'HLL_ROLE_INT',         1,
     'HLL_ROLE_NUM',         2,
@@ -2003,7 +2003,7 @@ my %const_map := nqp::hash(
     'HLL_ROLE_ARRAY',       4,
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
-    
+
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
     'CONTROL_LAST',         16,
@@ -2016,7 +2016,7 @@ my %const_map := nqp::hash(
     'CONTROL_AWAIT',        8192,
     'CONTROL_EMIT',         16384,
     'CONTROL_DONE',         32768,
-    
+
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
     'STAT_ISDIR',              2,
@@ -2745,7 +2745,7 @@ QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_CU, 'setLexValues', 'Void', $TYPE_TC, 'I', $TYPE_STR ));
     }
-    
+
     $il.append($ACONST_NULL);
     result($il, $RT_OBJ)
 });
@@ -2875,7 +2875,7 @@ class QAST::CompilerJAST {
         has @!cuids;
         has @!callsites;
         has %!callsite_map;
-        
+
         method BUILD() {
             $!cur_idx := 0;
             %!cuid_to_idx := {};
@@ -2884,28 +2884,28 @@ class QAST::CompilerJAST {
             @!callsites := [];
             %!callsite_map := {};
         }
-        
+
         method register_method($jastmeth, $cuid) {
             %!cuid_to_idx{$cuid} := $!cur_idx;
             nqp::push(@!jastmeth_names, $jastmeth.name);
             nqp::push(@!cuids, $cuid);
             $!cur_idx := $!cur_idx + 1;
         }
-        
+
         method know_cuid($cuid) {
             nqp::existskey(%!cuid_to_idx, $cuid)
         }
-        
+
         method cuid_to_idx($cuid) {
             nqp::existskey(%!cuid_to_idx, $cuid)
                 ?? %!cuid_to_idx{$cuid}
                 !! nqp::die("Unknown CUID '$cuid'")
         }
-        
+
         method cuid_to_jastmethname($cuid) {
             @!jastmeth_names[self.cuid_to_idx($cuid)]
         }
-        
+
         method get_callsite_idx(@arg_types, @arg_names) {
             my $key := join("-", @arg_types) ~ ';' ~ join("\0", @arg_names);
             if nqp::existskey(%!callsite_map, $key) {
@@ -2918,18 +2918,18 @@ class QAST::CompilerJAST {
                 return $idx;
             }
         }
-        
+
         method jastify() {
             self.callsites();
         }
 
         method callsites() {
             my $csa := JAST::Method.new( :name('getCallSites'), :returns("[$TYPE_CSD"), :static(0) );
-            
+
             # Create array.
             $csa.append(JAST::PushIndex.new( :value(+@!callsites) ));
             $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CSD ));
-            
+
             # All all the callsites
             my int $i := 0;
             for @!callsites -> @cs {
@@ -2967,13 +2967,13 @@ class QAST::CompilerJAST {
                     $TYPE_CSD, '<init>', 'Void', '[Byte', "[$TYPE_STR"));
                 $csa.append($AASTORE);
             }
-            
+
             # Return the array. Add method to class.
             $csa.append($ARETURN);
             $*JCLASS.add_method($csa);
         }
     }
-    
+
     # Holds information about the QAST::Block we're currently compiling.
     my class BlockInfo {
         has $!qast;             # The QAST::Block
@@ -2987,13 +2987,13 @@ class QAST::CompilerJAST {
         has @!lexical_names;    # List by type of lexial name lists
         has int $!num_save_sites;   # Count of points where a SaveStackException handler is needed
         has %!local2temp;       # Maps local names to temporarization info
-        
+
         method new($qast, $outer) {
             my $obj := nqp::create(self);
             $obj.BUILD($qast, $outer);
             $obj
         }
-        
+
         method BUILD($qast, $outer) {
             $!qast := $qast;
             $!outer := $outer;
@@ -3006,7 +3006,7 @@ class QAST::CompilerJAST {
             %!local2temp := nqp::hash();
             @!lexical_names := nqp::list([],[],[],[]);
         }
-        
+
         method add_param($var) {
             if $var.scope eq 'local' {
                 self.add_local($var);
@@ -3033,7 +3033,7 @@ class QAST::CompilerJAST {
         method add_lexicalref($var) {
             self.register_lexicalref($var);
         }
-        
+
         method add_local($var) {
             my $tempify := %!local2temp{$var.name};
             if $tempify {
@@ -3084,7 +3084,7 @@ class QAST::CompilerJAST {
             %!lexical_idxs{$name}     := nqp::elems(@!lexical_names[$RT_OBJ]);
             nqp::push(@!lexical_names[$RT_OBJ], $name);
         }
-        
+
         method register_local($var) {
             my $name := $var.name;
             if nqp::existskey(%!local_types, $name) {
@@ -3105,7 +3105,7 @@ class QAST::CompilerJAST {
         method outer() { $!outer }
         method params() { @!params }
         method locals() { @!locals }
-        
+
         method local_info($name) {
             my $tempify := %!local2temp{$name};
             $tempify ?? $tempify[0] !! [ $name, %!local_types{$name} ]
@@ -3115,7 +3115,7 @@ class QAST::CompilerJAST {
         method lexical_idx($name) { %!lexical_idxs{$name} }
         method lexical_names_by_type() { @!lexical_names }
     }
-    
+
     my class BlockTempAlloc {
         has int $!cur_i;
         has int $!cur_n;
@@ -3125,30 +3125,30 @@ class QAST::CompilerJAST {
         has @!free_n;
         has @!free_s;
         has @!free_o;
-        
+
         method fresh_i() {
             @!free_i ?? nqp::pop(@!free_i) !! "__TMP_I_" ~ $!cur_i++
         }
-        
+
         method fresh_n() {
             @!free_n ?? nqp::pop(@!free_n) !! "__TMP_N_" ~ $!cur_n++
         }
-        
+
         method fresh_s() {
             @!free_s ?? nqp::pop(@!free_s) !! "__TMP_S_" ~ $!cur_s++
         }
-        
+
         method fresh_o() {
             @!free_o ?? nqp::pop(@!free_o) !! "__TMP_O_" ~ $!cur_o++
         }
-        
+
         method release(@i, @n, @s, @o) {
             for @i { nqp::push(@!free_i, $_) }
             for @n { nqp::push(@!free_n, $_) }
             for @s { nqp::push(@!free_s, $_) }
             for @o { nqp::push(@!free_o, $_) }
         }
-        
+
         method add_temps_to_set($set) {
             sub temps($prefix, $n, $type) {
                 my int $i := 0;
@@ -3163,37 +3163,37 @@ class QAST::CompilerJAST {
             temps("__TMP_O_", $!cur_o, $RT_OBJ);
         }
     }
-    
+
     my class StmtTempAlloc {
         has @!used_i;
         has @!used_n;
         has @!used_s;
         has @!used_o;
-        
+
         method fresh_i() {
             my $al := $*BLOCK_TA.fresh_i();
             nqp::push(@!used_i, $al);
             $al
         }
-        
+
         method fresh_n() {
             my $al := $*BLOCK_TA.fresh_n();
             nqp::push(@!used_n, $al);
             $al
         }
-        
+
         method fresh_s() {
             my $al := $*BLOCK_TA.fresh_s();
             nqp::push(@!used_s, $al);
             $al
         }
-        
+
         method fresh_o() {
             my $al := $*BLOCK_TA.fresh_o();
             nqp::push(@!used_o, $al);
             $al
         }
-        
+
         method release() {
             $*BLOCK_TA.release(@!used_i, @!used_n, @!used_s, @!used_o)
         }
@@ -3221,7 +3221,7 @@ class QAST::CompilerJAST {
             $unit := QAST::Block.new($unit) unless nqp::istype($unit, QAST::Block);
             $source := QAST::CompUnit.new(:hll(''), $unit);
         }
-        
+
         # Set up a JAST::Class that will hold all the blocks (which become Java
         # methods) that we shall compile.
         my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "");
@@ -3230,35 +3230,35 @@ class QAST::CompilerJAST {
             :super('org.perl6.nqp.runtime.CompilationUnit'),
             :filename($file)
         );
-        
+
         # We'll also need to keep track of all the blocks we compile into Java
         # methods; the CodeRefBuilder takes care of that.
         my $*CODEREFS := CodeRefBuilder.new();
-        
+
         # Now compile $source. By the end of this, the various data structures
         # set up above will be fully populated.
         self.as_jast($source);
-        
+
         # Make various code-ref/dispatch related things.
         $*CODEREFS.jastify();
-        
+
         # Finally, we hand back the finished class.
         return $*JCLASS
     }
-    
+
     # Tracks what is currently on the stack, and what things that were on the
     # stack have been spilled to temporaries and thus will need re-instating
     # at some point in the future.
     my class StackState {
         has @!stack;
         has @!spill_locals;
-        
+
         method push($result) {
             nqp::istype($result, Result)
                 ?? nqp::push(@!stack, $result)
                 !! nqp::die("Can only push a Result onto the stack")
         }
-        
+
         method obtain($il, *@things) {
             # Sanity checks.
             if nqp::elems(@things) == 0 {
@@ -3267,7 +3267,7 @@ class QAST::CompilerJAST {
             if nqp::elems(@!stack) < nqp::elems(@things) {
                 nqp::die("Cannot obtain from empty or undersized stack");
             }
-            
+
             # See if the things we need are all on the stack.
             my int $sp        := @!stack - +@things;
             my int $tp        := 0;
@@ -3296,7 +3296,7 @@ class QAST::CompilerJAST {
                     for @things { nqp::pop(@!stack) }
                     return 1;
                 }
-                
+
                 # If they're all local, load them onto the stack. Also, we can
                 # re-use the stack saving temporaries.
                 elsif $all_local {
@@ -3314,7 +3314,7 @@ class QAST::CompilerJAST {
                     }
                     return 1;
                 }
-                
+
                 # Mix of local and stack: just spill everything still on the
                 # stack, and try again.
                 else {
@@ -3322,11 +3322,11 @@ class QAST::CompilerJAST {
                     return self.obtain($il, |@things);
                 }
             }
-            
+
             # Otherwise, bad access.
             nqp::die("Out-of-order access or re-use of stack items");
         }
-        
+
         # Spills the currnet stack contents to local variables.
         method spill_to_locals($il) {
             sub obtain_temp($type) {
@@ -3340,7 +3340,7 @@ class QAST::CompilerJAST {
                     bfresh($type);
                 }
             }
-            
+
             my $sp := nqp::elems(@!stack);
             while $sp-- {
                 my $item := @!stack[$sp];
@@ -3357,7 +3357,7 @@ class QAST::CompilerJAST {
     INIT {
         $serno := 10;
     }
-    
+
     method unique($prefix = '') { $prefix ~ $serno++ }
 
     proto method as_jast($node, :$want) {
@@ -3402,17 +3402,17 @@ class QAST::CompilerJAST {
         my $map := %*CUID_TO_QBID;
         nqp::existskey($map, $cuid) ?? $map{$cuid} !! ($map{$cuid} := $*NEXT_QBID++);
     }
-    
+
     multi method as_jast(QAST::CompUnit $cu, :$want) {
         # A compilation-unit-wide source of IDs for handlers.
         my $*EH_IDX := 1;
-        
+
         # Set HLL.
         my $*HLL := '';
         if $cu.hll {
             $*HLL := $cu.hll;
         }
-        
+
         # Should have a single child which is the outer block.
         if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
@@ -3435,7 +3435,7 @@ class QAST::CompilerJAST {
 
         # Compile the block.
         my $block_jast := self.as_jast($cu[0]);
-        
+
         # If we are in compilation mode, or have pre-deserialization or
         # post-deserialization tasks, handle those. Overall, the process
         # is to desugar this into simpler QAST nodes, then compile those.
@@ -3451,12 +3451,12 @@ class QAST::CompilerJAST {
             # Create a block into which we'll install all of the other
             # pieces.
             my $block := QAST::Block.new( :blocktype('raw') );
-            
+
             # Add pre-deserialization tasks, each as a QAST::Stmt.
             for @pre_des {
                 $block.push(QAST::Stmt.new($_));
             }
-            
+
             # If we need to do deserialization, emit code for that.
             if $*COMP_MODE {
                 $block.push(self.deserialization_code($cu.sc(), $cu.code_ref_blocks(),
@@ -3499,7 +3499,7 @@ class QAST::CompilerJAST {
                 }
             }
             $block.push($cur_pd_block);
-            
+
             # Compile to JAST and register this block as the deserialization
             # handler.
             self.as_jast($block);
@@ -3508,7 +3508,7 @@ class QAST::CompilerJAST {
             $des_meth.append($IRETURN);
             $*JCLASS.add_method($des_meth);
         }
-        
+
         # Compile and include load-time logic, if any.
         if nqp::defined($cu.load) {
             my $load_block := QAST::Block.new(
@@ -3522,7 +3522,7 @@ class QAST::CompilerJAST {
             $load_meth.append($IRETURN);
             $*JCLASS.add_method($load_meth);
         }
-        
+
         # Compile and include main-time logic, if any, and then add a Java
         # main that will lead to its invocation.
         if nqp::defined($cu.main) {
@@ -3547,19 +3547,19 @@ class QAST::CompilerJAST {
             $entry_cuid_meth.append($IRETURN);
             $*JCLASS.add_method($entry_cuid_meth);
         }
-        
+
         # Add method that returns HLL name.
         my $hll_meth := JAST::Method.new( :name('hllName'), :returns($TYPE_STR), :static(0) );
         $hll_meth.append(JAST::PushSVal.new( :value($*HLL) ));
         $hll_meth.append($ARETURN);
         $*JCLASS.add_method($hll_meth);
-        
+
         # Add method that returns the mainline block.
         my $mainline_meth := JAST::Method.new( :name('mainlineQbid'), :returns('I'), :static(0) );
         $mainline_meth.append(JAST::PushIndex.new( :value(self.cuid_to_qbid($cu[0].cuid)) ));
         $mainline_meth.append($IRETURN);
         $*JCLASS.add_method($mainline_meth);
-        
+
         return $*JCLASS;
     }
 
@@ -3581,10 +3581,10 @@ class QAST::CompilerJAST {
             $*JCLASS.serialized($serialized);
             $serialized := nqp::null();
         }
-        
+
         # Now it's serialized, pop this SC off the compiling SC stack.
         nqp::popcompsc();
-        
+
         # String heap QAST.
         my $sh_ast := QAST::Op.new( :op('list_s') );
         my $sh_elems := nqp::elems($sh);
@@ -3596,7 +3596,7 @@ class QAST::CompilerJAST {
             $i := $i + 1;
         }
         $sh_ast := QAST::Block.new( :blocktype('immediate'), $sh_ast );
-        
+
         # Handle repossession conflict resolution code, if any.
         if $repo_conf_res {
             $repo_conf_res.push(QAST::Var.new( :name('conflicts'), :scope('local') ));
@@ -3659,7 +3659,7 @@ class QAST::CompilerJAST {
         if $*NEED_ARGS_ARRAY {
             return $ARG_EXP_USE_BINDER;
         }
-        
+
         # Otherwise, go by arity, then look at particular cases.
         my int $num_params := +$block.params;
         if $num_params == 0 {
@@ -3742,7 +3742,7 @@ class QAST::CompilerJAST {
             my $*BINDVAL  := 0;
             my $outer     := try $*BLOCK;
             my $block     := BlockInfo.new($node, $outer);
-            
+
             # This array will contain any catch/control exception handlers the
             # block gets. A contextual lets us track nesting of handlers.
             my @handlers;
@@ -3759,7 +3759,7 @@ class QAST::CompilerJAST {
                     $EX_BLOCK, $lexidx]);
                 $unwind
             }
-            
+
             # Create JAST method and register it with the block's compilation unit
             # unique ID and name. (Note, always void return here as return values
             # are handled out of band).
@@ -3767,14 +3767,14 @@ class QAST::CompilerJAST {
             $*JMETH.cr_name($node.name);
             $*JMETH.cr_cuid($node.cuid) unless $*COMP_MODE;
             $*CODEREFS.register_method($*JMETH, $node.cuid);
-            
+
             # Set outer if we have one.
             if nqp::istype($outer, BlockInfo) {
                 $*JMETH.cr_outer(self.cuid_to_qbid($outer.qast.cuid));
             } else {
                 $*JMETH.cr_outer(-1); # marks as coderef
             }
-            
+
             # Various common arguments we always take; actual args are sorted
             # out later after looking through the block for params.
             $*JMETH.add_argument('cu', $TYPE_CU);
@@ -3782,11 +3782,11 @@ class QAST::CompilerJAST {
             $*JMETH.add_argument('cr', $TYPE_CR);
             $*JMETH.add_argument('csd', $TYPE_CSD);
             $*JMETH.add_argument('resume', $TYPE_RESUME);
-            
+
             # Set up temporaries allocator.
             my $*BLOCK_TA := BlockTempAlloc.new();
             my $*TA := $*BLOCK_TA;
-            
+
             # Compile method body.
             my $body;
             my $*STACK := StackState.new();
@@ -3797,14 +3797,14 @@ class QAST::CompilerJAST {
                 $body := self.compile_all_the_stmts($node.list, :node($node.node));
                 $*STACK.obtain(NQPMu, $body);
             }
-            
+
             # Stash lexical names.
             my @lex_names := $block.lexical_names_by_type();
             $*JMETH.cr_olex(@lex_names[$RT_OBJ]);
             $*JMETH.cr_ilex(@lex_names[$RT_INT]);
             $*JMETH.cr_nlex(@lex_names[$RT_NUM]);
             $*JMETH.cr_slex(@lex_names[$RT_STR]);
-            
+
             # If we have custom args processing, we always take an args array.
             my $il := JAST::InstructionList.new();
             if $node.custom_args {
@@ -3839,7 +3839,7 @@ class QAST::CompilerJAST {
                         $pos_required++;
                     }
                 }
-                
+
                 # Take args array and emit arity check instruction.
                 $*JMETH.add_argument('__args', "[$TYPE_OBJ");
                 $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
@@ -3853,7 +3853,7 @@ class QAST::CompilerJAST {
                 $il.append($ALOAD_1);
                 $il.append(JAST::Instruction.new( :op('getfield'), $TYPE_TC, 'flatArgs', "[$TYPE_OBJ" ));
                 $il.append(JAST::Instruction.new( :op('astore'), '__args' ));
-                
+
                 # Emit instructions to load each parameter.
                 my int $param_idx := 0;
                 for $block.params {
@@ -3923,7 +3923,7 @@ class QAST::CompilerJAST {
                 }
             }
             $args_expectation := $*JMETH.args_expectation();
-            
+
             # Add all the locals.
             my @all_locals;
             for $block.locals { nqp::push(@all_locals, $block.local_info($_.name)) }
@@ -3945,7 +3945,7 @@ class QAST::CompilerJAST {
                 }
                 $*JMETH.append(JAST::Instruction.new( :op(store_ins($type)), $name ));
             }
-            
+
             # Flatten handlers and store.
             my @flat_handlers := [nqp::elems(@handlers)];
             for @handlers {
@@ -3953,10 +3953,10 @@ class QAST::CompilerJAST {
                 for $_ { nqp::push(@flat_handlers, $_) }
             }
             $*JMETH.cr_handlers(@flat_handlers);
-            
+
             # Add method body JAST.
             $il.append($body.jast);
-            
+
             # Store return value.
             $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -3978,7 +3978,7 @@ class QAST::CompilerJAST {
             $*JMETH.append(JAST::Instruction.new( :op('invokespecial'), $TYPE_CF, '<init>',
                 'Void', $TYPE_TC, $TYPE_CR ));
             $*JMETH.append(JAST::Instruction.new( :op('astore'), 'cf' ));
-            
+
             # Emit the postlude. We catch any exceptions. Control ones are
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
@@ -4096,7 +4096,7 @@ class QAST::CompilerJAST {
                 $*JMETH.append($saver);
                 $*JMETH.append($resume);
             }
-            
+
             # Set exit handler and thunk flags if needed.
             if $node.has_exit_handler {
                 $*JMETH.has_exit_handler(1);
@@ -4104,7 +4104,7 @@ class QAST::CompilerJAST {
             if $node.is_thunk {
                 $*JMETH.is_thunk(1);
             }
-            
+
             # Finalize method and add it to the class.
             $*JCLASS.add_method($*JMETH);
         }
@@ -4135,7 +4135,7 @@ class QAST::CompilerJAST {
                     $il.append(JAST::Instruction.new( :op('getstatic'),
                         $TYPE_OPS, 'emptyArgList', "[$TYPE_OBJ" ));
                 }
-                
+
                 # Emit the virtual call.
                 if $args_expectation == $ARG_EXP_NO_ARGS {
                     $il.append(savesite(JAST::Instruction.new( :op('invokestatic'),
@@ -4169,18 +4169,18 @@ class QAST::CompilerJAST {
             }
         }
     }
-    
+
     multi method as_jast(QAST::Stmts $node, :$want) {
         self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node))
     }
-    
+
     multi method as_jast(QAST::Stmt $node, :$want) {
         my $*TA := StmtTempAlloc.new();
         my $result := self.compile_all_the_stmts($node.list, $node.resultchild, :node($node.node));
         $*TA.release();
         $result
     }
-    
+
     method compile_all_the_stmts(@stmts, $resultchild?, :$node) {
         unless @stmts {
             # Empty statement list will break things.
@@ -4196,14 +4196,14 @@ class QAST::CompilerJAST {
         unless nqp::defined($resultchild) {
             $resultchild := $n - 1;
         }
-        
+
         for @stmts {
             if $_.node && nqp::can($_.node,'orig') {
                 my $node := $_.node;
-                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));            
+                my $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1));
                 $il.append(JAST::Annotation.new( :line($line) ));
             }
-            
+
             my $void := $all_void || $i != $resultchild;
             if $void {
                 if nqp::istype($_, QAST::Want) {
@@ -4233,13 +4233,13 @@ class QAST::CompilerJAST {
             result($il, $last_res.type)
         }
     }
-    
+
     multi method as_jast(QAST::Op $node, :$want) {
         my $hll := '';
         try $hll := $*HLL;
         QAST::OperationsJAST.compile_op(self, $hll, $node);
     }
-    
+
     multi method as_jast(QAST::VM $node, :$want) {
         if $node.supports('jvm') {
             return nqp::defined($want)
@@ -4253,11 +4253,11 @@ class QAST::CompilerJAST {
                     !! ''));
         }
     }
-    
+
     multi method as_jast(QAST::Var $node, :$want) {
         self.compile_var($node)
     }
-    
+
     multi method as_jast(QAST::VarWithFallback $node, :$want) {
         if $*BINDVAL {
             self.compile_var($node)
@@ -4267,16 +4267,16 @@ class QAST::CompilerJAST {
             if ($var_res.type != $RT_OBJ) {
                 return $var_res;
             }
-            
+
             my $il := JAST::InstructionList.new();
             $il.append($var_res.jast);
             $*STACK.spill_to_locals($il);
             $*STACK.obtain($il, $var_res);
-            
+
             my $lbl := JAST::Label.new(:name($node.unique('fallback')));
             $il.append($DUP);
             $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
-            
+
             my $fallback_res := self.as_jast($node.fallback, :want($RT_OBJ));
             $il.append($POP);
             $il.append($fallback_res.jast);
@@ -4286,11 +4286,11 @@ class QAST::CompilerJAST {
             result($il, $RT_OBJ);
         }
     }
-    
+
     method compile_var($node) {
         my $scope := $node.scope;
         my $decl  := $node.decl;
-        
+
         # Handle any declarations; after this, we fall through to the
         # lookup code.
         if $decl {
@@ -4340,7 +4340,7 @@ class QAST::CompilerJAST {
                 nqp::die("Don't understand declaration type '$decl'");
             }
         }
-        
+
         # If there's no scope, figure it out from the symbol tables if
         # possible.
         my $name := $node.name;
@@ -4376,7 +4376,7 @@ class QAST::CompilerJAST {
                 $scope := 'attribute' if $scope eq 'attributeref';
             }
         }
-        
+
         # Now go by scope.
         if $scope eq 'local' {
             my $info := $*BLOCK.local_info($name);
@@ -4446,7 +4446,7 @@ class QAST::CompilerJAST {
                     }
                 }
             }
-            
+
             # If we didn't find it anywhere, it musta been explicitly marked as
             # lexical. Take the type from .returns and rewrite to a more dynamic
             # lookup.
@@ -4476,11 +4476,11 @@ class QAST::CompilerJAST {
                     return result($il, $RT_OBJ);
                 }
             }
-            
+
             # Map type in a couple of ways we'll need.
             my $jtype := $ref ?? $TYPE_SMO !! jtype($type);
             my $c     := $ref ?? 'o' !! typechar($type);
-            
+
             # If binding, always want the thing we're binding evaluated.
             my $il := JAST::InstructionList.new();
             if $*BINDVAL {
@@ -4491,7 +4491,7 @@ class QAST::CompilerJAST {
                 $il.append($valres.jast);
                 $*STACK.obtain($il, $valres);
             }
-            
+
             # If it's declared in the local scope...
             if $local {
                 $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
@@ -4502,7 +4502,7 @@ class QAST::CompilerJAST {
                     !! JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                             "getlex_$c", $jtype, $TYPE_CF, 'Integer' ));
             }
-            
+
             # Otherwise it must be a known number of scopes out.
             else {
                 $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
@@ -4650,7 +4650,7 @@ class QAST::CompilerJAST {
             if +@args != 2 {
                 nqp::die("An attribute lookup needs an object and a class handle");
             }
-            
+
             # Compile object, handle and name.
             my $il := JAST::InstructionList.new();
             my $obj_res := self.as_jast_clear_bindval(@args[0], :want($RT_OBJ));
@@ -4659,13 +4659,13 @@ class QAST::CompilerJAST {
             $il.append($han_res.jast);
             my $name_res := self.as_jast_clear_bindval(QAST::SVal.new( :value($name) ), :want($RT_STR));
             $il.append($name_res.jast);
-            
+
             # Get lookup hint if possible.
             my int $hint := -1;
             if @args[1].has_compile_time_value {
                 $hint := nqp::attrhintfor(@args[1].compile_time_value, $name);
             }
-            
+
             # Go by whether it's a bind or lookup.
             my $type := rttype_from_typeobj($node.returns);
             my $jtype := jtype($type);
@@ -4686,7 +4686,7 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "getattr$suffix", $jtype, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
             }
-            
+
             return result($il, $type);
         }
         elsif $scope eq 'attributeref' {
@@ -4737,30 +4737,30 @@ class QAST::CompilerJAST {
             nqp::die("QAST::Var with scope '$scope' NYI");
         }
     }
-    
+
     method as_jast_clear_bindval($node, :$want) {
         my $*BINDVAL := 0;
         nqp::defined($want) ?? self.as_jast($node, :$want) !! self.as_jast($node)
     }
-    
+
     method as_jast_in_handler($node, $*HANDLER_IDX, :$want) {
         my $*BINDVAL := 0;
         nqp::defined($want) ?? self.as_jast($node, :$want) !! self.as_jast($node)
     }
-    
+
     multi method as_jast(QAST::Want $node, :$want) {
         # If we're not in a coercive context, take the default.
         self.as_jast($node[0])
     }
-    
+
     multi method as_jast(QAST::IVal $node, :$want) {
         result(JAST::PushIVal.new( :value($node.value) ), $RT_INT)
     }
-    
+
     multi method as_jast(QAST::NVal $node, :$want) {
         result(JAST::PushNVal.new( :value($node.value) ), $RT_NUM)
     }
-    
+
     my int $split_point := 21845;
     multi method as_jast(QAST::SVal $node, :$want) {
         if nqp::chars($node.value) <= $split_point {
@@ -4789,7 +4789,7 @@ class QAST::CompilerJAST {
             result($il, $RT_STR)
         }
     }
-    
+
     multi method as_jast(QAST::BVal $node, :$want) {
         my $il := JAST::InstructionList.new();
         $il.append($ALOAD_0);
@@ -4798,7 +4798,7 @@ class QAST::CompilerJAST {
             $TYPE_CU, 'lookupCodeRef', $TYPE_CR, 'I' ));
         result($il, $RT_OBJ)
     }
-    
+
      multi method as_jast(QAST::WVal $node, :$want) {
         my $val    := $node.value;
         my $sc     := nqp::getobjsc($val);
@@ -4814,7 +4814,7 @@ class QAST::CompilerJAST {
         ));
         result($il, $RT_OBJ);
     }
-    
+
     method coerce($res, $desired) {
         my $got := $res.type;
         if $got == $desired {
@@ -4828,7 +4828,7 @@ class QAST::CompilerJAST {
             return result($coerced, $desired);
         }
     }
-    
+
     # Expects that the value in need of coercing has already been
     # obtained (and thus is on the stack top). Produces instructions
     # to coerce it. Doesn't touch the stack tracking.
@@ -4893,7 +4893,7 @@ class QAST::CompilerJAST {
         }
         $il
     }
-    
+
     # Checks if we have reached the correct unwind target. If not, does a
     # rethrow of the handler. Assumes the exception is on the stack top,
     # and that we will not swallow it.
@@ -4934,7 +4934,7 @@ class QAST::CompilerJAST {
             }
         }
     }
-    
+
     # Wraps a handler with code to set/clear the current handler.
     method delimit_handler($wrap_il, $outer, $inner) {
         my $il := JAST::InstructionList.new();
@@ -4955,7 +4955,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokespecial'), $type, '<init>', 'Void' ));
         $il.append($ATHROW);
     }
-    
+
     multi method as_jast(QAST::Regex $node, :$want) {
         # build the list of (unique) locals we need
         my %*REG;
@@ -4979,7 +4979,7 @@ class QAST::CompilerJAST {
         my $cutlabel     := JAST::Label.new( :name($prefix ~ 'cut') );
         my $cstacklabel  := JAST::Label.new( :name($prefix ~ 'cstack_done') );
         %*REG<fail>      := $faillabel;
-        
+
         # label to index mapping, for the jump table
         my @mark_labels;
         my %mark_lookup;
@@ -5080,12 +5080,12 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
-        
+
         # Compile the regex body itself; if we make it through it, we go to
         # the end and are finished.
         $il.append(self.regex_jast($node));
         $il.append(JAST::Instruction.new( :op('goto'), $endlabel ));
-        
+
         # Restart.
         $il.append($restartlabel);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
@@ -5095,7 +5095,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "getattr", $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
-        
+
         # Failure/backtrack handling. If no bstack, we're done.
         $il.append($faillabel);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
@@ -5104,7 +5104,7 @@ class QAST::CompilerJAST {
                 "elems", 'Long', $TYPE_SMO, $TYPE_TC ));
         $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
-        
+
         # Otherwise, start handling the cstack, if it's not empty.
         # The setup done here is used when we backtrack into subrules.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
@@ -5133,7 +5133,7 @@ class QAST::CompilerJAST {
                 "atpos", $TYPE_SMO, $TYPE_SMO, 'Long', $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('astore'), %*REG<subcur> ));
         $il.append($cstacklabel);
-        
+
         # Pop rep, pos and mark off the stack and store them.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
         $il.append($ALOAD_1);
@@ -5148,7 +5148,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "pop_i", 'Long', $TYPE_SMO, $TYPE_TC ));
         $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
-        
+
         # Handle position and mark special cases.
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($IVAL_MINUSONE);
@@ -5162,7 +5162,7 @@ class QAST::CompilerJAST {
         $il.append($IVAL_ZERO);
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifeq'), $faillabel ));
-        
+
         # Backtrack the cursor stack
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append(JAST::Instruction.new( :op('ifnull'), $jumplabel ));
@@ -5172,7 +5172,7 @@ class QAST::CompilerJAST {
             "islist", 'Long', $TYPE_SMO, $TYPE_TC ));
         $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $jumplabel ));
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
@@ -5182,7 +5182,7 @@ class QAST::CompilerJAST {
         $il.append($DUP2);
         $il.append($L2I);
         $il.append(JAST::Instruction.new( :op('ifeq'), $cutlabel ));
-        
+
         $il.append($IVAL_ONE);
         $il.append($LSUB);
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
@@ -5191,11 +5191,11 @@ class QAST::CompilerJAST {
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
-        
+
         $il.append($cutlabel);
         $il.append(JAST::Instruction.new( :op('invokevirtual'), $TYPE_SMO,
             "set_elems", 'Void', $TYPE_TC, 'Long' ));
-        
+
         # Otherwise, we need to jump to the appropriate label. Emit the
         # jump table.
         $il.append($jumplabel);
@@ -5206,7 +5206,7 @@ class QAST::CompilerJAST {
             $ts.push($_);
         }
         $il.append($ts);
-        
+
         # If we make it to here, we failed to match.
         $il.append($donelabel);
         my $fail_res := self.as_jast(QAST::Op.new(
@@ -5244,12 +5244,12 @@ class QAST::CompilerJAST {
         $il_marks.append($IVAL_ZERO);
         $il_marks.append(JAST::Instruction.new( :op('invokevirtual'), $TYPE_SMO,
             "set_elems", 'Void', $TYPE_TC, 'Long' ));
-        
+
         my $mark_endlabel := &*REGISTER_MARK($endlabel);
         self.regex_mark($il_alts, $mark_endlabel,
             $IVAL_MINUSONE,
             $IVAL_ZERO);
-        
+
         my $altmeth := QAST::Op.new(
             :op('callmethod'), :name('!alt'),
             QAST::Var.new( :name(%*REG<cur>), :scope('local') ),
@@ -5280,10 +5280,10 @@ class QAST::CompilerJAST {
             $il_marks.append($POP2);
             $altcount++;
         }
-        
+
         $il_alts.append($endlabel);
         self.regex_commit($il_alts, $mark_endlabel) if $node.backtrack eq 'r';
-        
+
         my $il := JAST::InstructionList.new();
         $il.append($il_marks);
         $il.append($il_alts);
@@ -5322,7 +5322,7 @@ class QAST::CompilerJAST {
         $il.append($endlabel);
         $il;
     }
-    
+
     method anchor($node) {
         my $il        := JAST::InstructionList.new();
         my $subtype   := $node.subtype;
@@ -5343,7 +5343,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5351,7 +5351,7 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5367,7 +5367,7 @@ class QAST::CompilerJAST {
             $il.append($IVAL_ZERO);
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifle'), %*REG<fail> ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5375,7 +5375,7 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_WORD) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5390,12 +5390,12 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
-            
+
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_NEWLINE) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5405,7 +5405,7 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
-            
+
             $il.append($donelabel);
         }
         elsif $subtype eq 'eol' {
@@ -5416,16 +5416,16 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), $donelabel ));
-            
+
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
-            
+
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifeq'), $donelabel ));
-            
+
             $il.append(JAST::PushIVal.new( :value(nqp::const::CCLASS_NEWLINE) ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5435,7 +5435,7 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
-            
+
             $il.append($donelabel);
         }
         elsif $subtype eq 'fail' {
@@ -5462,28 +5462,28 @@ class QAST::CompilerJAST {
     }
 
     method conj($node) { self.conjseq($node) }
-    
+
     method conjseq($node) {
         my $il         := JAST::InstructionList.new();
         my $prefix     := self.unique('rxconj') ~ '_';
         my $conjlabel  := JAST::Label.new( :name($prefix ~ 'fail') );
         my $firstlabel := JAST::Label.new( :name($prefix ~ 'first') );
         my $iter       := nqp::iterator($node.list);
-        
+
         # make a mark that holds our starting position in the pos slot
         my $mark := &*REGISTER_MARK($conjlabel);
         self.regex_mark($il, $mark,
              JAST::Instruction.new( :op('lload'), %*REG<pos> ),
              $IVAL_ZERO);
-        
+
         $il.append(JAST::Instruction.new( :op('goto'), $firstlabel ));
         $il.append($conjlabel);
         $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
-        
+
         # call the first child
         $il.append($firstlabel);
         $il.append(self.regex_jast(nqp::shift($iter)));
-        
+
         # use previous mark to make one with pos=start, rep=end
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
         $il.append($DUP);
@@ -5505,14 +5505,14 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
             $il.append(self.regex_jast(nqp::shift($iter)));
-            
+
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::PushIVal.new( :value($mark) ));
             $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "rxpeek", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
-            
+
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
             $il.append(JAST::PushIVal.new( :value(2) ));
@@ -5523,7 +5523,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifne'), %*REG<fail> ));
-            
+
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
             $il.append($IVAL_ONE);
@@ -5533,15 +5533,15 @@ class QAST::CompilerJAST {
                 "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<itemp> ));
         }
-        
+
         if $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<itemp> ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-        
+
         $il
     }
-    
+
     my %cclass_code;
     INIT {
         # Codes match constants in Ops.java.
@@ -5554,12 +5554,12 @@ class QAST::CompilerJAST {
 
     method cclass($node) {
         my $il := JAST::InstructionList.new();
-        
+
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-        
+
         my $subtype := nqp::lc($node.name);
         nqp::die("Unrecognized subtype '$subtype' in QAST::Regex cclass")
             unless nqp::existskey(%cclass_code, $subtype);
@@ -5572,7 +5572,7 @@ class QAST::CompilerJAST {
                 $TYPE_OPS, 'iscclass', 'Long', 'Long', $TYPE_STR, 'Long' ));
             $il.append($L2I);
             $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
-            
+
             if $cclass == nqp::const::CCLASS_NEWLINE && !$node.negate && $node.subtype ne 'zerowidth' {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
@@ -5580,19 +5580,19 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('invokestatic'),
                     $TYPE_OPS, 'checkcrlf', 'Long', $TYPE_STR, 'Long', 'Long' ));
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
-            } 
+            }
         }
-        
+
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append($IVAL_ONE);
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-        
+
         $il
     }
-    
+
     method dba($node) {
         my $qast := QAST::Op.new(
             :op('callmethod'), :name('!dba'),
@@ -5604,11 +5604,11 @@ class QAST::CompilerJAST {
         $*STACK.obtain(NQPMu, $res);
         $res.jast
     }
-    
+
     method enumcharlist($node) {
         my $il := JAST::InstructionList.new();
         my $donelabel;
-        
+
 	$il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
 	$il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
 	$il.append($LCMP);
@@ -5635,7 +5635,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_STR, 'indexOf', 'Integer', 'Integer' ));
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
-        
+
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append($IVAL_ONE);
@@ -5643,7 +5643,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
 	$il.append($donelabel) if $donelabel;
-        
+
         $il;
     }
 
@@ -5698,19 +5698,19 @@ class QAST::CompilerJAST {
 
         $il;
     }
-    
+
     method literal($node) {
         my $il := JAST::InstructionList.new();
         my $litconst := $node[0];
         my $litlen := nqp::chars($litconst);
-        
+
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append(JAST::PushIVal.new( :value($litlen) ));
         $il.append($LADD);
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<tgt> ));
         $il.append(JAST::PushIndex.new(
             :value($node.subtype eq 'ignorecase' ?? 1 !! 0) ));
@@ -5722,17 +5722,17 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokevirtual'),
             $TYPE_STR, 'regionMatches', 'Z', 'Z', 'Integer', $TYPE_STR, 'Integer', 'Integer' ));
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifne' !! 'ifeq'), %*REG<fail> ));
-        
+
         unless $node.subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
             $il.append(JAST::PushIVal.new( :value($litlen) ));
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-        
+
         $il;
     }
-    
+
     method pass($node) {
         my $qast := QAST::Op.new(
             :op('callmethod'), :name('!cursor_pass'),
@@ -5755,7 +5755,7 @@ class QAST::CompilerJAST {
 
     method qastnode($node) {
         my $il := JAST::InstructionList.new();
-        
+
         $il.append(JAST::PushSVal.new( :value("\$\xa2") ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cur> ));
         $il.append($DUP);
@@ -5774,7 +5774,7 @@ class QAST::CompilerJAST {
         my $node_res := self.as_jast($node[0], :want($RT_OBJ));
         $il.append($node_res.jast);
         $*STACK.obtain($il, $node_res);
-        
+
         if $node.subtype eq 'zerowidth' {
             $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -5785,7 +5785,7 @@ class QAST::CompilerJAST {
         else {
             $il.append($POP);
         }
-        
+
         $il;
     }
 
@@ -5975,7 +5975,7 @@ class QAST::CompilerJAST {
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
 
-            $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));      # if $max > 1 
+            $il.append(JAST::Instruction.new( :op('lload'), $max_reg ));      # if $max > 1
             $il.append($IVAL_ONE);
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifle'), $skip7label ));
@@ -6055,7 +6055,7 @@ class QAST::CompilerJAST {
             $il.append($IVAL_ONE);
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
-            
+
             if $min > 1 {
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append(JAST::PushIVal.new( :value($min) ));
@@ -6073,7 +6073,7 @@ class QAST::CompilerJAST {
                     JAST::Instruction.new( :op('lload'), %*REG<pos> ),
                     JAST::Instruction.new( :op('lload'), %*REG<rep> ));
             }
-            
+
             $il.append($donelabel);
         }
         else {
@@ -6089,10 +6089,10 @@ class QAST::CompilerJAST {
                     $IVAL_MINUSONE,
                     $IVAL_ZERO);
             }
-            
+
             $il.append($looplabel);
             $il.append(self.regex_jast($node[0]));
-            
+
             if $needmark {
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
                 $il.append($DUP);
@@ -6106,16 +6106,16 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                     "atpos_i", 'Long', $TYPE_SMO, 'Long', $TYPE_TC ));
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
-                
+
                 if $backtrack eq 'r' {
                     self.regex_commit($il, $mark);
                 }
-                
+
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                 $il.append($IVAL_ONE);
                 $il.append($LADD);
                 $il.append(JAST::Instruction.new( :op('lstore'), %*REG<rep> ));
-                
+
                 if $max > 1 {
                     $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
                     $il.append(JAST::PushIVal.new( :value($node.max) ));
@@ -6123,7 +6123,7 @@ class QAST::CompilerJAST {
                     $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
                 }
             }
-            
+
             unless $max == 1 {
                 self.regex_mark($il, $mark,
                     JAST::Instruction.new( :op('lload'), %*REG<pos> ),
@@ -6131,7 +6131,7 @@ class QAST::CompilerJAST {
                 $il.append(self.regex_jast($sep)) if $sep;
                 $il.append(JAST::Instruction.new( :op('goto'), $looplabel ));
             }
-            
+
             $il.append($donelabel);
             if $min > 1 {
                 $il.append(JAST::Instruction.new( :op('lload'), %*REG<rep> ));
@@ -6140,18 +6140,18 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('iflt'), %*REG<fail> ));
             }
         }
-        
+
         $il;
     }
-    
+
     method scan($node) {
         my $il := JAST::InstructionList.new();
-        
+
         my $prefix := self.unique('rxscan');
         my $looplabel := JAST::Label.new( :name($prefix ~ '_loop') );
         my $scanlabel := JAST::Label.new( :name($prefix ~ '_scan') );
         my $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
-        
+
         $il.append(JAST::Instruction.new( :op('aload'), 'self' ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
         $il.append(JAST::PushSVal.new( :value('$!from') ));
@@ -6162,7 +6162,7 @@ class QAST::CompilerJAST {
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifne'), $donelabel ));
         $il.append(JAST::Instruction.new( :op('goto'), $scanlabel ));
-        
+
         $il.append($looplabel);
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($IVAL_ONE);
@@ -6195,15 +6195,15 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 "bindattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
         $il.append($POP2);
-        
+
         $il.append($scanlabel);
-        
+
         my $mark := &*REGISTER_MARK($looplabel);
         self.regex_mark($il, $mark,
             JAST::Instruction.new( :op('lload'), %*REG<pos> ),
             $IVAL_ZERO);
         $il.append($donelabel);
-        
+
         $il;
     }
 
@@ -6265,12 +6265,12 @@ class QAST::CompilerJAST {
         my $methres := self.as_jast($methqast, :want($RT_VOID));
         $il.append($methres.jast);
         $*STACK.obtain($il, $methres);
-        
+
         $il.append(JAST::Instruction.new( :op('goto'), $donelabel ));
         $il.append($faillabel);
         $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail> ));
         $il.append($donelabel);
-        
+
         $il;
     }
 
@@ -6322,7 +6322,7 @@ class QAST::CompilerJAST {
         $il.append($IVAL_ZERO);
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
-        
+
         if $subtype ne 'zerowidth' {
             my $rxname := self.unique('rxsubrule');
             my $passlabel := JAST::Label.new( :name($rxname ~ '_pass') );
@@ -6338,7 +6338,7 @@ class QAST::CompilerJAST {
             else {
                 my $backlabel := JAST::Label.new( :name($rxname ~ '_back') );
                 $il.append(JAST::Instruction.new( :op('goto'), $passlabel ));
-                
+
                 $il.append($backlabel);
                 my $nextres := self.as_jast(QAST::Op.new(
                     :op('callmethod'), :name('!cursor_next'),
@@ -6356,7 +6356,7 @@ class QAST::CompilerJAST {
                 $il.append($IVAL_ZERO);
                 $il.append($LCMP);
                 $il.append(JAST::Instruction.new( :op($node.negate ?? 'ifge' !! 'iflt'), %*REG<fail> ));
-                
+
                 my $mark := &*REGISTER_MARK($backlabel);
                 $il.append($passlabel);
                 if $subtype eq 'capture' {
@@ -6414,7 +6414,7 @@ class QAST::CompilerJAST {
                     $*STACK.obtain($il, $pushres);
                     $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
                 }
-                
+
                 $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
                 $il.append($DUP);
                 $il.append($DUP2);
@@ -6443,7 +6443,7 @@ class QAST::CompilerJAST {
                 $il.append($POP2);
             }
         }
-        
+
         if !$captured && $subtype eq 'capture' {
             my $capres := self.as_jast(QAST::Op.new(
                 :op('callmethod'), :name('!cursor_capture'),
@@ -6455,7 +6455,7 @@ class QAST::CompilerJAST {
             $*STACK.obtain($il, $capres);
             $il.append(JAST::Instruction.new( :op('astore'), %*REG<cstack> ));
         }
-        
+
         unless $subtype eq 'zerowidth' {
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<subcur> ));
             $il.append(JAST::Instruction.new( :op('aload'), %*REG<curclass> ));
@@ -6465,7 +6465,7 @@ class QAST::CompilerJAST {
                 "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-        
+
         $il;
     }
 
@@ -6497,10 +6497,10 @@ class QAST::CompilerJAST {
 
         $il
     }
-    
+
     # a :rxtype<ws> node is a normal subrule call
     method ws($node) { self.subrule($node) }
-    
+
     method regex_mark($il, $mark, $pos, $rep) {
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
         $il.append(JAST::PushIVal.new( :value($mark) ));
@@ -6510,7 +6510,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxmark", 'Void', $TYPE_SMO, 'Long', 'Long', 'Long', $TYPE_TC ));
     }
-    
+
     method regex_commit($il, $mark) {
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<bstack> ));
         $il.append(JAST::PushIVal.new( :value($mark) ));
@@ -6518,13 +6518,13 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
             "rxcommit", 'Void', $TYPE_SMO, 'Long', $TYPE_TC ));
     }
-    
+
     multi method as_jast($unknown, :$want) {
         nqp::die("Unknown QAST node type " ~ $unknown.HOW.name($unknown));
     }
-    
+
     method result($il, $type) { result($il, $type) }
-    
+
     method operations() { QAST::OperationsJAST }
 }
 
