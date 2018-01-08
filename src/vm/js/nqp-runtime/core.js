@@ -1,3 +1,5 @@
+'use strict';
+
 const op = {};
 exports.op = op;
 
@@ -218,7 +220,7 @@ exports.slurpyPos = function(currentHLL, args, from) {
 
 exports.slurpyNamed = function(currentHLL, named, skip) {
   const hash = new Hash();
-  for (key in named) {
+  for (const key in named) {
     if (!skip[key]) {
       hash.content.set(key, arg(currentHLL, named[key]));
     }
@@ -309,7 +311,7 @@ op.captureexistsnamed = function(capture, arg) {
 
 op.capturenamedshash = function(currentHLL, capture) {
   const hash = new Hash();
-  for (key in capture.named) {
+  for (const key in capture.named) {
     hash.content.set(key, arg(currentHLL, capture.named[key]));
   }
   return hash;
