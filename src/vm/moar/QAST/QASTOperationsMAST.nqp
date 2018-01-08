@@ -628,37 +628,49 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
 });
 
 # Chaining.
+# TODO: Provide static-optimizations where possible for invocations involving metaops
 my $chain_gen := sub ($qastcomp, $op) {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $cqast := $op;
+
+    # Check if callee sub in name, if not first child is callee, not arg
+    my $arg_idx;
+    my &get_arg_idx := -> $cq { nqp::if( $cq.name, 0, 1 ) };
+
     while nqp::istype($cqast, QAST::Op)
     && ($cqast.op eq 'chain' || $cqast.op eq 'chainstatic') {
         nqp::push(@clist, $cqast);
-        $cqast := $cqast[0];
+        $arg_idx := get_arg_idx($cqast);
+        $cqast := $cqast[$arg_idx];
     }
 
     my @ops;
     my $regalloc := $*REGALLOC;
     my $res_reg  := $regalloc.fresh_register($MVM_reg_obj);
+    my $decont_reg  := $regalloc.fresh_register($MVM_reg_obj);
     my $endlabel := MAST::Label.new();
 
     $cqast := nqp::pop(@clist);
-    my $aqast := $cqast[0];
+    $arg_idx := get_arg_idx($cqast);
+
+    my $aqast := $cqast[$arg_idx];
     my $acomp := $qastcomp.as_mast($aqast, :want($MVM_reg_obj));
     push_ilist(@ops, $acomp);
 
     my $more := 1;
     while $more {
-        my $bqast := $cqast[1];
+        my $bqast := $cqast[$arg_idx + 1];
         my $bcomp := $qastcomp.as_mast($bqast, :want($MVM_reg_obj));
         push_ilist(@ops, $bcomp);
 
         my $callee := $qastcomp.as_mast: :want($MVM_reg_obj),
-            $cqast.op eq 'chainstatic'
-                ?? QAST::VM.new:   :moarop<getlexstatic_o>,
-                   QAST::SVal.new: :value($cqast.name)
-                !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
+            !$cqast.name
+                ?? $cqast[0]
+                !! $cqast.op eq 'chainstatic'
+                    ?? QAST::VM.new:   :moarop<getlexstatic_o>,
+                       QAST::SVal.new: :value($cqast.name)
+                    !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
 
         push_ilist(@ops, $callee);
         nqp::push(@ops, MAST::Call.new(
@@ -667,13 +679,16 @@ my $chain_gen := sub ($qastcomp, $op) {
             :result($res_reg),
             $acomp.result_reg, $bcomp.result_reg
         ));
+        push_op(@ops, 'decont', $decont_reg, $callee.result_reg);
 
         $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
+        $regalloc.release_register($decont_reg, $MVM_reg_obj);
         $regalloc.release_register($acomp.result_reg, $MVM_reg_obj);
 
         if @clist {
             push_op(@ops, 'unless_o', $res_reg, $endlabel);
             $cqast := nqp::pop(@clist);
+            $arg_idx := get_arg_idx($cqast);
             $acomp := $bcomp;
         }
         else {
