@@ -41,6 +41,8 @@ const shortid = require('shortid');
 
 const stripMarks = require('./strip-marks.js');
 
+const codecs = require('./codecs.js');
+
 const foldCase = require('fold-case');
 
 const xregexp = require('xregexp');
@@ -801,7 +803,7 @@ op.isint = function(value) {
 
 /* HACK - utf8-c is a different encoding than utf8 */
 function renameEncoding(encoding) {
-  return {'utf8-c8': 'utf8', 'utf16': 'utf16le', 'iso-8859-1': 'binary'}[encoding] || encoding;
+  return {'utf8-c8': 'utf8', 'utf16': 'utf16le', 'iso-8859-1': 'latin1'}[encoding] || encoding;
 }
 exports.renameEncoding = renameEncoding;
 
@@ -824,26 +826,52 @@ function byteSize(buf) {
 
 exports.byteSize = byteSize;
 
-op.encode = function(str, encoding_, buf) {
-  if (buf.array.length) {
+function writeBuffer(highLevel, lowLevel) {
+  const elementSize = byteSize(highLevel);
+  const isUnsigned = highLevel._STable.REPR.type._STable.REPR.isUnsigned;
+
+  let offset = 0;
+  for (let i = 0; i < lowLevel.length / elementSize; i++) {
+    highLevel.array[i] = isUnsigned ? lowLevel.readUIntLE(offset, elementSize) : lowLevel.readIntLE(offset, elementSize);
+    offset += elementSize;
+  }
+}
+
+op.encode = function(str, encoding_, output) {
+  if (output.array.length) {
     throw new NQPException('encode requires an empty array');
   }
 
   const encoding = renameEncoding(encoding_);
 
-  const elementSize = byteSize(buf);
+  let buffer;
 
-  const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-
-  const buffer = new Buffer(str, encoding);
-
-  let offset = 0;
-  for (let i = 0; i < buffer.length / elementSize; i++) {
-    buf.array[i] = isUnsigned ? buffer.readUIntLE(offset, elementSize) : buffer.readIntLE(offset, elementSize);
-    offset += elementSize;
+  if (encoding in codecs) {
+    buffer = codecs[encoding].encode(str);
+  } else {
+    buffer = new Buffer(str, encoding);
   }
 
-  return buf;
+  writeBuffer(output, buffer);
+
+
+  return output;
+};
+
+op.encoderep = function(str, encoding_, replacement, output) {
+  const encoding = renameEncoding(encoding_);
+
+  let buffer;
+
+  if (encoding in codecs) {
+    buffer = codecs[encoding].encodeWithReplacement(str, replacement);
+  } else {
+    throw new NQPException('encoding unsupported in encoderep');
+  }
+
+  writeBuffer(output, buffer);
+
+  return output;
 };
 
 function toRawBuffer(buf) {
@@ -868,8 +896,55 @@ function toRawBuffer(buf) {
 
 exports.toRawBuffer = toRawBuffer;
 
+function bufferDifference(a, b) {
+  for (let i=0; i < a.length; i++) {
+    if (a[i] != b[i]) {
+      return i;
+    }
+  }
+
+  return a.length;
+}
+
 op.decode = function(buf, encoding) {
-  return toRawBuffer(buf).toString(renameEncoding(encoding));
+  let rawBuffer = toRawBuffer(buf);
+  if (encoding === 'windows-1252') {
+    return codecs[encoding].decode(rawBuffer);
+  } else if (encoding === 'utf8') {
+    const decoded = rawBuffer.toString(renameEncoding(encoding))
+    const reencoded = Buffer.from(decoded, renameEncoding(encoding));
+    if (rawBuffer.equals(reencoded)) {
+      return decoded;
+    } else {
+      const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
+      const lines = correctPart.toString('utf8').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
+      throw new NQPException("Malformed UTF-8 at line "
+        + (lines.length) + " col " + (lines[lines.length - 1].length + 1)
+        + "(or malformed termination)"
+);
+    }
+  } else if (encoding === 'utf16') {
+    if (rawBuffer[0] === 0xff && rawBuffer[1] === 0xfe) { //LE BOM
+      rawBuffer = rawBuffer.slice(2);
+    } else if (rawBuffer[0] === 0xfe && rawBuffer[1] === 0xff) { //BE BOM
+      throw new NQPException('Big-endian UTF16 is NYI');
+    }
+
+    const decoded = rawBuffer.toString('utf16le')
+    const reencoded = Buffer.from(decoded, 'utf16le');
+    if (rawBuffer.equals(reencoded)) {
+      return decoded;
+    } else {
+      const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
+      const lines = correctPart.toString('utf16le').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
+      throw new NQPException("Malformed UTF-16 at line "
+        + (lines.length) + " col " + (lines[lines.length - 1].length + 1)
+        + "(or malformed termination)"
+);
+    }
+  } else {
+    return rawBuffer.toString(renameEncoding(encoding));
+  }
 };
 
 op.objprimspec = function(obj) {

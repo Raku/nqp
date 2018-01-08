@@ -535,6 +535,7 @@ class QAST::OperationsJS {
     add_simple_op('isinvokable', $T_INT, [$T_OBJ]);
 
     add_simple_op('encode', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
+    add_simple_op('encoderep', $T_OBJ, [$T_STR, $T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('decode', $T_STR, [$T_OBJ, $T_STR]);
 
     add_simple_op('gethostname', $T_STR, [$T_STR]);
