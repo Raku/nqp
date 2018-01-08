@@ -1,4 +1,6 @@
-"use strict";;
+"use strict";
+
+/* This file contains code borrowed/adapated from iconv-lite */
 
 const NQPException = require('./nqp-exception.js');
 
