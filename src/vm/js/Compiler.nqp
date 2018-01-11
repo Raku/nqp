@@ -1504,7 +1504,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::CompUnit $node, :$want) {
         # Should have a single child which is the outer block.
-        if +@($node) != 1 || !nqp::istype($node[0], QAST::Block) {
+        if nqp::elems(@($node)) != 1 || !nqp::istype($node[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
 

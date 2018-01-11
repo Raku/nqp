@@ -1520,7 +1520,7 @@ class QAST::OperationsJS {
     add_simple_op('getlexrel', $T_OBJ, [$T_OBJ, $T_STR]);
 
     add_op('getlex', sub ($comp, $node, :$want) {
-        if +@($node) != 1 || !nqp::istype($node[0], QAST::SVal) {
+        if nqp::elems(@($node)) != 1 || !nqp::istype($node[0], QAST::SVal) {
             nqp::die('getlex requires one string literal operand');
         }
         my str $name := $node[0].value;
@@ -1684,7 +1684,7 @@ class QAST::OperationsJS {
     }
 
     add_op('takedispatcher', sub ($comp, $node, :$want) {
-        if +@($node) != 1 || !nqp::istype($node[0], QAST::SVal) {
+        if nqp::elems(@($node)) != 1 || !nqp::istype($node[0], QAST::SVal) {
             nqp::die('takedispatcher requires one string literal operand');
         }
         my str $var := $node[0].value;
@@ -1732,7 +1732,7 @@ class QAST::OperationsJS {
         }
 
         my $code := nqp::istype($node[0], QAST::Want) ?? want($node[0], $T_STR) !! $node[0];
-        if +@($node) != 1 || !nqp::istype($code, QAST::SVal) {
+        if nqp::elems(@($node)) != 1 || !nqp::istype($code, QAST::SVal) {
             nqp::die('js requires one string literal operand');
         }
         Chunk.void($code.value ~ ";\n");

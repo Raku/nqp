@@ -322,7 +322,7 @@ class QAST::OperationsJAST {
     sub op_mapper($op, $instruction, @stack_in, $stack_out, :$tc = 0, :$cont = 0) {
         my int $expected_args := +@stack_in;
         return -> $qastcomp, $node {
-            if +@($node) != $expected_args {
+            if nqp::elems(@($node)) != $expected_args {
                 nqp::die("Operation '$op' requires $expected_args operands");
             }
 
@@ -1449,7 +1449,7 @@ my $call_codegen := sub ($qastcomp, $node) {
     # Otherwise, it's an indirect call.
     else {
         # Ensure we have a thing to invoke.
-        nqp::die("A 'call' node must have a name or at least one child") unless +@($node) >= 1;
+        nqp::die("A 'call' node must have a name or at least one child") unless nqp::elems(@($node)) >= 1;
 
         # Process arguments, making sure first one is an object (since that is
         # the thing to invoke).
@@ -1477,7 +1477,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     my $il := JAST::InstructionList.new();
 
     # Ensure we have an invocant.
-    if +@($node) == 0 {
+    if nqp::elems(@($node)) == 0 {
         nqp::die("A 'callmethod' node must have at least one child");
     }
     my @children := nqp::clone(@($node));
@@ -2702,7 +2702,7 @@ QAST::OperationsJAST.map_classlib_core_op('getstaticcode', $TYPE_OPS, 'getstatic
 QAST::OperationsJAST.map_classlib_core_op('setdispatcher', $TYPE_OPS, 'setdispatcher', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setdispatcherfor', $TYPE_OPS, 'setdispatcherfor', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
-    if +@($op) != 1 || !nqp::istype($op[0], QAST::SVal) {
+    if nqp::elems(@($op)) != 1 || !nqp::istype($op[0], QAST::SVal) {
         nqp::die('takedispatcher requires one string literal operand');
     }
     my $name := $op[0].value;
@@ -2718,7 +2718,7 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     result($il, $RT_VOID);
 });
 QAST::OperationsJAST.add_core_op('cleardispatcher', -> $qastcomp, $op {
-    if +@($op) != 0 {
+    if nqp::elems(@($op)) != 0 {
         nqp::die('cleardispatcher accepts no operands');
     }
     my $il := JAST::InstructionList.new();
@@ -2729,7 +2729,7 @@ QAST::OperationsJAST.add_core_op('cleardispatcher', -> $qastcomp, $op {
     result($il, $RT_OBJ);
 });
 QAST::OperationsJAST.add_core_op('setup_blv', -> $qastcomp, $op {
-    if +@($op) != 1 || !nqp::ishash($op[0]) {
+    if nqp::elems(@($op)) != 1 || !nqp::ishash($op[0]) {
         nqp::die('setup_blv requires one hash operand');
     }
 
@@ -3420,7 +3420,7 @@ class QAST::CompilerJAST {
         }
 
         # Should have a single child which is the outer block.
-        if +@($cu) != 1 || !nqp::istype($cu[0], QAST::Block) {
+        if nqp::elems(@($cu)) != 1 || !nqp::istype($cu[0], QAST::Block) {
             nqp::die("QAST::CompUnit should have one child that is a QAST::Block");
         }
 
@@ -5748,7 +5748,7 @@ class QAST::CompilerJAST {
         if $node.name() {
             $qast.push(QAST::SVal.new( :value($node.name()) ));
         }
-        elsif +@($node) == 1 {
+        elsif nqp::elems(@($node)) == 1 {
             $qast.push($node[0]);
         }
         if $node.backtrack ne 'r' {
@@ -6477,7 +6477,7 @@ class QAST::CompilerJAST {
 
     method uniprop($node) {
         my $il := JAST::InstructionList.new();
-        if +@($node) > 1 {
+        if nqp::elems(@($node)) > 1 {
             nqp::die("Unicode property pairs NYI on jvm backend");
         }
 

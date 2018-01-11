@@ -2765,8 +2765,9 @@ QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
 # code object related opcodes
 # XXX explicit takeclosure will go away under new model; for now, no-op it.
 QAST::MASTOperations.add_core_op('takeclosure', -> $qastcomp, $op {
-    unless +@($op) == 1 {
-        nqp::die("The 'takeclosure' op needs 1 argument, got " ~ +@($op));
+    unless nqp::elems(@($op)) == 1 {
+        nqp::die("The 'takeclosure' op needs 1 argument, got "
+            ~ nqp::elems(@($op)));
     }
     $qastcomp.as_mast($op[0])
 });

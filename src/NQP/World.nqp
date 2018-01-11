@@ -240,7 +240,7 @@ class NQP::World is HLL::World {
 
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
-                    $fixup_stmts.shift() while +@($fixup_stmts);
+                    $fixup_stmts.shift() while nqp::elems(@($fixup_stmts));
                 }
                 $i := $i + 1;
             }

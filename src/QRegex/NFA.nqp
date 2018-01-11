@@ -168,7 +168,7 @@ class QRegex::NFA {
     }
 
     method altseq($node, $from, $to) {
-        if +@($node) {
+        if nqp::elems(@($node)) {
             my $indent := dentin();
             my int $st := self.regex_nfa($node[0], $from, $to);
             $to := $st if $to < 0 && $st > 0;

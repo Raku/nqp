@@ -739,8 +739,9 @@ my class MASTCompilerInstance {
 
     multi method compile_node(QAST::CompUnit $cu, :$want) {
         # Should have a single child
-        if +@($cu) != 1 {
-            nqp::die("QAST::CompUnit should have 1 child, got " ~ +@($cu));
+        if nqp::elems(@($cu)) != 1 {
+            nqp::die("QAST::CompUnit should have 1 child, got "
+                ~ nqp::elems(@($cu)));
         }
 
         # Which is the outer block.
@@ -1324,8 +1325,9 @@ my class MASTCompilerInstance {
 
     multi method compile_node(QAST::Stmts $node, :$want) {
         my $resultchild := $node.resultchild;
-        nqp::die("resultchild out of range, max allowed is " ~ +@($node) - 1 ~ ", got $resultchild")
-            if (nqp::defined($resultchild) && $resultchild >= +@($node));
+        nqp::die("resultchild out of range, max allowed is "
+            ~ nqp::elems(@($node)) - 1 ~ ", got $resultchild")
+        if (nqp::defined($resultchild) && $resultchild >= nqp::elems(@($node)));
         self.compile_all_the_stmts(@($node), $resultchild)
     }
 
@@ -1344,8 +1346,9 @@ my class MASTCompilerInstance {
         my %*STMTTEMPS  := %stmt_temps;
         my $*INSTMT     := 1;
         my $resultchild := $node.resultchild;
-        nqp::die("resultchild out of range, max allowed is " ~ +@($node) - 1 ~ ", got $resultchild")
-            if (nqp::defined($resultchild) && $resultchild >= +@($node));
+        nqp::die("resultchild out of range, max allowed is "
+            ~ nqp::elems(@($node)) - 1 ~ ", got $resultchild")
+        if (nqp::defined($resultchild) && $resultchild >= nqp::elems(@($node)));
         self.compile_all_the_stmts(@($node), $resultchild);
     }
 

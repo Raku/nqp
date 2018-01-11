@@ -261,9 +261,9 @@ class RegexCompiler {
     }
 
     method uniprop($node) {
-        if +@($node) == 1 || +@($node) == 2 {
+        if nqp::elems(@($node)) == 1 || nqp::elems(@($node)) == 2 {
             my $arg;
-            if +@($node) == 2 {
+            if nqp::elems(@($node)) == 2 {
                 $arg := $!compiler.as_js($node[1], :want($T_OBJ));
             }
 
@@ -274,7 +274,7 @@ class RegexCompiler {
             # except the hyphen in U+1180 HANGUL JUNGSEONG O-E.
 
             my str $prop := "nqp.uniprop_{$node.negate ?? 'not_' !! ''}{$mangled}";
-            my str $try_prop := +@($node) == 1
+            my str $try_prop := nqp::elems(@($node)) == 1
                 ?? "$prop($!target, $!pos)"
                 !! "$prop($*CTX, $!cursor, $!target, $!pos, {$arg.expr})";
 
@@ -288,7 +288,7 @@ class RegexCompiler {
                 ~ "if ($offset === -1) \{{self.fail}\} else \{$!pos += $offset\}\n";
             }
 
-            +@($node) == 1 ?? $check !! Chunk.void($arg, $check);
+            nqp::elems(@($node)) == 1 ?? $check !! Chunk.void($arg, $check);
         } else {
             $!compiler.NYI("NYI uniprop with more arguments");
         }
@@ -305,7 +305,7 @@ class RegexCompiler {
         if $node.name {
             @setup.push("," ~ quote_string($node.name));
         }
-        elsif +@($node) == 1 {
+        elsif nqp::elems(@($node)) == 1 {
             my $name := $!compiler.as_js($node[0], :want($T_STR));
             @setup.unshift($name);
             @setup.push(',');

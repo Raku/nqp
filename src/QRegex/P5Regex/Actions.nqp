@@ -455,8 +455,8 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
-            while +@($qast) { @tmp.push(@($qast).shift) }
-            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+            while nqp::elems(@($qast)) { @tmp.push(@($qast).shift) }
+            while @tmp { @($qast).push(self.flip_ast(@tmp.pop)) }
         }
         else {
             for @($qast) { self.flip_ast($_) }

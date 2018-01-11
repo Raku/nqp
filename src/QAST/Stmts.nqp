@@ -13,7 +13,7 @@ class QAST::Stmts is QAST::Node does QAST::Children {
 
     method count_inline_placeholder_usages(@usages) {
         my int $i := 0;
-        my int $elems := +@(self);
+        my int $elems := nqp::elems(@(self));
         while $i < $elems {
             self[$i].count_inline_placeholder_usages(@usages);
             $i++;
@@ -23,7 +23,7 @@ class QAST::Stmts is QAST::Node does QAST::Children {
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
         my $i := 0;
-        my $elems := +@(self);
+        my $elems := nqp::elems(@(self));
         while $i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers);
             $i := $i + 1;
@@ -34,7 +34,7 @@ class QAST::Stmts is QAST::Node does QAST::Children {
     method evaluate_unquotes(@unquotes) {
         my $result := self.shallow_clone();
         my $i := 0;
-        my $elems := +@(self);
+        my $elems := nqp::elems(@(self));
         while $i < $elems {
             $result[$i] := self[$i].evaluate_unquotes(@unquotes);
             $i := $i + 1;

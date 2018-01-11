@@ -687,7 +687,7 @@ class QAST::MASTRegexCompiler {
             nqp::push(@args, $sname);
             nqp::push(@flags, $Arg::str);
         }
-        elsif +@($node) == 1 {
+        elsif nqp::elems(@($node)) == 1 {
             my $name := $!qastcomp.as_mast($node[0], :want($MVM_reg_str));
             merge_ins(@ins, $name.instructions);
             nqp::push(@args, $name.result_reg);
@@ -1361,7 +1361,7 @@ class QAST::MASTRegexCompiler {
             op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
             op('if_i', $i0, %!reg<fail>),
         ];
-        if +@($node) == 1 {
+        if nqp::elems(@($node)) == 1 {
             my $hasvalcode := label();
             my $endblock   := label();
             if $prop eq 'name' || $prop eq 'Name' {
