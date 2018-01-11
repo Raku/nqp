@@ -307,7 +307,7 @@ my class MASTCompilerInstance {
             }
             nqp::die("Could not resolve lexical $name");
         }
-        
+
         method capture_inner($block) {
             nqp::push(@!captured_inners, $block.cuid)
         }
@@ -398,7 +398,7 @@ my class MASTCompilerInstance {
             }
             elsif $got == $MVM_reg_num32 {
                 my $grow := self.coercion($res, $MVM_reg_num64);
-                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_num64, 
+                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_num64,
                     $grow.result_reg);
                 $il := $grow.instructions;
                 push_ilist($il, $box);
@@ -406,7 +406,7 @@ my class MASTCompilerInstance {
             }
             elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 {
                 my $grow := self.coercion($res, $MVM_reg_int64);
-                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_int64, 
+                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_int64,
                     $grow.result_reg);
                 $il := $grow.instructions;
                 push_ilist($il, $box);
@@ -414,7 +414,7 @@ my class MASTCompilerInstance {
             }
             elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                 my $grow := self.coercion($res, $MVM_reg_uint64);
-                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_uint64, 
+                my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_uint64,
                     $grow.result_reg);
                 $il := $grow.instructions;
                 push_ilist($il, $box);
@@ -736,7 +736,7 @@ my class MASTCompilerInstance {
     method register_kind_to_type($kind) { @return_types[$kind] }
 
     proto method compile_node($node, :$want) { * }
-    
+
     multi method compile_node(QAST::CompUnit $cu, :$want) {
         # Should have a single child
         if +@($cu) != 1 {
@@ -2137,11 +2137,11 @@ class MASTBytecodeAssembler {
             'HandlerScope',     MAST::HandlerScope
         )
     }
-    
+
     method assemble_to_file($mast, $file) {
         nqp::masttofile($mast, self.node_hash(), $file)
     }
-    
+
     method assemble_and_load($mast) {
         nqp::masttocu($mast, self.node_hash())
     }
@@ -2150,4 +2150,3 @@ class MASTBytecodeAssembler {
 if nqp::isnull(nqp::getcomp('MAST')) {
     nqp::bindcomp('MAST', MASTBytecodeAssembler);
 }
- 

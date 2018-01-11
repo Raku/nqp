@@ -3,7 +3,7 @@ class RegexCompiler {
 
     has str $!label; # the label we will jump to on the next while loop iteration
 
-    has str $!js_loop_label; # we need this call break to stop the while loop 
+    has str $!js_loop_label; # we need this call break to stop the while loop
 
     has int $!unique_label; # we need a supply of unique labels
 
@@ -35,7 +35,7 @@ class RegexCompiler {
     method compile($node) {
 
         # TODO better name for $start
-        # we need to unpack the array we !cursor_start_all into a bunch of variables 
+        # we need to unpack the array we !cursor_start_all into a bunch of variables
         my str $start := $*BLOCK.add_tmp();
 
         my str $jump := $*BLOCK.add_tmp();
@@ -100,7 +100,7 @@ class RegexCompiler {
             $!compiler.NYI("NYI QAST::Regex rxtype = {$node.rxtype}");
         }
     }
-    
+
 
     method goal($node) {
         self.compile_rx(QAST::Regex.new(
@@ -113,7 +113,7 @@ class RegexCompiler {
     method dba($node) {
         call($!cursor, "!dba", "new nqp.NQPInt($!pos)", quote_string($node.name)) ~ ";\n";
     }
-    
+
     method concat($node) {
         my @setup;
         for $node.list {
@@ -296,7 +296,7 @@ class RegexCompiler {
 
     method pass($node) {
         my @setup;
-        
+
         @setup.push(
             "{$!cursor}['!cursor_pass']({$*CTX},"
             ~ "\{backtrack: new nqp.NQPInt({$node.backtrack ne 'r'})\}, $!cursor, new nqp.NQPInt({$!pos})"
@@ -304,7 +304,7 @@ class RegexCompiler {
 
         if $node.name {
             @setup.push("," ~ quote_string($node.name));
-        } 
+        }
         elsif +@($node) == 1 {
             my $name := $!compiler.as_js($node[0], :want($T_STR));
             @setup.unshift($name);
@@ -333,7 +333,7 @@ class RegexCompiler {
             $code := $code ~ "if ({$node.negate ?? '' !! '!'}nqp.op.iscclass($cclass,$!target,$!pos)) \{{self.fail}\}\n";
             if $node.name eq 'n' && $node.subtype ne 'zerowidth' {
                 $code := $code ~ "if ($!target.substr($!pos,2) == \"\\r\\n\") \{$!pos++\}\n";
-            } 
+            }
         }
         $code := $code ~ "$!pos++;\n" unless $node.subtype eq 'zerowidth';
         $code;
@@ -377,7 +377,7 @@ class RegexCompiler {
     method pos_from_cursor($cursor) {
         self.get_cursor_attr_int($cursor, '$!pos');
     }
-    
+
     method set_cursor_attr_int($cursor, $attr, $value) {
         if $!has_cursor_type {
             "{self.cursor_attr($cursor, $attr)} = $value;\n";
@@ -438,7 +438,7 @@ class RegexCompiler {
 
                 if $node.subtype eq 'capture' {
                     $capture_code := $capture_code
-                        ~ "$!cstack = " 
+                        ~ "$!cstack = "
                         ~ call($!cursor, "!cursor_capture", $!subcur, quote_string($node.name)) ~ ".array;\n";
                     $captured := 1;
 
@@ -455,7 +455,7 @@ class RegexCompiler {
                         ~ call($!cursor, "!cursor_push_cstack", $!subcur) ~ ".array;\n";
                 }
                 $capture_code := $capture_code ~  "$!bstack.push($back_label, $!pos, 0, $!cstack.length);\n";
-                
+
            }
         }
 
@@ -478,8 +478,8 @@ class RegexCompiler {
 
 
     method subcapture($node) {
-        my str $done_label := self.new_label; 
-        my str $fail_label := self.new_label; 
+        my str $done_label := self.new_label;
+        my str $fail_label := self.new_label;
 
         my str $subcapture_from := $*BLOCK.add_tmp;
 
@@ -820,7 +820,7 @@ class RegexCompiler {
     }
 
     method goto($label) {
-        "$!label = $label;break;\n"; 
+        "$!label = $label;break;\n";
     }
 
     method peek($mark, *@regs) {

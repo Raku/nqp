@@ -10,7 +10,7 @@ class QAST::Stmts is QAST::Node does QAST::Children {
     }
 
     method resultchild($value = NO_VALUE) { $!resultchild := $value unless $value =:= NO_VALUE; $!resultchild }
-    
+
     method count_inline_placeholder_usages(@usages) {
         my int $i := 0;
         my int $elems := +@(self);

@@ -19,7 +19,7 @@ class QAST::Block is QAST::Node does QAST::Children {
         $node.set(%options) if %options;
         $node
     }
-    
+
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;
         nqp::isnull_s($!name) ?? "" !! $!name
@@ -75,7 +75,7 @@ class QAST::Block is QAST::Node does QAST::Children {
             nqp::ifnull(nqp::atkey(%!symbol, $name), %NOSYMS)
         }
     }
-    
+
     method symtable() {
         %!symbol := nqp::hash() if nqp::isnull(%!symbol);
         %!symbol

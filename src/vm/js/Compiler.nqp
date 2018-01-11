@@ -307,7 +307,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my @named_groups;
 
         my @groups := [[]];
-        
+
         for $args -> $arg {
             if $arg.flat {
                 if $arg.named {
@@ -363,7 +363,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         @groups[0].unshift($*CTX);
-        
+
 
         if +@groups == 1 {
             return Chunk.new($T_ARGS, nqp::join(',', @groups[0]), @setup);
@@ -800,7 +800,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         && nqp::istype($node[0][0], QAST::Var)
         && $node[0][0].name eq 'ctxsave';
     }
-    
+
     method chunk_sequence($type, @chunks, :$node, :$result_child = -1, :$expr) {
         if nqp::defined($expr) && $result_child != -1 {
             nqp::die("Can't pass both a :expr and :result_child");
@@ -846,7 +846,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         Chunk.new($type, $result, @setup, :$node);
     }
-    
+
     method compile_all_the_statements(QAST::Stmts $node, $want, :$result_child) {
         my @chunks;
         my @stmts := $node.list;
@@ -962,7 +962,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         '{' ~ nqp::join(',', @type_info) ~ '}';
     }
-    
+
     method wrap_static_block($expected_outer, @output, $block) {
         my int $missing_outer := $expected_outer.cuid ne $*BLOCK.cuid && $expected_outer.ctx ne 'null';
         if $missing_outer {
@@ -1280,7 +1280,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     has $!unique_vars;
 
-    # TODO avoid accidental name collisions 
+    # TODO avoid accidental name collisions
     method unique_var($prefix) {
         $!unique_vars := $!unique_vars + 1;
         $prefix~$!unique_vars;
@@ -1515,7 +1515,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $*HLL := $node.hll;
         }
 
-        # A fake outer block 
+        # A fake outer block
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
         $*BLOCK.ctx("null");
         my $*CTX := "null";
@@ -1560,7 +1560,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my $main := self.as_js($main_block, :want($T_OBJ));
 
             $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $main;
-            
+
         }
         else {
             $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $block_js;
@@ -1719,7 +1719,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     multi method as_js(QAST::WVal $node, :$want) {
         Chunk.new($T_OBJ, self.value_as_js($node.value));
     }
-    
+
     method var_is_lexicalish(QAST::Var $var) {
         $var.scope eq 'lexical' || $var.scope eq 'typevar';
     }
@@ -1790,7 +1790,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 if $*BLOCK.ctx_for_var($var) -> $ctx {
                     self.stored_result(Chunk.new($type, "({$ctx}[{quote_string($var.name)}] = {$bindval.expr})",  $bindval), :$want);
-                } 
+                }
                 else {
                     # nqp::die("we can't find ctx for {$var.name}");
                     self.stored_result(Chunk.new($type, "{$*BLOCK.ctx}.bind({quote_string($var.name)}, {$bindval.expr})",  $bindval), :$want);
@@ -1955,7 +1955,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if 0 {
                 # TODO - use hint
-                # OPTIMALIZATION OPPORTUNITY 
+                # OPTIMALIZATION OPPORTUNITY
                 # use hint
             }
             else {
@@ -2039,7 +2039,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method wrap_in_fake_block($code) {
-        # A fake outer block 
+        # A fake outer block
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
         $*BLOCK.ctx("null");
 
