@@ -2047,7 +2047,7 @@ of the type indicated by the opcode suffix.
 * `attrinited(Mu $obj. Mu:T $type, str $attributename --> int)`
 
 Test if the attribute of name `$attributename` of object `$obj`
-has been binded, see `bindattr`. Note that any access to the atribute
+has been bound, see `bindattr`. Note that any access to the atribute
 that results in a `getattr` call causes it to be inited.
 
 ## bindattr
