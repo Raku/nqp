@@ -49,6 +49,8 @@ const xregexp = require('xregexp');
 
 const graphemeBreaker = require('grapheme-breaker');
 
+const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -1661,12 +1663,7 @@ op.unicmp_s = function(a, b, collationMode, language, code) {
     throw new NQPException('collation with a set language NYI');
   }
 
-  if (collationMode != 85) {
-    throw new NQPException('collationMode NYI');
-  }
-
-  const result = a.localeCompare(b, 'ducet');
-  return (result < 0 ? -1 : (result > 0 ? 1 : 0));
+  return unicodeCollationAlgorithm.compare(a, b, collationMode);
 };
 
 op.cleardispatcher = function(ctx) {
