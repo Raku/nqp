@@ -1387,14 +1387,16 @@ Otherwise returns 1.
 * `if(Block $condition, Block $then, Block $else)`
 
 If the `$condition` evaluates to a non-zero value, run the `$then` block.
-If not, and an `$else` block is present, run that instead.
+If not, and an `$else` block is present, run that instead, if it's absent,
+return result of `$condition`.
 
 ## unless
 * `unless(Block $condition, Block $then)`
 * `unless(Block $condition, Block $then, Block $else)`
 
 If the `$condition` evaluates to 0, run the `$then` block.
-If not, and an `$else` block is present, run that instead.
+If not, and an `$else` block is present, run that instead, if it's absent,
+return result of `$condition`.
 
 # <a id="control"></a> Loop/Control Opcodes
 
