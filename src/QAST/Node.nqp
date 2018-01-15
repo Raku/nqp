@@ -87,6 +87,11 @@ class QAST::Node {
         %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
         %!annotations{$key} := $value;
     }
+    method annotate_self(str $key, $value) {
+        %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
+        %!annotations{$key} := $value;
+        self
+    }
 
     method ann(str $key) {
         nqp::ishash(%!annotations)
