@@ -29,7 +29,7 @@ class QAST::Node {
         $!returns := $value unless $value =:= NO_VALUE;
         $!returns
     }
-    
+
     method named($value = NO_VALUE) {
         if $value =:= NO_VALUE {
             NQPMu
@@ -49,7 +49,7 @@ class QAST::Node {
             self.flat($value);
         }
     }
-    
+
     method setflag($bit)   { $!flags := nqp::bitor_i($!flags, $bit) }
     method clearflag($bit) { $!flags := nqp::bitand_i($!flags, nqp::bitneg_i($bit)) }
     method isflag($bit)    { nqp::istrue(nqp::bitand_i($!flags, $bit)) }
@@ -77,7 +77,7 @@ class QAST::Node {
     method has_compile_time_value() {
         0
     }
-    
+
     method set_compile_time_value($value) {
         self.HOW.mixin(self, QAST::CompileTimeValue);
         self.set_compile_time_value($value);
@@ -109,11 +109,11 @@ class QAST::Node {
             (%uniques{$prefix} := 1);
         $prefix ~ '_' ~ $id
     }
-    
+
     method shallow_clone() {
         nqp::clone(self)
     }
-    
+
     method count_inline_placeholder_usages(@usages) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }
