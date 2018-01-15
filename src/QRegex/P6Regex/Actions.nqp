@@ -475,23 +475,23 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method cclass_backslash:sym<o>($/) {
         my $octlit :=
             HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
-        my $ast := $<sym> eq 'O'
-             ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
-                                  :negate(1), :node($/) )
-             !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
-        $ast.annotate('codepoint', $<octint> ?? $<octint>.ast !! $<octints><octint>[0].ast);
-        make $ast;
+        make ($<sym> eq 'O'
+          ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
+                              :negate(1), :node($/) )
+          !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) )
+        ).annotate_self('codepoint', $<octint>
+          ?? $<octint>.ast !! $<octints><octint>[0].ast)
     }
 
     method cclass_backslash:sym<x>($/) {
         my $hexlit :=
             HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
-        my $ast := $<sym> eq 'X'
-             ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
-                                  :negate(1), :node($/) )
-             !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
-        $ast.annotate('codepoint', $<hexint> ?? $<hexint>.ast !! $<hexints><hexint>[0].ast);
-        make $ast;
+        make ($<sym> eq 'X'
+          ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
+                              :negate(1), :node($/) )
+          !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) )
+        ).annotate_self('codepoint', $<hexint>
+          ?? $<hexint>.ast !! $<hexints><hexint>[0].ast)
     }
 
     method cclass_backslash:sym<c>($/) {
