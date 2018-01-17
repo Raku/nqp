@@ -425,12 +425,7 @@ role NQPMatchRole is export {
                 $braid := $!braid."!clone"();  # usually called when switching into a slang
             }
             else {
-                if nqp::isconcrete(self) && $!braid {
-                    $braid := Braid."!braid_init"(:grammar(self), :actions(self.actions), :package(nqp::getattr($!braid, Braid, '$!package')));
-                }
-                else {
-                    $braid := Braid."!braid_init"(:grammar(self));
-                }
+                $braid := Braid."!braid_init"(:grammar(self));
             }
         }
         nqp::die("No braid in cursor_init!") unless $braid;
