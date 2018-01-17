@@ -139,18 +139,28 @@ op.expmod_I = function(a, b, c, type) {
   return makeBI(type, getBI(a).powm(getBI(b), getBI(c)));
 };
 
+
+/* TODO - optimize by using a smaller bignum when so much isn't needed */
+const digits = 325;
+const digitsBignum = bignum(10).pow(digits);
+
 op.div_In = function(a, b) {
-  const digits = 1e+20;
   const divisor = getBI(b);
   if (divisor.eq(0)) {
     return getBI(a).toNumber() / 0;
   }
 
-  const big = getBI(a).mul(bignum(digits)).div(divisor).toString();
-  if (big.length <= 20) {
-    return parseFloat('0.' + '0'.repeat(20 - big.length) + big);
+  let sign = 1;
+  let big = getBI(a).mul(digitsBignum).div(divisor).toString();
+  if (big.substr(0, 1) == '-') {
+    big = big.substr(1);
+    sign = -1;
+  }
+
+  if (big.length <= digits) {
+    return sign * parseFloat('0.' + '0'.repeat(digits - big.length) + big);
   } else {
-    return parseFloat(big.substr(0, big.length - 20) + '.' + big.substr(big.length - 20));
+    return sign * parseFloat(big.substr(0, big.length - digits) + '.' + big.substr(big.length - digits));
   }
 };
 

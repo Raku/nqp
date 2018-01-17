@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(130);
+plan(134);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -211,11 +211,19 @@ ok(str(nqp::expmod_I(
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
 
-ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
+ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In sanity');
 my $n := nqp::div_In(
     nqp::pow_I(box(203), box(200), $n_type, $bi_type),
     nqp::pow_I(box(200), box(200), $n_type, $bi_type),
 );
+
+my $huge := nqp::pow_I(box(10), box(300), $n_type, $bi_type);
+
+ok(nqp::div_In(box(1), $huge) == 1e-300, 'super small result from div_In work');
+ok(nqp::div_In(box(-1), box(5)) == -0.2, 'div_In -1 by 5');
+ok(nqp::div_In(box(-1), box(20)) == -0.05, 'div_In -1 by 20');
+ok(nqp::div_In(box(1), box(-200)) == -0.005, 'div_In 1 by -20');
+
 ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
 
 my $maxRand := nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type);
