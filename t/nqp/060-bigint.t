@@ -211,7 +211,7 @@ ok(str(nqp::expmod_I(
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
 
-ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
+ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In sanity');
 my $n := nqp::div_In(
     nqp::pow_I(box(203), box(200), $n_type, $bi_type),
     nqp::pow_I(box(200), box(200), $n_type, $bi_type),
