@@ -907,6 +907,10 @@ class QAST::OperationsJS {
         my str $var_name := $node[0].value;
         my $block := $*BLOCK.outer;
         while $block {
+            if ($block.qast && $block.qast.ann('DYN_COMP_WRAPPER')) {
+                $block := NQPMu;
+                last;
+            }
             last if $block.has_own_variable($var_name);
             $block := $block.outer;
         }

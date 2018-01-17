@@ -243,6 +243,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
             while $info {
+                return NQPMu if $info.qast && $info.qast.ann('DYN_COMP_WRAPPER');
+
                 $reached_closure_template := $reached_closure_template || $info.qast.blocktype ne 'immediate';
 
                 if $info.has_own_variable($var.name) {
