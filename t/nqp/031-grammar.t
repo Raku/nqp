@@ -44,8 +44,8 @@ grammar G {
         foo
     }
     method foo(*%args) {
-        ok(%args<arg1> == 678);
-        ok(%args<arg2> == 456);
+        ok(%args<arg1> == 678, 'correct named args passed to subrule 1/2');
+        ok(%args<arg2> == 456, 'correct named args passed to subrule 2/2');
         self.literal;
     }
 }
