@@ -325,11 +325,8 @@ class RegexCompiler {
 
         if $node.name ne '.' {
             $code := $code ~ "if ({$node.negate ?? '' !! '!'}nqp.op.iscclass($cclass,$!target,$!pos)) \{{self.fail}\}\n";
-            if $node.name eq 'n' && $node.subtype ne 'zerowidth' {
-                $code := $code ~ "if ($!target.substr($!pos,2) == \"\\r\\n\") \{$!pos++\}\n";
-            }
         }
-        $code := $code ~ "$!pos++;\n" unless $node.subtype eq 'zerowidth';
+        $code := $code ~ "$!pos += nqp.nextGrapheme($!target, $!pos);\n" unless $node.subtype eq 'zerowidth';
         $code;
     }
 

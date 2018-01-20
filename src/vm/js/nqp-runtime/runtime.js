@@ -673,6 +673,10 @@ exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
   }
 };
 
+exports.nextGrapheme = function(target, pos) {
+  return graphemeBreaker.nextBreak(target, pos) - pos;
+};
+
 exports.noNamed = function(_NAMED) {
   if (Object.keys(_NAMED) != 0) {
     throw new NQPException(`Unexpected named argument ${Object.keys(_NAMED)[0]} passed`);
