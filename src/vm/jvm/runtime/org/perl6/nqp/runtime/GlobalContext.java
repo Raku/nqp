@@ -307,6 +307,14 @@ public class GlobalContext {
 
         if (exitStatus < 0) exitStatus = status;
         shuttingDown = true;
+
+        for (Thread th : allThreads.keySet()) {
+            if (java.lang.Thread.currentThread() == th)
+                continue;
+            th.interrupt();
+        }
+        mainThread = null;
+        currentThreadCtxRef = null;
         throw new ThreadDeath();
     }
 

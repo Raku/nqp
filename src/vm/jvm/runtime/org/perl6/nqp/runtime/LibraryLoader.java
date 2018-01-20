@@ -125,7 +125,8 @@ public class LibraryLoader {
     }
 
     public static Class<?> loadNew(byte[] bytes, byte[] serial) {
-        return new IgnoreNameClassLoader(bytes, serial).loadClass();
+        IgnoreNameClassLoader incl = new IgnoreNameClassLoader(bytes, serial);
+        return incl.loadClass();
     }
 
     private static class IgnoreNameClassLoader extends ClassLoader {
