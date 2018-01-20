@@ -2,7 +2,7 @@
 
 # Test grammars and regexes
 
-plan(15);
+plan(18);
 
 grammar ABC {
     token TOP { ok ' ' <integer> }
@@ -13,6 +13,10 @@ grammar ABC {
     token a-or-b { <[ab]> }
 
     token not_a_or_b { ^ <- a-or-b>+ $ }
+
+    token only_integer { ^ \d $ }
+    token only_L { ^ <:L> $ }
+    token only_not_backslash { ^ <-[\]\\]> $ }
 }
 
 my $match := ABC.parse('not ok');
@@ -32,6 +36,16 @@ ok( $match<int-num> == 123, 'captured $<int-num>');
 
 ok(?ABC.parse('ccc', :rule<not_a_or_b> ), "<- name-with-hyphen> matches");
 ok(!ABC.parse('cac', :rule<not_a_or_b> ), "<- name-with-hyphen> doesn't match");
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('not yet fixed on the JVM', 1);
+} else {
+    ok( ?ABC.parse("7\x[308]", :rule<only_integer>), '\d matches a combining character');
+
+    ok( ?ABC.parse("a\c[COMBINING DIAERESIS]", :rule<only_L>), '<:L> matches a combining character');
+    ok( ?ABC.parse("a\c[COMBINING DIAERESIS]", :rule<only_not_backslash>), 'a charclass matches a combining character');
+}
+
 
 my %args;
 %args<arg1> := 123;
