@@ -813,16 +813,32 @@ for <if unless with without> -> $op_name {
                    MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg));
                 $regalloc.release_register($method_reg, $MVM_reg_obj);
             }
+
             push_op(@ins,
-                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if' || $op_name eq 'with'),
+                ($op_name eq 'if' || $op_name eq 'with'
+                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]),
                 $decont_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
             $regalloc.release_register($decont_reg, $MVM_reg_obj);
         }
+        elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
+            my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
+            push_op(@ins,
+                $op_name eq 'if'
+                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+                $coerce-reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+            $regalloc.release_register: $coerce-reg, $coerce-kind;
+        }
         else {
             push_op(@ins,
-                resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'if'),
+                $op_name eq 'if'
+                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind],
                 @comp_ops[0].result_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
@@ -1095,15 +1111,31 @@ for ('', 'repeat_') -> $repness {
                 my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
                 push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
                 push_op(@loop_il,
-                    resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
+                    $op_name eq 'while'
+                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
                     $decont_reg,
                     $done_lbl
                 );
                 $regalloc.release_register($decont_reg, $MVM_reg_obj);
             }
+            elsif @Full-width-coerce-to[@comp_ops[0].result_kind]
+            -> $coerce-kind {
+                my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
+                push_op(@loop_il,
+                    $op_name eq 'while'
+                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+                    $coerce-reg,
+                    $done_lbl
+                );
+                $regalloc.release_register: $coerce-reg, $coerce-kind;
+            }
             else {
                 push_op(@loop_il,
-                    resolve_condition_op(@comp_ops[0].result_kind, $op_name eq 'while'),
+                    $op_name eq 'while'
+                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
                     @comp_ops[0].result_reg,
                     $done_lbl
                 );
@@ -2948,20 +2980,6 @@ QAST::MASTOperations.add_core_moarop_mapping('force_gc', 'force_gc');
 
 # MoarVM-specific coverage ops
 QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol');
-
-sub resolve_condition_op($kind, $negated) {
-    return $negated ??
-        $kind == $MVM_reg_int64 ?? 'unless_i' !!
-        $kind == $MVM_reg_num64 ?? 'unless_n' !!
-        $kind == $MVM_reg_str   ?? 'unless_s0' !!
-        $kind == $MVM_reg_obj   ?? 'unless_o' !!
-        nqp::die("Unhandled kind $kind")
-     !! $kind == $MVM_reg_int64 ?? 'if_i' !!
-        $kind == $MVM_reg_num64 ?? 'if_n' !!
-        $kind == $MVM_reg_str   ?? 'if_s0' !!
-        $kind == $MVM_reg_obj   ?? 'if_o' !!
-        nqp::die("Unhandled kind $kind")
-}
 
 sub push_op(@dest, str $op, *@args) {
     nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
