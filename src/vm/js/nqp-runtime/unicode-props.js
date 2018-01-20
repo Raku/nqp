@@ -3,6 +3,9 @@ const xregexp = require('xregexp');
 const names = require('./unicode-data/names.js');
 const core = require('./core.js');
 
+//TODO - the regexes should be tweaked to match full graphemes instead
+const graphemeBreaker = require('grapheme-breaker');
+
 function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
 }
@@ -37,7 +40,7 @@ function matchClass(shouldMatch, category, negated) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return regexp.lastIndex - pos;
+      return graphemeBreaker.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }
@@ -88,7 +91,7 @@ function matchDerived(shouldMatch, match, avoid) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return regexp.lastIndex - pos;
+      return graphemeBreaker.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }
@@ -175,7 +178,7 @@ function matchRegex(shouldMatch, regexString) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return regexp.lastIndex - pos;
+      return graphemeBreaker.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }
