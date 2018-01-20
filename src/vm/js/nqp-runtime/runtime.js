@@ -24,6 +24,7 @@ const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
 const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
+const graphemeBreaker = require('grapheme-breaker');
 
 const fs = require('fs');
 
@@ -661,6 +662,16 @@ exports.enumcharlist_m = function(negate, target, pos, charlist) {
     return found ? 1 : -1;
   }
 }
+
+exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
+  if (pos >= target.length) return (zerowidth && negate ? 0 : -1);
+  const found = charlist.indexOf(target.substr(pos,1)) != -1;
+  if (negate ? !found : found) {
+    return (graphemeBreaker.nextBreak(target, pos) - pos);
+  } else {
+    return -1;
+  }
+};
 
 exports.noNamed = function(_NAMED) {
   if (Object.keys(_NAMED) != 0) {
