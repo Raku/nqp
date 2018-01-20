@@ -38,7 +38,7 @@ ok(?ABC.parse('ccc', :rule<not_a_or_b> ), "<- name-with-hyphen> matches");
 ok(!ABC.parse('cac', :rule<not_a_or_b> ), "<- name-with-hyphen> doesn't match");
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('not yet fixed on the JVM', 1);
+    skip('not yet fixed on the JVM', 3);
 } else {
     ok( ?ABC.parse("7\x[308]", :rule<only_integer>), '\d matches a combining character');
 
