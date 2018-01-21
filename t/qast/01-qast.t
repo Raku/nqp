@@ -1,6 +1,6 @@
 use QAST;
 
-plan(166);
+plan(167);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2511,4 +2511,20 @@ is_qast(
             )
         ),
         'survived', 'wrong number of arguments lives with custom_args');
+}
+
+# QAST::SpecialArg: if parent doesn't have dump_extra_node_info method, don't die.
+{
+    my $node := QAST::Want.new( :named('somename') );
+
+    my $info := '';
+    my $died := 0;
+    {
+        $info := $node.dump_extra_node_info();
+        CATCH { $died := 1; }
+    }
+
+    ok( nqp::cmp_i($died, 0) == 0,
+        "SpecialArg: Parent doesn't have dump_extra_node_info; doesn't die"
+    );
 }
