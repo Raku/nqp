@@ -828,9 +828,9 @@ for <if unless with without> -> $op_name {
             }
 
             push_op(@ins,
-                ($op_name eq 'if' || $op_name eq 'with'
-                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]),
+                # the conditional routines are reversed on purpose
+                $op_name eq 'if' || $op_name eq 'with'
+                  ?? 'unless_o' !! 'if_o',
                 $decont_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
@@ -1124,9 +1124,8 @@ for ('', 'repeat_') -> $repness {
                 my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
                 push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
                 push_op(@loop_il,
-                    $op_name eq 'while'
-                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+                    # the conditional routines are reversed on purpose
+                    $op_name eq 'while' ?? 'unless_o' !! 'if_o',
                     $decont_reg,
                     $done_lbl
                 );
