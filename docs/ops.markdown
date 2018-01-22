@@ -280,6 +280,7 @@
   * [savecapture](#savecapture)
   * [usecapture](#usecapture)
   * [getlex](#getlex)
+  * [getlexref](#getlexref)
   * [bindlex](#bindlex)
   * [getlexdyn](#getlexdyn)
   * [bindlexdyn](#bindlexdyn)
@@ -2296,6 +2297,20 @@ Used by the multi-dispatcher.
 Looks up the lexical with the specified name and the specified type.
 Searching in the outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
+
+## getlexref
+* `getlexref_i(str $name)`
+* `getlexref_n(str $name)`
+* `getlexref_s(str $name)`
+
+Looks up the native type lexical with the specified name and the specified type.
+Searching in the outer frames, starting at the current.
+An error is thrown if it does not exist or if the type is incorrect.
+
+Lexicalref is a mechanism that allows us to treat a native value stored in
+a lexpad as if it were a read-writable container we can pass around. the
+lexicalref that gets created holds a reference to the frame in question and
+any access to it acts like `getlex` from the frame it originated in
 
 ## bindlex
 * `bindlex(str $name, Mu $value)`
