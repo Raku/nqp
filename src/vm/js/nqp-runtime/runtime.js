@@ -599,57 +599,35 @@ exports.charrange_im = function(char, lower, upper) {
 
 
 // TODO - optimize
-exports.literal_i = function(target, pos, literal) {
-  let count = 0;
+function fuzzyMatch(fuzzy, target, pos, literal) {
+  let end = pos;
   let result = -1;
   let matched = '';
-  const foldedLiteral = foldCase(literal);
+  const foldedLiteral = fuzzy(literal);
 
-  while (foldedLiteral.startsWith(matched) && pos + count <= target.length) {
+  while (foldedLiteral.startsWith(matched)) {
     if (matched === foldedLiteral) {
-      result = count;
+      result = end - pos;
     }
-    count++;
-    matched = foldCase(target.substr(pos, count));
+
+    if (end === target.length) break;
+    end = graphemeBreaker.nextBreak(target, end)
+    matched = fuzzy(target.substring(pos, end));
   }
 
   return result;
+}
+
+exports.literal_i = function(target, pos, literal) {
+  return fuzzyMatch(foldCase, target, pos, literal);
 };
 
-// TODO - optimize
 exports.literal_m = function(target, pos, literal) {
-  let count = 0;
-  let result = -1;
-  let matched = '';
-  const strippedLiteral = stripMarks(literal);
-
-  while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
-    if (matched === strippedLiteral) {
-      result = count;
-    }
-    count++;
-    matched = stripMarks(target.substr(pos, count));
-  }
-
-  return result;
+  return fuzzyMatch(stripMarks, target, pos, literal);
 };
 
-// TODO optimize and fold in a better manner
 exports.literal_im = function(target, pos, literal) {
-  let count = 0;
-  let result = -1;
-  let matched = '';
-  const strippedLiteral = stripMarks(literal).toLowerCase();
-
-  while (strippedLiteral.startsWith(matched) && pos + count <= target.length) {
-    if (matched === strippedLiteral) {
-      result = count;
-    }
-    count++;
-    matched = foldCase(stripMarks(target.substr(pos, count)));
-  }
-
-  return result;
+  return fuzzyMatch(string => foldCase(stripMarks(string)), target, pos, literal);
 };
 
 // TODO astral characters, multi character graphemes
