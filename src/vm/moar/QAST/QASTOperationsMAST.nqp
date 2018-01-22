@@ -740,7 +740,20 @@ for <if unless with without> -> $op_name {
                     QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
                     $op[0]));
             }
-        } else {
+        }
+        elsif nqp::istype($op[0], QAST::Var)
+        && $op[0].scope eq 'lexicalref'
+        && (!$*WANT || $operands == 3) {
+            # lexical refs are expensive; try to coerce them to something cheap
+            my $spec := nqp::objprimspec($op[0].returns);
+            @comp_ops[0] := $qastcomp.as_mast(:want(
+                $spec == 1 ?? $MVM_reg_int64 !!
+                $spec == 2 ?? $MVM_reg_num64 !!
+                $spec == 3 ?? $MVM_reg_str   !!
+                              $MVM_reg_obj
+            ), $op[0]);
+        }
+        else {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
         if needs_cond_passed($op[1]) {
