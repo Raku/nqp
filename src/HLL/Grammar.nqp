@@ -530,10 +530,10 @@ An operator precedence parser.
 
         self.EXPR_reduce(@termstack, @opstack) while @opstack;
 
-	self.'!clone_match_at'(
-	    nqp::pop(@termstack),
-	    nqp::getattr_i($here, NQPMatch, '$!pos')
-	).'!reduce'('EXPR')
+	    self.'!clone_match_at'(
+	        nqp::pop(@termstack),
+	        nqp::getattr_i($here, NQPMatch, '$!pos')
+	    ).'!reduce'('EXPR')
     }
 
     method EXPR_reduce(@termstack, @opstack) {
@@ -629,8 +629,8 @@ An operator precedence parser.
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }
-	$lang_cursor.check_PACKAGE_oopsies('LANG2');
+	    $lang_cursor.check_PACKAGE_oopsies('LANG2');
         my $result := $lang_cursor."$regex"(|@args);
-	$result.set_braid_from(self)
+	    $result.set_braid_from(self)
     }
 }
