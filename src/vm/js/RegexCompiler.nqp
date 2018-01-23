@@ -123,9 +123,9 @@ class RegexCompiler {
     }
 
     method ignore_suffix(str $subtype) {
-        return 'i' if $subtype eq 'ignorecase';
-        return 'm' if $subtype eq 'ignoremark';
-        return 'im' if $subtype eq 'ignorecase+ignoremark';
+        return '_i' if $subtype eq 'ignorecase';
+        return '_m' if $subtype eq 'ignoremark';
+        return '_im' if $subtype eq 'ignorecase+ignoremark';
         return '';
     }
 
@@ -135,7 +135,7 @@ class RegexCompiler {
 
         if self.ignore_suffix($node.subtype) -> str $suffix {
             my str $offset := $*BLOCK.add_tmp;
-            return "$offset = nqp.literal_{$suffix}($!target, $!pos, $qconst);\n"
+            return "$offset = nqp.literal{$suffix}($!target, $!pos, $qconst);\n"
                 ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
         }
 
@@ -169,19 +169,13 @@ class RegexCompiler {
     method enumcharlist($node) {
         my str $charlist := quote_string($node[0]);
 
-        if self.ignore_suffix($node.subtype) -> str $suffix {
-            my str $offset := $*BLOCK.add_tmp;
-            my str $negate := $node.negate ?? 'true' !! 'false';
-            return "$offset = nqp.enumcharlist_{$suffix}($negate, $!target, $!pos, $charlist);\n"
-                ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
-        }
+        my str $suffix := self.ignore_suffix($node.subtype);
 
-        my str $testop := $node.negate ?? '!=' !! '==';
-
-        my str $end_of_string := ($node.negate && $node.subtype eq 'zerowidth') ?? "$!pos < $!target.length &&" !! "$!pos >= $!target.length ||";
-
-        "if ($end_of_string $charlist.indexOf($!target.substr($!pos,1)) $testop -1) \{{self.fail()}\}"
-        ~ ($node.subtype eq 'zerowidth' ?? '' !! "$!pos++;\n")
+        my str $offset := $*BLOCK.add_tmp;
+        my str $negate := $node.negate ?? 'true' !! 'false';
+        return "$offset = nqp.enumcharlist{$suffix}($negate, $!target, $!pos, $charlist, {$node.subtype eq 'zerowidth' ?? "true" !! "false"});\n"
+            ~ "if ($offset === -1)  \{{self.fail}\}"
+            ~ ($node.subtype eq 'zerowidth' ?? '' !! "else \{{$!pos}+=$offset\}\n");
     }
 
     method charrange($node) {
@@ -331,11 +325,8 @@ class RegexCompiler {
 
         if $node.name ne '.' {
             $code := $code ~ "if ({$node.negate ?? '' !! '!'}nqp.op.iscclass($cclass,$!target,$!pos)) \{{self.fail}\}\n";
-            if $node.name eq 'n' && $node.subtype ne 'zerowidth' {
-                $code := $code ~ "if ($!target.substr($!pos,2) == \"\\r\\n\") \{$!pos++\}\n";
-            }
         }
-        $code := $code ~ "$!pos++;\n" unless $node.subtype eq 'zerowidth';
+        $code := $code ~ "$!pos += nqp.nextGrapheme($!target, $!pos);\n" unless $node.subtype eq 'zerowidth';
         $code;
     }
 
