@@ -519,15 +519,15 @@ class HLL::Compiler does HLL::Backend::Default {
         if %adverbs<transcode> {
             $s := $!backend.apply_transcodings($s, %adverbs<transcode>);
         }
-	my $outer_ctx := %adverbs<outer_ctx>;
+        my $outer_ctx := %adverbs<outer_ctx>;
         if nqp::existskey(%adverbs, 'grammar') {
-	    $grammar := %adverbs<grammar>;
-	    $actions := %adverbs<actions>;
-	}
-	else {
-	    $grammar := self.parsegrammar;
-	    $actions := self.parseactions;
-	}
+            $grammar := %adverbs<grammar>;
+            $actions := %adverbs<actions>;
+        }
+        else {
+            $grammar := self.parsegrammar;
+            $actions := self.parseactions;
+        }
         $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
         $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
