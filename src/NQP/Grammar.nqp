@@ -1,9 +1,9 @@
 grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
-	# Language braid.
-	my $*LANG := self;
-	self.define_slang('MAIN',  self,       self.actions);
-	self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
+	    # Language braid.
+	    my $*LANG := self;
+	    self.define_slang('MAIN',  self,       self.actions);
+	    self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Old language braids, going away.
         my %*LANG;
@@ -15,8 +15,8 @@ grammar NQP::Grammar is HLL::Grammar {
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
         # meta-object to go with it.
-	self.set_how('knowhow',      nqp::knowhow());
-	self.set_how('knowhow-attr', nqp::knowhowattr());
+	    self.set_how('knowhow',      nqp::knowhow());
+	    self.set_how('knowhow-attr', nqp::knowhowattr());
 
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
@@ -143,8 +143,8 @@ grammar NQP::Grammar is HLL::Grammar {
         <.outerctx>
 
         <statementlist>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('comp_unit')>
+	    <.set_braid_from(self)>
+	    <.check_PACKAGE_oopsies('comp_unit')>
         [ $ || <.panic: 'Confused'> ]
     }
 
