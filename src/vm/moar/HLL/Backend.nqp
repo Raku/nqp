@@ -197,10 +197,10 @@ class HLL::Backend::MoarVM {
         }
 
         # Usually only a small number of keys are seen,
-		# so a bubble sort would be fine. However, the
-		# number can get much larger (e.g., when profiling
-		# a build of the Rakudo settings), so use a heapsort
-		# instead.
+        # so a bubble sort would be fine. However, the
+        # number can get much larger (e.g., when profiling
+        # a build of the Rakudo settings), so use a heapsort
+        # instead.
         sub sorted_keys($hash) {
             my @keys;
             for $hash {

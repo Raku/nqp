@@ -254,7 +254,7 @@ class NQP::Actions is HLL::Actions {
         # See if we've exported any HOWs.
         if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
-		$*LANG.set_how($_.key, $_.value);
+        $*LANG.set_how($_.key, $_.value);
             }
         }
     }
@@ -392,7 +392,7 @@ class NQP::Actions is HLL::Actions {
             default_for('$'));
     }
 
-	method statement_prefix:sym<BEGIN>($/) {
+    method statement_prefix:sym<BEGIN>($/) {
         make $*W.run_begin_block($<blorst>.ast);
         $/.prune();
     }
@@ -507,7 +507,7 @@ class NQP::Actions is HLL::Actions {
             elsif $<twigil> eq '!' {
                 my $name := ~@name.pop;
                 my $ch;
-		my $package := $/.package;
+                my $package := $/.package;
                 if $*PKGDECL eq 'role' {
                     $ch := QAST::Var.new( :name('$?CLASS'), :scope('typevar') );
                     $ch.set_compile_time_value($package);
@@ -607,7 +607,7 @@ class NQP::Actions is HLL::Actions {
         my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := $/.how($*PKGDECL);
-	my $package := $/.package;
+        my $package := $/.package;
 
         # Get the body code.
         my $ast;
@@ -909,7 +909,7 @@ class NQP::Actions is HLL::Actions {
                         }
 
                         # Set up dispatch routine in this scope.
-						nqp::die("Dispatcher derivation NYI");
+                        nqp::die("Dispatcher derivation NYI");
                     }
 
                     # Create a code object and attach the signature.
@@ -925,7 +925,7 @@ class NQP::Actions is HLL::Actions {
                     # as the multi may be nested in another sub.
                     $ast.blocktype('declaration_static');
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push($ast);
+                    $BLOCK[0].push($ast);
                 }
                 elsif $*MULTINESS eq 'proto' {
                     # Create a candidate list holder for the dispatchees
@@ -934,7 +934,7 @@ class NQP::Actions is HLL::Actions {
                     if $*SCOPE eq 'our' { nqp::die('our-scoped protos not yet implemented') }
                     my $code := $*W.create_code($ast, $name, 1, :$onlystar);
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(QAST::Op.new(
+                    $BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $ast
@@ -956,7 +956,7 @@ class NQP::Actions is HLL::Actions {
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
-					$BLOCK[0].push(QAST::Op.new(
+                    $BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
                         $ast
@@ -1015,7 +1015,7 @@ class NQP::Actions is HLL::Actions {
         # Otherwise, build method block QAST.
         my $ast;
         my int $onlystar;
-	my $package := $/.package;
+        my $package := $/.package;
         if $<onlystar> {
             $ast := only_star_block();
             $onlystar := 1;
@@ -1143,7 +1143,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method signature($/) {
-		my $BLOCK     := $*W.cur_lexpad();
+        my $BLOCK     := $*W.cur_lexpad();
         my $BLOCKINIT := $BLOCK[0];
         if $<invocant> {
             my $inv := $<invocant>.ast;
@@ -1271,7 +1271,7 @@ class NQP::Actions is HLL::Actions {
 
     method regex_declarator($/, $key?) {
         my $name;
-	my $package := $/.package;
+    my $package := $/.package;
         if $<deflongname> {
             $name := ~$<deflongname>.ast;
         }
@@ -1605,7 +1605,8 @@ class NQP::Actions is HLL::Actions {
         my $ast := QAST::Op.new(
             :op<callmethod>, :name<new>,
             lexical_package_lookup(['NQPRegex'], $/),
-            $regex);
+            $regex
+        );
 
         # In sink context, we don't need the Regex::Regex object.
         $ast.annotate('sink', $regex);

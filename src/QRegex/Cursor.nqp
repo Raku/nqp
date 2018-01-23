@@ -219,14 +219,14 @@ role NQPMatchRole is export {
     }
     method refine_slang($name,$grole,$arole = nqp::null) {
         # nqp::die("No braid in define_slang!") unless $!braid;
-	    my $slangs := nqp::getattr($!braid, Braid, '$!slangs');
-	    my $tmp := nqp::atkey($slangs,$name);
+        my $slangs := nqp::getattr($!braid, Braid, '$!slangs');
+        my $tmp := nqp::atkey($slangs,$name);
         nqp::bindkey($slangs,$name, $tmp.HOW.mixin($tmp, $grole));
 
         unless nqp::isnull($arole) {
             $name := $name ~ '-actions';
-	        $tmp  := nqp::atkey($slangs,$name);
-	        nqp::bindkey($slangs,$name, $tmp.HOW.mixin($tmp, $arole));
+            $tmp  := nqp::atkey($slangs,$name);
+            nqp::bindkey($slangs,$name, $tmp.HOW.mixin($tmp, $arole));
         }
         self
     }

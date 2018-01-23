@@ -530,10 +530,10 @@ An operator precedence parser.
 
         self.EXPR_reduce(@termstack, @opstack) while @opstack;
 
-	    self.'!clone_match_at'(
-	        nqp::pop(@termstack),
-	        nqp::getattr_i($here, NQPMatch, '$!pos')
-	    ).'!reduce'('EXPR')
+        self.'!clone_match_at'(
+            nqp::pop(@termstack),
+            nqp::getattr_i($here, NQPMatch, '$!pos')
+        ).'!reduce'('EXPR')
     }
 
     method EXPR_reduce(@termstack, @opstack) {
@@ -603,7 +603,7 @@ An operator precedence parser.
             nqp::bindkey(%markhash, $markname, $cur);
         }
         else {
-	    nqp::bindattr_i($cur, NQPMatch, '$!from', self.from);
+        nqp::bindattr_i($cur, NQPMatch, '$!from', self.from);
             $cur."!cursor_pos"(self.pos());
             $cur
         }
@@ -621,7 +621,7 @@ An operator precedence parser.
     }
 
     method LANG($lang, $regex, *@args) {
-	self.check_PACKAGE_oopsies('LANG1');
+    self.check_PACKAGE_oopsies('LANG1');
         my $actions     := self.slang_actions($lang);
         my $lang_cursor := self.slang_grammar($lang).'!cursor_init'(self.orig(), :p(self.pos()), :shared(self.'!shared'()));
         $lang_cursor.clone_braid_from(self);
@@ -629,8 +629,8 @@ An operator precedence parser.
         if self.HOW.traced(self) {
             $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self));
         }
-	    $lang_cursor.check_PACKAGE_oopsies('LANG2');
+        $lang_cursor.check_PACKAGE_oopsies('LANG2');
         my $result := $lang_cursor."$regex"(|@args);
-	    $result.set_braid_from(self)
+        $result.set_braid_from(self)
     }
 }

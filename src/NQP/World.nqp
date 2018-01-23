@@ -197,9 +197,9 @@ class NQP::World is HLL::World {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
-	    my $cursor := $*LANG;
-	    my $package := $cursor.package;
-	    $cursor.check_PACKAGE_oopsies('create_code');
+        my $cursor := $*LANG;
+        my $package := $cursor.package;
+        $cursor.check_PACKAGE_oopsies('create_code');
         try {
             $code_type := self.find_sym([$code_type_name]);
             $have_code_type := $package.HOW.name($package) ne $code_type_name;
@@ -610,10 +610,10 @@ class NQP::World is HLL::World {
             if nqp::existskey($result.WHO, ~$_) {
                 $result := ($result.WHO){$_};
             }
-	        # XXX temp shim to avoid bootstrapping funniness
-	        elsif nqp::elems(@name) == 1 && @name[0] eq 'NQPCursor' {
-		        return self.find_sym(['NQPMatch']);
-	        }
+            # XXX temp shim to avoid bootstrapping funniness
+            elsif nqp::elems(@name) == 1 && @name[0] eq 'NQPCursor' {
+                return self.find_sym(['NQPMatch']);
+            }
             else {
                 nqp::die("Could not locate compile-time value for symbol " ~
                     join('::', @name));

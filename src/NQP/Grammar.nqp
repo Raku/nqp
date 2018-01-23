@@ -1,9 +1,9 @@
 grammar NQP::Grammar is HLL::Grammar {
     method TOP() {
-	    # Language braid.
-	    my $*LANG := self;
-	    self.define_slang('MAIN',  self,       self.actions);
-	    self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
+        # Language braid.
+        my $*LANG := self;
+        self.define_slang('MAIN',  self,       self.actions);
+        self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Old language braids, going away.
         my %*LANG;
@@ -15,8 +15,8 @@ grammar NQP::Grammar is HLL::Grammar {
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
         # meta-object to go with it.
-	    self.set_how('knowhow',      nqp::knowhow());
-	    self.set_how('knowhow-attr', nqp::knowhowattr());
+        self.set_how('knowhow',      nqp::knowhow());
+        self.set_how('knowhow-attr', nqp::knowhowattr());
 
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
@@ -143,13 +143,13 @@ grammar NQP::Grammar is HLL::Grammar {
         <.outerctx>
 
         <statementlist>
-	    <.set_braid_from(self)>
-	    <.check_PACKAGE_oopsies('comp_unit')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('comp_unit')>
         [ $ || <.panic: 'Confused'> ]
     }
 
     rule statementlist {
-	:my $*LANG := self;
+    :my $*LANG := self;
         ''
         [
         | $
@@ -321,7 +321,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <multi_declarator>
     }
     token term:sym<regex_declarator>   { <regex_declarator> }
-	
+
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
     token term:sym<last>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
@@ -354,47 +354,54 @@ grammar NQP::Grammar is HLL::Grammar {
     token twigil { <[*!?]> }
 
     proto token package_declarator { <...> }
+
     token package_declarator:sym<module> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'module';
         <sym> <package_def>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('package_declarator_module')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('package_declarator_module')>
     }
+
     token package_declarator:sym<knowhow> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'knowhow';
         <sym> <package_def>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('package_declarator_knowhow')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('package_declarator_knowhow')>
     }
+
     token package_declarator:sym<class> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'class';
         <sym> <package_def>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('package_declarator_class')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('package_declarator_class')>
     }
+
     token package_declarator:sym<grammar> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'grammar';
         <sym> <package_def>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('package_declarator_grammar')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('package_declarator_grammar')>
     }
+
     token package_declarator:sym<role> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'role';
         <sym> <package_def>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('package_declarator_role')>
+        <.set_braid_from(self)>
+        <.check_PACKAGE_oopsies('package_declarator_role')>
     }
+
     token package_declarator:sym<native> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'native';
         <sym> <package_def>
-	<.set_braid_from(self)>
+        <.set_braid_from(self)>
     }
+
     rule package_declarator:sym<stub> {
         :my $*OUTERPACKAGE := self.package;
         :my $*PKGDECL := 'stub';
@@ -405,9 +412,9 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
-	:my $*LANG := self;
+        :my $*LANG := self;
         :my $OUTER := $*W.cur_lexpad();
-	<!!{ $/.clone_braid_from(self) }>
+        <!!{ $/.clone_braid_from(self) }>
         ''
         [
         <name>
@@ -425,11 +432,11 @@ grammar NQP::Grammar is HLL::Grammar {
             }
             my $how := self.how($*PKGDECL);
             my $INNER := $*W.cur_lexpad();
-	    my $package := $*W.pkg_create_mo($how, |%args);
-	    $*PACKAGE := $package;
-	    $/.set_package($package);
-	    $/.check_PACKAGE_oopsies('package_def1');
-	    $*LANG := $/;
+            my $package := $*W.pkg_create_mo($how, |%args);
+            $*PACKAGE := $package;
+            $/.set_package($package);
+            $/.check_PACKAGE_oopsies('package_def1');
+            $*LANG := $/;
 
             # these need to be installed early so that they may be referenced from subs in the block
             if nqp::can($how, 'parametric') && $how.parametric($how) {
@@ -459,20 +466,20 @@ grammar NQP::Grammar is HLL::Grammar {
             }
         }
 
-	<.check_PACKAGE_oopsies('package_def2')>
-        [ $<export>=['is export'] ]?
-        [ $<nativesize>=['is nativesize(' $<size>=[\d+] ')' ] ]?
-        [ $<unsigned>=['is unsigned'] ]?
-        [ 'is' <parent=.name> ]?
-        [ 'does' <role=.name> ]*
-	<.check_PACKAGE_oopsies('package_def2')>
-        [
-        || ';' <.check_PACKAGE_oopsies('package_defu')><statementlist> [ $ || <.panic: 'Confused'> ]
-        || <?[{]> <.check_PACKAGE_oopsies('package_defb')><blockoid>
-        || <.panic: 'Malformed package declaration'>
-        ]
-        ]
-	<.check_PACKAGE_oopsies('package_defx')>
+        <.check_PACKAGE_oopsies('package_def2')>
+            [ $<export>=['is export'] ]?
+            [ $<nativesize>=['is nativesize(' $<size>=[\d+] ')' ] ]?
+            [ $<unsigned>=['is unsigned'] ]?
+            [ 'is' <parent=.name> ]?
+            [ 'does' <role=.name> ]*
+        <.check_PACKAGE_oopsies('package_def2')>
+            [
+            || ';' <.check_PACKAGE_oopsies('package_defu')><statementlist> [ $ || <.panic: 'Confused'> ]
+            || <?[{]> <.check_PACKAGE_oopsies('package_defb')><blockoid>
+            || <.panic: 'Malformed package declaration'>
+            ]
+            ]
+        <.check_PACKAGE_oopsies('package_defx')>
     }
 
     rule role_params {
