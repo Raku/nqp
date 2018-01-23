@@ -9,7 +9,7 @@
 # * Resolving references to objects, within or between compilation units
 #
 # Just as there is one AST produced per compilation unit, there is also a
-# world produce per compilation unit.
+# world produced per compilation unit.
 #
 # A world includes a serialization context. This contains a bunch of
 # objects - often meta-objects - that we want to persist across the
