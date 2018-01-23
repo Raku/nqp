@@ -6,7 +6,7 @@ Limited pod use is acceptable in nqp files.  The following forms are currently a
 
     =identifier ...text...  # note that use of 'cut' as an identifier will cause a panic
 
-Any word (other than 'cut') is accepted. The entry may be used inside a pod block.
+Any word (other than 'cut') is accepted as an identifier. The entry may be used inside a pod block.
 
 ### Blocks
 
