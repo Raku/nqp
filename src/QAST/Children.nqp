@@ -29,7 +29,7 @@ role QAST::Children {
                 nqp::push(@onto, "\n");
             }
         }
-    CATCH { nqp::push(@onto, "Oops!!! {nqp::getmessage($_)}\n") }
+        CATCH { nqp::push(@onto, "Oops!!! {nqp::getmessage($_)}\n") }
     }
 
     method extra_children() {
@@ -51,7 +51,8 @@ role QAST::Children {
         if $extra && @!children {
             nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n");
             self.dump_node_list($indent+2, @onto, @!children);
-        } else {
+        }
+        else {
             self.dump_node_list($indent, @onto, @!children);
         }
     }

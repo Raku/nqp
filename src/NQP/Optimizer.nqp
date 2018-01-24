@@ -281,7 +281,8 @@ class NQP::Optimizer {
         # Enrich various ops with int/num/str annotations.
         elsif $typeinfo eq '_i' {
             $op.returns(int);
-        } elsif $typeinfo eq '_s' {
+        }
+        elsif $typeinfo eq '_s' {
             $op.returns(str);
         }
         if $opname eq 'numify' {
@@ -309,12 +310,15 @@ class NQP::Optimizer {
                                 !! "";
                 if $typeinfo eq "_i" {
                     return 1
-                } elsif $node.op eq 'chars' || $node.op eq 'ord' || $node.op eq 'elems' {
+                }
+                elsif $node.op eq 'chars' || $node.op eq 'ord' || $node.op eq 'elems' {
                     return 1
                 }
-            } elsif nqp::istype($node, QAST::IVal) {
+            }
+            elsif nqp::istype($node, QAST::IVal) {
                 return 1
-            } elsif nqp::istype($node, QAST::Var) && $node.scope eq 'lexical' {
+            }
+            elsif nqp::istype($node, QAST::Var) && $node.scope eq 'lexical' {
                 my %sym := self.find_lex($node.name);
                 if nqp::existskey(%sym, 'type') && nqp::objprimspec(%sym<type>) == 1 {
                     return 1
@@ -327,7 +331,8 @@ class NQP::Optimizer {
             my $newopn := $asm ~ "_i";
             $op.op($newopn);
             $op.returns(int);
-        } else {
+        }
+        else {
             $op.returns(num);
         }
     }
@@ -341,7 +346,8 @@ class NQP::Optimizer {
         my str $scope := $var.scope;
         if $scope eq 'attribute' || $scope eq 'positional' || $scope eq 'associative' {
             self.visit_children($var);
-        } else {
+        }
+        else {
             my int $top := nqp::elems(@!block_var_stack) - 1;
             my $decl    := $var.decl;
             if $decl {
@@ -366,13 +372,17 @@ class NQP::Optimizer {
                     my $visit := $node[$i];
                     if nqp::istype($visit, QAST::Op) {
                         $node[$i] := self.visit_op($visit)
-                    } elsif nqp::istype($visit, QAST::Var) {
+                    }
+                    elsif nqp::istype($visit, QAST::Var) {
                         self.visit_var($visit);
-                    } elsif nqp::istype($visit, QAST::Block) {
+                    }
+                    elsif nqp::istype($visit, QAST::Block) {
                         $node[$i] := self.visit_block($visit)
-                    } elsif nqp::istype($visit, QAST::Want) {
+                    }
+                    elsif nqp::istype($visit, QAST::Want) {
                         self.visit_children($visit, :skip_selectors)
-                    } elsif nqp::istype($visit, QAST::Regex) {
+                    }
+                    elsif nqp::istype($visit, QAST::Regex) {
                         QRegex::Optimizer.new().optimize($visit,
                             @!block_stack[+@!block_stack - 1],
                             :main_lang_optimizer(sub ($node) {
@@ -400,7 +410,8 @@ class NQP::Optimizer {
                                 return $node;
                             }),
                             |%!adverbs);
-                    } else {
+                    }
+                    else {
                         self.visit_children($visit);
                     }
                 }

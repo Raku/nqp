@@ -734,13 +734,15 @@ for <if unless with without> -> $op_name {
                     :op('bind'),
                     QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
                     $op[0]), :want($MVM_reg_obj));
-            } else {
+            }
+            else {
                 @comp_ops[0] := $qastcomp.as_mast(QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name($cond_temp_lbl), :scope('local'), :decl('var') ),
                     $op[0]));
             }
-        } else {
+        }
+        else {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
         if needs_cond_passed($op[1]) {
@@ -1048,7 +1050,8 @@ for ('', 'repeat_') -> $repness {
             if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
                 $res_kind := $MVM_reg_void;
                 $res_reg := MAST::VOID;
-            } else {
+            }
+            else {
                 $res_reg := $regalloc.fresh_register($res_kind);
             }
 
@@ -2586,7 +2589,8 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
             push_op(@ins, $hintedop, $obj_mast.result_reg, $type_mast.result_reg,
                 MAST::SVal.new( :value($op[2].value) ),
                 $val_mast.result_reg, MAST::IVal.new( :value($hint) ));
-        } else {
+        }
+        else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
             push_ilist(@ins, $name_mast);
             push_op(@ins, $namedop, $obj_mast.result_reg, $type_mast.result_reg,
@@ -2621,7 +2625,8 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
             }
             push_op(@ins, $hintedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 MAST::SVal.new( :value($op[2].value) ), MAST::IVal.new( :value($hint) ));
-        } else {
+        }
+        else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
             push_ilist(@ins, $name_mast);
             push_op(@ins, $namedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,

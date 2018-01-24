@@ -25,7 +25,7 @@ class HLL::Compiler does HLL::Backend::Default {
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s repl-mode=s'
 #?if js
-        ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
+            ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
         );
         %!config     := nqp::hash();
@@ -51,7 +51,7 @@ class HLL::Compiler does HLL::Backend::Default {
         nqp::getcomp($name);
     }
 
-    method config() { %!config };
+    method config() { %!config }
 
     method autoprint($value) {
         self.interactive_result($value)
@@ -105,7 +105,7 @@ class HLL::Compiler does HLL::Backend::Default {
                     CATCH {
                         self.interactive_exception($!);
                     }
-                };
+                }
                 if self.input-incomplete($output) {
                     # Need to get more code before we execute
                     # Strip the trailing \, but reinstate the newline
@@ -129,9 +129,11 @@ class HLL::Compiler does HLL::Backend::Default {
 
                 if !$target {
                     self.autoprint($output);
-                } elsif $!backend.is_textual_stage($target) {
+                }
+                elsif $!backend.is_textual_stage($target) {
                    nqp::say($output);
-                } else {
+                }
+                else {
                    self.dumper($output, $target, |%adverbs);
                 }
             }
@@ -313,7 +315,7 @@ class HLL::Compiler does HLL::Backend::Default {
                         ?? self.interactive(|%adverbs)
                         !! self.evalfiles('-', |%adverbs);
                 }
-                elsif %adverbs<combine>    { $result := self.evalfiles(@a, |%adverbs) }
+                elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
                 else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
                 if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
@@ -329,7 +331,8 @@ class HLL::Compiler does HLL::Backend::Default {
                 CONTROL {
                     if nqp::can(self, 'handle-control') {
                         self.handle-control($_);
-                    } else {
+                    }
+                    else {
                         nqp::rethrow($_);
                     }
                 }
@@ -350,7 +353,8 @@ class HLL::Compiler does HLL::Backend::Default {
                 $err.say($message);
                 $err.say(nqp::join("\n", nqp::backtracestrings($error)));
                 nqp::exit(1);
-            } else {
+            }
+            else {
                 self.handle-exception($error);
             }
         }
@@ -425,7 +429,8 @@ class HLL::Compiler does HLL::Backend::Default {
         my $r := self.eval($code, |@args, |%adverbs);
         if $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
             return $r;
-        } else {
+        }
+        else {
             return self.dumper($r, $target, |%adverbs);
         }
     }
@@ -617,10 +622,12 @@ class HLL::Compiler does HLL::Backend::Default {
         if %adverbs<before> {
             $where    := %adverbs<before>;
             $position := 'before';
-        } elsif %adverbs<after> {
+        }
+        elsif %adverbs<after> {
             $where    := %adverbs<after>;
             $position := 'after';
-        } else {
+        }
+        else {
             my @new-stages := nqp::clone(self.stages);
             nqp::push(@new-stages, $stagename);
             self.stages(@new-stages);
@@ -632,11 +639,13 @@ class HLL::Compiler does HLL::Backend::Default {
                 if $position eq 'before' {
                     nqp::push(@new-stages, $stagename);
                     nqp::push(@new-stages, $_);
-                } else {
+                }
+                else {
                     nqp::push(@new-stages, $_);
                     nqp::push(@new-stages, $stagename);
                 }
-            } else {
+            }
+            else {
                 nqp::push(@new-stages, $_)
             }
         }
@@ -708,7 +717,8 @@ class HLL::Compiler does HLL::Backend::Default {
             $line := nqp::div_i(nqp::add_i($lo, $hi), 2);
             if nqp::isgt_i(nqp::atpos_i($linepos, $line), $pos) {
                 $hi := $line;
-            } else {
+            }
+            else {
                 $lo := nqp::add_i($line, 1);
             }
         }

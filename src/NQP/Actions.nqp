@@ -52,7 +52,8 @@ class NQP::Actions is HLL::Actions {
             my @parts;
             for $ast.list { @parts.push($_.value) }
             $s := join(' ', @parts)
-        } else {
+        }
+        else {
             $s := $ast.value
         }
         $s ~~ /<[ < > ]>/ ?? '«' ~ $s ~ '»' !! '<' ~ $s ~ '>';
@@ -254,7 +255,7 @@ class NQP::Actions is HLL::Actions {
         # See if we've exported any HOWs.
         if nqp::existskey($UNIT, 'EXPORTHOW') {
             for $UNIT<EXPORTHOW>.WHO {
-        $*LANG.set_how($_.key, $_.value);
+                $*LANG.set_how($_.key, $_.value);
             }
         }
     }
@@ -465,7 +466,8 @@ class NQP::Actions is HLL::Actions {
         if $<variable> {
             $<variable>.ast.named(~$<variable><desigilname>);
             make $<variable>.ast;
-        } else {
+        }
+        else {
             my $ast := $<circumfix>
                         ?? $<circumfix>.ast
                         !! QAST::IVal.new( :value( !$<not> ) );
@@ -1271,7 +1273,7 @@ class NQP::Actions is HLL::Actions {
 
     method regex_declarator($/, $key?) {
         my $name;
-    my $package := $/.package;
+        my $package := $/.package;
         if $<deflongname> {
             $name := ~$<deflongname>.ast;
         }
@@ -1294,8 +1296,9 @@ class NQP::Actions is HLL::Actions {
                     :blocktype('declaration_static'),
                     :node($/)
                 );
-                $*W.pkg_add_method($package, 'add_method', $name,
-                    $*W.create_code($ast, $name, 0, :code_type_name<NQPRegex>));
+            $*W.pkg_add_method($package, 'add_method', $name,
+                    $*W.create_code($ast, $name, 0, :code_type_name<NQPRegex>)
+                );
         }
         else {
             my $block := $*W.pop_lexpad();

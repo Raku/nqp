@@ -348,7 +348,8 @@ class QAST::OperationsJAST {
             if $cont {
                 $il.append(savesite($instruction));
                 result_from_cf($il, $stack_out);
-            } else {
+            }
+            else {
                 $il.append($instruction);
                 result($il, $stack_out)
             }
@@ -3050,7 +3051,8 @@ class QAST::CompilerJAST {
                 my str $tch   := typechar($type);
                 my str $local := $tempify[1]."fresh_$tch"();
                 $tempify[0] := [ $local, $type ];
-            } else {
+            }
+            else {
                 self.register_local($var);
                 @!locals[+@!locals] := $var;
             }
@@ -3777,7 +3779,8 @@ class QAST::CompilerJAST {
             # Set outer if we have one.
             if nqp::istype($outer, BlockInfo) {
                 $*JMETH.cr_outer(self.cuid_to_qbid($outer.qast.cuid));
-            } else {
+            }
+            else {
                 $*JMETH.cr_outer(-1); # marks as coderef
             }
 
@@ -5615,17 +5618,17 @@ class QAST::CompilerJAST {
         my $il := JAST::InstructionList.new();
         my $donelabel;
 
-    $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-    $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-    $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+        $il.append($LCMP);
         if $node.subtype eq 'zerowidth' && $node.negate {
-        my $prefix     := self.unique('enumcharlist');
-        $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
-        $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
-    }
-    else {
-        $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-    }
+            my $prefix     := self.unique('enumcharlist');
+            $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
+            $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
+        }
+        else {
+            $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
+        }
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($IVAL_ZERO);
@@ -5648,7 +5651,7 @@ class QAST::CompilerJAST {
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-    $il.append($donelabel) if $donelabel;
+        $il.append($donelabel) if $donelabel;
 
         $il;
     }
@@ -5684,7 +5687,8 @@ class QAST::CompilerJAST {
             $il.append($succeed_and_pop);
             $il.append($POP2);
             $il.append($succeed);
-        } else {
+        }
+        else {
             $il.append(JAST::Instruction.new( :op('ifge'), $succeed ));
             $il.append($POP2);
             $il.append(JAST::Instruction.new( :op('goto'), %*REG<fail>));
@@ -6188,7 +6192,8 @@ class QAST::CompilerJAST {
             $il.append(JAST::PushIVal.new( :value(-1) ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifeq'), %*REG<fail> ));
-        } else {
+        }
+        else {
             $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifgt'), %*REG<fail> ));

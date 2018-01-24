@@ -62,7 +62,8 @@ class HLL::Backend::MoarVM {
                 $filename := 'heap-snapshot-' ~ nqp::time_n();
             }
             $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
-        } else {
+        }
+        else {
             $prof_start_sub(nqp::hash('kind', $kind));
         }
 
@@ -106,7 +107,7 @@ class HLL::Backend::MoarVM {
             $escaped_dquote    := q{\\"};
         }
         else {
-            # Here we're creating a double-quoted JSON string destined for the
+            #  Here we're creating a double-quoted JSON string destined for the
             # inside of a single-quoted JS string. Ouch.
             $escaped_backslash := q{\\\\\\\\};
             $escaped_dquote    := q{\\\\"};
@@ -121,7 +122,8 @@ class HLL::Backend::MoarVM {
             try {
                 if nqp::existskey($id_remap, $node<id>) {
                     $node<id> := $id_remap{$node<id>};
-                } else {
+                }
+                else {
                     my str $newkey := ~($new-id-counter++);
                     $id_remap{$node<id>} := $newkey;
                     $node<id> := $newkey;
@@ -130,7 +132,8 @@ class HLL::Backend::MoarVM {
                     for $node<allocations> -> %alloc_info {
                         if nqp::existskey($id_remap, %alloc_info<id>) {
                             %alloc_info<id> := $id_remap{%alloc_info<id>};
-                        } else {
+                        }
+                        else {
                             my str $newkey := ~($new-id-counter++);
                             $id_remap{%alloc_info<id>} := $newkey;
                             %alloc_info<id> := $newkey;
@@ -187,7 +190,8 @@ class HLL::Backend::MoarVM {
                 }
                 if $swap == $root {
                     return;
-                } else {
+                }
+                else {
                     my str $tmp := @a[$root];
                     @a[$root] := @a[$swap];
                     @a[$swap] := $tmp;

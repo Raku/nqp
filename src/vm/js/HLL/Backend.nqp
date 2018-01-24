@@ -33,7 +33,8 @@ my sub run_command($command, :$stdout) {
           }
       };
       $config<buf_type> := create_buf(uint8);
-  } else {
+  }
+  else {
       $read_all := 1;
   }
 
@@ -63,7 +64,8 @@ my sub run_command($command, :$stdout) {
           nqp::decoderaddbytes($dec, $bytes);
       }
       nqp::decodertakeallchars($dec);
-  } else {
+  }
+  else {
       nqp::null();
   }
 }
@@ -94,15 +96,15 @@ class JavaScriptBackend {
     method apply_transcodings($s, $transcode) {
         $s
     }
-    
+
     method config() {
         nqp::backendconfig()
     }
-    
+
     method force_gc() {
         nqp::die("Cannot force GC on JVM backend yet");
     }
-    
+
     method name() {
         'js'
     }
@@ -123,10 +125,12 @@ class JavaScriptBackend {
             var v8profiler = null;
             try {
               v8profiler = require(\'v8-profiler\');
-            } catch (e) {
+            }
+            catch (e) {
               if (e.message == "Cannot find module \'v8-profiler\'") {
                 null;
-              } else {
+              }
+              else {
                 throw e;
               }
             }
@@ -162,24 +166,24 @@ class JavaScriptBackend {
 
         $result;
     }
-    
+
     method run_traced($level, $what) {
         nqp::die("No tracing support");
     }
-    
+
     method version_string() {
         "JS"
     }
-    
+
     method stages() {
         'js run'
     }
-    
+
     method is_precomp_stage($stage) {
         # Currently, everything is pre-comp since we're a cross-compiler.
         $stage eq 'js' || (($stage eq '' || $stage eq 'run') && self.spawn_new_node);
     }
-    
+
     method is_textual_stage($stage) {
         $stage eq 'js';
     }
@@ -202,7 +206,7 @@ class JavaScriptBackend {
     method get_ast($got) {
         nqp::istype($got, QASTWithMatch) ?? $got.ast !! $got;
     }
-    
+
     method js($parsed, *%adverbs) {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore');
 
@@ -222,7 +226,8 @@ class JavaScriptBackend {
             $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
 
             JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file);
-        } else {
+        }
+        else {
             my $code := $backend.emit(self.get_ast($parsed), :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
@@ -250,18 +255,19 @@ class JavaScriptBackend {
         # TODO a better temporary file name
         'tmp-' ~ nqp::getpid() ~ '.js';
     }
-    
+
     method run($js, *%adverbs) {
         # TODO source map support
 
         if !self.spawn_new_node {
             if nqp::istype($js, JSWithSourceMap) {
                 return nqp::getcomp('JavaScript').eval($js.js, :mapping($js.mapping), :p6-source($js.p6-source), :file($js.file));
-            } else {
+            }
+            else {
                 return nqp::getcomp('JavaScript').eval($js);
             }
         }
-        
+
         my $tmp_file := self.tmp_file;
 
         my $code := open($tmp_file, :w);
@@ -278,7 +284,7 @@ class JavaScriptBackend {
             }
 
             run_command(@cmd);
-        
+
             nqp::unlink($tmp_file); # TODO think about safety
         };
     }
@@ -294,7 +300,7 @@ class JavaScriptBackend {
         spew($module ~ '/package.json', $package_json);
     }
 
-    # When running on Moar a compunit is just a sub 
+    # When running on Moar a compunit is just a sub
 
     method compunit_mainline($cu) {
         nqp::isinvokable($cu) ?? $cu !! nqp::compunitmainline($cu);

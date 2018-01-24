@@ -15,11 +15,12 @@ class HLL::Actions {
                 $result := $result ~ nqp::chr($_.made);
             }
             $result;
-        } else {
+        }
+        else {
             nqp::chr($ints.made);
         }
     }
-    
+
     method CTXSAVE() {
         QAST::Stmts.new(
             QAST::Op.new(
@@ -45,7 +46,7 @@ class HLL::Actions {
                         QAST::Var.new( :name('ctxsave'), :scope('local')
                     )))))
     }
-   
+
     method SET_BLOCK_OUTER_CTX($block) {
         my $outer_ctx := %*COMPILING<%?OPTIONS><outer_ctx>;
         if nqp::defined($outer_ctx) {
@@ -132,7 +133,7 @@ class HLL::Actions {
                     $ast := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
-            else {            
+            else {
                 $/.panic("Can't form :w list from non-constant strings (yet)");
             }
         }

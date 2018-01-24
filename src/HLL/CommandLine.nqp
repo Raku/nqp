@@ -108,10 +108,12 @@ class HLL::CommandLine::Result {
         if nqp::existskey(%!options, $name) {
             if nqp::islist(%!options{$name}) {
                 nqp::push(%!options{$name}, $value);
-            } else {
+            }
+            else {
                 %!options{$name} := [ %!options{$name}, $value ];
             }
-        } else {
+        }
+        else {
             %!options{$name} := $value;
         }
     }
@@ -159,7 +161,8 @@ class HLL::CommandLine::Parser {
         if $i < 0 {
             $type    := 'b';
             @options := self.split-option-aliases($s);
-        } else {
+        }
+        else {
             $type    := nqp::substr($s, $i + 1);
             @options := self.split-option-aliases(nqp::substr($s, 0, $i));
         }
@@ -195,7 +198,8 @@ class HLL::CommandLine::Parser {
         sub get-value($opt) {
             if $i == $arg-count - 1 {
                 nqp::die("Option $opt needs a value");
-            } else {
+            }
+            else {
                 $i++;
                 @args[$i];
             }
@@ -225,7 +229,8 @@ class HLL::CommandLine::Parser {
                         $value     := nqp::substr($opt, $idx + 1);
                         $opt       := nqp::substr($opt, 0,      $idx);
                         $has-value := 1;
-                    } elsif self.optional-value($opt) {
+                    }
+                    elsif self.optional-value($opt) {
                         $value     := '';
                         $has-value := 1;
                     }
@@ -236,7 +241,8 @@ class HLL::CommandLine::Parser {
                     }
                     $result.add-option($opt, $value);
                     slurp-rest if %!stopper{"--$opt"};
-                } else {
+                }
+                else {
                     my $opt := nqp::substr($cur, 1);
                     my $len := nqp::chars($opt);
                     if $len == 1 {
@@ -245,11 +251,13 @@ class HLL::CommandLine::Parser {
                         if self.wants-value($opt) {
                             $result.add-option($opt,
                             get-value("-$opt"));
-                        } else {
+                        }
+                        else {
                             $result.add-option($opt, 1);
                         }
                         slurp-rest() if %!stopper{"-$opt"};
-                    } else {
+                    }
+                    else {
                         my $i := 0;
                         while $i < $len {
                             my $o := nqp::substr($opt, $i, 1);
@@ -257,7 +265,8 @@ class HLL::CommandLine::Parser {
                                 if self.wants-value($o) {
                                     if $i + 1 == $len {
                                         $result.add-option($o, get-value("-$o"));
-                                    } else {
+                                    }
+                                    else {
                                         $result.add-option($o, nqp::substr($opt, $i + 1));
                                     }
                                     last;
@@ -273,9 +282,11 @@ class HLL::CommandLine::Parser {
                         }
                     }
                 }
-            } elsif %!stopper{$cur} {
+            }
+            elsif %!stopper{$cur} {
                 slurp-rest();
-            } else {
+}
+            else {
                 $result.add-argument($cur);
                 slurp-rest() if $!stop-after-first-arg;
             }
@@ -284,5 +295,3 @@ class HLL::CommandLine::Parser {
         return $result;
     }
 }
-
-

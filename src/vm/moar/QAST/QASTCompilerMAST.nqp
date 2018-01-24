@@ -1293,7 +1293,8 @@ my class MASTCompilerInstance {
             if nqp::defined($want) && $want == $MVM_reg_void {
                 nqp::push(@ins, MAST::Call.new( :target($code_reg), :flags([]) ));
                 MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
-            } else {
+            }
+            else {
                 my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
                 nqp::push(@ins, MAST::Call.new(
                     :target($code_reg), :flags([]), :result($res_reg)

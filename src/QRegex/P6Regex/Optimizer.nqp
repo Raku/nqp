@@ -10,10 +10,12 @@ class QRegex::Optimizer {
         my $type   := $node.rxtype;
         if $type eq 'concat' {
             return self.visit_concat($node);
-        } elsif $type eq 'subrule' {
+        }
+        elsif $type eq 'subrule' {
             $node := $!main_opt($node) if $!main_opt;
             return self.simplify_assertion($node);
-        } else {
+        }
+        else {
             self.visit_children($node);
         }
         $node
@@ -24,7 +26,8 @@ class QRegex::Optimizer {
         for $node {
             if $node.rxtype eq $type {
                 $res++
-            } else {
+            }
+            else {
                 return -1;
             }
         }
@@ -38,13 +41,16 @@ class QRegex::Optimizer {
                     if $node[0].rxtype eq 'qastnode' && $node[0].subtype eq 'declarative' {
                         # the debugger puts these all over our code; we should pretend we never saw them.
                         $node := $node[1];
-                    } else {
+                    }
+                    else {
                         $node := $node[0];
                     }
-                } else {
+                }
+                else {
                     last;
                 }
-            } else {
+            }
+            else {
                 last;
             }
         }
@@ -60,10 +66,12 @@ class QRegex::Optimizer {
                 }
                 if $node.rxtype eq 'concat' {
                     $node := $node[0];
-                } else {
+                }
+                else {
                     last;
                 }
-            } else {
+            }
+            else {
                 last;
             }
         }
@@ -74,8 +82,10 @@ class QRegex::Optimizer {
         self.visit_children($node);
         if nqp::elems(@($node)) == 1 && $!level >= 1 {
             return $node[0];
-        } elsif nqp::istype($node[0], QAST::Regex)
-        && nqp::elems(@($node)) >= 2 && $!level >= 2 {
+        }
+        elsif nqp::istype($node[0], QAST::Regex)
+            && nqp::elems(@($node)) >= 2 && $!level >= 2 {
+
             # we may have a scan followed by a begin-of-string assertion.
             # in that case we just shouldn't scan.
             if $node[0].rxtype eq 'scan'
@@ -120,23 +130,28 @@ class QRegex::Optimizer {
                         $result := QAST::Regex.new(:rxtype<literal>, :subtype<zerowidth>, :node($simple.node),
                             :negate($simple.negate),
                             $simple[0]);
-                    } elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
+                    }
+                    elsif $simple.rxtype eq 'enumcharlist' && $simple.rxtype ne 'ignorecase' {
                         $result := QAST::Regex.new(:rxtype<enumcharlist>, :subtype<zerowidth>, :node($simple.node),
                             :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
                             $simple[0]);
-                    } elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
+                    }
+                    elsif $simple.rxtype eq 'charrange' && $simple.rxtype ne 'ignorecase' {
                         $result := QAST::Regex.new(:rxtype<charrange>, :subtype<zerowidth>, :node($simple.node),
                             :negate(nqp::bitxor_i($qast.negate, $simple.negate)),
                             $simple[0],
                             $simple[1],
                             $simple[2]);
-                    } elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
+                    }
+                    elsif $simple.rxtype eq 'cclass' && $simple.rxtype ne 'ignorecase' {
                         $result := QAST::Regex.new(:rxtype<cclass>, :subtype<zerowidth>, :node($simple.node),
                             :negate(nqp::bitxor_i($qast.negate, $simple.negate)), :name($simple.name));
-                    } else {
+                    }
+                    else {
                         # since before is implicitly anchored, we can remove the scan.
                         self.dont_scan($regex);
                     }
+
                     if $result {
                         self.stub_out_block($qast[0][1]);
                         $qast := $result;
@@ -161,27 +176,40 @@ class QRegex::Optimizer {
                     my $type := $visit.rxtype;
                     if $type eq 'concat' {
                         $node[$i] := self.visit_concat($visit);
-                    } elsif $type eq 'literal' {
-                    } elsif $type eq 'quant' {
+                    }
+                    elsif $type eq 'literal' {
+                    }
+                    elsif $type eq 'quant' {
                         self.visit_children($visit);
-                    } elsif $type eq 'subrule' {
+                    }
+                    elsif $type eq 'subrule' {
                         $node[$i] := $!main_opt($node[$i]) if $!main_opt;
                         $node[$i] := self.simplify_assertion($visit);
-                    } elsif $type eq 'qastnode' {
+                    }
+                    elsif $type eq 'qastnode' {
                         $node[$i] := $!main_opt($node[$i]) if $!main_opt;
-                    } elsif $type eq 'anchor' {
-                    } elsif $type eq 'enumcharlist' {
-                    } elsif $type eq 'cclass' {
-                    } elsif $type eq 'scan' {
-                    } elsif $type eq 'charrange' {
-                    } elsif $type eq 'dynquant' {
+                    }
+                    elsif $type eq 'anchor' {
+                    }
+                    elsif $type eq 'enumcharlist' {
+                    }
+                    elsif $type eq 'cclass' {
+                    }
+                    elsif $type eq 'scan' {
+                    }
+                    elsif $type eq 'charrange' {
+                    }
+                    elsif $type eq 'dynquant' {
                         $node[$i] := $!main_opt($node[$i]) if $!main_opt;
-                    } elsif $type eq 'pass' || $type eq 'fail' {
-                    } else {
+                    }
+                    elsif $type eq 'pass' || $type eq 'fail' {
+                    }
+                    else {
                         # alt, altseq, conjseq, conj, quant
                         self.visit_children($visit);
                     }
-                } elsif nqp::istype($visit, QAST::Block) {
+                }
+                elsif nqp::istype($visit, QAST::Block) {
                     @!outer.push($visit);
                     self.visit_children($visit);
                     @!outer.pop();

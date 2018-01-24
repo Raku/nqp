@@ -91,7 +91,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method mangle_own_lexical($name) {
             if nqp::existskey(%!mangled_lexicals, $name) {
                 %!mangled_lexicals{$name}
-            } else {
+            }
+            else {
                 nqp::null();
             }
         }
@@ -417,7 +418,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     $pos_slurpy := 1;
                     set_variable($param, "nqp.slurpyPos(HLL, arguments, {+@sig})");
                 }
-            } else {
+            }
+            else {
                 my int $type := self.type_from_typeobj($param.returns);
                 my $suffix := self.suffix_from_type($type);
                 my sub unpack($value) {
@@ -466,7 +468,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
                     if self.is_dynamic_var($*BLOCK, $param) {
                        $set := "{$*CTX}[{quote_string($param.name)}] = ";
-                    } else {
+                    }
+                    else {
                         my str $name := $*BLOCK.mangle_var($param);
                         $*BLOCK.add_js_lexical($name);
                         $set := "$name = ";
@@ -505,7 +508,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if !$named_slurpy {
             if +@known_named {
                 @setup.unshift("if (_NAMED !== null) \{nqp.checkNamed({known_named(@known_named)}, _NAMED)\}\n");
-            } else {
+            }
+            else {
                 @setup.unshift("if (_NAMED !== null) \{nqp.noNamed(_NAMED)\}\n");
             }
         }
@@ -518,7 +522,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $type == $T_INT8 || $type == $T_INT16 {
             my int $shift := 32 - self.bits($type);
             "($expr << $shift >> $shift)";
-        } else {
+        }
+        else {
             $expr;
         }
     }
@@ -526,9 +531,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     method bits(int $type) {
         if $type == $T_INT8 {
             8
-        } elsif $type == $T_INT16 {
+        }
+        elsif $type == $T_INT16 {
             16
-        } else {
+        }
+        else {
             nqp::die("We can't determine the number of bits for $type");
         }
     }
@@ -641,9 +648,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             if $desired == $T_BOOL {
                 if $got_int {
                     return Chunk.new($T_BOOL, $chunk.expr, $chunk);
-                } elsif $got == $T_NUM {
+                }
+                elsif $got == $T_NUM {
                     return Chunk.new($T_BOOL, "({$chunk.expr} !== 0)", $chunk);
-                } elsif $got == $T_STR {
+                }
+                elsif $got == $T_STR {
                     return Chunk.new($T_BOOL, "({$chunk.expr} && {$chunk.expr} !== nqp.null_s)", $chunk);
                 }
             }
@@ -1051,7 +1060,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 self.wrap_static_block($block_info.outer, @capture_inners, -> {
                     if self.has_closure_template($block_info) {
                         @capture_inners.push("$reg = $cuid.captureCtx({$block_info.outer.ctx});\n");
-                    } else {
+                    }
+                    else {
                         @capture_inners.push("$reg = $cuid.capture");
 
                         @capture_inners.push(%*BLOCKS_DONE{$kv.key});
@@ -1245,7 +1255,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $node.blocktype eq 'raw' {
             Chunk.void();
-        } elsif $node.blocktype eq 'immediate' {
+        }
+        elsif $node.blocktype eq 'immediate' {
             my $setup := [];
             my $cloned_block := $outer.clone_inner($node);
 
@@ -1296,9 +1307,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     multi method as_js(QAST::NVal $node, :$want) {
         if $node.value == nqp::inf {
             Chunk.new($T_NUM,'Infinity', :$node);
-        } elsif $node.value == nqp::neginf {
+        }
+        elsif $node.value == nqp::neginf {
             Chunk.new($T_NUM,'(-Infinity)', :$node);
-        } else {
+        }
+        else {
             Chunk.new($T_NUM,'('~$node.value()~')', :$node);
         }
     }
@@ -1493,7 +1506,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 $T_INT;
             }
-        } else {
+        }
+        else {
           @types[$type];
         }
     }
@@ -2000,7 +2014,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 else {
                     Chunk.new($type, "{$self.expr}.\$\$getattr$suffix({$class_handle.expr}, $name)", [$self, $class_handle]);
                 }
-            } else {
+            }
+            else {
                 if $type == $T_OBJ {
                     if $*BINDVAL {
                         my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($T_OBJ));

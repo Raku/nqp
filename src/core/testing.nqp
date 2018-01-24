@@ -21,7 +21,7 @@ sub ok($condition, $desc?) {
         @output.push($todo_reason);
     }
     say(|@output);
-    
+
     $condition ?? 1 !! 0
 }
 
@@ -65,7 +65,8 @@ sub dies-ok($code, $description, :$message) {
     if $message {
         if nqp::isstr($message) {
           is($got-message, $message, 'got correct exception message');
-        } else {
+        }
+        else {
           ok($got-message ~~ $message, 'exception message matches');
         }
     }

@@ -120,16 +120,19 @@ my module sprintf {
 
             if nqp::isint($number_representation) {
                 nqp::box_i($number_representation, $knowhow);
-            } else {
+            }
+            else {
                 if nqp::isnum($number_representation)
-                || nqp::isstr($number_representation) {
+                    || nqp::isstr($number_representation) {
+
                     if $number_representation > 0 {
                         nqp::fromnum_I(nqp::floor_n($number_representation), $knowhow);
                     }
                     else {
                         nqp::fromnum_I(nqp::ceil_n($number_representation), $knowhow);
                     }
-                } else {
+                }
+                else {
                     $number_representation;
                 }
             }
@@ -190,7 +193,8 @@ my module sprintf {
                 if $pad ne ' ' && $size {
                     my $chars_sign_pre := $sign ?? nqp::chars($pre) + 1 !! nqp::chars($pre);
                     $int := $sign ~ $pre ~ infix_x($pad, $size - $chars_sign_pre - nqp::chars($int)) ~ $int;
-                } else {
+                }
+                else {
                     $int := $sign ~ $pre ~ $int;
                 }
             }
@@ -244,7 +248,8 @@ my module sprintf {
         sub pad-with-sign($sign, $num, $size, $pad) {
             if $pad ne ' ' && $size {
                 $sign ~ infix_x($pad, $size - nqp::chars($num) - 1) ~ $num;
-            } else {
+            }
+            else {
                 $sign ~ $num;
             }
         }
@@ -266,9 +271,11 @@ my module sprintf {
             my $n := nqp::chars($num);
             if $new-radix-point > $n {
                 $num := $num ~ infix_x('0', $new-radix-point - $n);
-            } elsif $new-radix-point < 0 {
+            }
+            elsif $new-radix-point < 0 {
                 $num := "0." ~ infix_x('0', nqp::abs_n($new-radix-point)) ~ $num;
-            } else {
+            }
+            else {
                 $num := nqp::substr($num,0,$new-radix-point) ~ '.' ~ nqp::substr($num,$new-radix-point);
             }
             $sign ~ $num;
@@ -351,7 +358,8 @@ my module sprintf {
                 if $exp < 0 {
                     $exp := -$exp;
                     $float := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
-                } else {
+                }
+                else {
                     $float := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 }
             }
@@ -375,14 +383,16 @@ my module sprintf {
                 my $fixed-precision := $precision - ($exp + 1);
                 my $fixed := stringify-to-precision2($float, $precision);
                 pad-with-sign($sign, $fixed, $size, $pad);
-            } else {
+            }
+            else {
                 $float := $float / nqp::pow_n(10, $exp);
                 $float := stringify-to-precision2($float, $precision);
                 my $sci;
                 if $exp < 0 {
                     $exp := -$exp;
                     $sci := $float ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
-                } else {
+                }
+                else {
                     $sci := $float ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 }
 

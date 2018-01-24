@@ -82,8 +82,8 @@ grammar NQP::Grammar is HLL::Grammar {
             [ .*? \n \h* '=' 'end' \h+ 'END' » \N* || .* ]
         | 'begin' \h+ <identifier>
             [
-            ||  .*? \n \h* '=' 'end' \h+ $<identifier> » \N*
-            ||  <.panic: '=begin without matching =end'>
+            || .*? \n \h* '=' 'end' \h+ $<identifier> » \N*
+            || <.panic: '=begin without matching =end'>
             ]
         | 'begin' » \h*
             [ $$ || '#' || <.panic: 'Unrecognized token after =begin'> ]
@@ -92,11 +92,13 @@ grammar NQP::Grammar is HLL::Grammar {
             || <.panic: '=begin without matching =end'>
             ]
         | <identifier> {}
-            .*? \n <?before \h* [
-                '='
-                [ 'cut' »
-                  <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
-              | \n ]>
+            .*? \n
+            <?before \h*
+                [
+                | '=' [ 'cut' » <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
+                | \n
+                ]
+            >
         |   {}
             [ \s || <.panic: 'Illegal pod directive'> ]
             \N*
@@ -123,7 +125,10 @@ grammar NQP::Grammar is HLL::Grammar {
 
         # This is also the starting package.
         :my $*PACKAGE := $*GLOBALish;
-        { $/.set_package($*PACKAGE); $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE); }
+        {
+            $/.set_package($*PACKAGE);
+            $*W.install_lexical_symbol($*UNIT, '$?PACKAGE', $*PACKAGE);
+        }
 
         # Create EXPORT::DEFAULT.
         :my $*EXPORT;
@@ -149,7 +154,7 @@ grammar NQP::Grammar is HLL::Grammar {
     }
 
     rule statementlist {
-    :my $*LANG := self;
+        :my $*LANG := self;
         ''
         [
         | $
@@ -417,68 +422,69 @@ grammar NQP::Grammar is HLL::Grammar {
         <!!{ $/.clone_braid_from(self) }>
         ''
         [
-        <name>
-        <.newpad>
-        [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
-        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
+            <name>
+            <.newpad>
+            [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
+            [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
 
-        {
-            # Construct meta-object for this package, adding it to the
-            # serialization context for this compilation unit.
-            my %args;
-            %args<name> := ~$<name>;
-            if $<repr> {
-                %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
-            }
-            my $how := self.how($*PKGDECL);
-            my $INNER := $*W.cur_lexpad();
-            my $package := $*W.pkg_create_mo($how, |%args);
-            $*PACKAGE := $package;
-            $/.set_package($package);
-            $/.check_PACKAGE_oopsies('package_def1');
-            $*LANG := $/;
+            {
+                # Construct meta-object for this package, adding it to the
+                # serialization context for this compilation unit.
+                my %args;
+                %args<name> := ~$<name>;
+                if $<repr> {
+                    %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
+                }
+                my $how := self.how($*PKGDECL);
+                my $INNER := $*W.cur_lexpad();
+                my $package := $*W.pkg_create_mo($how, |%args);
+                $*PACKAGE := $package;
+                $/.set_package($package);
+                $/.check_PACKAGE_oopsies('package_def1');
+                $*LANG := $/;
 
-            # these need to be installed early so that they may be referenced from subs in the block
-            if nqp::can($how, 'parametric') && $how.parametric($how) {
-                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
-                $*W.install_lexical_symbol($INNER, '$?ROLE', $package);
-            }
-            else {
-                $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
-                $*W.install_lexical_symbol($INNER, '$?CLASS', $package);
-            }
+                # these need to be installed early so that they may be referenced from subs in the block
+                if nqp::can($how, 'parametric') && $how.parametric($how) {
+                    $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
+                    $*W.install_lexical_symbol($INNER, '$?ROLE', $package);
+                }
+                else {
+                    $*W.install_lexical_symbol($INNER, '$?PACKAGE', $package);
+                    $*W.install_lexical_symbol($INNER, '$?CLASS', $package);
+                }
 
-            # Install it in the current package or current lexpad as needed.
-            if $*SCOPE eq 'our' || $*SCOPE eq '' {
-                $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $package);
-                if +$<name><identifier> == 1 {
+                # Install it in the current package or current lexpad as needed.
+                if $*SCOPE eq 'our' || $*SCOPE eq '' {
+                    $*W.install_package_symbol($*OUTERPACKAGE, $<name><identifier>, $package);
+                    if +$<name><identifier> == 1 {
+                        $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
+                    }
+                }
+                elsif $*SCOPE eq 'my' {
+                    if +$<name><identifier> != 1 {
+                        $<name>.panic("A my scoped package cannot have a multi-part name yet");
+                    }
                     $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
                 }
-            }
-            elsif $*SCOPE eq 'my' {
-                if +$<name><identifier> != 1 {
-                    $<name>.panic("A my scoped package cannot have a multi-part name yet");
+                else {
+                    $/.panic("$*SCOPE scoped packages are not supported");
                 }
-                $*W.install_lexical_symbol($OUTER, ~$<name><identifier>[0], $package);
             }
-            else {
-                $/.panic("$*SCOPE scoped packages are not supported");
-            }
-        }
 
-        <.check_PACKAGE_oopsies('package_def2')>
+            <.check_PACKAGE_oopsies('package_def2')>
             [ $<export>=['is export'] ]?
             [ $<nativesize>=['is nativesize(' $<size>=[\d+] ')' ] ]?
             [ $<unsigned>=['is unsigned'] ]?
             [ 'is' <parent=.name> ]?
             [ 'does' <role=.name> ]*
-        <.check_PACKAGE_oopsies('package_def2')>
+
+            <.check_PACKAGE_oopsies('package_def2')>
             [
             || ';' <.check_PACKAGE_oopsies('package_defu')><statementlist> [ $ || <.panic: 'Confused'> ]
             || <?[{]> <.check_PACKAGE_oopsies('package_defb')><blockoid>
             || <.panic: 'Malformed package declaration'>
             ]
-            ]
+        ]
         <.check_PACKAGE_oopsies('package_defx')>
     }
 
@@ -540,7 +546,8 @@ grammar NQP::Grammar is HLL::Grammar {
         [ $<sigil>=['&'?]<deflongname> ]?
         <.newpad>
         [ '(' ~ ')' <signature>
-            || <.panic: 'Routine declaration requires a signature'> ]
+            || <.panic: 'Routine declaration requires a signature'>
+        ]
         <trait>*
         [
         | <onlystar>
@@ -557,7 +564,8 @@ grammar NQP::Grammar is HLL::Grammar {
         ]
         <.newpad>
         [ '(' ~ ')' <signature>
-            || <.panic: 'Routine declaration requires a signature'> ]
+            || <.panic: 'Routine declaration requires a signature'>
+        ]
         { $*INVOCANT_OK := 0; }
         <trait>*
         [
@@ -893,13 +901,13 @@ grammar NQP::Regex is QRegex::P6Regex::Grammar {
 
     token assertion:sym<name> {
         <longname=.identifier>
-            [
-            | <?[>]>
-            | '=' <assertion>
-            | ':' <arglist>
-            | '(' <arglist> ')'
-            | <.normspace> <nibbler>
-            ]?
+        [
+          | <?[>]>
+          | '=' <assertion>
+          | ':' <arglist>
+          | '(' <arglist> ')'
+          | <.normspace> <nibbler>
+        ]?
     }
 
     token assertion:sym<var> {

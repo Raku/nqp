@@ -109,7 +109,7 @@ class QAST::MASTRegexCompiler {
             'self',     $self,
             'cclass_word'   , $cclass_word,
             'cclass_newline', $cclass_newline
-            );
+        );
 
         @!rxjumps := nqp::list($donelabel);
 
@@ -402,7 +402,8 @@ class QAST::MASTRegexCompiler {
         }
         elsif $subtype eq 'pass' || $subtype eq '' {
             # Nothing to do.
-        } elsif $subtype eq 'zerowidth' {
+        }
+        elsif $subtype eq 'zerowidth' {
             # Nothing to do either. This gets generated for <???>, for example
         }
         else {

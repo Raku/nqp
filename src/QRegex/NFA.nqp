@@ -465,7 +465,8 @@ class QRegex::NFA {
                     my int $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
                     $to := $st if $to < 0 && $st > 0;
                 }
-            } else { # + quantifier
+            }
+            else { # + quantifier
                 my int $start := self.addstate();
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
                 my int $looper := self.addstate();
@@ -483,14 +484,16 @@ class QRegex::NFA {
             }
             note("$indent ...quant returns $to") if $nfadeb;
             dentout($to);
-        } elsif $min == 0 && $max == 1 { # ? quantifier
+        }
+        elsif $min == 0 && $max == 1 { # ? quantifier
             my int $st := self.regex_nfa($node[0], $from, $to);
             $to := $st if $to < 0 && $st > 0;
             $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
             $to := $st if $to < 0 && $st > 0;
             note("$indent ...quant returns $to") if $nfadeb;
             dentout($to);
-        } else {
+        }
+        else {
             note("$indent ...quant returns fate") if $nfadeb;
             dentout(self.fate($node, $from, $to))
         }

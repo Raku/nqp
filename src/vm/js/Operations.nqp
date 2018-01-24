@@ -12,7 +12,8 @@ class QAST::OperationsJS {
         if $hll {
             %hll_ops{$hll} := nqp::hash() unless nqp::existskey(%hll_ops, $hll);
             %hll_ops{$hll}{$op} := $cb;
-        } else {
+        }
+        else {
             %ops{$op} := $cb;
         }
         %inlinable{$op} := $inlinable;
@@ -47,7 +48,8 @@ class QAST::OperationsJS {
         if $takes_hll {
             if $method_call {
                 nqp::splice(@exprs, 'HLL', 1, 0);
-            } else {
+            }
+            else {
                 @exprs.unshift('HLL');
             }
         }
@@ -55,7 +57,8 @@ class QAST::OperationsJS {
         if $ctx {
             if $method_call {
                 nqp::splice(@exprs, nqp::list($*CTX), 1, 0);
-            } else {
+            }
+            else {
                 @exprs.unshift($*CTX);
             }
         }
@@ -319,7 +322,8 @@ class QAST::OperationsJS {
             if $inverted_result {
                 @setup.push($action ~ ";\n");
                 Chunk.new($type, $obj.expr, @setup);
-            } else {
+            }
+            else {
                 $comp.stored_result(Chunk.new($type, $action, @setup), :$want);
             }
         }
@@ -1347,7 +1351,8 @@ class QAST::OperationsJS {
                     )),
                     "\}"
                 );
-            } elsif $repeat_variant {
+            }
+            elsif $repeat_variant {
                 my str $neg := $op eq 'repeat_while' ?? '' !! '!';
                 Chunk.void(
                     $setup_previous_cond,
@@ -1357,7 +1362,8 @@ class QAST::OperationsJS {
                     $store_previous_cond,
                     "\} while ($neg {$check_cond.expr});"
                 );
-            } else {
+            }
+            else {
                 my str $neg := $op eq 'while' ?? '!' !! '';
                 Chunk.void(
                     "for (;;", $post, ") \{\n",

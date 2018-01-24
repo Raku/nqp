@@ -135,10 +135,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         [
           <!rxstopper>
           [
-          |  '||' { $*SEQ := 1; }
-          |  '|'
-          |  '&&'
-          |  '&'
+           |  '||' { $*SEQ := 1; }
+           |  '|'
+           |  '&&'
+           |  '&'
           ] <.ws>
         ]?
         <termseq>
@@ -153,9 +153,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     regex infixstopper {
         :dba('infix stopper')
         [
-        | <?before <.[\) \} \]]> >
-        | <?before '>' <.-[>]> >
-        | <?rxstopper>
+         | <?before <.[\) \} \]]> >
+         | <?before '>' <.-[>]> >
+         | <?rxstopper>
         ]
     }
 
@@ -247,9 +247,9 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token quantifier { <...> }
     token quantifier:sym<%> {
-    ('%''%'?) {
-        $/.panic("Missing quantifier on the left argument of " ~ $/[0]);
-    }
+        ('%''%'?) {
+            $/.panic("Missing quantifier on the left argument of " ~ $/[0]);
+        }
     }
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }

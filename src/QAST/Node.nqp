@@ -139,8 +139,8 @@ class QAST::Node {
         if nqp::chars($extra) {
             nqp::push(@chunks, "($extra)");
         }
-    nqp::push(@chunks, ' ');
-    nqp::push(@chunks, self.dump_annotations);
+        nqp::push(@chunks, ' ');
+        nqp::push(@chunks, self.dump_annotations);
         if (self.node) {
             nqp::push(@chunks, ' ');
             my $escaped_node := nqp::escape(self.node);
@@ -155,26 +155,26 @@ class QAST::Node {
     }
 
     method dump_annotations() {
-    my @anns;
-    nqp::push(@anns, self.dump_flags);
+        my @anns;
+        nqp::push(@anns, self.dump_flags);
 
         if nqp::ishash(%!annotations) {
-        for %!annotations {
-        my $k := $_.key;
-        my $v := $_.value;
-        try {
-            if nqp::isconcrete($v) {
-            if $k eq 'IN_DECL' || $k eq 'BY' {
-                nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
-            }
-            else {   # dunno how to introspect
-                nqp::push(@anns, ':' ~ $k ~ '<?>');
-            }
+            for %!annotations {
+                my $k := $_.key;
+                my $v := $_.value;
+                try {
+                    if nqp::isconcrete($v) {
+                        if $k eq 'IN_DECL' || $k eq 'BY' {
+                            nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
+                        }
+                        else {   # dunno how to introspect
+                            nqp::push(@anns, ':' ~ $k ~ '<?>');
+                        }
+                    }
+                }
             }
         }
-        }
-    }
-    nqp::join(' ',@anns);
+        nqp::join(' ',@anns);
     }
 
     method dump_children(int $indent, @onto) { }

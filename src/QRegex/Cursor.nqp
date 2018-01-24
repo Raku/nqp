@@ -908,10 +908,12 @@ role NQPMatchRole is export {
 
         if $!pos < 1 || $!pos >= nqp::chars($target) { # no other side to compare to
             nqp::getattr($!shared, ParseShared, '$!fail_cursor');
-        } elsif nqp::eqat($target, nqp::substr($target, $!pos, 1), nqp::sub_i($!pos, 1)) { # same char on both sides
+        }
+        elsif nqp::eqat($target, nqp::substr($target, $!pos, 1), nqp::sub_i($!pos, 1)) { # same char on both sides
             my $cur := self."!cursor_start_cur"();
             $cur."!cursor_pass"($!pos, 'same');
-        } else { # different chars on both sides
+        }
+        else { # different chars on both sides
             nqp::getattr($!shared, ParseShared, '$!fail_cursor');
         }
     }

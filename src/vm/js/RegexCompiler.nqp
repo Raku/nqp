@@ -27,7 +27,8 @@ class RegexCompiler {
     method set_cursor_var() {
         if $!compiler.is_dynamic_var($*BLOCK, QAST::Var.new(:name('$¢'))) {
             "{$*CTX}.bind({quote_string('$¢')}, $!cursor);\n";
-        } else {
+        }
+        else {
             $*BLOCK.mangle_lexical('$¢') ~ " = $!cursor;\n";
         }
     }
@@ -283,7 +284,8 @@ class RegexCompiler {
             }
 
             nqp::elems(@($node)) == 1 ?? $check !! Chunk.void($arg, $check);
-        } else {
+        }
+        else {
             $!compiler.NYI("NYI uniprop with more arguments");
         }
     }
@@ -529,7 +531,8 @@ class RegexCompiler {
         my str $needmark;
         if $backtrack eq 'r' {
             $needmark := 'true';
-        } else {
+        }
+        else {
             $needmark := $*BLOCK.add_tmp;
             @chunks.push("$needmark = $min > 1 || $max > 1;\n");
         }
