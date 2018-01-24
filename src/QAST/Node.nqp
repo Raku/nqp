@@ -62,16 +62,16 @@ class QAST::Node {
     method okifnil($value = NO_VALUE) { $value =:= NO_VALUE ?? self.isflag(0x20) !! $value ?? self.setflag(0x20) !! self.clearflag(0x20) }
 
     method dump_flags() {
-	my @flags;
-	if $!flags {
-	    nqp::push(@flags, 'wanted')  if self.wanted;
-	    nqp::push(@flags, 'sunk')    if self.sunk;
-	    nqp::push(@flags, 'nosink')  if self.nosink;
-	    nqp::push(@flags, 'sinkok')  if self.sinkok;
-	    nqp::push(@flags, 'final')   if self.final;
-	    nqp::push(@flags, 'okifnil') if self.okifnil;
-	}
-	@flags ?? '<' ~ nqp::join(' ',@flags) ~ '>' !! '';
+        my @flags;
+        if $!flags {
+            nqp::push(@flags, 'wanted')  if self.wanted;
+            nqp::push(@flags, 'sunk')    if self.sunk;
+            nqp::push(@flags, 'nosink')  if self.nosink;
+            nqp::push(@flags, 'sinkok')  if self.sinkok;
+            nqp::push(@flags, 'final')   if self.final;
+            nqp::push(@flags, 'okifnil') if self.okifnil;
+        }
+        @flags ?? '<' ~ nqp::join(' ',@flags) ~ '>' !! '';
     }
 
     method has_compile_time_value() {
@@ -139,8 +139,8 @@ class QAST::Node {
         if nqp::chars($extra) {
             nqp::push(@chunks, "($extra)");
         }
-	nqp::push(@chunks, ' ');
-	nqp::push(@chunks, self.dump_annotations);
+    nqp::push(@chunks, ' ');
+    nqp::push(@chunks, self.dump_annotations);
         if (self.node) {
             nqp::push(@chunks, ' ');
             my $escaped_node := nqp::escape(self.node);
@@ -155,26 +155,26 @@ class QAST::Node {
     }
 
     method dump_annotations() {
-	my @anns;
-	nqp::push(@anns, self.dump_flags);
+    my @anns;
+    nqp::push(@anns, self.dump_flags);
 
         if nqp::ishash(%!annotations) {
-	    for %!annotations {
-		my $k := $_.key;
-		my $v := $_.value;
-		try {
-		    if nqp::isconcrete($v) {
-			if $k eq 'IN_DECL' || $k eq 'BY' {
-			    nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
-			}
-			else {   # dunno how to introspect
-			    nqp::push(@anns, ':' ~ $k ~ '<?>');
-			}
-		    }
-		}
-	    }
-	}
-	nqp::join(' ',@anns);
+        for %!annotations {
+        my $k := $_.key;
+        my $v := $_.value;
+        try {
+            if nqp::isconcrete($v) {
+            if $k eq 'IN_DECL' || $k eq 'BY' {
+                nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
+            }
+            else {   # dunno how to introspect
+                nqp::push(@anns, ':' ~ $k ~ '<?>');
+            }
+            }
+        }
+        }
+    }
+    nqp::join(' ',@anns);
     }
 
     method dump_children(int $indent, @onto) { }
