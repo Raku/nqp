@@ -295,6 +295,7 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 
 m-test: m-all
 	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency
+	$(PROVE) -r --exec $(PERL) xt/nqp
 
 m-test-loud: m-all
 	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency
