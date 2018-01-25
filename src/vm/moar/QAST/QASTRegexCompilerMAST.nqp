@@ -18,6 +18,40 @@ my int $MVM_reg_uint16          := 18;
 my int $MVM_reg_uint32          := 19;
 my int $MVM_reg_uint64          := 20;
 
+my @Condition-op-kinds := nqp::list(
+    nqp::null,  'if_i',     # $MVM_reg_void,   $MVM_reg_int8
+    'if_i',     'if_i',     # $MVM_reg_int16,  $MVM_reg_int32
+    'if_i',     'if_n',     # $MVM_reg_int64,  $MVM_reg_num32
+    'if_n',     'if_s',     # $MVM_reg_num64,  $MVM_reg_str
+    'if_o',                 # $MVM_reg_obj
+    nqp::null, nqp::null, nqp::null, nqp::null,
+    nqp::null, nqp::null, nqp::null, nqp::null,
+    'if_i',                 # $MVM_reg_uint8
+    'if_i',     'if_i',     # $MVM_reg_uint16, $MVM_reg_uint32
+    'if_i',                 # $MVM_reg_uint64
+);
+my @Negated-condition-op-kinds := nqp::list(
+    nqp::null,  'unless_i', # $MVM_reg_void,   $MVM_reg_int8
+    'unless_i', 'unless_i', # $MVM_reg_int16,  $MVM_reg_int32
+    'unless_i', 'unless_n', # $MVM_reg_int64,  $MVM_reg_num32
+    'unless_n', 'unless_s', # $MVM_reg_num64,  $MVM_reg_str
+    'unless_o',             # $MVM_reg_obj,
+    nqp::null, nqp::null, nqp::null, nqp::null,
+    nqp::null, nqp::null, nqp::null, nqp::null,
+    'unless_i', 'unless_i', # $MVM_reg_uint8,  $MVM_reg_uint16
+    'unless_i', 'unless_i', # $MVM_reg_uint32, $MVM_reg_uint64
+);
+my @Full-width-coerce-to := nqp::list( # 0 means we don't need any coersion
+    0,              $MVM_reg_int64, # $MVM_reg_void,   $MVM_reg_int8
+    $MVM_reg_int64, $MVM_reg_int64, # $MVM_reg_int16,  $MVM_reg_int32
+    0,              $MVM_reg_num64, # $MVM_reg_int64,  $MVM_reg_num32
+    0,              0,              # $MVM_reg_num64,  $MVM_reg_str
+    0,                              # $MVM_reg_obj
+    0, 0, 0, 0,   0, 0, 0, 0,
+    $MVM_reg_int64, $MVM_reg_int64, # $MVM_reg_uint8,  $MVM_reg_uint16
+    $MVM_reg_int64, $MVM_reg_int64, # $MVM_reg_uint32, $MVM_reg_uint64
+);
+
 class QAST::MASTRegexCompiler {
     # The compiler we're working against.
     has $!qastcomp;
@@ -704,20 +738,6 @@ class QAST::MASTRegexCompiler {
         @ins
     }
 
-    sub resolve_condition_op($kind, $negated) {
-        return $negated ??
-            $kind == $MVM_reg_int64 ?? 'unless_i' !!
-            $kind == $MVM_reg_num64 ?? 'unless_n' !!
-            $kind == $MVM_reg_str   ?? 'unless_s' !!
-            $kind == $MVM_reg_obj   ?? 'unless_o' !!
-            ''
-         !! $kind == $MVM_reg_int64 ?? 'if_i' !!
-            $kind == $MVM_reg_num64 ?? 'if_n' !!
-            $kind == $MVM_reg_str   ?? 'if_s' !!
-            $kind == $MVM_reg_obj   ?? 'if_o' !!
-            ''
-    }
-
     method qastnode($node) {
         my @ins := [
             op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'), %!reg<pos>, ival(-1)),
@@ -726,8 +746,10 @@ class QAST::MASTRegexCompiler {
         my $cmast := $!qastcomp.as_mast($node[0]);
         merge_ins(@ins, $cmast.instructions);
         $!regalloc.release_register($cmast.result_reg, $cmast.result_kind);
-        my $cndop := resolve_condition_op($cmast.result_kind, !$node.negate);
-        if $node.subtype eq 'zerowidth' && $cndop ne '' {
+        my $cndop := $node.negate # the negation meaning is reversed for the op
+          ?? @Condition-op-kinds[        $cmast.result_kind]
+          !! @Negated-condition-op-kinds[$cmast.result_kind];
+        if $node.subtype eq 'zerowidth' && ! nqp::isnull($cndop) {
             nqp::push(@ins, op('decont', $cmast.result_reg, $cmast.result_reg))
                 if $cmast.result_kind == $MVM_reg_obj;
             nqp::push(@ins, op($cndop, $cmast.result_reg, %!reg<fail>));

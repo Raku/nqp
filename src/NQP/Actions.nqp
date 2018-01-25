@@ -998,10 +998,9 @@ class NQP::Actions is HLL::Actions {
             }
         }
 
-        my $lex_ast := QAST::Op.new( :op('takeclosure'), $ast );
-        $lex_ast.annotate('sink', $ast);
-        $lex_ast.annotate('block_ast', $block);
-        make $lex_ast;
+        make QAST::Op.new(
+            :op('takeclosure'), $ast
+        ).annotate_self('sink', $ast).annotate_self('block_ast', $block);
 
         # Apply traits.
         if $<trait> {
@@ -1082,11 +1081,12 @@ class NQP::Actions is HLL::Actions {
         }
 
         # Install AST node in match object, then apply traits.
-        my $lex_ast := QAST::Op.new( :op('takeclosure'), $ast );
-        $lex_ast.annotate('sink', $ast);
-        $lex_ast.annotate('block_ast', $ast);
-        $lex_ast.annotate('code_obj', $ast.ann('code_obj'));
-        make $lex_ast;
+        make QAST::Op.new( :op('takeclosure'), $ast ).annotate_self(
+          'sink', $ast
+        ).annotate_self(
+          'block_ast', $ast
+        ).annotate_self('code_obj', $ast.ann('code_obj'));
+
         if $<trait> {
             for $<trait> { $_.ast()($/); }
         }
@@ -1534,9 +1534,9 @@ class NQP::Actions is HLL::Actions {
 
     method circumfix:sym<{ }>($/) {
         if +$<pblock><blockoid><statementlist><statement> > 0 {
-            my $ast := QAST::Op.new( :op('takeclosure'), $<pblock>.ast );
-            $ast.annotate('bareblock', 1);
-            make $ast;
+            make QAST::Op.new(
+                :op('takeclosure'), $<pblock>.ast
+            ).annotate_self('bareblock', 1);
         }
         elsif $<pblock><blockoid><you_are_here> {
             make $<pblock>.ast;
