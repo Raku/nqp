@@ -91,13 +91,21 @@ class NQP::World is HLL::World {
             if self.is_precompilation_mode() {
                 self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
                     QAST::Op.new(
-                        :op('loadbytecode'),
-                        QAST::VM.new(
-                            :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
-                            :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                            :js(QAST::SVal.new( :value('ModuleLoader') ))
-                        )),
-                    $set_outer
+                        :op('ifnull'),
+                        QAST::Op.new(
+                            :op('getcurhllsym'),
+                            QAST::SVal.new( :value('ModuleLoader') ),
+                        ),
+                        QAST::Op.new(
+                            :op('loadbytecode'),
+                            QAST::VM.new(
+                                :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
+                                :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
+                                :js(QAST::SVal.new( :value('ModuleLoader') ))
+                            )
+                        ),
+                    ),
+                    $set_outer,
                 )));
             }
             else {
@@ -117,13 +125,6 @@ class NQP::World is HLL::World {
         # Make sure we do the loading during deserialization.
         if self.is_precompilation_mode() {
             self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
-                QAST::Op.new(
-                    :op('loadbytecode'),
-                    QAST::VM.new(
-                        :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
-                        :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                        :js(QAST::SVal.new( :value('ModuleLoader') ))
-                    )),
                 QAST::Op.new(
                    :op('callmethod'), :name('load_module'),
                    QAST::Op.new(
