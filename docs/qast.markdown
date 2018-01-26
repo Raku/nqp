@@ -206,7 +206,7 @@ There is a variant of QAST::Stmts, which is QAST::Stmt. While the first has
 no impact on the allocation of temporaries, QAST::Stmt marks a register
 allocation boundary; beyond it, any temporaries are free to be reused. You
 do not need to use QAST::Stmt, but it can lead to better code generation if
-used correct. Incorrect use can, of course, lead to incorrect code generation.
+used correctly. Incorrect use can, of course, lead to incorrect code generation.
 Like QAST::Stmts, it also can have multiple children and supports resultchild.
 
 ## QAST::IVal, QAST::NVal and QAST::SVal
