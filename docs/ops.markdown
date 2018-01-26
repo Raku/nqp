@@ -185,8 +185,8 @@
   * [tellfh](#tellfh)
   * [writefh](#writefh)
 - [External command Opcodes](#-external-command-opcodes)
-  * [shell](#shell)
-  * [spawn](#spawn)
+  * [shell](#spawnasync-moar)
+  * [spawn](#spawnasync-moar)
 - [File / Directory / Network Opcodes](#-file--directory--network-opcodes)
   * [chdir](#chdir)
   * [chmod](#chmod)
@@ -2667,6 +2667,8 @@ Cancel to stop reading.
 
 ## spawnprocasync `moar`
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
+
+Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of use.
 
 ## killprocasync `moar`
 * `killprocasync($handle, $signal)`
