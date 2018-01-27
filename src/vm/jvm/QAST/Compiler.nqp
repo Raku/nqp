@@ -453,10 +453,16 @@ my $chain_codegen := sub ($qastcomp, $op) {
     # First, we build up the list of nodes in the chain
     my @clist;
     my $c_ast := $op;
+
+    # Check if callee sub in name, if not first child is callee, not arg
+    my $arg_idx;
+    my &get_arg_idx := -> $cq { $cq.name ?? 0 !! 1 };
+
     while nqp::istype($c_ast, QAST::Op)
     && ($c_ast.op eq 'chain' || $c_ast.op eq 'chainstatic') {
         nqp::push(@clist, $c_ast);
-        $c_ast := $c_ast[0];
+        $arg_idx := get_arg_idx($c_ast);
+        $c_ast   := $c_ast[$arg_idx];
     }
 
     my $il       := JAST::InstructionList.new();
@@ -464,7 +470,7 @@ my $chain_codegen := sub ($qastcomp, $op) {
     my $endlabel := JAST::Label.new(:name($qastcomp.unique('chain_end_')));
 
     $c_ast := nqp::pop(@clist);
-    my $a_ast := $c_ast[0];
+    my $a_ast := $c_ast[$arg_idx];
     my $ares  := $qastcomp.as_jast($a_ast, :want($RT_OBJ));
     my $atmp  := $*TA.fresh_o();
     $il.append($ares.jast);
@@ -473,25 +479,41 @@ my $chain_codegen := sub ($qastcomp, $op) {
 
     my $more := 1;
     while $more {
-        my $b_ast := $c_ast[1];
+        my $b_ast := $c_ast[$arg_idx + 1];
         my $bres  := $qastcomp.as_jast($b_ast, :want($RT_OBJ));
         my $btmp  := $*TA.fresh_o();
         $il.append($bres.jast);
         $*STACK.obtain($il, $bres);
         $il.append(JAST::Instruction.new( :op('astore'), $btmp ));
 
+        my $indy_meth;
+        my @argTypes := [$TYPE_SMO, $TYPE_SMO];
+        my $calltmp  := 0;
+        if $c_ast.name {
+            $indy_meth := $c_ast.op eq 'chainstatic' ?? 'subcallstatic_noa' !! 'subcall_noa';
+            @argTypes  := [$TYPE_STR, 'I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO];
+        }
+        else {
+            my $callres := $qastcomp.as_jast($c_ast[0], :want($RT_OBJ));
+            $calltmp    := $*TA.fresh_o();
+            $il.append($callres.jast);
+            $*STACK.obtain($il, $callres);
+            $il.append(JAST::Instruction.new( :op('astore'), $calltmp ));
+            $indy_meth := 'indcall_noa';
+            @argTypes  := ['I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO, $TYPE_SMO];
+        }
+
         $*STACK.spill_to_locals($il);
         my $cs_idx := $*CODEREFS.get_callsite_idx([$ARG_OBJ, $ARG_OBJ], []);
-        $il.append(JAST::PushSVal.new( :value($c_ast.name) )),
-        $il.append(JAST::PushIndex.new( :value($cs_idx) )),
+
+        $il.append(JAST::PushSVal.new( :value($c_ast.name) )) if $c_ast.name;
+        $il.append(JAST::PushIndex.new( :value($cs_idx) ));
         $il.append($ALOAD_1);
+        $il.append(JAST::Instruction.new( :op('aload'), $calltmp )) if $calltmp;
         $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
         $il.append(JAST::Instruction.new( :op('aload'), $btmp ));
-        my $indy_meth := $c_ast.op eq 'chainstatic'
-            ?? 'subcallstatic_noa' !! 'subcall_noa';
         $il.append(savesite(JAST::InvokeDynamic.new(
-            $indy_meth, 'V', [$TYPE_STR, 'I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO],
-            'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth,
+            $indy_meth, 'V', @argTypes, 'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth,
         )));
         $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -507,6 +529,7 @@ my $chain_codegen := sub ($qastcomp, $op) {
             $il.append($LCMP);
             $il.append(JAST::Instruction.new( :op('ifeq'), $endlabel ));
             $c_ast := nqp::pop(@clist);
+            $arg_idx := get_arg_idx($c_ast);
             $atmp := $btmp;
         }
         else {
