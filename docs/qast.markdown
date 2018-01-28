@@ -417,3 +417,9 @@ returns 0 the 'bind_error' of the current HLL is called.
 
 
 ## QAST::VM
+
+---------------------------------------
+
+## Third-Party Resources
+
+* [Perl 6 Core Hacking: QASTalicious blog post](https://rakudo.party/post/Perl-6-Core-Hacking-QASTalicious)
