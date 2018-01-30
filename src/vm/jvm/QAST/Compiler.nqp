@@ -4828,7 +4828,7 @@ class QAST::CompilerJAST {
         result($il, $RT_OBJ)
     }
 
-     multi method as_jast(QAST::WVal $node, :$want) {
+    multi method as_jast(QAST::WVal $node, :$want) {
         my $val    := $node.value;
         my $sc     := nqp::getobjsc($val);
         my $handle := nqp::scgethandle($sc);
@@ -5638,17 +5638,17 @@ class QAST::CompilerJAST {
         my $il := JAST::InstructionList.new();
         my $donelabel;
 
-	$il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
-	$il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
-	$il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
+        $il.append(JAST::Instruction.new( :op('lload'), %*REG<eos> ));
+        $il.append($LCMP);
         if $node.subtype eq 'zerowidth' && $node.negate {
-	    my $prefix     := self.unique('enumcharlist');
-	    $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
-	    $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
-	}
-	else {
-	    $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
-	}
+            my $prefix     := self.unique('enumcharlist');
+            $donelabel := JAST::Label.new( :name($prefix ~ '_done') );
+            $il.append(JAST::Instruction.new( :op('ifge'), $donelabel ));
+        }
+        else {
+            $il.append(JAST::Instruction.new( :op('ifge'), %*REG<fail> ));
+        }
 
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($IVAL_ZERO);
@@ -5671,7 +5671,7 @@ class QAST::CompilerJAST {
             $il.append($LADD);
             $il.append(JAST::Instruction.new( :op('lstore'), %*REG<pos> ));
         }
-	$il.append($donelabel) if $donelabel;
+        $il.append($donelabel) if $donelabel;
 
         $il;
     }
@@ -6186,7 +6186,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::PushSVal.new( :value('$!from') ));
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
+            "getattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
         $il.append($IVAL_MINUSONE);
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifne'), $donelabel ));
@@ -6222,7 +6222,7 @@ class QAST::CompilerJAST {
         $il.append(JAST::Instruction.new( :op('lload'), %*REG<pos> ));
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                "bindattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
+            "bindattr_i", 'Long', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, 'Long', $TYPE_TC ));
         $il.append($POP2);
 
         $il.append($scanlabel);
