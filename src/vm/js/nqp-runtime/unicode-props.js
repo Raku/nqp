@@ -1,6 +1,7 @@
 const xregexp = require('xregexp');
 
-const names = require('./unicode-data/names.js');
+const ucd = require('nqp-unicode-data');
+
 const core = require('./core.js');
 
 //TODO - the regexes should be tweaked to match full graphemes instead
@@ -10,19 +11,14 @@ function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
 }
 
-const propIdToNames = {};
-for (const propName in names.props) {
-  const propId = names.props[propName];
-  if (!propIdToNames[propId]) propIdToNames[propId] = propIdToNames[propId] || [];
-  propIdToNames[propId].push(propName);
-}
 
 
 function addProp(propName, builder) {
-  const propId = names.props[propName];
+  const propId = ucd.propId(propName);
+
   const match = builder(true);
   const do_not_match = builder(false);
-  for (const alias of propIdToNames[propId]) {
+  for (const alias of ucd.propIdToNames(propId)) {
     exports['uniprop_' + mangled(alias)] = match;
     exports['uniprop_not_' + mangled(alias)] = do_not_match;
   }
@@ -55,7 +51,7 @@ addExtraProp('ascii', match => matchClass(match, 'ASCII'));
 addExtraProp('any', match => matchClass(match, 'Any'));
 
 function addPropValueProps(propName, builder, filter, extraMangle) {
-  for (const propValue of names.propValues[names.props[propName]]) {
+  for (const propValue of ucd.propValues(ucd.propId(propName))) {
     if (!filter(propValue[0])) continue;
     for (const alias of propValue) {
       const mangledAlias = mangled(extraMangle ? extraMangle(alias) : alias);
@@ -81,7 +77,7 @@ addPropValueProps('General_Category',
 
 function categoriesToRegex(categories) {
  return categories ? categories.map(
-    category => names.regexes[names.props[category]] || '\\p{' + category + '}'
+    category => ucd.regex(ucd.propId(category)) || '\\p{' + category + '}'
   ).join('|') : '';
 }
 
@@ -103,16 +99,13 @@ const matchLC = match => matchDerived(match, ['Ll', 'Lu', 'Lt']);
 addExtraProp('LC', matchLC);
 addExtraProp('Cased_Letter', matchLC);
 
-const UnicodeTrie = require('unicode-trie')
-const fs = require('fs')
 
 const nativeArgs = require('./native-args.js');
 const NativeStrArg = nativeArgs.NativeStrArg;
 
-const numericTypeData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericType.trie'));
-const bidiClassData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/BidiClass.trie'));
-const numericValueData = new UnicodeTrie(fs.readFileSync(__dirname + '/unicode-data/NumericValue.trie'));
-
+const numericTypeData = ucd.propTrie('NumericType');
+const bidiClassData = ucd.propTrie('BidiClass');
+const numericValueData = ucd.propTrie('NumericValue');
 
 function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
     const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value)).$$getInt();
@@ -125,13 +118,13 @@ function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
 }
 
 function propWithArgs(shouldMatch, trie, propName, longNames) {
-  const propId = names.props[propName];
+  const propId = ucd.propId(propName);
   return function(ctx, cursor, target, offset, obj) {
     const code = target.codePointAt(offset);
     if (code === undefined) return -1;
     const propValueId = trie.get(code);
 
-    let valueName = names.propValues[propId][propValueId-1][longNames ? 1 : 0];
+    let valueName = ucd.propValues(propId)[propValueId-1][longNames ? 1 : 0];
 
     return delegateAccepts(shouldMatch, ctx, cursor, obj, code, valueName);
   };
@@ -185,17 +178,17 @@ function matchRegex(shouldMatch, regexString) {
   };
 }
 
-for (const propId in names.regexes) {
-  const match = matchRegex(true, names.regexes[propId]);
-  const negatedMatch = matchRegex(false, names.regexes[propId]);
-  for (const propName of propIdToNames[propId]) {
+for (const propId of ucd.propIdsWithRegexes()) {
+  const match = matchRegex(true, ucd.regex(propId));
+  const negatedMatch = matchRegex(false, ucd.regex(propId));
+  for (const propName of ucd.propIdToNames(propId)) {
     exports['uniprop_' + mangled(propName)] = match;
     exports['uniprop_not_' + mangled(propName)] = negatedMatch;
   }
 }
 
 
-const mathRegex = names.regexes[names.props.Other_Math] + '|\\p{Sm}';
+const mathRegex = ucd.regex(ucd.propId('Other_Math')) + '|\\p{Sm}';
 addProp('Math', match => matchRegex(match, mathRegex));
 
 addExtraProp('Assigned', match => matchRegex(true, match ? '\\P{Cn}' : '\\p{Cn}'));
