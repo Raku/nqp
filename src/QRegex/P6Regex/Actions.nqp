@@ -580,7 +580,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             else {
                 $loc := nqp::index(%*RX<name>, ':');
                 my $angleloc := nqp::index(%*RX<name>, '<', $loc);
-		$angleloc := nqp::index(%*RX<name>, '«', $loc) if $angleloc < 0;
+                $angleloc := nqp::index(%*RX<name>, '«', $loc) if $angleloc < 0;
                 $rxname := nqp::substr(%*RX<name>, $loc + 1, $angleloc - $loc - 1) unless $loc < 0;
             }
             if $loc >= 0 {
@@ -631,17 +631,17 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my int $i := 1;
         my int $n := nqp::elems($clist);
         while $i < $n {
-	    unless ~$clist[$i]<sign> {
-		my $curse := $clist[$i]<sign>;
-		$curse."!clear_highwater"();
-		$curse.panic('Missing + or - between character class elements')
-	    }
+            unless ~$clist[$i]<sign> {
+                my $curse := $clist[$i]<sign>;
+                $curse."!clear_highwater"();
+                $curse.panic('Missing + or - between character class elements')
+            }
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
                 $qast := QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ),
-                        $qast );
+                                          QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ),
+                                          $qast );
             }
             else {
                 $qast := QAST::Regex.new( $qast, $ast, :rxtype<alt>, :node($/));
@@ -812,7 +812,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
-	my $*LANG := $qast.node;
+    my $*LANG := $qast.node;
         my $code_obj := nqp::existskey(%rest, 'code_obj')
             ?? %rest<code_obj>
             !! self.create_regex_code_object($block);

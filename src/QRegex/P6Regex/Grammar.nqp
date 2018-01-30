@@ -247,9 +247,10 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     proto token quantifier { <...> }
     token quantifier:sym<%> {
-	('%''%'?) {
-	    $/.panic("Missing quantifier on the left argument of " ~ $/[0]);
-	}
+        ('%''%'?)
+        {
+            $/.panic("Missing quantifier on the left argument of " ~ $/[0]);
+        }
     }
     token quantifier:sym<*> { <sym> <backmod> }
     token quantifier:sym<+> { <sym> <backmod> }
@@ -315,7 +316,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
 
     ## we cheat here, really should be regex_infix:sym<~>
     token metachar:sym<~> {
-	:my $*HAS_GOAL := 1;
+        :my $*HAS_GOAL := 1;
         <sym>
         <.ws> <GOAL=.quantified_atom>
         <.ws> <EXPR=.quantified_atom>
@@ -462,7 +463,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token mod_internal {
-	':'
+        ':'
         [
         | <?before '!'> $<n>=('!')**1  <mod_ident> »
         | <?before \d>  $<n>=(\d+)**1  <mod_ident> »
