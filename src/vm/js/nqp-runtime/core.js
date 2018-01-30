@@ -51,6 +51,8 @@ const graphemeBreaker = require('grapheme-breaker');
 
 const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
+const unicodeData = require('nqp-unicode-data');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -82,6 +84,9 @@ op.getuniprop_str = function(codePoint, propCode) {
 
 const numericValueProp = op.unipropcode("Numeric_Value");
 
+const numericTypeData = unicodeData.propTrie('NumericType');
+const numericTypePropId = unicodeData.propId('Numeric_Type');
+
 function radixHelper(radix, str, zpos, flags) {
   const lowercase = 'a-' + String.fromCharCode('a'.charCodeAt(0) + radix - 11);
   const uppercase = 'A-' + String.fromCharCode('A'.charCodeAt(0) + radix - 11);
@@ -108,6 +113,14 @@ function radixHelper(radix, str, zpos, flags) {
 
   let error;
   number = number.replace(notSimpleDigit, function(match, offset, string) {
+    const code = match.codePointAt(0);
+    const propValueId = numericTypeData.get(code);
+
+    // TODO: avoid this lookup
+    let valueName = unicodeData.propValues(numericTypePropId)[propValueId-1][1];
+
+    if (valueName !== 'Decimal') error = offset;
+
     const value = op.getuniprop_str(match.codePointAt(0), numericValueProp);
     const digit = parseInt(value);
     if (digit >= radix) {
