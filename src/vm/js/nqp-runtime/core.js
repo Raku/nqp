@@ -1559,7 +1559,7 @@ op.strtocodes = function(str, form, codes) {
 
 op.codes = function(str) {
   let count = 0;
-  for (const c of str.normalize('NFC')) {
+  for (const c of str.normalize('NFC')) { // eslint-disable-line no-unused-vars
     count++;
   }
   return count;

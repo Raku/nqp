@@ -86,7 +86,8 @@ class SingleByteCodec {
   decode(buf) {
     const decodeBuf = this.decodeBuf;
     const newBuf = new Buffer(buf.length*2);
-    let idx1 = 0, idx2 = 0;
+    let idx1 = 0;
+    let idx2 = 0;
     for (let i = 0; i < buf.length; i++) {
         idx1 = buf[i]*2; idx2 = i*2;
         newBuf[idx2] = decodeBuf[idx1];
