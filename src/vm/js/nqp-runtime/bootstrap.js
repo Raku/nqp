@@ -217,7 +217,7 @@ module.exports.bootType = bootType;
 module.exports.core = core;
 
 function bootArray(type) {
-  const array = bootType('BOOTArray', 'VMArray')
+  const array = bootType('BOOTArray', 'VMArray');
   array._STable.REPR.type = Null;
   array._STable.REPR.primType = type;
   array._STable.REPR.setupSTableWhenComposed(array._STable);

@@ -611,7 +611,7 @@ function fuzzyMatch(fuzzy, target, pos, literal) {
     }
 
     if (end === target.length) break;
-    end = graphemeBreaker.nextBreak(target, end)
+    end = graphemeBreaker.nextBreak(target, end);
     matched = fuzzy(target.substring(pos, end));
   }
 
@@ -633,17 +633,17 @@ exports.literal_im = function(target, pos, literal) {
 // TODO astral characters, multi character graphemes
 exports.enumcharlist_m = function(negate, target, pos, charlist) {
   if (pos >= target.length) return -1;
-  const found = charlist.indexOf(stripMarks(target.substr(pos,1))) != -1;
+  const found = charlist.indexOf(stripMarks(target.substr(pos, 1))) != -1;
   if (negate) {
     return found ? -1 : 1;
   } else {
     return found ? 1 : -1;
   }
-}
+};
 
 exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
   if (pos >= target.length) return (zerowidth && negate ? 0 : -1);
-  const found = charlist.indexOf(target.substr(pos,1)) != -1;
+  const found = charlist.indexOf(target.substr(pos, 1)) != -1;
   if (negate ? !found : found) {
     return (graphemeBreaker.nextBreak(target, pos) - pos);
   } else {
@@ -662,7 +662,7 @@ exports.noNamed = function(_NAMED) {
 };
 
 exports.checkNamed = function(known, _NAMED) {
-  for (let named in _NAMED) {
+  for (const named in _NAMED) {
     if (!known[named]) {
       throw new NQPException(`Unexpected named argument ${named} passed`);
     }
@@ -672,6 +672,6 @@ exports.checkNamed = function(known, _NAMED) {
 
 const props = require('./unicode-props.js');
 
-for (let prop in props) {
+for (const prop in props) {
   exports[prop] = props[prop];
 }

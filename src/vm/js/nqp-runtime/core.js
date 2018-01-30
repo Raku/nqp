@@ -82,7 +82,7 @@ op.getuniprop_str = function(codePoint, propCode) {
   return got === undefined ? 'NaN' : got;
 };
 
-const numericValueProp = op.unipropcode("Numeric_Value");
+const numericValueProp = op.unipropcode('Numeric_Value');
 
 const numericTypeData = unicodeData.propTrie('NumericType');
 const numericTypePropId = unicodeData.propId('Numeric_Type');
@@ -117,7 +117,7 @@ function radixHelper(radix, str, zpos, flags) {
     const propValueId = numericTypeData.get(code);
 
     // TODO: avoid this lookup
-    let valueName = unicodeData.propValues(numericTypePropId)[propValueId-1][1];
+    const valueName = unicodeData.propValues(numericTypePropId)[propValueId-1][1];
 
     if (valueName !== 'Decimal') error = offset;
 
@@ -926,35 +926,35 @@ op.decode = function(buf, encoding) {
   if (encoding === 'windows-1252') {
     return codecs[encoding].decode(rawBuffer);
   } else if (encoding === 'utf8') {
-    const decoded = rawBuffer.toString(renameEncoding(encoding))
+    const decoded = rawBuffer.toString(renameEncoding(encoding));
     const reencoded = Buffer.from(decoded, renameEncoding(encoding));
     if (rawBuffer.equals(reencoded)) {
       return decoded;
     } else {
       const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
       const lines = correctPart.toString('utf8').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
-      throw new NQPException("Malformed UTF-8 at line "
-        + (lines.length) + " col " + (lines[lines.length - 1].length + 1)
-        + "(or malformed termination)"
+      throw new NQPException('Malformed UTF-8 at line '
+        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
+        + '(or malformed termination)'
 );
     }
   } else if (encoding === 'utf16') {
-    if (rawBuffer[0] === 0xff && rawBuffer[1] === 0xfe) { //LE BOM
+    if (rawBuffer[0] === 0xff && rawBuffer[1] === 0xfe) { // LE BOM
       rawBuffer = rawBuffer.slice(2);
-    } else if (rawBuffer[0] === 0xfe && rawBuffer[1] === 0xff) { //BE BOM
+    } else if (rawBuffer[0] === 0xfe && rawBuffer[1] === 0xff) { // BE BOM
       throw new NQPException('Big-endian UTF16 is NYI');
     }
 
-    const decoded = rawBuffer.toString('utf16le')
+    const decoded = rawBuffer.toString('utf16le');
     const reencoded = Buffer.from(decoded, 'utf16le');
     if (rawBuffer.equals(reencoded)) {
       return decoded;
     } else {
       const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
       const lines = correctPart.toString('utf16le').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
-      throw new NQPException("Malformed UTF-16 at line "
-        + (lines.length) + " col " + (lines[lines.length - 1].length + 1)
-        + "(or malformed termination)"
+      throw new NQPException('Malformed UTF-16 at line '
+        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
+        + '(or malformed termination)'
 );
     }
   } else {
@@ -1559,7 +1559,7 @@ op.strtocodes = function(str, form, codes) {
 
 op.codes = function(str) {
   let count = 0;
-  for (let c of str.normalize('NFC')) {
+  for (const c of str.normalize('NFC')) {
     count++;
   }
   return count;
@@ -1681,7 +1681,7 @@ op.unicmp_s = function(a, b, collationMode, language, code) {
 
 op.cleardispatcher = function(ctx) {
   if (nqp.currentDispatcherFor === ctx.codeRef() || nqp.currentDispatcherFor === undefined) {
-    nqp.currentDispatcher = undefined
+    nqp.currentDispatcher = undefined;
   }
 };
 
@@ -1713,7 +1713,7 @@ op.getrusage = function() {
     usage.msgrcv,
     usage.nsignals,
     usage.nvcsw,
-    usage.nivcsw
+    usage.nivcsw,
   ]);
 };
 

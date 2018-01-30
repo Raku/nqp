@@ -1155,9 +1155,9 @@ class VMArray extends REPR {
           if (this.type._STable.REPR.isUnsigned) {
             mangle = function(value) {
               const trimmed = (value << shift >> shift);
-              const ret = trimmed < 0 ? (1 << bits) + trimmed  : trimmed;
+              const ret = trimmed < 0 ? (1 << bits) + trimmed : trimmed;
               return ret;
-            }
+            };
           } else {
             if (bits < 32) {
               mangle = value => (value<< shift >> shift);

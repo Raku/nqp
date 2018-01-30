@@ -1,5 +1,5 @@
 const fibers = require('fibers');
-const globalStack = []
+const globalStack = [];
 module.exports = function() {
   if (fibers.current === undefined) {
     return globalStack;

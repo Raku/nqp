@@ -110,13 +110,13 @@ class Ctx extends NQPObject {
         ctx = ctx.$$controlHandlerOuter;
       }
 
-      if (ctx.$$CONTROL || (ctx[handler]  && (!labeled || ctx.$$label === exception.$$payload))) {
+      if (ctx.$$CONTROL || (ctx[handler] && (!labeled || ctx.$$label === exception.$$payload))) {
         exception.caught = ctx;
         ctx.exception = exception;
 
         exceptionsStack().push(exception);
         try {
-          let wrapped = new Ctx(this, this, null);
+          const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler](wrapped);
           } else {
@@ -159,7 +159,7 @@ class Ctx extends NQPObject {
 
         exceptionsStack().push(exception);
         try {
-          let wrapped = new Ctx(this, this, null);
+          const wrapped = new Ctx(this, this, null);
           ctx.unwind.ret = ctx.$$CATCH(wrapped);
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -236,14 +236,14 @@ class Ctx extends NQPObject {
         ctx = ctx.$$controlHandlerOuter;
       }
 
-      //TODO - think about checking the label
+      // TODO - think about checking the label
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
         ctx.exception = exception;
 
         exceptionsStack().push(exception);
         try {
-          let wrapped = new Ctx(this, this, null);
+          const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
             ctx.unwind.ret = ctx[handler](wrapped);
           } else {

@@ -4,13 +4,12 @@ const ucd = require('nqp-unicode-data');
 
 const core = require('./core.js');
 
-//TODO - the regexes should be tweaked to match full graphemes instead
+// TODO - the regexes should be tweaked to match full graphemes instead
 const graphemeBreaker = require('grapheme-breaker');
 
 function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
 }
-
 
 
 function addProp(propName, builder) {
@@ -32,7 +31,7 @@ function addExtraProp(propName, builder) {
 }
 
 function matchClass(shouldMatch, category, negated) {
-  let regexp = xregexp('\\' + (shouldMatch ? 'p' : 'P') + '{' + category + '}', 'Ay');
+  const regexp = xregexp('\\' + (shouldMatch ? 'p' : 'P') + '{' + category + '}', 'Ay');
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
@@ -112,7 +111,7 @@ function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
     if (result === (shouldMatch ? 0 : 1)) {
       return -1;
     } else {
-      let isPair = 0; // TODO codes that take two bytes
+      const isPair = 0; // TODO codes that take two bytes
       return isPair ? 2 : 1;
     }
 }
@@ -124,7 +123,7 @@ function propWithArgs(shouldMatch, trie, propName, longNames) {
     if (code === undefined) return -1;
     const propValueId = trie.get(code);
 
-    let valueName = ucd.propValues(propId)[propValueId-1][longNames ? 1 : 0];
+    const valueName = ucd.propValues(propId)[propValueId-1][longNames ? 1 : 0];
 
     return delegateAccepts(shouldMatch, ctx, cursor, obj, code, valueName);
   };
@@ -148,10 +147,10 @@ function matchName(shouldMatch) {
 exports.uniprop_name = matchName(true);
 exports.uniprop_not_name = matchName(false);
 
-addPropWithArgs('numerictype', numericTypeData, 'nt', true)
-addPropWithArgs('nt', numericTypeData, 'nt', false)
-addPropWithArgs('bc', bidiClassData, 'bc', false)
-addPropWithArgs('numericvalue', numericValueData, 'nv', false)
+addPropWithArgs('numerictype', numericTypeData, 'nt', true);
+addPropWithArgs('nt', numericTypeData, 'nt', false);
+addPropWithArgs('bc', bidiClassData, 'bc', false);
+addPropWithArgs('numericvalue', numericValueData, 'nv', false);
 
 function maybeNegated(shouldMatch, main, exclude) {
   let regex;
