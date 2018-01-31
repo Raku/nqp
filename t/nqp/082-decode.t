@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(13);
+plan(22);
 
 
 my sub create_buf($type) {
@@ -75,3 +75,35 @@ my $pi_signed := create_buf(int8).new;
 nqp::push_i($pi_signed, -49);
 nqp::push_i($pi_signed, -128);
 is(nqp::decode($pi_signed, "utf8"), 'π', 'nqp::decode with a buffer of signed ints');
+
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("utf8-c8 not yet implemented on the JVM", 1 + 4*2);
+} else {
+    my $composed := $buf8.new;
+    nqp::push_i($composed, 0xc3);
+    nqp::push_i($composed, 0x85);
+
+    my $decomposed := $buf8.new;
+    nqp::push_i($decomposed, 0x41);
+    nqp::push_i($decomposed, 0xcc);
+    nqp::push_i($decomposed, 0x8a);
+
+    my $partial := $buf8.new;
+    nqp::push_i($partial, 0xcc);
+
+
+    my $wrong := $buf8.new;
+    nqp::push_i($wrong, 0xFE);
+    is(nqp::decode($composed, 'utf8-c8'), 'Å', 'NFC strings is read just like utf8');
+
+    my sub test_encode($buf, $result, $desc) {
+      is(buf_dump(nqp::encode(nqp::decode($buf, 'utf8-c8'), 'utf8-c8', $buf8.new)), $result, $desc);
+      is(buf_dump(nqp::encoderep(nqp::decode($buf, 'utf8-c8'), 'utf8-c8', 'XXX', $buf8.new)), $result, $desc ~ ' - nqp::encoderep');
+    }
+
+    test_encode($partial, '204', 'partial utf8');
+    test_encode($composed, '195,133', 'NFC string');
+    test_encode($decomposed, '65,204,138', 'not normalized UTF8');
+    test_encode($wrong, '254', 'not proper UTF8');
+}
