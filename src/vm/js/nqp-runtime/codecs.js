@@ -213,12 +213,13 @@ class Utf8C8 {
   }
 
   encode(str) {
-    const buf = new Buffer(Buffer.byteLength(str));
+    const normalized = str.normalize('NFC');
+    const buf = new Buffer(Buffer.byteLength(normalized));
     let state = 0;
     let offset = 0;
     let byte = 0;
 
-    for (const c of str) {
+    for (const c of normalized) {
       if (state === 0) {
         if (c === '\u{10FFFD}') {
           state = 1;
