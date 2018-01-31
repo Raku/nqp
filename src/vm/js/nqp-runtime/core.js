@@ -816,9 +816,8 @@ op.isint = function(value) {
   return (value instanceof NQPInt) ? 1 : 0;
 };
 
-/* HACK - utf8-c is a different encoding than utf8 */
 function renameEncoding(encoding) {
-  return {'utf8-c8': 'utf8', 'utf16': 'utf16le', 'iso-8859-1': 'latin1'}[encoding] || encoding;
+  return {'utf16': 'utf16le', 'iso-8859-1': 'latin1'}[encoding] || encoding;
 }
 exports.renameEncoding = renameEncoding;
 
@@ -923,7 +922,7 @@ function bufferDifference(a, b) {
 
 op.decode = function(buf, encoding) {
   let rawBuffer = toRawBuffer(buf);
-  if (encoding === 'windows-1252') {
+  if (encoding === 'windows-1252' || encoding === 'utf8-c8') {
     return codecs[encoding].decode(rawBuffer);
   } else if (encoding === 'utf8') {
     const decoded = rawBuffer.toString(renameEncoding(encoding));
