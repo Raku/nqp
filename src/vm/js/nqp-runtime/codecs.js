@@ -211,6 +211,38 @@ class Utf8C8 {
 
     return chunks.join('');
   }
+
+  encode(str) {
+    const buf = new Buffer(Buffer.byteLength(str));
+    let state = 0;
+    let offset = 0;
+    let byte = 0;
+
+    for (const c of str) {
+      if (state === 0) {
+        if (c === '\u{10FFFD}') {
+          state = 1;
+        } else {
+          offset += buf.write(c, offset);
+        }
+      } else if (state == 1) {
+        state = 2;
+      } else if (state == 2) {
+        byte = parseInt(c, 16) << 4;
+        state = 3;
+      } else if (state == 3) {
+        byte = byte | parseInt(c, 16)
+        offset = buf.writeUInt8(byte, offset);
+        state = 0;
+      }
+    }
+
+    return buf.slice(0, offset);
+  }
+
+  encodeWithReplacement(str, replacement) {
+    return this.encode(str);
+  }
 }
 
 module.exports['utf8-c8'] = new Utf8C8;
