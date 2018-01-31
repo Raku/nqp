@@ -170,10 +170,6 @@ class IOHandle extends NQPObject {
     this.seps = seps.array;
   }
 
-  $$setencoding(encoding) {
-    this.encoding = core.renameEncoding(encoding);
-  }
-
   $$setbuffersizefh(size) {
     return this;
   }
@@ -235,10 +231,6 @@ class FileHandle extends IOHandle {
     return fs.writeSync(this.fd, buffer, 0, buffer.length);
   }
 
-  $$setencoding(encoding) {
-    this.encoding = core.renameEncoding(encoding);
-  }
-
   $$readfh(buf, bytes) {
     const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
     const buffer = Buffer.allocUnsafe(bytes);
@@ -284,7 +276,6 @@ function modeToFlags(mode) {
 op.open = function(name, mode) {
   try {
     const fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
-    fh.encoding = 'utf8';
     return fh;
   } catch (e) {
     if (e.code === 'ENOENT') {
@@ -373,7 +364,6 @@ op.getenvhash = function() {
 class StdHandle extends IOHandle {
   constructor() {
     super();
-    this.encoding = 'utf8';
   }
 };
 
