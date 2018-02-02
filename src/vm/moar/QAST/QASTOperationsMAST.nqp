@@ -2387,6 +2387,7 @@ QAST::MASTOperations.add_core_moarop_mapping('matchuniprop', 'matchuniprop');
 
 # serialization context opcodes
 QAST::MASTOperations.add_core_moarop_mapping('sha1', 'sha1');
+QAST::MASTOperations.add_core_moarop_mapping('sha1bin', 'sha1bin');
 QAST::MASTOperations.add_core_moarop_mapping('createsc', 'createsc');
 QAST::MASTOperations.add_core_moarop_mapping('scsetobj', 'scsetobj', 2);
 QAST::MASTOperations.add_core_moarop_mapping('scsetcode', 'scsetcode', 2);
