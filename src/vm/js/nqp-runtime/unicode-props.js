@@ -60,15 +60,17 @@ function addPropValueProps(propName, builder, filter, extraMangle) {
   }
 }
 
+const missingBlocks = {NB: true, CJK_Ext_F: true, Kana_Ext_A: true, Masaram_Gondi: true, Nushu: true, Soyombo: true, Syriac_Sup: true, Zanabazar_Square: true};
 addPropValueProps('Block',
   (match, long) => matchClass(match, 'In' + long),
-  short => short !== 'NB',
+  short => !(short in missingBlocks),
   alias => 'In' + alias
 );
 
+const missingScripts = {Hrkt: true, Zzzz: true, Gonm: true, Nshu: true, Soyo: true, Zanb: true};
 addPropValueProps('Script',
   (match, long) => matchClass(match, long),
-  short => short !== 'Hrkt' && short !== 'Zzzz');
+  short => !(short in missingScripts));
 
 addPropValueProps('General_Category',
   (match, long) => matchClass(match, long.replace(/_/g, '')),
@@ -162,7 +164,7 @@ function maybeNegated(shouldMatch, main, exclude) {
     regex = shouldMatch ? main : '(?!' + main + ')\\p{Any}';
   }
 
-  return xregexp(regex, 'yA');
+  return xregexp(regex, 'yAu');
 }
 
 function matchRegex(shouldMatch, regexString) {
@@ -180,9 +182,11 @@ function matchRegex(shouldMatch, regexString) {
 for (const propId of ucd.propIdsWithRegexes()) {
   const match = matchRegex(true, ucd.regex(propId));
   const negatedMatch = matchRegex(false, ucd.regex(propId));
-  for (const propName of ucd.propIdToNames(propId)) {
-    exports['uniprop_' + mangled(propName)] = match;
-    exports['uniprop_not_' + mangled(propName)] = negatedMatch;
+  if (ucd.propIdToNames(propId)) {
+    for (const propName of ucd.propIdToNames(propId)) {
+      exports['uniprop_' + mangled(propName)] = match;
+      exports['uniprop_not_' + mangled(propName)] = negatedMatch;
+    }
   }
 }
 
