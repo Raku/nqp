@@ -43,6 +43,8 @@ const stripMarks = require('./strip-marks.js');
 
 const codecs = require('./codecs.js');
 
+const graphemeRegexp = require('./graphemes').regexp;
+
 const foldCase = require('fold-case');
 
 const xregexp = require('xregexp');
@@ -1722,20 +1724,32 @@ op.flip = function(str) {
 };
 
 op.charsnfg = function(str) {
-  return graphemeBreaker.countBreaks(str);
+  let count = 0;
+  graphemeRegexp.lastIndex = 0;
+  while (graphemeRegexp.test(str)) {
+    count++;
+  }
+  return count;
 };
 
 op.substr3nfg = function(str, start, length) {
   let startGraphemes = start;
-  let startChars = 0;
+
+  graphemeRegexp.lastIndex = 0;
   while (startGraphemes--) {
-    startChars = graphemeBreaker.nextBreak(str, startChars);
+    if (!graphemeRegexp.test(str)) return '';
   }
 
-  let lengthGraphemes = length;
+  let startChars = graphemeRegexp.lastIndex;
+
   let substringEnd = startChars;
+  let lengthGraphemes = length;
   while (lengthGraphemes--) {
-     substringEnd = graphemeBreaker.nextBreak(str, substringEnd);
+    if (graphemeRegexp.test(str)) {
+      substringEnd = graphemeRegexp.lastIndex;
+    } else {
+      break;
+    }
   }
 
   return str.substring(startChars, substringEnd);
@@ -1743,10 +1757,12 @@ op.substr3nfg = function(str, start, length) {
 
 op.substr2nfg = function(str, start) {
   let startGraphemes = start;
-  let startChars = 0;
+
+  graphemeRegexp.lastIndex = 0;
   while (startGraphemes--) {
-    startChars = graphemeBreaker.nextBreak(str, startChars);
+    if (!graphemeRegexp.test(str)) return '';
   }
+  let startChars = graphemeRegexp.lastIndex;
 
   return str.substr(startChars);
 };
