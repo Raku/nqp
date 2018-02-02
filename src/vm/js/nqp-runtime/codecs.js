@@ -196,10 +196,11 @@ class Utf8C8 {
 
       if (state === UTF8_REJECT) {
         this.buildGraphemes(codePoints, chunks);
-        this.reject(buf, accepted+1, i+1, chunks);
+        this.reject(buf, accepted+1, accepted+2, chunks);
 
         state = UTF8_ACCEPT;
-        accepted = i;
+        i = accepted+1;
+        accepted = accepted+1;
       }
     }
 
