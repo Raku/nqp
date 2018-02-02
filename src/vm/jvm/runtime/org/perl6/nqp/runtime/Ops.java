@@ -550,6 +550,8 @@ public final class Ops {
                 cs = Charset.forName("UTF-16");
             else if (encoding.equals("windows-1252"))
                 cs = Charset.forName("windows-1252");
+            else if (encoding.equals("windows-1251"))
+                cs = Charset.forName("windows-1251");
             else
                 throw ExceptionHandling.dieInternal(tc,
                     "Unsupported encoding " + encoding);
@@ -4427,6 +4429,8 @@ public final class Ops {
             return "ISO-8859-1";
         if (nameIn.equals("windows-1252"))
             return "windows-1252";
+        if (nameIn.equals("windows-1251"))
+            return "windows-1251";
         return null;
     }
 
