@@ -19,6 +19,6 @@ parts.Modified = '<Prepend>*(?:<RISequence>|<HangulSyllable>|(?:(?:<E_Base>|<E_B
 
 parts.Degenerate = '<ZWJ>(?:<Glue_After_Zwj>|<E_Base_GAZ><Extend>*<E_Modifier>?)';
 
-const graphemePattern = build('<CRLF>|<Degenerate>|<Modified>|[^]');
+const graphemePattern = build('\u{10FFFD}x[0-9A-Z][0-9A-Z]|<CRLF>|<Degenerate>|<Modified>|[^]');
 
 exports.regexp = new RegExp(graphemePattern, 'yu');
