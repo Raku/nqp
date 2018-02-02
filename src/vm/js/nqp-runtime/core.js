@@ -823,9 +823,9 @@ function renameEncoding(encoding) {
 }
 exports.renameEncoding = renameEncoding;
 
-const encodings = ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'latin1', 'binary', 'hex', 'utf8-c8'];
+const encodings = ['ascii', 'utf8', 'utf16le', 'ucs2', 'base64', 'latin1', 'binary', 'hex'];
 function isKnownEncoding(encoding) {
-  return encodings.indexOf(encoding) == -1 ? false : true;
+  return (encodings.indexOf(encoding) == -1 ? false : true) || (encoding in codecs);
 }
 exports.isKnownEncoding = isKnownEncoding;
 
