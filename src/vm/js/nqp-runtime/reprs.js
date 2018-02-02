@@ -18,6 +18,8 @@ const constants = require('./constants.js');
 
 const ref = require('ref');
 
+const codecs = require('./codecs.js');
+
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
 const EDGE_CODEPOINT = 2;
@@ -1736,7 +1738,11 @@ class Decoder extends REPR {
 
       $$decodertakeallchars() {
         this.$$check();
-        const ret = this.$$buffer.toString(this.$$encoding);
+
+        const ret = this.$$encoding === 'utf8-c8'
+          ? codecs[this.$$encoding].decode(this.$$buffer)
+          : this.$$buffer.toString(this.$$encoding);
+
         this.$$buffer = emptyBuffer;
         return this.$$translate(ret);
       }
