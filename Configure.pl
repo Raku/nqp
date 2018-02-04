@@ -74,7 +74,7 @@ MAIN: {
             $config{'jna'} = $options{'with-jna'};
         }
     } else {
-        $config{'jna'} = "3rdparty/jna/jna.jar";
+        $config{'jna'} = "3rdparty/jna/jna-4.0.0.jar";
     }
 
     if ($^O eq 'MSWin32') {
