@@ -15,7 +15,7 @@ class QAST::Var is QAST::Node does QAST::Children {
         $node.set(%options) if %options;
         $node
     }
-    
+
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;
         !nqp::isnull_s($!name) ?? $!name !! ""
