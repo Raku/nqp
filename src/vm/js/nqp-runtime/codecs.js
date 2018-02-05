@@ -10,6 +10,8 @@ const graphemeBreaker = require('grapheme-breaker');
 
 const StringDecoder = require('string_decoder').StringDecoder;
 
+const completeGrapheme = require('./graphemes').completeGrapheme;
+
 function isSurrogate(unit) {
   return false;
 }
@@ -143,9 +145,17 @@ class Utf8C8 {
   constructor() {
   }
 
-  buildGraphemes(codePoints, chunks) {
+  buildGraphemes(codePoints, chunks, incompleteOK) {
     const graphemes = graphemeBreaker.break(String.fromCodePoint(...codePoints));
-    for (const grapheme of graphemes) {
+
+    for (let i = 0;i < graphemes.length; i++) {
+      const grapheme = graphemes[i];
+      if (i == graphemes.length - 1 && !incompleteOK) {
+        if (!completeGrapheme.test(grapheme)) {
+          return grapheme;
+        }
+      }
+
       if (grapheme === grapheme.normalize('NFC')) {
         chunks.push(grapheme);
       } else {
@@ -158,6 +168,7 @@ class Utf8C8 {
       }
     }
     codePoints.length = 0;
+    return undefined;
   }
 
   toDigit(n) {
@@ -173,6 +184,14 @@ class Utf8C8 {
   }
 
   decode(buf) {
+    return this.decodeMaybePartial(buf, false);
+  }
+
+  decodePartial(buf) {
+    return this.decodeMaybePartial(buf, true);
+  }
+
+  decodeMaybePartial(buf, partial) {
     let state = UTF8_ACCEPT;
     let codePoint;
     const codePoints = [];
@@ -197,7 +216,7 @@ class Utf8C8 {
       }
 
       if (state === UTF8_REJECT) {
-        this.buildGraphemes(codePoints, chunks);
+        this.buildGraphemes(codePoints, chunks, true);
         this.reject(buf, accepted+1, accepted+2, chunks);
 
         state = UTF8_ACCEPT;
@@ -206,14 +225,20 @@ class Utf8C8 {
       }
     }
 
-    this.buildGraphemes(codePoints, chunks);
+    const rejected = this.buildGraphemes(codePoints, chunks, partial ? false : true);
 
-    if (state !== UTF8_ACCEPT) {
-      this.reject(buf, accepted+1, buf.length, chunks);
+    if (partial) {
+      let decodedPoint = accepted;
+      if (rejected !== undefined) decodedPoint -= Buffer.byteLength(rejected, 'utf8');
+      return {newBuffer: buf.slice(decodedPoint+1), text: chunks.join('')};
+    } else {
+      if (state !== UTF8_ACCEPT) {
+        this.reject(buf, accepted+1, buf.length, chunks);
+      }
+      return chunks.join('');
     }
-
-    return chunks.join('');
   }
+
 
   encode(str) {
     const normalized = str.normalize('NFC');
@@ -257,7 +282,7 @@ class NativeEncoding {
     decodePartial(buffer) {
       const decoder = new StringDecoder(this.encoding);
       const available = decoder.write(buffer);
-      return {text: available, newBuffer: buffer.slice(Buffer.byteLength(available, available))};
+      return {text: available, newBuffer: buffer.slice(Buffer.byteLength(available, this.encoding))};
     }
 
     decode(buffer) {
