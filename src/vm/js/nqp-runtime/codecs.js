@@ -8,6 +8,8 @@ const NQPException = require('./nqp-exception.js');
 
 const graphemeBreaker = require('grapheme-breaker');
 
+const StringDecoder = require('string_decoder').StringDecoder;
+
 function isSurrogate(unit) {
   return false;
 }
@@ -247,8 +249,30 @@ class Utf8C8 {
   }
 }
 
+class NativeEncoding {
+    constructor(encoding) {
+      this.encoding = encoding;
+    }
+
+    decodePartial(buffer) {
+      const decoder = new StringDecoder(this.encoding);
+      const available = decoder.write(buffer);
+      return {text: available, newBuffer: buffer.slice(Buffer.byteLength(available, available))};
+    }
+
+    decode(buffer) {
+      return buffer.toString(this.encoding);
+    }
+
+    encode(str) {
+      return new Buffer(str, this.encoding);
+    }
+}
+
 module.exports['utf8-c8'] = new Utf8C8;
 
 module.exports['windows-1252'] = windows1252;
 module.exports.latin1 = latin1;
 module.exports.ascii = ascii;
+
+module.exports.utf8 = new NativeEncoding('utf8');

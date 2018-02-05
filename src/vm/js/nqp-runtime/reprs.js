@@ -20,6 +20,8 @@ const ref = require('ref');
 
 const codecs = require('./codecs.js');
 
+const graphemeRegexp = require('./graphemes').regexp;
+
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
 const EDGE_CODEPOINT = 2;
@@ -1670,8 +1672,6 @@ reprs.ConcBlockingQueue = ConcBlockingQueue;
 
 const emptyBuffer = Buffer.allocUnsafe(0);
 
-const StringDecoder = require('string_decoder').StringDecoder;
-
 const defaultSeps = ['\r\n', '\n'];
 
 class Decoder extends REPR {
@@ -1700,6 +1700,8 @@ class Decoder extends REPR {
 
         this.$$seps = defaultSeps;
         this.$$buffer = emptyBuffer;
+        this.$$textBuffer = '';
+
         return this;
       }
 
@@ -1716,48 +1718,80 @@ class Decoder extends REPR {
 
       /* TODO NFG, codepoints that don't fit into 2 bytes */
       $$decodertakechars(count) {
+        let chars = '';
         this.$$check();
-        const decoder = new StringDecoder(this.$$encoding);
-        const everything = decoder.write(this.$$buffer);
-        const chars = everything.substr(0, count);
-        if (chars.length < count) {
-          return nullStr;
-        } else {
-          this.$$buffer = this.$$buffer.slice(Buffer.byteLength(chars, this.$$encoding));
+
+        let available = this.$$textBuffer;
+        let matched;
+
+        graphemeRegexp.lastIndex = 0;
+        while (count !== 0 && graphemeRegexp.test(this.$$textBuffer)) {
+          matched = graphemeRegexp.lastIndex;
+          count--;
+        }
+        if (matched !== undefined) {
+          chars = this.$$textBuffer.slice(0, matched);
+          available = available.slice(matched);
+        }
+
+        if (count === 0) {
+          this.$$textBuffer = available;
           return this.$$translate(chars);
+        }
+
+        const {newBuffer: newBuffer, text: text} = codecs[this.$$encoding].decodePartial(this.$$buffer);
+
+        let matchedInNewText = 0;
+        graphemeRegexp.lastIndex = 0;
+        while (count !== 0 && graphemeRegexp.test(text)) {
+          matchedInNewText = graphemeRegexp.lastIndex;
+          count--;
+        }
+
+        if (count === 0) {
+          this.$$buffer = newBuffer;
+          this.$$textBuffer = text.slice(matchedInNewText);
+          return this.$$translate(chars + text.slice(0, matchedInNewText));
+        } else {
+          return nullStr;
         }
       }
 
       $$decodertakeavailablechars() {
         this.$$check();
-        const decoder = new StringDecoder(this.$$encoding);
-        const available = decoder.write(this.$$buffer);
-        this.$$buffer = this.$$buffer.slice(Buffer.byteLength(available, available));
+
+        const {newBuffer: newBuffer, text: text} = codecs[this.$$encoding].decodePartial(this.$$buffer);
+        this.$$buffer = newBuffer;
+        const available = this.$$textBuffer + text;
+        this.$$textBuffer = '';
+
         return this.$$translate(available);
       }
 
       $$decodertakeallchars() {
         this.$$check();
 
-        const ret = this.$$encoding === 'utf8-c8'
-          ? codecs[this.$$encoding].decode(this.$$buffer)
-          : this.$$buffer.toString(this.$$encoding);
+        const all = this.$$textBuffer + codecs[this.$$encoding].decode(this.$$buffer);
 
         this.$$buffer = emptyBuffer;
-        return this.$$translate(ret);
+        this.$$textBuffer = '';
+
+        return this.$$translate(all);
       }
 
       /* TODO: NFG */
 
       $$decodertakeline(chomp, incompleteOk) {
         this.$$check();
-        const decoder = new StringDecoder(this.$$encoding);
-        const string = decoder.write(this.$$buffer);
+
+        const {newBuffer: newBuffer, text: text} = codecs[this.$$encoding].decodePartial(this.$$buffer);
+        this.$$buffer = newBuffer;
+        this.$$textBuffer = this.$$textBuffer + text;
 
         let newline = -1;
         let sep;
         for (let i = 0; i < this.$$seps.length; i++) {
-          const offset = string.indexOf(this.$$seps[i]);
+          const offset = this.$$textBuffer.indexOf(this.$$seps[i]);
           if (offset != -1 && (newline == -1 || offset < newline)) {
             newline = offset;
             sep = this.$$seps[i];
@@ -1765,16 +1799,16 @@ class Decoder extends REPR {
         }
 
         if (newline != -1) {
-          const upToNewline = string.slice(0, newline);
+          const upToNewline = this.$$textBuffer.slice(0, newline);
 
-          this.$$buffer = this.$$buffer.slice(Buffer.byteLength(upToNewline + sep, this.$$encoding));
-
+          this.$$textBuffer = this.$$textBuffer.slice(newline + sep.length);
           return this.$$translate(chomp ? upToNewline : upToNewline + sep);
         } else {
           if (incompleteOk) {
-            const ret = this.$$buffer.toString(this.$$encoding);
+            const all = this.$$textBuffer + codecs[this.$$encoding].decode(this.$$buffer);
             this.$$buffer = emptyBuffer;
-            return this.$$translate(ret);
+            this.$$textBuffer = '';
+            return this.$$translate(all);
           } else {
             return nullStr;
           }
@@ -1783,16 +1817,26 @@ class Decoder extends REPR {
 
       $$decoderempty() {
         this.$$check();
-        return this.$$buffer.length === 0 ? 1 : 0;
+        return (this.$$textBuffer === '' && this.$$buffer.length === 0) ? 1 : 0;
       }
 
       $$decoderbytesavailable() {
         this.$$check();
-        return this.$$buffer.length;
+        // TODO cache this to avoid reencoding
+        return codecs[this.$$encoding].encode(this.$$textBuffer).length + this.$$buffer.length;
       }
 
       $$decodertakebytes(bufType, bytes) {
         this.$$check();
+
+        if (this.$$textBuffer !== '') {
+          this.$$buffer = Buffer.concat([
+            codecs[this.$$encoding].encode(this.$$textBuffer),
+            this.$$buffer
+          ]);
+          this.$$textBuffer = '';
+        }
+
         if (bytes > this.$$buffer.length) {
           return Null;
         }
