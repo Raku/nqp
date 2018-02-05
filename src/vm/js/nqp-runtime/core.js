@@ -49,7 +49,7 @@ const foldCase = require('fold-case');
 
 const xregexp = require('xregexp');
 
-const graphemeBreaker = require('grapheme-breaker');
+const graphemes = require('./graphemes.js');
 
 const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
@@ -1572,7 +1572,7 @@ op.islist = function(list) {
 
 op.split = function(currentHLL, separator, string) {
   return hll.slurpyArray(currentHLL, string !== ''
-    ? (separator === '' ? graphemeBreaker.break(string) : string.split(separator))
+    ? (separator === '' ? graphemes.break(string) : string.split(separator))
     : []);
 };
 
@@ -1720,7 +1720,7 @@ op.getrusage = function() {
 
 
 op.flip = function(str) {
-  return graphemeBreaker.break(str).reverse().join('');
+  return graphemes.break(str).reverse().join('');
 };
 
 op.charsnfg = function(str) {

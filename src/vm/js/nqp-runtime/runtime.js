@@ -24,7 +24,7 @@ const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
 const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
-const graphemeBreaker = require('grapheme-breaker');
+const graphemes = require('./graphemes.js');
 
 const fs = require('fs');
 
@@ -611,7 +611,7 @@ function fuzzyMatch(fuzzy, target, pos, literal) {
     }
 
     if (end === target.length) break;
-    end = graphemeBreaker.nextBreak(target, end);
+    end = graphemes.nextBreak(target, end);
     matched = fuzzy(target.substring(pos, end));
   }
 
@@ -645,14 +645,14 @@ exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
   if (pos >= target.length) return (zerowidth && negate ? 0 : -1);
   const found = charlist.indexOf(target.substr(pos, 1)) != -1;
   if (negate ? !found : found) {
-    return (graphemeBreaker.nextBreak(target, pos) - pos);
+    return (graphemes.nextBreak(target, pos) - pos);
   } else {
     return -1;
   }
 };
 
 exports.nextGrapheme = function(target, pos) {
-  return graphemeBreaker.nextBreak(target, pos) - pos;
+  return graphemes.nextBreak(target, pos) - pos;
 };
 
 exports.noNamed = function(_NAMED) {

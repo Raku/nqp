@@ -6,7 +6,7 @@
 
 const NQPException = require('./nqp-exception.js');
 
-const graphemeBreaker = require('grapheme-breaker');
+const graphemes = require('./graphemes');
 
 const StringDecoder = require('string_decoder').StringDecoder;
 
@@ -146,10 +146,10 @@ class Utf8C8 {
   }
 
   buildGraphemes(codePoints, chunks, incompleteOK) {
-    const graphemes = graphemeBreaker.break(String.fromCodePoint(...codePoints));
+    const rawGraphemes = graphemes.break(String.fromCodePoint(...codePoints));
 
-    for (let i = 0;i < graphemes.length; i++) {
-      const grapheme = graphemes[i];
+    for (let i = 0;i < rawGraphemes.length; i++) {
+      const grapheme = rawGraphemes[i];
       if (i == graphemes.length - 1 && !incompleteOK) {
         if (!completeGrapheme.test(grapheme)) {
           return grapheme;

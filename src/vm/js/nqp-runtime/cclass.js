@@ -1,5 +1,7 @@
 'use strict';
 const xregexp = require('xregexp');
+const graphemes = require('./graphemes.js');
+
 const op = {};
 exports.op = op;
 
@@ -53,13 +55,11 @@ op.iscclass = function(cclass, target, offset) {
   return iscclass(cclass, target, offset);
 };
 
-const graphemeBreaker = require('grapheme-breaker');
-
 op.iscclassnfg = function(cclass, target, offset) {
   let offsetGraphemes = offset;
   let offsetChars = 0;
   while (offsetGraphemes--) {
-    offsetChars = graphemeBreaker.nextBreak(target, offsetChars);
+    offsetChars = graphemes.nextBreak(target, offsetChars);
   }
 
   return iscclass(cclass, target, offsetChars);

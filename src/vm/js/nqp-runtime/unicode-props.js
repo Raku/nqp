@@ -5,7 +5,7 @@ const ucd = require('nqp-unicode-data');
 const core = require('./core.js');
 
 // TODO - the regexes should be tweaked to match full graphemes instead
-const graphemeBreaker = require('grapheme-breaker');
+const graphemes = require('./graphemes.js');
 
 function mangled(name) {
   return name.toLowerCase(name).replace(/_/g, '');
@@ -35,7 +35,7 @@ function matchClass(shouldMatch, category, negated) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return graphemeBreaker.nextBreak(target, pos) - pos;
+      return graphemes.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }
@@ -88,7 +88,7 @@ function matchDerived(shouldMatch, match, avoid) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return graphemeBreaker.nextBreak(target, pos) - pos;
+      return graphemes.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }
@@ -172,7 +172,7 @@ function matchRegex(shouldMatch, regexString) {
   return function(target, pos) {
     regexp.lastIndex = pos;
     if (regexp.test(target)) {
-      return graphemeBreaker.nextBreak(target, pos) - pos;
+      return graphemes.nextBreak(target, pos) - pos;
     } else {
       return -1;
     }

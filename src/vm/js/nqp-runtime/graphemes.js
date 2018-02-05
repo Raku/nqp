@@ -21,6 +21,17 @@ parts.Degenerate = '<ZWJ>(?:<Glue_After_Zwj>|<E_Base_GAZ><Extend>*<E_Modifier>?)
 
 const graphemePattern = build('\u{10FFFD}x[0-9A-Z][0-9A-Z]|<CRLF>|<Degenerate>|<Modified>|[^]');
 
-exports.regexp = new RegExp(graphemePattern, 'yu');
+const graphemeRegexp = exports.regexp = new RegExp(graphemePattern, 'yu');
+const graphemeRegexpGlobal = new RegExp(graphemePattern, 'gu');
 
 exports.completeGrapheme = new RegExp(build('(?:<CR>|<LF>|<Control>)$'), 'u');
+
+exports.nextBreak = function(target, offset) {
+  graphemeRegexp.lastIndex = offset;
+  graphemeRegexp.test(target);
+  return graphemeRegexp.lastIndex;
+};
+
+exports.break = function(str) {
+  return str.match(graphemeRegexpGlobal);
+};
