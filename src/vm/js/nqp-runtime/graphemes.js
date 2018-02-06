@@ -34,3 +34,5 @@ exports.nextBreak = function(target, offset) {
 exports.break = function(str) {
   return str.match(graphemeRegexpGlobal);
 };
+
+exports.build = build;
