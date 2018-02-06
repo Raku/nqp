@@ -28,8 +28,7 @@ exports.completeGrapheme = new RegExp(build('(?:<CR>|<LF>|<Control>)$'), 'u');
 
 exports.nextBreak = function(target, offset) {
   graphemeRegexp.lastIndex = offset;
-  graphemeRegexp.test(target);
-  return graphemeRegexp.lastIndex;
+  return graphemeRegexp.test(target) ? graphemeRegexp.lastIndex : -1;
 };
 
 exports.break = function(str) {

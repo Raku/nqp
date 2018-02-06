@@ -154,8 +154,8 @@ class RegexCompiler {
         "if ({self.get_cursor_attr_int($*BLOCK.mangle_local('self'), '$!from')} != -1) \{{self.goto($done)}\}\n"
         ~ self.goto($scan)
         ~ self.case($loop)
-        ~ "$!pos++;\n"
-        ~ "if ($!pos > $!target.length) \{{self.fail}\}\n"
+        ~ "$!pos = nqp.nextGrapheme($!target, $!pos);\n"
+        ~ "if ($!pos === -1) \{{self.fail}\}\n"
         ~ self.set_cursor_attr_int($!cursor, '$!from', $!pos)
         ~ self.case($scan)
         ~ self.mark($loop,$!pos,0)
@@ -326,7 +326,7 @@ class RegexCompiler {
         if $node.name ne '.' {
             $code := $code ~ "if ({$node.negate ?? '' !! '!'}nqp.op.iscclass($cclass,$!target,$!pos)) \{{self.fail}\}\n";
         }
-        $code := $code ~ "$!pos += nqp.nextGrapheme($!target, $!pos);\n" unless $node.subtype eq 'zerowidth';
+        $code := $code ~ "$!pos = nqp.nextGrapheme($!target, $!pos);\n" unless $node.subtype eq 'zerowidth';
         $code;
     }
 

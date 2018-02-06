@@ -651,9 +651,7 @@ exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
   }
 };
 
-exports.nextGrapheme = function(target, pos) {
-  return graphemes.nextBreak(target, pos) - pos;
-};
+exports.nextGrapheme = graphemes.nextBreak;
 
 exports.noNamed = function(_NAMED) {
   if (Object.keys(_NAMED) != 0) {
