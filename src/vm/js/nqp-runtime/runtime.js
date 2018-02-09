@@ -643,9 +643,10 @@ exports.enumcharlist_m = function(negate, target, pos, charlist) {
 
 exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
   if (pos >= target.length) return (zerowidth && negate ? 0 : -1);
-  const found = charlist.indexOf(target.substr(pos, 1)) != -1;
+  const graphemeEnd = graphemes.nextBreak(target, pos);
+  const found = charlist.indexOf(target.substring(pos, graphemeEnd)) != -1;
   if (negate ? !found : found) {
-    return (graphemes.nextBreak(target, pos) - pos);
+    return (graphemeEnd - pos);
   } else {
     return -1;
   }

@@ -166,6 +166,7 @@ class RegexCompiler {
         "if ($!pos >= $!target.length) \{{self.fail()}\}";
     }
 
+    # TODO: Take composed and uncomposed variants into account
     method enumcharlist($node) {
         my str $charlist := quote_string($node[0]);
 
