@@ -133,17 +133,11 @@ class RegexCompiler {
         my str $const := $node[0];
         my str $qconst := quote_string($const);
 
-        if self.ignore_suffix($node.subtype) -> str $suffix {
-            my str $offset := $*BLOCK.add_tmp;
-            return "$offset = nqp.literal{$suffix}($!target, $!pos, $qconst);\n"
-                ~ "if ($offset === -1)  \{{self.fail}\} else \{{$!pos}+=$offset\}\n";
-        }
-
-        my int $constlen := nqp::chars($const);
-        my str $cmpop := $node.negate ?? '==' !! '!=';
-        my str $str := "{$!target}.substr({$!pos},$constlen)";
-        "if ($str $cmpop $qconst) \{{self.fail}\}" ~
-            ($node.subtype eq 'zerowidth' ?? "\n" !! " else \{{$!pos}+=$constlen\}\n");
+        my str $offset := $*BLOCK.add_tmp;
+        my str $suffix := self.ignore_suffix($node.subtype);
+        return "$offset = nqp.literal{$suffix}($!target, $!pos, $qconst);\n"
+            ~ "if ($offset === -1)  \{{self.fail}\}"
+            ~ ($node.subtype eq 'zerowidth' ?? "\n" !! " else \{{$!pos}+=$offset\}\n");
     }
 
     method scan($node) {

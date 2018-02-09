@@ -435,12 +435,10 @@ class QAST::OperationsJS {
 
     add_simple_op('replace', $T_STR, [$T_STR, $T_INT, $T_INT, $T_STR]);
 
-    add_simple_op('eqat', $T_BOOL, [$T_STR, $T_STR, $T_INT], sub ($haystack, $needle, $offset) {
-        "($haystack.substr($offset, $needle.length) === $needle)"
-    });
-    add_simple_op('eqatic', $T_BOOL, [$T_STR, $T_STR, $T_INT]);
-    add_simple_op('eqatim', $T_BOOL, [$T_STR, $T_STR, $T_INT]);
-    add_simple_op('eqaticim', $T_BOOL, [$T_STR, $T_STR, $T_INT]);
+    add_simple_op('eqat', $T_INT, [$T_STR, $T_STR, $T_INT]);
+    add_simple_op('eqatic', $T_INT, [$T_STR, $T_STR, $T_INT]);
+    add_simple_op('eqatim', $T_INT, [$T_STR, $T_STR, $T_INT]);
+    add_simple_op('eqaticim', $T_INT, [$T_STR, $T_STR, $T_INT]);
 
 
 

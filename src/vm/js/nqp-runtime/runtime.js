@@ -630,6 +630,18 @@ exports.literal_im = function(target, pos, literal) {
   return fuzzyMatch(string => foldCase(stripMarks(string)), target, pos, literal);
 };
 
+exports.literal = function(target, pos, literal) {
+  if (target.substr(pos, literal.length) == literal) {
+    if (graphemes.graphemeBoundary(target, pos + literal.length)) {
+      return literal.length;
+    } else {
+      return -1;
+    }
+  } else {
+    return -1;
+  }
+};
+
 // TODO astral characters, multi character graphemes
 exports.enumcharlist_m = function(negate, target, pos, charlist) {
   if (pos >= target.length) return -1;

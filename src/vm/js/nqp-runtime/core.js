@@ -1572,7 +1572,7 @@ op.islist = function(list) {
 
 op.split = function(currentHLL, separator, string) {
   return hll.slurpyArray(currentHLL, string !== ''
-    ? (separator === '' ? graphemes.break(string) : string.split(separator))
+    ? (separator === '' ? graphemes.break(string) : string.split(graphemes.regexForLiteral(separator)))
     : []);
 };
 
@@ -1644,6 +1644,19 @@ op.semrelease = function(semaphore) {
   return semaphore;
 };
 
+
+
+op.eqat = function(haystack, needle, offset) {
+  if (haystack.substr(offset, needle.length) === needle) {
+    if (graphemes.graphemeBoundary(haystack, offset + needle.length)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  } else {
+    return 0;
+  }
+};
 
 op.eqatic = function(haystack, needle, offset) {
   return foldCase(haystack.substr(offset)).startsWith(foldCase(needle)) ? 1 : 0;

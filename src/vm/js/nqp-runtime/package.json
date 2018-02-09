@@ -13,6 +13,7 @@
     "bignum": "^0.12.5",
     "bignum-browserify": "pmurias/bigint-browserify",
     "char-props": "0.1.5",
+    "escape-string-regexp": "^1.0.5",
     "ffi": "^2.2.0",
     "fibers": "^2.0.0",
     "fold-case": "^1.0.0",

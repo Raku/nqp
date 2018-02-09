@@ -1,5 +1,6 @@
 'use strict';
 const data = require('nqp-unicode-data');
+const escapeStringRegexp = require('escape-string-regexp');
 
 function build(source) {
   return source.replace(/ /g, '').replace(/<([^>]+)>/g, function(match, part) {
@@ -35,4 +36,21 @@ exports.break = function(str) {
   return str.match(graphemeRegexpGlobal);
 };
 
+// TODO: make it much more correct
+const extend = build('(?!<Extend>)');
+exports.regexForLiteral = function(literal) {
+  return new RegExp(escapeStringRegexp(literal) + extend, 'u');
+};
+
+/* TODO - make the grapheme boundary rules more correct */
+const extendCodes = new RegExp(build('<Extend>'), 'uy');
+
+exports.graphemeBoundary = function(target, pos) {
+  extendCodes.lastIndex = pos;
+  if (extendCodes.test(target)) {
+    return false;
+  } else {
+    return true;
+  }
+}
 exports.build = build;
