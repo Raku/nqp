@@ -704,8 +704,9 @@ QAST::MASTOperations.add_core_op: 'chainstatic', $chain_gen;
 
 # Conditionals.
 sub needs_cond_passed($n) {
-    nqp::istype($n, QAST::Block) && $n.arity > 0 &&
-        ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
+    nqp::istype($n, QAST::Block)
+    && ($n.arity > 0 || $n.ann: 'count') # slurpies would have .arity 0
+    && ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
 }
 for <if unless with without> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
