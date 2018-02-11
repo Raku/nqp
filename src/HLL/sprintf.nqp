@@ -108,6 +108,15 @@ my module sprintf {
             }
         }
 
+        sub floatify($n) {
+            unless $n =:= NQPMu {
+                for @handlers {
+                    return $_.float: $n if $_.mine: $n;
+                }
+            }
+            $n
+        }
+
         sub intify($number_representation) {
             if $number_representation =:= NQPMu {
                 return $zero;   ## missing argument is handled in method TOP
@@ -201,7 +210,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'c');
             }
-            make nqp::chr($next)
+            make nqp::chr(intify($next))
         }
 
         method directive:sym<d>($/) {
@@ -394,7 +403,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'e');
             }
-            my $float := $next;
+            my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
@@ -405,7 +414,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'f');
             }
-            my $int := $next;
+            my $int := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
@@ -416,7 +425,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'g');
             }
-            my $float := $next;
+            my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
