@@ -168,7 +168,6 @@ my module sprintf {
 
         method directive:sym<b>($/) {
             my $next := next_argument($/);
-            my int $i := 0;
             CATCH {
                 bad-type-for-directive($next, 'b');
             }
