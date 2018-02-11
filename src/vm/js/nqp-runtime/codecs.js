@@ -148,7 +148,7 @@ class Utf8C8 {
   buildGraphemes(codePoints, chunks, incompleteOK) {
     const rawGraphemes = graphemes.break(String.fromCodePoint(...codePoints));
 
-    for (let i = 0;i < rawGraphemes.length; i++) {
+    for (let i = 0; i < rawGraphemes.length; i++) {
       const grapheme = rawGraphemes[i];
       if (i == graphemes.length - 1 && !incompleteOK) {
         if (!completeGrapheme.test(grapheme)) {
@@ -260,7 +260,7 @@ class Utf8C8 {
         byte = parseInt(c, 16) << 4;
         state = 3;
       } else if (state == 3) {
-        byte = byte | parseInt(c, 16)
+        byte = byte | parseInt(c, 16);
         offset = buf.writeUInt8(byte, offset);
         state = 0;
       }

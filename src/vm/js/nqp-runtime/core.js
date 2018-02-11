@@ -1645,7 +1645,6 @@ op.semrelease = function(semaphore) {
 };
 
 
-
 op.eqat = function(haystack, needle, offset) {
   if (haystack.substr(offset, needle.length) === needle) {
     if (graphemes.graphemeBoundary(haystack, offset + needle.length)) {
@@ -1753,7 +1752,7 @@ op.substr3nfg = function(str, start, length) {
     if (!graphemeRegexp.test(str)) return '';
   }
 
-  let startChars = graphemeRegexp.lastIndex;
+  const startChars = graphemeRegexp.lastIndex;
 
   let substringEnd = startChars;
   let lengthGraphemes = length;
@@ -1775,7 +1774,7 @@ op.substr2nfg = function(str, start) {
   while (startGraphemes--) {
     if (!graphemeRegexp.test(str)) return '';
   }
-  let startChars = graphemeRegexp.lastIndex;
+  const startChars = graphemeRegexp.lastIndex;
 
   return str.substr(startChars);
 };

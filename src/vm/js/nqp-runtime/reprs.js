@@ -1832,7 +1832,7 @@ class Decoder extends REPR {
         if (this.$$textBuffer !== '') {
           this.$$buffer = Buffer.concat([
             codecs[this.$$encoding].encode(this.$$textBuffer),
-            this.$$buffer
+            this.$$buffer,
           ]);
           this.$$textBuffer = '';
         }

@@ -5,7 +5,7 @@ const escapeStringRegexp = require('escape-string-regexp');
 function build(source) {
   return source.replace(/ /g, '').replace(/<([^>]+)>/g, function(match, part) {
     const content = parts[part] ? build(parts[part]) : data.regex(part);
-    if (content === undefined) throw "Can't do anything with: " + part;
+    if (content === undefined) throw 'Can\'t do anything with: ' + part;
     return '(?:' + content + ')';
   });
 }
@@ -15,7 +15,7 @@ const parts = {};
 parts.CRLF = '<CR><LF>';
 parts.RISequence = '<Regional_Indicator><Regional_Indicator>';
 parts.HangulSyllable = '<L>*<V>+<T>*|<L>*<LV><V>*<T>*|<L>*<LVT><T>*|<L>+|<T>+';
-parts.Grapheme_Extend = '<Extend> | (?:<ZWJ><Glue_After_Zwj>) | (?:<ZWJ><E_Base_GAZ><Extend>*<E_Modifier>?) | <ZWJ>'
+parts.Grapheme_Extend = '<Extend> | (?:<ZWJ><Glue_After_Zwj>) | (?:<ZWJ><E_Base_GAZ><Extend>*<E_Modifier>?) | <ZWJ>';
 parts.Modified = '<Prepend>*(?:<RISequence>|<HangulSyllable>|(?:(?:<E_Base>|<E_Base_GAZ>)<Extend>*<E_Modifier>)|(?:(?!<Control>).))(<Grapheme_Extend>|<SpacingMark>)*';
 
 parts.Degenerate = '<ZWJ>(?:<Glue_After_Zwj>|<E_Base_GAZ><Extend>*<E_Modifier>?)';
@@ -52,5 +52,5 @@ exports.graphemeBoundary = function(target, pos) {
   } else {
     return true;
   }
-}
+};
 exports.build = build;
