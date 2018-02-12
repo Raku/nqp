@@ -49,8 +49,9 @@ sub run-command($command, :$stdout, :$stderr) {
     my @out-bytes;
     my $queue := nqp::create(Queue);
 
-    my $done     := 0;
-    my $read-all := 0;
+    my $done         := 0;
+    my $read-all     := 0;
+    my $calles-ready :=0;
 
     my $config := nqp::hash(
         'done', -> $status {
@@ -63,6 +64,9 @@ sub run-command($command, :$stdout, :$stderr) {
     }
 
     if $stdout && $stderr {
+        $config<ready> := -> $stdout?, $stderr? {
+            ++called-ready;
+        };
         $config<merge_bytes> := -> $seq, $data, $err {
             if nqp::isconcrete($data) {
                 @out-bytes[$seq] := $data;
@@ -73,6 +77,9 @@ sub run-command($command, :$stdout, :$stderr) {
         };
     }
     elsif $stdout {
+        $config<ready> := -> $stdout? {
+            ++called-ready;
+        };
         $config<stdout_bytes> := -> $seq, $data, $err {
             if nqp::isconcrete($data) {
                 @out-bytes[$seq] := $data;
@@ -83,6 +90,9 @@ sub run-command($command, :$stdout, :$stderr) {
         };
     }
     elsif $stderr {
+        $config<ready> := -> $stderr? {
+            ++called-ready;
+        };
         $config<stderr_bytes> := -> $seq, $data, $err {
             if nqp::isconcrete($data) {
                 @out-bytes[$seq] := $data;
