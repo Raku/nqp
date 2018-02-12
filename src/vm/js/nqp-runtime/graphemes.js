@@ -33,7 +33,7 @@ exports.nextBreak = function(target, offset) {
 };
 
 exports.break = function(str) {
-  return str.match(graphemeRegexpGlobal);
+  return str === '' ? [] : str.match(graphemeRegexpGlobal);
 };
 
 // TODO: make it much more correct
