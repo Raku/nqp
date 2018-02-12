@@ -399,12 +399,6 @@ String.prototype.$$getStr = function() {
   return this;
 };
 
-// needed for continuations
-Function.prototype.$$toBool = function(ctx) {
-  return 1;
-};
-
-
 exports.null_s = nullStr;
 exports.Null = Null;
 
