@@ -1374,9 +1374,9 @@ caveats about decoded-but-untaken bytes in `decoderbytesavailable` apply.
 ## decoderempty
 * `decoderempty(Decoder $dec --> int)`
 
-Returns 0 if the decoder is empty (this means that there are no undecoded
+Returns 1 if the decoder is empty (this means that there are no undecoded
 bytes, no decoded but untaken chars, and nothing in the normalization buffer).
-Otherwise returns 1.
+Otherwise returns 0.
 
 # <a id="conditional"></a> Conditional Opcodes
 
