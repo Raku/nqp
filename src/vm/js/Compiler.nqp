@@ -619,7 +619,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
 
                 if $*HLL eq 'nqp' {
-                    if $got == $T_NUM || $got == $T_STR {
+                    if $got == $T_NUM {
+                        return Chunk.new($T_OBJ, "new nqp.NQPNum({$chunk.expr})", $chunk);
+                    }
+                    elsif $got == $T_STR {
                         return $chunk;
                     }
                     elsif $got == $T_INT {

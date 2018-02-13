@@ -7,6 +7,8 @@ const core = require('./core.js');
 
 const hll = require('./hll.js');
 
+const NQPInt = require('./nqp-int.js');
+
 const op = {};
 exports.op = op;
 function intishBool(b) {
@@ -255,12 +257,12 @@ op.bool_I = function(n) {
 op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
   const extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), new NQPInt(-1)]);
   }
 
   if (radix == 10 || radix == 16) {
     const pow = bignum(radix).pow(extracted.power);
-    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), new NQPInt(extracted.offset)]);
   } else {
     const n = extracted.number;
     let base = bignum(1);
@@ -279,6 +281,6 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
 
     if (n[0] == '-') result = result.neg();
 
-    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), extracted.offset]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), new NQPInt(extracted.offset)]);
   }
 };

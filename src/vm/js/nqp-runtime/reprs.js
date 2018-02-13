@@ -1310,26 +1310,46 @@ class VMArray extends REPR {
   }
 
   deserializeFinish(obj, data) {
-    if (this.type !== Null) {
-      console.log('NYI: VMArrays of a type different then null');
-    }
-
     obj.array = [];
     const size = data.varint();
-    for (let i = 0; i < size; i++) {
-      obj.array[i] = data.variant();
+    if (this.primType === 0) {
+      for (let i = 0; i < size; i++) {
+        obj.array[i] = data.variant();
+      }
+    } else if (this.primType === 1) {
+      for (let i = 0; i < size; i++) {
+        obj.array[i] = data.varint();
+      }
+    } else if (this.primType === 2) {
+      for (let i = 0; i < size; i++) {
+        obj.array[i] = data.double();
+      }
+    } else if (this.primType === 3) {
+      for (let i = 0; i < size; i++) {
+        obj.array[i] = data.str();
+      }
     }
   }
 
 
   serialize(cursor, obj) {
-    if (this.type !== Null) {
-      console.log('NYI: VMArrays of a type different then null');
-    }
-
     cursor.varint(obj.array.length);
-    for (let i = 0; i < obj.array.length; i++) {
-      cursor.ref(obj.array[i] === undefined ? Null : obj.array[i]);
+    if (this.primType === 0) {
+      for (let i = 0; i < obj.array.length; i++) {
+        cursor.ref(obj.array[i] === undefined ? Null : obj.array[i]);
+      }
+    } else if (this.primType === 1) {
+      for (let i = 0; i < obj.array.length; i++) {
+        cursor.varint(obj.array[i] === undefined ? 0 : obj.array[i]);
+      }
+    } else if (this.primType === 2) {
+      for (let i = 0; i < obj.array.length; i++) {
+        cursor.double(obj.array[i] === undefined ? 0 : obj.array[i]);
+      }
+    } else if (this.primType === 3) {
+      for (let i = 0; i < obj.array.length; i++) {
+        cursor.str(obj.array[i] === undefined ? nullStr : obj.array[i]);
+      }
     }
   }
 

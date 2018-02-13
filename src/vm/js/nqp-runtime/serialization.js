@@ -2,6 +2,7 @@
 const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
 const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
 const Int64 = require('node-int64');
 const nullStr = require('./null_s.js');
 const Null = require('./null.js');
@@ -250,7 +251,7 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_NULL;
     } else if (ref instanceof NQPInt) {
       discrim = REFVAR_VM_INT;
-    } else if (typeof ref == 'number') {
+    } else if (ref instanceof NQPNum) {
       discrim = REFVAR_VM_NUM;
     } else if (typeof ref == 'string') {
       discrim = REFVAR_VM_STR;
@@ -294,7 +295,7 @@ class BinaryWriteCursor {
         this.varint(ref.value);
         break;
       case REFVAR_VM_NUM:
-        this.double(ref);
+        this.double(ref.value);
         break;
       case REFVAR_VM_STR:
         this.str(ref);

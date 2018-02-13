@@ -11,6 +11,7 @@ const CodeRef = require('./code-ref.js');
 const Ctx = require('./ctx.js');
 
 const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
 
 const NQPException = require('./nqp-exception.js');
 
@@ -160,10 +161,11 @@ exports.radixHelper = radixHelper;
 op.radix = function(currentHLL, radix, str, zpos, flags) {
   const extracted = radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(currentHLL, [0, 1, -1]);
+    return hll.slurpyArray(currentHLL, [new NQPInt(0), new NQPInt(1), new NQPInt(-1)]);
   }
   const pow = Math.pow(radix, extracted.power);
-  return hll.slurpyArray(currentHLL, [parseInt(extracted.number, radix), pow, extracted.offset]);
+  // TODO: use hll int type
+  return hll.slurpyArray(currentHLL, [new NQPInt(parseInt(extracted.number, radix)), new NQPInt(pow), new NQPInt(extracted.offset)]);
 };
 
 op.setdebugtypename = function(type, debugName) {
@@ -195,7 +197,7 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
 const numToObj = exports.numToObj = function(currentHLL, n) {
   const type = currentHLL.get('num_box');
   if (!type) {
-    return n;
+    return new NQPNum(n);
   } else {
     const repr = type._STable.REPR;
     const obj = repr.allocate(type._STable);
@@ -385,7 +387,7 @@ op.reprname = function(obj) {
     return 'P6int';
   } else if (typeof obj == 'string') {
     return 'P6str';
-  } else if (typeof obj == 'number') {
+  } else if (obj instanceof NQPNum) {
     return 'P6num';
   } else {
     console.log(obj);
@@ -501,7 +503,6 @@ op.box_n = function(n, type) {
 };
 
 op.unbox_n = function(obj) {
-  if (typeof obj == 'number') return obj;
   return obj.$$getNum();
 };
 
@@ -526,7 +527,6 @@ op.box_i = function(i, type) {
 };
 
 op.unbox_i = function(obj) {
-  if (typeof obj == 'number') return obj;
   return obj.$$getInt();
 };
 
@@ -599,6 +599,8 @@ function fromJS(obj) {
     return new WrappedFunction(obj);
   } else if (obj === undefined || obj === null) {
     return Null;
+  } else if (typeof obj === 'number') {
+    return new NQPNum(obj);
   } else {
     return obj;
   }
@@ -775,7 +777,7 @@ function getConfigFromPerl() {
 
 op.backendconfig = function() {
   const config = new Hash();
-  config.content.set('intvalsize', 4);
+  config.content.set('intvalsize', new NQPInt(4));
   config.content.set('osname', os.platform());
   const nativecallConfig = getConfigFromPerl();
   for (const key of Object.keys(nativecallConfig)) {
@@ -811,7 +813,7 @@ op.setpayload = function(exception, payload) {
 };
 
 op.isnum = function(value) {
-  return (typeof value == 'number') ? 1 : 0;
+  return (value instanceof NQPNum) ? 1 : 0;
 };
 
 op.isint = function(value) {
@@ -968,11 +970,11 @@ op.objprimspec = function(obj) {
   if (typeof obj === 'object') {
     if (obj instanceof NQPInt) {
       return 1;
+    } else if (obj instanceof NQPNum) {
+      return 2;
     } else {
       return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
     }
-  } else if (typeof obj == 'number') {
-    return 2;
   } else if (typeof obj == 'string') {
     return 3;
   } else {

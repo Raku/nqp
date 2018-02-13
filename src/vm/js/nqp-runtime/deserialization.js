@@ -19,6 +19,9 @@ const hll = require('./hll.js');
 
 const BOOT = require('./BOOT.js');
 
+const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+
 /* Possible reference types we can serialize. */
 const REFVAR_NULL = 1;
 const REFVAR_OBJECT = 2;
@@ -311,10 +314,9 @@ class BinaryCursor {
       case REFVAR_VM_NULL:
         return Null;
       case REFVAR_VM_INT:
-        // TODO deserialize bigger integers then can fit into a 32bit number
-        return this.varint();
+        return new NQPInt(this.varint());
       case REFVAR_VM_NUM:
-        return this.double();
+        return new NQPNum(this.double());
       case REFVAR_VM_STR:
         return this.str();
       case REFVAR_VM_ARR_VAR:

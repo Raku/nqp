@@ -5,6 +5,8 @@ exports.op = op;
 const refs = require('./refs.js');
 
 const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+
 const NQPException = require('./nqp-exception.js');
 
 const nullStr = require('./null_s.js');
@@ -30,6 +32,7 @@ const fs = require('fs');
 
 
 exports.NQPInt = NQPInt;
+exports.NQPNum = NQPNum;
 
 function loadOps(module) {
   for (const name in module.op) {
@@ -199,9 +202,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 
 exports.toStr = function(arg_, ctx) {
   const arg = arg_.$$decont(ctx);
-  if (typeof arg == 'number') {
-    return coercions.numToStr(arg);
-  } else if (typeof arg == 'string') {
+  if (typeof arg == 'string') {
     return arg;
   } else if (arg === Null) {
     return '';
@@ -216,7 +217,7 @@ exports.toStr = function(arg_, ctx) {
     if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
-    return numToStr(arg.$$getNum());
+    return coercions.numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
     return arg.$$getInt().toString();
   } else {
@@ -227,9 +228,7 @@ exports.toStr = function(arg_, ctx) {
 
 exports.toNum = function(arg_, ctx) {
   const arg = arg_.$$decont(ctx);
-  if (typeof arg == 'number') {
-    return arg;
-  } else if (arg === Null) {
+  if (arg === Null) {
     return 0;
   } else if (typeof arg == 'string') {
     return coercions.strToNum(arg);
@@ -239,8 +238,6 @@ exports.toNum = function(arg_, ctx) {
       return result.$$getNum();
     } else if (result.$$numify) {
       return result.$$numify();
-    } else if (typeof result == 'number') {
-      return result;
     } else {
       throw new NQPException('we can\'t numify result of toNum');
     }
@@ -346,34 +343,6 @@ exports.setCodeRefHLL = function(codeRefs, currentHLL) {
 
 
 /* TODO - make monkey patching builtin things optional */
-
-Number.prototype.$$decont = function(ctx) {
-  return this;
-};
-
-Number.prototype.$$toBool = function(ctx) {
-  return this === 0 ? 0 : 1;
-};
-
-Number.prototype.$$istype = function(ctx, type) {
-  return 0;
-};
-
-Number.prototype.$$can = function(ctx, name) {
-  return 0;
-};
-
-Number.prototype.$$isrwcont = function(ctx) {
-  return 0;
-};
-
-Number.prototype.$$getNum = function() {
-  return this;
-};
-
-Number.prototype.$$getInt = function() {
-  return this;
-};
 
 String.prototype.$$decont = function(ctx) {
   return this;
@@ -508,9 +477,7 @@ exports.arg_n = function(ctx, contedArg) {
   }
 
   const arg = contedArg.$$decont(ctx);
-  if (typeof arg === 'number') {
-    return arg;
-  } else if (arg.$$getNum) {
+  if (arg.$$getNum) {
     return arg.$$getNum();
   } else {
     throw new NQPException('Expected native num argument, but got something else');
