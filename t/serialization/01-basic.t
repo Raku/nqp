@@ -1,6 +1,6 @@
 #! nqp
 
-plan(1517);
+plan(1519);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -371,6 +371,7 @@ sub fresh_out_sc() {
             nqp::bindpos_i(@a, 0, 101);
             nqp::bindpos_i(@a, 1, 102);
             nqp::bindpos_i(@a, 2, 103);
+            nqp::bindpos_i(@a, 4, 105);
             $!a := @a;
         }
         method a() { $!a }
@@ -384,10 +385,13 @@ sub fresh_out_sc() {
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T10),          'deserialized object has correct type');
-    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'integer array came back with correct element count');
+    ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 5,         'integer array came back with correct element count');
     ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 0) == 101,  'integer array first element is correct');
     ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 1) == 102,  'integer array second element is correct');
     ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 2) == 103,  'integer array third element is correct');
+    ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 3) == 0,  'unset fourth element is correct');
+
+    ok(nqp::atpos_i(nqp::scgetobj($dsc, 0).a, 4) == 105,  'unset fourth element is correct');
 }
 
 # Number array
