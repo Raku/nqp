@@ -1626,7 +1626,7 @@ Return current access position for an open filehandle.
 
 Output the given object to the filehandle. Returns the number of bytes written.
 
-# <a id="extern"></a> External command Opcodes
+# <a id="filedirnet"></a> File / Directory / Network Opcodes
 
 ## chdir
 * `chdir(str $path)`
