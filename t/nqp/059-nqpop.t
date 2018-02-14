@@ -214,6 +214,21 @@ is( nqp::unshift($list,'zero'), 'zero', "nqp::unshift");
 ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
 ok( nqp::atpos($list,0) eq 'zero', 'nqp::unshift the correct element');
 
+my $list_i := nqp::list_i(1, 2);
+my $iter_i := nqp::iterator($list_i);
+is(nqp::shift($iter_i), 1);
+is(nqp::shift($iter_i), 2);
+
+my $list_n := nqp::list_n(1, 2);
+my $iter_n := nqp::iterator($list_n);
+is(nqp::shift($iter_n), 1);
+is(nqp::shift($iter_n), 2);
+
+my $list_s := nqp::list_s('a', 'b');
+my $iter_s := nqp::iterator($list_s);
+is(nqp::shift($iter_s), 'a');
+is(nqp::shift($iter_s), 'b');
+
 my %hash;
 %hash<foo> := 1;
 %hash<baz> := 2;
