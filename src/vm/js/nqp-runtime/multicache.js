@@ -1,6 +1,8 @@
 'use strict';
 const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
+
 const Null = require('./null.js');
 
 const nativeArgs = require('./native-args.js');
@@ -65,7 +67,7 @@ function posTypes(ctx, capture) {
       types[i] = 1;
     } else if (obj instanceof NQPNum) {
       types[i] = 2;
-    } else if (typeof obj == 'string') {
+    } else if (obj instanceof NQPStr) {
       types[i] = 3;
     }
   }

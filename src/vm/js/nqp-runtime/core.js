@@ -12,6 +12,7 @@ const Ctx = require('./ctx.js');
 
 const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
 
 const NQPException = require('./nqp-exception.js');
 
@@ -209,7 +210,7 @@ const numToObj = exports.numToObj = function(currentHLL, n) {
 const strToObj = exports.strToObj = function(currentHLL, s) {
   const type = currentHLL.get('str_box');
   if (!type) {
-    return s;
+    return new NQPStr(s);
   } else {
     const repr = type._STable.REPR;
     const obj = repr.allocate(type._STable);
@@ -385,7 +386,7 @@ op.reprname = function(obj) {
     return 'MVMCallCapture';
   } else if (obj instanceof NQPInt) {
     return 'P6int';
-  } else if (typeof obj == 'string') {
+  } else if (obj instanceof NQPStr) {
     return 'P6str';
   } else if (obj instanceof NQPNum) {
     return 'P6num';
@@ -724,7 +725,7 @@ compilerRegistry.set('JavaScript', new JavaScriptCompiler());
 
 class JSBackendStub extends NQPObject {
   name(ctx, named) {
-    return 'js';
+    return new NQPStr('js');
   }
 };
 
@@ -778,7 +779,7 @@ function getConfigFromPerl() {
 op.backendconfig = function() {
   const config = new Hash();
   config.content.set('intvalsize', new NQPInt(4));
-  config.content.set('osname', os.platform());
+  config.content.set('osname', new NQPStr(os.platform()));
   const nativecallConfig = getConfigFromPerl();
   for (const key of Object.keys(nativecallConfig)) {
     config.content.set(key, nativecallConfig[key]);
@@ -813,11 +814,15 @@ op.setpayload = function(exception, payload) {
 };
 
 op.isnum = function(value) {
-  return (value instanceof NQPNum) ? 1 : 0;
+  return (value instanceof NQPNum || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
 };
 
 op.isint = function(value) {
-  return (value instanceof NQPInt) ? 1 : 0;
+  return (value instanceof NQPInt || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
+};
+
+op.isstr = function(value) {
+  return (value instanceof NQPStr || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
 };
 
 function renameEncoding(encoding) {
@@ -975,7 +980,7 @@ op.objprimspec = function(obj) {
     } else {
       return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
     }
-  } else if (typeof obj == 'string') {
+  } else if (obj instanceof NQPStr) {
     return 3;
   } else {
     throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);
@@ -1573,9 +1578,10 @@ op.islist = function(list) {
 };
 
 op.split = function(currentHLL, separator, string) {
-  return hll.slurpyArray(currentHLL, string !== ''
+  // TODO think if performance wise we can avoid this wrapping
+  return hll.slurpyArray(currentHLL, (string !== ''
     ? (separator === '' ? graphemes.break(string) : string.split(graphemes.regexForLiteral(separator)))
-    : []);
+    : []).map(str => new NQPStr(str)));
 };
 
 op.exception = function() {

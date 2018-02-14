@@ -22,6 +22,7 @@ const nqp = require('nqp-runtime');
 const Null = require('./null.js');
 
 const NQPInt = require('./nqp-int.js');
+const NQPStr = require('./nqp-str.js');
 
 function boolish(bool) {
   return bool ? 1 : 0;
@@ -356,7 +357,7 @@ op.cwd = function() {
 op.getenvhash = function() {
   const hash = new Hash();
   for (const key in process.env) {
-    hash.content.set(key, process.env[key]);
+    hash.content.set(key, new NQPStr(process.env[key]));
   }
   return hash;
 };

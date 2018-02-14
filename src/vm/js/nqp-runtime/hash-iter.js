@@ -1,4 +1,6 @@
 const NQPObject = require('./nqp-object.js');
+const NQPStr = require('./nqp-str.js');
+
 class HashIter extends NQPObject {
   constructor(hash) {
     super();
@@ -26,11 +28,11 @@ class HashIter extends NQPObject {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   key(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   value(ctx, _NAMED, self) {

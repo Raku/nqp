@@ -3,6 +3,12 @@
 const NQPObject = require('./nqp-object.js');
 const Null = require('./null.js');
 
+const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
+
+const nullStr = require('./null_s.js');
+
 class Iter extends NQPObject {
   constructor(array) {
     super();
@@ -22,4 +28,28 @@ class Iter extends NQPObject {
   }
 };
 
-module.exports = Iter;
+class IterInt extends Iter {
+  $$shift() {
+    const value = this.$$array[this.$$idx++];
+    return new NQPInt(value === undefined ? 0 : value);
+  }
+};
+
+class IterNum extends Iter {
+  $$shift() {
+    const value = this.$$array[this.$$idx++];
+    return new NQPNum(value === undefined ? 0 : value);
+  }
+};
+
+class IterStr extends Iter {
+  $$shift() {
+    const value = this.$$array[this.$$idx++];
+    return new NQPStr(value === undefined ? nullStr : value);
+  }
+};
+
+exports.Iter = Iter;
+exports.IterInt = IterInt;
+exports.IterNum = IterNum;
+exports.IterStr = IterStr;

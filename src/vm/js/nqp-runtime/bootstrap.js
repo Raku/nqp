@@ -15,6 +15,9 @@ const BOOT = require('./BOOT.js');
 
 const Null = require('./null.js');
 
+const NQPStr = require('./nqp-str.js');
+
+
 const core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
@@ -34,7 +37,7 @@ function createKnowHOWAttribute() {
 
   const methods = {};
   methods.name = function(ctx, _NAMED, self) {
-    return self.__name;
+    return new NQPStr(self.__name);
   };
   methods['new'] = function(ctx, _NAMED, self) {
     const attr = r.allocate(self._STable);
@@ -92,7 +95,7 @@ function addKnowhowHowMethod(name, method) {
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
-  return self.__name;
+  return new NQPStr(self.__name);
 });
 
 addKnowhowHowMethod('attributes', function(ctx, _NAMED, self) {
@@ -164,7 +167,7 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   for (let i = 0; i < self.__attributes.length; i++) {
     const attrInfo = new Hash();
     const attr = self.__attributes[i];
-    attrInfo.content.set('name', attr.__name);
+    attrInfo.content.set('name', new NQPStr(attr.__name));
     attrInfo.content.set('type', attr.__type);
     if (attr.__boxTarget) {
       attrInfo.content.set('box_target', attr.__boxTarget);

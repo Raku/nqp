@@ -7,6 +7,8 @@ const exceptionsStack = require('./exceptions-stack.js');
 const BOOT = require('./BOOT.js');
 
 const NQPInt = require('./nqp-int.js');
+const NQPStr = require('./nqp-str.js');
+
 
 const stackTrace = require('stack-trace');
 
@@ -424,11 +426,11 @@ class CtxIter extends NQPObject {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   key(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   value(ctx, _NAMED, self) {

@@ -3,6 +3,7 @@ const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
 const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
 const Null = require('./null.js');
 const BOOT = require('./BOOT.js');
 
@@ -65,11 +66,11 @@ op.hllizefor = function(ctx, obj, language) {
     const boxed = repr.allocate(foreignTypeNum._STable);
     boxed.$$setNum(obj.value);
     return boxed;
-  } else if (typeof obj == 'string') {
+  } else if (obj instanceof NQPStr) {
     const foreignTypeStr = config.get('foreign_type_str');
     const repr = foreignTypeStr._STable.REPR;
     const boxed = repr.allocate(foreignTypeStr._STable);
-    boxed.$$setStr(obj);
+    boxed.$$setStr(obj.value);
     return boxed;
   } else if (obj === Null) {
     const nullValue = config.get('null_value');

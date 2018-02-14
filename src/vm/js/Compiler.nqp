@@ -623,7 +623,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         return Chunk.new($T_OBJ, "new nqp.NQPNum({$chunk.expr})", $chunk);
                     }
                     elsif $got == $T_STR {
-                        return $chunk;
+                        return Chunk.new($T_OBJ, "new nqp.NQPStr({$chunk.expr})", $chunk);
                     }
                     elsif $got == $T_INT {
                         return Chunk.new($T_OBJ, "new nqp.NQPInt({$chunk.expr})", $chunk);

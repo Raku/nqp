@@ -17,6 +17,9 @@ const constants = require('./constants.js');
 /* Needed for throwing exceptions from generated code */
 const NQPException = require('./nqp-exception.js');
 
+const nativeArgs = require('./native-args.js');
+const NativeStrArg = nativeArgs.NativeStrArg;
+
 function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
     const method = obj._STable.methodCache.get(name);
@@ -29,7 +32,7 @@ function findMethod(ctx, obj, name) {
   }
 
   if (obj._STable.HOW.$$can(ctx, 'find_method')) {
-    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+    return obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, new NativeStrArg(name));
   } else {
     return Null;
   }

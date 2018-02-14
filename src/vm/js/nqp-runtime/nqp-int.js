@@ -1,6 +1,7 @@
 'use strict';
 
 const NQPObject = require('./nqp-object.js');
+const NQPStr = require('./nqp-str.js');
 
 class NQPInt extends NQPObject {
   constructor(value) {
@@ -9,7 +10,7 @@ class NQPInt extends NQPObject {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.value.toString();
+    return new NQPStr(this.value.toString());
   }
 
   $$toBool(ctx) {

@@ -21,6 +21,7 @@ const BOOT = require('./BOOT.js');
 
 const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
 
 /* Possible reference types we can serialize. */
 const REFVAR_NULL = 1;
@@ -318,7 +319,7 @@ class BinaryCursor {
       case REFVAR_VM_NUM:
         return new NQPNum(this.double());
       case REFVAR_VM_STR:
-        return this.str();
+        return new NQPStr(this.str());
       case REFVAR_VM_ARR_VAR:
         return this.array(cursor => cursor.variant());
       case REFVAR_VM_ARR_STR:

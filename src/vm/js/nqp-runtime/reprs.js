@@ -2,10 +2,11 @@
 const sixmodel = require('./sixmodel.js');
 const Hash = require('./hash.js');
 const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
 const NQPException = require('./nqp-exception.js');
 const Null = require('./null.js');
 const nullStr = require('./null_s.js');
-const Iter = require('./iter.js');
+const iter = require('./iter.js');
 const BOOT = require('./BOOT.js');
 const core = require('./core.js');
 const nqp = require('nqp-runtime');
@@ -21,6 +22,9 @@ const ref = require('ref');
 const codecs = require('./codecs.js');
 
 const graphemeRegexp = require('./graphemes').regexp;
+
+const nativeArgs = require('./native-args.js');
+const NativeStrArg = nativeArgs.NativeStrArg;
 
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
@@ -62,7 +66,7 @@ function methodNotFoundError(ctx, obj, name) {
   if (handler === undefined) {
     throw new NQPException(`Cannot find method '${name}' on object of type ${obj._STable.debugName}`);
   } else {
-    handler.$$call(ctx, null, obj, name);
+    handler.$$call(ctx, null, obj, new NativeStrArg(name));
   }
 }
 
@@ -93,7 +97,7 @@ function basicConstructor(STable) {
     return function() {
       const how = this._STable.HOW;
 
-      const method = how.find_method(null, null, how, this, name);
+      const method = how.find_method(null, null, how, this, new NativeStrArg(name));
 
       if (method === Null) {
         methodNotFoundError(arguments[0], arguments[2], name);
@@ -401,7 +405,7 @@ class P6opaque {
           }
 
           slots.push(curAttr);
-          names.push(attr.get('name'));
+          names.push(attr.get('name').$$getStr());
 
           if (attrType !== undefined && attrType !== Null && attrType._STable.REPR.flattenSTable) {
             this.flattenedSTables.push(attrType._STable);
@@ -742,9 +746,10 @@ class P6int extends REPR {
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
     const attr = slotToAttr(slot);
-    /* TODO - use actual type instead of NQPInt */
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      return new NQPInt(this[attr]);
+      const obj = attrContentSTable.REPR.allocate(attrContentSTable);
+      obj.$$setInt(this[attr]);
+      return obj;
     });
   }
 
@@ -824,10 +829,10 @@ class P6num extends REPR {
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
     const attr = slotToAttr(slot);
 
-    /* TODO wrap object more correctly */
-
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      return this[attr];
+      const obj = attrContentSTable.REPR.allocate(attrContentSTable);
+      obj.$$setNum(this[attr]);
+      return obj;
     });
   }
 };
@@ -889,8 +894,11 @@ class P6str extends REPR {
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
     const attr = slotToAttr(slot);
+
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      return this[attr];
+      const obj = attrContentSTable.REPR.allocate(attrContentSTable);
+      obj.$$setStr(this[attr]);
+      return obj;
     });
   }
 };
@@ -1077,10 +1085,6 @@ class VMArray extends REPR {
         return this.array;
       }
 
-      $$iterator() {
-        return new Iter(this.array);
-      }
-
       $$numify() {
         return this.array.length;
       }
@@ -1114,6 +1118,10 @@ class VMArray extends REPR {
 
     if (this.primType === 0) {
       STable.addInternalMethods(class {
+        $$iterator() {
+          return new iter.Iter(this.array);
+        }
+
         $$atpos(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return Null;
@@ -1173,6 +1181,10 @@ class VMArray extends REPR {
       STable.addInternalMethod('$$mangle', mangle || (value => value));
 
       STable.addInternalMethods(class {
+        $$iterator() {
+          return new iter.IterInt(this.array);
+        }
+
         $$push_i(value) {
           if (this._SC !== undefined) this.$$scwb();
           this.array.push(this.$$mangle(value));
@@ -1209,6 +1221,10 @@ class VMArray extends REPR {
       });
     } else if (this.primType === 2) {
       STable.addInternalMethods(class {
+        $$iterator() {
+          return new iter.IterNum(this.array);
+        }
+
         $$atpos_n(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return 0.0;
@@ -1245,6 +1261,10 @@ class VMArray extends REPR {
       });
     } else if (this.primType === 3) {
       STable.addInternalMethods(class {
+        $$iterator() {
+          return new iter.IterStr(this.array);
+        }
+
         $$atpos_s(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return nullStr;
@@ -1727,7 +1747,7 @@ class Decoder extends REPR {
 
       $$decodersetlineseps(ctx, seps) {
         this.$$check();
-        this.$$seps = seps.array.map(sep => nqp.toStr(sep, ctx));
+        this.$$seps = seps.array;
       }
 
       $$decoderaddbytes(bytes) {

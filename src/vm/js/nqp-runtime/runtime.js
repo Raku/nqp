@@ -6,6 +6,7 @@ const refs = require('./refs.js');
 
 const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
 
 const NQPException = require('./nqp-exception.js');
 
@@ -33,6 +34,7 @@ const fs = require('fs');
 
 exports.NQPInt = NQPInt;
 exports.NQPNum = NQPNum;
+exports.NQPStr = NQPStr;
 
 function loadOps(module) {
   for (const name in module.op) {
@@ -113,7 +115,7 @@ exports.numToStr = coercions.numToStr;
 
 let libpath = [];
 exports.libpath = function(paths) {
-  libpath = paths;
+  libpath = paths.map(path => typeof path === 'string' ? path : path.$$getStr());
 };
 
 exports.loaderCtx = null;
@@ -202,8 +204,9 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 
 exports.toStr = function(arg_, ctx) {
   const arg = arg_.$$decont(ctx);
-  if (typeof arg == 'string') {
-    return arg;
+
+  if (arg instanceof NQPStr) {
+    return arg.value;
   } else if (arg === Null) {
     return '';
   } else if (arg === nullStr) {
@@ -214,7 +217,6 @@ exports.toStr = function(arg_, ctx) {
     return arg.$$getStr();
   } else if (arg.Str) {
     const ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
-    if (typeof ret == 'string') return ret;
     return ret.$$getStr();
   } else if (arg.$$getNum) {
     return coercions.numToStr(arg.$$getNum());
@@ -230,8 +232,8 @@ exports.toNum = function(arg_, ctx) {
   const arg = arg_.$$decont(ctx);
   if (arg === Null) {
     return 0;
-  } else if (typeof arg == 'string') {
-    return coercions.strToNum(arg);
+  } else if (arg instanceof NQPStr) {
+    return coercions.strToNum(arg.value);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
     const result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (result.$$getNum) {
@@ -326,7 +328,7 @@ exports.NYI = function(msg) {
 };
 
 exports.args = function(module) {
-  return require.main === module ? process.argv.slice(1) : [];
+  return require.main === module ? process.argv.slice(1).map(arg => new NativeStrArg(arg)) : [];
 };
 
 exports.NQPException = NQPException;
@@ -339,33 +341,6 @@ exports.setCodeRefHLL = function(codeRefs, currentHLL) {
   for (let i = 0; i < codeRefs.length; i++) {
     codeRefs[i].hll = currentHLL;
   }
-};
-
-
-/* TODO - make monkey patching builtin things optional */
-
-String.prototype.$$decont = function(ctx) {
-  return this;
-};
-
-String.prototype.$$toBool = function(ctx) {
-  return this === '' ? 0 : 1;
-};
-
-String.prototype.$$can = function(ctx, name) {
-  return 0;
-};
-
-String.prototype.$$istype = function(ctx, type) {
-  return 0;
-};
-
-String.prototype.$$isrwcont = function(ctx) {
-  return 0;
-};
-
-String.prototype.$$getStr = function() {
-  return this;
 };
 
 exports.null_s = nullStr;
@@ -486,6 +461,8 @@ exports.arg_n = function(ctx, contedArg) {
 
 exports.arg_s = function(ctx, contedArg) {
   if (contedArg instanceof NativeStrArg) {
+    return contedArg.value;
+  } else if (contedArg instanceof NQPStr) {
     return contedArg.value;
   } else if (contedArg instanceof NativeIntArg) {
     throw new NQPException('Expected native str argument, but got int');

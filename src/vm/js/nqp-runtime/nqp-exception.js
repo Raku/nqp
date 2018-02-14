@@ -1,3 +1,5 @@
+const NQPStr = require('./nqp-str.js');
+
 class NQPException extends Error {
   constructor(message) {
     super(message);
@@ -5,7 +7,7 @@ class NQPException extends Error {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.$$message;
+    return new NQPStr(this.$$message);
   }
 
   $$toBool(ctx) {
