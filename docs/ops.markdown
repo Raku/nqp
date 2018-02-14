@@ -1628,25 +1628,6 @@ Output the given object to the filehandle. Returns the number of bytes written.
 
 # <a id="extern"></a> External command Opcodes
 
-## shell
-* `shell(str $cmd, str $path, %env)`
-
-Using $path as the working directory, execute the given command using the
-specified environment variables. Returns a POSIX-style return value. Command
-is executed using an OS-appropriate shell (`sh -c` or `cmd /c`). Blocks
-until command is complete.
-
-## spawn
-* `spawn(@cmd, str $path, %env)`
-
-Using $path as the working directory, execute the given command  using the
-specified environment variables. Returns a POSIX-style return value. No shell
-processing of args is done. The first value of `@args` is the command
-executed, further values are passed as arguments. Blocks until command is
-complete.
-
-# <a id="filedirnet"></a> File / Directory / Network Opcodes
-
 ## chdir
 * `chdir(str $path)`
 
