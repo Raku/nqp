@@ -1,6 +1,6 @@
 #! nqp
 
-plan(29);
+plan(31);
 
 class Foo {
     has $!answer;
@@ -83,7 +83,10 @@ ok(nqp::getattr_n($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr_n');
 is(nqp::getattr_s($low, Lowlevel, '$!str'), 'hello world', 'nqp::getattr_s');
 ok(nqp::eqaddr(nqp::getattr($low, Lowlevel, '$!obj'), $obj), 'nqp::getattr');
 
-ok(nqp::getattr($low, Lowlevel, '$!int') == 456, 'nqp::getattr for an int attribute get the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!int') == 456, 'nqp::getattr for an int attribute gets the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr for an num attribute gets the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!str') eq 'hello world', 'nqp::getattr for an str attribute gets the correct value');
+
 ok(nqp::isint(nqp::getattr($low, Lowlevel, '$!int')), '...as an int');
 
 class ClassA {
