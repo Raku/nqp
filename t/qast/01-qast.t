@@ -1,6 +1,6 @@
 use QAST;
 
-plan(167);
+plan(168);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -2528,3 +2528,12 @@ is_qast(
         "SpecialArg: Parent doesn't have dump_extra_node_info; doesn't die"
     );
 }
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Stmts.new(
+        )
+    ),
+    -> $r {
+      ok(nqp::isnull($r), 'a empty QAST::Stmts produces a nqp::null');
+    });
