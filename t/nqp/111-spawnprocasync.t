@@ -16,7 +16,9 @@ my sub create_buf($type) {
 
 # reusable vars
 my str $s; # for testing output
-my $regex;
+my $string;
+my $command;
+my $args;
 # reusable vars needing reset
 my $done         := 0;
 my $read_all     := 0;
@@ -52,8 +54,10 @@ my $config := nqp::hash(
 );
 
 # define a task
-my $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', 'echo aardvarks')
-                        !! nqp::list('/bin/sh', '-c', 'echo aardvarks');
+$string  := "expected output";
+$command := "echo $string";
+$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
+                     !! nqp::list('/bin/sh', '-c', $command);
 my $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
 nqp::permit($task, 1, -1);
 
@@ -76,7 +80,7 @@ for @stdout_bytes -> $bytes {
     nqp::decoderaddbytes($dec, $bytes);
 }
 $s := nqp::decodertakeallchars($dec);
-ok($s ~~ /^aardvarks\s*$/, 'got the correct output on stdout');
+ok($s ~~ / $string /, 'got the correct output on stdout');
 
 #== test for stderr ============
 # reset some reusable vars
@@ -85,8 +89,10 @@ $read_all     := 0;
 $called_ready := 0;
 
 # define the task
-$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', 'foo')
-                     !! nqp::list('/bin/sh', '-c', 'foo');
+$string  := "expected output";
+$command := "echo $string >&2";
+$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
+                     !! nqp::list('/bin/sh', '-c', $command);
 $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
 nqp::permit($task, 2, -1);
 
@@ -114,6 +120,5 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     skip("no output from spawnprocasync stderr on the jvm", 1);
 }
 else {
-    ok($s  ~~ / '/bin/sh:' \s+ \d+ ':' \s+ foo \s* ':' \s* not \s* found/,
-       'got the correct output on stderr');
+    ok($s ~~ / $string /, 'got the correct output on stderr');
 }
