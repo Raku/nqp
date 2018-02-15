@@ -258,18 +258,25 @@ class QAST::OperationsJS {
 
         my sub chain_part($part) {
             if is_chain($part) {
-                my $callee := $comp.as_js(QAST::Var.new(:name($part.name),:scope('lexical')), :want($T_OBJ));
-                my $left := chain_part($part[0]);
-                my $right := $comp.as_js($part[1], :want($T_OBJ));
+                # Check if callee sub in name, if not first child is callee, not arg
+                my $arg_idx := nqp::if( $part.name, 0, 1 );
+
+                my $callee := $comp.as_js( :want($T_OBJ),
+                    $part.name
+                        ?? QAST::Var.new(:name($part.name),:scope('lexical'))
+                        !! $part[0]
+                );
+                my $left := chain_part($part[$arg_idx]);
+                my $right := $comp.as_js($part[$arg_idx + 1], :want($T_OBJ));
                 my @setup;
 
                 @setup.push($left);
 
-                @setup.push("if ($ret.\$\$toBool($*CTX)) \{\n") if is_chain($part[0]);
+                @setup.push("if ($ret.\$\$toBool($*CTX)) \{\n") if is_chain($part[$arg_idx]);
                 @setup.push($callee);
                 @setup.push($right);
                 @setup.push("$ret = {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
-                @setup.push("\}") if is_chain($part[0]);
+                @setup.push("\}") if is_chain($part[$arg_idx]);
 
                 Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
             }
