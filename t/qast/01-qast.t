@@ -1,6 +1,6 @@
 use QAST;
 
-plan(168);
+plan(172);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1376,6 +1376,11 @@ sub sval($value) {
     QAST::SVal.new(:$value);
 }
 
+sub op_name($name) {
+    QAST::Var.new( :$name, :scope<lexical>)
+}
+
+
 test_qast_result(
     QAST::Block.new(
         op('op1'),
@@ -1409,8 +1414,44 @@ test_qast_result(
         ok(stringy($r[1]) eq '(C + D)', 'nqp::chain - all return true');
         ok(stringy($r[2]) eq '0', 'nqp::chain - we have falsehood');
         ok(!$dont_call, 'nqp::chain shortcircuits');
-    }
-);
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        op('op1'),
+        op('op2'),
+        op('op3'),
+        QAST::Op.new(
+            :op<list>,
+            QAST::Op.new( :op<chain>, op_name('op1'), sval('a'), sval('b')),
+            QAST::Op.new( :op<chain>, op_name('op1'),
+                QAST::Op.new( :op<chain>, op_name('op2'),
+                    QAST::Op.new( :op<chain>, op_name('op2'), sval('A'), sval('B')
+                    ),
+                    sval('C')
+                ),
+                sval('D')
+           ),
+           QAST::Op.new( :op<chain>, op_name('op1'),
+               QAST::Op.new( :op<chain>, op_name('op2'),
+                   QAST::Op.new( :op<chain>, op_name('op3'),
+                       QAST::Op.new( :op<chain>, op_name('op2'), sval('A'), sval('B')),
+                       sval('E')
+                   ),
+                   sval('C')
+               ),
+               QAST::Op.new( :op<callmethod>, :name('is_called'), QAST::WVal.new( :value(Ops) )),
+           ),
+       )
+    ),
+    -> $r {
+        ok(stringy($r[0]) eq '(a + b)', 'nqp::chain (3 argument) - just to arguments');
+        ok(stringy($r[1]) eq '(C + D)', 'nqp::chain (3 argument) - all return true');
+        ok(stringy($r[2]) eq '0', 'nqp::chain (3 argument) - we have falsehood');
+        ok(!$dont_call, 'nqp::chain (3 argument) shortcircuits');
+    });
+
+$dont_call := 0;
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
     skip("with/without are broken on the jvm", 4);
