@@ -755,9 +755,6 @@ class P6int extends REPR {
 
 
   serializeReprData(st, cursor) {
-    if (typeof this.bits != 'string' && typeof this.bits != 'number') {
-      console.log(this.bits);
-    }
     cursor.varint(this.bits);
     cursor.varint(this.isUnsigned);
   }
