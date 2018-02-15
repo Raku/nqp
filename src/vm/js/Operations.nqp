@@ -259,7 +259,7 @@ class QAST::OperationsJS {
         my sub chain_part($part) {
             if is_chain($part) {
                 # Check if callee sub in name, if not first child is callee, not arg
-                my $arg_idx := nqp::if( $part.name, 0, 1 );
+                my int $arg_idx := $part.name ?? 0 !! 1;
 
                 my $callee := $comp.as_js( :want($T_OBJ),
                     $part.name
