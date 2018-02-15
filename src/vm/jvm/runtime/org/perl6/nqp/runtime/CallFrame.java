@@ -138,6 +138,7 @@ public class CallFrame implements Cloneable {
             int numoLex = sci.oLexStatic.length;
             this.oLex = new SixModelObject[numoLex];
             for (int i = 0; i < numoLex; i++) {
+                // 0 = static, 1 = clone, 2 = state
                 switch (sci.oLexStaticFlags[i]) {
                 case 0:
                     this.oLex[i] = sci.oLexStatic[i];
@@ -148,6 +149,7 @@ public class CallFrame implements Cloneable {
                 case 2:
                     if (cr.oLexState == null) {
                         cr.oLexState = new SixModelObject[sci.oLexStatic.length];
+                        cr.oLexStateIsHllInit = new boolean[sci.oLexStatic.length];
                         this.stateInit = true;
                     }
                     if (cr.oLexState[i] == null)
