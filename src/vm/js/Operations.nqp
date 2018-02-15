@@ -699,9 +699,6 @@ class QAST::OperationsJS {
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :side_effects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
-    # TODO
-    # add_simple_op('nfatostatelist', $T_OBJ, [$T_OBJ]);
-
     add_op('callmethod', sub ($comp, $node, :$want) {
         my @args := nqp::clone($node.list);
 
