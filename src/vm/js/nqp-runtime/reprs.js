@@ -24,6 +24,9 @@ const codecs = require('./codecs.js');
 const graphemeRegexp = require('./graphemes').regexp;
 
 const nativeArgs = require('./native-args.js');
+
+const NativeIntArg = nativeArgs.NativeIntArg;
+const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
 const EDGE_FATE = 0;
@@ -1119,6 +1122,10 @@ class VMArray extends REPR {
           return new iter.Iter(this.array);
         }
 
+        $$flatArgs() {
+          return this.array;
+        }
+
         $$atpos(index) {
           const value = this.array[index < 0 ? this.array.length + index : index];
           if (value === undefined) return Null;
@@ -1178,6 +1185,10 @@ class VMArray extends REPR {
       STable.addInternalMethod('$$mangle', mangle || (value => value));
 
       STable.addInternalMethods(class {
+        $$flatArgs() {
+          return this.array.map(arg => new NativeIntArg(arg));
+        }
+
         $$iterator() {
           return new iter.IterInt(this.array);
         }
@@ -1218,6 +1229,10 @@ class VMArray extends REPR {
       });
     } else if (this.primType === 2) {
       STable.addInternalMethods(class {
+        $$flatArgs() {
+          return this.array.map(arg => new NativeNumArg(arg));
+        }
+
         $$iterator() {
           return new iter.IterNum(this.array);
         }
@@ -1258,6 +1273,10 @@ class VMArray extends REPR {
       });
     } else if (this.primType === 3) {
       STable.addInternalMethods(class {
+        $$flatArgs() {
+          return this.array.map(arg => new NativeStrArg(arg));
+        }
+
         $$iterator() {
           return new iter.IterStr(this.array);
         }

@@ -326,7 +326,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 else {
                     my $arg_chunk := self.as_js($arg, :want($T_OBJ));
                     @setup.push($arg_chunk);
-                    @groups.push("({$arg_chunk.expr}).array");
+                    @groups.push("({$arg_chunk.expr}).\$\$flatArgs()");
                     @groups.push([]);
                 }
             }
