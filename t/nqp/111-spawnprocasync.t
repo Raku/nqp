@@ -54,7 +54,7 @@ my $config := nqp::hash(
 );
 
 # define a task
-$string  := "expected output";
+$string  := "expected output from stdout";
 $command := "echo $string";
 $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
                      !! nqp::list('/bin/sh', '-c', $command);
@@ -65,11 +65,11 @@ nqp::permit($task, 1, -1);
 while !$done || !$read_all {
   if nqp::shift($queue) -> $task {
     if nqp::list($task) {
-      my $code := nqp::shift($task);
-      $code(|$task);
+        my $code := nqp::shift($task);
+        $code(|$task);
     }
     else {
-      $task();
+        $task();
     }
   }
 }
@@ -89,7 +89,7 @@ $read_all     := 0;
 $called_ready := 0;
 
 # define the task
-$string  := "expected output";
+$string  := "expected output from stderr";
 $command := "echo $string >&2";
 $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
                      !! nqp::list('/bin/sh', '-c', $command);
@@ -100,11 +100,11 @@ nqp::permit($task, 2, -1);
 while !$done || !$read_all {
   if nqp::shift($queue) -> $task {
     if nqp::list($task) {
-      my $code := nqp::shift($task);
-      $code(|$task);
+        my $code := nqp::shift($task);
+        $code(|$task);
     }
     else {
-      $task();
+        $task();
     }
   }
 }
