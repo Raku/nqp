@@ -419,7 +419,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
             } else {
                 my int $type := self.type_from_typeobj($param.returns);
-                my $suffix := self.suffix_from_type($type);
+                my str $suffix := self.suffix_from_type($type);
                 my sub unpack($value) {
                     if $type == $T_INT8 || $type == $T_INT16 {
                         self.int_to_fancy_int($type, "nqp.arg_i($*CTX, $value)");
@@ -1895,9 +1895,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
 
                     my int $is_fancy_int := $type == $T_INT8 || $type == $T_INT16;
-                    my $suffix := self.suffix_from_type($type);
-                    my $get := self.get_var($var);
-                    my $set := self.set_var($var, self.int_to_fancy_int($type, 'value'));
+                    my str $suffix := self.suffix_from_type($type);
+                    my str $get := self.get_var($var);
+                    my str $set := self.set_var($var, self.int_to_fancy_int($type, 'value'));
 
                     Chunk.new($T_OBJ, "nqp.lexRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
                 }
@@ -1911,7 +1911,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
                     }
                     else {
-                        my $suffix := self.suffix_from_type($ref_type);
+                        my str $suffix := self.suffix_from_type($ref_type);
                         return Chunk.new($ref_type, self.get_var($var) ~ ".\$\$decont{$suffix}()", :node($var));
                     }
                 }
@@ -1956,7 +1956,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             @setup.push($self);
 
-            my $suffix := self.suffix_from_type($type);
+            my str $suffix := self.suffix_from_type($type);
 
             if 0 {
                 # TODO - use hint
@@ -1987,7 +1987,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 #$hint := nqp::hintfor($var[1].compile_time_value, $var.name);
             }
 
-            my $suffix := self.suffix_from_type($type);
+            my str $suffix := self.suffix_from_type($type);
 
             my $self := self.as_js_clear_bindval($var[0], :want($T_OBJ));
 
