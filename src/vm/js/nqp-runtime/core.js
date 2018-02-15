@@ -601,6 +601,8 @@ function fromJS(obj) {
     return Null;
   } else if (typeof obj === 'number') {
     return new NQPNum(obj);
+  } else if (typeof obj === 'string') {
+    return new NQPStr(obj);
   } else {
     return obj;
   }
