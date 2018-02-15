@@ -1548,7 +1548,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         self.mark_serializable($node[0]);
 
         # Compile the block.
-        my $block_js := self.compile_block($node[0], $*BLOCK, $*LOOP, :hll($node.hll), :want(($instant && nqp::defined($node.main)) ?? $T_VOID !! $T_OBJ));
+        my $block_js := self.compile_block($node[0], $*BLOCK, $*LOOP, :hll($node.hll), :want($T_OBJ));
 
         my @post;
         for $node.post_deserialize -> $node {
