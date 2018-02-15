@@ -817,7 +817,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my str $result_var;
 
-        my str $result;
+        my str $result := 'nqp.Null';
 
         if nqp::defined($expr) {
             $result := $expr;
