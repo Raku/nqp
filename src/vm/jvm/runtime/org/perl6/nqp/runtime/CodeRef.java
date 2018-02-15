@@ -39,6 +39,11 @@ public class CodeRef extends SixModelObject {
     public SixModelObject[] oLexState;
 
     /**
+     * Has the given statevar been assigned a value by the HLL?
+     */
+    public boolean[] oLexStateIsHllInit;
+
+    /**
      * The (human-readable) name of the code-ref (not in staticInfo as a
      * number of places want to tweak it per closure clone).
      */
