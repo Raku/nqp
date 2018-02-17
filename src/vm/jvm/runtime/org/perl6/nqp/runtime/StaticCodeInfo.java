@@ -59,6 +59,11 @@ public class StaticCodeInfo implements Cloneable {
     public byte[] oLexStaticFlags;
 
     /**
+     * Has the given lexical been assigned a value by the HLL?
+     */
+    public boolean[] oLexStaticIsHllInit;
+
+    /**
      * Names of the lexicals we have of each of the base types.
      */
     public String[] oLexicalNames;
@@ -172,6 +177,7 @@ public class StaticCodeInfo implements Cloneable {
         if (oLexicalNames != null) {
             this.oLexStatic = new SixModelObject[oLexicalNames.length];
             this.oLexStaticFlags = new byte[oLexicalNames.length];
+            this.oLexStaticIsHllInit = new boolean[oLexicalNames.length];
         }
         this.argsExpectation = argsExpectation;
         MethodType t = mh.type();
@@ -209,6 +215,7 @@ public class StaticCodeInfo implements Cloneable {
             if (result.oLexStatic != null) {
                 result.oLexStatic = result.oLexStatic.clone();
                 result.oLexStaticFlags = result.oLexStaticFlags.clone();
+                result.oLexStaticIsHllInit = result.oLexStaticIsHllInit.clone();
             }
             return result;
         }
