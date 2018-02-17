@@ -1,19 +1,128 @@
 # NQP Built-in Subs List
 
-The following subroutines are available to use in ```nqp``` programs.
-They are described in ```nqp/src/core``` modules.
+The following subroutines are available to use in `nqp` programs.
+They are described in `nqp/src/core` modules.
 
-# From ```nqp/src/core/Regex.nqp```
+# From `nqp/src/core/Regex.nqp`
 
 ## match
-* `match($text, $regex, :$global?)`
+* `match($text, $regex, :$global? --> @array)`
 
-Match ```$text``` against ```$regex```.  If the ```$global``` flag is
+Match `$text` against `$regex`.  If the `$global` flag is
 given, then return an array of all non-overlapping matches.
 
 ## subst
-* `subst($text, $regex, $replacement, :$global?)`
+* `subst($text, $regex, $replacement, :$global? --> str)`
 
-Substitute a match of ```$regex``` in ```$text``` with ```$replacement```,
-returning the substituted string.  If ```$global``` is given, then
-perform the replacement on all matches of ```$text```.
+Substitute a match of `$regex` in `$text` with `$replacement`,
+returning the substituted string.  If `$global` is given, then
+perform the replacement on all matches of `$text`.
+
+# From `nqp/src/core/IO.nqp`
+
+## open
+* `open($filename, :$r, :$w, :$a, :$bin, :$enc, :$chomp --> $filehandle)`
+
+Open file `$filename`. Options:
++ :w - open for writing
++ :r - open for reading (default)
++ :a - open for appending
++ :bin - open in binary  mode
++ :enc - define encoding (default: `utf8`)
++ :chomp - strip ending newlines (default: true)
+
+## close
+* `close($fh)`
+
+Close the file attached to file handle `$fh`.
+
+## slurp
+* `slurp ($filename --> str)`
+
+Returns the contents of `$filename` as a single string.
+
+## spew
+* `spew($filename, $contents)`
+
+Write the string value of `$contents` to `$filename`.
+
+## say
+* `say($string)`
+
+Write `$string` to `stdout` with a newline added.
+
+## note
+* `note($string)`
+
+Write `$string` to `stderr` with a newline added.
+
+## join
+* `join($delim, @array --> str)`
+
+Returns a string formed by joining each element of `@array`
+with the `$delim`.
+
+## print
+* `print($string)`
+
+Write `$string` to `stdout`.
+
+## stdin
+* `stdin(--> $filehandle)`
+
+Returns a file handle to `stdin`.
+
+## stdout
+* `stdout(--> $filehandle)`
+
+Returns a file handle to `stdout`.
+
+## stderr
+* `stderr(--> $filehandle)`
+
+Returns a file handle to `stderr`.
+
+# File handle (fh) methods
+
+Some methods available on the file handle (fh) returned from `open`.
+Other methods available of lesser interest not documented below are:
++ flush
++ get
++ seek
++ set-encoding
++ set-nl-in
++ t
++ tell
++ wrap
+
+## fh.slurp
+* `$fh.slurp()`
+
+Reads the entire file attached to file handle `$fh`.
+
+## fh.print
+* `$fh.print($string)`
+
+Write `$string` to the file attached to file handle `$fh`.
+An ending newline is not added.
+
+## fh.say
+* `$fh.say($string)`
+
+Write `$string` to the file attached to file handle `$fh`.
+An ending newline is added.
+
+## fh.close
+* `$fh.close()`
+
+Close the file attached to file handle `$fh`.
+
+## fh.readchars
+* `$fh.readchars($nchars)`
+
+Read `$nchars` characters from file handle `$fh`.
+
+## fh.eof
+* `$fh.eof`
+
+Returns true if end-of-file has been reached on file handle `$fh`.

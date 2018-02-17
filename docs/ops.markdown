@@ -1,4 +1,4 @@
-# NQP Opcode List
+ List
 
 ## Table of Contents
 
@@ -1321,7 +1321,7 @@ must have elements of type `int8` or `uint8`.
 
 Returns an NFG string consisting of `$num-chars` graphemes, provided that
 many are available after decoding. If less than `$num-chars` characters
-can be decoded, then `nqp::null_s` will be returned. Note that some a
+can be decoded, then `nqp::null_s` will be returned. Note that a
 decoded codepoint at the end of a byte buffer may not be available as a
 character if the encoding allows the next character to be a combining
 character.
@@ -1349,7 +1349,7 @@ Decodes bytes until a line separator is reached, or all bytes have been
 decoded. If `$incomplete-ok` is zero and the separator was not found, then
 `nqp::null_s` will be returned. (Thus, `$incomplete-ok` is appropriate only
 when knowing that the end of the stream has been reached.) If `$chomp` is
-non-zero, then the separator - if present - will not be included in the
+non-zero, then the separator--if present--will not be included in the
 resulting string.
 
 ## decoderbytesavailable
@@ -2540,18 +2540,23 @@ specific to a given backend. The type to use for that is given as $handle_type.
 ## permit
 * `permit(AsyncTask $handle, int $channel, int $permits)`
 
-Takes something with the AsyncTask REPR and permits it to emit up to `$permits`
-more notifications. This is used as a back-pressure mechanism for asynchronous
-tasks that produce a stream of events, such as representing data arriving over
-a socket. Some kinds of tasks may emit on multiple channels, for example an
-asynchronous process may emit events for STDOUT and STDERR if both are of
-interest. The `$channel` argument is used to specify which channel is to get
-the permits if needed. If `$permits` is less than zero then it means there is
-no limit to the emits. If it is set to any value greater than or equal to
-zero, then:
+Takes something with the AsyncTask REPR (the `$handle` parameter) and
+permits it to emit up to `$permits` more notifications. This is used
+as a back-pressure mechanism for asynchronous tasks that produce a
+stream of events, such as representing data arriving over a
+socket. Some kinds of tasks may emit on multiple channels, for example
+an asynchronous process may emit events for STDOUT (channel 1) and
+STDERR (channel 2) if both are of interest. The `$channel` argument is
+used to specify which channel is to get the permits if needed (use a
+separate `permit` stament for each channel of interest).
+
+If `$permits` is less than zero (e.g., `permit($task, $channel, -1)`,
+then it means there is no limit to the emits.
+
+If `$permits` is set to any value greater than or equal to zero, then:
 
 * In the case unlimited emits were permitted previously, the permits will be
-  set to the new value. If the new value is zero then the reader will be
+  set to the new value. If the new value is zero, then the reader will be
   stopped.
 * Otherwise the number of permits will be incremented by the specified value.
   If the resulting number of permits allowed is greater than zero and the
