@@ -147,7 +147,7 @@ my class NQPFileHandle {
         $line
     }
 
-     method slurp() {
+    method slurp() {
         $!decoder || nqp::die("Cannot 'slurp' on a binary file handle");
         while nqp::elems(my $buf := nqp::readfh($!vmio, nqp::create($NQPBuf), 0x100000)) {
             $!decoder.add-bytes($buf);
