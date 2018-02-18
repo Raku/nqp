@@ -22,10 +22,10 @@ is(nqp::getcurhllsym("key4"), "value5", 'nqp::bindhllsym/nqp::getcurhllsym combo
 
 nqp::sethllconfig('foobar', nqp::hash(
     'foreign_transform_hash', -> $hash {
-        'HASH:' ~ $hash<key>;
+        nqp::list('HASH:' ~ $hash<key>);
     },
     'foreign_transform_array', -> $array {
-        'ARRAY:' ~ $array[2];
+        nqp::list('ARRAY:' ~ $array[2]);
     },
     'foreign_transform_code', -> $code {
         sub ($value) {$code($value) * 10};
@@ -36,9 +36,9 @@ nqp::sethllconfig('foobar', nqp::hash(
 nqp::sethllconfig('empty', nqp::hash(
 ));
 
-is(nqp::hllizefor(nqp::hash('key', 'value1'), 'foobar'), 'HASH:value1', 'hllizefor with hash');
+is(nqp::atpos(nqp::hllizefor(nqp::hash('key', 'value1'), 'foobar'), 0), 'HASH:value1', 'hllizefor with hash');
 
-is(nqp::hllizefor(nqp::list('the 0th one', 'the 1st one', 'the 2nd'), 'foobar'), 'ARRAY:the 2nd', 'hllizefor with nqp::list');
+is(nqp::atpos(nqp::hllizefor(nqp::list('the 0th one', 'the 1st one', 'the 2nd'), 'foobar'), 0), 'ARRAY:the 2nd', 'hllizefor with nqp::list');
 
 
 my $list_i := nqp::list_i(1, 2, 3);
@@ -53,7 +53,7 @@ my $boot_array := nqp::create(nqp::bootarray());
 nqp::push($boot_array, 'the 0th boot one');
 nqp::push($boot_array, 'the 1th boot one');
 nqp::push($boot_array, 'the 2nd boot one');
-is(nqp::hllizefor($boot_array, 'foobar'), 'ARRAY:the 2nd boot one', 'hllizefor with nqp::bootarray');
+is(nqp::atpos(nqp::hllizefor($boot_array, 'foobar'), 0), 'ARRAY:the 2nd boot one', 'hllizefor with nqp::bootarray');
 
 my $sub := nqp::hllizefor(sub ($value) {$value+2}, 'foobar');
 ok($sub(5) == 70, 'hllizerfor with coderef');
@@ -70,13 +70,13 @@ ok(nqp::isnull(nqp::hllizefor(nqp::null(), 'empty')), 'preserving null');
 
 nqp::sethllconfig('baz', nqp::hash(
     'foreign_transform_array', -> $array {
-        'ARRAY:' ~ $array.bazify();
+        nqp::list('ARRAY:' ~ $array.bazify());
     },
     'foreign_transform_code', -> $code {
-        'CODE:' ~ $code.bazify();
+        nqp::list('CODE:' ~ $code.bazify());
     },
     'foreign_transform_hash', -> $hash {
-        'HASH:' ~ $hash.bazify();
+        nqp::list('HASH:' ~ $hash.bazify());
     }
 ));
 
@@ -120,13 +120,13 @@ my $foobar-other := FooBarOther.new;
 
 
 ok(nqp::eqaddr(nqp::hllizefor($foobar-array, "foobar"), $foobar-array), "array in correct language");
-is(nqp::hllizefor($foobar-array, "baz"), 'ARRAY:bazified array', "converting custom array");
+is(nqp::atpos(nqp::hllizefor($foobar-array, "baz"), 0), 'ARRAY:bazified array', "converting custom array");
 
 ok(nqp::eqaddr(nqp::hllizefor($foobar-code, "foobar"), $foobar-code), "code in correct language");
-is(nqp::hllizefor($foobar-code, "baz"), 'CODE:bazified code', "converting custom code");
+is(nqp::atpos(nqp::hllizefor($foobar-code, "baz"), 0), 'CODE:bazified code', "converting custom code");
 
 ok(nqp::eqaddr(nqp::hllizefor($foobar-hash, "foobar"), $foobar-hash), "hash in correct language");
-is(nqp::hllizefor($foobar-hash, "baz"), 'HASH:bazified hash', "converting custom hash");
+is(nqp::atpos(nqp::hllizefor($foobar-hash, "baz"), 0), 'HASH:bazified hash', "converting custom hash");
 
 ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "foobar"), $foobar-other), "other stuff doesn't get transformed");
 ok(nqp::eqaddr(nqp::hllizefor($foobar-other, "baz"), $foobar-other), "other stuff doesn't get transformed");

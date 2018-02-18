@@ -436,7 +436,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     nqp::sethllconfig('foo', nqp::hash(
         'foreign_transform_array', -> $array {
-            'fooifed';
+            nqp::list('fooifed');
          }
     ));
     nqp::sethllconfig('baz', nqp::hash(
@@ -476,7 +476,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     nqp::sethllconfig('somelang', nqp::hash(
         'foreign_transform_array', -> $array {
-            'fooifed';
+            nqp::list('fooifed');
          }
     ));
     my $sc := nqp::createsc('TEST_SC_12_IN');
@@ -495,7 +495,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 
     my $hllized := nqp::hllizefor($obj, "somelang");
-    ok(nqp::isstr($hllized) && $hllized eq "fooifed", "hll role is preserved correctly");
+    ok(nqp::atpos($hllized, 0) eq "fooifed", "hll role is preserved correctly");
 }
 
 # Setting the type check mode nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved by serialization
