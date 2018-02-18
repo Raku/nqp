@@ -19,7 +19,6 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
     FileChannel fc;
     FileLock lock;
-    protected boolean eof = false;
 
     public static OpenOption[] resolveOpenMode(String mode) {
         if(mode.length() == 0)
@@ -153,7 +152,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             return false;
         else {
             try {
-                eof = fc.position() >= fc.size();
+                eof = fc.size() > 0 && fc.position() >= fc.size();
                 return eof;
             }
             catch (Exception e) {
