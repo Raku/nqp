@@ -25,6 +25,8 @@ const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
 const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
+const NativeNumRet = exports.NativeNumRet = nativeArgs.NativeNumRet;
+
 const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
 const graphemes = require('./graphemes.js');
@@ -216,8 +218,8 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    const ret = arg.Str(ctx, null, arg).$$decont(ctx); // eslint-disable-line new-cap
-    return ret.$$getStr();
+    const ret = arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+    return (typeof ret === 'string' ? ret : ret.$$decont(ctx).$$getStr());
   } else if (arg.$$getNum) {
     return coercions.numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
@@ -236,7 +238,9 @@ exports.toNum = function(arg_, ctx) {
     return coercions.strToNum(arg.value);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
     const result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
-    if (result.$$getNum) {
+    if (typeof result === 'number') {
+      return result;
+    } else if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {
       return result.$$numify();
@@ -258,6 +262,61 @@ exports.toNum = function(arg_, ctx) {
 
 exports.toInt = function(arg, ctx) {
   return (exports.toNum(arg, ctx) | 0);
+};
+
+exports.retval = function(currentHLL, arg) {
+  if (typeof arg === 'number') {
+    return core.intToObj(currentHLL, arg);
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return core.strToObj(currentHLL, arg);
+  } else if (arg instanceof NativeNumRet) {
+    return core.numToObj(currentHLL, arg.value);
+  } else {
+    return arg;
+  }
+};
+
+exports.retval_bool = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg === 0 ? 0 : 1;
+  } else if (typeof arg === 'string') {
+    return arg === '' ? 0 : 1;
+  } else if (arg === nullStr) {
+    return 0;
+  } else {
+    return arg.$$toBool(ctx);
+  }
+};
+
+exports.retval_i = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg;
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return coercions.strToNum(arg)|0;
+  } else {
+    return exports.toInt(arg, ctx);
+  }
+};
+
+
+exports.retval_n = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg;
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return coercions.strToNum(arg);
+  } else {
+    return exports.toNum(arg, ctx);
+  }
+};
+
+exports.retval_s = function(ctx, arg) {
+  if (typeof arg === 'string' || arg === nullStr) {
+    return arg;
+  } else if (typeof arg === 'number') {
+    return arg.toString();
+  } else {
+    return exports.toStr(arg, ctx);
+  }
 };
 
 // Placeholder
@@ -357,7 +416,8 @@ exports.dumpObj = function(obj) {
   if (typeof obj === 'object') {
     if (obj._STable) {
       console.log(obj._STable.REPR.name);
-      console.log(obj._STable.HOW.name(null, null, obj._STable.HOW, obj));
+      const name = obj._STable.HOW.name(null, null, obj._STable.HOW, obj);
+      console.log(name instanceof NQPStr ? name.value : name);
     } else {
       console.log('no STable', obj.constructor.name);
     }
@@ -477,6 +537,8 @@ const chunkNamesToTypes = {
   T_BOOL: 4,
   T_CALL_ARG: 5,
   T_INT16: 6,
+  T_INT8: 7,
+  T_RETVAL: 8,
 
   T_VOID: -1,
   T_NONVAL: -2,

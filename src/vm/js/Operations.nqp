@@ -275,7 +275,7 @@ class QAST::OperationsJS {
                 @setup.push("if ($ret.\$\$toBool($*CTX)) \{\n") if is_chain($part[$arg_idx]);
                 @setup.push($callee);
                 @setup.push($right);
-                @setup.push("$ret = {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr});\n");
+                @setup.push("$ret = nqp.retval(HLL, {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr}));\n");
                 @setup.push("\}") if is_chain($part[$arg_idx]);
 
                 Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
@@ -657,8 +657,7 @@ class QAST::OperationsJS {
 
         my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
-        $comp.stored_result(
-            Chunk.new($T_OBJ, $callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node), :$want);
+        $comp.get_return_value($callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node, :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -727,8 +726,7 @@ class QAST::OperationsJS {
 
         @setup.push($compiled_args);
 
-        $comp.stored_result(
-            Chunk.new($T_OBJ, "{$invocant.expr}.\$\$decont($*CTX)" ~ $method ~ $call ~ $compiled_args.expr ~ ')' , @setup, :$node), :$want);
+        $comp.get_return_value("{$invocant.expr}.\$\$decont($*CTX)" ~ $method ~ $call ~ $compiled_args.expr ~ ')', @setup, :$want, :$node);
 
     });
 
@@ -1093,7 +1091,7 @@ class QAST::OperationsJS {
             }
 
             my $check_cond := $is_withy
-                ?? Chunk.new($T_INT, "{$cond.expr}.\$\$decont($*CTX).defined($*CTX, null, {$cond.expr}.\$\$decont($*CTX)).\$\$toBool($*CTX)", $cond)
+                ?? Chunk.new($T_INT, "nqp.retval(HLL, {$cond.expr}.\$\$decont($*CTX).defined($*CTX, null, {$cond.expr})).\$\$decont($*CTX).\$\$toBool($*CTX)", $cond)
                 !! $comp.coerce($cond, $T_BOOL);
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
@@ -1560,7 +1558,7 @@ class QAST::OperationsJS {
     add_simple_op('captureinnerlex', $T_OBJ, [$T_OBJ], :!inlinable, :side_effects);
 
     add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "$invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos))"
+        "nqp.retval(HLL, $invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos)))"
     }, :side_effects);
 
 
@@ -1664,10 +1662,10 @@ class QAST::OperationsJS {
 
     # Continuations
 
-    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
 
 
     # Dealing with compiled compunits

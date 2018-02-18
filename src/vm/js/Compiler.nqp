@@ -295,6 +295,23 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         0;
     }
 
+
+    # Boxes/unboxes the return value when neccessary
+    method get_return_value(str $expr, @setup, :$want, :$node) {
+        my int $unpack_as_type :=
+          ($want == $T_INT || $want == $T_STR || $want == $T_NUM)
+          ?? $want
+          !! $T_OBJ;
+
+        my str $suffix := self.suffix_from_type($unpack_as_type);
+        my str $unpacked :=
+          $want == $T_VOID
+            ?? $expr
+            !! "nqp.retval$suffix({$unpack_as_type == $T_OBJ ?? 'HLL' !! $*CTX}, $expr)";
+
+        self.stored_result(Chunk.new($unpack_as_type, $unpacked, @setup, :$node), :$want);
+    }
+
     # turns a list of arguments for a call into a js code according to our most general calling convention
     # $args is the list of QAST::Node arguments
     # returns a Chunk containing either a comma separated list of arguments or an expression that evaluates to a array of arguments
@@ -542,6 +559,27 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 return Chunk.new($T_VOID, "", $chunk.setup);
             }
 
+            if $desired == $T_RETVAL {
+                if $got == $T_OBJ {
+                    return Chunk.new($T_RETVAL, $chunk.expr, $chunk);
+                }
+                if $got == $T_BOOL {
+                    return Chunk.new($T_RETVAL, "({$chunk.expr} ? 1 : 0)", $chunk);
+                }
+                if $got_int {
+                    return Chunk.new($T_RETVAL, $chunk.expr, $chunk);
+                }
+                if $got == $T_NUM {
+                    return Chunk.new($T_RETVAL, "new nqp.NativeNumRet({$chunk.expr})", $chunk);
+                }
+                if $got == $T_STR {
+                    return Chunk.new($T_RETVAL, $chunk.expr, $chunk);
+                }
+                if $got == $T_VOID {
+                    return Chunk.new($T_RETVAL, "nqp.Null", $chunk);
+                }
+            }
+
             if $desired == $T_CALL_ARG {
                 if $got == $T_OBJ {
                     return Chunk.new($T_CALL_ARG, $chunk.expr, $chunk);
@@ -636,6 +674,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT16} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
+                    %convert{$T_RETVAL} := 'retval';
                     nqp::die("Can't coerce $got to OBJ") unless nqp::existskey(%convert, $got);
                     return Chunk.new($T_OBJ, "nqp.{%convert{$got}}(HLL, {$chunk.expr})", $chunk);
                 }
@@ -1094,7 +1133,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             %*BLOCKS_INFO{$node.cuid} := $*BLOCK;
 
-            my int $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_OBJ;
+            my int $body_want := $node.blocktype eq 'immediate' ?? $want !! $T_RETVAL;
 
             my int $has_closure_template := $node.blocktype ne 'immediate';
 
@@ -1664,13 +1703,20 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::VarWithFallback $node, :$want) {
         my $compiled := self.compile_var($node, :$want);
-        if $*BINDVAL || ($compiled.type != $T_OBJ && $compiled.type != $T_CALL_ARG) {
+        my int $can_be_null :=
+          $compiled.type == $T_OBJ
+          || $compiled.type == $T_CALL_ARG
+          || $compiled.type == $T_RETVAL;
+
+        if $*BINDVAL || !$can_be_null {
             $compiled
         }
         else {
             my $fallback := self.as_js($node.fallback, :want($T_OBJ));
             my str $tmp := $*BLOCK.add_tmp();
-            Chunk.new($T_OBJ, $tmp, [
+
+            # We can put a T_OBJ into a T_CALL_ARG or T_RETVAL without casting
+            Chunk.new($compiled.type, $tmp, [
                 $compiled,
                 "if ({$compiled.expr} === nqp.Null) \{\n"
                     ,$fallback

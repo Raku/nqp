@@ -41,6 +41,8 @@ op.hllizefor = function(ctx, obj, language) {
     }
   }
 
+  // we don't support returning native typed stuff from foreign_transform_*
+
   if (obj instanceof Hash || role == 5) {
     const foreignTransformHash = config.get('foreign_transform_hash');
     if (foreignTransformHash === undefined) return obj;

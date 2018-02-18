@@ -45,3 +45,19 @@ class NativeStrArg {
 };
 
 exports.NativeStrArg = NativeStrArg;
+
+class NativeNumRet {
+  constructor(value) {
+    this.value = value;
+  }
+
+  $$getNum() {
+    return this.value;
+  }
+
+  $$decont() {
+    return this;
+  }
+}
+
+exports.NativeNumRet = NativeNumRet;
