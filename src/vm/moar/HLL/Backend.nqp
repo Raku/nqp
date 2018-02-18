@@ -354,7 +354,9 @@ class HLL::Backend::MoarVM {
 
         # Post-process the call data, turning objects into flat data.
         for $data {
-            post_process_call_graph_node($_<call_graph>);
+            if nqp::existskey($_, "call_graph") {
+                post_process_call_graph_node($_<call_graph>);
+            }
         }
 
         nqp::unshift($data, $id_to_thing);
