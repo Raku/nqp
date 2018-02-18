@@ -1582,7 +1582,7 @@ op.split = function(currentHLL, separator, string) {
   // TODO think if performance wise we can avoid this wrapping
   return hll.slurpyArray(currentHLL, (string !== ''
     ? (separator === '' ? graphemes.break(string) : string.split(graphemes.regexForLiteral(separator)))
-    : []).map(str => new NQPStr(str)));
+    : []).map(str => strToObj(currentHLL, str)));
 };
 
 op.exception = function() {
