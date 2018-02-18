@@ -1,4 +1,4 @@
-plan(51);
+plan(56);
 
 sub one_arg_sub($arg) {
 }
