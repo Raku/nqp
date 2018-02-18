@@ -288,9 +288,11 @@ class HLL::Backend::MoarVM {
         }
 
         sub to_sql($obj) {
-            my @profile;
-            for $obj[0] -> $k {
-                my $v := $obj[0]{$k};
+            my int $node_id := 0;
+            #my %profile := nqp::hash();
+            my $mapping := nqp::shift($obj);
+            for $mapping -> $k {
+                my $v := $mapping{$k};
                 if nqp::ishash($v) {
                     $profile_fh.say("INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
                 }
@@ -298,58 +300,64 @@ class HLL::Backend::MoarVM {
                     $profile_fh.say("INSERT INTO types VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
                 }
             }
-            for $obj[1] -> $k {
-                my $v := $obj[1]{$k};
-                if $k eq 'total_time' {
-                    @profile[0] := ~$v;
-                }
-                elsif $k eq 'spesh_time' {
-                    @profile[1] := ~$v;
-                }
-                elsif $k eq 'gcs' {
-                    for $v -> $gc {
-                        my @g := nqp::list_s();
-                        for <time retained_bytes promoted_bytes gen2_roots full cleared_bytes start_time> -> $f {
-                            nqp::push_s(@g, ~($gc{$f} // '0'));
-                        }
-                        $profile_fh.say('INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
+            for $obj -> $thread {
+                my $thisprof := nqp::list;
+                note($thread<thread>);
+                for $thread -> $k {
+                    my $v := $thread{$k};
+                    if $k eq 'total_time' {
+                        $thisprof[0] := ~$v;
                     }
-                }
-                elsif $k eq 'call_graph' {
-                    my %call_rec_depth;
-                    my int $node_id := 0;
-                    sub collect_calls(str $parent_id, %call_graph) {
-                        my str $call_id := ~$node_id;
-                        $node_id++;
-                        my @call := nqp::list_s($call_id, $parent_id);
-                        for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one deopt_all> -> $f {
-                            nqp::push_s(@call, ~(%call_graph{$f} // '0'));
+                    elsif $k eq 'spesh_time' {
+                        $thisprof[1] := ~$v;
+                    }
+                    elsif $k eq 'thread' {
+                        $thisprof[2] := ~$v;
+                    }
+                    elsif $k eq 'gcs' {
+                        for $v -> $gc {
+                            my @g := nqp::list_s();
+                            for <time retained_bytes promoted_bytes gen2_roots full responsible cleared_bytes start_time> -> $f {
+                                nqp::push_s(@g, ~($gc{$f} // '0'));
+                            }
+                            $profile_fh.say('INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
                         }
-                        my str $routine_id := ~%call_graph<id>;
-                        %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
-                        nqp::push_s(@call, ~%call_rec_depth{$routine_id});
-                        $profile_fh.say('INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
-                        if %call_graph<allocations> {
-                            for %call_graph<allocations> -> $a {
-                                my @a := nqp::list_s($call_id);
-                                for <id spesh jit count> -> $f {
-                                    nqp::push_s(@a, ~($a{$f} // '0'));
+                    }
+                    elsif $k eq 'call_graph' {
+                        my %call_rec_depth;
+                        sub collect_calls(str $parent_id, %call_graph) {
+                            my str $call_id := ~$node_id;
+                            $node_id++;
+                            my @call := nqp::list_s($call_id, $parent_id);
+                            for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one deopt_all> -> $f {
+                                nqp::push_s(@call, ~(%call_graph{$f} // '0'));
+                            }
+                            my str $routine_id := ~%call_graph<id>;
+                            %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
+                            nqp::push_s(@call, ~%call_rec_depth{$routine_id});
+                            $profile_fh.say('INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
+                            if %call_graph<allocations> {
+                                for %call_graph<allocations> -> $a {
+                                    my @a := nqp::list_s($call_id);
+                                    for <id spesh jit count> -> $f {
+                                        nqp::push_s(@a, ~($a{$f} // '0'));
+                                    }
+                                    $profile_fh.say('INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
                                 }
-                                $profile_fh.say('INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
+                            }
+                            if %call_graph<callees> {
+                                %call_rec_depth{$routine_id}++;
+                                for %call_graph<callees> -> $c {
+                                    collect_calls(~$call_id, $c);
+                                }
+                                %call_rec_depth{$routine_id}--;
                             }
                         }
-                        if %call_graph<callees> {
-                            %call_rec_depth{$routine_id}++;
-                            for %call_graph<callees> -> $c {
-                                collect_calls(~$call_id, $c);
-                            }
-                            %call_rec_depth{$routine_id}--;
-                        }
+                        collect_calls(~$node_id, $v);
                     }
-                    collect_calls(~$node_id, $v);
                 }
+                $profile_fh.say('INSERT INTO profile VALUES (' ~ nqp::join(',', $thisprof) ~ ');');
             }
-            $profile_fh.say('INSERT INTO profile VALUES (' ~ nqp::join(',', @profile) ~ ');');
         }
 
         # Post-process the call data, turning objects into flat data.
@@ -359,6 +367,8 @@ class HLL::Backend::MoarVM {
             }
         }
 
+        # The data array is normally a list of threads, but the first entry is
+        # actually our mapping for filenames and type names and such.
         nqp::unshift($data, $id_to_thing);
 
         # First make sure the template file exists if we want html
@@ -392,8 +402,8 @@ class HLL::Backend::MoarVM {
             $profile_fh.say('BEGIN;');
             $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
-            $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT);');
-            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, cleared_bytes INT, start_time INT);');
+            $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT, thread_id INT);');
+            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
             $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
