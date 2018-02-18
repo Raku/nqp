@@ -124,3 +124,27 @@ sub is_arg_null($arg) {
   nqp::isnull($arg);
 }
 ok(!is_arg_null(%hash<foo>), "%hash<foo> isn't null when used as an argument to a call");
+
+sub returns_str() {
+  my str $ret;
+  $ret := 'foo';
+  $ret;
+}
+
+sub returns_null_str() {
+  my str $ret;
+  $ret := nqp::null_s;
+  $ret;
+}
+
+my str $get_str_as_str := returns_str();
+my $get_str_as_obj := returns_str();
+
+is($get_str_as_str, 'foo', 'returning a str');
+is($get_str_as_obj, 'foo', 'returning a str');
+
+my str $get_null_str_as_str := returns_null_str();
+my $get_null_str_as_obj := returns_null_str();
+ok(nqp::isnull_s($get_null_str_as_str), 'returning a null str');
+ok(nqp::isnull_s($get_null_str_as_obj), 'returning a null str');
+ok(nqp::isstr($get_null_str_as_obj), 'returning a null str - isstr');
