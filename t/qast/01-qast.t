@@ -1,6 +1,6 @@
 use QAST;
 
-plan(172);
+plan(173);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1952,6 +1952,33 @@ test_qast_result(
         -> $r {
             ok(nqp::istype($r, $str_boxer), 'an automatically boxed str is of the correct type');
             ok($r.twice eq '244', '...and it has the correct value');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$tmp>, :scope<local>, :decl<var>),
+                        QAST::Var.new(:name<$cb>, :scope<local>, :decl<param>),
+                        QAST::Op.new(
+                            :op<bind>,
+                            QAST::Var.new(:name<$tmp>, :scope<local>),
+                            QAST::Op.new(
+                              :op<call>,
+                              QAST::Var.new(:name<$cb>, :scope<local>)
+                            )
+                        ),
+                        QAST::Var.new(:name<$tmp>, :scope<local>)
+                    )
+                )
+            )
+        ),
+        -> $r {
+            my $boxed := $r(-> {my int $int := 200; $int});
+            ok(nqp::istype($boxed, $int_boxer), 'native ints get boxed on the caller side');
         }
     );
 
