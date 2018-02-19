@@ -174,6 +174,9 @@
           <span ng-show="{{FullGCRuns > 0}}">
             The average full collection time was <strong>{{FullAverage}}ms</strong>.
           </span>
+          <span ng-show="{{AverageParticipants > 1}}">
+            On average, <strong>{{AverageParticipants}}</strong> threads participated in GC.
+          </span>
         </p>
 
         <h3>Dynamic Optimization</h3>
@@ -736,8 +739,41 @@
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
     }());
+
+    var maxSeqNum      = 0;
+    var gcParticipants = [];
+    var gcTimings      = [];
+    (function() {
+        rawData.forEach(function (data, index) {
+            gcs = data.gcs;
+            if (gcs.length == 0)
+                return;
+            let seq = gcs[gcs.length - 1].sequence;
+            if (seq > maxSeqNum)
+                maxSeqNum = seq;
+            gcs.forEach(function (data) {
+                if (typeof gcParticipants[data.sequence] == "undefined")
+                    gcParticipants[data.sequence] = [];
+                if (typeof gcTimings[data.sequence] == "undefined")
+                    gcTimings[data.sequence] = { start: Infinity, end: -Infinity, full: 0 };
+                gcParticipants[data.sequence].push(index);
+                if (data.start_time < gcTimings[data.sequence].start)
+                    gcTimings[data.sequence].start = data.start_time;
+                if (data.start_time + data.time > gcTimings[data.sequence].end)
+                    gcTimings[data.sequence].end = data.start_time + data.time;
+                gcTimings[data.sequence].full = data.full;
+            });
+        });
+        gcTimings.forEach(function (data) {
+            data.total = data.end - data.start;
+        });
+    }());
+
 
     // Register application and add controllers, increase recursion depth for callGraphController
     var moarProfApp = angular.module('moarProfApp', ['ui.bootstrap']).config(function($rootScopeProvider) {
@@ -749,6 +785,12 @@
     });
 
     moarProfApp.controller('OverviewController', function ($scope) {
+        /* It's okay to take only the first thread's data here:
+         * - the total time of the main thread should be the maximum
+         *   anyway, since all other threads are spawned from it.
+         * - Spesh time is stashed in the main thread's profile data,
+         *   even though it's actually spent in another thread.
+         */
         var totalTime     = rawData[0].total_time;
         var speshTime     = rawData[0].spesh_time;
         var gcTime        = 0;
@@ -763,15 +805,23 @@
         var deoptOnes     = 0;
         var deoptAlls     = 0;
         var osrs          = 0;
-        rawData[0].gcs.map(function (gc) {
-            gcTime += gc.time;
+        var numThreads    = rawData.length;
+
+        var averageParticipants = 0;
+        gcParticipants.forEach(function (run) {
+            averageParticipants += run.length;
+        });
+
+        averageParticipants = averageParticipants / gcParticipants.length;
+        gcTimings.map(function (gc) {
+            gcTime += gc.total;
             if (gc.full) {
                 gcFull++;
-                gcFullTime += gc.time;
+                gcFullTime += gc.total;
             }
             else {
                 gcNursery++;
-                gcNurseryTime += gc.time;
+                gcNurseryTime += gc.total;
             }
         });
         function walkCallGraphNode(node) {
@@ -785,7 +835,12 @@
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
+
+        $scope.NumThreads            = numThreads;
 
         // Time spent
         var overheadTime             = gcTime;
@@ -817,6 +872,7 @@
         $scope.FullGCRuns     = gcFull;
         $scope.NurseryAverage = +((gcNurseryTime / 1000) / gcNursery).toFixed(2);
         $scope.FullAverage    = +((gcFullTime / 1000) / gcFull).toFixed(2);
+        $scope.AverageParticipants = averageParticipants.toFixed(2);
 
         // Dynamic optimization
         var optimizedFrames    = speshEntries + jitEntries;
@@ -863,7 +919,10 @@
                 idRecDepth[node.id]--;
             }
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
 
         // Build object list per routine.
         var routineList = [];
@@ -1042,7 +1101,10 @@
                 node.callees.map(walkCallGraphNode);
             }
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
 
         // Build allocation summary.
         var allocationSummary = [];
@@ -1097,9 +1159,9 @@
     moarProfApp.controller('GCController', function ($scope) {
         // Find longest GC run.
         var longestGC = 0;
-        rawData[0].gcs.map(function (gc) {
-            if (gc.time > longestGC)
-                longestGC = gc.time;
+        gcTimings.map(function (timing) {
+            if (timing.total > longestGC)
+                longestGC = timing.total;
         });
 
         // Produce something nice to render.
