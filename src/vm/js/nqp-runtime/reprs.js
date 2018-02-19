@@ -19,6 +19,8 @@ const constants = require('./constants.js');
 
 const ref = require('ref');
 
+const Union = require('ref-union');
+
 const codecs = require('./codecs.js');
 
 const graphemeRegexp = require('./graphemes').regexp;
@@ -135,7 +137,74 @@ REPR.prototype.typeObjectFor = basicTypeObjectFor;
 REPR.prototype.compose = noopCompose;
 REPR.prototype.createObjConstructor = basicConstructor;
 
-class P6opaque {
+class REPRWithAttributes extends REPR {
+  deserializeNameToIndexMapping(cursor) {
+    const numClasses = cursor.varint();
+    this.nameToIndexMapping = [];
+
+    const slots = [];
+
+    for (let i = 0; i < numClasses; i++) {
+      this.nameToIndexMapping[i] = {slots: [], names: [], classKey: cursor.variant()};
+
+      const numAttrs = cursor.varint();
+
+      for (let j = 0; j < numAttrs; j++) {
+        const name = cursor.str();
+        const slot = cursor.varint();
+
+        this.nameToIndexMapping[i].names[j] = name;
+        this.nameToIndexMapping[i].slots[j] = slot;
+
+
+        slots[slot] = name;
+      }
+    }
+  }
+
+  serializeNameToIndexMapping(cursor) {
+    cursor.varint(this.nameToIndexMapping.length);
+    for (let i = 0; i < this.nameToIndexMapping.length; i++) {
+      cursor.ref(this.nameToIndexMapping[i].classKey);
+
+      const numAttrs = this.nameToIndexMapping[i].names.length;
+
+      cursor.varint(numAttrs);
+
+      for (let j = 0; j < numAttrs; j++) {
+        cursor.str(this.nameToIndexMapping[i].names[j]);
+        cursor.varint(this.nameToIndexMapping[i].slots[j]);
+      }
+    }
+  }
+
+  generateUniversalAccessor(STable, name, action, extraSig, scwb, actionDescription) {
+    let code = 'function(classHandle, attrName' + extraSig + ') {\n' +
+        (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
+        'switch (classHandle) {\n';
+    let classKeyIndex = 0;
+    let setup = '';
+    if (this.nameToIndexMapping) {
+      for (let i = 0; i < this.nameToIndexMapping.length; i++) {
+        const classKey = 'classKey' + classKeyIndex;
+        setup += 'var ' + classKey + ' = STable.REPR.nameToIndexMapping[' + i + '].classKey;\n';
+        code += 'case ' + classKey + ': switch (attrName) {\n';
+        for (let j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
+          const slot = this.nameToIndexMapping[i].slots[j];
+          code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ';\n';
+        }
+        code += '}\n';
+        classKeyIndex++;
+      }
+    }
+    code += `default: throw new NQPException('P6opaque: no such attribute \\'' + attrName + '\\' in type ' + classHandle._STable.debugName + ' when trying to ${actionDescription}')`;
+    code += '}\n}\n';
+    STable.compileAccessor(name, code, setup);
+  }
+
+};
+
+class P6opaque extends REPRWithAttributes {
   allocate(STable) {
     const obj = new STable.ObjConstructor();
     obj.$$setDefaults();
@@ -175,28 +244,7 @@ class P6opaque {
       }
     }
 
-    const numClasses = cursor.varint();
-    this.nameToIndexMapping = [];
-
-    const slots = [];
-
-    for (let i = 0; i < numClasses; i++) {
-      this.nameToIndexMapping[i] = {slots: [], names: [], classKey: cursor.variant()};
-
-      const numAttrs = cursor.varint();
-
-      for (let j = 0; j < numAttrs; j++) {
-        const name = cursor.str();
-        const slot = cursor.varint();
-
-        this.nameToIndexMapping[i].names[j] = name;
-        this.nameToIndexMapping[i].slots[j] = slot;
-
-
-        slots[slot] = name;
-      }
-    }
-
+    this.deserializeNameToIndexMapping(cursor);
 
     this.positionalDelegateSlot = cursor.varint();
     this.associativeDelegateSlot = cursor.varint();
@@ -292,20 +340,7 @@ class P6opaque {
       cursor.varint(0);
     }
 
-
-    cursor.varint(this.nameToIndexMapping.length);
-    for (let i = 0; i < this.nameToIndexMapping.length; i++) {
-      cursor.ref(this.nameToIndexMapping[i].classKey);
-
-      const numAttrs = this.nameToIndexMapping[i].names.length;
-
-      cursor.varint(numAttrs);
-
-      for (let j = 0; j < numAttrs; j++) {
-        cursor.str(this.nameToIndexMapping[i].names[j]);
-        cursor.varint(this.nameToIndexMapping[i].slots[j]);
-      }
-    }
+    this.serializeNameToIndexMapping(cursor);
 
     cursor.varint(this.positionalDelegateSlot);
     cursor.varint(this.associativeDelegateSlot);
@@ -449,6 +484,28 @@ class P6opaque {
     this.generateAccessors(STable);
   }
 
+  generateUniversalAccessors(STable) {
+    this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
+      return 'return this.$$getattr$' + slot + '()';
+    }, '', false, 'get a value');
+
+    this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
+      return 'return this.$$bindattr$' + slot + '(value)';
+    }, ', value', false, 'bind a value');
+
+    const suffixes = ['_s', '_i', '_n'];
+    for (const suffix of suffixes) {
+      /* TODO only check attributes of proper type */
+      this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
+        return 'return this.' + slotToAttr(slot);
+      }, '', false, 'get a value');
+
+      this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
+        return 'return (this.' + slotToAttr(slot) + ' = value)';
+      }, ', value', true, 'bind a value');
+    }
+  }
+
   generateNormalAccessors(STable, slot) {
     const attr = slotToAttr(slot);
 
@@ -497,52 +554,6 @@ class P6opaque {
     STable.compileAccessor('$$setDefaults', 'function() {\n' + defaults + '}');
     STable.compileAccessor('$$clone', 'function() {var cloned = new this._STable.ObjConstructor();' + clone + 'return cloned}');
     STable.evalGatheredCode();
-  }
-
-  generateUniversalAccessors(STable) {
-    this.generateUniversalAccessor(STable, '$$getattr', function(slot) {
-      return 'return this.$$getattr$' + slot + '()';
-    }, '', false, 'get a value');
-
-    this.generateUniversalAccessor(STable, '$$bindattr', function(slot) {
-      return 'return this.$$bindattr$' + slot + '(value)';
-    }, ', value', false, 'bind a value');
-
-    const suffixes = ['_s', '_i', '_n'];
-    for (const suffix of suffixes) {
-      /* TODO only check attributes of proper type */
-      this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
-        return 'return this.' + slotToAttr(slot);
-      }, '', false, 'get a value');
-
-      this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
-        return 'return (this.' + slotToAttr(slot) + ' = value)';
-      }, ', value', true, 'bind a value');
-    }
-  }
-
-  generateUniversalAccessor(STable, name, action, extraSig, scwb, actionDescription) {
-    let code = 'function(classHandle, attrName' + extraSig + ') {\n' +
-        (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
-        'switch (classHandle) {\n';
-    let classKeyIndex = 0;
-    let setup = '';
-    if (this.nameToIndexMapping) {
-      for (let i = 0; i < this.nameToIndexMapping.length; i++) {
-        const classKey = 'classKey' + classKeyIndex;
-        setup += 'var ' + classKey + ' = STable.REPR.nameToIndexMapping[' + i + '].classKey;\n';
-        code += 'case ' + classKey + ': switch (attrName) {\n';
-        for (let j = 0; j < this.nameToIndexMapping[i].slots.length; j++) {
-          const slot = this.nameToIndexMapping[i].slots[j];
-          code += 'case \'' + this.nameToIndexMapping[i].names[j] + '\':' + action(slot) + ';\n';
-        }
-        code += '}\n';
-        classKeyIndex++;
-      }
-    }
-    code += `default: throw new NQPException('P6opaque: no such attribute \\'' + attrName + '\\' in type ' + classHandle._STable.debugName + ' when trying to ${actionDescription}')`;
-    code += '}\n}\n';
-    STable.compileAccessor(name, code, setup);
   }
 
   generateAccessors(STable) {
@@ -674,6 +685,18 @@ class P6int extends REPR {
     return this.bits/8;
   }
 
+  asRefType() {
+    if (this.bits === 8) {
+      return ref.types.int8;
+    } else if (this.bits === 16) {
+      return ref.types.int16;
+    } else if (this.bits === 32) {
+      return ref.types.int32;
+    } else {
+      throw new NQPException(`Unsupported use in lowlevel contex, bits: ${this.bits}`);
+    }
+  }
+
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setInt(value) {
@@ -756,6 +779,22 @@ class P6int extends REPR {
     });
   }
 
+  generateUnionAccessors(ownerSTable, attrContentSTable, slot) {
+    const attr = slotToAttr(slot);
+    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+      const obj = attrContentSTable.REPR.allocate(attrContentSTable);
+      obj.$$setInt(this.$$union[attr]);
+      return obj;
+    });
+
+    ownerSTable.addInternalMethod('$$getattr$' + slot + '_i', function() {
+      return this.$$union[attr];
+    });
+
+    ownerSTable.addInternalMethod('$$bindattr$' + slot + '_i', function(value) {
+      return this.$$union[attr] = value;
+    });
+  }
 
   serializeReprData(st, cursor) {
     cursor.varint(this.bits);
@@ -2224,6 +2263,112 @@ class CStr extends REPR {
   }
 };
 reprs.CStr = CStr;
+
+class CUnion extends REPRWithAttributes {
+  allocate(STable) {
+    const obj = new STable.ObjConstructor();
+    if (!this.UnionConstructor) {
+      throw new NQPException("CUnion: must compose before allocating");
+    }
+    obj.$$union = this.UnionConstructor();
+    return obj;
+  }
+
+  compose(STable, reprInfoHash) {
+    this.nameToIndexMapping = [];
+
+    this.slotTypes = [];
+
+    let curAttr = 0;
+    const reprInfo = reprInfoHash.content.get('attribute').array;
+
+    for (let i = reprInfo.length - 1; i >= 0; i--) {
+      const entry = reprInfo[i].array;
+      const type = entry[0];
+      const attrs = entry[1].array;
+      const parents = entry[2].array;
+
+      /* If it has any attributes, give them each indexes and put them
+         * in the list to add to the layout. */
+      const numAttrs = attrs.length;
+      if (numAttrs > 0) {
+        const names = [];
+        const slots = [];
+
+        for (let j = 0; j < numAttrs; j++) {
+          const attr = attrs[j].content;
+
+          const attrType = attr.get('type');
+
+          this.slotTypes[curAttr] = attrType;
+
+/*          console.log('attrType');
+          require('nqp-runtime').dumpObj(attrType);*/
+
+          if (!attrType._STable.REPR.asRefType) {
+            throw new NQPException(`CUnion: Can't use attr ${attr.get('name').$$getStr()} as CUnion attr`);
+          }
+
+          slots.push(curAttr);
+          names.push(attr.get('name').$$getStr());
+
+          curAttr++;
+        }
+        this.nameToIndexMapping.push({classKey: type, slots: slots, names: names});
+      }
+
+      if (parents.length > 1) {
+        throw new NQPException("CUnion representation does not support multiple inheritance");
+      }
+    }
+
+    this.buildUnion(STable);
+  }
+
+  buildUnion(STable) {
+    const refTypes = {};
+    for (let slot = 0; slot < this.slotTypes.length; slot++) {
+      refTypes[slotToAttr(slot)] = this.slotTypes[slot]._STable.REPR.asRefType();
+      this.slotTypes[slot]._STable.REPR.generateUnionAccessors(STable, this.slotTypes[slot]._STable, slot);
+    }
+    this.UnionConstructor = new Union(refTypes);
+
+
+    const suffixes = ['','_s', '_i', '_n'];
+    for (const suffix of suffixes) {
+      this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
+        return 'return this.$$getattr$' + slot + suffix + '()';
+      }, '', false, 'get a value');
+
+      this.generateUniversalAccessor(STable, '$$bindattr' + suffix, function(slot) {
+        return 'return this.$$bindattr$' + slot + suffix + '(value)';
+      }, ', value', false, 'bind a value');
+    }
+
+    STable.evalGatheredCode();
+  }
+
+
+  serializeReprData(st, cursor) {
+    cursor.varint(this.slotTypes.length);
+    for (let i = 0; i < this.slotTypes.length; i++) {
+      cursor.ref(this.slotTypes[i]);
+    }
+    this.serializeNameToIndexMapping(cursor);
+  }
+
+  deserializeReprData(cursor, STable) {
+    this.slotTypes = [];
+    const slotTypeCount = cursor.varint();
+    for (let i = 0; i < slotTypeCount; i++) {
+      this.slotTypes[i] = cursor.variant();
+    }
+    this.deserializeNameToIndexMapping(cursor);
+
+    this.buildUnion(STable);
+  }
+}
+reprs.CUnion = CUnion;
 
 
 let ID = 0;

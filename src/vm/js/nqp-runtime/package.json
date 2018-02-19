@@ -21,8 +21,10 @@
     "mkdirp": "^0.5.1",
     "node-int64": "^0.4.0",
     "nqp-js-ucd": "0.0.1",
+    "nqp-unicode-data": "^2.0.0",
     "qrusage": "^1.4.0",
     "ref": "^1.3.4",
+    "ref-union": "^1.0.1",
     "sha1": "^1.1.1",
     "shortid": "2.2.8",
     "sleep": "^5.1.1",
@@ -31,7 +33,6 @@
     "unicharadata": "*",
     "unicode-collation-algorithm": "^0.0.2",
     "xorshift": "^1.1.0",
-    "xregexp": "^3.2.0",
-    "nqp-unicode-data": "^2.0.0"
+    "xregexp": "^3.2.0"
   }
 }
