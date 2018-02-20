@@ -1329,7 +1329,7 @@ class QAST::OperationsJS {
                 my str $neg := ($op eq 'while' || $op eq 'repeat_while') ?? '!' !! '';
 
                 # With perl6 we always emit all handlers
-                my $has_redo := $*HLL ne 'nqp' || $loop.has_redo || $repeat_variant; # we don't use 'my int' due to NQP bug
+                my int $has_redo := $*HLL ne 'nqp' || $loop.has_redo || $repeat_variant;
 
                 Chunk.void(
                     $repeat_variant ?? "{$loop.redo} = true;\n" !! '',
