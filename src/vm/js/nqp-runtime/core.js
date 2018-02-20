@@ -413,6 +413,10 @@ op.findmethod = function(ctx, obj, name) {
   return method;
 };
 
+op.tryfindmethod = function(ctx, obj, name) {
+  return sixmodel.findMethod(ctx, obj, name);
+};
+
 op.getcodename = function(code) {
   return code.name;
 };
