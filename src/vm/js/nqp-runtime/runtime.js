@@ -539,6 +539,8 @@ const chunkNamesToTypes = {
   T_INT16: 6,
   T_INT8: 7,
   T_RETVAL: 8,
+  T_INT16: 9,
+  T_UINT8: 10,
 
   T_VOID: -1,
   T_NONVAL: -2,

@@ -996,6 +996,10 @@ op.objprimbits = function(type) {
   return type._STable.REPR.bits;
 };
 
+op.objprimunsigned = function(type) {
+  return type._STable.REPR.isUnsigned ? 1 : 0;
+};
+
 /* Parametricity operations. */
 op.setparameterizer = function(ctx, type, parameterizer) {
   const st = type._STable;

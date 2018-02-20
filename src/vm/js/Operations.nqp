@@ -867,6 +867,7 @@ class QAST::OperationsJS {
     add_simple_op('lexprimspec', $T_INT, [$T_OBJ, $T_STR]);
     add_simple_op('objprimspec', $T_INT, [$T_OBJ]);
     add_simple_op('objprimbits', $T_INT, [$T_OBJ]);
+    add_simple_op('objprimunsigned', $T_INT, [$T_OBJ]);
 
     add_simple_op('ctxouter', :!inlinable, $T_OBJ, [$T_OBJ]);
 
@@ -1836,8 +1837,7 @@ class QAST::OperationsJS {
         %convert{$T_STR} := 'toStr';
         %convert{$T_NUM} := 'toNum';
         %convert{$T_INT} := 'toInt';
-        my int $is_fancy_int := $desired == $T_INT8 || $desired == $T_INT16;
-
+        my int $is_fancy_int := $comp.is_fancy_int($desired);
         nqp::die("Can't coerce OBJ to $desired") unless nqp::existskey(%convert, $desired) || $is_fancy_int;
 
         my str $rough_convert := 'nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})";

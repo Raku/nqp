@@ -11,6 +11,9 @@ my $T_INT8 := 7; # We use a javascript number but always treat it as a 8bit inte
 
 my $T_RETVAL := 8; # Something that will be returned from a sub/method call
 
+my $T_UINT16 := 9; # We use a javascript number but always treat it as a 16bit integer
+my $T_UINT8 := 10; # We use a javascript number but always treat it as a 8bit integer
+
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
