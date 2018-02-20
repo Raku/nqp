@@ -642,8 +642,10 @@ role NQPMatchRole is export {
 
     method !reduce(str $name) {
         my $actions := self.actions;
-        nqp::findmethod($actions, $name)($actions, self.MATCH)
-            if !nqp::isnull($actions) && nqp::can($actions, $name);
+        my $method := nqp::isnull($actions)
+            ?? nqp::null()
+            !! nqp::tryfindmethod($actions, $name);
+        $method($actions, self.MATCH) unless nqp::isnull($method);
         self;
     }
 
