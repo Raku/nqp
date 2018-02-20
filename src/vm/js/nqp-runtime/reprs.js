@@ -687,11 +687,11 @@ class P6int extends REPR {
 
   asRefType() {
     if (this.bits === 8) {
-      return ref.types.int8;
+      return this.isUnsigned ? ref.types.uint8 : ref.types.int8;
     } else if (this.bits === 16) {
-      return ref.types.int16;
+      return this.isUnsigned ? ref.types.uint16 : ref.types.int16;
     } else if (this.bits === 32) {
-      return ref.types.int32;
+      return this.isUnsigned ? ref.types.uint32 : ref.types.int32;
     } else {
       throw new NQPException(`Unsupported use in lowlevel contex, bits: ${this.bits}`);
     }
