@@ -2567,6 +2567,7 @@ QAST::MASTOperations.add_core_moarop_mapping('who', 'getwho', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('where', 'getwhere', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('objectid', 'objectid', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('findmethod', 'findmeth_s', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('tryfindmethod', 'tryfindmeth_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setwho', 'setwho', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('knowhow', 'knowhow');
