@@ -1,4 +1,4 @@
-plan(13);
+plan(16);
 
 class Foo {
     has $!attr;
@@ -13,6 +13,12 @@ class Foo {
 my $foo := Foo.new(attr => 'frob');
 is(nqp::findmethod($foo, 'foo')($foo), 'foo', 'calling result of findmethod only with invocant');
 is(nqp::findmethod($foo, 'bar')($foo, 'baz'), 'barfrobbaz', 'calling result of findmethod with argument');
+
+ok(nqp::eqaddr(nqp::findmethod($foo, 'foo'), nqp::tryfindmethod($foo, 'foo')), 'nqp::tryfindmethod works like nqp::findmethod when the method exists');
+
+dies-ok({nqp::findmethod($foo, 'no_such_method_ever')}, "nqp::findmethod throws exception when the method doesn\'t exit");
+
+ok(nqp::isnull(nqp::tryfindmethod($foo, 'no_such_method_ever')), 'nqp::tryfindmethod returns null for missing method');
 
 ok(nqp::can($foo, 'foo') == 1, 'nqp::can with existing method');
 ok(nqp::can($foo, 'no_such_method_ever') == 0, 'nqp::can with missing method');
