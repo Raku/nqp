@@ -261,7 +261,16 @@ class Ctx extends NQPObject {
           exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        let check = lookFrom;
+        while (check) {
+          if (check === ctx) {
+            throw ctx.unwind;
+          }
+          check = check.$$caller;
+        }
+
+        this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(1));
+        return;
       }
 
       ctx = ctx.$$outer;
