@@ -1247,7 +1247,8 @@ class VMArray extends REPR {
 
         $$bindpos_i(index, value) {
           if (this._SC !== undefined) this.$$scwb();
-          return this.array[index < 0 ? this.array.length + index : index] = this.$$mangle(value);
+          this.array[index < 0 ? this.array.length + index : index] = this.$$mangle(value);
+          return value;
         }
 
         $$pop_i() {
