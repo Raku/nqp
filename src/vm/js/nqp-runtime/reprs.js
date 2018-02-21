@@ -20,6 +20,7 @@ const constants = require('./constants.js');
 const ref = require('ref');
 
 const Union = require('ref-union');
+const StructType = require('ref-struct');
 
 const codecs = require('./codecs.js');
 
@@ -779,20 +780,20 @@ class P6int extends REPR {
     });
   }
 
-  generateUnionAccessors(ownerSTable, attrContentSTable, slot) {
+  generateRefAccessors(ownerSTable, attrContentSTable, slot) {
     const attr = slotToAttr(slot);
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
       const obj = attrContentSTable.REPR.allocate(attrContentSTable);
-      obj.$$setInt(this.$$union[attr]);
+      obj.$$setInt(this.$$data[attr]);
       return obj;
     });
 
     ownerSTable.addInternalMethod('$$getattr$' + slot + '_i', function() {
-      return this.$$union[attr];
+      return this.$$data[attr];
     });
 
     ownerSTable.addInternalMethod('$$bindattr$' + slot + '_i', function(value) {
-      return this.$$union[attr] = value;
+      return this.$$data[attr] = value;
     });
   }
 
@@ -2264,13 +2265,13 @@ class CStr extends REPR {
 };
 reprs.CStr = CStr;
 
-class CUnion extends REPRWithAttributes {
+class CREPR extends REPRWithAttributes {
   allocate(STable) {
     const obj = new STable.ObjConstructor();
     if (!this.UnionConstructor) {
       throw new NQPException("CUnion: must compose before allocating");
     }
-    obj.$$union = this.UnionConstructor();
+    obj.$$data = this.UnionConstructor();
     return obj;
   }
 
@@ -2322,16 +2323,17 @@ class CUnion extends REPRWithAttributes {
       }
     }
 
-    this.buildUnion(STable);
+    this.build(STable);
   }
 
-  buildUnion(STable) {
+  build(STable) {
     const refTypes = {};
     for (let slot = 0; slot < this.slotTypes.length; slot++) {
       refTypes[slotToAttr(slot)] = this.slotTypes[slot]._STable.REPR.asRefType();
-      this.slotTypes[slot]._STable.REPR.generateUnionAccessors(STable, this.slotTypes[slot]._STable, slot);
+      this.slotTypes[slot]._STable.REPR.generateRefAccessors(STable, this.slotTypes[slot]._STable, slot);
     }
-    this.UnionConstructor = new Union(refTypes);
+
+    this.UnionConstructor = this.createLowlevelConstructor(refTypes);
 
 
     const suffixes = ['','_s', '_i', '_n'];
@@ -2365,10 +2367,24 @@ class CUnion extends REPRWithAttributes {
     }
     this.deserializeNameToIndexMapping(cursor);
 
-    this.buildUnion(STable);
+    this.build(STable);
   }
-}
+};
+
+class CUnion extends CREPR {
+  createLowlevelConstructor(refTypes) {
+    return new Union(refTypes);
+  }
+};
+
+class CStruct extends CREPR {
+};
+
+
+
 reprs.CUnion = CUnion;
+
+reprs.CStruct = CUnion;
 
 
 let ID = 0;
