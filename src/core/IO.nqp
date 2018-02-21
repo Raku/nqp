@@ -293,4 +293,145 @@ sub join($delim, @things) {
     nqp::join($delim, @strs)
 }
 
+sub run-command($command, :$stdout, :$stderr) {
+    my class Queue is repr('ConcBlockingQueue') { }
+
+    # we alway capture stdout and stderr output, but we only return what is asked for
+    # use one output stream, both, or none
+    # return an array of lines for each stream called for
+    my $line-length := 85;
+    my @stdout-bytes;
+    my @stderr-bytes;
+
+    my $queue := nqp::create(Queue);
+
+    my $done         := 0;
+    my $read-all1    := 0;
+    my $read-all2    := 0;
+    my $called-ready := 0;
+
+    my $config := nqp::hash();
+    $config<done> := -> $status {
+        ++$done;
+    };
+    $config<buf_type> := create-buf(uint8);
+    $config<ready> := -> $stdout?, $stderr? {
+        ++called-ready;
+    };
+    $config<stdout_bytes> := -> $seq, $data, $err {
+        if nqp::isconcrete($data) {
+            @stdout-bytes[$seq] := $data;
+        }
+        else {
+            ++$read-all1;
+        }
+    };
+    $config<stderr_bytes> := -> $seq, $data, $err {
+        if nqp::isconcrete($data) {
+            @stderr-bytes[$seq] := $data;
+        }
+        else {
+            ++$read-all2;
+        }
+    };
+
+    my $task := nqp::spawnprocasync($queue, $command, nqp::cwd(), nqp::getenvhash(), $config);
+
+    nqp::permit($task, 1, -1);
+    nqp::permit($task, 2, -1);
+
+    while !$done || !$read-all1 || !$read-all2 {
+        if nqp::shift($queue) -> $task {
+            if nqp::list($task) {
+                my $code := nqp::shift($task);
+                $code(|$task);
+            }
+            else {
+                $task();
+            }
+        }
+    }
+
+    if $stdout || $stderr {
+        my class VMDecoder is repr('Decoder') {}
+
+        my $dec1;
+        my $dec2;
+        my @data1 := nqp::list();
+        my @data2 := nqp::list();
+        my $chomp    := 1; # line sep chars will be chomped
+        my $no-chomp := 0; # line sep chars will NOT be chomped
+        my $incomplete-ok  := 1; # take the last line even with no ending line sep
+        my $incomplete-nok := 0; # DON'T take the last line
+
+        if $stdout {
+            $dec1 := nqp::create(VMDecoder);
+            nqp::decoderconfigure($dec1, 'utf8', nqp::hash());
+            for @stdout-bytes -> $bytes {
+                nqp::decoderaddbytes($dec1, $bytes);
+            }
+            # return as lines
+            if nqp::decoderempty($dec1) {
+                @data1.push('');
+            }
+            else {
+                while nqp::decoderbytesavailable($dec1) > $line-length {
+                    @data1.push(nqp::decodertakechars($dec1, $line-length));
+                }
+                if  nqp::decoderbytesavailable($dec1) {
+                    @data1.push(nqp::decodertakeline($dec1, $no-chomp, $incomplete-ok));
+                }
+            }
+        }
+        else {
+            @data1.push('');
+        }
+
+        if $stderr {
+            $dec2 := nqp::create(VMDecoder);
+            nqp::decoderconfigure($dec2, 'utf8', nqp::hash());
+            for @stderr-bytes -> $bytes {
+                nqp::decoderaddbytes($dec2, $bytes);
+            }
+            # return as lines
+            if nqp::decoderempty($dec2) {
+                @data2.push('');
+            }
+            else {
+                while nqp::decoderbytesavailable($dec2) > $line-length {
+                    @data2.push(nqp::decodertakechars($dec2, $line-length));
+                }
+                if  nqp::decoderbytesavailable($dec2) {
+                    @data2.push(nqp::decodertakeline($dec2, $no-chomp, $incomplete-ok));
+                }
+            }
+        }
+        else {
+            @data2.push('');
+        }
+
+        my @arr := nqp::list();
+        @arr.push(@data1);
+        @arr.push(@data2);
+        return @arr;
+    }
+    else {
+        my @data1 := nqp::list();
+        my @data2 := nqp::list();
+        @data1.push('');
+        @data2.push('');
+        my @arr := nqp::list();
+        @arr.push(@data1);
+        @arr.push(@data2);
+        return @arr;
+    }
+
+    sub create-buf($type) {
+        my $buf := nqp::newtype(nqp::null(), 'VMArray');
+        nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+        nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+        $buf;
+    }
+}
+
 # vim: ft=perl6
