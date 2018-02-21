@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(107);
+plan(109);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -465,4 +465,14 @@ my sub create_buf($type) {
     nqp::unlink($dir ~ '/file1');
     nqp::unlink($dir ~ '/file2');
     nqp::rmdir($dir);
+}
+
+# test spurt
+{
+    my $s := "line 1\nline 2";
+    spurt($test-file, $s);
+    my $fh := open($test-file);
+    is($fh.get(), 'line 1', 'read from spurted line 1 ok');
+    is($fh.get(), 'line 2', 'read from spurted line 2 ok');
+    nqp::unlink($test-file);
 }

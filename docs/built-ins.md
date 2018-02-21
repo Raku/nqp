@@ -41,8 +41,8 @@ Close the file attached to file handle `$fh`.
 
 Returns the contents of `$filename` as a single string.
 
-## spew
-* `spew($filename, $contents)`
+## spurt
+* `spurt($filename, $contents)`
 
 Write the string value of `$contents` to `$filename`.
 
@@ -87,18 +87,18 @@ Returns a file handle to `stderr`.
 Some methods available on the file handle (fh) returned from `open`.
 Other methods available of lesser interest not documented below are:
 + flush
-+ get
 + seek
 + set-encoding
 + set-nl-in
++ slurp
 + t
 + tell
 + wrap
 
-## fh.slurp
-* `$fh.slurp()`
+## fh.get
+* `$fh.get()`
 
-Reads the entire file attached to file handle `$fh`.
+Reads a line from the file attached to file handle `$fh`.
 
 ## fh.print
 * `$fh.print($string)`
