@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(22);
+plan(27);
 
 
 my sub create_buf($type) {
@@ -56,14 +56,36 @@ my $hello2 := $buf8.new;
 nqp::encode('Hello World', 'utf8', $hello2);
 is(buf_dump($hello2), "72,101,108,108,111,32,87,111,114,108,100", "the buf passed to nqp::encode is actually changed");
 
-my $replaced_ascii := nqp::encoderep('åfooåbar', 'ascii', 'XXX', $buf8.new);
+# encode/decode config tests
+my $replaced_ascii := nqp::encoderepconf('åfooåbar', 'ascii', 'XXX', $buf8.new, 0);
 is(nqp::decode($replaced_ascii, "utf8"), 'XXXfooXXXbar', 'nqp::encoderep works with ascii');
 
 my $replaced_latin1 := nqp::encoderep('☃foo☃barå', 'iso-8859-1', 'XXX', $buf8.new);
 is(nqp::decode($replaced_latin1, 'iso-8859-1'), 'XXXfooXXXbarå', 'nqp::encoderep works with latin1');
 
 my $replaced_windows1252 := nqp::encoderep('☃foo☃barå', 'windows-1252', 'XXX', $buf8.new);
+
+my $replaced_w := nqp::encoderepconf("\c[129]åfooåbar→", 'windows-1252', 'XXX', $buf8.new, 1);
+is(nqp::decodeconf($replaced_w, "windows-1252", 1), "\c[129]åfooåbarXXX",
+  'nqp::encoderepconf(.., 1) only replaces things not fiting in one byte');
+my $replaced_w2 := nqp::encoderepconf("\c[129]åfooåbar", 'windows-1252', 'XXX', $buf8.new, 0);
+is(nqp::decode($replaced_w2, "windows-1252"), "XXXåfooåbar",
+  'nqp::encoderepconf(…, 0) replaces anything not officially mapped.');
+# Encode chr 129 using unstrict mode (invalid codepoint otherwise)
+my $special_windows1252 := nqp::encodeconf(nqp::chr(129), 'windows-1252', $buf8.new, 1);
+# Test that it can be decoded unstrict
+is(nqp::decodeconf($special_windows1252, 'windows-1252', 1), "\c[129]",
+  'nqp::encodeconf works with windows-1252 and non-strict. decodeconf works non-strict');
+# Test we can decode invalid codepoint and it is replaced instead on strict mode
+is(nqp::decoderepconf($special_windows1252, 'windows-1252', 'X', 0), "X",
+  "nqp::decoderepconf works on strict (does do replacement)");
+# Test that if we use non-strict mode, it leaves things that fit into Unicode
+# unchanged.
+is(nqp::decoderepconf($special_windows1252, 'windows-1252', 'X', 1), "\c[129]",
+  "nqp::decoderepconf(…,1) doesn't replace if byte fits into unicode");
+
 is(nqp::decode($replaced_latin1, 'windows-1252'), 'XXXfooXXXbarå', 'nqp::encoderep works with windows-1252');
+
 
 
 my $pi_unsigned := $buf8.new;
