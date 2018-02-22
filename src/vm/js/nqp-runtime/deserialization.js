@@ -679,7 +679,11 @@ class BinaryCursor {
     for (let i = 0; i < STables.length; i++) {
       const STable = sc.rootSTables[i];
       if (STable._methodCache instanceof Hash) {
-        STable.setLazyMethodCache(STable._methodCache.content);
+        if (STable.methodCache) {
+          STable.setMethodCache(STable._methodCache.content);
+        } else {
+          STable.setLazyMethodCache(STable._methodCache.content);
+        }
       }
     }
   }
