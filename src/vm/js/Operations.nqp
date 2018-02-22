@@ -1320,8 +1320,27 @@ class QAST::OperationsJS {
 
             my $post := '';
 
+            my str $last_exception;
+
             if +@operands == 3 {
-                $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                my $ctx := $*CTX;
+
+                if $*HLL eq 'nqp' {
+                    $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                } else {
+                    my $*CTX := $comp.unique_var('ctx');
+
+                    $last_exception := $*BLOCK.add_tmp;
+
+                    $post := Chunk.void(
+                        '(function() {',
+                        "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
+                        "$*CTX.\$\$LAST = function() \{\};",
+                        "$last_exception = \{\};\n",
+                        "$*CTX.unwind = $last_exception;\n",
+                         $comp.as_js(@operands[2], :want($T_VOID)),
+                         '})()');
+                }
             }
 
 
@@ -1335,6 +1354,7 @@ class QAST::OperationsJS {
                 Chunk.void(
                     $repeat_variant ?? "{$loop.redo} = true;\n" !! '',
                     $setup_previous_cond,
+                    $last_exception ?? "try \{\n" !! "",
                     "{$loop.js_label}: for (;;", ($post && $has_redo ?? "{$loop.redo} || " !! '') , $post, ") \{\n",
                     $comp.handle_control($loop, $control_ctx, Chunk.void(
                         ($has_redo
@@ -1348,7 +1368,8 @@ class QAST::OperationsJS {
                         ($has_redo ?? "\}\n" !! ''),
                         $body,
                     )),
-                    "\}"
+                    "\}",
+                    $last_exception ?? "\} catch (e) \{\nif (e !== $last_exception) \{throw e;\}\n\}\n" !! "",
                 );
             } elsif $repeat_variant {
                 my str $neg := $op eq 'repeat_while' ?? '' !! '!';
