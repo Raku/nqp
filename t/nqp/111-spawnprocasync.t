@@ -21,7 +21,8 @@ my $command;
 my $args;
 # reusable vars needing reset
 my $done         := 0;
-my $read_all     := 0;
+my $read-all1    := 0;
+my $read-all2    := 0;
 my $called_ready := 0;
 
 # task-specific vars
@@ -39,7 +40,7 @@ my $config := nqp::hash(
             @stdout_bytes[$seq] := $data;
         }
         else {
-            $read_all := 1;
+            ++$read-all1;
         }
     },
     'stderr_bytes', -> $seq, $data, $err {
@@ -47,7 +48,7 @@ my $config := nqp::hash(
             @stderr_bytes[$seq] := $data;
         }
         else {
-            $read_all := 1;
+            ++$read-all2;
         }
     },
     'buf_type', create_buf(uint8)
@@ -60,9 +61,10 @@ $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
                      !! nqp::list('/bin/sh', '-c', $command);
 my $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
 nqp::permit($task, 1, -1);
+nqp::permit($task, 2, -1);
 
 # run the task
-while !$done || !$read_all {
+while !$done || !$read-all1 || !$read-all2 {
   if nqp::shift($queue) -> $task {
     if nqp::list($task) {
         my $code := nqp::shift($task);
@@ -85,7 +87,8 @@ ok($s ~~ / $string /, 'got the correct output on stdout');
 #== test for stderr ============
 # reset some reusable vars
 $done         := 0;
-$read_all     := 0;
+$read-all1    := 0;
+$read-all2    := 0;
 $called_ready := 0;
 
 # define the task
@@ -94,10 +97,11 @@ $command := "echo $string >&2";
 $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
                      !! nqp::list('/bin/sh', '-c', $command);
 $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
+nqp::permit($task, 1, -1);
 nqp::permit($task, 2, -1);
 
 # run the task
-while !$done || !$read_all {
+while !$done || !$read-all1 || !$read-all2 {
   if nqp::shift($queue) -> $task {
     if nqp::list($task) {
         my $code := nqp::shift($task);
@@ -115,10 +119,4 @@ for @stderr_bytes -> $bytes {
     nqp::decoderaddbytes($dec, $bytes);
 }
 $s := nqp::decodertakeallchars($dec);
-
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("no output from spawnprocasync stderr on the jvm", 1);
-}
-else {
-    ok($s ~~ / $string /, 'got the correct output on stderr');
-}
+ok($s ~~ / $string /, 'got the correct output on stderr');
