@@ -92,6 +92,8 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
         /* Reset readBuffer since content is out of sync after fc.position. */
         readBuffer = null;
+        /* Reset eof since it might have changed; needs to be checked anew. */
+        eof = false;
     }
 
     public long tell(ThreadContext tc) {
