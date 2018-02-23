@@ -1452,13 +1452,37 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my str $quoted_data := nqp::isnull_s($sc_data) ?? 'null' !! quote_string($sc_data);
 
+        self.declare_var(QAST::Var.new( :name('conflicts'), :scope('local'), :decl('var')));
+
+        my $resolve_conflicts;
+        if $ast.repo_conflict_resolver {
+            $resolve_conflicts := $ast.repo_conflict_resolver;
+            $resolve_conflicts.push(QAST::Var.new( :name('conflicts'), :scope('local') ));
+        } else {
+            $resolve_conflicts := QAST::Op.new(
+                :op('die_s'),
+                QAST::SVal.new( :value('Repossession conflicts occurred during deserialization') )
+            );
+        }
+
+        my $resolve_conflicts_chunk := self.as_js(QAST::Op.new(
+            :op('if'),
+            QAST::Op.new(
+                :op('elems'),
+                QAST::Var.new( :name('conflicts'), :scope('local') )
+            ),
+            $resolve_conflicts
+        ), :want($T_VOID));
 
         Chunk.void(
             "var sh = nqp.createArray([{nqp::join(',',@sh)}]);\n"
             ~ "var sc = nqp.op.createsc({quote_string(nqp::scgethandle($sc))});\n"
             ~ self.emit_code_refs_list($ast)
-            , "nqp.op.deserialize(HLL, $quoted_data,sc,sh,code_refs,null,cuids,function() \{{self.setup_wvals}\});\n"
-            ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n");
+            ~ "{$*BLOCK.mangle_local('conflicts')} = nqp.list(HLL, []);\n"
+            , "nqp.op.deserialize(HLL, $quoted_data,sc,sh,code_refs,{$*BLOCK.mangle_local('conflicts')},cuids,function() \{{self.setup_wvals}\});\n"
+            ~ "nqp.op.scsetdesc(sc,{quote_string(nqp::scgetdesc($sc))});\n",
+            $resolve_conflicts_chunk
+        );
     }
 
     method do_control($type, $loop) {
@@ -1631,7 +1655,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL);\n";
 
         my $set_code_objects := self.set_code_objects;
-        my @setup := [$pre , $comp_mode ?? self.create_sc($node) !! '', $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.declare_js_vars($*BLOCK.js_lexicals), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
+        my $create_sc := $comp_mode ?? self.create_sc($node) !! '';
+        my @setup := [$pre , self.declare_js_vars($*BLOCK.js_lexicals), $create_sc, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }

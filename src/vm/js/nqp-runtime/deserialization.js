@@ -23,6 +23,8 @@ const NQPInt = require('./nqp-int.js');
 const NQPNum = require('./nqp-num.js');
 const NQPStr = require('./nqp-str.js');
 
+const NQPException = require('./nqp-exception.js');
+
 /* Possible reference types we can serialize. */
 const REFVAR_NULL = 1;
 const REFVAR_OBJECT = 2;
@@ -45,7 +47,7 @@ module.exports.wval = function(handle, idx) {
   return serializationContexts[handle].rootObjects[idx];
 };
 
-op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflict, cuids, setupWVals) {
+op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, setupWVals) {
   const buffer = new Buffer(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
@@ -58,7 +60,7 @@ op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflict, cuids, s
   sh = sh.array;
   const cursor = new BinaryCursor(buffer, 0, sh, sc);
 
-  cursor.deserialize(sc, cuids, setupWVals, currentHLL);
+  cursor.deserialize(sc, cuids, conflicts, setupWVals, currentHLL);
 };
 
 op.createsc = function(handle) {
@@ -528,7 +530,7 @@ class BinaryCursor {
     Resolve the static variables in all CodeRefs contained in cuids
    */
 
-  deserialize(sc, cuids, setupWVals, currentHLL) {
+  deserialize(sc, cuids, conflicts, setupWVals, currentHLL) {
     const version = this.int32();
 
     this.sc = sc;
@@ -588,7 +590,7 @@ class BinaryCursor {
 
     this.stubSTables(STables);
 
-    this.repossessObjects(objects, repossessed);
+    this.repossessObjects(objects, repossessed, conflicts);
 
     this.stubObjects(objects);
 
@@ -746,15 +748,27 @@ class BinaryCursor {
       if (entry.type === 1) {
         const origSTable = this.sc.deps[entry.origSC].rootSTables[entry.origIndex];
         this.sc.rootSTables[entry.index] = origSTable;
+
+        if (origSTable._SC != this.sc.deps[entry.origSC]) {
+          throw new NQPException('STable conflict detected during deserialization.\n'
+            + '(Probable attempt to load a mutated module or modules that cannot be loaded together).');
+        }
+
         origSTable._SC = this.sc;
       }
     }
   }
 
-  repossessObjects(objects, repossessed) {
+  repossessObjects(objects, repossessed, conflicts) {
     for (const entry of repossessed) {
       if (entry.type === 0) {
         const origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
+        if (origObj._SC !== this.sc.deps[entry.origSC]) {
+          const backup = origObj.typeObject_ ? origObj._STable.createTypeObject() : origObj.$$clone();
+          conflicts.$$push(backup);
+          conflicts.$$push(origObj);
+        }
+
         this.sc.rootObjects[entry.index] = origObj;
         origObj._SC = this.sc;
 
