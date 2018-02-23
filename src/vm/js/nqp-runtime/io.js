@@ -320,7 +320,16 @@ op.chdir = function(dir) {
 };
 
 op.rmdir = function(dir) {
-  fs.rmdirSync(dir);
+  try {
+    fs.rmdirSync(dir);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+    } else if (err.code === 'ENOTEMPTY') {
+      throw new NQPException('Failed to rmdir: directory not empty');
+    } else {
+      throw err;
+    }
+  }
 };
 
 op.mkdir = function(dir, mode) {
