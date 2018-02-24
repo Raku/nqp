@@ -126,3 +126,39 @@ Read `$nchars` characters from file handle `$fh`.
 * `$fh.eof`
 
 Returns true if end-of-file has been reached on file handle `$fh`.
+
+# From `nqp/src/core/testing.nqp`
+
+## plan
+* `plan($quantity --> str)`
+
+## ok
+* `ok($condition, $descrip?)`
+
+## is
+* `is($got, $expected, $desc?)`
+
+## todo
+* `todo($reason, $count)`
+
+## skip
+* `skip($desc, $count=1)`
+
+## bug-workaround
+* `bug-workaround($code)`
+
+If `$code` dies, returns the error message.
+
+## dies-ok
+* `dies-ok($code, $description, :$message)`
+
+## run-command
+* `run-command($command, :$stdout, :$stderr --> @array)`
+
+Returns an array of two elements, one for each stream, with element 1
+being output from `stdout` (file descriptor 1) and 2 being output from
+`stderr` (fd 2).
+
+Both `stdout` and `stderr` output are always captured, but only the
+desired stream(s) is(are) returned in the array.  The element for a
+stream will be the empty string if it wasn't requested.
