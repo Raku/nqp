@@ -13,7 +13,8 @@ my $fh    := open($fname, :w);
 $fh.print($pod);
 close($fh);
 
-my $cmd     := './nqp';
+#my $cmd := './nqp';
+my $cmd := nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
 my $cmdargs := $fname;
 my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
 my $args := $is-windows ?? nqp::list($cmd, $cmdargs)
