@@ -2917,6 +2917,7 @@ QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
 QAST::MASTOperations.add_core_moarop_mapping('sleep', 'sleep', 0);
 QAST::MASTOperations.add_core_moarop_mapping('getenvhash', 'getenvhash');
 QAST::MASTOperations.add_core_moarop_mapping('getpid', 'getpid');
+QAST::MASTOperations.add_core_moarop_mapping('getppid', 'getppid');
 QAST::MASTOperations.add_core_moarop_mapping('gethostname', 'gethostname');
 QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
 QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
