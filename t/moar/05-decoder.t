@@ -1,4 +1,4 @@
-plan(48);
+plan(49);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -146,4 +146,12 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderaddbytes($dec, $testbuf1);
     my $got := nqp::decodertakeallchars($dec);
     is($got, "one\ntwo\r\n", "Newlines don't get translated if the options is not passed");
+}
+
+{
+    my $emptybuf := nqp::encode('', 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $emptybuf);
+    ok(nqp::decoderempty($dec), 'Decoder is still empty after adding an empty buffer');
 }
