@@ -26,12 +26,11 @@ my $regex := /^ \h* Obsolete \h+ pod \h+ format \h+ .+ ',' \h+ please \h+ use \h
 # running with only stderr capture"
 my @arr := run-command($args, :stderr);
 my $err := @arr[2];
-if 1 {
-    skip('local tests good, failing on travis-ci', 1);
-}
-else {
+#if 1 {
+#    skip('local tests good, failing on travis-ci', 1);
+#}
+#else {
     ok($err ~~ $regex, 'got the correct output from stderr');
-}
-
+#}
 
 nqp::unlink($fname);
