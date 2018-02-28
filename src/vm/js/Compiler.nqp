@@ -951,11 +951,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!lexicals_type_info;
         has $!outer_cuid;
         has $!static_lexicals;
+        has $!contvar_lexicals;
         has $!statevars;
         method outer_cuid() {$!outer_cuid}
         method lexicals_type_info() {$!lexicals_type_info}
         method closure_template() {$!closure_template}
         method static_lexicals() {$!static_lexicals}
+        method contvar_lexicals() {$!contvar_lexicals}
         method statevars() {$!statevars}
     }
 
@@ -1265,21 +1267,30 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 %*BLOCKS_DONE{$node.cuid} := Chunk.void("(", |@function, ")");
             }
 
+            my $var;
             my @static;
+            my @contvar;
+
             for $*BLOCK.variables -> $var {
-                if $var.decl eq 'static' {
+                my $name_value_pair;
+                if $var.decl eq 'static' || $var.decl eq 'contvar' {
                     if $*COMPUNIT && $*COMPUNIT.sc && $*COMPUNIT.compilation_mode {
                         my $sc     := nqp::getobjsc($var.value);
                         my int $idx    := nqp::scgetobjidx($sc, $var.value);
-                        @static.push(quote_string($var.name) ~ ':' ~ (
+                        $name_value_pair := quote_string($var.name) ~ ':' ~ (
                             ($sc =:= $*COMPUNIT.sc)
                             ?? $idx
-                            !! "[{quote_string(nqp::scgethandle($sc))}, $idx]"));
+                            !! "[{quote_string(nqp::scgethandle($sc))}, $idx]");
                     }
                     else {
-                        @static.push(quote_string($var.name) ~ ':' ~ self.value_as_js($var.value));
+                        $name_value_pair := quote_string($var.name) ~ ':' ~ self.value_as_js($var.value);
                     }
+                }
 
+                if $var.decl eq 'static' {
+                    @static.push($name_value_pair);
+                } elsif $var.decl eq 'contvar' {
+                    @contvar.push($name_value_pair);
                 }
             }
 
@@ -1288,12 +1299,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
             }
 
+            my $contvar_lexicals;
+            if +@contvar {
+               $contvar_lexicals := '{' ~ nqp::join(',', @contvar) ~ '}';
+            }
+
             %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                 :$statevars,
                 :$closure_template,
                 :$outer_cuid,
                 :$lexicals_type_info,
-                :$static_lexicals
+                :$static_lexicals,
+                :$contvar_lexicals
             );
         }
 
@@ -1406,6 +1423,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @setup.push(
                     ~ "," ~ $info.lexicals_type_info
                     ~ "," ~ ($info.static_lexicals // 'null')
+                    ~ "," ~ ($info.contvar_lexicals // 'null')
                     ~ ");\n");
             }
         }

@@ -627,6 +627,16 @@ class BinaryCursor {
             }
           }
         }
+
+        if (codeRef.contVars) {
+          for (const name in codeRef.contVars) {
+            if (codeRef.contVars[name] instanceof Array) {
+              codeRef.contVars[name] = serializationContexts[codeRef.contVars[name][0]].rootObjects[codeRef.contVars[name][1]];
+            } else if (typeof codeRef.contVars[name] === 'number') {
+              codeRef.contVars[name] = sc.rootObjects[codeRef.contVars[name]];
+            }
+          }
+        }
       }
     }
     if (setupWVals) setupWVals();

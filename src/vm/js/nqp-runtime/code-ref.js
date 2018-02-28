@@ -67,6 +67,14 @@ class CodeRef extends NQPObject {
               fakeCtx[staticVarName] = staticVars[staticVarName];
             }
           }
+
+          const contVars = outerCode.contVars;
+          if (contVars) {
+            for (const contVarName in contVars) {
+              /* not cloning make INIT and BEGIN correctly */
+              fakeCtx[contVarName] = contVars[contVarName];
+            }
+          }
           searched = searched.outerCodeRef;
         } else {
           setOuter(null);
@@ -140,11 +148,12 @@ class CodeRef extends NQPObject {
     return this;
   }
 
-  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo, staticVars) {
+  setInfo(outerCodeRef, closureTemplate, lexicalsTypeInfo, staticVars, contVars) {
     this.closureTemplate = closureTemplate;
     this.outerCodeRef = outerCodeRef;
     this.lexicalsTypeInfo = lexicalsTypeInfo;
     this.staticVars = staticVars;
+    this.contVars = contVars;
     return this;
   }
 
