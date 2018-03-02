@@ -302,7 +302,6 @@ class HLL::Backend::MoarVM {
             }
             for $obj -> $thread {
                 my $thisprof := nqp::list;
-                note($thread<thread>);
                 $thisprof[3] := "NULL";
                 for $thread -> $k {
                     my $v := $thread{$k};
