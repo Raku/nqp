@@ -586,12 +586,11 @@ public final class Ops {
         return obj;
     }
 
-    public static SixModelObject seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
+    public static long seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOSeekable) {
                 ((IIOSeekable)h.handle).seek(tc, offset, whence);
-                return obj;
             }
             else
                 throw ExceptionHandling.dieInternal(tc,
@@ -601,6 +600,7 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "seekfh requires an object with the IOHandle REPR");
         }
+        return offset;
     }
 
     public static long tellfh(SixModelObject obj, ThreadContext tc) {
