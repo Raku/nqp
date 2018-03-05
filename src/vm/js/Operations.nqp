@@ -883,6 +883,7 @@ class QAST::OperationsJS {
 
 
     add_op('curlexpad', :!inlinable, sub ($comp, $node, :$want) {
+        if $*HLL eq 'nqp' {
             my @get;
             my @set;
 
@@ -901,6 +902,9 @@ class QAST::OperationsJS {
                    ~ '}');
             }
             Chunk.new($T_OBJ, "new nqp.CurLexpad(\{{nqp::join(',', @get)}\}, \{{nqp::join(',', @set)}\})", :$node);
+        } else {
+            Chunk.new($T_OBJ, $*CTX, :$node);
+        }
     });
 
     add_op('getlexouter', :!inlinable, sub ($comp, $node, :$want) {
