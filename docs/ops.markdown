@@ -1561,7 +1561,7 @@ Return 1 if this filehandle is at the end of the file, otherwise 0.
 
 ## filenofh
 * `filenofh(Handle $fh --> int)`
-Returns the filehandle number.
+Returns the filehandle number. Not usable on the JVM (always returns -1).
 
 ## flushfh
 * `flushfh(Handle $fh)`

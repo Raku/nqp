@@ -37,7 +37,7 @@ Open file `$filename`. Options:
 Close the file attached to file handle `$fh`.
 
 ## slurp
-* `slurp ($filename --> str)`
+* `slurp($filename --> str)`
 
 Returns the contents of `$filename` as a single string.
 

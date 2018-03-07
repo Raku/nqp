@@ -94,9 +94,13 @@ used.  On Mavericks use 10.9 (like above), on Yosemite use 10.10.
 
 The L<examples directory|https://github.com/perl6/nqp/tree/master/examples> is a good place to start, with the
 L<loops|https://github.com/perl6/nqp/blob/master/examples/loops.nqp> and other files. Opcodes are listed in
-L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/ops.markdown>. You can use NQP from this
+L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/ops.markdown>. NQP also has built-in routines
+listed in L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/built-ins.md>. You can use NQP from this
 release, it will be already installed if you have built Perl6 from
 scratch.
+
+Developers and module authors should note that significant run-time speed-ups are sometimes possible by using NQP
+inside Perl 6 code.
 
 =head2 JavaScript backend
 

@@ -41,7 +41,11 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             byte[] array = new byte[bytes];
             int read = 0;
             int offset = 0;
-            while ((read = is.read(array, offset, bytes - offset)) != -1) {
+            while (offset < bytes) {
+                if ((read = is.read(array, offset, bytes - offset)) == -1) {
+                    eof = true;
+                    break;
+                }
                 offset += read;
             }
             byte[] compact = new byte[offset];

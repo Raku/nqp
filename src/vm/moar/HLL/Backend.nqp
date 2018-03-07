@@ -291,18 +291,37 @@ class HLL::Backend::MoarVM {
             my int $node_id := 0;
             #my %profile := nqp::hash();
             my $mapping := nqp::shift($obj);
+            my $pieces := nqp::list_s();
+            my $empty-array := nqp::list_s();
             for $mapping -> $k {
                 my $v := $mapping{$k};
                 if nqp::ishash($v) {
-                    $profile_fh.say("INSERT INTO routines VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v<name>, "'", "''"), ~$v<line>, ~$v<file>)) ~ "');");
+                    nqp::push_s($pieces, "INSERT INTO routines VALUES ('");
+                    nqp::push_s($pieces,
+                        nqp::join("','",
+                                  nqp::list(
+                                      nqp::iterkey_s($k),
+                                      literal_subst(~$v<name>, "'", "''"),
+                                      ~$v<line>,
+                                      ~$v<file>))
+                                  ~ "');\n");
                 }
                 else {
-                    $profile_fh.say("INSERT INTO types VALUES ('" ~ nqp::join("','", nqp::list(nqp::iterkey_s($k), literal_subst(~$v, "'", "''"))) ~ "');");
+                    nqp::push_s($pieces, "INSERT INTO types VALUES ('");
+                    nqp::push_s($pieces,
+                        nqp::join("','",
+                            nqp::list(
+                                nqp::iterkey_s($k),
+                                literal_subst(~$v, "'", "''")))
+                        ~ "');\n");
+                }
+                if nqp::elems($pieces) > 500 {
+                    $profile_fh.say(nqp::join("", $pieces));
+                    nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
                 }
             }
             for $obj -> $thread {
                 my $thisprof := nqp::list;
-                note($thread<thread>);
                 $thisprof[3] := "NULL";
                 for $thread -> $k {
                     my $v := $thread{$k};
@@ -322,7 +341,8 @@ class HLL::Backend::MoarVM {
                                 nqp::push_s(@g, ~($gc{$f} // '0'));
                             }
                             nqp::push_s(@g, ~$thread<thread>);
-                            $profile_fh.say('INSERT INTO gcs VALUES (' ~ nqp::join(',', @g) ~ ');');
+                            nqp::push_s($pieces, 'INSERT INTO gcs VALUES (');
+                            nqp::push_s($pieces, nqp::join(',', @g) ~ ");\n");
                         }
                     }
                     elsif $k eq 'call_graph' {
@@ -338,14 +358,16 @@ class HLL::Backend::MoarVM {
                             my str $routine_id := ~%call_graph<id>;
                             %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
                             nqp::push_s(@call, ~%call_rec_depth{$routine_id});
-                            $profile_fh.say('INSERT INTO calls VALUES (' ~ nqp::join(',', @call) ~ ');');
+                            nqp::push_s($pieces, 'INSERT INTO calls VALUES (');
+                            nqp::push_s($pieces, nqp::join(',', @call) ~ ");\n");
                             if %call_graph<allocations> {
                                 for %call_graph<allocations> -> $a {
                                     my @a := nqp::list_s($call_id);
                                     for <id spesh jit count> -> $f {
                                         nqp::push_s(@a, ~($a{$f} // '0'));
                                     }
-                                    $profile_fh.say('INSERT INTO allocations VALUES (' ~ nqp::join(',', @a) ~ ');');
+                                    nqp::push_s($pieces, 'INSERT INTO allocations VALUES (');
+                                    nqp::push_s($pieces, nqp::join(',', @a) ~ ");\n");
                                 }
                             }
                             if %call_graph<callees> {
@@ -355,12 +377,23 @@ class HLL::Backend::MoarVM {
                                 }
                                 %call_rec_depth{$routine_id}--;
                             }
+                            if nqp::elems($pieces) > 500 {
+                                $profile_fh.say(nqp::join("", $pieces));
+                                nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
+                            }
                         }
                         collect_calls(~$node_id, $v);
                     }
                 }
-                $profile_fh.say('INSERT INTO profile VALUES (' ~ nqp::join(',', $thisprof) ~ ');');
+                nqp::push_s($pieces, 'INSERT INTO profile VALUES (');
+                nqp::push_s($pieces, nqp::join(',', $thisprof) ~ ");\n");
+                if nqp::elems($pieces) > 500 {
+                    $profile_fh.say(nqp::join("", $pieces));
+                    nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
+                }
             }
+            $profile_fh.say(nqp::join("", $pieces));
+            nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
         }
 
         # Post-process the call data, turning objects into flat data.
