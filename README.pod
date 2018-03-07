@@ -99,6 +99,9 @@ listed in L<the docs directory|https://github.com/perl6/nqp/blob/master/docs/bui
 release, it will be already installed if you have built Perl6 from
 scratch.
 
+Developers and module authors should note that significant run-time speed-ups are sometimes possible by using NQP
+inside Perl 6 code.
+
 =head2 JavaScript backend
 
 The best thing before playing with it/hacking on it is to contact pmurias via IRC at #perl6 on irc.freenode.org.
