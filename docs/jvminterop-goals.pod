@@ -1,3 +1,5 @@
+=encoding utf8
+
 =head1 Introduction
 
 This infodump describes aspects of the most desirable interface for Java
