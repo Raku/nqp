@@ -691,14 +691,6 @@ class JavaScriptCompiler extends NQPObject {
 
       // HACK
       sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString());
-
-      const jsProps = charProps(codeStr);
-      const p6Props = charProps(nqp.toStr(_NAMED['p6-source'], ctx));
-
-      sourceMaps[fakeFilename].eachMapping(m => {
-        m.generatedPos = jsProps.indexAt({line: m.generatedLine, column: m.generatedColumn});
-        m.originalPos = p6Props.indexAt({line: m.originalLine, column: m.originalColumn});
-    }, undefined, SourceMapConsumer.GENERATED_ORDER);
     }
 
     const script = new Script(preamble + codeStr, {filename: fakeFilename});
