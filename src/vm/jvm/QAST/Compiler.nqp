@@ -2077,10 +2077,6 @@ my %const_map := nqp::hash(
     'PIPE_CAPTURE_ERR',         256,
     'PIPE_MERGED_OUT_ERR',      512,
 
-    # could probably support a few more...
-    'SIG_INT',                  2,
-    'SIG_KILL',                 9,
-
     'TYPE_CHECK_CACHE_DEFINITIVE',  0,
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
@@ -2805,6 +2801,7 @@ QAST::OperationsJAST.map_classlib_core_op('nfarunalt', $TYPE_OPS, 'nfarunalt', [
 
 # process related opcodes
 QAST::OperationsJAST.map_classlib_core_op('exit', $TYPE_OPS, 'exit', [$RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getsignals', $TYPE_IO_OPS, 'getsignals', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('sleep', $TYPE_OPS, 'sleep', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('getenvhash', $TYPE_OPS, 'getenvhash', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getpid', $TYPE_OPS, 'getpid', [], $RT_INT, :tc);
