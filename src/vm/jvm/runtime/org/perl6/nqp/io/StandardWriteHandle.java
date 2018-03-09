@@ -41,7 +41,8 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
     }
 
     public long write(ThreadContext tc, byte[] bytes) {
-    	ps.write(bytes, 0, bytes.length);
+        ps.write(bytes, 0, bytes.length);
+        pos += bytes.length;
         return bytes.length;
     }
 
