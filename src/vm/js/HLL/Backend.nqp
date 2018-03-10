@@ -283,17 +283,6 @@ class JavaScriptBackend {
         };
     }
 
-    method node_module($js, *%adverbs) {
-        my $module := %adverbs<output>;
-        if nqp::stat($module, nqp::const::STAT_EXISTS) == 0 {
-            nqp::mkdir($module, 0o777);
-        }
-
-        spew($module ~ "/main.js", $js);
-        my $package_json := '{ "main": "main.js", "version": "0.0.0", "name": "'~ %adverbs<name> ~ '" }';
-        spew($module ~ '/package.json', $package_json);
-    }
-
     # When running on Moar a compunit is just a sub 
 
     method compunit_mainline($cu) {
