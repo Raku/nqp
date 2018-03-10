@@ -10,6 +10,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -62,6 +63,19 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             OpenOption[] opts = resolveOpenMode(mode);
             if(opts == null)
                 ExceptionHandling.dieInternal(tc, "Unhandled file open mode '" + mode + "'");
+
+            // work around differences between Perl 6 and FileChannel.open
+            if (Arrays.asList(opts).contains(StandardOpenOption.READ) && !Arrays.asList(opts).contains(StandardOpenOption.WRITE)) {
+                // TRUNCATE_EXISTING is ignored when the file is opened only for reading.
+                if (Arrays.asList(opts).contains(StandardOpenOption.TRUNCATE_EXISTING))
+                    if (Files.exists(p))
+                        Files.write(p, new byte[0]);
+                // CREATE is ignored when the file is opened only for reading.
+                if (Arrays.asList(opts).contains(StandardOpenOption.CREATE))
+                    if (!Files.exists(p))
+                        Files.createFile(p);
+            }
+
             fc = FileChannel.open(p, opts);
             chan = fc;
             setEncoding(tc, Charset.forName("UTF-8"));
