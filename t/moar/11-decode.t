@@ -31,7 +31,10 @@ my $special_windows1252 := nqp::encodeconf(nqp::chr(129), 'windows-1252', $buf8.
 is(nqp::decodeconf($special_windows1252, 'windows-1252', 1), "\c[129]",
 'nqp::encodeconf works with windows-1252 and non-strict. decodeconf works non-strict');
 # Test we can decode invalid codepoint and it is replaced instead on strict mode
-is(nqp::decoderepconf($special_windows1252, 'windows-1252', 'X', 0), "X",
+my $nspecial_windows_str := "//" ~ nqp::chr(129) ~ "//" ~ nqp::chr(129) ~ nqp::chr(129) ~ "//"; #"//$special_windows1252//$special_windows1252$special_windows1252//";
+my $nspecial_windows := nqp::encodeconf($nspecial_windows_str, 'windows-1252', $buf8.new, 1);
+
+is(nqp::decoderepconf($nspecial_windows, 'windows-1252', 'ABCDE', 0), "//ABCDE//ABCDEABCDE//",
 "nqp::decoderepconf works on strict (does do replacement)");
 # Test that if we use non-strict mode, it leaves things that fit into Unicode
 # unchanged.
