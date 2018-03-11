@@ -57,6 +57,10 @@ const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
 const unicodeData = require('nqp-unicode-data');
 
+const resolveSourceMap = require('./resolve-sourcemap.js');
+
+const path = require('path');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -646,29 +650,73 @@ const SourceNode = require('source-map').SourceNode;
 
 const charProps = require('char-props');
 
-function createSourceMap(js, p6, mapping, jsFile, p6File) {
+function applyLineDirectives(file, line, directives) {
+  if (directives) {
+    for (let i = directives.length - 1; i >= 0; i--) {
+      if (line > directives[i].originalLine) {
+        return {
+          line: line - directives[i].originalLine + directives[i].line - 1,
+          file: directives[i].file
+        };
+      }
+    }
+  }
+  return {file: file, line: line};
+}
+
+function processCompLineDirectives(ctx, compLineDirectives) {
+  if (compLineDirectives === undefined) return undefined;
+  return compLineDirectives.array.map(directive => ({
+    originalLine: nqp.toInt(directive.array[0], ctx),
+    file: nqp.toStr(directive.array[2], ctx),
+    line: nqp.toInt(directive.array[1], ctx)
+  }));
+}
+
+function createSourceMap(js, p6, mapping, jsFile, p6File, lineDirectives) {
   const generator = new SourceMapGenerator({file: jsFile});
 
   const jsProps = charProps(js);
   const p6Props = charProps(p6);
 
-
   for (let i=0; i < mapping.length; i += 2) {
+    const {file: generatedFile, line: generatedLine} = applyLineDirectives(p6File, p6Props.lineAt(mapping[i])+1, lineDirectives);
     generator.addMapping({
       generated: {
         line: jsProps.lineAt(mapping[i+1])+1,
         column: jsProps.columnAt(mapping[i+1])+1,
       },
       original: {
-        line: p6Props.lineAt(mapping[i])+1,
+        line: generatedLine,
         column: p6Props.columnAt(mapping[i])+1,
       },
-      source: p6File,
+      source: generatedFile,
     });
   }
 
-  return new SourceMapConsumer(generator.toString());
+  return generator.toString();
 }
+
+
+class BuildSourceMap extends NQPObject {
+  $$call(ctx, NAMED, js, p6, mapping, jsFile, p6File, compLineDirectives, sourcemapFile) {
+    js = nqp.arg_s(ctx, js);
+    p6 = nqp.arg_s(ctx, p6);
+    jsFile = nqp.arg_s(ctx, jsFile);
+    mapping = mapping.array;
+    p6File = nqp.arg_s(ctx, p6File)
+    compLineDirectives = processCompLineDirectives(ctx, compLineDirectives);
+    sourcemapFile = nqp.arg_s(ctx, sourcemapFile);
+
+    const ret = new Hash();
+    ret.content.set('content', new NQPStr(createSourceMap(js, p6, mapping, path.relative(path.dirname(sourcemapFile), jsFile), p6File, compLineDirectives)));
+    ret.content.set('url', new NQPStr(path.relative(path.dirname(jsFile), sourcemapFile)));
+    return ret;
+  }
+}
+
+exports.buildSourceMap = new BuildSourceMap();
+
 
 class JavaScriptCompiler extends NQPObject {
   eval(ctx, _NAMED, self, code) {
@@ -686,7 +734,15 @@ class JavaScriptCompiler extends NQPObject {
     global.nqp = nqp;
 
     if (_NAMED !== null && _NAMED.hasOwnProperty('mapping')) {
-      sourceMaps[fakeFilename] = createSourceMap(codeStr, nqp.toStr(_NAMED['p6-source'], ctx), _NAMED.mapping.array, fakeFilename, nqp.toStr(_NAMED.file, ctx));
+      sourceMaps[fakeFilename] = new SourceMapConsumer(
+        createSourceMap(
+          codeStr,
+          nqp.toStr(_NAMED['p6-source'], ctx),
+          _NAMED.mapping.array,
+          fakeFilename,
+          nqp.toStr(_NAMED.file, ctx),
+          processCompLineDirectives(ctx, _NAMED.comp_line_directives)));
+
       const node = SourceNode.fromStringWithSourceMap(codeStr, sourceMaps[fakeFilename]);
 
       // HACK
@@ -1365,6 +1421,18 @@ function backtrace(exception) {
                   file = original.source;
                   line = original.line;
                   column = original.column;
+                }
+              } else {
+                if (file) {
+                  const resolved = resolveSourceMap(file);
+                  if (resolved !== null) {
+                    const original = resolved.originalPositionFor({line: line, column: column});
+                    if (original.source) {
+                      file = original.source;
+                      line = original.line;
+                      column = original.column;
+                    }
+                  }
                 }
               }
               if (file === undefined) file = '?';

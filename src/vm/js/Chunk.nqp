@@ -68,7 +68,8 @@ class Chunk {
     }
 
     method collect_with_source_map_info($offset, @strs, @mapping) {
-        if nqp::defined($!node) && $!node.node {
+        # HACK sometimes a QAST::Op sneaks into $!node.node, so call nqp::can
+        if nqp::defined($!node) && $!node.node && nqp::can($!node.node, 'from') {
             nqp::push_i(@mapping, $!node.node.from());
             nqp::push_i(@mapping, $offset);
         }

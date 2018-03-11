@@ -672,3 +672,5 @@ const props = require('./unicode-props.js');
 for (const prop in props) {
   exports[prop] = props[prop];
 }
+
+exports.buildSourceMap = core.buildSourceMap;

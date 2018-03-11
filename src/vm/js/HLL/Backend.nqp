@@ -73,10 +73,12 @@ my class JSWithSourceMap {
     has $!mapping;
     has $!p6-source;
     has $!file;
+    has $!comp_line_directives;
     method js() {$!js}
     method mapping() {$!mapping}
     method p6-source() {$!p6-source}
     method file() {$!file}
+    method comp_line_directives() {$!comp_line_directives}
 }
 
 class QASTWithMatch {
@@ -221,12 +223,33 @@ class JavaScriptBackend {
             my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
             $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
 
-            JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file);
+            my $sourcemap_and_js := JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file, comp_line_directives => @*comp_line_directives);
+
+            %adverbs<output> ?? self.sourcemap_to_file($sourcemap_and_js, %adverbs<output>) !! $sourcemap_and_js;
         } else {
             my $code := $backend.emit(self.get_ast($parsed), :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
+    }
+
+    method sourcemap_to_file($sourcemap_and_js, $output) {
+        my str $sourcemap_file := "$output.map";
+
+        my $sourcemap := nqp::getcomp('JavaScript').eval('nqp.buildSourceMap')(
+            $sourcemap_and_js.js,
+            $sourcemap_and_js.p6-source,
+            $sourcemap_and_js.mapping,
+            $output,
+            $sourcemap_and_js.file,
+            $sourcemap_and_js.comp_line_directives,
+            $sourcemap_file
+        );
+
+        spurt($sourcemap_file, $sourcemap<content>);
+
+
+        $sourcemap_and_js.js ~ "//# sourceMappingURL={$sourcemap<url>}";
     }
 
     method beautify($code) {
@@ -252,11 +275,10 @@ class JavaScriptBackend {
     }
     
     method run($js, *%adverbs) {
-        # TODO source map support
 
         if !self.spawn_new_node {
             if nqp::istype($js, JSWithSourceMap) {
-                return nqp::getcomp('JavaScript').eval($js.js, :mapping($js.mapping), :p6-source($js.p6-source), :file($js.file));
+                return nqp::getcomp('JavaScript').eval($js.js, :mapping($js.mapping), :p6-source($js.p6-source), :file($js.file), :comp_line_directives($js.comp_line_directives));
             } else {
                 return nqp::getcomp('JavaScript').eval($js);
             }
@@ -269,6 +291,7 @@ class JavaScriptBackend {
         close($code);
 
         sub (*@args) {
+            # TODO source map support
             my @cmd := ["node",$tmp_file];
 
             my $i := 1;
