@@ -759,6 +759,11 @@ sub boolify_instructions($il, $cond_type) {
         $il.append($LCMP);
     }
 }
+sub needs_cond_passed($n) {
+    nqp::istype($n, QAST::Block)
+    && ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
+    && $n.arity > 0
+}
 for <if unless with without> -> $op_name {
     my $is_withy := $op_name eq 'with' || $op_name eq 'without';
     QAST::OperationsJAST.add_core_op($op_name, -> $qastcomp, $op {
@@ -768,13 +773,8 @@ for <if unless with without> -> $op_name {
             if $operands < 2 || $operands > 3;
 
         # See if any immediate block wants to be passed the condition.
-        my $im_then := nqp::istype($op[1], QAST::Block) &&
-                       ($op[1].blocktype eq 'immediate' || $op[1].blocktype eq 'immediate_static') &&
-                       $op[1].arity > 0;
-        my $im_else := $operands == 3 &&
-                       nqp::istype($op[2], QAST::Block) &&
-                       ($op[2].blocktype eq 'immediate' || $op[2].blocktype eq 'immediate_static') &&
-                       $op[2].arity > 0;
+        my $im_then := needs_cond_passed($op[1]);
+        my $im_else := needs_cond_passed($op[2]);
 
         # Create labels and a place to store the overall result.
         my $if_id    := $qastcomp.unique($op_name);
@@ -1097,9 +1097,7 @@ for ('', 'repeat_') -> $repness {
             }
 
             # See if there's an immediate block wanting to be passed the condition.
-            my $has_im := nqp::istype(@operands[1], QAST::Block) &&
-                          (@operands[1].blocktype eq 'immediate' || @operands[1].blocktype eq 'immediate_static') &&
-                          @operands[1].arity > 0;
+            my $has_im := needs_cond_passed(@operands[1]);
 
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
