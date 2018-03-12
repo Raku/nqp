@@ -761,8 +761,8 @@ sub boolify_instructions($il, $cond_type) {
 }
 sub needs_cond_passed($n) {
     nqp::istype($n, QAST::Block)
+    && ($n.arity > 0 || $n.ann: 'count') # slurpies would have .arity 0
     && ($n.blocktype eq 'immediate' || $n.blocktype eq 'immediate_static')
-    && $n.arity > 0
 }
 for <if unless with without> -> $op_name {
     my $is_withy := $op_name eq 'with' || $op_name eq 'without';
