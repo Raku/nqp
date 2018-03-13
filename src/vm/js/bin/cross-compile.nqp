@@ -11,13 +11,23 @@ class HLL::Backend::JavaScriptAndMoar {
         $obj.BUILD($js);
         $obj
     }
+
+    method ast($source, *%adverbs) {
+        $!js.ast($source, |%adverbs);
+    }
+
+    method optimize($ast, *%adverbs) {
+        $!js.optimize($ast, |%adverbs);
+    }
+
     method stages() {
         'js ' ~ 'mast mbc moar'
     }
+
     method js($qast, *%adverbs) {
-        my $js_code := $!js.js(QASTWithMatch.new(ast=>$qast));
+        my $js_code := $!js.js($qast, :output(%adverbs<js-output>), :source-map);
         say($js_code);
-        $qast;
+        $qast.ast;
     }
 }
 
@@ -60,6 +70,9 @@ sub MAIN(*@ARGS, *%ARGS) {
 
 
     $combined.HOW.reparent($combined, $moar);
+
+    my @clo := $nqpcomp-cc.commandline_options();
+    @clo.push('js-output=s');
 
     $nqpcomp-cc.backend($combined);
     $nqpcomp-cc.addstage('optimize', :after<ast>); # we need to re-add optimize after .backend removes it

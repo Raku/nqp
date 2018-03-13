@@ -84,7 +84,7 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     rule($moarvm, nqp::join(' ', $deps), 
         make_parents($moarvm),
         make_parents($js),
-	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm {$no-regex-lib ?? "--no-regex-lib" !! ""} $source > $js"
+	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --js-output $js --output $moarvm {$no-regex-lib ?? "--no-regex-lib" !! ""} $source > $js"
         );
 }
 
@@ -155,7 +155,7 @@ out("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
 
-my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js>;
+my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js nqp-js-on-js/NQPCORE.setting.js.map nqp-js-on-js/NQPHLL.js.map nqp-js-on-js/nqpmo.js.map nqp-js-on-js/NQPP5QRegex.js.map nqp-js-on-js/NQPP6QRegex.js.map nqp-js-on-js/QAST-Compiler.js.map nqp-js-on-js/QAST.js.map nqp-js-on-js/QASTNode.js.map nqp-js-on-js/QRegex.js.map nqp-js-on-js/sprintf.js.map>;
 
 my @cp_all;
 for @install -> $file {

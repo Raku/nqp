@@ -715,6 +715,7 @@ class BuildSourceMap extends NQPObject {
   }
 }
 
+exports.createSourceMap = createSourceMap;
 exports.buildSourceMap = new BuildSourceMap();
 
 

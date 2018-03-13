@@ -674,3 +674,4 @@ for (const prop in props) {
 }
 
 exports.buildSourceMap = core.buildSourceMap;
+exports.createSourceMap = core.createSourceMap;

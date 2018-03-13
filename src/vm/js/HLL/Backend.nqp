@@ -236,20 +236,59 @@ class JavaScriptBackend {
     method sourcemap_to_file($sourcemap_and_js, $output) {
         my str $sourcemap_file := "$output.map";
 
-        my $sourcemap := nqp::getcomp('JavaScript').eval('nqp.buildSourceMap')(
-            $sourcemap_and_js.js,
-            $sourcemap_and_js.p6-source,
-            $sourcemap_and_js.mapping,
-            $output,
-            $sourcemap_and_js.file,
-            $sourcemap_and_js.comp_line_directives,
-            $sourcemap_file
-        );
+        my str $sourcemap_url;
 
-        spurt($sourcemap_file, $sourcemap<content>);
+        if nqp::isnull(nqp::getcomp('JavaScript')) {
+            my @tmp_files;
+            my sub as_tmp_file($content) {
+                my $tmp_file := self.tmp_file();
+                my $fh := open($tmp_file, :w);
+                $fh.print($content);
+                close($fh);
+
+                @tmp_files.push($tmp_file);
+
+                $tmp_file;
+            }
 
 
-        $sourcemap_and_js.js ~ "//# sourceMappingURL={$sourcemap<url>}";
+            my $mapping := nqp::list_s();
+            for $sourcemap_and_js.mapping -> $offset {
+                nqp::push_s($mapping, ~$offset);
+            }
+
+            $sourcemap_url := run_command(:stdout, [
+                'node',
+                'src/vm/js/bin/build-sourcemap.js',
+                as_tmp_file($sourcemap_and_js.js),
+                as_tmp_file($sourcemap_and_js.p6-source),
+                as_tmp_file(nqp::join(',', $mapping)),
+                $output,
+                $sourcemap_and_js.file,
+                $sourcemap_file
+            ]);
+
+
+            for @tmp_files -> $tmp_file {
+                nqp::unlink($tmp_file);
+            }
+        } else {
+            my $sourcemap := nqp::getcomp('JavaScript').eval('nqp.buildSourceMap')(
+                $sourcemap_and_js.js,
+                $sourcemap_and_js.p6-source,
+                $sourcemap_and_js.mapping,
+                $output,
+                $sourcemap_and_js.file,
+                $sourcemap_and_js.comp_line_directives,
+                $sourcemap_file
+            );
+
+            $sourcemap_url := $sourcemap<url>;
+            spurt($sourcemap_file, $sourcemap<content>);
+        }
+
+        # HACK Add extra ~ so that the literal isn't used as the directive
+        $sourcemap_and_js.js ~ "//# sourceMappingURL" ~ "=" ~ $sourcemap_url;
     }
 
     method beautify($code) {
@@ -271,7 +310,7 @@ class JavaScriptBackend {
 
     method tmp_file() {
         # TODO a better temporary file name
-        'tmp-' ~ nqp::getpid() ~ '.js';
+        'tmp-' ~ nqp::getpid() ~ nqp::rand_n(4) ~ '.js';
     }
     
     method run($js, *%adverbs) {
