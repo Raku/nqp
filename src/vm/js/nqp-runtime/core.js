@@ -684,11 +684,11 @@ function createSourceMap(js, p6, mapping, jsFile, p6File, lineDirectives) {
     generator.addMapping({
       generated: {
         line: jsProps.lineAt(mapping[i+1])+1,
-        column: jsProps.columnAt(mapping[i+1])+1,
+        column: jsProps.columnAt(mapping[i+1]),
       },
       original: {
         line: generatedLine,
-        column: p6Props.columnAt(mapping[i])+1,
+        column: p6Props.columnAt(mapping[i]),
       },
       source: generatedFile,
     });
