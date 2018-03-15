@@ -679,19 +679,65 @@ function createSourceMap(js, p6, mapping, jsFile, p6File, lineDirectives) {
   const jsProps = charProps(js);
   const p6Props = charProps(p6);
 
-  for (let i=0; i < mapping.length; i += 2) {
-    const {file: generatedFile, line: generatedLine} = applyLineDirectives(p6File, p6Props.lineAt(mapping[i])+1, lineDirectives);
-    generator.addMapping({
-      generated: {
-        line: jsProps.lineAt(mapping[i+1])+1,
-        column: jsProps.columnAt(mapping[i+1]),
-      },
-      original: {
-        line: generatedLine,
-        column: p6Props.columnAt(mapping[i]),
-      },
-      source: generatedFile,
-    });
+
+  let stack = [];
+  let lastGenerated = -1;
+
+  for (let i = 0; i < mapping.length; i += 2) {
+    let originalOffset = mapping[i];
+    let generatedOffset = mapping[i+1];
+
+    function addRange() {
+        const {file: originalFile, line: originalLine} = applyLineDirectives(p6File, p6Props.lineAt(stack[stack.length - 1])+1, lineDirectives);
+
+        const originalColumn = p6Props.columnAt(stack[stack.length - 1]);
+
+        const lineFrom = jsProps.lineAt(lastGenerated)+1;
+        const columnFrom = jsProps.columnAt(lastGenerated);
+
+        const lineTo = jsProps.lineAt(generatedOffset)+1;
+
+        generator.addMapping({
+          generated: {
+            line: lineFrom,
+            column: columnFrom,
+          },
+          original: {
+            line: originalLine,
+            column: originalColumn,
+          },
+          source: originalFile,
+        });
+
+        for (let between = lineFrom + 1; between <= lineTo; between++) {
+          generator.addMapping({
+            generated: {
+              line: between,
+              column: 0,
+            },
+            original: {
+              line: originalLine,
+              column: originalColumn,
+            },
+            source: originalFile,
+          });
+        }
+    }
+
+    if (originalOffset === -1) {
+      if (lastGenerated !== generatedOffset) {
+        addRange();
+      }
+      stack.pop();
+    } else {
+      if (lastGenerated !== generatedOffset) {
+        if (stack.length) {
+          addRange();
+        }
+      }
+      stack.push(originalOffset);
+    }
+    lastGenerated = generatedOffset;
   }
 
   return generator.toString();

@@ -69,19 +69,25 @@ class Chunk {
 
     method collect_with_source_map_info($offset, @strs, @mapping) {
         # HACK sometimes a QAST::Op sneaks into $!node.node, so call nqp::can
-        if nqp::defined($!node) && $!node.node && nqp::can($!node.node, 'from') {
+        my int $sourcemap_info := nqp::defined($!node) && $!node.node && nqp::can($!node.node, 'from');
+        if $sourcemap_info {
             nqp::push_i(@mapping, $!node.node.from());
             nqp::push_i(@mapping, $offset);
         }
 
+        #if nqp::defined($!node) && $!node.node && !nqp::can($!node.node, 'from') {
+        #    stderr().print("problem with node.node");
+        #}
+
+
+        my int $count := 0;
+
         if nqp::isnull($!setup) {
-          0;
         }
         elsif nqp::istype($!setup, Chunk) {
-            $!setup.collect_with_source_map_info($offset, @strs, @mapping);
+            $count := $!setup.collect_with_source_map_info($offset, @strs, @mapping);
         }
         else {
-            my int $count := 0;
             for $!setup -> $part {
                 if nqp::isstr($part) {
                     $count := $count + nqp::chars($part);
@@ -91,8 +97,14 @@ class Chunk {
                     $count := $count + $part.collect_with_source_map_info($offset + $count, @strs, @mapping);
                 }
             }
-            $count;
         }
+
+        if $sourcemap_info {
+            nqp::push_i(@mapping, -1);
+            nqp::push_i(@mapping, $offset + $count);
+        }
+
+        $count;
     }
 
     method type() {
