@@ -1526,7 +1526,12 @@ op.hintfor = function(classHandle, attrName) {
 };
 
 op.ctxcaller = function(ctx) {
-  return ctx.$$caller.$$skipHandlers();
+  if (ctx.$$caller === null) {
+    return Null;
+  } else {
+    const caller = ctx.$$caller.$$skipHandlers();
+    return caller === null ? Null : caller;
+  }
 };
 
 op.ctxcallerskipthunks = function(ctx) {
