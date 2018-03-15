@@ -1346,7 +1346,7 @@ op.replace = function(str, offset, count, repl) {
 
 op.getcodelocation = function(code) {
   const hash = new Hash();
-  hash.content.set('file', 'unknown');
+  hash.content.set('file', new NQPStr('unknown'));
   hash.content.set('line', new NQPInt(-1));
   return hash;
 };
@@ -1491,8 +1491,8 @@ function backtrace(exception) {
         }
       }
 
-      annotations.content.set('file', file);
-      annotations.content.set('line', line);
+      annotations.content.set('file', new NQPStr(file));
+      annotations.content.set('line', new NQPInt(line));
 
       rows.push(row);
 
