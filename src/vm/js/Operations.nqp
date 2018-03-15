@@ -778,7 +778,7 @@ class QAST::OperationsJS {
             }
 
             @setup.push("$unwind_marker = \{\};\n");
-            @setup.push("$handler_ctx.unwind = $unwind_marker;\n");
+            @setup.push("$handler_ctx.\$\$unwind = $unwind_marker;\n");
 
             {
                 my $*CTX := $handler_ctx;
@@ -1341,7 +1341,7 @@ class QAST::OperationsJS {
                         "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
                         "$*CTX.\$\$LAST = function() \{\};",
                         "$last_exception = \{\};\n",
-                        "$*CTX.unwind = $last_exception;\n",
+                        "$*CTX.\$\$unwind = $last_exception;\n",
                          $comp.as_js(@operands[2], :want($T_VOID)),
                          '})()');
                 }
@@ -1455,7 +1455,7 @@ class QAST::OperationsJS {
 
                 Chunk.new($T_OBJ, $result, [
                     "$unwind_marker = \{\};\n",
-                    "$*CTX.unwind = $unwind_marker;\n",
+                    "$*CTX.\$\$unwind = $unwind_marker;\n",
                     "$*CTX.\$\${$type} = function() \{\n",
                         $handle_result,
                         "$result = {$handle_result.expr};\n",

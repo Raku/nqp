@@ -120,9 +120,9 @@ class Ctx extends NQPObject {
         try {
           const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler](wrapped);
+            ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL(wrapped);
+            ctx.$$unwind.ret = ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -134,7 +134,7 @@ class Ctx extends NQPObject {
           exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        throw ctx.$$unwind;
       }
       ctx = ctx.$$caller;
     }
@@ -162,7 +162,7 @@ class Ctx extends NQPObject {
         exceptionsStack().push(exception);
         try {
           const wrapped = new Ctx(this, this, null);
-          ctx.unwind.ret = ctx.$$CATCH(wrapped);
+          ctx.$$unwind.ret = ctx.$$CATCH(wrapped);
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
             return;
@@ -173,7 +173,7 @@ class Ctx extends NQPObject {
           exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        throw ctx.$$unwind;
       }
       ctx = ctx.$$caller;
     }
@@ -247,9 +247,9 @@ class Ctx extends NQPObject {
         try {
           const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler](wrapped);
+            ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = ctx.$$CONTROL(wrapped);
+            ctx.$$unwind.ret = ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -264,7 +264,7 @@ class Ctx extends NQPObject {
         let check = lookFrom;
         while (check) {
           if (check === ctx) {
-            throw ctx.unwind;
+            throw ctx.$$unwind;
           }
           check = check.$$caller;
         }
