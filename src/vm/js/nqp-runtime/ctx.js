@@ -1,5 +1,6 @@
 'use strict';
 const NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
+const NQPException = require('./nqp-exception.js');
 const NQPObject = require('./nqp-object.js');
 const Null = require('./null.js');
 const exceptionsStack = require('./exceptions-stack.js');
@@ -354,8 +355,15 @@ class Ctx extends NQPObject {
     }
   }
 
-  $$atkey(key) {
-    return this.lookup(key);
+  $$atkey(name) {
+    let ctx = this;
+    while (ctx) {
+      if (ctx.hasOwnProperty(name)) {
+        return ctx[name];
+      }
+      ctx = ctx.$$outer;
+    }
+    throw new NQPException(`Lexical with name '${name}' does not exist in this frame`);
   }
 
   $$bindkey(key, value) {
