@@ -1,9 +1,5 @@
 use QASTNode;
 
-our $nfatime;
-our $lastnfatime;
-our $etctime;
-
 class QRegex::NFA {
     my $EDGE_FATE            := 0;
     my $EDGE_EPSILON         := 1;
@@ -204,9 +200,6 @@ class QRegex::NFA {
             'CODEPOINT_LL','CODEPOINT_I_LL','CODEPOINT_M','CODEPOINT_M_NEG'];
         # $ind := 0;
         # $indent := '';
-        $nfatime := 0;
-        $etctime := 0;
-        $lastnfatime := nqp::time_n();
     }
 
     method cclass($node, $from, $to) {
@@ -696,15 +689,7 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-#        my $t0 := nqp::time_n();
-#        $etctime := $etctime + $t0 - $lastnfatime;
         my $result := nqp::nfarunproto($!nfa_object, $target, $offset);
-#        my $t1 := nqp::time_n();
-#        $nfatime := $nfatime + $t1 - $t0;
-#        if nqp::chars($target) == $offset {
-#            note( "EOS in proto at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)));
-#        }
-#        $lastnfatime := $t1;
         $result;
     }
 
@@ -715,15 +700,7 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-#        my $t0 := nqp::time_n();
-#        $etctime := $etctime + $t0 - $lastnfatime;
         my $result := nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels);
-#        my $t1 := nqp::time_n();
-#        $nfatime := $nfatime + $t1 - $t0;
-#        if nqp::chars($target) == $offset {
-#            note( "EOS in alt at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)));
-#        }
-#        $lastnfatime := $t1;
         $result;
     }
 
