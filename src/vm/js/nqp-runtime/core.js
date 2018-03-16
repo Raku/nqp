@@ -643,6 +643,8 @@ const nqp = require('nqp-runtime');
 const Script = require('vm').Script;
 
 const sourceMaps = {};
+const evaledP6Sources = {};
+const evaledP6Filenames = {};
 
 const SourceMapGenerator = require('source-map').SourceMapGenerator;
 const SourceMapConsumer = require('source-map').SourceMapConsumer;
@@ -796,14 +798,22 @@ class JavaScriptCompiler extends NQPObject {
       sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString());
     }
 
+    if ('p6-source' in _NAMED) {
+      evaledP6Sources[fakeFilename] = nqp.toStr(_NAMED['p6-source'], ctx);
+      evaledP6Filenames[fakeFilename] = nqp.toStr(_NAMED.file, ctx);
+    }
+
     const script = new Script(preamble + codeStr, {filename: fakeFilename});
 
     global.nqpModule = module;
+
+    global.__filename = fakeFilename;
 
     const oldNqpRequire = global.nqpRequire;
     global.nqpRequire = function(path) {
       return require(path);
     };
+
 
     const ret = fromJS(script.runInThisContext());
     global.nqpRequire = oldNqpRequire;
@@ -1344,10 +1354,29 @@ op.replace = function(str, offset, count, repl) {
   return str.substr(0, offset) + repl + str.substr(offset + count);
 };
 
+const fs = require('fs');
+const sourceMapResolve = require('source-map-resolve');
+
 op.getcodelocation = function(code) {
+  let sourcePath;
+  let source;
+
+  if (code.staticCode.filename in evaledP6Sources) {
+    sourcePath = evaledP6Filenames[code.staticCode.filename];
+    source = evaledP6Sources[code.staticCode.filename];
+  } else {
+    const result = sourceMapResolve.resolveSourceMapSync(fs.readFileSync(code.staticCode.filename).toString('utf8'), code.staticCode.filename,  fs.readFileSync);
+    sourcePath = path.resolve(path.dirname(result.sourcesRelativeTo), result.map.sources[0]);
+
+    source = fs.readFileSync(sourcePath, 'utf8');
+  }
+
+  const props = charProps(source);
+
   const hash = new Hash();
-  hash.content.set('file', new NQPStr('unknown'));
-  hash.content.set('line', new NQPInt(-1));
+  hash.content.set('file', new NQPStr(sourcePath));
+  hash.content.set('line', new NQPInt(props.lineAt(code.staticCode.sourceOffset)+1));
+
   return hash;
 };
 

@@ -380,9 +380,10 @@ exports.wrapException = function(e) {
   return new NQPException('<<wrapped exception:\n' + e.stack + '\n>>\n');
 };
 
-exports.setCodeRefHLL = function(codeRefs, currentHLL) {
+exports.setCodeRefHLL = function(codeRefs, currentHLL, filename) {
   for (let i = 0; i < codeRefs.length; i++) {
     codeRefs[i].hll = currentHLL;
+    codeRefs[i].filename = filename;
   }
 };
 

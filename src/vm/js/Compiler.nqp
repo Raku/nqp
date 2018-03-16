@@ -952,6 +952,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         has $!outer_cuid;
         has $!static_lexicals;
         has $!contvar_lexicals;
+        has $!source_offset;
         has $!statevars;
         method outer_cuid() {$!outer_cuid}
         method lexicals_type_info() {$!lexicals_type_info}
@@ -959,6 +960,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         method static_lexicals() {$!static_lexicals}
         method contvar_lexicals() {$!contvar_lexicals}
         method statevars() {$!statevars}
+        method source_offset() {$!source_offset}
     }
 
     method setup_cuids() {
@@ -1304,13 +1306,16 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                $contvar_lexicals := '{' ~ nqp::join(',', @contvar) ~ '}';
             }
 
+            my int $source_offset := $node.node ?? $node.node.from !! -1;
+
             %!serialized_code_ref_info{$node.cuid} := SerializedCodeRefInfo.new(
                 :$statevars,
                 :$closure_template,
                 :$outer_cuid,
                 :$lexicals_type_info,
                 :$static_lexicals,
-                :$contvar_lexicals
+                :$contvar_lexicals,
+                :$source_offset
             );
         }
 
@@ -1424,6 +1429,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     ~ "," ~ $info.lexicals_type_info
                     ~ "," ~ ($info.static_lexicals // 'null')
                     ~ "," ~ ($info.contvar_lexicals // 'null')
+                    ~ "," ~ ($info.source_offset)
                     ~ ");\n");
             }
         }
@@ -1670,7 +1676,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $comp_mode := $node.compilation_mode;
 
-        my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL);\n";
+        my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL, __filename);\n";
 
         my $set_code_objects := self.set_code_objects;
         my $create_sc := $comp_mode ?? self.create_sc($node) !! '';
