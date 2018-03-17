@@ -35,6 +35,25 @@ public final class IOOps {
                 new Object[] { Ops.box_i(signum, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc) });
         }
     }
+
+    private static class SigSupported {
+        private static List<String> supported = Arrays.asList("SIGINT", "SIGKILL");
+        public static Map<String, Integer> build() {
+            Map<String, Integer> m = new HashMap<String, Integer>();
+            for ( String k : supported ) { m.put(k, 1); }
+            return m;
+        }
+    }
+    private static final Map<String, Integer> sigSupported = SigSupported.build();
+    private static final List<String> sigKeys = Arrays.asList(
+        "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
+        "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
+        "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
+        "SIGCONT", "SIGCHLD",   "SIGTTIN",   "SIGTTOU",  "SIGIO",   "SIGXCPU",
+        "SIGXFSZ", "SIGVTALRM", "SIGPROF",   "SIGWINCH", "SIGINFO", "SIGUSR1",
+        "SIGUSR2", "SIGTHR",    "SIGSTKFLT", "SIGPWR",   "SIGBREAK"
+    );
+
     private static SixModelObject sigCache = null;
     public static SixModelObject getsignals(ThreadContext tc) {
         SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
@@ -43,14 +62,6 @@ public final class IOOps {
 
         if (sigCache != null) return sigCache;
 
-        final List<String> sigKeys = Arrays.asList(
-            "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
-            "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
-            "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
-            "SIGCONT", "SIGCHLD",   "SIGTTIN",   "SIGTTOU",  "SIGIO",   "SIGXCPU",
-            "SIGXFSZ", "SIGVTALRM", "SIGPROF",   "SIGWINCH", "SIGINFO", "SIGUSR1",
-            "SIGUSR2", "SIGTHR",    "SIGSTKFLT", "SIGPWR",   "SIGBREAK"
-        );
         Map<String, Integer> sigWanted = new HashMap<String, Integer>();
         for ( String k : sigKeys ) { sigWanted.put(k, 0); }
 
@@ -100,7 +111,10 @@ public final class IOOps {
         }
 
         for (String sig : sigWanted.keySet()) {
-            res.bind_key_boxed( tc, sig, Ops.box_i((long)sigWanted.get(sig), intType, tc) );
+            long signum      = (long)sigWanted.get(sig);
+            long signumFinal = sigSupported.containsKey(sig) ? signum : -signum;
+
+            res.bind_key_boxed( tc, sig, Ops.box_i(signumFinal, intType, tc) );
         }
         sigCache = res;
         return res;
