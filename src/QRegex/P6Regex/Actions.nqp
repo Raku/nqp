@@ -946,7 +946,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 self.alt_nfas($code_obj, $block, $_);
                 nqp::push(@alternatives, QRegex::NFA.new.addnode($_));
             }
-            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ $*W.handle());
             self.store_regex_alt_nfa($code_obj, $block, $ast.name, @alternatives);
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {

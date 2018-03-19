@@ -1,4 +1,5 @@
 grammar NQP::Grammar is HLL::Grammar {
+    my $sc_id := 0;
     method TOP() {
 	    # Language braid.
 	    my $*LANG := self;
@@ -23,7 +24,7 @@ grammar NQP::Grammar is HLL::Grammar {
         # with this compilation unit.
         my $file := nqp::getlexdyn('$?FILES');
         my $source_id := nqp::sha1(self.target()) ~
-            (%*COMPILING<%?OPTIONS><stable-sc> ?? '' !! '-' ~ ~nqp::time_n());
+            (%*COMPILING<%?OPTIONS><stable-sc> ?? '' !! '-' ~ ~($sc_id++));
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
