@@ -1483,6 +1483,12 @@ function backtrace(exception) {
       if (ctx instanceof Ctx) {
         ctx = ctx.$$skipHandlers();
         const codeRef = ctx.codeRef();
+
+        if (codeRef && codeRef.staticCode.isThunk) {
+          ctx = ctx.$$caller;
+          continue;
+        }
+
         if (codeRef !== null) {
           const wanted = codeRef.$$call.name;
           while (stackIndex < stack.length) {
