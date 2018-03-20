@@ -60,8 +60,8 @@ my class Semaphore is repr('Semaphore') { }
     }, 0);
     my $t6 := nqp::newthread({
         nqp::sleep(3.0);
-        nqp::semrelease($s);
         $released := 1;
+        nqp::semrelease($s);
     }, 0);
 
     # First, exhaust semaphore capacity
