@@ -32,8 +32,8 @@ plan(24);
     }, 0);
     ok(1, 'Can write to STDOUT in parent thread before threadrun');
     nqp::threadrun($t);
-    $done := 1;
     ok(1, 'Can write to STDOUT in parent thread after threadrun');
+    $done := 1;
     nqp::threadjoin($t);
     ok(1, 'Can write to STDOUT in parent thread after threadjoin');
 }
