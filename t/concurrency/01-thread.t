@@ -95,9 +95,9 @@ plan(24);
 {
     my @a;
     my $t := nqp::newthread({
-        nqp::threadyield() until nqp::elems(@a) == 1;
+        nqp::threadyield() until nqp::elems(@a) == 1 && @a[0] eq 'a';
         nqp::push(@a, '1');
-        nqp::threadyield() until nqp::elems(@a) == 3;
+        nqp::threadyield() until nqp::elems(@a) == 3 && @a[2] eq 'b';
         nqp::push(@a, '2');
     }, 0);
 
@@ -107,9 +107,9 @@ plan(24);
 
     {
         nqp::push(@a, 'a');
-        nqp::threadyield() until nqp::elems(@a) == 2;
+        nqp::threadyield() until nqp::elems(@a) == 2 && @a[1] eq '1';
         nqp::push(@a, 'b');
-        nqp::threadyield() until nqp::elems(@a) == 4;
+        nqp::threadyield() until nqp::elems(@a) == 4 && @a[3] eq '2';
         nqp::push(@a, 'c');
     }
 
