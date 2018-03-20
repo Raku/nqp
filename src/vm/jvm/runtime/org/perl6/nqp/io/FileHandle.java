@@ -19,9 +19,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
     FileChannel fc;
     FileLock lock;
-    private boolean truncate = false;
-    private boolean create   = false;
-    private boolean append   = false;
+    private boolean append = false;
 
     public OpenOption[] resolveOpenMode(String mode) {
         if(mode.length() == 0)
@@ -57,28 +55,11 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         /* work around differences between Perl 6 and FileChannel.open */
         List<OpenOption> optsToRemove = new ArrayList<OpenOption>();
         if (opts.contains(StandardOpenOption.READ)) {
-            if (!opts.contains(StandardOpenOption.WRITE)) {
-                /* TRUNCATE_EXISTING is ignored when the file is opened only for reading. */
-                if (opts.contains(StandardOpenOption.TRUNCATE_EXISTING)) {
-                    truncate = true;
-                    optsToRemove.add(StandardOpenOption.TRUNCATE_EXISTING);
-                }
-                /* CREATE is ignored when the file is opened only for reading. */
-                if (opts.contains(StandardOpenOption.CREATE)) {
-                    create = true;
-                    optsToRemove.add(StandardOpenOption.CREATE);
-                }
-            }
             /* APPEND may not be used in conjunction with READ. */
             if (opts.contains(StandardOpenOption.APPEND)) {
                 append = true;
                 optsToRemove.add(StandardOpenOption.APPEND);
             }
-        }
-        /* APPEND may not be used in conjunction with TRUNCATE_EXISTING. */
-        else if (opts.contains(StandardOpenOption.TRUNCATE_EXISTING) && opts.contains(StandardOpenOption.APPEND)) {
-            append = true;
-            optsToRemove.add(StandardOpenOption.APPEND);
         }
         opts.removeAll(optsToRemove);
 
@@ -93,12 +74,6 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             OpenOption[] opts = resolveOpenMode(mode);
             if(opts == null)
                 ExceptionHandling.dieInternal(tc, "Unhandled file open mode '" + mode + "'");
-            if (truncate)
-                if (Files.exists(p))
-                    Files.write(p, new byte[0]);
-            if (create)
-                if (!Files.exists(p))
-                    Files.createFile(p);
             fc = FileChannel.open(p, opts);
             chan = fc;
             setEncoding(tc, Charset.forName("UTF-8"));
