@@ -73,6 +73,7 @@
   * [bindkey](#bindkey)
   * [existskey](#existskey)
   * [deletekey](#deletekey)
+  * [hash](#hash)
   * [iterkey](#iterkey)
   * [iterval](#iterval)
 - [String Opcodes](#-string-opcodes)
@@ -91,7 +92,6 @@
   * [findcclass](#findcclass)
   * [findnotcclass](#findnotcclass)
   * [flip](#flip)
-  * [hash](#hash)
   * [index](#index)
   * [indexic](#indexic)
   * [indexim `moar`](#indexim-moar)
@@ -839,6 +839,13 @@ Return 1 if %hash has key $key bound to something, otherwise 0.
 
 Delete the given key from %hash.
 
+## hash
+* `hash(... --> Mu)`
+
+Return a hash. The first argument is a key, the second its value, and so on.
+Be sure to pass an even number of arguments, a VM specific error may occur
+otherwise.
+
 ## iterkey
 * `iterkey_s($pair --> str)`
 
@@ -970,13 +977,6 @@ is smaller.
 * `flip(str $str --> str)`
 
 Return a string with the characters of `$string` in reverse order.
-
-## hash
-* `hash(... --> Mu)`
-
-Return a hash. The first argument is a key, the second its value, and so on.
-Be sure to pass an even number of arguments, a VM specific error may occur
-otherwise.
 
 ## index
 * `index(str $haystack, str $needle --> int)`
