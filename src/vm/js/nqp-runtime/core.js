@@ -1549,7 +1549,7 @@ op.backtracestrings = function(currentHLL, exception) {
   for (const row of backtrace(exception)) {
     const annotations = row.$$atkey('annotations');
     const sub = row.$$atkey('sub');
-    lines.push((first ? '  at ' : ' from ') + annotations.$$atkey('file')+ ':'+ annotations.$$atkey('line') + ' (cuid ' + sub.cuid + ')');
+    lines.push((first ? '  at ' : ' from ') + annotations.$$atkey('file').value + ':'+ annotations.$$atkey('line').value + ' (cuid ' + sub.cuid + ')');
     first = false;
   }
   return hll.list(currentHLL, lines);
