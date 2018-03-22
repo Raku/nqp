@@ -311,6 +311,10 @@ class NativeEncoding {
     encode(str) {
       return new Buffer(str, this.encoding);
     }
+
+    encodeWithReplacement(str, replacement) {
+      return this.encode(str);
+    }
 }
 
 module.exports['utf8-c8'] = new Utf8C8;
