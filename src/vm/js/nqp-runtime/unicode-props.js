@@ -109,7 +109,8 @@ const bidiClassData = ucd.propTrie('BidiClass');
 const numericValueData = ucd.propTrie('NumericValue');
 
 function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
-    const result = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value)).$$getInt();
+    const resultMaybeBoxed = cursor['!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value));
+    const result = typeof resultMaybeBoxed == 'number' ? resultMaybeBoxed : resultMaybeBoxed.$$getInt();
     if (result === (shouldMatch ? 0 : 1)) {
       return -1;
     } else {
