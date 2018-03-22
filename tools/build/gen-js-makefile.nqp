@@ -213,6 +213,13 @@ rule($nqp-bootstrapped, "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $n
     ".@slash@\$(JS_CROSS_RUNNER) --target=js --shebang $nqp-combined > $nqp-bootstrapped"
 );
 
+rule('js-runner-default', 'js-all',
+  '$(CP) $(JS_RUNNER) nqp$(BAT)',
+  '$(CHMOD) 755 nqp$(BAT)');
+
+rule('js-runner-default-install', 'js-runner-default js-install',
+  '$(CP) $(DESTDIR)$(BIN_DIR)/$(JS_RUNNER) $(DESTDIR)$(BIN_DIR)/nqp$(BAT)',
+  '$(CHMOD) 755 $(DESTDIR)$(BIN_DIR)/nqp$(BAT)');
 
 rule('js-deps', '',
   '$(PERL) tools/build/npm-install-or-link.pl . src/vm/js/nqp-runtime nqp-runtime @link@');
