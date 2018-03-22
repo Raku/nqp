@@ -1050,7 +1050,7 @@ function bufferDifference(a, b) {
 
 op.decodeconf = function(buf, encoding, permissive) {
   let rawBuffer = toRawBuffer(buf);
-  if (encoding === 'windows-1252' || encoding === 'utf8-c8') {
+  if (encoding === 'windows-1251' || encoding === 'windows-1252' || encoding === 'utf8-c8') {
     return codecs[encoding].decode(rawBuffer, permissive);
   } else if (encoding === 'utf8') {
     const decoded = rawBuffer.toString(renameEncoding(encoding));
@@ -1094,7 +1094,7 @@ op.decode = function(buf, encoding) {
 };
 
 op.decoderepconf = function(buf, encoding, replacement, permissive) {
-  if (encoding === 'windows-1252') {
+  if (encoding === 'windows-1252' || encoding === 'windows-1251' ) {
     const rawBuffer = toRawBuffer(buf);
     return codecs[encoding].decodeWithReplacement(rawBuffer, replacement, permissive);
   } else {
