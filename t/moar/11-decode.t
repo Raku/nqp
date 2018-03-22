@@ -1,6 +1,6 @@
 # This can be moved when *conf ops are added to jvm and others
 use nqpmo;
-plan(7);
+plan(9);
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -33,6 +33,14 @@ is(nqp::decodeconf($special_windows1252, 'windows-1252', 1), "\c[129]",
 # Test we can decode invalid codepoint and it is replaced instead on strict mode
 my $nspecial_windows_str := "//" ~ nqp::chr(129) ~ "//" ~ nqp::chr(129) ~ nqp::chr(129) ~ "//"; #"//$special_windows1252//$special_windows1252$special_windows1252//";
 my $nspecial_windows := nqp::encodeconf($nspecial_windows_str, 'windows-1252', $buf8.new, 1);
+
+dies-ok({
+  nqp::encodeconf(nqp::chr(129), 'windows-1252', $buf8.new, 0);
+}, 'nqp::encodeconf can\'t encode unmapped chars in strict mode');
+
+dies-ok({
+  nqp::encodeconf('☃', 'windows-1252', $buf8.new, 1);
+}, 'nqp::encodeconf only fuges unmapped chars in permissive mode');
 
 is(nqp::decoderepconf($nspecial_windows, 'windows-1252', 'ABCDE', 0), "//ABCDE//ABCDEABCDE//",
 "nqp::decoderepconf works on strict (does do replacement)");
