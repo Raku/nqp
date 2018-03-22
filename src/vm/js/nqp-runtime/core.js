@@ -61,6 +61,8 @@ const resolveSourceMap = require('./resolve-sourcemap.js');
 
 const path = require('path');
 
+const nullStr = require('./null_s.js');
+
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
@@ -997,6 +999,11 @@ op.encode = function(str, encoding, output) {
 };
 
 op.encoderepconf = function(str, encoding_, replacement, output, permissive) {
+
+  if (replacement === nullStr) {
+    return op.encodeconf(str, encoding_, output, permissive);
+  }
+
   const encoding = renameEncoding(encoding_);
 
   let buffer;
