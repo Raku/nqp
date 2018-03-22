@@ -893,7 +893,7 @@ op.backendconfig = function() {
   config.content.set('osname', new NQPStr(os.platform()));
   const nativecallConfig = getConfigFromPerl();
   for (const key of Object.keys(nativecallConfig)) {
-    config.content.set(key, nativecallConfig[key]);
+    config.content.set(key, new NQPStr(nativecallConfig[key]));
   }
   return config;
 };
