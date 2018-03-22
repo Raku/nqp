@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(22);
+plan(24);
 
 
 my sub create_buf($type) {
@@ -106,4 +106,13 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     test_encode($composed, '195,133', 'NFC string');
     test_encode($decomposed, '65,204,138', 'not normalized UTF8');
     test_encode($wrong, '254', 'not proper UTF8');
+}
+
+{
+  my $encoded_ascii := nqp::encoderep('foobarr', 'ascii', nqp::null_s, $buf8.new);
+  is(buf_dump($encoded_ascii), '102,111,111,98,97,114,114', 'nqp::encoderep with null_s without replacements');
+
+  dies-ok({
+    nqp::encoderep('åfooåbar', 'ascii', nqp::null_s, $buf8.new);
+  }, 'encoderep dies instead of replacing with a null_s replacement');
 }
