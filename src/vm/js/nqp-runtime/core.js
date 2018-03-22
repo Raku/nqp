@@ -971,7 +971,7 @@ function writeBuffer(highLevel, lowLevel) {
   }
 }
 
-op.encode = function(str, encoding_, output) {
+op.encodeconf = function(str, encoding_, output, permissive) {
   if (output.array.length) {
     throw new NQPException('encode requires an empty array');
   }
@@ -981,7 +981,7 @@ op.encode = function(str, encoding_, output) {
   let buffer;
 
   if (encoding in codecs) {
-    buffer = codecs[encoding].encode(str);
+    buffer = codecs[encoding].encode(str, permissive);
   } else {
     buffer = new Buffer(str, encoding);
   }
@@ -992,13 +992,17 @@ op.encode = function(str, encoding_, output) {
   return output;
 };
 
-op.encoderep = function(str, encoding_, replacement, output) {
+op.encode = function(str, encoding, output) {
+  return op.encodeconf(str, encoding, output, 1);
+};
+
+op.encoderepconf = function(str, encoding_, replacement, output, permissive) {
   const encoding = renameEncoding(encoding_);
 
   let buffer;
 
   if (encoding in codecs) {
-    buffer = codecs[encoding].encodeWithReplacement(str, replacement);
+    buffer = codecs[encoding].encodeWithReplacement(str, replacement, permissive);
   } else {
     throw new NQPException('encoding unsupported in encoderep');
   }
@@ -1006,6 +1010,10 @@ op.encoderep = function(str, encoding_, replacement, output) {
   writeBuffer(output, buffer);
 
   return output;
+};
+
+op.encoderep = function(str, encoding, replacement, output) {
+  return op.encoderepconf(str, encoding, replacement, output, 1);
 };
 
 function toRawBuffer(buf) {
@@ -1040,10 +1048,10 @@ function bufferDifference(a, b) {
   return a.length;
 }
 
-op.decode = function(buf, encoding) {
+op.decodeconf = function(buf, encoding, permissive) {
   let rawBuffer = toRawBuffer(buf);
   if (encoding === 'windows-1252' || encoding === 'utf8-c8') {
-    return codecs[encoding].decode(rawBuffer);
+    return codecs[encoding].decode(rawBuffer, permissive);
   } else if (encoding === 'utf8') {
     const decoded = rawBuffer.toString(renameEncoding(encoding));
     const reencoded = Buffer.from(decoded, renameEncoding(encoding));
@@ -1078,6 +1086,19 @@ op.decode = function(buf, encoding) {
     }
   } else {
     return rawBuffer.toString(renameEncoding(encoding));
+  }
+};
+
+op.decode = function(buf, encoding) {
+  return op.decodeconf(buf, encoding, 1);
+};
+
+op.decoderepconf = function(buf, encoding, replacement, permissive) {
+  if (encoding === 'windows-1252') {
+    const rawBuffer = toRawBuffer(buf);
+    return codecs[encoding].decodeWithReplacement(rawBuffer, replacement, permissive);
+  } else {
+    return op.decodeconf(buf, encoding, permissive);
   }
 };
 

@@ -22,23 +22,35 @@ class SingleByteCodec {
     this.encodeBuf = new Buffer(65536);
     this.encodeBuf.fill(0);
 
+    this.encodeBufPermissive = new Buffer(65536);
+    this.encodeBufPermissive.fill(0);
+
     // stored separately so that we can have a unmapped flag in encodeBuf
     this.zero = codes.charCodeAt(0);
     for (let i = 1; i < codes.length; i++) {
-      this.encodeBuf[codes.charCodeAt(i)] = i;
+      if (codes[i] === '�') {
+        this.encodeBufPermissive[i] = i;
+      } else {
+        this.encodeBufPermissive[codes.charCodeAt(i)] = i;
+        this.encodeBuf[codes.charCodeAt(i)] = i;
+      }
     }
 
     this.decodeBuf = Buffer.from(codes, 'ucs2');
+    this.decodeBufPermissive = Buffer.from(codes.replace(/�/g, function(match, offset, string) {
+      return String.fromCharCode(offset);
+    }), 'ucs2');
   }
 
-  encode(str) {
+  encode(str, permissive) {
     const buf = new Buffer(str.length);
+    const encodeBuf = permissive ? this.encodeBufPermissive : this.encodeBuf;
     for (let i = 0; i < str.length; i++) {
       const unit = str.charCodeAt(i);
       if (unit === this.zero) {
         buf[i] = 0;
       } else {
-        const encoded = this.encodeBuf[unit];
+        const encoded = encodeBuf[unit];
         if (encoded === 0) {
           throw new NQPException('Error encoding ' + this.name + ' string: could not encode codepoint ' + unit);
         } else {
@@ -50,7 +62,9 @@ class SingleByteCodec {
     return buf;
   }
 
-  encodeWithReplacement(str, replacement) {
+  encodeWithReplacement(str, replacement, permissive) {
+    const encodeBuf = permissive ? this.encodeBufPermissive : this.encodeBuf;
+
     const replacementBuffer = this.encode(replacement);
 
     let replacementCount = 0;
@@ -60,7 +74,7 @@ class SingleByteCodec {
         i++;
         replacementCount++;
       } else {
-        if (code !== this.zero && this.encodeBuf[code] === 0) {
+        if (code !== this.zero && encodeBuf[code] === 0) {
           replacementCount++;
         }
       }
@@ -75,7 +89,7 @@ class SingleByteCodec {
       if (unit === this.zero) {
         buf[i] = 0;
       } else {
-        const encoded = this.encodeBuf[unit];
+        const encoded = encodeBuf[unit];
         if (encoded === 0) {
           offset += replacementBuffer.copy(buf, offset);
         } else {
@@ -91,8 +105,8 @@ class SingleByteCodec {
     return buf;
   }
 
-  decode(buf) {
-    const decodeBuf = this.decodeBuf;
+  decode(buf, permissive) {
+    const decodeBuf = permissive ? this.decodeBufPermissive : this.decodeBuf;
     const newBuf = new Buffer(buf.length*2);
     let idx1 = 0;
     let idx2 = 0;
@@ -102,6 +116,10 @@ class SingleByteCodec {
         newBuf[idx2+1] = decodeBuf[idx1+1];
     }
     return newBuf.toString('ucs2');
+  }
+
+  decodeWithReplacement(buf, replacement, permissive) {
+    return this.decode(buf, permissive).replace(/�/g, replacement);
   }
 };
 
@@ -114,7 +132,8 @@ function withASCII(codes) {
   return codes;
 }
 
-const windows1252 = new SingleByteCodec('Windows-1252', withASCII('€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘’“”•–—˜™š›œžŸ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'));
+
+const windows1252 = new SingleByteCodec('Windows-1252', withASCII('€�‚ƒ„…†‡ˆ‰Š‹Œ�Ž��‘’“”•–—˜™š›œ�žŸ ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'));
 
 const latin1 = new SingleByteCodec('Latin-1', withASCII(' ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ'));
 
