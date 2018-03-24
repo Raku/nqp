@@ -1855,11 +1855,11 @@ op.eqatic = function(haystack, needle, offset) {
 };
 
 op.eqaticim = function(haystack, needle, offset) {
-  return foldCase(stripMarks(haystack.substr(offset))).startsWith(foldCase(stripMarks(needle)));
+  return foldCase(stripMarks(haystack.substr(offset))).startsWith(foldCase(stripMarks(needle))) ? 1 : 0;
 };
 
 op.eqatim = function(haystack, needle, offset) {
-  return stripMarks(haystack.substr(offset)).startsWith(stripMarks(needle));
+  return stripMarks(haystack.substr(offset)).startsWith(stripMarks(needle)) ? 1 : 0;
 };
 
 // STUB
