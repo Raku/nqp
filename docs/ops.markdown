@@ -798,7 +798,7 @@ Return the $v on JVM.
 
 Returns an iterator object to iterate over a list's items.  For example:
 
-```perl
+```perl6
 
 my $list := nqp::list('a', 'b', 'c');
 my $iter := nqp::iterator($list);
@@ -1136,7 +1136,7 @@ and `int`. `mine` gets the the value in question and returns true if this
 handler is in charge for this type, false otherwise.
 The method `int` does the conversion for patterns like %d.
 
-```perl
+```perl6
 my class MyHandler {
     method mine($x) { $x ~~ MyType }
     method int($x) { $x.Int }
@@ -1455,7 +1455,7 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 Executes the given statements sequentially. For example:
 
-```perl
+```perl6
 
 nqp::stmts((my $a := nqp::chars("foo")), say($a), say("bar"));
 # 3
