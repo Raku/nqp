@@ -852,10 +852,17 @@ otherwise.
 Returns the key associated with the given key-value pair.
 For example:
 
-```perl
-
+```perl6
 for %hash {
     say(nqp::iterkey_s($_), ' => ', nqp::iterval($_));
+}
+```
+Or alternately:
+```perl6
+my $iter := nqp::iterator(%hash);
+while $iter {
+    my $pair := nqp::shift($iter);
+    say(nqp::iterkey_s($pair), ' => ', nqp::iterval($pair));
 }
 
 ```
