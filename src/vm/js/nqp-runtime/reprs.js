@@ -372,9 +372,37 @@ class P6opaque extends REPRWithAttributes {
   }
 
   changeType(obj, newType) {
-    // TODO some sanity checks for the new mro being a subset and newType being also a P6opaque
+    if (!(newType._STable.REPR instanceof P6opaque)) {
+      throw new NQPException(
+        `New type for ${obj._STable.debugName} must have a matching representation (P6opaque vs ${newType._STable.REPR.name})"`
+      );
+    }
 
     const newREPR = newType._STable.REPR;
+
+    const newMapping = newREPR.nameToIndexMapping;
+    const currentMapping = obj._STable.REPR.nameToIndexMapping;
+
+    /* Ensure the MRO prefixes match up. */
+    let currentIndex = 0;
+    let newIndex = 0;
+
+    while (currentIndex < currentMapping.length
+      && currentMapping[currentIndex].slots.length == 0) currentIndex++;
+
+    while (newIndex < newMapping.length
+      && newMapping[newIndex].slots.length == 0) newIndex++;
+
+    while (currentIndex < currentMapping.length) {
+      if (newIndex >= newMapping.length
+        || newMapping[newIndex].classKey !== currentMapping[currentIndex].classKey) {
+        throw new NQPException(
+          `Incompatible MROs in P6opaque rebless for types %s and %s`
+        );
+      }
+      newIndex++;
+      currentIndex++;
+    }
 
     for (let i = 0; i < newREPR.nameToIndexMapping.length; i++) {
       for (let j = 0; j < newREPR.nameToIndexMapping[i].slots.length; j++) {
