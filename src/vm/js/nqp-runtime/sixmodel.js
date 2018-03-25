@@ -109,9 +109,7 @@ class STable {
         }
 
         const typeCheckResult = HOW.type_check(ctx, null, HOW, this, type);
-        return (typeof typeCheckResult === 'number' ? typeCheckResult : typeCheckResult.$$toBool(ctx));
-
-        if (HOW.type_check(ctx, null, HOW, this, type).$$toBool(ctx)) {
+        if (typeof typeCheckResult === 'number' ? typeCheckResult : typeCheckResult.$$toBool(ctx)) {
           return 1;
         }
       }
