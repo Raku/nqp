@@ -13,7 +13,7 @@ my %const_map := nqp::hash(
     'CCLASS_ALPHANUMERIC',  2048,
     'CCLASS_NEWLINE',       4096,
     'CCLASS_WORD',          8192,
-    
+
     'HLL_ROLE_NONE',        0,
     'HLL_ROLE_INT',         1,
     'HLL_ROLE_NUM',         2,
@@ -21,7 +21,7 @@ my %const_map := nqp::hash(
     'HLL_ROLE_ARRAY',       4,
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
-    
+
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
     'CONTROL_LAST',         16,
@@ -34,7 +34,7 @@ my %const_map := nqp::hash(
     'CONTROL_AWAIT',        8192,
     'CONTROL_EMIT',         16384,
     'CONTROL_DONE',         32768,
-    
+
     'STAT_EXISTS',             0,
     'STAT_FILESIZE',           1,
     'STAT_ISDIR',              2,
@@ -64,6 +64,7 @@ my %const_map := nqp::hash(
     'C_TYPE_SIZE_T',            -6,
     'C_TYPE_BOOL',              -7,
     'C_TYPE_ATOMIC_INT',        -8,
+    'C_TYPE_WCHAR_T',           -9,
     'C_TYPE_FLOAT',             -1,
     'C_TYPE_DOUBLE',            -2,
     'C_TYPE_LONGDOUBLE',        -3,

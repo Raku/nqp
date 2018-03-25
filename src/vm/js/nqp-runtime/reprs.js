@@ -681,6 +681,7 @@ const C_TYPE_LONGLONG = -5;
 const C_TYPE_SIZE_T = -6;
 const C_TYPE_BOOL = -7;
 const C_TYPE_ATOMIC_INT = -8;
+const C_TYPE_WCHAR_T = -9;
 
 function cType(ctype) {
   switch (ctype) {
@@ -697,6 +698,8 @@ function cType(ctype) {
       return ref.types.longlong;
     case C_TYPE_SIZE_T:
       return ref.types.size_t;
+    case C_TYPE_WCHAR_T:
+      return ref.types.wchar_t;
     case C_TYPE_BOOL:
       return ref.types.bool;
   }
