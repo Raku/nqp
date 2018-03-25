@@ -79,6 +79,10 @@ my class JSWithSourceMap {
     method p6-source() {$!p6-source}
     method file() {$!file}
     method comp_line_directives() {$!comp_line_directives}
+
+    method dump() {
+       "/* With sourcemap for $!file */\n" ~ $!js;
+    }
 }
 
 class QASTWithMatch {
@@ -183,7 +187,7 @@ class JavaScriptBackend {
     }
     
     method is_textual_stage($stage) {
-        $stage eq 'js';
+        0;
     }
 
     method spawn_new_node() {

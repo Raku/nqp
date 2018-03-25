@@ -548,6 +548,11 @@ class HLL::Compiler does HLL::Backend::Default {
             $out.print($obj.dump());
             $out.flush();
         }
+        elsif nqp::isstr($obj) {
+            my $out := stdout();
+            $out.print($obj);
+            $out.flush();
+        }
         else {
             nqp::die("Cannot dump this object; no dump method");
         }
