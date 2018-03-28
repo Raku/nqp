@@ -2807,7 +2807,7 @@ QAST::OperationsJAST.map_classlib_core_op('sleep', $TYPE_OPS, 'sleep', [$RT_NUM]
 QAST::OperationsJAST.map_classlib_core_op('getenvhash', $TYPE_OPS, 'getenvhash', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getpid', $TYPE_OPS, 'getpid', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmgetproperties', $TYPE_OPS, 'jvmgetproperties', [], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('getrusage', $TYPE_OPS, 'getrusage', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getrusage', $TYPE_OPS, 'getrusage', [$RT_OBJ], $RT_OBJ, :tc);
 
 # thread related opcodes
 QAST::OperationsJAST.map_classlib_core_op('newthread', $TYPE_OPS, 'newthread', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);

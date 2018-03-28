@@ -125,6 +125,7 @@ import org.perl6.nqp.sixmodel.reprs.SCRefInstance;
 import org.perl6.nqp.sixmodel.reprs.SemaphoreInstance;
 import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i16;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i32;
 import org.perl6.nqp.sixmodel.reprs.VMArrayInstance_i8;
@@ -5572,17 +5573,31 @@ public final class Ops {
     /* There's not a getrusage (with Windows fakery) equivalent on JVM, sadly.
      * The main reason this op exists is for the thread pool scheduler in
      * Rakudo, and we can get (or fake up enough of) what it needs. */
-    public static SixModelObject getrusage(ThreadContext tc) {
-        SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
-        SixModelObject res = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
-        long cpuNanos = ((OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean())
-            .getProcessCpuTime();
-        long cpuMillis = cpuNanos / 1000;
-        tc.native_i = cpuMillis / 1000000; // UTIME_SEC
-        res.bind_pos_native(tc, 0);
-        tc.native_i = cpuMillis % 1000000; // UTIME_MSEC
-        res.bind_pos_native(tc, 1);
-        return res;
+    public static SixModelObject getrusage(SixModelObject res, ThreadContext tc) {
+        if (Ops.isconcrete(res, tc) == 1) {
+            long cpuNanos = ((OperatingSystemMXBean)ManagementFactory.getOperatingSystemMXBean())
+                .getProcessCpuTime();
+            long cpuMillis = cpuNanos / 1000;
+            if (res instanceof VMArrayInstance_i) {
+                tc.native_i = cpuMillis / 1000000; // UTIME_SEC
+                res.bind_pos_native(tc, 0);
+                tc.native_i = cpuMillis % 1000000; // UTIME_MSEC
+                res.bind_pos_native(tc, 1);
+            }
+            /* TODO remove workar^H^H^Hdirty hack for non-working native arrays in ThreadPoolScheduler */
+            /* https://github.com/rakudo/rakudo/issues/1666 */
+            else {
+                SixModelObject Int = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+                res.bind_pos_boxed(tc, 0, box_i(cpuMillis / 1000000, Int, tc)); // UTIME_SEC
+                res.bind_pos_boxed(tc, 1, box_i(cpuMillis % 1000000, Int, tc)); // UTIME_MSEC
+                res.bind_pos_boxed(tc, 2, box_i(0, Int, tc));                   // STIME_SEC
+                res.bind_pos_boxed(tc, 3, box_i(0, Int, tc));                   // STIME_SEC
+            }
+            return res;
+        }
+        else {
+            throw new RuntimeException("getrusage needs a concrete 64bit int array, got " + res.getClass().getSimpleName());
+        }
     }
 
     public static SixModelObject jvmgetproperties(ThreadContext tc) {
