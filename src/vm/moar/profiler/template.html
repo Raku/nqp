@@ -221,8 +221,8 @@
             <input ng-model="NameFilter">
           </th>
           <th><a href="" ng-click="reverse = predicate == 'Entries' ? !reverse : true; predicate = 'Entries';">Entries</a></th>
-          <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
-          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'InclusiveTime' ? !reverse : true; predicate = 'InclusiveTime';">Inclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTime' ? !reverse : true; predicate = 'ExclusiveTime';">Exclusive Time</a></th>
           <th>
             <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
             <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
@@ -947,7 +947,7 @@
             routineList.push(entry);
         }
         $scope.Routines  = routineList;
-        $scope.predicate = "InclusiveTimePercent";
+        $scope.predicate = "InclusiveTime";
         $scope.reverse   = true;
     });
 
