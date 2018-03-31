@@ -101,11 +101,9 @@ class Makefile {
         my $target := self.target($target-name);
         my $newest := 0;
         if $target {
-            my $name := self.expand-macros($target.name);
-
             my $modified := 0;
-            if file-exists($name) {
-                $newest := $modified := file-modified($name);
+            if file-exists($target-name) {
+                $newest := $modified := file-modified($target-name);
             }
 
             for $target.prerequisites -> $prerequisite {
@@ -137,19 +135,15 @@ class Makefile {
                 }
             }
 
-            %built{$name} := 1;
+            %built{$target-name} := 1;
         }
         else {
-            my $names := $target-name;
-            $names := %!macro-lookup{$names}.expand if nqp::existskey(%!macro-lookup, $names);
-            for split-names($names) -> $name {
-                if $name {
-                    unless file-exists($name) {
-                        nqp::die("don't know how to create file $name");
-                    }
-                    my $modified := file-modified($name);
-                    $newest := $modified if $modified > $newest;
+            if $target-name {
+                unless file-exists($target-name) {
+                    nqp::die("don't know how to create file $target-name");
                 }
+                my $modified := file-modified($target-name);
+                $newest := $modified if $modified > $newest;
             }
         }
         return $newest;
