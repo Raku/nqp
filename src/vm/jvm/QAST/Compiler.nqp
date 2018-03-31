@@ -4246,7 +4246,7 @@ class QAST::CompilerJAST {
             $il.append($last_res.jast)
                 unless $void && nqp::istype($_, QAST::Var) && !nqp::istype($_, QAST::VarWithFallback);
             $*STACK.obtain($il, $last_res);
-            if $resultchild == $i && $resultchild != $n - 1 {
+            if !$all_void && $resultchild == $i && $resultchild != $n - 1 {
                 $res_type := $last_res.type;
                 $res_temp := fresh($res_type);
                 $il.append(JAST::Instruction.new( :op(store_ins($res_type)), $res_temp ));
