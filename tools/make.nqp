@@ -102,9 +102,7 @@ class Makefile {
         my $newest := 0;
         if $target {
             my $modified := 0;
-            if file-exists($target-name) {
-                $newest := $modified := file-modified($target-name);
-            }
+            $modified := file-modified($target-name) if file-exists($target-name);
 
             for $target.prerequisites -> $prerequisite {
                 my $names := self.expand-macros($prerequisite);
@@ -133,18 +131,21 @@ class Makefile {
                     my $status := run($args);
                     nqp::die("Got $status from $args") if $check-exit-status && $status != 0;
                 }
+
+                if file-exists($target-name) {
+                    $modified := file-modified($target-name);
+                    $newest := $modified if $modified > $newest;
+                }
             }
 
             %built{$target-name} := 1;
         }
-        else {
-            if $target-name {
-                unless file-exists($target-name) {
-                    nqp::die("don't know how to create file $target-name");
-                }
-                my $modified := file-modified($target-name);
-                $newest := $modified if $modified > $newest;
+        elsif $target-name {
+            unless file-exists($target-name) {
+                nqp::die("don't know how to create file $target-name");
             }
+            my $modified := file-modified($target-name);
+            $newest := $modified if $modified > $newest;
         }
         return $newest;
     }
