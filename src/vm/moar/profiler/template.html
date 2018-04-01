@@ -488,7 +488,10 @@
       </table>
       <script type="text/ng-template" id="myModalContent.html">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <button type="button" ng-click="modalInstance.close()"
+                      class="close" data-dismiss="modal">
+                      <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+              </button>
               <h4 class="modal-title" id="allocatingRoutinesModalLabel">
                 Routines Allocating {{CurrentAllocatingRoutine}}
               </h4>
@@ -528,7 +531,8 @@
               </table>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" ng-click="modalInstance.close()"
+                      class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
       </script>
       </div>
@@ -1145,11 +1149,12 @@
         $scope.routineReverse    = true;
 
         // Allocating routines handlng.
+        $scope.modalInstance = null;
         $scope.showAllocatingRoutines = function (alloc) {
             // Show modal dialog with data.
             $scope.CurrentAllocatingRoutine      = alloc.Name;
             $scope.CurrentAllocatingRoutineStats = alloc.RoutineStats;
-            var modalInstance = $uibModal.open({
+            $scope.modalInstance = $uibModal.open({
                 templateUrl: 'myModalContent.html',
                 scope: $scope
             });
