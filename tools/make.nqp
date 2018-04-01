@@ -377,7 +377,12 @@ sub MAIN(*@ARGS) {
     my $handle := open("Makefile", :r);
     my $make := Makefile::Grammar.parse($handle.slurp, :actions(Makefile::Actions.new));
 
-    if @ARGS[1] eq 'help' && !$make.ast.target(@ARGS[1]) {
+    if nqp::elems(@ARGS) < 2 {
+        for $make.ast.targets -> $target {
+            return $make.ast.make($target.name) if nqp::substr($target.name, 0, 1) ne '.';
+        }
+    }
+    elsif @ARGS[1] eq 'help' && !$make.ast.target(@ARGS[1]) {
         say("Targets:");
         say($make.ast.expand-macros($_.name)) for $make.ast.targets;
     }
