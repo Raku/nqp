@@ -2737,7 +2737,13 @@ QAST::OperationsJAST.add_core_op('takedispatcher', -> $qastcomp, $op {
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'),
         $TYPE_OPS, 'takedispatcher', 'V', 'I', $TYPE_TC ));
-    result($il, $RT_VOID);
+    if $*WANT != $RT_VOID {
+        $il.append($ACONST_NULL);
+        result($il, $RT_OBJ)
+    }
+    else {
+        result($il, $RT_VOID)
+    }
 });
 QAST::OperationsJAST.add_core_op('cleardispatcher', -> $qastcomp, $op {
     if nqp::elems(@($op)) != 0 {

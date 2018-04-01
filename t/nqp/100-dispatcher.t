@@ -64,8 +64,6 @@ sub take_or_clear($take) {
     my $foo := 100;
     if $take {
       nqp::takedispatcher('$foo');
-      ## TODO remove workaround for JVM once GH #384 is fixed
-      1
     } else {
       nqp::cleardispatcher();
     }
