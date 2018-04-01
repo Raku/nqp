@@ -175,8 +175,7 @@ class Makefile {
                 }
                 else {
                     if file-exists($job.name) {
-                        my $modified := file-modified($job.name);
-                        $job.set-modified($modified);
+                        $job.set-modified(file-modified($job.name));
                     }
                     $job.set-status(2);
 
@@ -202,7 +201,7 @@ class Makefile {
                 my $modified := $prerequisite.modified;
                 $newest := $modified if $modified > $newest;
             }
-            my $modified := $job.modified;
+            my $modified := file-exists($job.name) ?? file-modified($job.name) !! 0;
             if $modified == 0 || $newest > $modified {
                 my @recipe;
                 for $job.target.recipe -> $command {
