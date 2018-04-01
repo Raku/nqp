@@ -92,8 +92,11 @@ class Makefile {
         method build($target-name) {
             $!queue := nqp::create(Queue);
             $!job-tree := self.create-job($target-name);
-            my $next-job := self.find-next-job($!job-tree);
-            self.build-job($next-job);
+            my $j := 3;
+            while $j-- {
+                my $next-job := self.find-next-job($!job-tree);
+                self.build-job($next-job) if $next-job;
+            }
             until $!job-tree.status == 2 {
                 if nqp::shift($!queue) -> $task {
                     if nqp::list($task) {
@@ -140,7 +143,7 @@ class Makefile {
                     my $job := self.find-next-job($prerequisite);
                     return $job if $job;
                 }
-                return $job-tree;
+                return $job-tree if $buildable;
             }
             return Nil;
         }
@@ -158,14 +161,11 @@ class Makefile {
                 $command := nqp::substr($command, 1);
                 $check-exit-status := 0;
             }
-            if nqp::substr($command, 0, 5) eq '@echo' {
-                say(nqp::substr($command, 6));
-                next;
-            }
-            note($command);
+
             my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
             my $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
                 !! nqp::list('/bin/sh', '-c', $command);
+
             my $config := nqp::hash();
             $config<done> := -> $status {
                 nqp::die("Got $status from $args") if $check-exit-status && $status != 0;
@@ -184,6 +184,14 @@ class Makefile {
                     self.build-job($next-job) if $next-job;
                 }
             }
+
+            if nqp::substr($command, 0, 5) eq '@echo' {
+                say(nqp::substr($command, 6));
+                $config<done>(0);
+                return;
+            }
+
+            note($command);
             self.run($args, $config);
         }
 
