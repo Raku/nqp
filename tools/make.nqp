@@ -210,12 +210,12 @@ class Makefile {
                 }
 
                 if @recipe {
-                    self.run-next-command($job, @recipe);
-                }
-                else { # nothing to do actually, so mark it as done immediately
-                    $job.set-status(2);
+                    return self.run-next-command($job, @recipe);
                 }
             }
+            $job.set-status(2); # nothing to do actually, so mark it as done immediately
+            my $next-job := self.find-next-job($!job-tree);
+            self.build-job($next-job) if $next-job;
         }
     }
 
