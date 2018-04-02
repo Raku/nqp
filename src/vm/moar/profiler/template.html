@@ -387,7 +387,7 @@
                 <input ng-model="NameFilter">
               </th>
               <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
-              <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
+              <th><a href="" ng-click="reverse = predicate == 'Time' ? !reverse : true; predicate = 'Time';">Time In Callee</a></th>
               <th>
                 <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
                 <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
@@ -960,7 +960,7 @@
         $scope.total_time    = rawData[0].total_time;
         $scope.SuchCallers   = false;
         $scope.RecentCallers = [];
-        $scope.predicate     = "TimePercent";
+        $scope.predicate     = "Time";
         $scope.reverse       = true;
         var all_callers      = [];
         updateCurrentData();
