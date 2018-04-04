@@ -1,6 +1,6 @@
 #! nqp
 
-plan(31);
+plan(33);
 
 class Foo {
     has $!answer;
@@ -134,6 +134,12 @@ $partial.get_attr1;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr1'), 'nqp::attrinitied on a attr that has been autovivified');
 $partial.set_attr2;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr2'), 'nqp::attrinitied on a attr that has been bound to');
+
+my $in_void := AttrInitedTest.new;
+ok(!nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied before getting attr');
+nqp::getattr($in_void, AttrInitedTest, '$!attr1');
+ok(nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied with nqp::getattr as void');
+
 
 use nqpmo;
 
