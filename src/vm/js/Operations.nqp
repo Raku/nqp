@@ -343,7 +343,7 @@ class QAST::OperationsJS {
             my $obj := $comp.as_js(:want($T_OBJ), $node[0]);
             if static_hint($node) -> $hint {
                 if $type == $T_OBJ {
-                    Chunk.new($T_OBJ, "{$obj.expr}\.\$\$getattr\${$hint}()", $obj);
+                    $comp.stored_result(Chunk.new($T_OBJ, "{$obj.expr}\.\$\$getattr\${$hint}()", $obj), :$want);
                 }
                 else {
                     Chunk.new($type, "{$obj.expr}\.attr\${$hint}", $obj);
@@ -353,8 +353,8 @@ class QAST::OperationsJS {
                 my $classHandle := $comp.as_js(:want($T_OBJ), $node[1]);
                 my $attrName := $comp.as_js(:want($T_STR), $node[2]);
 
-                Chunk.new($type, "{$obj.expr}\.\$\$getattr{$suffix}({$classHandle.expr}, {$attrName.expr})",
-                    [$obj, $classHandle, $attrName]);
+                $comp.stored_result(Chunk.new($type, "{$obj.expr}\.\$\$getattr{$suffix}({$classHandle.expr}, {$attrName.expr})",
+                    [$obj, $classHandle, $attrName]), :$want);
             }
         });
     }
