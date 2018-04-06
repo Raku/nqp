@@ -10,14 +10,7 @@ class QAST::NVal is QAST::Node {
         $node
     }
 
-    method value($value = NO_VALUE) {
-        $!value := $value unless $value =:= NO_VALUE;
-        $!value
-    }
-    method cvalue($value) {
-        $!value := $value;
-        self.compile_time_value: $value;
-    }
+    method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
 
     method count_inline_placeholder_usages(@usages) { }
 
