@@ -889,7 +889,7 @@ class BinaryCursor {
    */
   cstr() {
     const len = this.varint();
-    const str = this.buffer.slice(this.offset, len).toString('utf8');
+    const str = this.buffer.slice(this.offset, this.offset + len).toString('utf8');
     this.offset += len;
     return str;
   }
