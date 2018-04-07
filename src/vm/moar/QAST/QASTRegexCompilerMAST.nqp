@@ -105,10 +105,6 @@ class QAST::MASTRegexCompiler {
         my $method   := $!regalloc.fresh_o();
         my $tmp      := $!regalloc.fresh_o();
 
-        # cclass_const
-        my $cclass_word     := $!regalloc.fresh_i();
-        my $cclass_newline  := $!regalloc.fresh_i();
-
         # create our labels
         my $startlabel   := label();
         my $donelabel    := label();
@@ -141,9 +137,7 @@ class QAST::MASTRegexCompiler {
             'jump',     $jumplabel,
             'method',   $method,
             'self',     $self,
-            'cclass_word'   , $cclass_word,
-            'cclass_newline', $cclass_newline
-            );
+        );
 
         @!rxjumps := nqp::list($donelabel);
 
@@ -158,8 +152,6 @@ class QAST::MASTRegexCompiler {
             op('const_i64', $two, ival(2)),
             op('const_i64', $three, ival(3)),
             op('const_i64', $four, ival(4)),
-            op('const_i64', $cclass_word, ival(nqp::const::CCLASS_WORD)),
-            op('const_i64', $cclass_newline, ival(nqp::const::CCLASS_NEWLINE)),
             op('findmeth', $method, $self, sval('!cursor_start')),
             call($method, [ $Arg::obj ], :result($cur), $self )
         ];
@@ -384,52 +376,64 @@ class QAST::MASTRegexCompiler {
             nqp::push(@ins, op('if_i', $itmp, $fail));
         }
         elsif $subtype eq 'lwb' {
+            my $cclass_word := $!regalloc.fresh_i();
             merge_ins(@ins, [
                 op('ge_i', $itmp, $pos, %!reg<eos>),
                 op('if_i', $itmp, $fail),
-                op('iscclass', $itmp, %!reg<cclass_word>, %!reg<tgt>, $pos),
+                op('const_i64', $cclass_word, ival(nqp::const::CCLASS_WORD)),
+                op('iscclass', $itmp, $cclass_word, %!reg<tgt>, $pos),
                 op('unless_i', $itmp, %!reg<fail>),
                 op('sub_i', $itmp, %!reg<pos>, %!reg<one>),
-                op('iscclass', $itmp, %!reg<cclass_word>, %!reg<tgt>, $itmp),
+                op('iscclass', $itmp, $cclass_word, %!reg<tgt>, $itmp),
                 op('if_i', $itmp, $fail)
             ]);
+            $!regalloc.release_register($cclass_word, $MVM_reg_int64);
         }
         elsif $subtype eq 'rwb' {
+            my $cclass_word := $!regalloc.fresh_i();
             merge_ins(@ins, [
                 op('le_i', $itmp, $pos, %!reg<zero>),
                 op('if_i', $itmp, $fail),
-                op('iscclass', $itmp, %!reg<cclass_word>, %!reg<tgt>, $pos),
+                op('const_i64', $cclass_word, ival(nqp::const::CCLASS_WORD)),
+                op('iscclass', $itmp, $cclass_word, %!reg<tgt>, $pos),
                 op('if_i', $itmp, %!reg<fail>),
                 op('sub_i', $itmp, %!reg<pos>, %!reg<one>),
-                op('iscclass', $itmp, %!reg<cclass_word>, %!reg<tgt>, $itmp),
+                op('iscclass', $itmp, $cclass_word, %!reg<tgt>, $itmp),
                 op('unless_i', $itmp, $fail)
             ]);
+            $!regalloc.release_register($cclass_word, $MVM_reg_int64);
         }
         elsif $subtype eq 'bol' {
+            my $cclass_newline := $!regalloc.fresh_i();
             merge_ins(@ins, [
                 op('eq_i', $itmp, %!reg<pos>, %!reg<zero>),
                 op('if_i', $itmp, $donelabel),
                 op('ge_i', $itmp, $pos, %!reg<eos>),
                 op('if_i', $itmp, $fail),
                 op('sub_i', $itmp, %!reg<pos>, %!reg<one>),
-                op('iscclass', $itmp, %!reg<cclass_newline>, %!reg<tgt>, $itmp),
+                op('const_i64', $cclass_newline, ival(nqp::const::CCLASS_NEWLINE)),
+                op('iscclass', $itmp, $cclass_newline, %!reg<tgt>, $itmp),
                 op('unless_i', $itmp, $fail),
                 $donelabel
             ]);
+            $!regalloc.release_register($cclass_newline, $MVM_reg_int64);
         }
         elsif $subtype eq 'eol' {
+            my $cclass_newline := $!regalloc.fresh_i();
             merge_ins(@ins, [
-                op('iscclass', $itmp, %!reg<cclass_newline>, %!reg<tgt>, %!reg<pos>),
+                op('const_i64', $cclass_newline, ival(nqp::const::CCLASS_NEWLINE)),
+                op('iscclass', $itmp, $cclass_newline, %!reg<tgt>, %!reg<pos>),
                 op('if_i', $itmp, $donelabel),
                 op('ne_i', $itmp, %!reg<pos>, %!reg<eos>),
                 op('if_i', $itmp, $fail),
                 op('eq_i', $itmp, %!reg<pos>, %!reg<zero>),
                 op('if_i', $itmp, $donelabel),
                 op('sub_i', $itmp, %!reg<pos>, %!reg<one>),
-                op('iscclass', $itmp, %!reg<cclass_newline>, %!reg<tgt>, $itmp),
+                op('iscclass', $itmp, $cclass_newline, %!reg<tgt>, $itmp),
                 op('if_i', $itmp, $fail),
                 $donelabel
             ]);
+            $!regalloc.release_register($cclass_newline, $MVM_reg_int64);
         }
         elsif $subtype eq 'fail' {
             nqp::push(@ins, op('goto', $fail));
