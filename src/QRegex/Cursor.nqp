@@ -552,22 +552,24 @@ role NQPMatchRole is export {
             nqp::push($!cstack, $capture);
         }
         elsif !nqp::isnull($capture) {
-            my $name := nqp::getattr_s($capture, $?CLASS, '$!name');
-            if !nqp::isnull_s($name) && nqp::defined($name) {
-                nqp::push($!cstack, $capture);
-            }
-            else {  # is top capture anonymous enough to be reused?
-                my $top         := nqp::atpos($!cstack,-1);
-                my str $topname := nqp::getattr_s($top, $?CLASS, '$!name');
-                if !nqp::isnull_s($topname) && nqp::defined($topname) {
-                    nqp::push($!cstack, $capture);
-                }
-                else {
-                    # $top anon capture just used for pos advancement, so update it in place.
-                    # We replace the whole capture because jvm can't seem to copy only the pos,
-                    # and because the chances are that both captures are in the nursury anyway.
+            if nqp::isnull_s(nqp::getattr_s($capture, $?CLASS, '$!name')) {
+                if nqp::isnull_s(nqp::getattr_s(nqp::atpos($!cstack,-1), $?CLASS, '$!name')) {
+                    # $top anon capture just used for pos advancement, so update
+                    # it in place.  We replace the whole capture because jvm
+                    # can't seem to copy only the pos, and because the chances
+                    # are that both captures are in the nursury anyway.
                     nqp::bindpos($!cstack, -1, $capture);
                 }
+
+                # top capture anonymous enough to be reused
+                else {
+                    nqp::push($!cstack, $capture);
+                }
+            }
+
+            # capture has a name
+            else {
+                nqp::push($!cstack, $capture);
             }
         }
         $!cstack;
