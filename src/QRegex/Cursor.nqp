@@ -380,7 +380,7 @@ role NQPMatchRole is export {
                 $subcur   := nqp::atpos($cs, $csi);
                 $submatch := $subcur.MATCH;
                 $name     := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                if !nqp::isnull_s($name) && nqp::defined($name) {
+                unless nqp::isnull_s($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
