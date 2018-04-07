@@ -1184,11 +1184,9 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     $dest := nqp::atkey($hash, $onlyname);
                 }
                 while $csi < $cselems {
-                    my $subcur   := nqp::atpos($cs, $csi);
-                    my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull_s($name) && nqp::defined($name) {
-                        my $submatch := $subcur.MATCH();
-                        nqp::push($dest, $submatch);
+                    my $subcur := nqp::atpos($cs, $csi);
+                    unless nqp::isnull_s(nqp::getattr_s($subcur, $?CLASS, '$!name')) {
+                        nqp::push($dest,$subcur.MATCH());
                     }
                     ++$csi;
                 }
