@@ -897,7 +897,7 @@ role NQPMatchRole is export {
     }
 
     method same() {
-        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
 
         if $!pos < 1 || $!pos >= nqp::chars($target) { # no other side to compare to
             nqp::getattr($!shared, ParseShared, '$!fail_cursor');
