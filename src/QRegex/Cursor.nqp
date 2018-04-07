@@ -532,7 +532,7 @@ role NQPMatchRole is export {
         $new;
     }
 
-    method !cursor_capture($capture, $name) {
+    method !cursor_capture($capture, str $name) {
         $!match  := nqp::null();
         $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
