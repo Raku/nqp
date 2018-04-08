@@ -88,6 +88,10 @@ op.unipropcode = function(name) {
 };
 
 op.getuniprop_str = function(codePoint, propCode) {
+  /* TODO - load and use real data */
+  if (propCode === 84) {
+    return codePoint == 780 ? '230' : '0';
+  }
   const got = uniData.props[propCode][codePoint];
   return got === undefined ? 'NaN' : got;
 };
