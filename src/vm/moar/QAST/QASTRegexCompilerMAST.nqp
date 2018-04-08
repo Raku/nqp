@@ -68,6 +68,9 @@ class QAST::MASTRegexCompiler {
     # Jump table.
     has @!rxjumps;
 
+    # Do we use the cursor stack?
+    has int $!cstack_used;
+
     method new(:$qastcomp!, :$regalloc!) {
         my $obj := nqp::create(self);
         $obj.BUILD($qastcomp, $regalloc);
@@ -82,6 +85,11 @@ class QAST::MASTRegexCompiler {
 
     method unique($str?) {
         $!qastcomp.unique($str)
+    }
+
+    method !get_cstack() {
+        $!cstack_used := 1;
+        %!reg<cstack>
     }
 
     method as_mast($node, :$want) {
@@ -111,8 +119,6 @@ class QAST::MASTRegexCompiler {
         my $restartlabel := label();
         my $faillabel    := label();
         my $jumplabel    := label();
-        my $cutlabel     := label();
-        my $cstacklabel  := label();
 
         my $self := $*BLOCK.local('self');
 
@@ -209,25 +215,34 @@ class QAST::MASTRegexCompiler {
         $i0 := $!regalloc.fresh_i();
         $itmp := $!regalloc.fresh_i();
         my $i18 := $!regalloc.fresh_i();
+        nqp::push(@ins, $restartlabel);
+        if $!cstack_used {
+            nqp::push(@ins, op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
+                ival(nqp::hintfor($!cursor_type, '$!cstack'))));
+        }
         merge_ins(@ins, [
-            $restartlabel,
-            op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
-                ival(nqp::hintfor($!cursor_type, '$!cstack'))),
             $faillabel,
             op('isnull', $i0, $bstack),
             op('if_i', $i0, $donelabel),
             op('elems', $i0, $bstack),
             op('gt_i', $i0, $i0, $zero),
             op('unless_i', $i0, $donelabel),
-            op('pop_i', $itmp, $bstack),
-            op('islist', $i0, $cstack),
-            op('unless_i', $i0, $cstacklabel),
-            op('elems', $i0, $cstack),
-            op('gt_i', $i0, $i0, $zero),
-            op('unless_i', $i0, $cstacklabel),
-            op('dec_i', $itmp),
-            op('atpos_o', $back_cur, $cstack, $itmp),
-            $cstacklabel,
+            op('pop_i', $itmp, $bstack)
+        ]);
+        if $!cstack_used {
+            my $cstacklabel := label();
+            merge_ins(@ins, [
+                op('islist', $i0, $cstack),
+                op('unless_i', $i0, $cstacklabel),
+                op('elems', $i0, $cstack),
+                op('gt_i', $i0, $i0, $zero),
+                op('unless_i', $i0, $cstacklabel),
+                op('dec_i', $itmp),
+                op('atpos_o', $back_cur, $cstack, $itmp),
+                $cstacklabel
+            ]);
+        }
+        merge_ins(@ins, [
             op('pop_i', $rep, $bstack),
             op('pop_i', $pos, $bstack),
             op('pop_i', $itmp, $bstack),
@@ -237,17 +252,24 @@ class QAST::MASTRegexCompiler {
             op('if_i', $i0, $faillabel),
             op('eq_i', $i0, $itmp, $zero),
             op('if_i', $i0, $faillabel),
+        ]);
+        if $!cstack_used {
             # backtrack the cursor stack
-            op('isnull', $i0, $cstack),
-            op('if_i', $i0, $jumplabel),
-            op('unless_o', $cstack, $jumplabel),
-            op('elems', $i18, $bstack),
-            op('le_i', $i0, $i18, $zero),
-            op('if_i', $i0, $cutlabel),
-            op('dec_i', $i18),
-            op('atpos_i', $i18, $bstack, $i18),
-            $cutlabel,
-            op('setelemspos', $cstack, $i18),
+            my $cutlabel := label();
+            merge_ins(@ins, [
+                op('isnull', $i0, $cstack),
+                op('if_i', $i0, $jumplabel),
+                op('unless_o', $cstack, $jumplabel),
+                op('elems', $i18, $bstack),
+                op('le_i', $i0, $i18, $zero),
+                op('if_i', $i0, $cutlabel),
+                op('dec_i', $i18),
+                op('atpos_i', $i18, $bstack, $i18),
+                $cutlabel,
+                op('setelemspos', $cstack, $i18),
+            ]);
+        }
+        merge_ins(@ins, [
             $jumplabel,
             op('jumplist', ival(+@!rxjumps), $itmp)
         ]);
@@ -1062,7 +1084,7 @@ class QAST::MASTRegexCompiler {
             op('findmeth', %!reg<method>, %!reg<cur>, sval('!cursor_capture')),
             op('const_s', $s11, sval($node.name)),
             call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                %!reg<cur>, $p11, $s11, :result(%!reg<cstack>)),
+                %!reg<cur>, $p11, $s11, :result(self.'!get_cstack'())),
             op('goto', $donelabel),
             $faillabel,
             op('goto', %!reg<fail>),
@@ -1193,7 +1215,7 @@ class QAST::MASTRegexCompiler {
                         sval('!cursor_capture')));
                     nqp::push(@ins, op('const_s', $sname, sval($node.name)));
                     nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                        %!reg<cur>, $p11, $sname, :result(%!reg<cstack>)));
+                        %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'())));
                     $!regalloc.release_register($sname, $MVM_reg_str);
                     $captured := 1;
 
@@ -1207,7 +1229,7 @@ class QAST::MASTRegexCompiler {
                         op('push_i', $bstack, $itmp),
                         op('push_i', $bstack, %!reg<negone>),
                         op('push_i', $bstack, %!reg<negone>),
-                        op('elems', $itmp, %!reg<cstack>),
+                        op('elems', $itmp, self.'!get_cstack'()),
                         op('dec_i', $itmp),
                         op('push_i', $bstack, $itmp)
                     ]);
@@ -1216,7 +1238,7 @@ class QAST::MASTRegexCompiler {
                     nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>,
                         sval('!cursor_push_cstack')));
                     nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj],
-                        %!reg<cur>, $p11, :result(%!reg<cstack>)));
+                        %!reg<cur>, $p11, :result(self.'!get_cstack'())));
                 }
 
                 my $bstack := %!reg<bstack>;
@@ -1225,7 +1247,7 @@ class QAST::MASTRegexCompiler {
                     op('push_i', $bstack, $itmp),
                     op('push_i', $bstack, %!reg<zero>),
                     op('push_i', $bstack, %!reg<pos>),
-                    op('elems', $itmp, %!reg<cstack>),
+                    op('elems', $itmp, self.'!get_cstack'()),
                     op('push_i', $bstack, $itmp)
                 ]);
             }
@@ -1237,7 +1259,7 @@ class QAST::MASTRegexCompiler {
                 sval('!cursor_capture')));
             nqp::push(@ins, op('const_s', $sname, sval($node.name)));
             nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                %!reg<cur>, $p11, $sname, :result(%!reg<cstack>)));
+                %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'())));
             $!regalloc.release_register($sname, $MVM_reg_str);
         }
 
