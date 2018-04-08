@@ -240,7 +240,7 @@ class BinaryWriteCursor {
     this.idIdx(ref[0], ref[1]);
   }
 
-  ref(ref) {
+  refVarType(ref) {
     /* Work out what kind of thing we have and determine the discriminator. */
     let discrim = 0;
 
@@ -280,6 +280,11 @@ class BinaryWriteCursor {
       discrim = REFVAR_OBJECT;
     }
 
+    return discrim;
+  }
+
+  ref(ref) {
+    const discrim = this.refVarType(ref);
 
     this.int8(discrim);
 
@@ -328,7 +333,7 @@ class BinaryWriteCursor {
   }
 };
 
-const HEADER_SIZE = 4 * 18;
+const HEADER_SIZE = 4 * 20;
 
 class SerializationWriter {
   constructor(sc, sh) {
@@ -338,6 +343,7 @@ class SerializationWriter {
     this.sh = sh;
     this.sh.push(nullStr);
     this.numClosures = 0;
+    this.numParamInterns = 0;
 
     this.stables = new BinaryWriteCursor(this);
     this.stablesData = new BinaryWriteCursor(this);
@@ -348,6 +354,7 @@ class SerializationWriter {
     this.contextsHeaders = new BinaryWriteCursor(this);
     this.contextsData = new BinaryWriteCursor(this);
     this.repossessionsData = new BinaryWriteCursor(this);
+    this.paramInterns = new BinaryWriteCursor(this);
   }
 
   serializeObject(obj) {
@@ -513,12 +520,44 @@ class SerializationWriter {
     }
 
     if (st.modeFlags & constants.PARAMETERIZED_TYPE) {
-      /* TODO - figure out the intern table */
+      /* To deserve an entry in the intern table, we need that both the type
+       * being parameterized and all of the arguments are from an SC other
+       * than the one we're currently serializing. Otherwise, there is no
+       * way the parameterized type in question could have been produced by
+       * another compilation unit. We keep a counter of things, which should
+       * add up to parameters + 1 if we need the intern entry. */
+
+      let internability = 0;
+
+      /* Write a reference to the type being parameterized, and increment the
+       * internability if it's from a different SC (easier to check that after,
+       * as writing the ref will be sure to mark it as being in this one if it
+       * has no SC yet). */
+
       this.stablesData.ref(st.parametricType);
+
+      if (st.parametricType._SC !== this.sc) {
+        internability++;
+      }
+
       const params = st.parameters.array;
       this.stablesData.varint(params.length);
       for (let i = 0; i < params.length; i++) {
         this.stablesData.ref(params[i]);
+
+        /* If what we write was an object reference and it's from another
+         * SC, add to the internability count. */
+        if (this.stablesData.refVarType(params[i]) == REFVAR_OBJECT) {
+
+          if (params[i]._SC != this.sc) {
+            internability++;
+          }
+        }
+      }
+
+      /* Make intern table entry if needed. */
+      if (internability == (params.length + 1)) {
+        this.addParamIntern(st.WHAT, st.parametricType, params);
       }
     }
 
@@ -583,6 +622,34 @@ class SerializationWriter {
           this.contextsData.str(ctx[name]);
       }
     }
+  }
+
+  addParamIntern(type, parametricType, params) {
+    /* Parametric type object reference. */
+    this.paramInterns.objRef(parametricType);
+
+    /* Indexes in this SC of type object and STable. */
+    if (type._SC !== this.sc) {
+        throw new NQPException('Serialization error: parameterized type to intern not in current SC');
+    }
+
+    this.paramInterns.int32(this.sc.rootObjects.indexOf(type));
+
+    if (type._STable._SC !== this.sc) {
+      throw new NQPException('Serialization error: STable of parameterized type to intern not in current SC');
+    }
+
+    this.paramInterns.int32(this.sc.rootSTables.indexOf(type._STable));
+
+    /* Write parameter count and parameter object refs. */
+    this.paramInterns.int32(params.length);
+
+    for (let i = 0; i < params.length; i++) {
+      this.paramInterns.objRef(params[i]);
+    }
+
+    /* Increment number of parameterization interns. */
+    this.numParamInterns++;
   }
 
   getSerializedContextIdx(ctx) {
@@ -843,6 +910,7 @@ class SerializationWriter {
     outputSize += this.contextsData.offset;
     outputSize += this.contextsHeaders.offset;
     outputSize += this.repossessionsData.offset;
+    outputSize += this.paramInterns.offset;
 
     this.buffer = new Buffer(outputSize);
 
@@ -901,6 +969,11 @@ class SerializationWriter {
     this.headerInt32(this.sc.repScs.length);
 
     this.writeChunk(this.repossessionsData);
+
+    this.headerInt32(this.offset);
+    this.headerInt32(this.numParamInterns);
+
+    this.writeChunk(this.paramInterns);
 
 
     /* Sanity check. */

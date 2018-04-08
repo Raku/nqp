@@ -1164,22 +1164,9 @@ op.parameterizetype = function(ctx, type, params) {
 
   const unpackedParams = params.array;
 
-  const lookup = st.parameterizerCache;
-  for (let i = 0; i < lookup.length; i++) {
-    if (unpackedParams.length == lookup[i].params.length) {
-      let match = true;
-      for (let j = 0; j < unpackedParams.length; j++) {
-        /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
-        if (unpackedParams[j] !== lookup[i].params[j]) {
-          match = false;
-          break;
-        }
-      }
-
-      if (match) {
-        return lookup[i].type;
-      }
-    }
+  const found = st.lookupParametric(unpackedParams);
+  if (found !== undefined) {
+    return found;
   }
 
   const result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
@@ -1189,7 +1176,7 @@ op.parameterizetype = function(ctx, type, params) {
   newSTable.parameters = params;
   newSTable.modeFlags |= constants.PARAMETERIZED_TYPE;
 
-  lookup.push({type: result, params: unpackedParams});
+  st.parameterizerCache.push({type: result, params: unpackedParams});
 
   return result;
 };

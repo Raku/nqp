@@ -131,6 +131,26 @@ class STable {
     }
   }
 
+  lookupParametric(params) {
+    const lookup = this.parameterizerCache;
+    for (let i = 0; i < lookup.length; i++) {
+      if (params.length == lookup[i].params.length) {
+        let match = true;
+        for (let j = 0; j < params.length; j++) {
+          /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
+          if (params[j] !== lookup[i].params[j]) {
+            match = false;
+            break;
+          }
+        }
+
+        if (match) {
+          return lookup[i].type;
+        }
+      }
+    }
+  }
+
   setboolspec(mode, method) {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {

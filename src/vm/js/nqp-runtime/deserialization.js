@@ -578,13 +578,19 @@ class BinaryCursor {
       return cursor.objectEntry(objectsData);
     });
 
-
     const reposTable = this.at(4 * 14).int32();
     const numRepos = this.at(4 * 15).int32();
+
+    const paramInternsOffset = this.at(4 * 16).int32();
+    const numParamInterns = this.at(4 * 17).int32();
 
     const repossessed = this.at(reposTable).times(numRepos, function(cursor) {
       return {type: cursor.int32(), index: cursor.int32(), origSC: cursor.int32(), origIndex: cursor.int32()};
     });
+
+    if (numParamInterns != 0) {
+      this.resolveParamInterns(this.at(paramInternsOffset), numParamInterns, STables);
+    }
 
     this.repossessSTables(repossessed);
 
@@ -679,13 +685,10 @@ class BinaryCursor {
     // numRepos
     this.int32();
 
-    this.int32(); // paramInternsData
-    const numParamInterns = this.int32();
-
-    if (numParamInterns != 0) {
-      // XXX do we need to care?
-    }
-
+    // paramInternsOffset
+    this.int32();
+    //numParamInterns
+    this.int32();
 
     /* We set the method caches after everything else is ready */
     for (let i = 0; i < STables.length; i++) {
@@ -719,6 +722,9 @@ class BinaryCursor {
 
   deserializeSTables(STables) {
     for (let i = 0; i < STables.length; i++) {
+      if (this.sc.rootSTables[i].$$avoid) {
+        continue;
+      }
       STables[i][1].stable(this.sc.rootSTables[i]);
     }
   }
@@ -742,6 +748,9 @@ class BinaryCursor {
 
   deserializeObjects(objects) {
     for (let i = 0; i < objects.length; i++) {
+      if (this.sc.rootObjects[i].$$avoid) {
+        continue;
+      }
       if (objects[i].isConcrete) {
         const repr = this.sc.rootObjects[i]._STable.REPR;
         if (repr.deserializeFinish) {
@@ -820,6 +829,43 @@ class BinaryCursor {
       codeRef.capture(closure.staticCode.freshBlock());
 
       codeRef.outerCtx = ctx;
+    }
+  }
+
+  resolveParamInterns(data, count) {
+    for (let i = 0; i < count; i++) {
+      /* Resolve the parametric type. */
+      const ptype = data.objRef();
+
+      /* Read indexes where type object and STable will get placed if a
+       * matching intern is found. */
+      const typeIdx = data.int32();
+      const stIdx   = data.int32();
+
+      /* Read parameters and push into array. */
+      const numParams = data.int32();
+
+      const params = [];
+      for (let i = 0; i < numParams; i++) {
+        params.push(data.objRef(true));
+      }
+
+      const ptypeSTableIndex = this.sc.rootSTables.indexOf(ptype._STable);
+      if (ptypeSTableIndex !== -1) {
+        if (this.sc.rootSTables[ptypeSTableIndex].HOW === undefined) {
+          STables[ptypeSTableIndex][1].stable(this.sc.rootSTables[ptypeSTableIndex]);
+        }
+      }
+
+      const matching = ptype._STable.lookupParametric(params);
+
+      /* Try to find a matching parameterization. */
+      if (matching) {
+        this.sc.rootObjects[typeIdx] = matching;
+        this.sc.rootObjects[typeIdx].$$avoid = 1;
+        this.sc.rootSTables[stIdx] = matching._STable;
+        this.sc.rootSTables[stIdx].$$avoid = 1;
+      }
     }
   }
 
