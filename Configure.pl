@@ -147,7 +147,8 @@ MAIN: {
     }
     $config{'makefile-timing'} = $options{'makefile-timing'};
     $config{'stagestats'} = '--stagestats' if $options{'makefile-timing'};
-    $config{'shell'} = $^O eq 'MSWin32' ? 'cmd' : 'sh';
+    my $shell = $^O eq 'MSWin32' ? 'cmd' : 'sh';
+    $config{'shell'} = $^O eq 'solaris' ? '' : "SHELL = $shell";
     $config{'bat'}   = $^O eq 'MSWin32' ? '.bat' : '';
     $config{'cpsep'} = $^O eq 'MSWin32' ? ';' : ':';
     $config{'slash'} = $slash;
