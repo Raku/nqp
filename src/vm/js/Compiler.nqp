@@ -534,7 +534,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         $type == $T_INT8
             || $type == $T_INT16
             || $type == $T_UINT8
-            || $type == $T_UINT16;
+            || $type == $T_UINT16
+            || $type == $T_UINT32;
     }
 
     #= Convert a 32bit integer which is a result of js expr $expr into integer type $type for storage
@@ -542,7 +543,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         if $type == $T_INT8 || $type == $T_INT16 {
             my int $shift := 32 - self.bits($type);
             "($expr << $shift >> $shift)";
-        } elsif $type == $T_UINT8 || $type == $T_UINT16 {
+        } elsif $type == $T_UINT8 || $type == $T_UINT16 || $type == $T_UINT32 {
             my int $shift := 32 - self.bits($type);
             "($expr << $shift >>> $shift)";
         } else {
@@ -552,9 +553,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method bits(int $type) {
         if $type == $T_INT8 || $type == $T_UINT8 {
-            8
+            8;
         } elsif $type == $T_INT16 || $type == $T_UINT16 {
-            16
+            16;
+        } elsif $type == $T_INT || $type == $T_UINT32 {
+            32;
         } else {
             nqp::die("We can't determine the number of bits for $type");
         }
@@ -562,7 +565,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method coerce(Chunk $chunk, $desired) {
         my int $got := $chunk.type;
-        my int $got_int := $got == $T_INT || self.is_fancy_int($got);
+        my int $got_int := $got == $T_INT || (self.is_fancy_int($got) && $got != $T_UINT32);
 
         if $got != $desired {
             if $desired == $T_VOID {
@@ -578,6 +581,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 if $got_int {
                     return Chunk.new($T_RETVAL, $chunk.expr, $chunk);
+                }
+                if $got == $T_UINT32 {
+                    return Chunk.new($T_RETVAL, "new nqp.NativeUIntRet({$chunk.expr})", $chunk);
                 }
                 if $got == $T_NUM {
                     return Chunk.new($T_RETVAL, "new nqp.NativeNumRet({$chunk.expr})", $chunk);
@@ -600,6 +606,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got_int {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeIntArg({$chunk.expr})", $chunk);
                 }
+                if $got == $T_UINT32 {
+                    return Chunk.new($T_CALL_ARG, "new nqp.NativeUIntArg({$chunk.expr})", $chunk);
+                }
                 if $got == $T_NUM {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeNumArg({$chunk.expr})", $chunk);
                 }
@@ -609,7 +618,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_NUM {
-                if $got_int {
+                if $got_int || $got == $T_UINT32 {
                     # we store both as a javascript number, and 32bit integers fit into doubles
                     return Chunk.new($T_NUM, $chunk.expr, $chunk);
                 }
@@ -625,7 +634,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_STR {
                     return Chunk.new($T_INT, "parseInt({$chunk.expr})", $chunk);
                 }
-                if $got == $T_NUM {
+                if $got == $T_NUM || $got == $T_UINT32 {
                     return Chunk.new($T_INT, "({$chunk.expr}|0)", $chunk);
                 }
                 if $got == $T_BOOL {
@@ -645,7 +654,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_STR {
-                if $got_int {
+                if $got_int || $got == $T_UINT32 {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', $chunk);
                 }
                 elsif $got == $T_NUM {
@@ -684,6 +693,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT16} := 'intToObj';
                     %convert{$T_UINT8} := 'intToObj';
                     %convert{$T_UINT16} := 'intToObj';
+                    %convert{$T_UINT32} := 'intToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
                     %convert{$T_RETVAL} := 'retval';
@@ -693,7 +703,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_BOOL {
-                if $got_int {
+                if $got_int || $got == $T_UINT32 {
                     return Chunk.new($T_BOOL, $chunk.expr, $chunk);
                 } elsif $got == $T_NUM {
                     return Chunk.new($T_BOOL, "({$chunk.expr} !== 0)", $chunk);
@@ -1593,6 +1603,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             elsif $bits == 16 {
                 $unsigned ?? $T_UINT16 !! $T_INT16;
             }
+            elsif $bits == 32 {
+                $unsigned ?? $T_UINT32 !! $T_INT;
+            }
             else {
                 $T_INT;
             }
@@ -1703,7 +1716,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed(HLL, $*CTX, Array.prototype.slice.call(arguments));\n");
     }
 
-    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s', $T_INT16, '0', $T_INT8, '0', $T_UINT8, '0', $T_UINT16, '0');
+    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s', $T_INT16, '0', $T_INT8, '0', $T_UINT8, '0', $T_UINT16, '0', $T_UINT32, '0');
 
     method declare_var(QAST::Var $node) {
         my int $type := self.type_from_typeobj($node.returns);

@@ -190,6 +190,7 @@ exports.hash = function() {
 
 const nativeArgs = require('./native-args.js');
 const NativeIntArg = nativeArgs.NativeIntArg;
+const NativeUIntArg = nativeArgs.NativeUIntArg;
 const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
@@ -231,6 +232,8 @@ const strToObj = exports.strToObj = function(currentHLL, s) {
 
 const arg = exports.arg = function(currentHLL, arg) {
   if (arg instanceof NativeIntArg) {
+    return intToObj(currentHLL, arg.value);
+  } else if (arg instanceof NativeUIntArg) { // TODO: should work only for bignums
     return intToObj(currentHLL, arg.value);
   } else if (arg instanceof NativeNumArg) {
     return numToObj(currentHLL, arg.value);
@@ -623,7 +626,7 @@ function fromJS(obj) {
 }
 
 function toJS(obj) {
-  if (obj instanceof NativeIntArg) {
+  if (obj instanceof NativeIntArg || obj instanceof NativeUIntArg) {
     return obj.value;
   } else if (obj instanceof NativeNumArg) {
     return obj.value;
@@ -1612,7 +1615,7 @@ op.ctxouterskipthunks = function(ctx) {
 };
 
 op.captureposprimspec = function(capture, idx) {
-  if (capture.pos[idx] instanceof NativeIntArg) {
+  if (capture.pos[idx] instanceof NativeIntArg || capture.pos[idx] instanceof NativeUIntArg) {
     return 1;
   } else if (capture.pos[idx] instanceof NativeNumArg) {
     return 2;

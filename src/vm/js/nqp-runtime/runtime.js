@@ -22,10 +22,12 @@ const BOOT = require('./BOOT.js');
 const nativeArgs = require('./native-args.js');
 
 const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
+const NativeUIntArg = exports.NativeUIntArg = nativeArgs.NativeUIntArg;
 const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
 
 const NativeNumRet = exports.NativeNumRet = nativeArgs.NativeNumRet;
+const NativeUIntRet = exports.NativeUIntRet = nativeArgs.NativeUIntRet;
 
 const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
@@ -271,6 +273,8 @@ exports.retval = function(currentHLL, arg) {
     return core.strToObj(currentHLL, arg);
   } else if (arg instanceof NativeNumRet) {
     return core.numToObj(currentHLL, arg.value);
+  } else if (arg instanceof NativeUIntRet) {
+    return core.intToObj(currentHLL, arg.value);
   } else {
     return arg;
   }
@@ -471,6 +475,8 @@ exports.tooManyPos = function(got, expected) {
 exports.arg_i = function(ctx, contedArg) {
   if (contedArg instanceof NativeIntArg) {
     return contedArg.value;
+  } else if (contedArg instanceof NativeUIntArg) {
+    return contedArg.value|0;
   } else if (contedArg instanceof NativeNumArg) {
     throw new NQPException('Expected native int argument, but got num');
   } else if (contedArg instanceof NativeStrArg) {
@@ -540,8 +546,9 @@ const chunkNamesToTypes = {
   T_INT16: 6,
   T_INT8: 7,
   T_RETVAL: 8,
-  T_INT16: 9,
+  T_UINT16: 9,
   T_UINT8: 10,
+  T_UINT32: 11,
 
   T_VOID: -1,
   T_NONVAL: -2,

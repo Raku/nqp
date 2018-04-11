@@ -14,6 +14,22 @@ class NativeIntArg {
 
 exports.NativeIntArg = NativeIntArg;
 
+class NativeUIntArg {
+  constructor(value) {
+    this.value = value;
+  }
+
+  $$getInt() {
+    return (this.value|0);
+  }
+
+  $$decont() {
+    throw new Error('deconting native int arg');
+  }
+};
+
+exports.NativeUIntArg = NativeUIntArg;
+
 class NativeNumArg {
   constructor(value) {
     this.value = value;
@@ -61,3 +77,19 @@ class NativeNumRet {
 }
 
 exports.NativeNumRet = NativeNumRet;
+
+class NativeUIntRet {
+  constructor(value) {
+    this.value = value;
+  }
+
+  $$getInt() {
+    return this.value|0;
+  }
+
+  $$decont() {
+    return this;
+  }
+}
+
+exports.NativeUIntRet = NativeUIntRet;
