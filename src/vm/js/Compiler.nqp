@@ -1591,7 +1591,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 $unsigned ?? $T_UINT8 !! $T_INT8;
             }
             elsif $bits == 16 {
-                $unsigned ?? $T_UINT8 !! $T_INT16;
+                $unsigned ?? $T_UINT16 !! $T_INT16;
             }
             else {
                 $T_INT;
