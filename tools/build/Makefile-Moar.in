@@ -39,6 +39,8 @@ P5QREGEX_MOAR     = NQPP5QRegex.moarvm
 NQP_MOAR     = nqp.moarvm
 M_NQP_SOURCES= src/vm/moar/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
+MAKE_MOAR    = make.moarvm
+
 M_SOURCES = \
   $(COMMON_SOURCES) \
   $(M_QAST_SOURCES) \
@@ -86,7 +88,7 @@ realclean: clean
 
 testclean:
 
-m-all: $(NQP_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
+m-all: $(NQP_MOAR) $(MAKE_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
 
 m-install: m-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
@@ -255,6 +257,9 @@ $(M_STAGE2_DIR)/$(NQP_MOAR): $(M_STAGE1_DIR) $(M_STAGE2_DIR)/$(P6QREGEX_MOAR) $(
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
 	    --output=$(M_STAGE2_DIR)/$(NQP_MOAR) $(M_STAGE2_DIR)/$(NQP_COMBINED)
 
+$(MAKE_MOAR): $(M_RUNNER) tools/make.nqp
+	$(M_RUNNER) --target=mbc --output=$(MAKE_MOAR) tools/make.nqp
+
 $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) $(M_STAGE2_DIR)/$(NQP_MO_MOAR) .
 	$(CP) $(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR) .
@@ -301,10 +306,10 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 ## testing
 
 m-test: m-all
-	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency
+	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency t/make
 
 m-test-loud: m-all
-	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency
+	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency t/make
 
 m-core-test: $(M_RUNNER)
 	$(PROVE) -r --exec ".@slash@$(M_RUNNER)" t/nqp
