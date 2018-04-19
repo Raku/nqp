@@ -1,6 +1,6 @@
 use make;
 
-plan(14);
+plan(20);
 
 my $match := Makefile::Grammar.parse('
 # just a comment
@@ -51,3 +51,38 @@ NQP_MO_MOAR     = nqpmo.moarvm
 $(M_STAGE1_DIR)/$(NQP_MO_MOAR):
 ', :actions(Makefile::Actions.new));
 is($match.ast.expand-macros($match.ast.targets[0].name), 'gen/moar/stage1/nqpmo.moarvm');
+
+my $make := Makefile::Grammar.parse(q[
+TEST_DIR = gen/make_test
+clean:
+	rm -f gen/make_test/foo
+	rm -f gen/make_test/bar
+	rm -f gen/make_test/baz
+all: $(TEST_DIR)/foo
+$(TEST_DIR)/foo: $(TEST_DIR)/bar
+	nqp -e "spurt('$(TEST_DIR)/foo', slurp('$(TEST_DIR)/bar'))"
+$(TEST_DIR)/bar: $(TEST_DIR)/baz
+	nqp -e "spurt('$(TEST_DIR)/bar', slurp('$(TEST_DIR)/baz'))"
+$(TEST_DIR)/baz: $(TEST_DIR)
+	nqp -e "spurt('$(TEST_DIR)/baz', 'baz!')"
+$(TEST_DIR):
+	mkdir $(TEST_DIR)
+], :actions(Makefile::Actions.new));
+
+my $test_dir := 'gen/make_test';
+
+$make.ast.make('clean');
+$make.ast.make($test_dir ~ '/foo');
+
+ok(nqp::stat($test_dir ~ '/foo', nqp::const::STAT_EXISTS));
+ok(nqp::stat($test_dir ~ '/bar', nqp::const::STAT_EXISTS));
+ok(nqp::stat($test_dir ~ '/baz', nqp::const::STAT_EXISTS));
+is(slurp($test_dir ~ '/foo'), 'baz!', 'foo has correct content');
+spurt($test_dir ~ '/baz', 'bazz!');
+$make.ast.make($test_dir ~ '/foo');
+is(slurp($test_dir ~ '/foo'), 'bazz!', 'foo updated after distant dependency changed');
+
+my $before := nqp::stat_time($test_dir ~ '/foo', nqp::const::STAT_MODIFYTIME);
+$make.ast.make('all');
+my $after := nqp::stat_time($test_dir ~ '/foo', nqp::const::STAT_MODIFYTIME);
+is($after, $before, "foo did not get updated when dependencies didn't change");

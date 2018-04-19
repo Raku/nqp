@@ -214,6 +214,7 @@ class Makefile {
                 }
             }
             $job.set-status(2); # nothing to do actually, so mark it as done immediately
+            $job.set-modified(file-exists($job.name) ?? file-modified($job.name) !! nqp::time_n());
             my $next-job := self.find-next-job($!job-tree);
             self.build-job($next-job) if $next-job;
         }
