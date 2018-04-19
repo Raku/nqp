@@ -644,8 +644,11 @@ role NQPMatchRole is export {
 
     method !reduce_with_match(str $name, str $key, $match) {
         my $actions := self.actions;
-        nqp::findmethod($actions, $name)($actions, $match, $key)
-            if !nqp::isnull($actions) && nqp::can($actions, $name);
+        my $method := nqp::isnull($actions)
+            ?? nqp::null()
+            !! nqp::tryfindmethod($actions, $name);
+        $method($actions, $match, $key) unless nqp::isnull($method);
+        self
     }
 
     method !shared_type() { ParseShared }
