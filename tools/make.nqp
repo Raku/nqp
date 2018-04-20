@@ -131,6 +131,7 @@ class Makefile {
             }
             elsif $target-name {
                 nqp::die("Unknown target $target-name") unless file-exists($target-name);
+                return Job.new(:name($target-name));
             }
             return Nil;
         }

@@ -86,3 +86,18 @@ my $before := nqp::stat_time($test_dir ~ '/foo', nqp::const::STAT_MODIFYTIME);
 $make.ast.make('all');
 my $after := nqp::stat_time($test_dir ~ '/foo', nqp::const::STAT_MODIFYTIME);
 is($after, $before, "foo did not get updated when dependencies didn't change");
+
+$make := Makefile::Grammar.parse(q[
+TEST_DIR = gen/make_test
+clean:
+	rm -f $(TEST_DIR)/qux
+$(TEST_DIR)/qux: $(TEST_DIR)/foo
+	nqp -e "spurt('$(TEST_DIR)/qux', slurp('$(TEST_DIR)/foo'))"
+], :actions(Makefile::Actions.new));
+$make.ast.make('clean');
+$make.ast.make($test_dir ~ '/qux');
+is(slurp($test_dir ~ '/qux'), 'bazz!', 'Built from non-target source file');
+nqp::sleep(0.1);
+spurt($test_dir ~ '/foo', 'foo');
+$make.ast.make($test_dir ~ '/qux');
+is(slurp($test_dir ~ '/qux'), 'foo', 'Noticed change in non-target source file');
