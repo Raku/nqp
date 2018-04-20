@@ -996,6 +996,26 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             while nqp::elems(@($qast)) { @tmp.push(@($qast).shift) }
             while @tmp { @($qast).push(self.flip_ast(@tmp.pop)) }
         }
+        elsif $qast.rxtype eq 'anchor' {
+            if $qast.subtype eq 'rwb' {
+                $qast.subtype("lwb");
+            }
+            elsif $qast.subtype eq 'lwb' {
+                $qast.subtype("rwb");
+            }
+            elsif $qast.subtype eq 'bol' {
+                $qast.subtype("eol");
+            }
+            elsif $qast.subtype eq 'eol' {
+                $qast.subtype("bol");
+            }
+            elsif $qast.subtype eq 'bos' {
+                $qast.subtype("eos");
+            }
+            elsif $qast.subtype eq 'eos' {
+                $qast.subtype("bos");
+            }
+        }
         else {
             for @($qast) { self.flip_ast($_) }
         }
