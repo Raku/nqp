@@ -1,4 +1,4 @@
-plan(33);
+plan(34);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '',
