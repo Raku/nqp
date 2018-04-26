@@ -174,6 +174,25 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         elems--;
     }
 
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+        long lastElem = this.elems - 1;
+        if (lastElem < start || lastElem < end || (end < start && 0 <= start && 0 <= end) ) {
+            throw ExceptionHandling.dieInternal(tc, "VMArray: Slice index out of bounds");
+        }
+
+        start = 0 <= start ? start : 0;
+        end   = 0 <= end   ? end   : lastElem;
+
+        long numWanted = end - start + 1;
+        if (0 < numWanted) {
+            for (long i = 0; i < numWanted; i++) {
+                this.at_pos_native(tc, start + i);
+                dest.bind_pos_native(tc, i);
+            }
+        }
+        return dest;
+    }
+
     /* This can be optimized for the case we have two VMArray representation objects. */
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         long elems0 = elems;

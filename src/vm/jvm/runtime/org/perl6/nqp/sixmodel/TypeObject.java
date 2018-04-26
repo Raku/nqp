@@ -54,6 +54,9 @@ public class TypeObject extends SixModelObject {
     public SixModelObject shift_boxed(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+    }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
