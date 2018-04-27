@@ -41,12 +41,17 @@ is(   9e-324, 1e-323, '9e-324 denormal is 1e-323');
 # U+0CEE KANNADA DIGIT EIGHT [Nd] (೮)
 # U+0CEF KANNADA DIGIT NINE [Nd] (೯)
 
-isn't(೫e-೩೨೪, ೦e೦,    'denormal 5e-324 is recognized and is not 0 (Uni)');
-is(   ೬e-೩೨೪, ೫e-೩೨೪, '6e-324 denormal equates to 5e-324 denormal (Uni)');
-is(   ೫e-೩೨೪, ೫e-೩೨೪, '5e-324 denormal equates to 5e-324 denormal (Uni)');
-is(   ೩e-೩೨೪, ೫e-೩೨೪, '2e-324 denormal equates to 5e-324 denormal (Uni)');
-is(   ೨e-೩೨೪, ೦e೦,    '2e-324 denormal is 0e0 (Uni)');
-is(   ೯e-೩೨೪, ೧e-೩೨೩, '9e-324 denormal is 1e-323 (Uni)');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("JVM doesn't know how to Unicode properly", 6);
+}
+else {
+    isn't(೫e-೩೨೪, ೦e೦,    'denormal 5e-324 is recognized and is not 0 (Uni)');
+    is(   ೬e-೩೨೪, ೫e-೩೨೪, '6e-324 denormal equates to 5e-324 denormal (Uni)');
+    is(   ೫e-೩೨೪, ೫e-೩೨೪, '5e-324 denormal equates to 5e-324 denormal (Uni)');
+    is(   ೩e-೩೨೪, ೫e-೩೨೪, '2e-324 denormal equates to 5e-324 denormal (Uni)');
+    is(   ೨e-೩೨೪, ೦e೦,    '2e-324 denormal is 0e0 (Uni)');
+    is(   ೯e-೩೨೪, ೧e-೩೨೩, '9e-324 denormal is 1e-323 (Uni)');
+}
 
 isn't(1180591620717411303424e0, 1180591620717409992704e0,
     'distinct num literals close to each other are not equal');

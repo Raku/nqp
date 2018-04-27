@@ -71,12 +71,12 @@ is(nqp::getuniname(0xA0), 'NO-BREAK SPACE', 'nqp::getuniname for controls');
 is(nqp::getuniname(0x1F514), "BELL", 'nqp::getuniname for U+1F514 BELL');
 is(nqp::getuniname(0x10FFFF), "<noncharacter-10FFFF>",
   'nqp::getuniname for U+10FFFF is a noncharacter');
-is(nqp::getuniname(0x20001), "CJK UNIFIED IDEOGRAPH-20001",
-  "nqp::getuninme for U+20001 CJK UNIFIED IDEOGRAPH");
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-  skip("Tangut and Nushu characters not in JVM yet", 2);
+  skip("Tangut, Nushu characters not in JVM yet / CJK has 'extension b'", 3);
 }
 else {
+  is(nqp::getuniname(0x20001), "CJK UNIFIED IDEOGRAPH-20001",
+    "nqp::getuninme for U+20001 CJK UNIFIED IDEOGRAPH");
   is(nqp::getuniname(0x17000), "TANGUT IDEOGRAPH-17000", "Tangut ideograph nqp::uniname");
   is(nqp::getuniname(0x1B170), "NUSHU CHARACTER-1B170", "Nushu character nqp::uniname");
 }
