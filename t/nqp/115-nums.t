@@ -58,8 +58,8 @@ sub () {
     my int $i;
     while $i++ < 300 {
         my $n := gen-num();
-        is(+$n,     +~+$n, "no drift in str -> num roundtrip {+$n} (1 level)");
-        is(+$n,   +~+~+$n, "no drift in str -> num roundtrip {+$n} (2 levels)");
-        is(+$n, +~+~+~+$n, "no drift in str -> num roundtrip {+$n} (3 levels)");
+        is(+$n,     +~+$n, "no drift in str -> num roundtrip `$n` (1 level)");
+        is(+$n,   +~+~+$n, "no drift in str -> num roundtrip `$n` (2 levels)");
+        is(+$n, +~+~+~+$n, "no drift in str -> num roundtrip `$n` (3 levels)");
     }
 }()
