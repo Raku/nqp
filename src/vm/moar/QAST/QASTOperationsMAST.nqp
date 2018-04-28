@@ -598,6 +598,9 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
     }
     $arr
 });
+QAST::MASTOperations.add_core_op('numify', -> $qastcomp, $op {
+    $qastcomp.as_mast($op[0], :want($MVM_reg_num64))
+});
 QAST::MASTOperations.add_core_op('qlist', -> $qastcomp, $op {
     $qastcomp.as_mast(QAST::Op.new( :op('list'), |@($op) ))
 });
