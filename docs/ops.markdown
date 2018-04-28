@@ -100,6 +100,7 @@
   * [join](#join)
   * [lc](#lc)
   * [normalizecodes](#normalizecodes)
+  * [numify](#numify)
   * [ord](#ord)
   * [ordbaseat](#ordbaseat)
   * [radix](#radix)
@@ -1041,6 +1042,16 @@ Return lowercase copy of string.
 Takes the codepoints in $codes-in, applies the specified normalization, and
 places the result into the $codes-out array. Both arrays of codepoints must
 be 32-bit integer arrays.
+
+## numify
+
+```perl6
+use nqp; say nqp::numify(nqp::unbox_s("42e0"));
+```
+
+Converts a string to one of the numeric types. Only used in HLL space, as in pure
+nqp `+"42e0"` performs the same numification. The op can be used, for example, to parse a Num
+out of a string.
 
 ## ord
 * `ord(str $str --> int)`
