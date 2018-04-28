@@ -1,4 +1,4 @@
-plan(34);
+plan(35);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '',
@@ -79,4 +79,10 @@ else {
     "nqp::getuninme for U+20001 CJK UNIFIED IDEOGRAPH");
   is(nqp::getuniname(0x17000), "TANGUT IDEOGRAPH-17000", "Tangut ideograph nqp::uniname");
   is(nqp::getuniname(0x1B170), "NUSHU CHARACTER-1B170", "Nushu character nqp::uniname");
+}
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+  skip("Hangul Syllables give incorrect result", 1);
+}
+else {
+  is(nqp::getuniname(0xAC00), "HANGUL SYLLABLE GA", "U+AC00 returns HANGUL SYLLABLE GA");
 }
