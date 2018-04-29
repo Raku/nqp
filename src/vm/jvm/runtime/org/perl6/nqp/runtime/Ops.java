@@ -7358,24 +7358,44 @@ public final class Ops {
         String name;
         int cp = (int) codePoint;
         try {
-            if(codePoint < 0) {
+            if (codePoint < 0) {
                 name = "<illegal>";
             }
             /* Return <control-XXXX> for control characters */
             else if (codePoint <= 0x1F || (0x7F <= codePoint && codePoint <= 0x9F)) {
                 name = String.format("<control-%04X>", codePoint);
             }
-            else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE)  {
+            else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF)
+                   || (0xFFFE & codePoint) == 0xFFFE)  {
                 name = String.format("<noncharacter-%04X>", codePoint);
+            }
+            /* Surrogates */
+            else if (0xD800 <= codePoint && codePoint <= 0xDFFF) {
+                name = String.format("<surrogate-%04X>", codePoint);
+            }
+            /* Private Use Area */
+            else if ((0xE000 <= codePoint && codePoint <= 0xF8FF)
+                 || (0xF0000 <= codePoint && codePoint <= 0x10FFFF)) {
+                name = String.format("<private-use-%04X>", codePoint);
             }
             else {
                 name = Character.getName(cp);
-                if(name == null) {
-                    name = "<unassigned>";
+                if (name == null) {
+                    if (0x10FFFF < codePoint) {
+                        name = "<unassigned>";
+                    }
+                    else {
+                        name = String.format("<reserved-%04X>", codePoint);
+                    }
                 }
             }
         } catch (IllegalArgumentException iae) {
-            name = "<unassigned>";
+            if (0x10FFFF < codePoint) {
+                name = "<unassigned>";
+            }
+            else {
+                name = String.format("<reserved-%04X>", codePoint);
+            }
         }
         return name;
     }

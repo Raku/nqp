@@ -1,4 +1,4 @@
-plan(35);
+plan(40);
 is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::getstrfromname('super fake not real name'), '',
@@ -37,7 +37,7 @@ else {
   is(nqp::getstrfromname('woman gesturing OK'), $woman-gesturing-OK,
     'nqp::getstrfromaname with an Emoji ZWJ Sequences');
   is(nqp::getstrfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB),
-    'nqp::getstrfromaname wih an Emoji Sequences');
+    'nqp::getstrfromaname wih an Emoji Sequence');
 
 }
 
@@ -71,6 +71,11 @@ is(nqp::getuniname(0xA0), 'NO-BREAK SPACE', 'nqp::getuniname for controls');
 is(nqp::getuniname(0x1F514), "BELL", 'nqp::getuniname for U+1F514 BELL');
 is(nqp::getuniname(0x10FFFF), "<noncharacter-10FFFF>",
   'nqp::getuniname for U+10FFFF is a noncharacter');
+is(nqp::getuniname(0xF901), "CJK COMPATIBILITY IDEOGRAPH-F901", "nqp::getuniname for CJK COMPATIBILITY IDEOGRAPH");
+is(nqp::getuniname(0xF8E4), "<private-use-F8E4>", "nqp::getuniname for Private use characters return <private-use-XXXX>");
+is(nqp::getuniname(0xDFFD), "<surrogate-DFFD>", "nqp::getuniname for Low Surrogates returns <surrogate-XXXX>");
+is(nqp::getuniname(0xDBFF), "<surrogate-DBFF>", "nqp::getuniname for Private Use High Surrogates returns <surrogate-XXXX>");
+is(nqp::getuniname(0xDB7F), "<surrogate-DB7F>", "nqp::getuniname for Non Private Use High Surrogates returns <surrogate-XXXX>");
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("Tangut, Nushu characters not in JVM yet / CJK has 'extension b'", 3);
 }
