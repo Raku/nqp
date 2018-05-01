@@ -61,3 +61,32 @@ plan(2);
     ok(purify(&assumed-pure-c) == 300, 'Exact object guard matches on second call (3)');
     ok($times-run == 3, 'Resolve ran once per distinct guard match even at same position');
 }
+
+# Concrete, non-concrete, and type guards
+{
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'type-and-definedness-counter', -> $obj {
+        nqp::speshguardtype($obj, $obj.WHAT);
+        nqp::isconcrete($obj)
+            ?? nqp::speshguardconcrete($obj)
+            !! nqp::speshguardtypeobj($obj);
+        ++$times-run
+    });
+    sub test($obj) {
+        nqp::speshresolve('type-and-definedness-counter', $obj)
+    }
+    my class A {}
+    my class B {}
+    ok(test(A) == 1, 'First run with A type object is correct result');
+    ok(test(A) == 1, 'Second run with A type object gets same result');
+    ok(test(B) == 2, 'First run with B type object is correct result');
+    ok(test(B) == 2, 'Second run with B type object gets same result');
+    ok(test(A.new) == 3, 'First run with A instance is correct result');
+    ok(test(A.new) == 3, 'Second run with A instance gets same result');
+    ok(test(B.new) == 4, 'First run with B instance is correct result');
+    ok(test(B.new) == 4, 'Second run with B instance gets same result');
+    ok(test(A) == 1, 'Third run with A type object is correct result');
+    ok(test(B) == 2, 'Third run with B type object is correct result');
+    ok(test(A.new) == 3, 'Third run with A instance is correct result');
+    ok(test(B.new) == 4, 'Third run with B instance is correct result');
+}
