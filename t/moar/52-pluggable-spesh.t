@@ -43,4 +43,21 @@ plan(2);
     }
     ok($times-run == 3, 'Ran resolver once per bytecode location');
     ok($total == 3 * (100 + 101 + 102), 'Got correct cached results');
+
+    # Check that the object guard is enforced.
+    sub assumed-pure-b() { 2 * $a }
+    sub assumed-pure-c() { 3 * $a }
+    $times-run := 0;
+    $a := 100;
+    sub purify(&target) {
+        nqp::speshresolve('assume-pure', &target)
+    }
+    ok(purify(&assumed-pure) == 100, 'Exact object guard honored on first call (1)');
+    ok(purify(&assumed-pure-b) == 200, 'Exact object guard honored on first call (2)');
+    ok(purify(&assumed-pure-c) == 300, 'Exact object guard honored on first call (3)');
+    $a++;
+    ok(purify(&assumed-pure) == 100, 'Exact object guard matches on second call (1)');
+    ok(purify(&assumed-pure-b) == 200, 'Exact object guard matches on second call (2)');
+    ok(purify(&assumed-pure-c) == 300, 'Exact object guard matches on second call (3)');
+    ok($times-run == 3, 'Resolve ran once per distinct guard match even at same position');
 }
