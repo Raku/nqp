@@ -90,3 +90,44 @@ plan(2);
     ok(test(A.new) == 3, 'Third run with A instance is correct result');
     ok(test(B.new) == 4, 'Third run with B instance is correct result');
 }
+
+# Attribute fetch for guarding
+{
+    my class TestWithAttr {
+        has $!attr;
+        method new($attr) {
+            my $self := nqp::create(self);
+            nqp::bindattr($self, TestWithAttr, '$!attr', $attr);
+            $self
+        }
+    }
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'attr-type-and-definedness-counter', -> $obj {
+        nqp::speshguardtype($obj, TestWithAttr);
+        nqp::speshguardconcrete($obj);
+        my $attr := nqp::speshguardgetattr($obj, TestWithAttr, '$!attr');
+        nqp::speshguardtype($attr, $attr.WHAT);
+        nqp::isconcrete($attr)
+            ?? nqp::speshguardconcrete($attr)
+            !! nqp::speshguardtypeobj($attr);
+        ++$times-run
+    });
+    sub test($obj) {
+        nqp::speshresolve('attr-type-and-definedness-counter', TestWithAttr.new($obj))
+    }
+    my class A { }
+    my class B { }
+    ok(test(A) == 1, 'First run with attr holding A type object is correct result');
+    ok(test(A) == 1, 'Second run with attr holding A type object gets same result');
+    ok(test(B) == 2, 'First run with attr holding B type object is correct result');
+    ok(test(B) == 2, 'Second run with attr holding B type object gets same result');
+    ok(test(A.new) == 3, 'First run with attr holding A instance is correct result');
+    ok(test(A.new) == 3, 'Second run with attr holding A instance gets same result');
+    ok(test(B.new) == 4, 'First run with attr holding B instance is correct result');
+    ok(test(B.new) == 4, 'Second run with attr holding B instance gets same result');
+    ok(test(A) == 1, 'Third run with A type attr holding object is correct result');
+    ok(test(B) == 2, 'Third run with B type attr holding object is correct result');
+    ok(test(A.new) == 3, 'Third run with A attr holding instance is correct result');
+    ok(test(B.new) == 4, 'Third run with B attr holding instance is correct result');
+
+}
