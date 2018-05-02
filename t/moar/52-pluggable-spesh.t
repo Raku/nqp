@@ -129,5 +129,24 @@ plan(2);
     ok(test(B) == 2, 'Third run with B type attr holding object is correct result');
     ok(test(A.new) == 3, 'Third run with A attr holding instance is correct result');
     ok(test(B.new) == 4, 'Third run with B attr holding instance is correct result');
+}
 
+# Many calls, to exercise specialization.
+{
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'assume-pure-spesh', -> $code {
+        $times-run++;
+        nqp::speshguardobj($code);
+        $code()
+    });
+    my $a := 2;
+    sub assumed-pure() { $a }
+    my $total := 0;
+    my int $i := 0;
+    while $i++ < 10_000_000 {
+        $total := $total + nqp::speshresolve('assume-pure-spesh', &assumed-pure);
+        $a++;
+    }
+    ok($times-run, 1, 'Only ran the plugin once in hot code');
+    ok($total == 20_000_000, 'Correct result from hot code');
 }
