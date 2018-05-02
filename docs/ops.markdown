@@ -65,6 +65,7 @@
   * [pop](#pop)
   * [setelems](#setelems)
   * [shift](#shift)
+  * [slice](#slice)
   * [splice](#splice)
   * [unshift](#unshift)
   * [iterator](#iterator)
@@ -775,6 +776,14 @@ elements at the end are bound with potentially VM specific null entries.
 Return the value of @arr at index 0, unbind @arr at index 0, and move all
 other bindings of @arr to the index one below what they were previously bound
 to.
+
+## slice
+* `slice(@arr, int $start_pos, int $end_pos --> @copy)`
+
+Copy the elements in `@arr` starting at `$start_pos` and ending at `$end_pos`
+and return the resulting list.  If `$start_pos` is a negative value, the start
+value is set to position 0. If `$end_pos` is a negative value, the end value is
+set to the position of the last element in the list.
 
 ## splice
 * `splice(@arr, @from, int $offset, int $count --> @arr)`
