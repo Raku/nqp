@@ -143,10 +143,13 @@ plan(2);
     sub assumed-pure() { $a }
     my $total := 0;
     my int $i := 0;
-    while $i++ < 10_000_000 {
-        $total := $total + nqp::speshresolve('assume-pure-spesh', &assumed-pure);
-        $a++;
+    sub hot-loop() {
+        while $i++ < 5_000_000 {
+            $total := $total + nqp::speshresolve('assume-pure-spesh', &assumed-pure);
+            $a++;
+        }
     }
-    ok($times-run, 1, 'Only ran the plugin once in hot code');
-    ok($total == 20_000_000, 'Correct result from hot code');
+    hot-loop();
+    ok($times-run == 1, 'Only ran the plugin once in hot code');
+    ok($total == 10_000_000, 'Correct result from hot code');
 }
