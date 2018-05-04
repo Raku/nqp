@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(353);
+plan(365);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
