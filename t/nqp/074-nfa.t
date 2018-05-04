@@ -1,4 +1,4 @@
-plan(11);
+plan(14);
 
 my knowhow NFAType is repr('NFA') { }
 
@@ -47,4 +47,22 @@ ok(nqp::elems($empty_fates) == 0,"an empty nfa matches no fates");
   is(nqp::atpos_i($matching, 2), 11, 'right order of fates (3/3)');
 }
 
+{
+  my $states := [
+    ["x0", "x1", "x2", "NOT OK", "x4", "x5", "x6", "x7", "x8", "OK"],
+    [$EDGE_EPSILON,0,5, $EDGE_EPSILON,0, 2],
+    [$EDGE_CHARLIST, '$@%', 3],
+    [$EDGE_FATE,3,0],
+    [$EDGE_FATE,9,0],
+    [-1073739506, 64, 4]
+  ];
 
+  my $nfa := nqp::nfafromstatelist($states, NFAType);
+
+  my $fates := nqp::nfarunproto($nfa, '@', 0);
+
+  is(nqp::elems($fates), 2, '2 fates are found');
+
+  is(nqp::atpos_i($fates, 0), 3, 'a literal of length 1 is prefered');
+  is(nqp::atpos_i($fates, 1), 9, 'the other fate is less prefered');
+}
