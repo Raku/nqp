@@ -1029,9 +1029,10 @@ my class MASTCompilerInstance {
                     push_op(@pre, 'capturelex', $capture_reg);
                 }
                 $*REGALLOC.release_register($capture_reg, $MVM_reg_obj);
-                for $block.cloned_inners() {
-                    my $frame := %!mast_frames{$_.key};
-                    my $reg   := $_.value;
+                my %cloned_inners := $block.cloned_inners();
+                for sorted_keys(%cloned_inners) {
+                    my $frame := %!mast_frames{$_};
+                    my $reg   := %cloned_inners{$_};
                     push_op(@pre, 'getcode', $reg, $frame);
                     push_op(@pre, 'takeclosure', $reg, $reg);
                 }
