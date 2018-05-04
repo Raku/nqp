@@ -14,6 +14,7 @@ knowhow NQPConcreteRoleHOW {
     # Attributes and methods.
     has @!attributes;
     has %!methods;
+    has @!method_order;
     has @!multi_methods_to_incorporate;
     has @!collisions;
 
@@ -47,6 +48,7 @@ knowhow NQPConcreteRoleHOW {
         $!instance_of := $instance_of;
         @!attributes := nqp::list();
         %!methods := nqp::hash();
+        @!method_order := nqp::list();
         @!multi_methods_to_incorporate := nqp::list();
         @!collisions := nqp::list();
         @!roles := nqp::list();
@@ -65,7 +67,7 @@ knowhow NQPConcreteRoleHOW {
         if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
-        %!methods{$name} := $code_obj;
+        nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -124,11 +126,7 @@ knowhow NQPConcreteRoleHOW {
     ##
 
     method methods($obj, :$local, :$all) {
-        my @meths;
-        for %!methods {
-            nqp::push(@meths, nqp::iterval($_));
-        }
-        @meths
+        @!method_order
     }
 
     method method_table($obj) {
