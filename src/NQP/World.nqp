@@ -140,8 +140,8 @@ class NQP::World is HLL::World {
 
     method import($stash) {
         my $target := self.cur_lexpad();
-        for $stash {
-            self.install_lexical_symbol($target, $_.key, $_.value);
+        for sorted_keys($stash) {
+            self.install_lexical_symbol($target, $_, $stash{$_});
         }
     }
 
