@@ -1,4 +1,4 @@
-plan(16);
+plan(17);
 
 my sub isnan($n) {
     nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
@@ -8,6 +8,7 @@ ok(isnan(+'NaN'), 'numifying NaN');
 ok(+'Inf' == nqp::inf, 'numifying Inf');
 ok(+'+Inf' == nqp::inf, 'numifying +Inf');
 ok(+'-Inf' == nqp::neginf, 'numifying -Inf');
+ok(+'3.14159_26535' == 3.1415926535, 'numifying works with underscores');
 is(~100, '100', 'stringifing 100');
 is(~100.0, '100', 'stringifing 100');
 ok(~3.14 == 3.14, 'stringifing 3.14');
