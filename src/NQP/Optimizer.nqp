@@ -65,16 +65,16 @@ class NQP::Optimizer {
                 $vars_info.get_usages_flat, %decls);
 
             sub add_to_set(%set, %to_add, %exclude) {
-                for %to_add {
-                    my $name := $_.key;
+                for sorted_keys(%to_add) {
+                    my $name := $_;
                     next if nqp::existskey(%exclude, $name);
                     my @existing := %set{$name};
                     if @existing {
-                        for $_.value { nqp::push(@existing, $_) }
-                        #nqp::splice(@existing, $_.value, 0, 0);
+                        for %to_add{$_} { nqp::push(@existing, $_) }
+                        #nqp::splice(@existing, %to_add($_), 0, 0);
                     }
                     else {
-                        %set{$name} := $_.value;
+                        %set{$name} := %to_add{$_};
                     }
                 }
             }
