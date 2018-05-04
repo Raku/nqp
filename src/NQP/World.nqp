@@ -440,17 +440,17 @@ class NQP::World is HLL::World {
         while $i > 0 {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
-            for %symbols {
-                if !%seen{$_.key} && nqp::existskey($_.value, 'value') || nqp::existskey($_.value, 'lazy_value_from') {
-                    my $value := self.force_value($_.value, $_.key, 0);
+            for sorted_keys(%symbols) {
+                if !%seen{$_} && nqp::existskey(%symbols{$_}, 'value') || nqp::existskey(%symbols{$_}, 'lazy_value_from') {
+                    my $value := self.force_value(%symbols{$_}, $_, 0);
                     unless nqp::isnull(nqp::getobjsc($value)) {
                         $wrapper[0].push(QAST::Op.new(
                             :op('bind'),
-                            QAST::Var.new( :name($_.key), :scope('lexical'), :decl('var') ),
+                            QAST::Var.new( :name($_), :scope('lexical'), :decl('var') ),
                             QAST::WVal.new( :value($value) )
                         ));
                     }
-                    %seen{$_.key} := 1;
+                    %seen{$_} := 1;
                 }
             }
         }
