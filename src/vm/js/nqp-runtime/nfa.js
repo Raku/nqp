@@ -206,7 +206,7 @@ function runNFA(nfa, target, pos) {
             while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
             }
-            longlit[fate] = pos - origPos;
+            longlit[fate] = pos - origPos + 1;
           }
         } else if (act == EDGE_CODEPOINT_NEG) {
           if (target.charCodeAt(pos) != edgeInfo[i].argI) {
@@ -236,7 +236,7 @@ function runNFA(nfa, target, pos) {
             while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
             }
-            longlit[fate] = pos - origPos;
+            longlit[fate] = pos - origPos + 1;
           }
         } else if (act == EDGE_CODEPOINT_I) {
           const codePoint = target.codePointAt(pos);
