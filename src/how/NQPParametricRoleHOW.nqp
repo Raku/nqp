@@ -170,8 +170,8 @@ knowhow NQPParametricRoleHOW {
 
     method methods($obj, :$local, :$all) {
         my @meths;
-        for %!methods {
-            nqp::push(@meths, nqp::iterval($_));
+        for sorted_keys(%!methods) {
+            nqp::push(@meths, %!methods{$_});
         }
         @meths
     }
