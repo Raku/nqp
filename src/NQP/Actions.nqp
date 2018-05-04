@@ -203,9 +203,10 @@ class NQP::Actions is HLL::Actions {
             my $ast := $<statementlist>.ast;
             if %*HANDLERS {
                 $ast := QAST::Op.new( :op('handle'), $ast );
-                for %*HANDLERS {
-                    $ast.push($_.key);
-                    $ast.push($_.value);
+                my %handlers := %*HANDLERS;
+                for sorted_keys(%handlers) {
+                    $ast.push($_);
+                    $ast.push(%handlers{$_});
                 }
             }
             $BLOCK.push($ast);
