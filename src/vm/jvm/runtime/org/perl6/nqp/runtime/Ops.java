@@ -6743,6 +6743,8 @@ public final class Ops {
         try {
             // remove valid underscores
             in = in.replaceAll("(\\d)_+(\\d)", "$1$2");
+            // replace unicode minus U+2212 with ascii version
+            in = in.replaceAll("\u2212", "-");
             return Double.parseDouble(in);
         }
         catch (NumberFormatException e) {
