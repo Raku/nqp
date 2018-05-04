@@ -604,3 +604,40 @@ is(
 
 is(nqp::codes('hello'), 5, 'nqp::codes with ascii');
 is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars bigger than a single code unit');
+
+# Test nqp::slice op
+{
+    my @l := 0, 1, 2, 3, 4;
+
+    my &to-str := -> @a {
+        my @strs := ();
+        @strs.push(~$_) for @a;
+        nqp::join(',', @strs);
+    };
+
+    is( &to-str( nqp::slice(@l,  2,  3  )), '2,3', 'nqp::slice some values' );
+    is( &to-str( nqp::slice(@l, -1,  3  )), '0,1,2,3', 'nqp::slice from beginning');
+    is( &to-str( nqp::slice(@l,  2, -1  )), '2,3,4', 'nqp::slice until end');
+    is( &to-str( nqp::slice(@l, -1, -1  )), '0,1,2,3,4', 'nqp::slice from beginning until end');
+    is( &to-str( nqp::slice(@l, -3, -19 )), '0,1,2,3,4', 'nqp::slice from beginning until end; arbitrary negative values');
+    is( &to-str( nqp::slice(@l,  2,  2  )), '2', 'nqp::slice one elem');
+    is( &to-str( nqp::slice(@l,  0,  0  )), '0', 'nqp::slice one elem at beginning');
+    is( &to-str( nqp::slice(@l, +@l - 1, +@l - 1)), '4', 'nqp::slice one elem at end');
+
+    # Test slice exceptions
+    for (3, 2, 'nqp::slice dies; start pos greater than end pos'),
+        (8, 2, 'nqp::slice dies; start pos out of bounds'),
+        (2, 8, 'nqp::slice dies; end pos out of bounds'),
+        (8, 8, 'nqp::slice dies; both out of bounds')
+    {
+        my $start := $_.shift;
+        my $end   := $_.shift;
+        my $msg   := $_.shift;
+
+        my $died := 0;
+        {   nqp::slice(@l, $start, $end);
+            CATCH { $died := 1 }
+        }
+        ok($died == 1, $msg);
+    }
+}
