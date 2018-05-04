@@ -6741,6 +6741,8 @@ public final class Ops {
     }
     public static double coerce_s2n(String in) {
         try {
+            // remove valid underscores
+            in = in.replaceAll("(\\d)_+(\\d)", "$1$2");
             return Double.parseDouble(in);
         }
         catch (NumberFormatException e) {
