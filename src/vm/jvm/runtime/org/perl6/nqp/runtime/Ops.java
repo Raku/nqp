@@ -6546,7 +6546,7 @@ public final class Ops {
                                 nextst.add(to);
                                 while (usedlonglit <= fate)
                                     longlit[usedlonglit++] = 0;
-                                longlit[fate] = pos - orig_pos;
+                                longlit[fate] = pos - orig_pos + 1;
                             }
                             continue;
                         }
@@ -6595,7 +6595,7 @@ public final class Ops {
                                 nextst.add(to);
                                 while (usedlonglit <= fate)
                                     longlit[usedlonglit++] = 0;
-                                longlit[fate] = pos - orig_pos;
+                                longlit[fate] = pos - orig_pos + 1;
                             }
                             continue;
                         }
