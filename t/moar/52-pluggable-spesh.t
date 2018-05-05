@@ -131,7 +131,8 @@ plan(2);
     ok(test(B.new) == 4, 'Third run with B attr holding instance is correct result');
 }
 
-# Many calls, to exercise specialization.
+# Many calls, to exercise specialization, with an exact match guard that'd trigger
+# deopt.
 {
     my $times-run := 0;
     nqp::speshreg('nqp', 'assume-pure-spesh', -> $code {
@@ -140,16 +141,25 @@ plan(2);
         $code()
     });
     my $a := 2;
-    sub assumed-pure() { $a }
+    sub assumed-pure() { $a++ }
     my $total := 0;
-    my int $i := 0;
-    sub hot-loop() {
+    sub purify(&func) {
+        nqp::speshresolve('assume-pure-spesh', &func);
+    }
+    sub hot-loop-a(&func) {
+        my int $i := 0;
         while $i++ < 5_000_000 {
-            $total := $total + nqp::speshresolve('assume-pure-spesh', &assumed-pure);
+            $total := $total + purify(&func);
             $a++;
         }
     }
-    hot-loop();
+    hot-loop-a(&assumed-pure);
     ok($times-run == 1, 'Only ran the plugin once in hot code');
     ok($total == 10_000_000, 'Correct result from hot code');
+
+    $a := 3;
+    $times-run := 0;
+    sub another() { $a }
+    ok(purify(&another) == 3, 'Correct result when we trigger deopt');
+    ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to guard failure');
 }
