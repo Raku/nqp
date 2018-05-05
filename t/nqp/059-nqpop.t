@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(365);
+plan(371);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -616,19 +616,25 @@ is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars 
     };
 
     is( &to-str( nqp::slice(@l,  2,  3  )), '2,3', 'nqp::slice some values' );
-    is( &to-str( nqp::slice(@l, -1,  3  )), '0,1,2,3', 'nqp::slice from beginning');
+    is( &to-str( nqp::slice(@l, -3, -2  )), '2,3', 'nqp::slice some values relative to end' );
+    is( &to-str( nqp::slice(@l,  2, -2  )), '2,3', 'nqp::slice some values relative to end (mixed)');
+    is( &to-str( nqp::slice(@l,  0,  3  )), '0,1,2,3', 'nqp::slice from beginning');
     is( &to-str( nqp::slice(@l,  2, -1  )), '2,3,4', 'nqp::slice until end');
-    is( &to-str( nqp::slice(@l, -1, -1  )), '0,1,2,3,4', 'nqp::slice from beginning until end');
-    is( &to-str( nqp::slice(@l, -3, -19 )), '0,1,2,3,4', 'nqp::slice from beginning until end; arbitrary negative values');
+    is( &to-str( nqp::slice(@l,  0, -1  )), '0,1,2,3,4', 'nqp::slice from beginning until end');
     is( &to-str( nqp::slice(@l,  2,  2  )), '2', 'nqp::slice one elem');
+    is( &to-str( nqp::slice(@l,  2, -3  )), '2', 'nqp::slice one elem (mixed)');
     is( &to-str( nqp::slice(@l,  0,  0  )), '0', 'nqp::slice one elem at beginning');
-    is( &to-str( nqp::slice(@l, +@l - 1, +@l - 1)), '4', 'nqp::slice one elem at end');
+    is( &to-str( nqp::slice(@l, -1, -1  )), '4', 'nqp::slice one elem at end');
 
     # Test slice exceptions
-    for (3, 2, 'nqp::slice dies; start pos greater than end pos'),
-        (8, 2, 'nqp::slice dies; start pos out of bounds'),
-        (2, 8, 'nqp::slice dies; end pos out of bounds'),
-        (8, 8, 'nqp::slice dies; both out of bounds')
+    for ( 3,   2, 'nqp::slice dies; start pos greater than end pos'),
+        ( 8,   2, 'nqp::slice dies; start pos out of bounds'),
+        ( 2,   8, 'nqp::slice dies; end pos out of bounds'),
+        (-2,  -3, 'nqp::slice dies; start pos greater than end pos (relative to end)'),
+        (-8,   2, 'nqp::slice dies; start pos out of bounds (relative to end)'),
+        ( 2,  -8, 'nqp::slice dies; end pos out of bounds (relative to end)'),
+        (-8,   8, 'nqp::slice dies; both out of bounds'),
+        ( 2, +@l, 'nqp::slice dies; using ".elems" is out of bounds')
     {
         my $start := $_.shift;
         my $end   := $_.shift;

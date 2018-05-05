@@ -179,13 +179,11 @@ public class VMArrayInstance_u32 extends VMArrayInstanceBase {
     }
 
     public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
-        long lastElem = this.elems - 1;
-        if (lastElem < start || lastElem < end || (end < start && 0 <= start && 0 <= end) ) {
+        start = start < 0 ? this.elems + start : start;
+        end   = end   < 0 ? this.elems + end   : end;
+        if ( end < start || start < 0 || end < 0 || this.elems <= start || this.elems <= end ) {
             throw ExceptionHandling.dieInternal(tc, "VMArray: Slice index out of bounds");
         }
-
-        start = 0 <= start ? start : 0;
-        end   = 0 <= end   ? end   : lastElem;
 
         long numWanted = end - start + 1;
         if (0 < numWanted) {

@@ -781,9 +781,19 @@ to.
 * `slice(@arr, int $start_pos, int $end_pos --> @copy)`
 
 Copy the elements in `@arr` starting at `$start_pos` and ending at `$end_pos`
-and return the resulting list.  If `$start_pos` is a negative value, the start
-value is set to position 0. If `$end_pos` is a negative value, the end value is
-set to the position of the last element in the list.
+and return the resulting list. If `$start_pos` or `$end_pos` is ```-n``` it will
+translate into the ```n```th position relative to the end of the list.
+
+```perl6
+
+my @a := 'a', 'b', 'c';
+print($_ ~ ', ') for nqp::slice(@a, 0, -2);
+
+# OUTPUT: «a, b»
+```
+
+Will throw an exception if either `$start_pos` or `$end_pos` is out-of-bounds
+(after translation).
 
 ## splice
 * `splice(@arr, @from, int $offset, int $count --> @arr)`
