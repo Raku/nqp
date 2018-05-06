@@ -1157,6 +1157,20 @@ class VMArray extends REPR {
         return this.array.length;
       }
 
+      $$slice(start, end) {
+        start = start < 0 ? this.array.length + start : start;
+        end   = end   < 0 ? this.array.length + end   : end;
+        if ( end < start || start < 0 || end < 0
+             || this.array.length <= start || this.array.length <= end )
+        {
+            throw new NQPException('VMArray: Slice index out of bounds');
+        }
+
+        const dest = new STable.ObjConstructor();
+        dest.array = this.array.slice(start, end + 1);
+        return dest;
+      }
+
       $$splice(source, offset, count) {
         const removing = this.array.length - offset > count ? count : this.array.length - offset;
         // TODO think about the case when the source is not VMArray
@@ -2058,6 +2072,10 @@ class MultiDimArray extends REPR {
 
       $$push(value) {
         throw new NQPException('Cannot push a fixed dimension array');
+      }
+
+      $$slice(start, end) {
+        throw new NQPException('Cannot slice a multidim array');
       }
 
       $$splice(source, offset, length) {
