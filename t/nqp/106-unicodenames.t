@@ -81,7 +81,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 }
 else {
   is(nqp::getuniname(0x20001), "CJK UNIFIED IDEOGRAPH-20001",
-    "nqp::getuninme for U+20001 CJK UNIFIED IDEOGRAPH");
+    "nqp::getuniname for U+20001 CJK UNIFIED IDEOGRAPH");
   is(nqp::getuniname(0x17000), "TANGUT IDEOGRAPH-17000", "Tangut ideograph nqp::uniname");
   is(nqp::getuniname(0x1B170), "NUSHU CHARACTER-1B170", "Nushu character nqp::uniname");
 }
