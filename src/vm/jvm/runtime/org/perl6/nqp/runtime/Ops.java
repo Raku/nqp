@@ -2824,6 +2824,9 @@ public final class Ops {
     }
     public static SixModelObject getattr(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
         try {
+            // XXX: as below (getattr_i)
+            if (obj.st.REPRData instanceof P6OpaqueREPRData && ((P6OpaqueREPRData) obj.st.REPRData).mi)
+                hint = STable.NO_HINT;
             return obj.get_attribute_boxed(tc, decont(ch, tc), name, hint);
         }
         catch (P6OpaqueBaseInstance.BadReferenceRuntimeException badRef) {
