@@ -943,6 +943,8 @@ class QAST::OperationsJS {
         }
     });
 
+    add_simple_op('slice', $T_OBJ, [$T_OBJ, $T_INT, $T_INT], :method_call, :side_effects);
+
     add_simple_op('splice', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_INT],
         :method_call, :side_effects);
 

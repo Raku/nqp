@@ -2545,6 +2545,7 @@ QAST::MASTOperations.add_core_moarop_mapping('shift_i', 'shift_i');
 QAST::MASTOperations.add_core_moarop_mapping('shift_n', 'shift_n');
 QAST::MASTOperations.add_core_moarop_mapping('shift_s', 'shift_s');
 QAST::MASTOperations.add_core_moarop_mapping('splice', 'splice', 0);
+QAST::MASTOperations.add_core_moarop_mapping('slice', 'slice');
 QAST::MASTOperations.add_core_moarop_mapping('isint', 'isint', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isnum', 'isnum', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isstr', 'isstr', :decont(0));

@@ -65,6 +65,7 @@
   * [pop](#pop)
   * [setelems](#setelems)
   * [shift](#shift)
+  * [slice](#slice)
   * [splice](#splice)
   * [unshift](#unshift)
   * [iterator](#iterator)
@@ -776,6 +777,24 @@ elements at the end are bound with potentially VM specific null entries.
 Return the value of @arr at index 0, unbind @arr at index 0, and move all
 other bindings of @arr to the index one below what they were previously bound
 to.
+
+## slice
+* `slice(@arr, int $start_pos, int $end_pos --> @copy)`
+
+Copy the elements in `@arr` starting at `$start_pos` and ending at `$end_pos`
+and return the resulting list. If `$start_pos` or `$end_pos` is ```-n``` it will
+translate into the ```n```th position relative to the end of the list.
+
+```perl6
+
+my @a := 'a', 'b', 'c';
+print($_ ~ ', ') for nqp::slice(@a, 0, -2);
+
+# OUTPUT: «a, b»
+```
+
+Will throw an exception if either `$start_pos` or `$end_pos` is out-of-bounds
+(after translation).
 
 ## splice
 * `splice(@arr, @from, int $offset, int $count --> @arr)`
