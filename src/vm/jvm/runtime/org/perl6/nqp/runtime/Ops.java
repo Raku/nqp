@@ -75,6 +75,7 @@ import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTCompiler;
+import org.perl6.nqp.truffle.TruffleCompiler;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
@@ -7146,6 +7147,12 @@ public final class Ops {
         res.jc = JASTCompiler.buildClass(jast, jastNodes, false, tc);
         return res;
     }
+
+    public static SixModelObject runtruffle(SixModelObject nodes, ThreadContext tc) {
+        TruffleCompiler.run();
+        return null;
+    }
+
     public static SixModelObject compilejasttofile(SixModelObject jast, SixModelObject jastNodes, String filename, ThreadContext tc) {
         JASTCompiler.writeClass(jast, jastNodes, filename, tc);
         return jast;
