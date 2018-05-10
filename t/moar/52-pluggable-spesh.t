@@ -195,3 +195,71 @@ plan(2);
     ok(name() eq 'BBB', 'Correct result when we trigger type deopt');
     ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to type guard failure');
 }
+
+# Deopt by concrete guard.
+{
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'concrete-spesh', -> $obj {
+        $times-run++;
+        nqp::isconcrete($obj) || nqp::die("Must have a concrete object");
+        nqp::speshguardconcrete($obj);
+        2
+    });
+    my class AAA { }
+    my @obj := [AAA.new];
+    sub conc() {
+        nqp::speshresolve('concrete-spesh', nqp::atpos(@obj, 0));
+    }
+    sub hot-loop() {
+        my int $i := 0;
+        my $conc := 0;
+        while $i++ < 1_000_000 {
+            $conc := $conc + conc();
+        }
+        return $conc;
+    }
+    my $result := hot-loop();
+    ok($times-run == 1, 'Only ran the concrete-based plugin once in hot code');
+    ok($result == 2_000_000, 'Correct result from hot code');
+
+    $times-run := 0;
+    @obj[0] := AAA;
+    my $msg := '';
+    try { conc(); CATCH { $msg := nqp::getmessage($_) } }
+    ok($msg eq 'Must have a concrete object', 'Correct result when we trigger concrete deopt');
+    ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to concrete guard failure');
+}
+
+# Deopt by type object.
+{
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'typeobj-spesh', -> $obj {
+        $times-run++;
+        nqp::isconcrete($obj) && nqp::die("Must have a type object");
+        nqp::speshguardtypeobj($obj);
+        2
+    });
+    my class AAA { }
+    my @obj := [AAA];
+    sub typeobj() {
+        nqp::speshresolve('typeobj-spesh', nqp::atpos(@obj, 0));
+    }
+    sub hot-loop() {
+        my int $i := 0;
+        my $typeobj := 0;
+        while $i++ < 1_000_000 {
+            $typeobj := $typeobj + typeobj();
+        }
+        return $typeobj;
+    }
+    my $result := hot-loop();
+    ok($times-run == 1, 'Only ran the type-object-based plugin once in hot code');
+    ok($result == 2_000_000, 'Correct result from hot code');
+
+    $times-run := 0;
+    @obj[0] := AAA.new;
+    my $msg := '';
+    try { typeobj(); CATCH { $msg := nqp::getmessage($_) } }
+    ok($msg eq 'Must have a type object', 'Correct result when we trigger type object deopt');
+    ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to type object guard failure');
+}
