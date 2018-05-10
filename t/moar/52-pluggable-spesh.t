@@ -163,3 +163,35 @@ plan(2);
     ok(purify(&another) == 3, 'Correct result when we trigger deopt');
     ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to guard failure');
 }
+
+# Deopt by type guard.
+{
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'type-name-spesh', -> $obj {
+        $times-run++;
+        nqp::speshguardtype($obj, $obj.WHAT);
+        $obj.HOW.name($obj)
+    });
+    my class AAA { }
+    my @obj := [AAA];
+    sub name() {
+        nqp::speshresolve('type-name-spesh', nqp::atpos(@obj, 0));
+    }
+    sub hot-loop() {
+        my int $i := 0;
+        my $name := '';
+        while $i++ < 1_000_000 {
+            $name := $name ~ name();
+        }
+        return $name;
+    }
+    my $result := hot-loop();
+    ok($times-run == 1, 'Only ran the type-based plugin once in hot code');
+    ok($result eq nqp::x('AAA', 1_000_000), 'Correct result from hot code');
+
+    $times-run := 0;
+    my class BBB { }
+    @obj[0] := BBB;
+    ok(name() eq 'BBB', 'Correct result when we trigger type deopt');
+    ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to type guard failure');
+}
