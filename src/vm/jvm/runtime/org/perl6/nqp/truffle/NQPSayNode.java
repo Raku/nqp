@@ -2,10 +2,21 @@ package org.perl6.nqp.truffle;
 
 import org.perl6.nqp.truffle.NQPExpressionNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.NodeChild;
 
+@NodeChildren({@NodeChild("arg")})
 public class NQPSayNode extends NQPExpressionNode {
+    @Child private NQPExpressionNode arg;
+
+    NQPSayNode(NQPExpressionNode arg) {
+      this.arg = arg;
+    }
+
     @Override
-    public void executeVoid(VirtualFrame frame) {
-        System.out.println("Hello Truffle World");
+    public Object executeGeneric(VirtualFrame frame) {
+        String value = (String) this.arg.executeGeneric(frame);
+        System.out.println(value);
+        return value;
     }
 }

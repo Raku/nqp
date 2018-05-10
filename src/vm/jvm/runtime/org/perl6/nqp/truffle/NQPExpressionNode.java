@@ -41,8 +41,10 @@
 
 package org.perl6.nqp.truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.NQPNode;
 
+@TypeSystemReference(NQPTypes.class)
 public abstract class NQPExpressionNode extends NQPNode {
-    abstract public void executeVoid(VirtualFrame frame);
+    public abstract Object executeGeneric(VirtualFrame frame);
 }

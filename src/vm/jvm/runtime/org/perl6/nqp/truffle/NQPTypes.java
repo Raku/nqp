@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -39,25 +39,7 @@
  * SOFTWARE.
  */
 package org.perl6.nqp.truffle;
-
-import com.oracle.truffle.api.frame.FrameDescriptor;
-import com.oracle.truffle.api.nodes.NodeInfo;
-import com.oracle.truffle.api.nodes.RootNode;
-import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.NodeInfo;
-import org.perl6.nqp.truffle.NQPExpressionNode;
-import org.perl6.nqp.truffle.NQPLanguage;
-
-@NodeInfo(language = "NQP", description = "The root of all NQP execution trees")
-public class NQPRootNode extends RootNode {
-    /** The function body that is executed, and specialized during execution. */
-    @Child private NQPExpressionNode bodyNode;
-    public NQPRootNode(NQPLanguage language, FrameDescriptor frameDescriptor, NQPExpressionNode bodyNode) {
-        super(language, frameDescriptor);
-        this.bodyNode = bodyNode;
-    }
-
-    public Object execute(VirtualFrame frame) {
-        return bodyNode.executeGeneric(frame);
-    }
+import com.oracle.truffle.api.dsl.TypeSystem;
+@TypeSystem({String.class})
+public abstract class NQPTypes {
 }
