@@ -515,6 +515,7 @@ class QAST::OperationsJS {
     add_simple_op('bootarray', $T_OBJ, []);
 
     add_simple_op('getpid', $T_INT, []);
+    add_simple_op('getppid', $T_INT, []);
 
     add_simple_op('exit', $T_VOID, [$T_INT], :side_effects);
 

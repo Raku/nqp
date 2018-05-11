@@ -917,6 +917,10 @@ op.getpid = function() {
   return process.pid;
 };
 
+op.getppid = function() {
+  return process.ppid;
+};
+
 op.getmessage = function(exception) {
   return (exception.$$message === undefined ? null_s : exception.$$message);
 };
