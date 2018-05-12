@@ -1,4 +1,4 @@
- List
+# NQP Opcode List
 
 ## Table of Contents
 
