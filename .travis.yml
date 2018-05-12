@@ -21,7 +21,7 @@ addons:
     - gcc-6
 
 script:
-    - if [[ $TRAVIS_OS_NAME != osx && $NQP_OPTIONS =~ jvm ]]; then sudo -E apt-get install oracle-java9-installer; fi
+    - if [[ $TRAVIS_OS_NAME != osx && $NQP_OPTIONS =~ jvm ]]; then sudo -E apt-get install openjdk-9-jdk; fi
     - perl Configure.pl $NQP_OPTIONS
     - make test
     - make install
