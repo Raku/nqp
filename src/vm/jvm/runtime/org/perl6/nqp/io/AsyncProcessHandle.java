@@ -4,6 +4,7 @@ import com.sun.jna.*;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ProcessHandle;
 import java.lang.ProcessBuilder;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Field;
@@ -244,26 +245,10 @@ public class AsyncProcessHandle implements IIOClosable {
         public int GetProcessId(Long hProcess);
     }
 
-    /* not tested on windows; taken from https://stackoverflow.com/a/6032734 */
     private long getPID(Process proc) {
         long result = 0;
         try {
-            String procName = proc.getClass().getName();
-            /* for unix/linux systems */
-            if (procName.equals("java.lang.UNIXProcess")) {
-                Field f = proc.getClass().getDeclaredField("pid");
-                f.setAccessible(true);
-                result = f.getLong(proc);
-                f.setAccessible(false);
-            }
-            /* for windows */
-            else if (procName.equals("java.lang.Win32Process") ||
-                     procName.equals("java.lang.ProcessImpl")) {
-                Field f = proc.getClass().getDeclaredField("handle");
-                f.setAccessible(true);
-                result = Kernel32.INSTANCE.GetProcessId((Long)f.get(proc));
-                f.setAccessible(false);
-            }
+            result = proc.toHandle().pid();
         }
         catch (Exception ex) {
             result = 0;
