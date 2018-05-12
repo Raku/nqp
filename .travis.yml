@@ -1,15 +1,10 @@
-language: perl
-
-os:
-    - linux
-    - osx
+language: java
 
 sudo: false
-
 fast_finish: true
-
 install: "echo"
 dist: trusty
+jdk: oraclejdk9
 
 addons:
   apt:
@@ -19,9 +14,9 @@ addons:
     packages:
     # install toolchains
     - gcc-6
+    - oracle-java9-installer
 
 script:
-    - if [[ $TRAVIS_OS_NAME != osx && $NQP_OPTIONS =~ jvm ]]; then sudo -E apt-get install openjdk-9-jdk; fi
     - perl Configure.pl $NQP_OPTIONS
     - make test
     - make install
