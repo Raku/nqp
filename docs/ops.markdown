@@ -318,8 +318,8 @@
   * [asyncwritebytes](#asyncwritebytes)
   * [asyncreadchars](#asyncreadchars)
   * [asyncreadbytes](#asyncreadbytes)
-  * [spawnprocasync `moar`](#spawnprocasync-moar)
-  * [killprocasync `moar`](#killprocasync-moar)
+  * [spawnprocasync](#spawnprocasync)
+  * [killprocasync](#killprocasync)
 - [Atomic Operations](#-atomic-operations)
   * [cas `moar`](#cas-moar)
   * [cas_i `moar`](#cas_i-moar)
@@ -2691,12 +2691,12 @@ at 0, the buffer or just its type object on error, and an error string (type
 object if no error). If EOF is reached, a sequence number of -1 is sent.
 Cancel to stop reading.
 
-## spawnprocasync `moar`
+## spawnprocasync
 * `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
 
 Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of use.
 
-## killprocasync `moar`
+## killprocasync
 * `killprocasync($handle, $signal)`
 
 # <a id="atomic"></a> Atomic Operations
