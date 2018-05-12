@@ -1,16 +1,30 @@
-language: "java"
-    
+language: perl
+
+os:
+    - linux
+    - osx
+
 sudo: false
-dist: trusty
+
+fast_finish: true
 
 install: "echo"
-#install: travis_wait 30 mvn install
+dist: trusty
 
-#script: "perl Configure.pl $NQP_OPTIONS; make test"
-script: 
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    # install toolchains
+    - gcc-6
+
+script:
+    - if [[ $TRAVIS_OS_NAME != osx && $NQP_OPTIONS =~ jvm ]]; then sudo -E apt-get install oracle-java9-installer; fi
     - perl Configure.pl $NQP_OPTIONS
-    - make
-    - travis_wait 30 make test
+    - make test
+    - make install
 
 branches:
    only:
