@@ -925,7 +925,11 @@ public final class Ops {
 
     public static SixModelObject setbuffersizefh(SixModelObject obj, long size, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            // TODO: Implement this
+            IOHandleInstance h = (IOHandleInstance)obj;
+
+            // TODO: what to do with instances of other classes like BOOTIO?
+            if (h.handle instanceof IIOSyncWritable)
+                ((IIOSyncWritable)h.handle).setBufferSize(tc, size);
         }
         else {
             die_s("setbuffersizefh requires an object with the IOHandle REPR", tc);

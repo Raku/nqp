@@ -70,4 +70,9 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
     public boolean isTTY(ThreadContext tc) {
         return System.console() != null;
     }
+
+    public void setBufferSize(ThreadContext tc, long size) {
+        // TODO: does it make sense to have setBufferSize here?
+        // currently required as IIOSyncWritable has this method
+    }
 }

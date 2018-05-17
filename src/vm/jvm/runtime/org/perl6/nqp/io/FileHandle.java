@@ -77,9 +77,17 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             fc = FileChannel.open(p, opts);
             chan = fc;
             setEncoding(tc, Charset.forName("UTF-8"));
+            useWriteBuffer = true;
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                if (chan.isOpen()) {
+                    close(tc);
+                }
+            }
+        }));
     }
 
     public long write(ThreadContext tc, byte[] array) {
@@ -112,6 +120,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
     public void seek(ThreadContext tc, long offset, long whence) {
         try {
+            flushWriteBuffer(tc);
             switch ((int)whence) {
             case 0:
                 fc.position(offset);
@@ -138,6 +147,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
     public long tell(ThreadContext tc) {
         try {
+            flushWriteBuffer(tc);
             long position = fc.position();
             return readBuffer != null ? position - readBuffer.remaining() : position;
         } catch (IOException e) {
@@ -181,6 +191,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
 
     public void flush(ThreadContext tc) {
         try {
+            flushWriteBuffer(tc);
             fc.force(false);
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
