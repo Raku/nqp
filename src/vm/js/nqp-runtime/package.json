@@ -33,7 +33,7 @@
     "source-map-resolve": "^0.5.1",
     "stack-trace": "0.0.10",
     "unicharadata": "*",
-    "unicode-collation-algorithm": "0.0.2",
+    "unicode-collation-algorithm": "0.0.3",
     "xorshift": "^1.1.0",
     "xregexp": "^3.2.0"
   }
