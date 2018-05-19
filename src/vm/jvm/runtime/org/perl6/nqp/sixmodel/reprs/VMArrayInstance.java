@@ -184,7 +184,7 @@ public class VMArrayInstance extends VMArrayInstanceBase {
         long numWanted = end - start + 1;
         if (0 < numWanted) {
             for (long i = 0; i < numWanted; i++) {
-                dest.bind_pos_boxed(tc, i, this.slots[ (int)(start + i) ]);
+                dest.bind_pos_boxed(tc, i, this.at_pos_boxed(tc, start + i));
             }
         }
         return dest;
