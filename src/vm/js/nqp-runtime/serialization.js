@@ -61,7 +61,7 @@ const PACKED_SC_OVERFLOW = 0xFFF;
 
 class BinaryWriteCursor {
   constructor(writer) {
-    this.buffer = new Buffer(1024);
+    this.buffer = Buffer.allocUnsafe(1024);
     this.writer = writer;
     this.offset = 0;
     this.metadata = [];
@@ -71,7 +71,7 @@ class BinaryWriteCursor {
   growToHold(space) {
     if (this.offset + space > this.buffer.length) {
       const old = this.buffer;
-      this.buffer = new Buffer(old.length * 2);
+      this.buffer = Buffer.allocUnsafe(old.length * 2);
       old.copy(this.buffer);
     }
   }
@@ -912,7 +912,7 @@ class SerializationWriter {
     outputSize += this.repossessionsData.offset;
     outputSize += this.paramInterns.offset;
 
-    this.buffer = new Buffer(outputSize);
+    this.buffer = Buffer.allocUnsafe(outputSize);
 
     /* Write version into header. */
     this.headerInt32(CURRENT_VERSION);

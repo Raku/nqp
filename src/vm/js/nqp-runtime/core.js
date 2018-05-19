@@ -992,7 +992,7 @@ op.encodeconf = function(str, encoding_, output, permissive) {
   if (encoding in codecs) {
     buffer = codecs[encoding].encode(str, permissive);
   } else {
-    buffer = new Buffer(str, encoding);
+    buffer = Buffer.allocUnsafe(str, encoding);
   }
 
   writeBuffer(output, buffer);
@@ -1035,7 +1035,7 @@ function toRawBuffer(buf) {
   const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
   const array = buf.array;
 
-  const buffer = new Buffer(array.length * elementSize);
+  const buffer = Buffer.allocUnsafe(array.length * elementSize);
 
   let offset = 0;
   for (let i = 0; i < array.length; i++) {

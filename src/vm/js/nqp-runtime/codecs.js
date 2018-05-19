@@ -19,11 +19,9 @@ function isSurrogate(unit) {
 class SingleByteCodec {
   constructor(name, codes) {
     this.name = name;
-    this.encodeBuf = new Buffer(65536);
-    this.encodeBuf.fill(0);
+    this.encodeBuf = Buffer.alloc(65536);
 
-    this.encodeBufPermissive = new Buffer(65536);
-    this.encodeBufPermissive.fill(0);
+    this.encodeBufPermissive = Buffer.alloc(65536);
 
     // stored separately so that we can have a unmapped flag in encodeBuf
     this.zero = codes.charCodeAt(0);
@@ -43,7 +41,7 @@ class SingleByteCodec {
   }
 
   encode(str, permissive) {
-    const buf = new Buffer(str.length);
+    const buf = Buffer.allocUnsafe(str.length);
     const encodeBuf = permissive ? this.encodeBufPermissive : this.encodeBuf;
     for (let i = 0; i < str.length; i++) {
       const unit = str.charCodeAt(i);
@@ -80,7 +78,7 @@ class SingleByteCodec {
       }
     }
 
-    const buf = new Buffer(str.length + replacementCount * (replacementBuffer.length - 1));
+    const buf = Buffer.allocUnsafe(str.length + replacementCount * (replacementBuffer.length - 1));
 
     let offset = 0;
 
@@ -107,7 +105,7 @@ class SingleByteCodec {
 
   decode(buf, permissive) {
     const decodeBuf = permissive ? this.decodeBufPermissive : this.decodeBuf;
-    const newBuf = new Buffer(buf.length*2);
+    const newBuf = Buffer.alloc(buf.length*2);
     let idx1 = 0;
     let idx2 = 0;
     for (let i = 0; i < buf.length; i++) {
@@ -261,7 +259,7 @@ class Utf8C8 {
 
   encode(str) {
     const normalized = str.normalize('NFC');
-    const buf = new Buffer(Buffer.byteLength(normalized));
+    const buf = Buffer.alloc(Buffer.byteLength(normalized));
     let state = 0;
     let offset = 0;
     let byte = 0;
