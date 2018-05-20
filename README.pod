@@ -121,4 +121,19 @@ If you are developing nqp-js, you may want to pass the --link option to configur
     $ cd src/vm/js/nqp-runtime; npm link .
     $ perl Configure --backends=moar,js
 
+=head2 The Truffle backend
+
+To work on truffle you need to use GraalVM as your JDK
+
+Look at L<http://www.graalvm.org/docs/getting-started/> for how to set it up.
+
+For now it's built together with the old JVM backend.
+
+    $ perl Configure --backends=jvm
+    $ make
+
+Currently it needs to be run like:
+
+./nqp-j nqp-truffle.nqp -e 'nqp::say("Hello World")'
+
 =cut
