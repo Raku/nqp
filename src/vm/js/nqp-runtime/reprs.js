@@ -11,10 +11,6 @@ const BOOT = require('./BOOT.js');
 const core = require('./core.js');
 const nqp = require('nqp-runtime');
 
-const bignum = require('bignum-browserify');
-// disable for eval
-const ZERO = bignum(0); // eslint-disable-line no-unused-vars
-
 const constants = require('./constants.js');
 
 const ref = require('ref');
@@ -1599,12 +1595,13 @@ function getBI(obj) {
   return obj.$$getBignum();
 }
 
+
 function getIntFromBI(bignum) {
-  const bits = bignum.bitLength();
-  if (bits >= 64) {
-    throw new NQPException(`Cannot unbox ${bits} bit wide bigint into native integer`);
+  if (bignum < -(2n**64n) || 2n**64n <= bignum) {
+    // TODO - put exact number of bits into exception
+    throw new NQPException(`Cannot unbox too big bigint into native integer`);
   } else {
-    return bignum.toNumber() | 0;
+    return Number(bignum) | 0;
   }
 }
 
@@ -1612,7 +1609,7 @@ class P6bigint extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this.value = bignum(value);
+        this.value = BigInt(value);
       }
 
       $$getInt() {
@@ -1637,7 +1634,7 @@ class P6bigint extends REPR {
     const attr = slotToAttr(slot);
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      const value = this[attr] || bignum(0);
+      const value = this[attr] || 0n;
       return makeBI(attrContentSTable, value);
     });
 
@@ -1649,17 +1646,17 @@ class P6bigint extends REPR {
 
   deserializeFinish(obj, data) {
     if (data.varint() == 1) { /* Is it small int? */
-      obj.value = bignum(data.varint());
+      obj.value = BigInt(data.varint());
     } else {
-      obj.value = bignum(data.str());
+      obj.value = BigInt(data.str());
     }
   }
 
   deserializeInline(data) {
     if (data.varint() == 1) { /* Is it small int? */
-      return bignum(data.varint());
+      return BigInt(data.varint());
     } else {
-      return bignum(data.str());
+      return BigInt(data.str());
     }
   }
 
@@ -1688,7 +1685,7 @@ class P6bigint extends REPR {
   generateBoxingMethods(STable, name) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this[name] = bignum(value);
+        this[name] = BigInt(value);
       }
 
       $$getInt() {
@@ -1711,7 +1708,7 @@ class P6bigint extends REPR {
 };
 
 P6bigint.prototype.flattenSTable = true;
-P6bigint.prototype.flattenedDefault = 'ZERO';
+P6bigint.prototype.flattenedDefault = '0n';
 
 
 reprs.P6bigint = P6bigint;

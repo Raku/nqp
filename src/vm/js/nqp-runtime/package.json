@@ -10,8 +10,6 @@
   "repository": "http://github.com/perl6/nqp/",
   "main": "runtime.js",
   "dependencies": {
-    "bignum": "^0.12.5",
-    "bignum-browserify": "pmurias/bigint-browserify",
     "char-props": "0.1.5",
     "escape-string-regexp": "^1.0.5",
     "ffi": "^2.2.0",
