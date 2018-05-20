@@ -133,7 +133,7 @@ class QAST::Node {
 
     method dump(int $indent = 0) {
         my @chunks := [
-            nqp::x(' ', $indent), '- ', self.HOW.name(self),
+            self.dump_indent_string($indent), '- ', self.HOW.name(self)
         ];
         my $extra := self.dump_extra_node_info();
         if nqp::chars($extra) {
