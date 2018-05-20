@@ -178,4 +178,21 @@ class QAST::Node {
     method dump_children(int $indent, @onto) { }
 
     method dump_extra_node_info() { '' }
+
+    my $indent-string := "" ;
+    my $indent-length := 0  ;
+
+    method dump_indent_string(int $ind) {
+        if $ind > $indent-length {
+            my $diff := $ind - $indent-length ;
+            $indent-string := $indent-string ~ nqp::x(' ', $diff) ;
+            $indent-length := nqp::chars($indent-string)
+        }
+        elsif $ind < $indent-length {
+            $indent-string := nqp::substr($indent-string, 0, $ind) ;
+            $indent-length := $ind
+        }
+
+        $indent-string
+    }
 }
