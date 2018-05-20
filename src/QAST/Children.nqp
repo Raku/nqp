@@ -23,7 +23,7 @@ role QAST::Children {
                 nqp::push(@onto, $_.dump($indent));
             }
             else {
-                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, self.dump_indent_string($indent));
                 nqp::push(@onto, '- ');
                 nqp::istype($_, NQPMu)
                     ?? nqp::push(@onto, '(NQPMu)')
@@ -44,7 +44,7 @@ role QAST::Children {
         my $extra := 0;
         for self.extra_children -> $tag, $nodes {
             if $nodes {
-                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, self.dump_indent_string($indent));
                 nqp::push(@onto, "[" ~ $tag ~ "]");
                 nqp::push(@onto, "\n");
                 self.dump_node_list($indent+2, @onto, nqp::islist($nodes) ?? $nodes !! [$nodes]);
@@ -53,7 +53,7 @@ role QAST::Children {
         }
 
         if $extra && @!children {
-            nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n");
+            nqp::push(@onto, self.dump_indent_string($indent) ~ "[children]\n");
             self.dump_node_list($indent+2, @onto, @!children);
         } else {
             self.dump_node_list($indent, @onto, @!children);
