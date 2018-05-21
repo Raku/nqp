@@ -131,9 +131,9 @@ class QAST::Node {
         nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
     }
 
-    method dump(int $indent = 0) {
+    method dump(int $indent = 0, :$guide-line = 0) {
         my @chunks := [
-            self.dump_indent_string($indent), '- ', self.HOW.name(self)
+            self.dump_indent_string($indent, :$guide-line), '- ', self.HOW.name(self)
         ];
         my $extra := self.dump_extra_node_info();
         if nqp::chars($extra) {
@@ -182,10 +182,12 @@ class QAST::Node {
     my $indent-string := "" ;
     my $indent-length := 0  ;
 
-    method dump_indent_string(int $ind) {
+    method dump_indent_string(int $ind, :$guide-line) {
         if $ind > $indent-length {
             my $diff := $ind - $indent-length ;
-            $indent-string := $indent-string ~ nqp::x(' ', $diff) ;
+            my $extra := $guide-line  ?? '│'   !! ' ';
+            $extra := $extra ~ nqp::x(' ', $diff-1) ;
+            $indent-string := $indent-string ~ $extra ;
             $indent-length := nqp::chars($indent-string)
         }
         elsif $ind < $indent-length {
