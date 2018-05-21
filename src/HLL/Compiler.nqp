@@ -412,7 +412,9 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::exit(1) if $err;
             try {
                 nqp::push(@codes, $in-handle.slurp());
-                $in-handle.close;
+                unless $filename eq '-' {
+                    $in-handle.close;
+                }
                 CATCH {
                     note("Error while reading from file: $_");
                     $err := 1;
