@@ -3164,9 +3164,9 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "This is not a native str array");
         return tc.native_s;
     }
-    public static SixModelObject slice(SixModelObject arr, long start, long end, ThreadContext tc) {
+    public static SixModelObject slice(SixModelObject arr, long beginning, long end, ThreadContext tc) {
         SixModelObject dest = arr.st.REPR.allocate(tc, arr.st);
-        return arr.slice(tc, dest, start, end);
+        return arr.slice(tc, dest, beginning, end);
     }
     public static SixModelObject splice(SixModelObject arr, SixModelObject from, long offset, long count, ThreadContext tc) {
         arr.splice(tc, from, offset, count);
