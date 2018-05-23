@@ -1,0 +1,75 @@
+From 8db026cf0764d0e651168e17070defb01b5eac40 Mon Sep 17 00:00:00 2001
+From: Martin Ryan <mryan50@fastmail.fm>
+Date: Wed, 23 May 2018 14:24:50 +1000
+Subject: [PATCH] Shrink the QAST dump (--target=ast) for Want nodes
+
+---
+ src/QAST/Want.nqp | 54 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 54 insertions(+)
+
+diff --git a/src/QAST/Want.nqp b/src/QAST/Want.nqp
+index 7cf1ec7..7cbe4f5 100644
+--- a/src/QAST/Want.nqp
++++ b/src/QAST/Want.nqp
+@@ -47,4 +47,58 @@ class QAST::Want is QAST::Node does QAST::Children {
+         }
+         $result
+     }
++
++    method dump(int $indent = 0, :$guide-line) {
++        # Start off the same as QAST::Node::dump()
++        my @chunks := [
++            self.dump_indent_string($indent, :$guide-line), '- ', self.HOW.name(self)
++        ];
++        my $extra := self.dump_extra_node_info();
++        if nqp::chars($extra) {
++            nqp::push(@chunks, "($extra)");
++        }
++
++        nqp::push(@chunks, ' ');
++        nqp::push(@chunks, self.dump_annotations);
++
++        # Is this a Want node we can summarize ?
++        my $summary := "" ;
++        my $want_type := '[[unrecognised]]' ;
++        my int $elems := nqp::elems(@(self));
++        $want_type := ~self[1] if $elems == 3 ;
++
++        if ($want_type eq 'Ii' || $want_type eq 'Ss' || $want_type eq 'v') {
++            # Yes it is...
++            $summary := $summary ~ " '$want_type'" ;
++            $summary := $summary ~ "oid [with/out p6sink]" if $want_type eq 'v' ;
++            nqp::push(@chunks, $summary);
++        }
++ 
++        # Back to QAST::Node::Dump code path...
++        if (self.node) {
++            nqp::push(@chunks, ' ');
++            my $escaped_node := nqp::escape(self.node);
++            nqp::push(@chunks, nqp::substr($escaped_node, 0, 50));
++            if (nqp::chars($escaped_node) > 50) {
++                nqp::push(@chunks, "...");
++            }
++        }
++        nqp::push(@chunks, "\n");
++
++        # Dumping Children - do the "trimming" here if its a node we can summarize
++        if ($summary) {
++            if ($want_type eq 'v') {
++                # Only dump the first of the three children
++                nqp::push(@chunks, self[0].dump($indent + 2));
++            }
++            # NOTE If want_type = Ii or Ss, then skip dumping children completely
++        }
++        else {
++            # Dump the children normally - as in QAST::Node::dump
++            self.dump_children($indent + 2, @chunks)
++        }
++    
++        return join('', @chunks);
++    }
++
+ }
+-- 
+2.8.2
+
