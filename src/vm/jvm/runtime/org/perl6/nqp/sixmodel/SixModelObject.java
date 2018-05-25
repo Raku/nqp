@@ -121,7 +121,7 @@ public abstract class SixModelObject implements Cloneable {
     public void shift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement shift_native");
     }
-    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement slice");
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {

@@ -61,8 +61,8 @@ public class P6OpaqueDelegateInstance extends P6OpaqueBaseInstance {
     public SixModelObject shift_boxed(ThreadContext tc) {
         return delegate.shift_boxed(tc);
     }
-    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
-        return delegate.slice(tc, dest, start, end);
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
+        return delegate.slice(tc, dest, beginning, end);
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         delegate.splice(tc, from, offset, count);

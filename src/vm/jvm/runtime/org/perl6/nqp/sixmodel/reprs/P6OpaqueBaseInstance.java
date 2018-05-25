@@ -160,8 +160,8 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public void shift_native(ThreadContext tc) {
         posDelegate().shift_native(tc);
     }
-    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
-        return posDelegate().slice(tc, dest, start, end);
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
+        return posDelegate().slice(tc, dest, beginning, end);
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         posDelegate().splice(tc, from, offset, count);
