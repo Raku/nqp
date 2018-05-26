@@ -1,10 +1,11 @@
 exports.strToNum = function(str) {
+  /* TODO - validate for correctness */
   /* TODO - more converts more stuff */
   if (str === 'NaN') return NaN;
   if (str === 'Inf') return Infinity;
   if (str === '-Inf') return -Infinity;
   if (str === '+Inf') return Infinity;
-  const parsed = parseFloat(str);
+  const parsed = parseFloat(str.replace(/^\u2212/, '-').replace(/_/g, ''));
   if (isNaN(parsed)) {
     return 0;
   }
