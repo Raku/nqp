@@ -7,7 +7,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class CallCaptureInstance extends SixModelObject {
     public CallSiteDescriptor descriptor;
     public Object[] args;
-    
+
     public SixModelObject clone(ThreadContext tc) {
         CallCaptureInstance clone = new CallCaptureInstance();
         clone.st = this.st;

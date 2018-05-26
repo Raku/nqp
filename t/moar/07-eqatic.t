@@ -1,7 +1,7 @@
 #!/usr/bin/env nqp
 ## TODO XXX need MORE tests to check failures, not just succeses
 plan(103);
-ok(!nqp::eqatic('b', 'bb', 0), "MVM index/equatic bug");
+ok(!nqp::eqatic('b', 'bb', 0), "MVM index/eqatic bug");
 ok(!nqp::eqatic('st', 'ﬆa', 0));
 ok(!nqp::eqatic('st', 'ﬆassssssss', 0));
 ok(!nqp::eqatic('ﬆ', 'ﬆassssssss', 0));
@@ -25,7 +25,7 @@ test-it('st', 'ﬆ',  20, 0);
 # Without codepoint which expand when casefolded
 for (0,1,2,3,4,5,6) -> $val {
     my str $letter := nqp::chr($val + nqp::ord('A'));
-    ok( nqp::eqatic('ABCDEFG', $letter, $val), "nqp::equat(\$needle,  '$letter', $val)");
+    ok( nqp::eqatic('ABCDEFG', $letter, $val), "nqp::eqatic(\$needle,  '$letter', $val)");
 }
 
 sub test-it ($needle, $text, $max, $opt) {

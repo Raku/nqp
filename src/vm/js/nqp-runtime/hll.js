@@ -1,14 +1,16 @@
 'use strict';
-var Hash = require('./hash.js');
-var CodeRef = require('./code-ref.js');
-var NQPInt = require('./nqp-int.js');
-var Null = require('./null.js');
-var BOOT = require('./BOOT.js');
+const Hash = require('./hash.js');
+const CodeRef = require('./code-ref.js');
+const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
+const Null = require('./null.js');
+const BOOT = require('./BOOT.js');
 
-var op = {};
+const op = {};
 exports.op = op;
 
-var hllSyms = new Map();
+const hllSyms = new Map();
 
 op.gethllsym = function(hllName, name, value) {
   if (hllSyms.has(hllName) && hllSyms.get(hllName).has(name)) {
@@ -27,9 +29,9 @@ op.bindhllsym = function(hllName, name, value) {
 };
 
 op.hllizefor = function(ctx, obj, language) {
-  var languageHash = getHLL(language);
-  var config = languageHash;
-  var role;
+  const languageHash = getHLL(language);
+  const config = languageHash;
+  let role;
   if (obj !== null && obj._STable) {
     if (obj._STable.hllOwner === languageHash) {
       return obj;
@@ -39,39 +41,41 @@ op.hllizefor = function(ctx, obj, language) {
     }
   }
 
+  // we don't support returning native typed stuff from foreign_transform_*
+
   if (obj instanceof Hash || role == 5) {
-    var foreignTransformHash = config.get('foreign_transform_hash');
+    const foreignTransformHash = config.get('foreign_transform_hash');
     if (foreignTransformHash === undefined) return obj;
     return foreignTransformHash.$$call(ctx, {}, obj);
   } else if (role == 4) {
-    var foreignTransformArray = config.get('foreign_transform_array');
+    const foreignTransformArray = config.get('foreign_transform_array');
     if (foreignTransformArray === undefined) return obj;
     return foreignTransformArray.$$call(ctx, {}, obj);
   } else if (obj instanceof CodeRef || role == 6) {
-    var foreignTransformCode = config.get('foreign_transform_code');
+    const foreignTransformCode = config.get('foreign_transform_code');
     if (foreignTransformCode === undefined) return obj;
     return foreignTransformCode.$$call(ctx, {}, obj);
   // TODO handle already boxed ones
   } else if (obj instanceof NQPInt) {
-    var foreignTypeInt = config.get('foreign_type_int');
-    var repr = foreignTypeInt._STable.REPR;
-    var boxed = repr.allocate(foreignTypeInt._STable);
+    const foreignTypeInt = config.get('foreign_type_int');
+    const repr = foreignTypeInt._STable.REPR;
+    const boxed = repr.allocate(foreignTypeInt._STable);
     boxed.$$setInt(obj.value);
     return boxed;
-  } else if (typeof obj == 'number') {
-    var foreignTypeNum = config.get('foreign_type_num');
-    var repr = foreignTypeNum._STable.REPR;
-    var boxed = repr.allocate(foreignTypeNum._STable);
-    boxed.$$setNum(obj);
+  } else if (obj instanceof NQPNum) {
+    const foreignTypeNum = config.get('foreign_type_num');
+    const repr = foreignTypeNum._STable.REPR;
+    const boxed = repr.allocate(foreignTypeNum._STable);
+    boxed.$$setNum(obj.value);
     return boxed;
-  } else if (typeof obj == 'string') {
-    var foreignTypeStr = config.get('foreign_type_str');
-    var repr = foreignTypeStr._STable.REPR;
-    var boxed = repr.allocate(foreignTypeStr._STable);
-    boxed.$$setStr(obj);
+  } else if (obj instanceof NQPStr) {
+    const foreignTypeStr = config.get('foreign_type_str');
+    const repr = foreignTypeStr._STable.REPR;
+    const boxed = repr.allocate(foreignTypeStr._STable);
+    boxed.$$setStr(obj.value);
     return boxed;
   } else if (obj === Null) {
-    var nullValue = config.get('null_value');
+    const nullValue = config.get('null_value');
     if (nullValue === undefined) return obj;
     return nullValue;
   } else {
@@ -79,12 +83,14 @@ op.hllizefor = function(ctx, obj, language) {
   }
 };
 
-var hllConfigs = {};
+const hllConfigs = {};
 exports.hllConfigs = hllConfigs;
 
 function getHLL(language) {
   if (!hllConfigs[language]) {
     hllConfigs[language] = new Map;
+    hllConfigs[language].set('slurpy_array', BOOT.Array);
+    hllConfigs[language].set('list', BOOT.Array);
 
     // For serialization purposes
     hllConfigs[language].set('name', language);
@@ -95,7 +101,7 @@ function getHLL(language) {
 exports.getHLL = getHLL;
 
 op.sethllconfig = function(language, configHash) {
-  var hll = getHLL(language);
+  const hll = getHLL(language);
 
   configHash.content.forEach(function(value, key, map) {
     hll.set(key, value);
@@ -115,16 +121,12 @@ op.settypehllrole = function(type, role) {
   return type;
 };
 
-exports.slurpyArray = function(hllName, array) {
-  var slurpyArray;
-  if (hllConfigs[hllName]) slurpyArray = hllConfigs[hllName].get('slurpy_array');
-  if (slurpyArray === undefined) slurpyArray = BOOT.Array;
+exports.slurpyArray = function(currentHLL, array) {
+  const slurpyArray = currentHLL.get('slurpy_array');
   return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
 };
 
-exports.list = function(hllName, array) {
-  var list;
-  if (hllConfigs[hllName]) list = hllConfigs[hllName].get('list');
-  if (list === undefined) list = BOOT.Array;
+exports.list = function(currentHLL, array) {
+  const list = currentHLL.get('list');
   return list._STable.REPR.allocateFromArray(list._STable, array);
 };

@@ -1,6 +1,6 @@
 # while, until statements
 
-plan(16);
+plan(21);
 
 my $a; my $sum;
 
@@ -104,4 +104,43 @@ my $str := 'hello there';
 while $str -> $got {
     is($got, 'hello there', 'regression test for a bug in type conversion');
     $str := '';
+}
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('repeat until seems to have a bug on the jvm', 2);
+} else {
+    my $x := 0;
+    repeat until $x >= 2 -> $another_x {
+      if $x == 0 {
+        ok(nqp::isnull($another_x), 'repeat until -> get null before condition');
+      } else {
+        is($another_x, 0, 'repeat until -> gets condition');
+      }
+      $x := $x + 1;
+    }
+}
+
+sub cond($y) {
+  $y == 1 ?? 100 !! 0;
+}
+my $y := 0;
+repeat while cond($y) -> $cond {
+  if $y == 0 {
+    ok(nqp::isnull($cond), 'repeat while -> get null before condition');
+  } else {
+    is($cond, 100, 'repeat while -> gets condition');
+  }
+  $y := $y + 1;
+}
+
+{
+    my int $i := 10;
+    my $log := '';
+    nqp::while($i >= 0, nqp::stmts(
+        $log := $log ~ "|$i",
+        $i := $i-1,
+        nqp::if($i % 2 == 0, redo),
+        $log := $log ~ ":ev",
+    ), $log := $log ~ 'en');
+    is($log,'|10:even|9|8:even|7|6:even|5|4:even|3|2:even|1|0:even', 'redo works correctly with 3 argument while');
 }

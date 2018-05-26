@@ -2,6 +2,7 @@ knowhow RoleToRoleApplier {
     method apply($target, @roles) {
         # Aggregate all of the methods sharing names.
         my %meth_info;
+        my @meth_names;
         for @roles {
             my @methods := $_.HOW.methods($_);
             for @methods {
@@ -12,6 +13,7 @@ knowhow RoleToRoleApplier {
                     @meth_list := %meth_info{$name};
                 }
                 else {
+                    nqp::push(@meth_names, $name);
                     %meth_info{$name} := @meth_list;
                 }
                 my $found := 0;
@@ -35,8 +37,7 @@ knowhow RoleToRoleApplier {
         }
 
         # Process method list.
-        for %meth_info {
-            my $name := nqp::iterkey_s($_);
+        for @meth_names -> $name {
             my @add_meths := %meth_info{$name};
 
             # Do we already have a method of this name? If so, ignore all of the

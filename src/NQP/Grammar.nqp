@@ -1,9 +1,10 @@
 grammar NQP::Grammar is HLL::Grammar {
+    my $sc_id := 0;
     method TOP() {
-	# Language braid.
-	my $*LANG := self;
-	self.define_slang('MAIN',  self,       self.actions);
-	self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
+	    # Language braid.
+	    my $*LANG := self;
+	    self.define_slang('MAIN',  self,       self.actions);
+	    self.define_slang('Regex', NQP::Regex, NQP::RegexActions);
 
         # Old language braids, going away.
         my %*LANG;
@@ -15,15 +16,15 @@ grammar NQP::Grammar is HLL::Grammar {
         # Package declarator to meta-package mapping. Note that there is
         # one universal KnowHOW from the 6model core, and an attribute
         # meta-object to go with it.
-	self.set_how('knowhow',      nqp::knowhow());
-	self.set_how('knowhow-attr', nqp::knowhowattr());
+	    self.set_how('knowhow',      nqp::knowhow());
+	    self.set_how('knowhow-attr', nqp::knowhowattr());
 
         # Serialization context builder - keeps track of objects that
         # cross the compile-time/run-time boundary that are associated
         # with this compilation unit.
         my $file := nqp::getlexdyn('$?FILES');
         my $source_id := nqp::sha1(self.target()) ~
-            (%*COMPILING<%?OPTIONS><stable-sc> ?? '' !! '-' ~ ~nqp::time_n());
+            (%*COMPILING<%?OPTIONS><stable-sc> // '') ~ '-' ~ ~($sc_id++);
         my $*W := nqp::isnull($file) ??
             NQP::World.new(:handle($source_id)) !!
             NQP::World.new(:handle($source_id), :description($file));
@@ -95,7 +96,7 @@ grammar NQP::Grammar is HLL::Grammar {
             .*? \n <?before \h* [
                 '='
                 [ 'cut' »
-                  <.panic: 'Obsolete pod format, please use =begin/=end instead'> ]?
+                  <.panic: "Obsolete pod format (={$<identifier>}/=cut), please use =begin/=end instead"> ]?
               | \n ]>
         |   {}
             [ \s || <.panic: 'Illegal pod directive'> ]
@@ -143,8 +144,8 @@ grammar NQP::Grammar is HLL::Grammar {
         <.outerctx>
 
         <statementlist>
-	<.set_braid_from(self)>
-	<.check_PACKAGE_oopsies('comp_unit')>
+	    <.set_braid_from(self)>
+	    <.check_PACKAGE_oopsies('comp_unit')>
         [ $ || <.panic: 'Confused'> ]
     }
 

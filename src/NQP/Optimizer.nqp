@@ -82,16 +82,16 @@ class NQP::Optimizer {
 
         method lexicals_to_locals() {
             return 0 if $!poisoned;
-            for %!decls {
+            for sorted_keys(%!decls) {
                 # We're looking for lexical var or param decls.
-                my $qast := $_.value;
+                my $qast := %!decls{$_};
                 my str $scope := $qast.scope;
                 next unless $scope eq 'lexical';
                 my str $decl := $qast.decl;
                 next unless $decl eq 'param' || $decl eq 'var';
 
                 # Consider name. Can't lower if it's used by any nested blocks.
-                my str $name := $_.key;
+                my str $name := $_;
                 unless nqp::existskey(%!usages_inner, $name) {
                     # Lowerable if it's a normal variable.
                     next if nqp::chars($name) < 2;
@@ -361,7 +361,7 @@ class NQP::Optimizer {
     method visit_children($node, :$skip_selectors) {
         my int $i := 0;
         unless nqp::isstr($node) || !nqp::defined($node) {
-            while $i < +@($node) {
+            while $i < nqp::elems(@($node)) {
                 unless $skip_selectors && $i % 2 {
                     my $visit := $node[$i];
                     if nqp::istype($visit, QAST::Op) {

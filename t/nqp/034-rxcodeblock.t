@@ -1,6 +1,6 @@
 #! nqp
 
-plan(12);
+plan(13);
 
 grammar ABC {
     token TOP { { ok(1, 'basic code assertion'); } }
@@ -30,3 +30,13 @@ ok( !DEF.parse('0def'),    'fails assertion');
 ok( !DEF.parse('1234'),    'passes assertion, fails text after');
 ok( ?DEF.parse('999def'),  'passes assertion, text after');
 
+grammar SeeCursor {
+    token TOP {
+        $<bcd>=[.*]
+        {
+            my $get := nqp::getlex('$¢');
+            is($get<bcd>, 'abc', 'getting stuff from nqp::getlex "$¢" works');
+        }
+    }
+}
+SeeCursor.parse('abc');

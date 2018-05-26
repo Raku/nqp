@@ -1,70 +1,96 @@
 'use strict';
-var op = {};
+const op = {};
 exports.op = op;
 
-var refs = require('./refs.js');
+const refs = require('./refs.js');
 
-var NQPInt = require('./nqp-int.js');
-var NQPException = require('./nqp-exception.js');
+const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
 
-var nullStr = require('./null_s.js');
-var Null = require('./null.js');
+const NQPException = require('./nqp-exception.js');
 
-var Capture = require('./capture.js');
+const nullStr = require('./null_s.js');
+const Null = require('./null.js');
 
-var StaticCtx = require('./static-ctx.js');
+const Capture = require('./capture.js');
+
+const StaticCtx = require('./static-ctx.js');
 
 const BOOT = require('./BOOT.js');
 
+const nativeArgs = require('./native-args.js');
+
+const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
+const NativeUIntArg = exports.NativeUIntArg = nativeArgs.NativeUIntArg;
+const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
+const NativeStrArg = exports.NativeStrArg = nativeArgs.NativeStrArg;
+
+const NativeNumRet = exports.NativeNumRet = nativeArgs.NativeNumRet;
+const NativeUIntRet = exports.NativeUIntRet = nativeArgs.NativeUIntRet;
+
+const stripMarks = require('./strip-marks.js');
+const foldCase = require('fold-case');
+const graphemes = require('./graphemes.js');
+
 const fs = require('fs');
 
+
 exports.NQPInt = NQPInt;
+exports.NQPNum = NQPNum;
+exports.NQPStr = NQPStr;
 
 function loadOps(module) {
-  for (var name in module.op) {
+  for (const name in module.op) {
     op[name] = module.op[name];
   }
 }
 
 exports.loadOps = loadOps;
 
-var core = require('./core');
+const core = require('./core');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
+exports.slurpyPos = core.slurpyPos;
 exports.named = core.named;
 exports.unwrapNamed = core.unwrapNamed;
+exports.arg = core.arg;
+
+exports.intToObj = core.intToObj;
+exports.numToObj = core.numToObj;
+exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
-var io = require('./io.js');
+const io = require('./io.js');
 loadOps(io);
 
-var bignum = require('./bignum.js');
+const bignum = require('./bignum.js');
 loadOps(bignum);
 
-var nfa = require('./nfa.js');
+const nfa = require('./nfa.js');
 loadOps(nfa);
 
-var cclass = require('./cclass.js');
+const cclass = require('./cclass.js');
 loadOps(cclass);
 
-var hll = require('./hll.js');
+const hll = require('./hll.js');
 loadOps(hll);
 
 loadOps(require('./multicache.js'));
 
-var deserialization = require('./deserialization.js');
+const deserialization = require('./deserialization.js');
 exports.wval = deserialization.wval;
 loadOps(deserialization);
 
-var serialization = require('./serialization.js');
+const serialization = require('./serialization.js');
 loadOps(serialization);
 
-var nativecall = require('./nativecall.js');
+const nativecall = require('./nativecall.js');
 loadOps(nativecall);
 
-var CodeRef = require('./code-ref.js');
+const CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
 const asyncContinuations = require('./async-continuations.js');
@@ -74,48 +100,53 @@ exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
 exports.CurLexpad = require('./curlexpad.js');
 
-var Ctx = require('./ctx.js');
+const Ctx = require('./ctx.js');
 module.exports.Ctx = Ctx;
 
 module.exports.CtxWithStatic = require('./ctx-with-static.js');
 module.exports.CtxJustHandler = require('./ctx-just-handler.js');
 
-var bootstrap = require('./bootstrap.js');
+const bootstrap = require('./bootstrap.js');
 module.exports.knowhowattr = bootstrap.knowhowattr;
 module.exports.knowhow = bootstrap.knowhow;
 
 loadOps(refs);
-for (let name in refs.helpers) {
+for (const name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
+const coercions = require('./coercions');
+
+exports.strToNum = coercions.strToNum;
+exports.numToStr = coercions.numToStr;
+
 let libpath = [];
 exports.libpath = function(paths) {
-  libpath = paths;
+  libpath = paths.map(path => typeof path === 'string' ? path : path.$$getStr());
 };
 
 exports.loaderCtx = null;
 
 op.loadbytecode = async function(ctx, file) {
   // HACK - temporary hack for rakudo-js
-  if (file == '/share/nqp/lib/Perl6/BOOTSTRAP.js') {
+  if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
   }
 
-  var loadFrom;
+  let loadFrom;
   if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
   } else {
     loadFrom = module;
   }
 
-  var oldLoaderCtx = exports.loaderCtx;
+  const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  var mangled = file.replace(/::/g, '-');
+  const mangled = file.replace(/::/g, '-');
 
-  var prefixes = libpath.slice();
+  const prefixes = libpath.slice();
   prefixes.push('./', './nqp-js-on-js/');
-  var found = false;
-  for (var prefix of prefixes) {
+  let found = false;
+  for (const prefix of prefixes) {
     try {
       await loadFrom.require(prefix + mangled);
 
@@ -134,9 +165,9 @@ op.loadbytecode = async function(ctx, file) {
 };
 
 op.loadbytecodefh = function(ctx, fh, file) {
-  let oldLoaderCtx = exports.loaderCtx;
+  const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
-  let js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
+  const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
   eval(js);
   exports.loaderCtx = oldLoaderCtx;
 };
@@ -180,11 +211,15 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
 };
 
 exports.toStr = async function(arg_, ctx) {
-  let arg = await arg_.$$decont(ctx);
-  if (typeof arg == 'number') {
-    return numToStr(arg);
-  } else if (typeof arg == 'string') {
-    return arg;
+  if (!arg_.$$decont) {
+    console.log('#2');
+    console.log(arg_);
+    console.trace('got raw promise');
+  }
+  const arg = await arg_.$$decont(ctx);
+
+  if (arg instanceof NQPStr) {
+    return arg.value;
   } else if (arg === Null) {
     return '';
   } else if (arg === nullStr) {
@@ -194,11 +229,10 @@ exports.toStr = async function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    let ret = await (await arg.Str(ctx, null, arg)).$$decont(ctx); // eslint-disable-line new-cap
-    if (typeof ret == 'string') return ret;
-    return ret.$$getStr();
+    const ret = await arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+    return (typeof ret === 'string' ? ret : (await ret.$$decont(ctx)).$$getStr());
   } else if (arg.$$getNum) {
-    return numToStr(arg.$$getNum());
+    return coercions.numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
     return arg.$$getInt().toString();
   } else {
@@ -206,45 +240,24 @@ exports.toStr = async function(arg_, ctx) {
   }
 };
 
-function strToNum(str) {
-  if (str === 'NaN') return NaN;
-  if (str === 'Inf') return Infinity;
-  if (str === '-Inf') return -Infinity;
-  if (str === '+Inf') return Infinity;
-  let parsed = parseFloat(str);
-  if (isNaN(parsed)) {
-    return 0;
-  }
-  return parsed;
-}
-
-exports.strToNum = strToNum;
-
-function numToStr(num) {
-  if (num === Infinity) return 'Inf';
-  if (num === -Infinity) return '-Inf';
-
-  return num.toString();
-}
-
-exports.numToStr = numToStr;
 
 exports.toNum = async function(arg_, ctx) {
-  let arg = await arg_.$$decont(ctx);
-  if (typeof arg == 'number') {
-    return arg;
-  } else if (arg === Null) {
+  if (!arg_.$$decont) {
+    console.log('there');
+  }
+  const arg = await arg_.$$decont(ctx);
+  if (arg === Null) {
     return 0;
-  } else if (typeof arg == 'string') {
-    return strToNum(arg);
+  } else if (arg instanceof NQPStr) {
+    return coercions.strToNum(arg.value);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    var result = await arg.Num(ctx, null, arg); // eslint-disable-line new-cap
-    if (result.$$getNum) {
+    const result = await arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    if (typeof result === 'number') {
+      return result;
+    } else if (result.$$getNum) {
       return result.$$getNum();
     } else if (result.$$numify) {
       return result.$$numify();
-    } else if (typeof result == 'number') {
-      return result;
     } else {
       throw new NQPException('we can\'t numify result of toNum');
     }
@@ -265,62 +278,62 @@ exports.toInt = async function(arg, ctx) {
   return ((await exports.toNum(arg, ctx)) | 0);
 };
 
-exports.intToObj = function(hllName, i) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('int_box');
-  if (!type) {
-    return new NQPInt(i);
+exports.retval = function(currentHLL, arg) {
+  if (typeof arg === 'number') {
+    return core.intToObj(currentHLL, arg);
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return core.strToObj(currentHLL, arg);
+  } else if (arg instanceof NativeNumRet) {
+    return core.numToObj(currentHLL, arg.value);
+  } else if (arg instanceof NativeUIntRet) {
+    return core.intToObj(currentHLL, arg.value);
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setInt(i);
-    return obj;
+    return arg;
   }
 };
 
-exports.numToObj = function(hllName, n) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('num_box');
-  if (!type) {
-    return n;
+exports.retval_bool = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg === 0 ? 0 : 1;
+  } else if (typeof arg === 'string') {
+    return arg === '' ? 0 : 1;
+  } else if (arg === nullStr) {
+    return 0;
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setNum(n);
-    return obj;
+    return arg.$$toBool(ctx);
   }
 };
 
-exports.strToObj = function(hllName, s) {
-  var currentHLL = hll.hllConfigs[hllName];
-  var type;
-  if (currentHLL) type = currentHLL.get('str_box');
-  if (!type) {
-    return s;
+exports.retval_i = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg;
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return coercions.strToNum(arg)|0;
   } else {
-    var repr = type._STable.REPR;
-    var obj = repr.allocate(type._STable);
-    obj.$$setStr(s);
-    return obj;
+    return exports.toInt(arg, ctx);
   }
 };
 
-if (!Math.imul) {
-  /* Polyfill from:
-  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/imul
-  */
-  Math.imul = function(a, b) {
-    var ah = (a >>> 16) & 0xffff;
-    var al = a & 0xffff;
-    var bh = (b >>> 16) & 0xffff;
-    var bl = b & 0xffff;
-    // the shift by 0 fixes the sign on the high part
-    // the final |0 converts the unsigned value into a signed value
-    return ((al * bl) + (((ah * bl + al * bh) << 16) >>> 0) | 0);
-  };
-}
+
+exports.retval_n = function(ctx, arg) {
+  if (typeof arg === 'number') {
+    return arg;
+  } else if (typeof arg === 'string' || arg === nullStr) {
+    return coercions.strToNum(arg);
+  } else {
+    return exports.toNum(arg, ctx);
+  }
+};
+
+exports.retval_s = function(ctx, arg) {
+  if (typeof arg === 'string' || arg === nullStr) {
+    return arg;
+  } else if (typeof arg === 'number') {
+    return arg.toString();
+  } else {
+    return exports.toStr(arg, ctx);
+  }
+};
 
 // Placeholder
 exports.topContext = function() {
@@ -329,7 +342,7 @@ exports.topContext = function() {
 
 // helper for regexs
 exports.regexPeek = function(bstack, mark) {
-  var ptr = bstack.length;
+  let ptr = bstack.length;
   while (ptr >= 0) {
     if (bstack[ptr] == mark) break;
     ptr -= 4;
@@ -338,8 +351,8 @@ exports.regexPeek = function(bstack, mark) {
 };
 
 exports.regexCommit = function(bstack, mark) {
-  var ptr = bstack.length;
-  var caps;
+  let ptr = bstack.length;
+  let caps;
   if (ptr > 0) {
     caps = bstack[ptr - 1];
   } else {
@@ -374,7 +387,7 @@ exports.NYI = function(msg) {
 };
 
 exports.args = function(module) {
-  return require.main === module ? process.argv.slice(1) : [];
+  return require.main === module ? process.argv.slice(1).map(arg => new NativeStrArg(arg)) : [];
 };
 
 exports.NQPException = NQPException;
@@ -383,60 +396,12 @@ exports.wrapException = function(e) {
   return new NQPException('<<wrapped exception:\n' + e.stack + '\n>>\n');
 };
 
-exports.setCodeRefHLL = function(codeRefs, hllName) {
-  for (var i = 0; i < codeRefs.length; i++) {
-    codeRefs[i].hll = hll.hllConfigs[hllName];
+exports.setCodeRefHLL = function(codeRefs, currentHLL, filename) {
+  for (let i = 0; i < codeRefs.length; i++) {
+    codeRefs[i].hll = currentHLL;
+    codeRefs[i].filename = filename;
   }
 };
-
-
-/* TODO - make monkey patching builtin things optional */
-
-Number.prototype.$$decont = function(ctx) {
-  return this;
-};
-
-Number.prototype.$$toBool = function(ctx) {
-  return this === 0 ? 0 : 1;
-};
-
-Number.prototype.$$istype = function(ctx, type) {
-  return 0;
-};
-
-Number.prototype.$$can = function(ctx, name) {
-  return 0;
-};
-
-Number.prototype.$$isrwcont = function(ctx) {
-  return 0;
-};
-
-String.prototype.$$decont = function(ctx) {
-  return this;
-};
-
-String.prototype.$$toBool = function(ctx) {
-  return this === '' ? 0 : 1;
-};
-
-String.prototype.$$can = function(ctx, name) {
-  return 0;
-};
-
-String.prototype.$$istype = function(ctx, type) {
-  return 0;
-};
-
-String.prototype.$$isrwcont = function(ctx) {
-  return 0;
-};
-
-// needed for continuations
-Function.prototype.$$toBool = function(ctx) {
-  return 1;
-};
-
 
 exports.null_s = nullStr;
 exports.Null = Null;
@@ -445,29 +410,31 @@ exports.list = hll.list;
 
 
 exports.list_i = function lowlevelList(array) {
-  let stable = BOOT.IntArray._STable;
+  const stable = BOOT.IntArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_n = function lowlevelList(array) {
-  let stable = BOOT.NumArray._STable;
+  const stable = BOOT.NumArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_s = function lowlevelList(array) {
-  let stable = BOOT.StrArray._STable;
+  const stable = BOOT.StrArray._STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT').createArray;
+exports.createIntArray = require('./BOOT').createIntArray;
 
 exports.dumpObj = function(obj) {
   console.log(typeof obj);
   if (typeof obj === 'object') {
     if (obj._STable) {
       console.log(obj._STable.REPR.name);
-      console.log(obj._STable.HOW.name(null, null, obj._STable.HOW, obj));
+      const name = obj._STable.HOW.name(null, null, obj._STable.HOW, obj);
+      console.log(name instanceof NQPStr ? name.value : name);
     } else {
       console.log('no STable', obj.constructor.name);
     }
@@ -476,19 +443,19 @@ exports.dumpObj = function(obj) {
   }
 };
 
-let containerSpecs = require('./container-specs.js');
+const containerSpecs = require('./container-specs.js');
 exports.extraRuntime = function(lang, path) {
   if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
-  let runtime = require(path);
+  const runtime = require(path);
   if (!runtime.loaded) {
     runtime.loaded = true;
     runtime.load(exports, CodeRef, Capture, containerSpecs);
   }
 };
 
-exports.paramcheckfailed = function(hllName, ctx, args) {
-  let capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
-  return hll.hllConfigs[hllName].get('bind_error').$$call(ctx, null, capture);
+exports.paramcheckfailed = function(currentHLL, ctx, args) {
+  const capture = new Capture(args[1], Array.prototype.slice.call(args, 2));
+  return currentHLL.get('bind_error').$$call(ctx, null, capture);
 };
 
 let execname;
@@ -500,8 +467,8 @@ op.execname = function() {
   return execname;
 };
 
-exports.exitHandler = function(ctx, hllName, value) {
-  hll.hllConfigs[hllName].get('exit_handler').$$call(ctx, null, ctx.codeRef(), value === undefined ? Null : value);
+exports.exitHandler = function(ctx, currentHLL, value) {
+  currentHLL.get('exit_handler').$$call(ctx, null, ctx.codeRef(), value === undefined ? Null : value);
 };
 
 exports.NativeRef = require('./reprs.js').NativeRef;
@@ -511,3 +478,224 @@ exports.getHLL = hll.getHLL;
 exports.run = function(code) {
   return code();
 };
+
+exports.tooFewPos = function(got, expected) {
+  throw new NQPException(`Too few positionals passed; expected ${expected-2} arguments but got ${got-2}`);
+};
+
+exports.tooManyPos = function(got, expected) {
+  throw new NQPException(`Too many positionals passed; expected ${expected-2} arguments but got ${got-2}`);
+};
+
+
+exports.arg_i = function(ctx, contedArg) {
+  if (contedArg instanceof NativeIntArg) {
+    return contedArg.value;
+  } else if (contedArg instanceof NativeUIntArg) {
+    return contedArg.value|0;
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native int argument, but got num');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native int argument, but got str');
+  }
+
+  const arg = contedArg.$$decont(ctx);
+  if (arg instanceof NQPInt) {
+    return arg.value;
+  } else if (arg.$$getInt) {
+    return arg.$$getInt();
+  } else {
+    throw new NQPException('Expected native int argument, but got something else');
+  }
+};
+
+exports.arg_n = function(ctx, contedArg) {
+  if (contedArg instanceof NativeNumArg) {
+    return contedArg.value;
+  } else if (contedArg instanceof NativeIntArg) {
+    throw new NQPException('Expected native num argument, but got int');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native num argument, but got str');
+  }
+
+  const arg = contedArg.$$decont(ctx);
+  if (arg.$$getNum) {
+    return arg.$$getNum();
+  } else {
+    throw new NQPException('Expected native num argument, but got something else');
+  }
+};
+
+exports.arg_s = function(ctx, contedArg) {
+  if (contedArg instanceof NativeStrArg) {
+    return contedArg.value;
+  } else if (contedArg instanceof NQPStr) {
+    return contedArg.value;
+  } else if (contedArg instanceof NativeIntArg) {
+    throw new NQPException('Expected native str argument, but got int');
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native str argument, but got num');
+  }
+
+  const arg = contedArg.$$decont(ctx);
+  if (typeof arg === 'string') {
+    return arg;
+  } else if (arg.$$getStr) {
+    return arg.$$getStr();
+  } else {
+    throw new NQPException('Expected native str argument, but got something else');
+  }
+};
+
+exports.missingNamed = function(name) {
+  throw new NQPException(`Required named parameter '${name}' not passed`);
+};
+
+
+const chunkNamesToTypes = {
+  T_OBJ: 0,
+  T_INT: 1,
+  T_NUM: 2,
+  T_STR: 3,
+  T_BOOL: 4,
+  T_CALL_ARG: 5,
+  T_INT16: 6,
+  T_INT8: 7,
+  T_RETVAL: 8,
+  T_UINT16: 9,
+  T_UINT8: 10,
+  T_UINT32: 11,
+
+  T_VOID: -1,
+  T_NONVAL: -2,
+  T_ARGS: -3,
+  T_ARGS_ARRAY: -4,
+};
+
+const chunkTypesToNames = {};
+for (const name of Object.keys(chunkNamesToTypes)) {
+  chunkTypesToNames[chunkNamesToTypes[name]] = name;
+}
+
+exports.coercion = function(got, expected) {
+  throw new Error('Can\'t convert, got: ' + chunkTypesToNames[got] + ' expected:' + chunkTypesToNames[expected]);
+};
+
+exports.charrange_i = function(char, lower, upper) {
+  return (
+    lower <= char.toLowerCase().charCodeAt(0)
+    && char.toLowerCase().charCodeAt(0) <= upper
+  ) || (
+    lower <= char.toUpperCase().charCodeAt(0)
+    && char.toUpperCase().charCodeAt(0) <= upper
+  );
+};
+
+exports.charrange_m = function(char, lower, upper) {
+  const codePoint = stripMarks(char).codePointAt(0);
+  return (lower <= codePoint && codePoint <= upper);
+};
+
+exports.charrange_im = function(char, lower, upper) {
+  const stripped = stripMarks(char);
+  return (
+    lower <= stripped.toLowerCase().codePointAt(0)
+    && stripped.toLowerCase().codePointAt(0) <= upper
+  ) || (
+    lower <= stripped.toUpperCase().codePointAt(0)
+    && stripped.toUpperCase().codePointAt(0) <= upper
+  );
+};
+
+
+// TODO - optimize
+function fuzzyMatch(fuzzy, target, pos, literal) {
+  let end = pos;
+  let result = -1;
+  let matched = '';
+  const foldedLiteral = fuzzy(literal);
+
+  while (foldedLiteral.startsWith(matched)) {
+    if (matched === foldedLiteral) {
+      result = end - pos;
+    }
+
+    if (end === target.length) break;
+    end = graphemes.nextBreak(target, end);
+    matched = fuzzy(target.substring(pos, end));
+  }
+
+  return result;
+}
+
+exports.literal_i = function(target, pos, literal) {
+  return fuzzyMatch(foldCase, target, pos, literal);
+};
+
+exports.literal_m = function(target, pos, literal) {
+  return fuzzyMatch(stripMarks, target, pos, literal);
+};
+
+exports.literal_im = function(target, pos, literal) {
+  return fuzzyMatch(string => foldCase(stripMarks(string)), target, pos, literal);
+};
+
+exports.literal = function(target, pos, literal) {
+  if (target.substr(pos, literal.length) == literal) {
+    if (graphemes.graphemeBoundary(target, pos + literal.length)) {
+      return literal.length;
+    } else {
+      return -1;
+    }
+  } else {
+    return -1;
+  }
+};
+
+// TODO astral characters, multi character graphemes
+exports.enumcharlist_m = function(negate, target, pos, charlist) {
+  if (pos >= target.length) return -1;
+  const found = charlist.indexOf(stripMarks(target.substr(pos, 1))) != -1;
+  if (negate) {
+    return found ? -1 : 1;
+  } else {
+    return found ? 1 : -1;
+  }
+};
+
+exports.enumcharlist = function(negate, target, pos, charlist, zerowidth) {
+  if (pos >= target.length) return (zerowidth && negate ? 0 : -1);
+  const graphemeEnd = graphemes.nextBreak(target, pos);
+  const found = charlist.indexOf(target.substring(pos, graphemeEnd)) != -1;
+  if (negate ? !found : found) {
+    return (graphemeEnd - pos);
+  } else {
+    return -1;
+  }
+};
+
+exports.nextGrapheme = graphemes.nextBreak;
+
+exports.noNamed = function(_NAMED) {
+  if (Object.keys(_NAMED) != 0) {
+    throw new NQPException(`Unexpected named argument ${Object.keys(_NAMED)[0]} passed`);
+  }
+};
+
+exports.checkNamed = function(known, _NAMED) {
+  for (const named in _NAMED) {
+    if (!known[named]) {
+      throw new NQPException(`Unexpected named argument ${named} passed`);
+    }
+  }
+};
+
+
+const props = require('./unicode-props.js');
+
+for (const prop in props) {
+  exports[prop] = props[prop];
+}
+
+exports.buildSourceMap = core.buildSourceMap;
+exports.createSourceMap = core.createSourceMap;

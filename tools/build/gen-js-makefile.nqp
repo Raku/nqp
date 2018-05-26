@@ -84,7 +84,7 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     rule($moarvm, nqp::join(' ', $deps), 
         make_parents($moarvm),
         make_parents($js),
-	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --output $moarvm {$no-regex-lib ?? "--no-regex-lib" !! ""} $source > $js"
+	"\$(JS_NQP) --module-path gen/js/stage1 src/vm/js/bin/cross-compile.nqp --setting=$setting --target=mbc --js-output $js --output $moarvm {$no-regex-lib ?? "--no-regex-lib" !! ""} $source > $js"
         );
 }
 
@@ -155,7 +155,7 @@ out("js-lint:
 	gjslint --strict --max_line_length=200 --nojsdoc src/vm/js/nqp-runtime/*.js");
 
 
-my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js>;
+my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js nqp-js-on-js/NQPCORE.setting.js.map nqp-js-on-js/NQPHLL.js.map nqp-js-on-js/nqpmo.js.map nqp-js-on-js/NQPP5QRegex.js.map nqp-js-on-js/NQPP6QRegex.js.map nqp-js-on-js/QAST-Compiler.js.map nqp-js-on-js/QAST.js.map nqp-js-on-js/QASTNode.js.map nqp-js-on-js/QRegex.js.map nqp-js-on-js/sprintf.js.map>;
 
 my @cp_all;
 for @install -> $file {
@@ -213,6 +213,13 @@ rule($nqp-bootstrapped, "$QAST-moarvm $NQPP5QRegex-moarvm $NQPP6QRegex-moarvm $n
     ".@slash@\$(JS_CROSS_RUNNER) --target=js --shebang $nqp-combined > $nqp-bootstrapped"
 );
 
+rule('js-runner-default', 'js-all',
+  '$(CP) $(JS_RUNNER) nqp$(BAT)',
+  '$(CHMOD) 755 nqp$(BAT)');
+
+rule('js-runner-default-install', 'js-runner-default js-install',
+  '$(CP) $(DESTDIR)$(BIN_DIR)/$(JS_RUNNER) $(DESTDIR)$(BIN_DIR)/nqp$(BAT)',
+  '$(CHMOD) 755 $(DESTDIR)$(BIN_DIR)/nqp$(BAT)');
 
 rule('js-deps', '',
   '$(PERL) tools/build/npm-install-or-link.pl . src/vm/js/nqp-runtime nqp-runtime @link@');
@@ -220,5 +227,5 @@ rule('js-deps', '',
 deps("js-all", "js-deps", "js-cross", $nqp-bootstrapped);
 
 sub MAIN($program, $output-file) {
-    spew($output-file, $out);
+    spurt($output-file, $out);
 }

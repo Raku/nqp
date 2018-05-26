@@ -12,12 +12,12 @@ public class StaticCodeInfo implements Cloneable {
      * The compilation unit where the code lives.
      */
     public CompilationUnit compUnit;
-    
+
     /**
      * Method handle for the code ref.
      */
     MethodHandle mh;
-    
+
     /**
      * The expected arguments needed to invoke the method handle.
      */
@@ -32,17 +32,17 @@ public class StaticCodeInfo implements Cloneable {
      * Method name for correlation with stack traces.
      */
     public String methodName;
-    
+
     /**
      * The compilation-unit unique ID of the routine (from QAST cuuid).
      */
     public String uniqueId;
-    
+
     /**
      * Static outer.
      */
     public StaticCodeInfo outerStaticInfo;
-    
+
     /**
      * Most recent invocation, if any.
      */
@@ -52,12 +52,12 @@ public class StaticCodeInfo implements Cloneable {
      * Static lexicals.
      */
     public SixModelObject[] oLexStatic;
-    
+
     /**
      * Flags for each static lexical usage.
      */
     public byte[] oLexStaticFlags;
-    
+
     /**
      * Names of the lexicals we have of each of the base types.
      */
@@ -65,17 +65,17 @@ public class StaticCodeInfo implements Cloneable {
     public String[] iLexicalNames;
     public String[] nLexicalNames;
     public String[] sLexicalNames;
-    
+
     /**
      * Map of handlers.
      */
     public long[][] handlers;
-    
+
     /**
      * Static code object (base of any clones).
      */
     public SixModelObject staticCode;
-    
+
     /**
      * Lexical name maps (produced lazily on first use). Note they are only
      * used when we do lexical lookup by name.
@@ -84,17 +84,17 @@ public class StaticCodeInfo implements Cloneable {
     public HashMap<String, Integer> iLexicalMap;
     public HashMap<String, Integer> nLexicalMap;
     public HashMap<String, Integer> sLexicalMap;
-    
+
     /**
      * Does this code object have a block exit handler?
      */
     public boolean hasExitHandler;
-    
+
     /**
      * Is this code object marked as a thunk?
      */
     public boolean isThunk;
-    
+
     public Integer oTryGetLexicalIdx(String name) {
         if (oLexicalNames != null) {
             if (oLexicalMap == null) {
@@ -108,7 +108,7 @@ public class StaticCodeInfo implements Cloneable {
             return null;
         }
     }
-    
+
     public Integer iTryGetLexicalIdx(String name) {
         if (iLexicalNames != null) {
             if (iLexicalMap == null) {
@@ -122,7 +122,7 @@ public class StaticCodeInfo implements Cloneable {
             return null;
         }
     }
-    
+
     public Integer nTryGetLexicalIdx(String name) {
         if (nLexicalNames != null) {
             if (nLexicalMap == null) {
@@ -136,7 +136,7 @@ public class StaticCodeInfo implements Cloneable {
             return null;
         }
     }
-    
+
     public Integer sTryGetLexicalIdx(String name) {
         if (sLexicalNames != null) {
             if (sLexicalMap == null) {
@@ -150,7 +150,7 @@ public class StaticCodeInfo implements Cloneable {
             return null;
         }
     }
-    
+
     /**
      * Initializes the static code info data structure.
      */
@@ -202,7 +202,7 @@ public class StaticCodeInfo implements Cloneable {
             this.mh = MethodHandles.insertArguments(mh, 3, (Object)null);
         }
     }
-    
+
     public StaticCodeInfo clone() {
         try {
             StaticCodeInfo result = (StaticCodeInfo)super.clone();

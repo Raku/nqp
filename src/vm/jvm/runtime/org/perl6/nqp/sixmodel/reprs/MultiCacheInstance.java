@@ -8,26 +8,26 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_MAX_ARITY = 4;
-    private static final int MD_CACHE_MAX_ENTRIES = 16;
+    private static final int MD_CACHE_MAX_ENTRIES = 32;
     private static final int MD_CACHE_INT = 1;
     private static final int MD_CACHE_NUM = 2;
     private static final int MD_CACHE_STR = 3;
-    
+
     private SixModelObject zeroArity;
     private ArityCache[] arityCaches = new ArityCache[MD_CACHE_MAX_ARITY];
-    
+
     private class ArityCache
     {
         /* The number of entries we have in the cache. */
         public int numEntries;
-        
+
         /* This is a bunch of ST hashes, with natives special-cased. We allocate
          * it arity * MAX_ENTRIES big and go through it in arity sized chunks. */
         public long typeIds[];
-        
+
         /* Whether the entry is allowed to have named arguments. Doesn't say
          * anything about which ones, though. Something that is ambivalent
-         * about named arguments to the degree it doesn't care about them 
+         * about named arguments to the degree it doesn't care about them
          * even tie-breaking (like NQP) can just throw such entries into the
          * cache. Things that do care should not make such cache entries. */
         public boolean namedOK[];
@@ -35,19 +35,19 @@ public class MultiCacheInstance extends SixModelObject {
         /* The results we return from the cache. */
         public SixModelObject[] results;
     }
-    
+
     public void add(CallCaptureInstance capture, SixModelObject result, ThreadContext tc) {
         /* If there's flattenings, we can't cache. */
         if (capture.descriptor.hasFlattening)
             return;
-        
-        /* If it's zero arity, just stick it in that slot. */
+
         Object[] args = capture.args;
+        /* If it's zero arity, just stick it in that slot. */
         if (args.length == 0) {
             this.zeroArity = result;
             return;
         }
-        
+
         /* Count number of positional args and build type tuple. */
         int numArgs = 0;
         byte[] argFlags = capture.descriptor.argFlags;
@@ -73,8 +73,15 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
-                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
+                SixModelObject cont = (SixModelObject)args[i];
+                SixModelObject decont = Ops.decont(cont, tc);
+                long flag = ((long)decont.st.hashCode()) << 3;
+                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                    flag |= 4;    /* Native ref vs. non-native ref */
+                    flag |= 2;    /* Native refs are always writable. */
+                }
+                else if (Ops.isrwcont(cont, tc) == 1)
+                    flag |= 2;
                 if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
@@ -85,16 +92,26 @@ public class MultiCacheInstance extends SixModelObject {
                 hasNamed = true;
             }
         }
-        
+
+        /* Again, if it's zero arity, just stick it in that slot. */
+        if (numArgs == 0) {
+            this.zeroArity = result;
+            return;
+        }
+
+        /* If number of positional args exceeds arity limit, don't do anything. */
         if (numArgs >= MD_CACHE_MAX_ARITY)
             return;
 
+        /* The zero arity case was handled above.
+         * At index 0 we have the cache for arity 1 */
+        ArityCache ac = this.arityCaches[numArgs - 1];
+
         /* If the cache is saturated, don't do anything (we could instead do a random
          * replacement). */
-        ArityCache ac = this.arityCaches[numArgs];
         if (ac != null && ac.numEntries == MD_CACHE_MAX_ENTRIES)
             return;
-        
+
         /* If there's no entries yet, need to do some allocation. */
         if (ac == null) {
             ac = new ArityCache();
@@ -117,7 +134,7 @@ public class MultiCacheInstance extends SixModelObject {
         /* If there's flattenings, we can't use the cache. */
         if (capture.descriptor.hasFlattening)
             return null;
-        
+
         /* Count number of positional args and build type tuple. */
         int numArgs = 0;
         Object[] args = capture.args;
@@ -144,8 +161,15 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
-                SixModelObject decont = Ops.decont((SixModelObject)args[i], tc);
-                long flag = ((long)decont.st.hashCode()) << 1;
+                SixModelObject cont = (SixModelObject)args[i];
+                SixModelObject decont = Ops.decont(cont, tc);
+                long flag = ((long)decont.st.hashCode()) << 3;
+                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                    flag |= 4;    /* Native ref vs. non-native ref */
+                    flag |= 2;    /* Native refs are always writable. */
+                }
+                else if (Ops.isrwcont(cont, tc) == 1)
+                    flag |= 2;
                 if (!(decont instanceof TypeObject))
                     flag |= 1;
                 argTup[numArgs++] = flag;
@@ -156,7 +180,7 @@ public class MultiCacheInstance extends SixModelObject {
                 hasNamed = true;
             }
         }
-        
+
         /* If it's zero-arity, return result right off. */
         if (numArgs == 0)
             return hasNamed ? null : this.zeroArity;

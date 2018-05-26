@@ -1,6 +1,6 @@
 #! nqp
 
-plan(190);
+plan(213);
 
 sub is-dims(@arr, @expected-dims, $description) {
     my $got-dims := nqp::dimensions(@arr);
@@ -12,15 +12,6 @@ sub is-dims(@arr, @expected-dims, $description) {
         $i++;
     }
     ok($ok, "$description - correct dimensions");
-}
-sub dies-ok($code, $description, :$message) {
-    my $died := 0;
-    my $got-message := '';
-    try { $code(); CATCH { $died := 1; $got-message := nqp::getmessage($_); } }
-    ok($died, $description);
-    if $message {
-        ok($got-message ~~ /$message/, "Exception message contained '$message'");
-    }
 }
 
 # Normal dynamic array has a single element, irrespective of type or contents.
@@ -40,7 +31,7 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i()) }, 'cannot set zero dimensions on normal array');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i(3,3)) }, 'cannot set two dimensions on normal array');
     dies-ok({ nqp::setdimensions(@a, nqp::list_i(3,3,3)) }, 'cannot set three dimensions on normal array');
-    nqp::setdimensions(@a, nqp::list_i(24));
+    ok(nqp::eqaddr(nqp::setdimensions(@a, nqp::list_i(24)), @a), 'nqp::setdimensions has correct return value');
     ok(nqp::elems(@a) == 24, 'can set single dimension on normal array, and it influences elems');
     nqp::push(@a, 1);
     ok(nqp::elems(@a) == 25, 'normal array stays dynamic even with setdimensions');
@@ -50,6 +41,10 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
 {
     my @normal_a := ('a', 'b');
     is(nqp::atposnd(@normal_a, nqp::list_i(0)), 'a', 'normal object array can be read with multi-dim op (1)');
+    my $default := nqp::list_i();
+    nqp::setelems($default, 1);
+    is(nqp::atposnd(@normal_a, $default), 'a', 'normal object array can be read with multi-dim op with defaults');
+
     is(nqp::atposnd(@normal_a, nqp::list_i(1)), 'b', 'normal object array can be read with multi-dim op (2)');
     my @normal_b := nqp::list_i(41, 42);
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(0)) == 41, 'normal int array can be read with multi-dim op (1)');
@@ -71,6 +66,13 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     nqp::bindposnd(@normal_a, nqp::list_i(1), 'b');
     is(@normal_a[0], 'a', 'normal object array can be bound with multi-dim op (1)');
     is(@normal_a[1], 'b', 'normal object array can be bound with multi-dim op (2)');
+
+    my $defaults := nqp::list_i();
+    nqp::setelems($defaults, 1);
+    nqp::bindposnd(@normal_a, $defaults, 'c');
+
+    is(@normal_a[0], 'c', 'normal object array can be bound with multi-dim op with default indexes (1)');
+
     my @normal_b := nqp::list_i();
     nqp::bindposnd_i(@normal_b, nqp::list_i(0), 41);
     nqp::bindposnd_i(@normal_b, nqp::list_i(1), 42);
@@ -238,6 +240,12 @@ dies-ok({
         'Bind to 2D array with out-of-range index dies (1)');
     dies-ok({ nqp::bindposnd($test_2d, nqp::list_i(0, 3), 69) },
         'Bind to 2D array with out-of-range index dies (2)');
+
+    my $default_indexed := nqp::list_i();
+    nqp::setelems($default_indexed, 2);
+
+    ok(nqp::atposnd($test_2d, $default_indexed) == 101, 'Access to 2D array works with list_i with defaults');
+
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 0)) == 101, 'Access to 2D array works (1)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 1)) == 102, 'Access to 2D array works (2)');
     ok(nqp::atposnd($test_2d, nqp::list_i(0, 2)) == 103, 'Access to 2D array works (3)');
@@ -292,11 +300,11 @@ dies-ok({
 {
     my $test_1d := nqp::create($array_type_1d);
     nqp::setdimensions($test_1d, nqp::list_i(3));
-    dies-ok({ nqp::pop($test_1d) }, :message('pop'), 'popping dies');
-    dies-ok({ nqp::push($test_1d, 1) }, :message('push'), 'pushing dies');
-    dies-ok({ nqp::shift($test_1d) }, :message('shift'), 'shifting dies');
-    dies-ok({ nqp::unshift($test_1d, 1) }, :message('unshift'), 'unshifting dies');
-    dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message('splice'), 'splicing dies');
+    dies-ok({ nqp::pop($test_1d) }, :message(/pop/), 'popping dies');
+    dies-ok({ nqp::push($test_1d, 1) }, :message(/push/), 'pushing dies');
+    dies-ok({ nqp::shift($test_1d) }, :message(/shift/), 'shifting dies');
+    dies-ok({ nqp::unshift($test_1d, 1) }, :message(/unshift/), 'unshifting dies');
+    dies-ok({ nqp::splice($test_1d, [], 0, 3) }, :message(/splice/), 'splicing dies');
 }
 
 # can use normal array access ops on a 1D multi-dimensioned array (this makes
@@ -501,3 +509,150 @@ sub add_to_sc($sc, $idx, $obj) {
 # Can't use numdimensions or dimensions on a type object.
 dies-ok({ nqp::numdimensions($array_type_2d) }, "Can't use numdimensions on a type object");
 dies-ok({ nqp::dimensions($array_type_2d) }, "Can't use dimensions on a type object");
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    nqp::bindposnd($array, nqp::list_i(0), 100);
+    is(nqp::atposnd($array, nqp::list_i(0)), '100', 'nqp::atposnd with no type');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', NQPMu)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    nqp::bindposnd($array, nqp::list_i(0), 100);
+    is(nqp::atposnd($array, nqp::list_i(0)), '100', 'nqp::atposnd with a NQPMu type');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', NQPMu)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::isnull(nqp::atposnd($array, nqp::list_i(0))), 'nqp::atposnd returns null on not set elems');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::isnull(nqp::atpos($array, 0)), 'atpos on MultiDimArray - uninitialized');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', int)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::iseq_i(nqp::atpos_i($array, 0), 0), 'atpos_i on MultiDimArray - uninitialized');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', num)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::iseq_n(nqp::atpos_n($array, 0), 0), 'atpos_n on MultiDimArray - uninitialized');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array',
+        nqp::hash('dimensions', 1, 'type', str)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(1));
+    ok(nqp::isnull_s(nqp::atpos_s($array, 0)), 'atpos_s on MultiDimArray - uninitialized');
+}
+
+sub make_ref_type($name, $kind, :$ref_kind = 'lexical') {
+    my $class := nqp::newtype(NQPMu, 'NativeRef');
+    my $info  := nqp::hash();
+    $info<nativeref> := nqp::hash();
+    $info<nativeref><type> := $kind;
+    $info<nativeref><refkind> := $ref_kind;
+    nqp::composetype($class, $info);
+    nqp::setcontspec($class, 'native_ref', nqp::null());
+    return $class;
+}
+
+my $hllconfig := nqp::hash();
+
+$hllconfig<int_multidim_ref> := make_ref_type('StubIntLexRef', int, :ref_kind('multidim'));
+$hllconfig<num_multidim_ref> := make_ref_type('StubNumLexRef', num, :ref_kind('multidim'));
+$hllconfig<str_multidim_ref> := make_ref_type('StubStrLexRef', str, :ref_kind('multidim'));
+
+nqp::sethllconfig('nqp', $hllconfig);
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array', nqp::hash('type', int, 'dimensions', 2)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(4, 3));
+
+    is(nqp::decont_i(nqp::multidimref_i($array, nqp::list_i(1,1))), 0, 'decont_i with default value');
+
+    nqp::assign(nqp::multidimref_i($array, nqp::list_i(1,1)), 10);
+
+    is(nqp::atposnd_i($array, nqp::list_i(1,1)), 10, 'assign binds value');
+
+    nqp::assign_i(nqp::multidimref_i($array, nqp::list_i(1,2)), 20);
+
+    is(nqp::atposnd_i($array, nqp::list_i(1,2)), 20, 'assign_i binds value');
+
+    nqp::bindposnd_i($array, nqp::list_i(0,2), 30);
+
+    is(nqp::decont_i(nqp::multidimref_i($array, nqp::list_i(0,2))), 30, 'can get value with decont_i');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array', nqp::hash('type', num, 'dimensions', 2)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(4, 3));
+
+    is(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(1,1))), 0, 'decont_n with default value');
+
+    nqp::assign(nqp::multidimref_n($array, nqp::list_i(1,1)), 10.1);
+
+    is(nqp::atposnd_n($array, nqp::list_i(1,1)), 10.1, 'assign binds value');
+
+    nqp::assign_n(nqp::multidimref_n($array, nqp::list_i(1,2)), 20.2);
+
+    is(nqp::atposnd_n($array, nqp::list_i(1,2)), 20.2, 'assign_i binds value');
+
+    nqp::bindposnd_n($array, nqp::list_i(0,2), 30.3);
+
+    is(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(0,2))), 30.3, 'can get value with decont_n');
+}
+
+{
+    my $array_type := nqp::newtype(nqp::knowhow(), 'MultiDimArray');
+    nqp::composetype($array_type, nqp::hash('array', nqp::hash('type', str, 'dimensions', 2)));
+    my $array := nqp::create($array_type);
+    nqp::setdimensions($array, nqp::list_i(4, 3));
+
+    ok(nqp::isnull_s(nqp::decont_s(nqp::multidimref_s($array, nqp::list_i(1,1)))), 'decont_s with default value');
+
+    nqp::assign(nqp::multidimref_s($array, nqp::list_i(1,1)), '10foo');
+
+    is(nqp::atposnd_s($array, nqp::list_i(1,1)), '10foo', 'assign binds value');
+
+    nqp::assign_s(nqp::multidimref_s($array, nqp::list_i(1,2)), '20bar');
+
+    is(nqp::atposnd_s($array, nqp::list_i(1,2)), '20bar', 'assign_i binds value');
+
+    nqp::bindposnd_s($array, nqp::list_i(0,2), '30baz');
+
+    is(nqp::decont_s(nqp::multidimref_s($array, nqp::list_i(0,2))), '30baz', 'can get value with decont_s');
+}

@@ -8,7 +8,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class ConcBlockingQueueInstance extends SixModelObject {
 	public LinkedBlockingQueue<SixModelObject> queue;
-    
+
     /* Looking at the first element counts as a peek. */
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         if (index == 0)
@@ -17,11 +17,11 @@ public class ConcBlockingQueueInstance extends SixModelObject {
             throw ExceptionHandling.dieInternal(tc,
                 "Can only request (peek) head of a concurrent blocking queue");
     }
-    
+
     public void push_boxed(ThreadContext tc, SixModelObject value) {
         queue.add(value);
     }
-    
+
     public SixModelObject shift_boxed(ThreadContext tc) {
         try {
             return queue.take();
@@ -29,5 +29,9 @@ public class ConcBlockingQueueInstance extends SixModelObject {
         catch (InterruptedException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
+    }
+
+    public long elems(ThreadContext tc) {
+        return queue.size();
     }
 }

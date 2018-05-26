@@ -106,7 +106,9 @@ my class CondVar is repr('ConditionVariable') { }
     my $t1 := nqp::newthread({
         nqp::lock($l);
         nqp::push(@log, 'ale');
-        nqp::condwait($c);
+        until nqp::elems(@log) == 2 {
+            nqp::condwait($c);
+        }
         nqp::push(@log, 'stout');
         nqp::condsignalall($c);
         $now1 := nqp::time_n();
@@ -125,7 +127,9 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::lock($l);
         nqp::push(@log, 'porter');
         nqp::condsignalone($c);
-        nqp::condwait($c);
+        until nqp::elems(@log) == 3 {
+            nqp::condwait($c);
+        }
         nqp::push(@log, 'lager');
         nqp::unlock($l);
     }, 0);
@@ -194,6 +198,7 @@ my class CondVar is repr('ConditionVariable') { }
     nqp::threadrun($t3);
     nqp::threadrun($t4);
     nqp::threadrun($t5);
+    nqp::sleep(1.0);
 
     # Start signaling thread
     nqp::threadrun($t1);

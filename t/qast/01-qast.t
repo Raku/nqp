@@ -1,6 +1,6 @@
 use QAST;
 
-plan(147);
+plan(173);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -51,6 +51,20 @@ is_qast(
     ),
     6.9,
     'NVal node');
+
+is_qast(
+    QAST::Block.new(
+        QAST::NVal.new( :value(nqp::inf) )
+    ),
+    nqp::inf,
+    'NVal node with infinity as value');
+
+is_qast(
+    QAST::Block.new(
+        QAST::NVal.new( :value(nqp::neginf) )
+    ),
+    nqp::neginf,
+    'NVal node with negative infinity as value');
 
 is_qast(
     QAST::Block.new(
@@ -1362,6 +1376,11 @@ sub sval($value) {
     QAST::SVal.new(:$value);
 }
 
+sub op_name($name) {
+    QAST::Var.new( :$name, :scope<lexical>)
+}
+
+
 test_qast_result(
     QAST::Block.new(
         op('op1'),
@@ -1395,8 +1414,44 @@ test_qast_result(
         ok(stringy($r[1]) eq '(C + D)', 'nqp::chain - all return true');
         ok(stringy($r[2]) eq '0', 'nqp::chain - we have falsehood');
         ok(!$dont_call, 'nqp::chain shortcircuits');
-    }
-);
+    });
+
+test_qast_result(
+    QAST::Block.new(
+        op('op1'),
+        op('op2'),
+        op('op3'),
+        QAST::Op.new(
+            :op<list>,
+            QAST::Op.new( :op<chain>, op_name('op1'), sval('a'), sval('b')),
+            QAST::Op.new( :op<chain>, op_name('op1'),
+                QAST::Op.new( :op<chain>, op_name('op2'),
+                    QAST::Op.new( :op<chain>, op_name('op2'), sval('A'), sval('B')
+                    ),
+                    sval('C')
+                ),
+                sval('D')
+           ),
+           QAST::Op.new( :op<chain>, op_name('op1'),
+               QAST::Op.new( :op<chain>, op_name('op2'),
+                   QAST::Op.new( :op<chain>, op_name('op3'),
+                       QAST::Op.new( :op<chain>, op_name('op2'), sval('A'), sval('B')),
+                       sval('E')
+                   ),
+                   sval('C')
+               ),
+               QAST::Op.new( :op<callmethod>, :name('is_called'), QAST::WVal.new( :value(Ops) )),
+           ),
+       )
+    ),
+    -> $r {
+        ok(stringy($r[0]) eq '(a + b)', 'nqp::chain (3 argument) - just to arguments');
+        ok(stringy($r[1]) eq '(C + D)', 'nqp::chain (3 argument) - all return true');
+        ok(stringy($r[2]) eq '0', 'nqp::chain (3 argument) - we have falsehood');
+        ok(!$dont_call, 'nqp::chain (3 argument) shortcircuits');
+    });
+
+$dont_call := 0;
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
     skip("with/without are broken on the jvm", 4);
@@ -1899,6 +1954,107 @@ test_qast_result(
             ok($r.twice eq '244', '...and it has the correct value');
         }
     );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$tmp>, :scope<local>, :decl<var>),
+                        QAST::Var.new(:name<$cb>, :scope<local>, :decl<param>),
+                        QAST::Op.new(
+                            :op<bind>,
+                            QAST::Var.new(:name<$tmp>, :scope<local>),
+                            QAST::Op.new(
+                              :op<call>,
+                              QAST::Var.new(:name<$cb>, :scope<local>)
+                            )
+                        ),
+                        QAST::Var.new(:name<$tmp>, :scope<local>)
+                    )
+                )
+            )
+        ),
+        -> $r {
+            my $boxed := $r(-> {my int $int := 200; $int});
+            ok(nqp::istype($boxed, $int_boxer), 'native ints get boxed on the caller side');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$foo>, :scope<local>, :decl<param>)
+                    )
+                )
+            )
+        ),
+        -> $block {
+            my int $int := 100;
+            my num $num := 10.5;
+            my str $str := 'hi';
+
+
+            my $boxed_int := $block($int);
+            ok(nqp::istype($boxed_int, $int_boxer), 'the native int passed as arg is boxed to the correct type');
+            is(nqp::unbox_i($boxed_int), 100, '...and has the right value');
+
+            my $boxed_num := $block($num);
+            ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as arg is boxed to the correct type');
+            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+
+            my $boxed_str := $block($str);
+            ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as arg is boxed to the correct type');
+            is(nqp::unbox_s($boxed_str), 'hi', '...and has the right value');
+
+            my $autoboxed_int := $int;
+            my $not_boxed_twice_int := $block($autoboxed_int);
+            ok(nqp::eqaddr($autoboxed_int, $not_boxed_twice_int), "alread autoboxed ints don't get boxed twice");
+
+            my $autoboxed_str := $str;
+            my $not_boxed_twice_str := $block($autoboxed_str);
+            ok(nqp::eqaddr($autoboxed_str, $not_boxed_twice_str), "alread autoboxed strs don't get boxed twice");
+
+            my $autoboxed_num := $num;
+            my $not_boxed_twice_num := $block($autoboxed_num);
+            ok(nqp::eqaddr($autoboxed_num, $not_boxed_twice_num), "alread autoboxed nums don't get boxed twice");
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<takeclosure>, # needed for JVM
+                    QAST::Block.new(
+                        QAST::Var.new(:name<$foo>, :scope<local>, :decl<param>, :slurpy)
+                    )
+                )
+            )
+        ),
+        -> $block {
+            my int $int := 100;
+            my num $num := 10.5;
+            my str $str := 'hi';
+
+
+            my $boxed_int := $block($int)[0];
+            ok(nqp::istype($boxed_int, $int_boxer), 'the native int passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_i($boxed_int), 100, '...and has the right value');
+
+            my $boxed_num := $block($num)[0];
+            ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+
+            my $boxed_str := $block($str)[0];
+            ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as slurpy arg is boxed to the correct type');
+            is(nqp::unbox_s($boxed_str), 'hi', '...and has the right value');
+        }
+    );
 }
 
 test_qast_result(
@@ -2202,6 +2358,9 @@ is_qast(
     my class Caller {
         method from() {'caller of the sub'}
     }
+    my class Outer {
+        method from() {'outside of the sub'}
+    }
 
     my $called_exit_handler := 0;
     my $exit_handler_return_value;
@@ -2236,7 +2395,7 @@ is_qast(
                 QAST::Op.new(
                     :op('bind'),
                     QAST::Var.new( :name('$*DYNAMIC_VAR'), :scope('lexical'), :decl('var')),
-                    QAST::WVal.new( :value(OUter) )
+                    QAST::WVal.new( :value(Outer) )
                 ),
                 QAST::Op.new(
                     :op('bind'),
@@ -2373,3 +2532,76 @@ is_qast(
     is($called, '1', 'called the lexical_handler_not_found_error handler - with throwpayloadlex');
     is($got_cat, nqp::const::CONTROL_RETURN, '...got right category of handler');
 }
+
+{
+    my $no_custom_args := QAST::Block.new(
+        QAST::Var.new( :name('arg1'), :scope('lexical'), :decl('param')),
+        QAST::SVal.new( :value('survived') )
+    );
+
+    my $custom_args := QAST::Block.new(
+        QAST::SVal.new( :value('survived') )
+    );
+
+    $custom_args.custom_args(1);
+
+    is_qast(
+        QAST::CompUnit.new(
+            QAST::Block.new(
+              QAST::Op.new(
+                :op('handle'),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Op.new(:op<takeclosure>, # needed for JVM
+                        $no_custom_args,
+                    ),
+                ),
+                'CATCH', QAST::SVal.new( :value('died') )
+              )
+            )
+        ),
+        'died', 'wrong number of arguments dies without custom_args');
+
+    is_qast(
+        QAST::CompUnit.new(
+            QAST::Block.new(
+              QAST::Op.new(
+                :op('handle'),
+                QAST::Op.new(
+                    :op('call'),
+                    QAST::Op.new(:op<takeclosure>, # needed for JVM
+                        $custom_args,
+                    ),
+                    QAST::SVal.new( :value('arg') )
+                ),
+                'CATCH', QAST::SVal.new( :value('died') )
+              )
+            )
+        ),
+        'survived', 'wrong number of arguments lives with custom_args');
+}
+
+# QAST::SpecialArg: if parent doesn't have dump_extra_node_info method, don't die.
+{
+    my $node := QAST::Want.new( :named('somename') );
+
+    my $info := '';
+    my $died := 0;
+    {
+        $info := $node.dump_extra_node_info();
+        CATCH { $died := 1; }
+    }
+
+    ok( nqp::cmp_i($died, 0) == 0,
+        "SpecialArg: Parent doesn't have dump_extra_node_info; doesn't die"
+    );
+}
+
+test_qast_result(
+    QAST::Block.new(
+        QAST::Stmts.new(
+        )
+    ),
+    -> $r {
+      ok(nqp::isnull($r), 'a empty QAST::Stmts produces a nqp::null');
+    });

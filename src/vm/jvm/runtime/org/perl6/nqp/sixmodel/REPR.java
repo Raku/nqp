@@ -15,12 +15,12 @@ public abstract class REPR {
      * some cases, don't persist.
      */
     public int ID;
-    
+
     /**
      * The name of the representation.
      */
     public String name;
-    
+
     /**
      * Creates a new type object of this representation, and associates it
      * with the given HOW.
@@ -31,21 +31,21 @@ public abstract class REPR {
      * Allocates a new, but uninitialized object, based on the
      * specified s-table. */
     public abstract SixModelObject allocate(ThreadContext tc, STable st);
-    
+
     /**
      * Composes the representation; typically performed at type composition time.
      */
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         // By default, nothing to do.
     }
-    
+
     /**
      * Gets attribute access hint for the representation.
      */
     public long hint_for(ThreadContext tc, STable st, SixModelObject class_handle, String name) {
         return STable.NO_HINT;
     }
-    
+
     /**
      * Gets information on how objects of this representation like to be
      * stored (inlined into the body of another object, or referencey).
@@ -60,7 +60,7 @@ public abstract class REPR {
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "This representation does not implement get_value_storage_spec");
     }
-    
+
     /**
      * Handles an object changing its type. The representation is responsible
      * for doing any changes to the underlying data structure, and may reject
@@ -73,14 +73,14 @@ public abstract class REPR {
     public void change_type(ThreadContext tc, SixModelObject Object, SixModelObject NewType) {
         throw ExceptionHandling.dieInternal(tc, "This representation does not support type changes.");
     }
-    
+
     /**
      * Object serialization. Writes the objects body out using the passed
      * serialization writer. */
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "Missing serialize function for REPR " + name);
     }
-    
+
     /**
      * Object deserialization. Happens in two steps. The first stub step
      * creates an object to be filled out later. Note that the STable may
@@ -89,7 +89,7 @@ public abstract class REPR {
      * references may not be) and should do the rest of the work. */
     public abstract SixModelObject deserialize_stub(ThreadContext tc, STable st);
     public abstract void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj);
-    
+
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
@@ -98,7 +98,7 @@ public abstract class REPR {
     {
         // It's fine for this to be unimplemented.
     }
-    
+
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
@@ -107,7 +107,7 @@ public abstract class REPR {
     {
         // It's fine for this to be unimplemented.
     }
-    
+
     /**
      * Flattening related functions.
      */
@@ -124,9 +124,9 @@ public abstract class REPR {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
-        throw ExceptionHandling.dieInternal(tc, "This representation does not support being a box target");        
+        throw ExceptionHandling.dieInternal(tc, "This representation does not support being a box target");
     }
-    public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer, 
+    public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
             String prefix, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot serialize an inlined representation of itself");
     }

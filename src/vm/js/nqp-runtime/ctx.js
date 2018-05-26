@@ -1,10 +1,17 @@
 'use strict';
-var NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
-var NQPObject = require('./nqp-object.js');
-var Null = require('./null.js');
-var exceptionsStack = require('./exceptions-stack.js');
+const NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
+const NQPException = require('./nqp-exception.js');
+const NQPObject = require('./nqp-object.js');
+const Null = require('./null.js');
+const exceptionsStack = require('./exceptions-stack.js');
 
-var BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
+
+const NQPInt = require('./nqp-int.js');
+const NQPStr = require('./nqp-str.js');
+
+
+const stackTrace = require('stack-trace');
 
 const NEXT = 4;
 const REDO = 8;
@@ -19,7 +26,7 @@ const AWAIT = 8192;
 const EMIT = 16384;
 const DONE = 32768;
 
-let categoryIDs = {
+const categoryIDs = {
   NEXT: NEXT,
   REDO: REDO,
   LAST: LAST,
@@ -33,8 +40,8 @@ let categoryIDs = {
   DONE: DONE,
 };
 
-let categoryToName = {};
-for (let name of Object.keys(categoryIDs)) {
+const categoryToName = {};
+for (const name of Object.keys(categoryIDs)) {
   categoryToName[categoryIDs[name]] = name;
 }
 
@@ -81,37 +88,42 @@ class Ctx extends NQPObject {
   }
 
   controlException(category) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
     return this.propagateControlException(exception);
   }
 
   controlExceptionLabeled(label, category) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category | LABELED;
     exception.$$payload = label;
     return this.propagateControlException(exception);
   }
 
   async propagateControlException(exception) {
-    let handler = '$$' + categoryToName[exception.$$category & ~LABELED];
-    let labeled = exception.$$category & LABELED;
+    const handler = '$$' + categoryToName[exception.$$category & ~LABELED];
+    const labeled = exception.$$category & LABELED;
 
-    var ctx = this;
+    let ctx = this;
 
     while (ctx) {
-      if ((ctx[handler] || ctx.$$CONTROL) && (!labeled || ctx.$$label === exception.$$payload)) {
+      if (ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
+
+      if (ctx.$$CONTROL || (ctx[handler] && (!labeled || ctx.$$label === exception.$$payload))) {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
+          const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler]();
+            ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = await ctx.$$CONTROL();
+            ctx.$$unwind.ret = await ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -120,10 +132,10 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        throw ctx.$$unwind;
       }
       ctx = ctx.$$caller;
     }
@@ -137,16 +149,21 @@ class Ctx extends NQPObject {
       return;
     }
 
-    var ctx = this;
+    let ctx = this;
 
     while (ctx) {
+      if (ctx.$$catchHandlerOuter) {
+        ctx = ctx.$$catchHandlerOuter;
+      }
+
       if (ctx.$$CATCH) {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
-          ctx.unwind.ret = await ctx.$$CATCH();
+          const wrapped = new Ctx(this, this, null);
+          ctx.$$unwind.ret = await ctx.$$CATCH(wrapped);
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
             return;
@@ -154,23 +171,25 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        throw ctx.$$unwind;
       }
       ctx = ctx.$$caller;
     }
+
     throw exception;
   }
 
   async catchException(exception) {
     this.exception = exception;
-    exceptionsStack.push(exception);
+    exceptionsStack().push(exception);
     try {
-      return await this.$$CATCH();
+      // we don't have access to the most correct ctx in case of this sort of exception
+      return await this.$$CATCH(this);
     } finally {
-      exceptionsStack.pop();
+      exceptionsStack().pop();
     }
   }
 
@@ -179,7 +198,7 @@ class Ctx extends NQPObject {
   }
 
   die(msg) {
-    return this.propagateException(new NQPExceptionWithCtx(msg, this));
+    return this.propagateException(new NQPExceptionWithCtx(msg, this, stackTrace.get()));
   }
 
   resume(exception) {
@@ -187,12 +206,14 @@ class Ctx extends NQPObject {
   }
 
   throw(exception) {
+    exception.$$stack = stackTrace.get();
+    exception.$$ctx = this;
     return this.propagateException(exception);
   }
 
   throwpayloadlexcaller(category, payload) {
     let ctx = this.$$skipHandlers().$$caller;
-    let isThunkOrCompilerStub = code => code.staticCode.isThunk || code.isCompilerStub;
+    const isThunkOrCompilerStub = code => code !== null && (code.staticCode.isThunk || code.isCompilerStub);
     while (ctx && isThunkOrCompilerStub(ctx.codeRef())) {
       ctx = ctx.$$caller;
     }
@@ -205,25 +226,32 @@ class Ctx extends NQPObject {
   }
 
   async $$throwLexicalException(lookFrom, category, payload) {
-    let exType = BOOT.Exception;
-    let exception = exType._STable.REPR.allocate(exType._STable);
+    const exType = BOOT.Exception;
+    const exception = exType._STable.REPR.allocate(exType._STable);
+
     exception.$$category = category;
     exception.$$payload = payload;
-    let handler = '$$' + categoryToName[category];
+    const handler = '$$' + categoryToName[category];
 
     let ctx = lookFrom;
 
     while (ctx) {
+      if (ctx.$$controlHandlerOuter) {
+        ctx = ctx.$$controlHandlerOuter;
+      }
+
+      // TODO - think about checking the label
       if (ctx[handler] || ctx.$$CONTROL) {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack.push(exception);
+        exceptionsStack().push(exception);
         try {
+          const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.unwind.ret = ctx[handler]();
+            ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.unwind.ret = await ctx.$$CONTROL();
+            ctx.$$unwind.ret = await ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -232,19 +260,29 @@ class Ctx extends NQPObject {
             throw e;
           }
         } finally {
-          exceptionsStack.pop();
+          exceptionsStack().pop();
         }
 
-        throw ctx.unwind;
+        let check = lookFrom;
+        while (check) {
+          if (check === ctx) {
+            throw ctx.$$unwind;
+          }
+          check = check.$$caller;
+        }
+
+        this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(1));
+        return;
       }
+
       ctx = ctx.$$outer;
     }
 
-    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, category, 0);
+    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
   }
 
   lookupDynamic(name) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -256,8 +294,16 @@ class Ctx extends NQPObject {
        nqp code usually fallbacks to looking up of global */
   }
 
+  lookupOrNull(name) {
+    if (this.hasOwnProperty(name)) {
+      return this[name];
+    } else {
+      return Null;
+    }
+  }
+
   lookupDynamicFromCaller(name) {
-    var ctx = this.$$caller;
+    let ctx = this.$$caller;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -270,9 +316,9 @@ class Ctx extends NQPObject {
   }
 
   lookupWithCallers(name) {
-    var currentCallerCtx = this;
+    let currentCallerCtx = this;
     while (currentCallerCtx) {
-      var currentCtx = currentCallerCtx;
+      let currentCtx = currentCallerCtx;
       while (currentCtx) {
         if (currentCtx.hasOwnProperty(name)) {
           return currentCtx[name];
@@ -285,7 +331,7 @@ class Ctx extends NQPObject {
   }
 
   lookup(name) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         return ctx[name];
@@ -301,7 +347,7 @@ class Ctx extends NQPObject {
   }
 
   $$getHLL() {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.$$hll) {
         return ctx.$$hll;
@@ -310,8 +356,15 @@ class Ctx extends NQPObject {
     }
   }
 
-  $$atkey(key) {
-    return this.lookup(key);
+  $$atkey(name) {
+    let ctx = this;
+    while (ctx) {
+      if (ctx.hasOwnProperty(name)) {
+        return ctx[name];
+      }
+      ctx = ctx.$$outer;
+    }
+    throw new NQPException(`Lexical with name '${name}' does not exist in this frame`);
   }
 
   $$bindkey(key, value) {
@@ -328,7 +381,7 @@ class Ctx extends NQPObject {
   }
 
   bind(name, value) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         ctx[name] = value;
@@ -340,7 +393,7 @@ class Ctx extends NQPObject {
   }
 
   bindDynamic(name, value) {
-    var ctx = this;
+    let ctx = this;
     while (ctx) {
       if (ctx.hasOwnProperty(name)) {
         ctx[name] = value;
@@ -391,11 +444,11 @@ class CtxIter extends NQPObject {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   key(ctx, _NAMED, self) {
-    return this.$$iterkey_s();
+    return new NQPStr(this.$$iterkey_s());
   }
 
   value(ctx, _NAMED, self) {

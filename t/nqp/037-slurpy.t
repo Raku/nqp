@@ -1,6 +1,6 @@
 # slurpy args
 
-plan(10);
+plan(12);
 
 sub slurpy_pos(*@pos) {
     ok(@pos[0] == 1);
@@ -38,3 +38,10 @@ my @bc;
 @bc[0] := 'b';
 @bc[1] := 'c';
 slurpy_sandwitched('a', |@bc, 'd');
+
+sub slurpy_with_optional($optional?, *@optional) {
+    nqp::join(',', @optional);
+}
+
+is(slurpy_with_optional(), '', 'slurpy + optional with no arguments');
+is(slurpy_with_optional('foo', 'bar', 'baz'), 'bar,baz', 'slurpy + optional with arguments');

@@ -1,11 +1,11 @@
-plan(4);
+plan(5);
 
 sub foo($arg) {
   my $this := nqp::curcode();
   if $arg == 1 {
     $this(7);
   } elsif $arg == 7 {
-    ok("nqp::curcode returns the correct sub");
+    ok(1, "nqp::curcode returns the correct sub");
   }
 }
 foo(1);
@@ -20,6 +20,9 @@ sub bar($arg) {
     is(nqp::getcodeobj($this), "second","nqp::setcodeobj works on result of nqp::curcode");
   }
 }
+
+
+ok(nqp::isnull(nqp::getcodeobj(&bar)), 'the code obj is null by default');
 nqp::setcodeobj(&bar,"first");
 bar(1);
 

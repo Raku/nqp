@@ -1,31 +1,34 @@
 'use strict';
-var fs = require('fs-ext');
-var os = require('os');
-var sleep = require('sleep');
+const fs = require('fs-ext');
+const os = require('os');
+const sleep = require('sleep');
 
-var tty = require('tty');
+const tty = require('tty');
 
-var Hash = require('./hash.js');
+const Hash = require('./hash.js');
 
-var core = require('./core.js');
+const core = require('./core.js');
 
-var child_process = require('child_process');
+const child_process = require('child_process');
 
-var NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 
-var mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp');
 
 const NQPException = require('./nqp-exception.js');
 
-var nqp = require('nqp-runtime');
+const nqp = require('nqp-runtime');
 
 const Null = require('./null.js');
+
+const NQPInt = require('./nqp-int.js');
+const NQPStr = require('./nqp-str.js');
 
 function boolish(bool) {
   return bool ? 1 : 0;
 }
 
-var op = {};
+const op = {};
 exports.op = op;
 
 op.print = function(arg) {
@@ -87,11 +90,12 @@ function stat(file, code, lstat) {
   const PLATFORM_BLOCKS = -7;
 
   // we can't use fs.existsSync(file) as it follows symlinks
+  let stats;
   try {
     if (lstat || code == ISLNK) {
-      var stats = fs.lstatSync(file);
+      stats = fs.lstatSync(file);
     } else {
-      var stats = fs.statSync(file);
+      stats = fs.statSync(file);
     }
   } catch (err) {
     if (code == EXISTS && err.code === 'ENOENT') {
@@ -147,6 +151,10 @@ op.lstat_time = function(file, code) {
 };
 
 class IOHandle extends NQPObject {
+  $$can(ctx, name) {
+    return 0;
+  }
+
   $$toBool(ctx) {
     return 1;
   }
@@ -161,10 +169,6 @@ class IOHandle extends NQPObject {
 
   $$setinputlineseps(seps) {
     this.seps = seps.array;
-  }
-
-  $$setencoding(encoding) {
-    this.encoding = core.renameEncoding(encoding);
   }
 
   $$setbuffersizefh(size) {
@@ -192,18 +196,14 @@ class FileHandle extends IOHandle {
     return 1;
   }
 
-  $$can(ctx, name) {
-    return 0;
-  }
-
   $$filenofh() {
     return this.fd;
   }
 
   $$eoffh() {
     // I haven't found a way to implement this directly in node.js
-    var current = fs.seekSync(this.fd, 0, 1);
-    var end = fs.seekSync(this.fd, 0, 2);
+    const current = fs.seekSync(this.fd, 0, 1);
+    const end = fs.seekSync(this.fd, 0, 2);
     fs.seekSync(this.fd, current, 0);
     return current == end ? 1 : 0;
   }
@@ -228,18 +228,14 @@ class FileHandle extends IOHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     return fs.writeSync(this.fd, buffer, 0, buffer.length);
   }
 
-  $$setencoding(encoding) {
-    this.encoding = core.renameEncoding(encoding);
-  }
-
   $$readfh(buf, bytes) {
-    let isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
-    let buffer = Buffer.allocUnsafe(bytes);
-    let read = fs.readSync(this.fd, buffer, 0, bytes, null);
+    const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+    const buffer = Buffer.allocUnsafe(bytes);
+    const read = fs.readSync(this.fd, buffer, 0, bytes, null);
     buf.array.length = read;
     for (let i = 0; i < read; i++) {
       if (isUnsigned) {
@@ -267,7 +263,7 @@ function modeToFlags(mode) {
     else throw 'unknown mode to open: ' + mode;
   }
 
-  for (let c of mode.substr(1)) {
+  for (const c of mode.substr(1)) {
     if (c === 'a') flags |= fs.constants.O_APPEND;
     else if (c === 'c') flags |= fs.constants.O_CREAT;
     else if (c === 't') flags |= fs.constants.O_TRUNC;
@@ -279,9 +275,16 @@ function modeToFlags(mode) {
 }
 
 op.open = function(name, mode) {
-  let fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
-  fh.encoding = 'utf8';
-  return fh;
+  try {
+    const fh = new FileHandle(fs.openSync(name, modeToFlags(mode)));
+    return fh;
+  } catch (e) {
+    if (e.code === 'ENOENT') {
+      throw new NQPException(`Failed to open file ${name}: No such file or director`);
+    } else {
+      throw e;
+    }
+  }
 };
 
 op.seekfh = function(ctx, fh, offset, whence) {
@@ -317,7 +320,16 @@ op.chdir = function(dir) {
 };
 
 op.rmdir = function(dir) {
-  fs.rmdirSync(dir);
+  try {
+    fs.rmdirSync(dir);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+    } else if (err.code === 'ENOTEMPTY') {
+      throw new NQPException('Failed to rmdir: directory not empty');
+    } else {
+      throw err;
+    }
+  }
 };
 
 op.mkdir = function(dir, mode) {
@@ -352,9 +364,9 @@ op.cwd = function() {
 };
 
 op.getenvhash = function() {
-  var hash = new Hash();
-  for (var key in process.env) {
-    hash.content.set(key, process.env[key]);
+  const hash = new Hash();
+  for (const key in process.env) {
+    hash.content.set(key, new NQPStr(process.env[key]));
   }
   return hash;
 };
@@ -362,7 +374,6 @@ op.getenvhash = function() {
 class StdHandle extends IOHandle {
   constructor() {
     super();
-    this.encoding = 'utf8';
   }
 };
 
@@ -380,7 +391,7 @@ class Stderr extends StdHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     process.stderr.write(buffer);
   }
 };
@@ -390,7 +401,7 @@ op.getstderr = function() {
 };
 
 class Stdout extends StdHandle {
-  isttyfh() {
+  $$isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
   }
 
@@ -402,7 +413,7 @@ class Stdout extends StdHandle {
   }
 
   $$writefh(buf) {
-    var buffer = core.toRawBuffer(buf);
+    const buffer = core.toRawBuffer(buf);
     process.stdout.write(buffer);
   }
 };
@@ -412,18 +423,20 @@ op.getstdout = function() {
 };
 
 
-class Stdin extends StdHandle {
-  $$filenofh() {
-    return process.stdin.fd;
-  }
-
-  $$isttyfh() {
-    return (process.stdin.isTTY ? 1 : 0);
-  }
-};
-
+let stdin;
 op.getstdin = function() {
-  return new Stdin();
+  if (!stdin) {
+    let fd;
+    try {
+      fd = fs.openSync('/dev/stdin', 'rs');
+    } catch (e) {
+      /* this should work on Windows, we need to test it tho */
+      fd = 0;
+    };
+    stdin = new FileHandle(fd);
+  }
+
+  return stdin;
 };
 
 op.exit = function(code) {
@@ -472,7 +485,7 @@ function wrapBuffer(buffer, type) {
 }
 
 async function stringifyEnv(ctx, hash) {
-  let stringifed = {};
+  const stringifed = {};
 
   for (let key of hash.content.keys()) {
     stringifed[key] = await nqp.toStr(hash.content.get(key), ctx);
@@ -482,8 +495,8 @@ async function stringifyEnv(ctx, hash) {
 }
 
 async function stringifyArray(ctx, array) {
-  let stringified = [];
-  for (let element of array.array) {
+  const stringified = [];
+  for (const element of array.array) {
     stringified.push(await nqp.toStr(element, ctx));
   }
   return stringified;
@@ -494,7 +507,11 @@ op.spawnprocasync = async function(ctx, queue, args, cwd, env, config) {
     shell: false,
     cwd: cwd,
     env: await stringifyEnv(ctx, env),
-    stdio: [process.stdin, 'pipe', 'pipe'],
+    stdio: [
+      process.stdin,
+      config.content.get('stdout_bytes') ? 'pipe' : process.stdout,
+      config.content.get('stderr_bytes') ? 'pipe' : process.stderr,
+    ],
   };
 
   const stringified = await stringifyArray(ctx, args);
@@ -511,17 +528,17 @@ op.spawnprocasync = async function(ctx, queue, args, cwd, env, config) {
   if (str_box === undefined) str_box = Null;
 
   if (config.content.get('stdout_bytes')) {
-    await config.content.get('stdout_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
-    await config.content.get('stdout_bytes').$$call(ctx, null, 1, str_box, str_box);
+    await config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
+    await config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('stderr_bytes')) {
-    await config.content.get('stderr_bytes').$$call(ctx, null, 0, wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
-    await config.content.get('stderr_bytes').$$call(ctx, null, 1, str_box, str_box);
+    await config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
+    await config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('done')) {
-    await config.content.get('done').$$call(ctx, null, result.status << 8);
+    await config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
   }
 };
 

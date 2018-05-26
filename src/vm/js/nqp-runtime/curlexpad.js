@@ -1,6 +1,6 @@
 'use strict';
 
-var Null = require('./null.js');
+const Null = require('./null.js');
 
 class CurLexpad {
   constructor(get, set) {

@@ -159,7 +159,7 @@ public class AsyncSocketHandle implements IIOClosable {
                     } else {
                         readBuffer.flip();
                         SixModelObject decoded = decoder.decode(tc, readBuffer, numRead);
-                        readBuffer.compact(); 
+                        readBuffer.compact();
 
                         callback(curTC, task, task.seq++, decoded, Null);
 
@@ -173,7 +173,7 @@ public class AsyncSocketHandle implements IIOClosable {
             @Override
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                SixModelObject err = (t instanceof AsynchronousCloseException) 
+                SixModelObject err = (t instanceof AsynchronousCloseException)
                         ? Str : Ops.box_s(t.toString(), Str, curTC);
                 callback(curTC, task, -1, Str, err);
             }

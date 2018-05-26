@@ -14,59 +14,59 @@ public class HLLConfig {
     public static final int ROLE_ARRAY = 4;
     public static final int ROLE_HASH  = 5;
     public static final int ROLE_CODE  = 6;
-    
+
     /**
      * HLL name.
      */
     public String name;
-    
+
     /**
      * The types the languages wish to get things boxed as.
      */
     public SixModelObject intBoxType;
     public SixModelObject numBoxType;
     public SixModelObject strBoxType;
-    
+
     /**
      * The type to use for nqp::list(...)
      */
     public SixModelObject listType;
-    
+
     /**
      * The type to use for nqp::hash(...)
      */
     public SixModelObject hashType;
-    
+
     /**
      * The type to use for slurpy arrays.
      */
     public SixModelObject slurpyArrayType;
-    
+
     /**
      * The type to use for slurpy hashes.
      */
     public SixModelObject slurpyHashType;
-    
+
     /**
      * The type to use for array iteration (should have VMIter REPR).
      */
     public SixModelObject arrayIteratorType;
-    
+
     /**
      * The type to use for hash iteration (should have VMIter REPR).
      */
     public SixModelObject hashIteratorType;
-    
+
     /**
      * The type to construct for exceptions (should have VMException REPR).
      */
     public SixModelObject exceptionType;
-    
+
     /**
      * The type to construct for IO handles.
      */
     public SixModelObject ioType;
-    
+
     /**
      * HLL interop types.
      */
@@ -74,7 +74,7 @@ public class HLLConfig {
     public SixModelObject foreignTypeNum;
     public SixModelObject foreignTypeStr;
     public SixModelObject nullValue;
-    
+
     /**
      * HLL interop mappers.
      */
@@ -85,7 +85,7 @@ public class HLLConfig {
     public SixModelObject foreignTransformHash;
     public SixModelObject foreignTransformCode;
     public SixModelObject foreignTransformAny;
-    
+
     /**
      * Block exit handler, for those that need it.
      */
@@ -108,4 +108,7 @@ public class HLLConfig {
     public SixModelObject intPosRef;
     public SixModelObject numPosRef;
     public SixModelObject strPosRef;
+    public SixModelObject intMultidimRef;
+    public SixModelObject numMultidimRef;
+    public SixModelObject strMultidimRef;
 }

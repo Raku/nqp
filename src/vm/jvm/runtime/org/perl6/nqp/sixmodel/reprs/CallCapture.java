@@ -22,7 +22,7 @@ public class CallCapture extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "CallCapture does not participate in serialization");
     }

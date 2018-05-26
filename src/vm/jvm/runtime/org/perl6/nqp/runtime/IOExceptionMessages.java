@@ -9,7 +9,7 @@ import java.nio.file.NotDirectoryException;
 import java.nio.file.NotLinkException;
 
 public class IOExceptionMessages {
-    
+
     public static String message(Exception e) {
         if (e instanceof FileNotFoundException
             || e instanceof NoSuchFileException) {

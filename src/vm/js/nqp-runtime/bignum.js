@@ -1,26 +1,28 @@
 'use strict';
-var bignum = require('bignum-browserify');
+const bignum = require('bignum-browserify');
 
-var sslBignum = require('bignum');
+const sslBignum = require('bignum');
 
-var core = require('./core.js');
+const core = require('./core.js');
 
-var hll = require('./hll.js');
+const hll = require('./hll.js');
 
-var op = {};
+const NQPInt = require('./nqp-int.js');
+
+const op = {};
 exports.op = op;
 function intishBool(b) {
   return b ? 1 : 0;
 }
 
 function makeNum(type, num) {
-  var instance = type._STable.REPR.allocate(type._STable);
+  const instance = type._STable.REPR.allocate(type._STable);
   instance.$$setNum(num);
   return instance;
 }
 
 function makeBI(type, num) {
-  var instance = type._STable.REPR.allocate(type._STable);
+  const instance = type._STable.REPR.allocate(type._STable);
   instance.$$setBignum(num);
   return instance;
 }
@@ -38,16 +40,16 @@ op.tostr_I = function(n) {
 };
 
 op.base_I = function(n, base) {
-  var orig = getBI(n);
+  const orig = getBI(n);
   if (orig.eq(0)) return '0';
 
   if (base == 16 || base == 10) {
     return orig.toString(base).toUpperCase().replace(/^(-?)0+/, '$1');
-  } else if (base < 16 && base > 1) {
-    var orig = getBI(n);
-    var num = orig.abs();
-    var string = '';
-    var letters = '0123456789ABCDEF';
+  } else if (1 < base && base <= 36) {
+    let num = orig.abs();
+    let string = '';
+    const letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
     while (num.gt(0)) {
       string = letters[num.mod(base).toNumber()] + string;
       num = num.div(base);
@@ -83,8 +85,8 @@ op.sub_I = function(a, b, type) {
 };
 
 op.div_I = function(a, b, type) {
-  let divident = getBI(a);
-  let divisor = getBI(b);
+  const divident = getBI(a);
+  const divisor = getBI(b);
   // workaround for .div rounding to zero not down
   if (divisor.lt(0) != divident.lt(0) && divident.mod(divisor).ne(0)) {
     return makeBI(type, divident.div(divisor).sub(1));
@@ -93,8 +95,8 @@ op.div_I = function(a, b, type) {
 };
 
 op.pow_I = function(a, b, numType, biType) {
-  var base = getBI(a);
-  var exponent = getBI(b);
+  const base = getBI(a);
+  const exponent = getBI(b);
   if (exponent.lt(0)) {
     return makeNum(numType, Math.pow(base.toNumber(), exponent.toNumber()));
   } else {
@@ -114,11 +116,11 @@ op.mod_I = function(n, m, type) {
   /* TODO - think if this can be optimized. */
   /* We are doing this in complicated way because,
      bignum returns the module with the sign equal to the dividend not the divisor. */
-  var a = getBI(n);
-  var b = getBI(m);
+  const a = getBI(n);
+  const b = getBI(m);
   if ((a.lt(0) && b.gt(0)) || (a.gt(0) && b.lt(0))) {
-    var x = a.div(b).sub(1);
-    var ret = a.sub(b.mul(x));
+    const x = a.div(b).sub(1);
+    const ret = a.sub(b.mul(x));
     return makeBI(type, (ret.eq(b) ? bignum(0) : ret));
   }
   return makeBI(type, a.mod(b));
@@ -139,13 +141,29 @@ op.expmod_I = function(a, b, c, type) {
   return makeBI(type, getBI(a).powm(getBI(b), getBI(c)));
 };
 
+
+/* TODO - optimize by using a smaller bignum when so much isn't needed */
+const digits = 325;
+const digitsBignum = bignum(10).pow(digits);
+
 op.div_In = function(a, b) {
-  let digits = 1e+20;
-  let divisor = getBI(b);
+  const divisor = getBI(b);
   if (divisor.eq(0)) {
     return getBI(a).toNumber() / 0;
   }
-  return getBI(a).mul(bignum(digits)).div(divisor).toNumber() / digits;
+
+  let sign = 1;
+  let big = getBI(a).mul(digitsBignum).div(divisor).toString();
+  if (big.substr(0, 1) == '-') {
+    big = big.substr(1);
+    sign = -1;
+  }
+
+  if (big.length <= digits) {
+    return sign * parseFloat('0.' + '0'.repeat(digits - big.length) + big);
+  } else {
+    return sign * parseFloat(big.substr(0, big.length - digits) + '.' + big.substr(big.length - digits));
+  }
 };
 
 op.rand_I = function(max, type) {
@@ -169,7 +187,7 @@ op.isgt_I = function(a, b) {
 };
 
 op.cmp_I = function(a, b) {
-  var result = getBI(a).cmp(getBI(b));
+  const result = getBI(a).cmp(getBI(b));
   return result == 0 ? 0 : (result < 0 ? -1 : 1);
 };
 
@@ -178,23 +196,11 @@ op.isprime_I = function(n) {
 };
 
 op.bitshiftl_I = function(a, b, type) {
-  let n = getBI(a);
-  if (b < 0 && n.lt(0)) {
-    let shifted = n.shiftLeft(b);
-    return makeBI(type, shifted.shiftRight(b).eq(n) ? shifted : shifted.sub(1));
-  } else {
-    return makeBI(type, n.shiftLeft(b));
-  }
+  return makeBI(type, getBI(a).shiftLeft(b));
 };
 
 op.bitshiftr_I = function(a, b, type) {
-  let n = getBI(a);
-  if (b >= 0 && n.lt(0)) {
-    let shifted = n.shiftRight(b);
-    return makeBI(type, shifted.shiftLeft(b).eq(n) ? shifted : shifted.sub(1));
-  } else {
-    return makeBI(type, n.shiftRight(b));
-  }
+  return makeBI(type, getBI(a).shiftRight(b));
 };
 
 op.bitand_I = function(a, b, type) {
@@ -214,8 +220,8 @@ op.bitneg_I = function(a, type) {
 };
 
 op.lcm_I = function(n, m, type) {
-  var a = getBI(n);
-  var b = getBI(m);
+  const a = getBI(n);
+  const b = getBI(m);
   return makeBI(type, (a.abs().div(a.gcd(b)).mul(b.abs())));
 };
 
@@ -231,6 +237,10 @@ op.tonum_I = function(n) {
   return getBI(n).toNumber();
 };
 
+op.fromI_I = function(value, type) {
+  return makeBI(type, getBI(value));
+};
+
 op.fromnum_I = function(num, type) {
   // node-bignum bug workaround, when a negative number is too big it gets turned into 0
   if (num < 0) {
@@ -244,22 +254,22 @@ op.bool_I = function(n) {
   return intishBool(getBI(n).toNumber());
 };
 
-op.radix_I = function(hllName, radix, str, zpos, flags, type) {
-  var extracted = core.radixHelper(radix, str, zpos, flags);
+op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
+  const extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(hllName, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), -1]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(0)), makeBI(type, bignum(1)), new NQPInt(-1)]);
   }
 
   if (radix == 10 || radix == 16) {
-    var pow = bignum(radix).pow(extracted.power);
-    return hll.slurpyArray(hllName, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), extracted.offset]);
+    const pow = bignum(radix).pow(extracted.power);
+    return hll.slurpyArray(currentHLL, [makeBI(type, bignum(extracted.number, radix)), makeBI(type, pow), new NQPInt(extracted.offset)]);
   } else {
-    var n = extracted.number;
-    var base = bignum(1);
-    var result = bignum(0);
+    const n = extracted.number;
+    let base = bignum(1);
+    let result = bignum(0);
 
-    for (var i = n.length - 1; i >= 0; i--) {
-      var digit = n.charCodeAt(i);
+    for (let i = n.length - 1; i >= 0; i--) {
+      let digit = n.charCodeAt(i);
       if (digit >= 48 && digit <= 57) digit -= 48; // 0-9
       else if (digit >= 97 && digit <= 122) digit = digit - 97 + 10; // a-z
       else if (digit >= 65 && digit <= 90) digit = digit - 65 + 10; // A-Z
@@ -271,6 +281,6 @@ op.radix_I = function(hllName, radix, str, zpos, flags, type) {
 
     if (n[0] == '-') result = result.neg();
 
-    return hll.slurpyArray(hllName, [makeBI(type, result), makeBI(type, base), extracted.offset]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), new NQPInt(extracted.offset)]);
   }
 };

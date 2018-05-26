@@ -1,4 +1,4 @@
-plan(51);
+plan(52);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -142,4 +142,12 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(nqp::atpos_i($bytes, 5) == 0xb4, 'Byte 6 correct');
     ok(nqp::decoderbytesavailable($dec) == 0, 'Now no bytes available');
     ok(nqp::decoderempty($dec), 'And so the decoder is empty');
+}
+
+{
+    my $emptybuf := nqp::encode('', 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $emptybuf);
+    ok(nqp::decoderempty($dec), 'Decoder is still empty after adding an empty buffer');
 }

@@ -1,12 +1,14 @@
 'use strict';
-var op = {};
+const op = {};
 exports.op = op;
 
-var iscclass = require('./cclass.js').op.iscclass;
-var nqp = require('nqp-runtime');
+const iscclass = require('./cclass.js').op.iscclass;
+const nqp = require('nqp-runtime');
 
-var Null = require('./null.js');
-var BOOT = require('./BOOT.js');
+const Null = require('./null.js');
+const BOOT = require('./BOOT.js');
+
+const stripMarks = require('./strip-marks.js');
 
 const EDGE_FATE = 0;
 const EDGE_EPSILON = 1;
@@ -16,14 +18,20 @@ const EDGE_CHARCLASS = 4;
 const EDGE_CHARCLASS_NEG = 5;
 const EDGE_CHARLIST = 6;
 const EDGE_CHARLIST_NEG = 7;
-const EDGE_SUBRULE = 8;
 const EDGE_CODEPOINT_I = 9;
 const EDGE_CODEPOINT_I_NEG = 10;
-const EDGE_GENERIC_VAR = 11;
 const EDGE_CHARRANGE = 12;
 const EDGE_CHARRANGE_NEG = 13;
 const EDGE_CODEPOINT_LL = 14;
 const EDGE_CODEPOINT_I_LL = 15;
+const EDGE_CODEPOINT_M = 16;
+const EDGE_CODEPOINT_M_NEG = 17;
+const EDGE_CODEPOINT_M_LL = 18;
+const EDGE_CODEPOINT_IM = 19;
+const EDGE_CODEPOINT_IM_NEG = 20;
+const EDGE_CODEPOINT_IM_LL = 21;
+const EDGE_CHARRANGE_M = 22;
+const EDGE_CHARRANGE_M_NEG = 23;
 
 function convertState(thing) {
   if (thing.$$toArray) {
@@ -35,17 +43,17 @@ function convertState(thing) {
 
 // TODO think about type conversions of the stuff inside the array
 op.nfafromstatelist = async function(ctx, rawStates, type) {
-  var nfa = type._STable.REPR.allocate(type._STable);
+  const nfa = type._STable.REPR.allocate(type._STable);
 
   nfa.fates = rawStates.$$toArray()[0];
 
-  let states = convertState(rawStates);
+  const states = convertState(rawStates);
 
   nfa.states = [];
-  for (var i = 1; i < states.length; i++) {
+  for (let i = 1; i < states.length; i++) {
     nfa.states[i - 1] = [];
-    for (var j = 0; j < states[i].length; j += 3) {
-      var edge = {act: await nqp.toInt(states[i][j], ctx), to: await nqp.toInt(states[i][j + 2], ctx)};
+    for (let j = 0; j < states[i].length; j += 3) {
+      const edge = {act: await nqp.toInt(states[i][j], ctx), to: await nqp.toInt(states[i][j + 2], ctx)};
       switch (edge.act & 0xff) {
         case EDGE_EPSILON:
           break;
@@ -53,6 +61,9 @@ op.nfafromstatelist = async function(ctx, rawStates, type) {
         case EDGE_CODEPOINT:
         case EDGE_CODEPOINT_LL:
         case EDGE_CODEPOINT_NEG:
+        case EDGE_CODEPOINT_M:
+        case EDGE_CODEPOINT_M_LL:
+        case EDGE_CODEPOINT_M_NEG:
         case EDGE_CHARCLASS:
         case EDGE_CHARCLASS_NEG:
           edge.argI = await nqp.toInt(states[i][j + 1], ctx);
@@ -65,8 +76,13 @@ op.nfafromstatelist = async function(ctx, rawStates, type) {
         case EDGE_CODEPOINT_I:
         case EDGE_CODEPOINT_I_LL:
         case EDGE_CODEPOINT_I_NEG:
+        case EDGE_CODEPOINT_IM:
+        case EDGE_CODEPOINT_IM_LL:
+        case EDGE_CODEPOINT_IM_NEG:
         case EDGE_CHARRANGE:
         case EDGE_CHARRANGE_NEG:
+        case EDGE_CHARRANGE_M:
+        case EDGE_CHARRANGE_M_NEG:
           edge.argLc = await nqp.toInt(states[i][j + 1][0], ctx);
           edge.argUc = await nqp.toInt(states[i][j + 1][1], ctx);
           break;
@@ -79,28 +95,33 @@ op.nfafromstatelist = async function(ctx, rawStates, type) {
   return nfa;
 };
 
+function baseCodePoint(string, index) {
+  const codePoint = string.codePointAt(index);
+  return String.fromCodePoint(codePoint).normalize('NFD').codePointAt(0);
+}
+
 function runNFA(nfa, target, pos) {
-  var origPos = pos;
+  const origPos = pos;
 
-  var longlit = [];
-  for (var i = 0; i < 200; i++) longlit[i] = 0;
+  const longlit = [];
+  for (let i = 0; i < 200; i++) longlit[i] = 0;
 
 
-  var eos = target.length;
-  var gen = 1;
+  const eos = target.length;
+  let gen = 1;
 
   /* Allocate a "done states" array. */
-  var done = [];
+  const done = [];
 
   /* JVM clears out arrays here, we allocate new ones for simplicity */
-  var fates = [];
-  var curst = [];
-  var nextst = [];
-  var numStates = nfa.states.length;
+  let fates = [];
+  let curst = [];
+  let nextst = [];
+  const numStates = nfa.states.length;
 
   nextst.push(1);
 
-  var usedlonglit = 0;
+  let usedlonglit = 0;
 
   while (nextst.length && pos <= eos) {
     /* Translation of:
@@ -115,10 +136,10 @@ function runNFA(nfa, target, pos) {
     nextst = [];
 
     /* Save how many fates we have before this position is considered. */
-    var prevFates = fates.length;
+    let prevFates = fates.length;
 
     while (curst.length) {
-      var st = curst.pop();
+      const st = curst.pop();
       if (st <= numStates) {
         if (done[st] == gen) {
           continue;
@@ -126,10 +147,10 @@ function runNFA(nfa, target, pos) {
         done[st] = gen;
       }
 
-      var edgeInfo = nfa.states[st - 1];
-      for (var i = 0; i < edgeInfo.length; i++) {
-        var act = edgeInfo[i].act;
-        var to = edgeInfo[i].to;
+      const edgeInfo = nfa.states[st - 1];
+      for (let i = 0; i < edgeInfo.length; i++) {
+        let act = edgeInfo[i].act;
+        const to = edgeInfo[i].to;
 
         if (act <= EDGE_EPSILON) {
           if (act < 0) {
@@ -137,11 +158,11 @@ function runNFA(nfa, target, pos) {
           } else if (act == EDGE_FATE) {
             /* Crossed a fate edge. Check if we already saw this, and
                  * if so bump the entry we already saw. */
-            var arg = edgeInfo[i].argI;
-            var foundFate = false;
+            let arg = edgeInfo[i].argI;
+            let foundFate = false;
 
             arg &= 0xffffff;
-            for (var j = 0; j < fates.length; j++) {
+            for (let j = 0; j < fates.length; j++) {
               if (foundFate) {
                 fates[j - 1] = fates[j];
               }
@@ -180,12 +201,12 @@ function runNFA(nfa, target, pos) {
           }
         } else if (act == EDGE_CODEPOINT_LL) {
           if (target.charCodeAt(pos) == edgeInfo[i].argI) {
-            var fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            const fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
             nextst.push(to);
             while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
             }
-            longlit[fate] = pos - origPos;
+            longlit[fate] = pos - origPos + 1;
           }
         } else if (act == EDGE_CODEPOINT_NEG) {
           if (target.charCodeAt(pos) != edgeInfo[i].argI) {
@@ -208,15 +229,45 @@ function runNFA(nfa, target, pos) {
             nextst.push(to);
           }
         } else if (act == EDGE_CODEPOINT_I_LL) {
-          console.log('TODO CODEPOINT I LL');
+          const codePoint = target.codePointAt(pos);
+          if (codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc) {
+            const fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            nextst.push(to);
+            while (usedlonglit <= fate) {
+              longlit[usedlonglit++] = 0;
+            }
+            longlit[fate] = pos - origPos + 1;
+          }
         } else if (act == EDGE_CODEPOINT_I) {
-          console.log('TODO CODEPOINT I');
+          const codePoint = target.codePointAt(pos);
+          if (codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc) {
+            nextst.push(to);
+          }
         } else if (act == EDGE_CODEPOINT_I_NEG) {
-          console.log('TODO CODEPOINT NEG');
+          const codePoint = target.codePointAt(pos);
+          if (!(codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc)) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CODEPOINT_M) {
+          if (baseCodePoint(target, pos) === edgeInfo[i].argI) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CODEPOINT_IM) {
+          const base = baseCodePoint(target, pos);
+          if (base === edgeInfo[i].argLc || base == edgeInfo[i].argUc) {
+            nextst.push(to);
+          }
         } else if (act == EDGE_CHARRANGE) {
-          var ucArg = edgeInfo[i].argUc;
-          var lcArg = edgeInfo[i].argLc;
-          var ord = target.charCodeAt(pos);
+          const ucArg = edgeInfo[i].argUc;
+          const lcArg = edgeInfo[i].argLc;
+          const ord = target.charCodeAt(pos);
+          if (ord >= lcArg && ord <= ucArg) {
+            nextst.push(to);
+          }
+        } else if (act == EDGE_CHARRANGE_M) {
+          const ucArg = edgeInfo[i].argUc;
+          const lcArg = edgeInfo[i].argLc;
+          const ord = stripMarks(target.substr(pos, 1)).charCodeAt(0);
           if (ord >= lcArg && ord <= ucArg) {
             nextst.push(to);
           }
@@ -235,10 +286,10 @@ function runNFA(nfa, target, pos) {
     /* If we got multiple fates at this offset, sort them by the
        * declaration order (represented by the fate number). In the
        * future, we'll want to factor in longest literal prefix too. */
-    var charFates = fates.length - prevFates;
+    const charFates = fates.length - prevFates;
     if (charFates > 1) {
       // TODO do it more efficiently
-      var charFateList = fates.slice(prevFates);
+      const charFateList = fates.slice(prevFates);
       charFateList.sort((a, b) => b - a);
       fates = fates.slice(0, prevFates).concat(charFateList);
     }
@@ -246,12 +297,12 @@ function runNFA(nfa, target, pos) {
 
 
   if (usedlonglit > 0) {
-    for (var i = 0; i < fates.length; i++) {
+    for (let i = 0; i < fates.length; i++) {
       fates[i] = fates[i] & 0xffffff;
     }
   }
 
-  return BOOT.createArray(fates);
+  return BOOT.createIntArray(fates);
 }
 
 op.nfarunproto = function(nfa, target, pos) {
@@ -259,21 +310,21 @@ op.nfarunproto = function(nfa, target, pos) {
 };
 
 op.nfarunalt = function(nfa, target, pos, bstackWrapped, cstackWrapped, marksWrapped) {
-  var cstack;
+  let cstack;
 
   if (cstackWrapped !== Null && !cstackWrapped.typeObject_) {
     cstack = cstackWrapped.$$toArray();
   }
-  var bstack = bstackWrapped.$$toArray();
-  var marks = marksWrapped.$$toArray();
+  const bstack = bstackWrapped.$$toArray();
+  const marks = marksWrapped.$$toArray();
 
   /* Run the NFA. */
-  var fates = runNFA(nfa, target, pos).array;
+  const fates = runNFA(nfa, target, pos).array;
 
   /* Push the results onto the bstack. */
-  var caps = cstack instanceof Array ? cstack.length : 0;
+  const caps = cstack instanceof Array ? cstack.length : 0;
 
-  for (var i = 0; i < fates.length; i++) {
+  for (let i = 0; i < fates.length; i++) {
     bstack.push(marks[fates[i]], pos, 0, caps);
   }
 

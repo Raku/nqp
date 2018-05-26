@@ -1,5 +1,17 @@
 #!/usr/bin/env nqp
-plan(119 * 2);
+plan(119 * 2 + 4 * 3);
+ok(nqp::indexic('hi', '', 2) == 2, 'nqp::indexic finds empty string after last index');
+ok(nqp::indexic('hi', '', 0) == 0, 'nqp::indexic finds empty string at start');
+ok(nqp::indexic('hi', '', 1) == 1, 'nqp::indexic finds empty string in the middle');
+ok(nqp::indexic('hi', '', 3) == -1, 'nqp::indexic does not find empty string at graphs + 1');
+ok(nqp::indexicim('hi', '', 2) == 2, 'nqp::indexicim finds empty string after last index');
+ok(nqp::indexicim('hi', '', 0) == 0, 'nqp::indexicim finds empty string at start');
+ok(nqp::indexicim('hi', '', 1) == 1, 'nqp::indexicim finds empty string in the middle');
+ok(nqp::indexicim('hi', '', 3) == -1, 'nqp::indexicim does not find empty string at graphs + 1');
+ok(nqp::indexim('hi', '', 2) == 2, 'nqp::indexim finds empty string after last index');
+ok(nqp::indexim('hi', '', 0) == 0, 'nqp::indexim finds empty string at start');
+ok(nqp::indexim('hi', '', 1) == 1, 'nqp::indexim finds empty string in the middle');
+ok(nqp::indexim('hi', '', 3) == -1, 'nqp::indexim does not find empty string at graphs + 1');
 my @array :=
 # (haystack, needle, result)
 # line below is a todo example: commented out in case someone else needs to todo one of these tests

@@ -1,4 +1,4 @@
-plan(10);
+plan(11);
 
 sub foo_inner() {
   my $caller := nqp::callercode();
@@ -79,4 +79,19 @@ toplevel(0);
     }
 
     outer();
+}
+
+{
+    my sub reach_end() {
+      my $count := 0;
+      my $ctx := nqp::ctx(); 
+      while !nqp::isnull($ctx) {
+        $ctx := nqp::ctxcaller($ctx);
+        $count := $count + 1;
+      }
+
+      ok($count > 0 && nqp::isnull($ctx), 'nqp::ctxcaller get nqp::null when we have no caller');
+    }
+    
+    reach_end();
 }

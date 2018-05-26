@@ -38,7 +38,7 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc,
             "MultiDimArray: can only set dimensions once");
     }
-    
+
     protected int indicesToFlatIndex(ThreadContext tc, long[] indices) {
         if (indices.length == dimensions.length) {
             long multiplier = 1;
@@ -88,6 +88,9 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     }
     public void shift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
+    }
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot slice a multidim array");
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, "Cannot splice a fixed dimension array");

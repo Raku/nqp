@@ -17,12 +17,12 @@ public abstract class SixModelObject implements Cloneable {
      * The STable of the object.
      */
     public STable st;
-    
+
     /**
      * The serialization context this object belongs to, if any.
      */
     public SerializationContext sc;
-    
+
     /**
      * Attribute access functions. The native variants load the value into
      * or store a value from the Thread Context.
@@ -75,7 +75,7 @@ public abstract class SixModelObject implements Cloneable {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation can not unbox "
             + REPRRegistry.getById((int)reprId).name);
     }
-    
+
     /**
      * Positional access functions.
      */
@@ -121,6 +121,9 @@ public abstract class SixModelObject implements Cloneable {
     public void shift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement shift_native");
     }
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement slice");
+    }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement splice");
     }
@@ -142,7 +145,7 @@ public abstract class SixModelObject implements Cloneable {
     public void set_dimensions(ThreadContext tc, long[] dimensions) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement set_dimensions");
     }
-    
+
     /**
      * Associative access functions.
      */
@@ -171,7 +174,7 @@ public abstract class SixModelObject implements Cloneable {
     public long elems(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not implement elems");
     }
-    
+
     /**
      * Clones the object.
      */

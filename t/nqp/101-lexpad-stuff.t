@@ -1,4 +1,4 @@
-plan(16);
+plan(18);
 sub more-inner() {
     my $outer := nqp::ctxcaller(nqp::ctx());
     my $outermost := nqp::ctxcaller(nqp::ctxcaller(nqp::ctx()));
@@ -103,3 +103,23 @@ my sub elems_on_caller() {
     my $*c := 300;
     elems_on_caller();
 }
+
+my sub iterate_over_ctx() {
+    my $*FOO := 123;
+    my $found_foo;
+    my $found_foo_key;
+    for nqp::ctxlexpad(nqp::ctx) {
+        if ~$_ eq '$*FOO' {
+            $found_foo := nqp::iterval($_);
+        }
+
+        if $_.key eq '$*FOO' {
+            $found_foo_key := $_.value;
+        }
+    }
+
+    is($found_foo, 123, 'iterating over ctx works');
+    is($found_foo_key, 123, 'iterating over ctx works .key/.value');
+}
+
+iterate_over_ctx();

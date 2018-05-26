@@ -2,7 +2,7 @@
 
 # Test nqp::op pseudo-functions.
 
-plan(318);
+plan(371);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -10,6 +10,8 @@ ok( nqp::mul_i(5,2) == 10, 'nqp::mul_i');
 ok( nqp::div_i(5,2) == 2, 'nqp::div_i');
 is(nqp::div_i(-8, 3), -3, 'nqp::div_i - with a negative number');
 is(nqp::div_i(9, -4), -3, 'nqp::div_i rounds down');
+dies-ok({nqp::div_i(1, 0)}, 'division by zero is not allowed');
+
 ok( nqp::mod_i(5,2) == 1, 'nqp::mod_i');
 ok( nqp::pow_i(6, 4) == 1296, 'nqp::pow_i');
 ok( nqp::gcd_i(8, 12) == 4, 'nqp::gcd_i');
@@ -64,6 +66,16 @@ ok( nqp::rindex('Hello World', '', 1) == 1, 'nqp::rindex with empty match at off
 ok( nqp::rindex('Hello World', '', 11) == 11, 'nqp::rindex with empty match at end returns length');
 ok( nqp::rindex('Hello World', '', 100) == -1, 'nqp::rindex with empty match at offset outside string returns -1');
 
+# Empty string tests
+ok(nqp::rindex('hi', '', 2) == 2, 'nqp::rindex finds empty string after last index');
+ok(nqp::rindex('hi', '', 0) == 0, 'nqp::rindex finds empty string at start');
+ok(nqp::rindex('hi', '', 1) == 1, 'nqp::rindex finds empty string in the middle');
+ok(nqp::rindex('hi', '', 3) == -1, 'nqp::rindex does not find empty string at graphs + 1');
+ok(nqp::index('hi', '', 2) == 2, 'nqp::index finds empty string after last index');
+ok(nqp::index('hi', '', 0) == 0, 'nqp::index finds empty string at start');
+ok(nqp::index('hi', '', 1) == 1, 'nqp::index finds empty string in the middle');
+ok(nqp::index('hi', '', 3) == -1, 'nqp::dindex does not find empty string at graphs + 1');
+
 is( nqp::chr(120), 'x', 'nqp::chr');
 is( nqp::ord('xyz'),120, 'nqp::ord');
 is( nqp::ord('xyz',2),122, '2 argument nqp::ord');
@@ -88,6 +100,9 @@ ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 5) == -1, 'nqp::cmp_i');
 
+ok( nqp::cmp_n(10, nqp::nan) ==  0, 'nqp::cmp_n with nan as left argument');
+ok( nqp::cmp_n(nqp::nan, 10) ==  0, 'nqp::cmp_n with nan as right argument');
+
 ok( nqp::cmp_n(2.5, 0.5) ==  1, 'nqp::cmp_n');
 ok( nqp::cmp_n(2.5, 2.5) ==  0, 'nqp::cmp_n');
 ok( nqp::cmp_n(2.5, 5.0) == -1, 'nqp::cmp_n');
@@ -109,6 +124,7 @@ my $a := 10;
 ok( nqp::if(0, ($a++), ($a--)) == 10, 'nqp::if shortcircuit');
 ok( $a == 9, 'nqp::if shortcircuit');
 
+ok( nqp::pow_n(1, nqp::nan) == 1, 'nqp::pow_n(1, nqp::nan)');
 ok( nqp::pow_n(1, nqp::inf) == 1, 'nqp::pow_n(1, nqp::inf)');
 ok( nqp::pow_n(1, nqp::neginf) == 1, 'nqp::pow_n(1, nqp::neginf)');
 ok( nqp::pow_n(2.0, 4) == 16.0, 'nqp::pow_n');
@@ -155,6 +171,7 @@ ok( nqp::isnull(nqp::null()) == 1, 'nqp::isnull/nqp::null' );
 ok( nqp::isnull("hello") == 0, '!nqp::isnull(string)' );
 ok( nqp::isnull(13232) == 0, 'nqp::isnull(number)' );
 
+ok( nqp::istrue(nqp::nan) == 1, 'nqp::istrue on NaN');
 ok( nqp::istrue(0) == 0, 'nqp::istrue');
 ok( nqp::istrue(1) == 1, 'nqp::istrue');
 ok( nqp::istrue('') == 0, 'nqp::istrue');
@@ -197,6 +214,21 @@ is( nqp::unshift($list,'zero'), 'zero', "nqp::unshift");
 ok( nqp::elems($list) == 4, 'nqp::unshift adds 1 element');
 ok( nqp::atpos($list,0) eq 'zero', 'nqp::unshift the correct element');
 
+my $list_i := nqp::list_i(1, 2);
+my $iter_i := nqp::iterator($list_i);
+is(nqp::shift($iter_i), 1);
+is(nqp::shift($iter_i), 2);
+
+my $list_n := nqp::list_n(1, 2);
+my $iter_n := nqp::iterator($list_n);
+is(nqp::shift($iter_n), 1);
+is(nqp::shift($iter_n), 2);
+
+my $list_s := nqp::list_s('a', 'b');
+my $iter_s := nqp::iterator($list_s);
+is(nqp::shift($iter_s), 'a');
+is(nqp::shift($iter_s), 'b');
+
 my %hash;
 %hash<foo> := 1;
 %hash<baz> := 2;
@@ -218,6 +250,8 @@ ok(!nqp::existspos(@arr, -2), 'existspos with missing pos');
 ok(!nqp::existspos(@arr, -100), 'existspos with absurd values');
 @arr[1] := NQPMu;
 ok(nqp::existspos(@arr, 1), 'existspos with still existing pos');
+@arr[1] := nqp::null;
+ok(!nqp::existspos(@arr, 1), 'existspos is 0 for array elements containing null');
 
 sub test_splice_with_return() {
     my @children := [1, 2, 3];
@@ -244,6 +278,21 @@ ok(nqp::eqat("foobar","bar", -3) == 1, "eqat with a negative offset argument");
 ok(nqp::eqat("foobar","foo", -9001) == 1, "eqat with a gigantic offset argument");
 ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer than haystack");
 
+ok(nqp::eqat("Foobar","foO", 0) == 0, "eqat doesn't match with wrong case");
+ok(nqp::eqat("fOobar","oOb", 1) == 0, "eqat doesn't match with wrong case");
+ok(nqp::eqat("fooBar","baR", -3) == 0, "eqat doesn't match with wrong case");
+
+ok(nqp::eqatic("foobar","foo", 0) == 1, "eqatic with needle argument that matches at 0");
+ok(nqp::eqatic("foobar","oob", 1) == 1, "eqatic with needle argument that matches at 1");
+ok(nqp::eqatic("foobar","foo", 1) == 0, "eqatic with needle argument that matches");
+ok(nqp::eqatic("foobar","bar", -3) == 1, "eqatic with a negative offset argument");
+ok(nqp::eqatic("foobar","foo", -9001) == 1, "eqatic with a gigantic offset argument");
+ok(nqp::eqatic("foobar","foobarbaz", 0) == 0, "eqatic with needle argument longer than haystack");
+
+ok(nqp::eqatic("Foobar","foO", 0) == 1, "eqatic with needle argument that matches at 0");
+ok(nqp::eqatic("fOobar","oOb", 1) == 1, "eqatic with needle argument that matches at 1");
+ok(nqp::eqatic("fooBar","baR", -3) == 1, "eqatic with a negative offset argument");
+
 {
     my $source := nqp::list("100", "200", "300");
     my $a := nqp::list("1", "2", "3");
@@ -253,6 +302,12 @@ ok(nqp::eqat("foobar","foobarbaz", 0) == 0, "eqat with needle argument longer th
     my $b := nqp::list("1", "2", "3", "4");
     nqp::splice($b, $source, 1, 2);
     is(nqp::join(",", $b), '1,100,200,300,4', "splice");
+
+    my $c := nqp::list("1", "2", "3", "4");
+
+    nqp::splice($c, $source, 1, 200);
+
+    is(nqp::join(",", $c), '1,100,200,300', "splice with removing past the end of array");
 }
 
 {
@@ -311,7 +366,7 @@ ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isge - both string equal');
 ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
 
 ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
-ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)'); 
+ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)');
 
 ok(12.5 % 5 == 2.5, '% test');
 ok(3 % 2.5 == 0.5, '% test');
@@ -546,3 +601,49 @@ is(
 is(
   nqp::join(',', nqp::splice(nqp::split(',', '0,1,2,3,4,5,6,7,8,9'), nqp::split(',', 'a,b,c'), 4, 1)),
   '0,1,2,3,a,b,c,5,6,7,8,9', 'nqp::splice test');
+
+is(nqp::codes('hello'), 5, 'nqp::codes with ascii');
+is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars bigger than a single code unit');
+
+# Test nqp::slice op
+{
+    my @l := 0, 1, 2, 3, 4;
+
+    my &to-str := -> @a {
+        my @strs := ();
+        @strs.push(~$_) for @a;
+        nqp::join(',', @strs);
+    };
+
+    is( &to-str( nqp::slice(@l,  2,  3  )), '2,3', 'nqp::slice some values' );
+    is( &to-str( nqp::slice(@l, -3, -2  )), '2,3', 'nqp::slice some values relative to end' );
+    is( &to-str( nqp::slice(@l,  2, -2  )), '2,3', 'nqp::slice some values relative to end (mixed)');
+    is( &to-str( nqp::slice(@l,  0,  3  )), '0,1,2,3', 'nqp::slice from beginning');
+    is( &to-str( nqp::slice(@l,  2, -1  )), '2,3,4', 'nqp::slice until end');
+    is( &to-str( nqp::slice(@l,  0, -1  )), '0,1,2,3,4', 'nqp::slice from beginning until end');
+    is( &to-str( nqp::slice(@l,  2,  2  )), '2', 'nqp::slice one elem');
+    is( &to-str( nqp::slice(@l,  2, -3  )), '2', 'nqp::slice one elem (mixed)');
+    is( &to-str( nqp::slice(@l,  0,  0  )), '0', 'nqp::slice one elem at beginning');
+    is( &to-str( nqp::slice(@l, -1, -1  )), '4', 'nqp::slice one elem at end');
+
+    # Test slice exceptions
+    for ( 3,   2, 'nqp::slice dies; start pos greater than end pos'),
+        ( 8,   2, 'nqp::slice dies; start pos out of bounds'),
+        ( 2,   8, 'nqp::slice dies; end pos out of bounds'),
+        (-2,  -3, 'nqp::slice dies; start pos greater than end pos (relative to end)'),
+        (-8,   2, 'nqp::slice dies; start pos out of bounds (relative to end)'),
+        ( 2,  -8, 'nqp::slice dies; end pos out of bounds (relative to end)'),
+        (-8,   8, 'nqp::slice dies; both out of bounds'),
+        ( 2, +@l, 'nqp::slice dies; using ".elems" is out of bounds')
+    {
+        my $start := $_.shift;
+        my $end   := $_.shift;
+        my $msg   := $_.shift;
+
+        my $died := 0;
+        {   nqp::slice(@l, $start, $end);
+            CATCH { $died := 1 }
+        }
+        ok($died == 1, $msg);
+    }
+}

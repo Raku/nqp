@@ -147,7 +147,7 @@ my class NQPFileHandle {
         $line
     }
 
-     method slurp() {
+    method slurp() {
         $!decoder || nqp::die("Cannot 'slurp' on a binary file handle");
         while nqp::elems(my $buf := nqp::readfh($!vmio, nqp::create($NQPBuf), 0x100000)) {
             $!decoder.add-bytes($buf);
@@ -262,11 +262,11 @@ sub slurp ($filename) {
     $contents
 }
 
-=begin item spew
+=begin item spurt
 Write the string value of C<$contents> to C<$filename>.
 =end item
 
-sub spew($filename, $contents) {
+sub spurt($filename, $contents) {
     my $handle := open($filename, :w);
     $handle.print($contents);
     $handle.close;

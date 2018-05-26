@@ -4,6 +4,17 @@ my $T_INT  := 1; # We use a javascript number but always treat it as a 32bit int
 my $T_NUM  := 2; # We use a javascript number for that
 my $T_STR  := 3; # We use a javascript str for that
 my $T_BOOL := 4; # Something that can be used in boolean context in javascript. To the user it should be presented as a 0 or 1
+my $T_CALL_ARG := 5; # Something that will be passed to a sub/method call
+
+my $T_INT16 := 6; # We use a javascript number but always treat it as a 16bit integer
+my $T_INT8 := 7; # We use a javascript number but always treat it as a 8bit integer
+
+my $T_RETVAL := 8; # Something that will be returned from a sub/method call
+
+my $T_UINT16 := 9; # We use a javascript number but always treat it as a 16bit integer
+my $T_UINT8 := 10; # We use a javascript number but always treat it as a 8bit integer
+my $T_UINT32 := 11; # We use a javascript number but always treat it as a unsigned 32bit integer
+
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
@@ -58,19 +69,26 @@ class Chunk {
     }
 
     method collect_with_source_map_info($offset, @strs, @mapping) {
-        if nqp::defined($!node) && $!node.node {
+        # HACK sometimes a QAST::Op sneaks into $!node.node, so call nqp::can
+        my int $sourcemap_info := nqp::defined($!node) && $!node.node && nqp::can($!node.node, 'from');
+        if $sourcemap_info {
             nqp::push_i(@mapping, $!node.node.from());
             nqp::push_i(@mapping, $offset);
         }
 
+        #if nqp::defined($!node) && $!node.node && !nqp::can($!node.node, 'from') {
+        #    stderr().print("problem with node.node");
+        #}
+
+
+        my int $count := 0;
+
         if nqp::isnull($!setup) {
-          0;
         }
         elsif nqp::istype($!setup, Chunk) {
-            $!setup.collect_with_source_map_info($offset, @strs, @mapping);
+            $count := $!setup.collect_with_source_map_info($offset, @strs, @mapping);
         }
         else {
-            my int $count := 0;
             for $!setup -> $part {
                 if nqp::isstr($part) {
                     $count := $count + nqp::chars($part);
@@ -80,8 +98,14 @@ class Chunk {
                     $count := $count + $part.collect_with_source_map_info($offset + $count, @strs, @mapping);
                 }
             }
-            $count;
         }
+
+        if $sourcemap_info {
+            nqp::push_i(@mapping, -1);
+            nqp::push_i(@mapping, $offset + $count);
+        }
+
+        $count;
     }
 
     method type() {

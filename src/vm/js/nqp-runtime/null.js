@@ -1,6 +1,6 @@
 'use strict';
-let NQPObject = require('./nqp-object.js');
-let singleton;
+const NQPObject = require('./nqp-object.js');
+let singleton; // eslint-disable-line prefer-const
 class Null extends NQPObject {
   $$toBool(ctx) {
     return 0;

@@ -47,7 +47,7 @@ public class BootJavaInterop {
 
     /** The global context that this interop factory is used for. */
     protected GlobalContext gc;
-    
+
     /** If we need to load stuff from a JAR, the class loader for doing so. */
     protected HashMap<String, URLClassLoader> jarClassLoaders;
 
@@ -191,7 +191,7 @@ public class BootJavaInterop {
         finishClass(cc);
         return RuntimeSupport.boxJava(cc.constructed, getSTableForClass(Class.class));
     }
-    
+
     /** Hiding arbitrary 6model objects under Object, for working with
       * untyped collection classes, etc. */
     public SixModelObject sixmodelToJavaObject(SixModelObject smo) {
@@ -275,7 +275,7 @@ public class BootJavaInterop {
 
         return hash;
     }
-    
+
     /** Produces a meta-object for a Java type. Override this to have something
       * other than the BOOTJava one. */
     protected SixModelObject computeHOW(ThreadContext tc, String name) {
@@ -612,7 +612,7 @@ public class BootJavaInterop {
                 }
                 else if( tc.native_type == ThreadContext.NATIVE_INT ) {
                     value = new Long(tc.native_i);
-                } 
+                }
                 else {
                     SixModelObject cur = Ops.atpos(in, i, tc);
                     if( cur instanceof JavaObjectWrapper ) {
@@ -626,13 +626,13 @@ public class BootJavaInterop {
                 Array.set(out, i, value);
             }
         }
-        else { 
+        else {
             // we've hopefully been called from a subclass, so we rely on them for casting and just unbox
             for( int i = 0; i < size; ++i ) {
                 in.at_pos_native(tc, i);
                 Object value = null;
                 if( tc.native_type == ThreadContext.NATIVE_NUM ) {
-                    if( out == null ) 
+                    if( out == null )
                         out = new Double[size];
                     ((Double[]) out)[i] = new Double(tc.native_n);
                 }
@@ -645,7 +645,7 @@ public class BootJavaInterop {
                     if( out == null )
                         out = new Long[size];
                     ((Long[]) out)[i] = new Long(tc.native_i);
-                } 
+                }
                 else {
                     SixModelObject cur = Ops.atpos(in, i, tc);
                     if( cur instanceof JavaObjectWrapper ) {

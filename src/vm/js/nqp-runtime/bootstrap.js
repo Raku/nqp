@@ -1,21 +1,24 @@
 'use strict';
-var SerializationContext = require('./serialization-context.js');
-var reprs = require('./reprs.js');
+const SerializationContext = require('./serialization-context.js');
+const reprs = require('./reprs.js');
 
-var Hash = require('./hash.js');
-var STable = require('./sixmodel.js').STable;
+const Hash = require('./hash.js');
+const STable = require('./sixmodel.js').STable;
 
-var repr = new reprs.KnowHOWREPR();
+const repr = new reprs.KnowHOWREPR();
 
-var CodeRef = require('./code-ref.js');
+const CodeRef = require('./code-ref.js');
 
-var constants = require('./constants.js');
+const constants = require('./constants.js');
 
-var BOOT = require('./BOOT.js');
+const BOOT = require('./BOOT.js');
 
-var Null = require('./null.js');
+const Null = require('./null.js');
 
-var core = new SerializationContext('__6MODEL_CORE__');
+const NQPStr = require('./nqp-str.js');
+
+
+const core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
 
 function addToScWithSt(obj) {
@@ -27,29 +30,27 @@ function addToScWithSt(obj) {
 
 /* Creates and installs the KnowHOWAttribute type. */
 function createKnowHOWAttribute() {
-  var metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
 
-  var r = new reprs.KnowHOWAttribute();
-  var typeObj = r.typeObjectFor(metaObj);
+  const r = new reprs.KnowHOWAttribute();
+  const typeObj = r.typeObjectFor(metaObj);
 
-  var methods = {};
+  const methods = {};
   methods.name = function(ctx, _NAMED, self) {
-    return self.__name;
+    return new NQPStr(self.__name);
   };
   methods['new'] = function(ctx, _NAMED, self) {
-    var attr = r.allocate(self._STable);
-    // TODO convert to string
-    attr.__name = _NAMED.name;
+    const attr = r.allocate(self._STable);
+    attr.__name = _NAMED.name.$$getStr();
     attr.__type = _NAMED.type;
-    // TODO convert to int
-    attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target : 0;
+    attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target.$$getInt() : 0;
     return attr;
   };
 
   typeObj._STable.methodCache = new Map();
   typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
-  for (let method of Object.keys(methods)) {
+  for (const method of Object.keys(methods)) {
     typeObj._STable.ObjConstructor.prototype[method] = methods[method];
     typeObj._STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
@@ -59,13 +60,13 @@ function createKnowHOWAttribute() {
 
 /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
  * pass in null. */
-var KnowHOW = repr.typeObjectFor(null);
+const KnowHOW = repr.typeObjectFor(null);
 
 addToScWithSt(KnowHOW);
 
-var st = new STable(repr, null);
+const st = new STable(repr, null);
 
-var KnowHowHOW = repr.allocate(st);
+const KnowHowHOW = repr.allocate(st);
 KnowHowHOW.__name = 'KnowHOW';
 
 addToScWithSt(KnowHowHOW);
@@ -78,7 +79,7 @@ KnowHowHOW._STable.methodCache = new Map();
 KnowHowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
-  var codeRef = new CodeRef(name, undefined);
+  const codeRef = new CodeRef(name, undefined);
   codeRef.$$call = method;
   return codeRef;
 }
@@ -88,13 +89,13 @@ function addKnowhowHowMethod(name, method) {
   KnowHowHOW._STable.ObjConstructor.prototype[name] = method;
   KnowHOW._STable.ObjConstructor.prototype[name] = method;
 
-  var wrapped = wrapMethod(name, method);
+  const wrapped = wrapMethod(name, method);
   KnowHOW._STable.methodCache.set(name, wrapped);
   KnowHowHOW._STable.methodCache.set(name, wrapped);
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
-  return self.__name;
+  return new NQPStr(self.__name);
 });
 
 addKnowhowHowMethod('attributes', function(ctx, _NAMED, self) {
@@ -107,19 +108,19 @@ addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
 
 addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
   /* We first create a new HOW instance. */
-  var HOW = self._STable.REPR.allocate(self._STable);
+  const HOW = self._STable.REPR.allocate(self._STable);
 
   /* See if we have a representation name; if not default to P6opaque. */
-  var reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr : 'P6opaque';
+  const reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr.$$getStr() : 'P6opaque';
 
   /* Create a new type object of the desired REPR. (Note that we can't
      * default to KnowHOWREPR here, since it doesn't know how to actually
      * store attributes, it's just for bootstrapping knowhow's. */
-  var typeObject = (new reprs[reprName]).typeObjectFor(HOW);
+  const typeObject = (new reprs[reprName]).typeObjectFor(HOW);
 
   /* See if we were given a name; put it into the meta-object if so. */
   if (_NAMED && _NAMED.name) {
-    HOW.__name = _NAMED.name;
+    HOW.__name = _NAMED.name.$$getStr();
   } else {
     HOW.__name = null;
   }
@@ -135,7 +136,7 @@ addKnowhowHowMethod('add_attribute', function(ctx, _NAMED, self, type, attr) {
 });
 
 addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) {
-  self.__methods.content.set(name, code);
+  self.__methods.content.set(name === 'string' ? name : name.$$getStr(), code);
 });
 
 addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
@@ -149,24 +150,24 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 
   /* Use any attribute information to produce attribute protocol
      * data. The protocol consists of an array... */
-  var reprInfo = [];
+  const reprInfo = [];
 
   /* ...which contains an array per MRO entry... */
-  var typeInfo = [];
+  const typeInfo = [];
   reprInfo.push(BOOT.createArray(typeInfo));
 
   /* ...which in turn contains this type... */
   typeInfo.push(typeObject);
 
   /* ...then an array of hashes per attribute... */
-  var attrInfoList = [];
+  const attrInfoList = [];
   typeInfo.push(BOOT.createArray(attrInfoList));
 
   /* ...then an array of hashes per attribute... */
-  for (var i = 0; i < self.__attributes.length; i++) {
-    var attrInfo = new Hash();
-    var attr = self.__attributes[i];
-    attrInfo.content.set('name', attr.__name);
+  for (let i = 0; i < self.__attributes.length; i++) {
+    const attrInfo = new Hash();
+    const attr = self.__attributes[i];
+    attrInfo.content.set('name', new NQPStr(attr.__name));
     attrInfo.content.set('type', attr.__type);
     if (attr.__boxTarget) {
       attrInfo.content.set('box_target', attr.__boxTarget);
@@ -175,11 +176,11 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   }
 
   /* ...followed by a list of parents (none). */
-  var parentInfo = [];
+  const parentInfo = [];
   typeInfo.push(BOOT.createArray(parentInfo));
 
   /* All of this goes in a hash. */
-  var reprInfoHash = new Hash();
+  const reprInfoHash = new Hash();
   reprInfoHash.content.set('attribute', BOOT.createArray(reprInfo));
 
 
@@ -193,7 +194,7 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 module.exports.knowhow = KnowHOW;
 
 
-var KnowHOWAttribute = createKnowHOWAttribute();
+const KnowHOWAttribute = createKnowHOWAttribute();
 
 module.exports.knowhowattr = KnowHOWAttribute;
 
@@ -201,10 +202,10 @@ module.exports.knowhowattr = KnowHOWAttribute;
 addToScWithSt(KnowHOWAttribute);
 
 function bootType(typeName, reprName) {
-  var metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
   metaObj.__name = typeName;
 
-  var typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
+  const typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
   core.rootObjects.push(metaObj);
   metaObj._SC = core;
@@ -218,21 +219,20 @@ module.exports.bootType = bootType;
 
 module.exports.core = core;
 
-BOOT.Array = bootType('BOOTArray', 'VMArray');
-BOOT.Array._STable.REPR.type = Null;
-BOOT.Array._STable.setboolspec(8, Null);
+function bootArray(type) {
+  const array = bootType('BOOTArray', 'VMArray');
+  array._STable.REPR.type = Null;
+  array._STable.REPR.primType = type;
+  array._STable.REPR.setupSTableWhenComposed(array._STable);
+  array._STable.setboolspec(8, Null);
+  return array;
+}
+
+BOOT.Array = bootArray(0);
 BOOT.Array._STable.hllRole = 4;
 
-BOOT.IntArray = bootType('BOOTIntArray', 'VMArray');
-BOOT.IntArray._STable.REPR.type = Null; // TODO correct type
-BOOT.IntArray._STable.setboolspec(8, Null);
-
-BOOT.NumArray = bootType('BOOTNumArray', 'VMArray');
-BOOT.NumArray._STable.REPR.type = Null; // TODO correct type
-BOOT.NumArray._STable.setboolspec(8, Null);
-
-BOOT.StrArray = bootType('BOOTStrArray', 'VMArray');
-BOOT.StrArray._STable.REPR.type = Null; // TODO correct type
-BOOT.StrArray._STable.setboolspec(8, Null);
+BOOT.IntArray = bootArray(1);
+BOOT.NumArray = bootArray(2);
+BOOT.StrArray = bootArray(3);
 
 BOOT.Exception = bootType('BOOTException', 'VMException');

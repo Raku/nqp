@@ -86,9 +86,8 @@ role NQPMatchRole is export {
     method pos()    { $!pos }
     method to()     { $!to < 0 ?? $!pos !! $!to }
     method CURSOR() { self }
-    method PRECURSOR() { self."!cursor_init"(nqp::getattr($!shared, ParseShared, '$!target'), :p($!from)) }
-    method Str()       { $!pos >= $!from ?? nqp::substr(nqp::getattr($!shared, ParseShared, '$!target'), $!from, nqp::sub_i(self.to, $!from)) !! '' }
-    method Int()       { my int $i := +self.Str(); $i }  # XXX need a better way to do this
+    method PRECURSOR() { self."!cursor_init"(nqp::getattr_s($!shared, ParseShared, '$!target'), :p($!from)) }
+    method Str()       { $!pos >= $!from ?? nqp::substr(nqp::getattr_s($!shared, ParseShared, '$!target'), $!from, nqp::sub_i(self.to, $!from)) !! '' }
     method Num()       { +self.Str() }
     method Bool()      { $!pos >= $!from }
     method chars()     { $!pos >= $!from ?? nqp::sub_i(self.to, $!from) !! 0 }
@@ -342,15 +341,6 @@ role NQPMatchRole is export {
 #        self;
 #    }
 
-    method !APPEND_TO_ORIG($value) {
-        my $orig := nqp::getattr($!shared, ParseShared, '$!orig');
-        $orig := $orig ~ $value;
-        nqp::bindattr($!shared, ParseShared, '$!orig', $orig);
-        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-        $target := $target ~ $value;
-        nqp::bindattr_s($!shared, ParseShared, '$!target', $target);
-    }
-
     my $NO_CAPS := nqp::hash();
     method CAPHASH() {
         my $caps    := nqp::hash();
@@ -381,7 +371,7 @@ role NQPMatchRole is export {
                 $subcur   := nqp::atpos($cs, $csi);
                 $submatch := $subcur.MATCH;
                 $name     := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                if !nqp::isnull_s($name) && nqp::defined($name) {
+                unless nqp::isnull_s($name) {
                     if nqp::index($name, '=') < 0 {
                         %caplist{$name} >= 2
                             ?? nqp::push($caps{$name}, $submatch)
@@ -426,12 +416,7 @@ role NQPMatchRole is export {
                 $braid := $!braid."!clone"();  # usually called when switching into a slang
             }
             else {
-                if nqp::isconcrete(self) && $!braid {
-                    $braid := Braid."!braid_init"(:grammar(self), :actions(self.actions), :package(nqp::getattr($!braid, Braid, '$!package')));
-                }
-                else {
-                    $braid := Braid."!braid_init"(:grammar(self));
-                }
+                $braid := Braid."!braid_init"(:grammar(self));
             }
         }
         nqp::die("No braid in cursor_init!") unless $braid;
@@ -547,7 +532,7 @@ role NQPMatchRole is export {
         $new;
     }
 
-    method !cursor_capture($capture, $name) {
+    method !cursor_capture($capture, str $name) {
         $!match  := nqp::null();
         $!cstack := [] unless nqp::defined($!cstack);
         nqp::push($!cstack, $capture);
@@ -567,22 +552,24 @@ role NQPMatchRole is export {
             nqp::push($!cstack, $capture);
         }
         elsif !nqp::isnull($capture) {
-            my $name := nqp::getattr_s($capture, $?CLASS, '$!name');
-            if !nqp::isnull_s($name) && nqp::defined($name) {
-                nqp::push($!cstack, $capture);
-            }
-            else {  # is top capture anonymous enough to be reused?
-                my $top         := nqp::atpos($!cstack,-1);
-                my str $topname := nqp::getattr_s($top, $?CLASS, '$!name');
-                if !nqp::isnull_s($topname) && nqp::defined($topname) {
-                    nqp::push($!cstack, $capture);
-                }
-                else {
-                    # $top anon capture just used for pos advancement, so update it in place.
-                    # We replace the whole capture because jvm can't seem to copy only the pos,
-                    # and because the chances are that both captures are in the nursury anyway.
+            if nqp::isnull_s(nqp::getattr_s($capture, $?CLASS, '$!name')) {
+                if nqp::isnull_s(nqp::getattr_s(nqp::atpos($!cstack,-1), $?CLASS, '$!name')) {
+                    # $top anon capture just used for pos advancement, so update
+                    # it in place.  We replace the whole capture because jvm
+                    # can't seem to copy only the pos, and because the chances
+                    # are that both captures are in the nursury anyway.
                     nqp::bindpos($!cstack, -1, $capture);
                 }
+
+                # top capture anonymous enough to be reused
+                else {
+                    nqp::push($!cstack, $capture);
+                }
+            }
+
+            # capture has a name
+            else {
+                nqp::push($!cstack, $capture);
             }
         }
         $!cstack;
@@ -648,17 +635,23 @@ role NQPMatchRole is export {
 
     method !reduce(str $name) {
         my $actions := self.actions;
-        nqp::findmethod($actions, $name)($actions, self.MATCH)
-            if !nqp::isnull($actions) && nqp::can($actions, $name);
+        my $method := nqp::isnull($actions)
+            ?? nqp::null()
+            !! nqp::tryfindmethod($actions, $name);
+        $method($actions, self.MATCH) unless nqp::isnull($method);
         self;
     }
 
     method !reduce_with_match(str $name, str $key, $match) {
         my $actions := self.actions;
-        nqp::findmethod($actions, $name)($actions, $match, $key)
-            if !nqp::isnull($actions) && nqp::can($actions, $name);
+        my $method := nqp::isnull($actions)
+            ?? nqp::null()
+            !! nqp::tryfindmethod($actions, $name);
+        $method($actions, $match, $key) unless nqp::isnull($method);
+        self
     }
 
+    method !shared_type() { ParseShared }
     method !shared() { $!shared }
     method !braid()  { $!braid }
 
@@ -909,7 +902,7 @@ role NQPMatchRole is export {
     }
 
     method same() {
-        my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
+        my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
 
         if $!pos < 1 || $!pos >= nqp::chars($target) { # no other side to compare to
             nqp::getattr($!shared, ParseShared, '$!fail_cursor');
@@ -1194,11 +1187,9 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     $dest := nqp::atkey($hash, $onlyname);
                 }
                 while $csi < $cselems {
-                    my $subcur   := nqp::atpos($cs, $csi);
-                    my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull_s($name) && nqp::defined($name) {
-                        my $submatch := $subcur.MATCH();
-                        nqp::push($dest, $submatch);
+                    my $subcur := nqp::atpos($cs, $csi);
+                    unless nqp::isnull_s(nqp::getattr_s($subcur, $?CLASS, '$!name')) {
+                        nqp::push($dest,$subcur.MATCH());
                     }
                     ++$csi;
                 }
@@ -1289,6 +1280,12 @@ class NQPMatch is NQPCapture does NQPMatchRole {
     method Bool() {
         !nqp::isnull(nqp::getattr(self, $?CLASS, '$!match'))
           && nqp::istrue(nqp::getattr(self, $?CLASS, '$!match'));
+    }
+
+    method Int() {
+        # XXX need a better way to do this
+        my int $i := +self.Str();
+        $i;
     }
 
     method parse($target, :$rule = 'TOP', :$actions, *%options) {

@@ -1,4 +1,4 @@
-plan(12);
+plan(13);
 sub foo() {
     'hello there';
 }
@@ -22,6 +22,8 @@ class Foo {
         $!foo := $value;
     }
 }
+
+ok(nqp::eqaddr(Foo, Foo), 'nqp::clone on a type object returns it');
 
 {
     my $c := Foo.new(foo => 123);

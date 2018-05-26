@@ -29,7 +29,7 @@ class QAST::Node {
         $!returns := $value unless $value =:= NO_VALUE;
         $!returns
     }
-    
+
     method named($value = NO_VALUE) {
         if $value =:= NO_VALUE {
             NQPMu
@@ -49,7 +49,7 @@ class QAST::Node {
             self.flat($value);
         }
     }
-    
+
     method setflag($bit)   { $!flags := nqp::bitor_i($!flags, $bit) }
     method clearflag($bit) { $!flags := nqp::bitand_i($!flags, nqp::bitneg_i($bit)) }
     method isflag($bit)    { nqp::istrue(nqp::bitand_i($!flags, $bit)) }
@@ -77,7 +77,7 @@ class QAST::Node {
     method has_compile_time_value() {
         0
     }
-    
+
     method set_compile_time_value($value) {
         self.HOW.mixin(self, QAST::CompileTimeValue);
         self.set_compile_time_value($value);
@@ -86,6 +86,11 @@ class QAST::Node {
     method annotate(str $key, $value) {
         %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
         %!annotations{$key} := $value;
+    }
+    method annotate_self(str $key, $value) {
+        %!annotations := nqp::hash() unless nqp::ishash(%!annotations);
+        %!annotations{$key} := $value;
+        self
     }
 
     method ann(str $key) {
@@ -109,11 +114,11 @@ class QAST::Node {
             (%uniques{$prefix} := 1);
         $prefix ~ '_' ~ $id
     }
-    
+
     method shallow_clone() {
         nqp::clone(self)
     }
-    
+
     method count_inline_placeholder_usages(@usages) {
         nqp::die(self.HOW.name(self) ~ " does not support inlining");
     }
@@ -150,26 +155,24 @@ class QAST::Node {
     }
 
     method dump_annotations() {
-	my @anns;
-	nqp::push(@anns, self.dump_flags);
-
+        my @anns;
+        nqp::push(@anns, self.dump_flags);
         if nqp::ishash(%!annotations) {
-	    for %!annotations {
-		my $k := $_.key;
-		my $v := $_.value;
-		try {
-		    if nqp::isconcrete($v) {
-			if $k eq 'IN_DECL' || $k eq 'BY' {
-			    nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
-			}
-			else {   # dunno how to introspect
-			    nqp::push(@anns, ':' ~ $k ~ '<?>');
-			}
-		    }
-		}
-	    }
-	}
-	nqp::join(' ',@anns);
+            for sorted_keys(%!annotations) -> $k {
+                my $v := %!annotations{$_};
+                try {
+                    if nqp::isconcrete($v) {
+                        if $k eq 'IN_DECL' || $k eq 'BY' || $k eq 'statement_id' {
+                            nqp::push(@anns, ':' ~ $k ~ '<' ~ $v ~ '>');
+                        }
+                        else {   # dunno how to introspect
+                            nqp::push(@anns, ':' ~ $k ~ '<?>');
+                        }
+                    }
+                }
+            }
+        }
+        nqp::join(' ',@anns);
     }
 
     method dump_children(int $indent, @onto) { }

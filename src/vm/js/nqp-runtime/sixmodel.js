@@ -1,20 +1,28 @@
 'use strict';
 
-var nullStr = require('./null_s.js'); /* Used when evaling runtime compiled methods */
-var Null = require('./null.js');
+/* Used when evaling runtime compiled methods */
+const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
+const bignum = require('bignum-browserify');
+const ZERO = bignum(0);  // eslint-disable-line no-unused-vars
 
-var repossession = require('./repossession.js');
-var compilingSCs = repossession.compilingSCs;
+const Null = require('./null.js');
 
-var constants = require('./constants.js');
+const repossession = require('./repossession.js');
+const compilingSCs = repossession.compilingSCs;
+
+const constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
-var bignum = require('bignum-browserify');
-var ZERO = bignum(0);
+
+/* Needed for throwing exceptions from generated code */
+const NQPException = require('./nqp-exception.js');
+
+const nativeArgs = require('./native-args.js');
+const NativeStrArg = nativeArgs.NativeStrArg;
 
 async function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
-    let method = obj._STable.methodCache.get(name);
+    const method = obj._STable.methodCache.get(name);
     if (method !== undefined) {
       return method;
     }
@@ -24,7 +32,7 @@ async function findMethod(ctx, obj, name) {
   }
 
   if (await obj._STable.HOW.$$can(ctx, 'find_method')) {
-    return await obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, name);
+    return await obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, new NativeStrArg(name));
   } else {
     return Null;
   }
@@ -45,8 +53,8 @@ class STable {
 
     /* HACK - it's a bit hackish - think how correct it is */
     this.ObjConstructor.prototype.$$clone = function() {
-      var clone = new this._STable.ObjConstructor();
-      for (var i in this) {
+      const clone = new this._STable.ObjConstructor();
+      for (const i in this) {
         if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
         }
@@ -77,15 +85,15 @@ class STable {
       }
 
       if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-        var owned = this._SC.ownedObjects.get(this);
+        const owned = this._SC.ownedObjects.get(this);
         compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
       }
     };
 
     this.ObjConstructor.prototype.$$istype = async function(ctx, type) {
-      var cache = this._STable.typeCheckCache;
+      const cache = this._STable.typeCheckCache;
       if (cache) {
-        for (var i = 0; i < cache.length; i++) {
+        for (let i = 0; i < cache.length; i++) {
           if (cache[i] === type) {
             return 1;
           }
@@ -94,13 +102,14 @@ class STable {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
 
-        var HOW = this._STable.HOW;
+        const HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
         if (!await HOW.$$can(ctx, 'type_check')) {
           return 0;
         }
 
-        if ((await HOW.type_check(ctx, null, HOW, this, type)).$$toBool(ctx)) {
+        const typeCheckResult = await HOW.type_check(ctx, null, HOW, this, type);
+        if (typeof typeCheckResult === 'number' ? typeCheckResult : typeCheckResult.$$toBool(ctx)) {
           return 1;
         }
       }
@@ -122,11 +131,32 @@ class STable {
     }
   }
 
+  lookupParametric(params) {
+    const lookup = this.parameterizerCache;
+    for (let i = 0; i < lookup.length; i++) {
+      if (params.length == lookup[i].params.length) {
+        let match = true;
+        for (let j = 0; j < params.length; j++) {
+          /* XXX More cases to consider here. - copied over from the jvm backend, need to consider what they are*/
+          if (params[j] !== lookup[i].params[j]) {
+            match = false;
+            break;
+          }
+        }
+
+        if (match) {
+          return lookup[i].type;
+        }
+      }
+    }
+  }
+
   setboolspec(mode, method) {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {
       this.ObjConstructor.prototype.$$toBool = async function(ctx) {
-        return (await method.$$call(ctx, {}, this)).$$decont().$$toBool(ctx);
+        const ret = await method.$$call(ctx, {}, this);
+        return (typeof ret === 'number' ? (ret === 0 ? 0 : 1) : ret.$$decont().$$toBool(ctx));
       };
     } else if (mode == 1) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
@@ -142,8 +172,9 @@ class STable {
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        var str = this.$$getStr();
-        return this.typeObject_ || (str == '' || str == '0') ? 0 : 1;
+        if (this.typeObject_) return 0;
+        const str = this.$$getStr();
+        return (str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
     // this is the default - do nothing
@@ -158,16 +189,16 @@ class STable {
         return this.$$elems() ? 1 : 0;
       };
     } else {
-      throw 'setboolspec with mode: ' + mode + ' NYI';
+      throw new NQPException('setboolspec with mode: ' + mode + ' NYI');
     }
   }
 
   setinvokespec(classHandle, attrName, invocationHandler) {
     if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
-      var getter = this.REPR.getterForAttr(classHandle, attrName);
+      const getter = this.REPR.getterForAttr(classHandle, attrName);
       this.ObjConstructor.prototype.$$call = function() {
-        var value = this[getter]();
+        const value = this[getter]();
         return value.$$call.apply(value, arguments);
       };
       this.ObjConstructor.prototype.$$apply = function(args) {
@@ -175,22 +206,22 @@ class STable {
       };
     } else {
       this.ObjConstructor.prototype.$$call = function() {
-        var args = [];
+        const args = [];
         args.push(arguments[0]);
         args.push(arguments[1]);
         args.push(this);
-        for (var i = 2; i < arguments.length; i++) {
+        for (let i = 2; i < arguments.length; i++) {
           args.push(arguments[i]);
         }
         return invocationHandler.$$apply(args);
       };
 
       this.ObjConstructor.prototype.$$apply = function(args) {
-        var newArgs = [];
+        const newArgs = [];
         newArgs.push(args[0]);
         newArgs.push(args[1]);
         newArgs.push(this);
-        for (var i = 2; i < args.length; i++) {
+        for (let i = 2; i < args.length; i++) {
           newArgs.push(args[i]);
         }
         return invocationHandler.$$apply(newArgs);
@@ -201,7 +232,7 @@ class STable {
 
 
   createTypeObject() {
-    var obj = new this.ObjConstructor();
+    const obj = new this.ObjConstructor();
     obj.typeObject_ = 1;
     obj.$$atkey = function(key) {
       return Null;
@@ -212,6 +243,22 @@ class STable {
     obj.$$decont = function(ctx) {
       return this;
     };
+    obj.$$clone = function(ctx) {
+      return this;
+    };
+
+    obj.$$getInt = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an int.`);
+    };
+
+    obj.$$getNum = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an num.`);
+    };
+
+    obj.$$getStr = function() {
+      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an str.`);
+    };
+
     return obj;
   }
 
@@ -227,7 +274,7 @@ class STable {
 
     this.lazyMethodCache = false;
 
-    let proto = this.ObjConstructor.prototype;
+    const proto = this.ObjConstructor.prototype;
 
     methodCache.forEach(function(method, name, map) {
       proto[name] = function() {
@@ -286,7 +333,7 @@ class STable {
   }
 
   addInternalMethods(klass) {
-    for (let methodName of Object.getOwnPropertyNames(klass.prototype)) {
+    for (const methodName of Object.getOwnPropertyNames(klass.prototype)) {
       this.addInternalMethod(methodName, klass.prototype[methodName]);
     }
   }
@@ -300,7 +347,7 @@ class STable {
 
   evalGatheredCode() {
     if (this.code) {
-      var STable = this; // eslint-disable-line no-unused-vars
+      const STable = this; // eslint-disable-line no-unused-vars
       eval(this.setup + this.code);
       this.code = '';
     }

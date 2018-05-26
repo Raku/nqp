@@ -13,7 +13,7 @@ public class IOHandleInstance extends SixModelObject {
 
     /* This wraps directories that were opened for lazy file listings */
     public DirectoryStream<Path> dirstrm;
-    
+
     /* This is the iterator from the dirstrm */
     public Iterator<Path> diri;
 }

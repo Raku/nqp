@@ -21,7 +21,7 @@ public class StorageSpec {
     public static final short CAN_BOX_INT = 1;
     public static final short CAN_BOX_NUM = 2;
     public static final short CAN_BOX_STR = 4;
-    
+
     /* 0 if this is to be referenced, anything else otherwise. */
     public short inlineable;
 
@@ -33,7 +33,7 @@ public class StorageSpec {
      * primitive type and can unbox, this says what primitive type
      * that they unbox to. */
     public short boxed_primitive;
-    
+
     /* The types that this one can box/unbox to. */
     public short can_box;
 

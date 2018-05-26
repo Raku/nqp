@@ -22,10 +22,15 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     protected CharsetDecoder dec;
     protected boolean eof = false;
     protected ByteBuffer readBuffer;
+    protected ByteBuffer writeBuffer;
+    protected int writeBufferSize = 8192;
+    protected boolean useWriteBuffer = false;
     protected byte[] linesep = null;
 
     public void close(ThreadContext tc) {
         try {
+            if (useWriteBuffer)
+                flushWriteBuffer(tc);
             chan.close();
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
@@ -259,6 +264,21 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     protected long write(ThreadContext tc, ByteBuffer buffer) {
         try {
             int toWrite = buffer.limit();
+            if (useWriteBuffer && writeBufferSize > 0) {
+                /* Ensure we have a buffer available. */
+                if (writeBuffer == null)
+                    writeBuffer = ByteBuffer.allocate(writeBufferSize);
+                /* If we can't fit it on the end of the buffer, flush the buffer. */
+                if (toWrite > writeBuffer.remaining())
+                    flushWriteBuffer(tc);
+                /* If we can fit it in the buffer now, copy it there, and we're
+                 * done. */
+                if (toWrite < writeBufferSize) {
+                    writeBuffer.put(buffer.array());
+                    return (long)toWrite;
+                }
+            }
+
             int written = 0;
             while (written < toWrite) {
                 written += chan.write(buffer);
@@ -284,12 +304,37 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         return bytes;
     }
 
+    protected void flushWriteBuffer(ThreadContext tc) {
+        if (writeBuffer != null) {
+            try {
+                writeBuffer.flip();
+                while (writeBuffer.hasRemaining())
+                    chan.write(writeBuffer);
+                writeBuffer.clear();
+            } catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+        }
+    }
+
     public void setInputLineSeparator(ThreadContext tc, String sep) {
         try {
             linesep = enc.charset().newEncoder().encode(
                 CharBuffer.wrap(sep)).array();
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
+        }
+    }
+
+    public void setBufferSize(ThreadContext tc, long size) {
+        if (useWriteBuffer) {
+            if (writeBuffer != null)
+                flushWriteBuffer(tc);
+            writeBufferSize = (int)size;
+            if (writeBufferSize > 0)
+                writeBuffer = ByteBuffer.allocate(writeBufferSize);
+            else
+                writeBuffer = null;
         }
     }
 }

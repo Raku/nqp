@@ -22,7 +22,7 @@ public class TypeObject extends SixModelObject {
             String name, long hint) {
         throw ExceptionHandling.dieInternal(tc, "Cannot look up attributes in a type object");
     }
-    
+
     public long get_int(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object");
     }
@@ -32,7 +32,7 @@ public class TypeObject extends SixModelObject {
     public String get_str(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object");
     }
-    
+
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         return null;
     }
@@ -54,6 +54,9 @@ public class TypeObject extends SixModelObject {
     public SixModelObject shift_boxed(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+    }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
@@ -72,7 +75,7 @@ public class TypeObject extends SixModelObject {
     public long elems(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
-    
+
     public SixModelObject clone(ThreadContext tc) {
         try {
             SixModelObject cloned = (SixModelObject)this.clone();

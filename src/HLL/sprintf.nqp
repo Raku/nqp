@@ -108,6 +108,15 @@ my module sprintf {
             }
         }
 
+        sub floatify($n) {
+            unless $n =:= NQPMu {
+                for @handlers {
+                    return $_.float: $n if $_.mine: $n;
+                }
+            }
+            $n
+        }
+
         sub intify($number_representation) {
             if $number_representation =:= NQPMu {
                 return $zero;   ## missing argument is handled in method TOP
@@ -158,6 +167,7 @@ my module sprintf {
             elsif $<escape> { $st := $<escape> }
             else { $st := $<literal> }
             my @pieces;
+            # Adds padding chars on in certain cases
             @pieces.push: infix_x(padding_char($st), $st<size>.made - nqp::chars($st.made)) if $st<size>;
             has_flag($st, 'minus')
                 ?? @pieces.unshift: $st.made
@@ -171,23 +181,36 @@ my module sprintf {
                 bad-type-for-directive($next, 'b');
             }
             my $int := intify($next);
-            $int := nqp::base_I($int, 2);
-            my $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int ne '0' && has_flag($/, 'hash');
+            my $pad := padding_char($/);
+            my $sign := nqp::islt_I($int, $zero) ?? '-'
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
+                     !! '';
+            $int := nqp::base_I(nqp::abs_I($int, $knowhow), 2);
+            my $size := $<size> ?? $<size>.made !! 0;
+            my $pre := '';
+            $pre := ($<sym> eq 'b' ?? '0b' !! '0B') if $int ne '0' && has_flag($/, 'hash');
             if nqp::chars($<precision>) {
-                $int := '' if $<precision>.made == 0 && $int == 0;
-                $int := $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
+                $int := ($<precision>.made == 0 && $int == 0) ?? ''
+                     !! $sign ~ $pre ~ infix_x('0', $<precision>.made - nqp::chars($int)) ~ $int;
             }
             else {
-                $int := $pre ~ $int
+                if $pad ne ' ' && $size {
+                    my $chars_sign_pre := $sign ?? nqp::chars($pre) + 1 !! nqp::chars($pre);
+                    $int := $sign ~ $pre ~ infix_x($pad, $size - $chars_sign_pre - nqp::chars($int)) ~ $int;
+                } else {
+                    $int := $sign ~ $pre ~ $int;
+                }
             }
             make $int;
         }
+
         method directive:sym<c>($/) {
             my $next := next_argument($/);
             CATCH {
                 bad-type-for-directive($next, 'c');
             }
-            make nqp::chr($next)
+            make nqp::chr(intify($next))
         }
 
         method directive:sym<d>($/) {
@@ -380,7 +403,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'e');
             }
-            my $float := $next;
+            my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
@@ -391,7 +414,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'f');
             }
-            my $int := $next;
+            my $int := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;
@@ -402,7 +425,7 @@ my module sprintf {
             CATCH {
                 bad-type-for-directive($next, 'g');
             }
-            my $float := $next;
+            my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
             my $pad := padding_char($/);
             my $size := $<size> ?? $<size>.made !! 0;

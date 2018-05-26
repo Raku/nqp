@@ -1,4 +1,4 @@
-plan(19);
+plan(21);
 class Foo {
     method foo() {
         'bar';
@@ -64,3 +64,13 @@ class Extended is Base {
 my $obj := Base.new;
 nqp::rebless($obj, Extended);
 $obj.attrs_ok;
+
+class IntReprClass is repr('P6int') {
+}
+class Class1 {
+}
+
+dies-ok({nqp::rebless(Base.new, IntReprClass)}, 'reblessing to an incompatible type is not allowed');
+
+
+dies-ok({nqp::rebless(Extended.new, Base)}, 'can\'t rebless to an incompatible type');

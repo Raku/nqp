@@ -1,3 +1,5 @@
+const NQPStr = require('./nqp-str.js');
+
 class NQPException extends Error {
   constructor(message) {
     super(message);
@@ -5,7 +7,7 @@ class NQPException extends Error {
   }
 
   Str(ctx, _NAMED, self) {
-    return this.$$message;
+    return new NQPStr(this.$$message);
   }
 
   $$toBool(ctx) {
@@ -25,7 +27,7 @@ class NQPException extends Error {
   }
 };
 
-let proto = NQPException.prototype; /* Avoid gjslint warning */
+const proto = NQPException.prototype; /* Avoid gjslint warning */
 proto._STable = {
   HOW: {
     name: function(ctx, _NAMED, how, obj) {

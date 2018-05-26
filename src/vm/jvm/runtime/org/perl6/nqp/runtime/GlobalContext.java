@@ -22,52 +22,52 @@ public class GlobalContext {
      * The KnowHOW.
      */
     public SixModelObject KnowHOW;
-    
+
     /**
      * The KnowHOWAttribute.
      */
     public SixModelObject KnowHOWAttribute;
-    
+
     /**
      * BOOTArray type; a basic, method-less type with the VMArray REPR.
      */
     public SixModelObject BOOTArray;
-    
+
     /**
      * BOOTHash type; a basic, method-less type with the VMHash REPR.
      */
     public SixModelObject BOOTHash;
-    
+
     /**
      * BOOTIter type; a basic, method-less type with the VMIter REPR.
      */
     public SixModelObject BOOTIter;
-    
+
     /**
      * BOOTInt type; a basic, method-less type with the P6int REPR.
      */
     public SixModelObject BOOTInt;
-    
+
     /**
      * BOOTNum type; a basic, method-less type with the P6num REPR.
      */
     public SixModelObject BOOTNum;
-    
+
     /**
      * BOOTStr type; a basic, method-less type with the P6str REPR.
      */
     public SixModelObject BOOTStr;
-    
+
     /**
      * BOOTCode type; a basic, method-less type with the CodeRef REPR.
      */
     public SixModelObject BOOTCode;
-    
+
     /**
      * SCRef type; a basic, method-less type with the SCRef REPR.
      */
     public SixModelObject SCRef;
-    
+
     /**
      * Continuation type; a basic, method-less type with the Continuation REPR.
      */
@@ -77,22 +77,22 @@ public class GlobalContext {
      * ContextRef type; a basic, method-less type with the ContextRef REPR.
      */
     public SixModelObject ContextRef;
-    
+
     /**
      * CallCapture type; a basic, method-less type with the CallContext REPR.
      */
     public SixModelObject CallCapture;
-    
+
      /**
      * Thread type; a basic, method-less type with the Thread REPR.
      */
     public SixModelObject Thread;
 
     /**
-     * BOOTException type; a basic, method-less type with the VMException REPR. 
+     * BOOTException type; a basic, method-less type with the VMException REPR.
      */
     public SixModelObject BOOTException;
-    
+
     /**
      * BOOTIO type; a basic, method-less type with the IOHandle REPR.
      */
@@ -102,24 +102,24 @@ public class GlobalContext {
      * BOOTJava type; a basic, method-less type with the JavaWrap REPR.
      */
     public SixModelObject BOOTJava;
-    
+
     /**
      * Typed VMArrays.
      */
     public SixModelObject BOOTIntArray;
     public SixModelObject BOOTNumArray;
     public SixModelObject BOOTStrArray;
-    
+
     /**
      * Multi-dispatch cache type.
      */
     public SixModelObject MultiCache;
-    
+
     /**
      * The main, startup thread's ThreadContext.
      */
     public ThreadContext mainThread;
-    
+
     /**
      * Timer object, used by nqp::timer.
      */
@@ -129,38 +129,38 @@ public class GlobalContext {
      * Active HLL configuration (maps HLL name to the configuration).
      */
     private HashMap<String, HLLConfig> hllConfiguration;
-    
+
     /**
      * HLL configuration of the compiler. We need to distinguish it from
      * the HLL configuration of the code being compiled in bootstrap.
      */
     private HashMap<String, HLLConfig> compilerHLLConfiguration;
-    
+
     /**
      * HLL configuration of the compilee (see above).
      */
     private HashMap<String, HLLConfig> compileeHLLConfiguration;
-    
+
     /**
      * HLL global symbols.
      */
     public HashMap<String, HashMap<String, SixModelObject>> hllSyms;
-    
+
     /**
      * Compiler registry.
      */
     public HashMap<String, SixModelObject> compilerRegistry;
-    
+
     /**
      * Container configurer registry.
      */
     public HashMap<String, ContainerConfigurer> contConfigs;
-    
+
     /**
      * Serialization context lookup hash.
      */
     public HashMap<String, SerializationContext> scs;
-    
+
     /**
      * Serialization context wrapper object hash.
      */
@@ -231,17 +231,17 @@ public class GlobalContext {
         compilerHLLConfiguration = new HashMap<String, HLLConfig>();
         hllConfiguration = compilerHLLConfiguration;
         getHLLConfigFor("");
-        
+
         scs = new HashMap<String, SerializationContext>();
         scRefs = new HashMap<String, SixModelObject>();
         compilerRegistry = new HashMap<String, SixModelObject>();
         hllSyms = new HashMap<String, HashMap<String, SixModelObject>>();
         loaded = new HashSet<String>();
-        
+
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());
         contConfigs.put("native_ref", new NativeRefContainerConfigurer());
-        
+
         currentThreadCtxRef = new ThreadLocal< >();
         allThreads = new WeakHashMap< >();
 
@@ -249,7 +249,7 @@ public class GlobalContext {
         timer = new Timer(true);
         KnowHOWBootstrapper.bootstrap(mainThread);
         bootInterop = new BootJavaInterop(this);
-        
+
         // BOOT* not available earlier; fixup some stuff.
         setupConfig(compileeHLLConfiguration.get(""));
         setupConfig(compilerHLLConfiguration.get(""));
@@ -263,7 +263,7 @@ public class GlobalContext {
 
         byteClassLoader = new ByteClassLoader(getClass().getClassLoader());
     }
-    
+
     /**
      * Gets HLL configuration object for the specified language.
      */
@@ -307,6 +307,14 @@ public class GlobalContext {
 
         if (exitStatus < 0) exitStatus = status;
         shuttingDown = true;
+
+        for (Thread th : allThreads.keySet()) {
+            if (java.lang.Thread.currentThread() == th)
+                continue;
+            th.interrupt();
+        }
+        mainThread = null;
+        currentThreadCtxRef = null;
         throw new ThreadDeath();
     }
 

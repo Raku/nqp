@@ -42,7 +42,7 @@ public class LibraryLoader {
 
             Class<?> c = loadFile(filename, tc.gc.sharingHint);
             loadClass(tc, c);
-            
+
             // Note that we already loaded it.
             tc.gc.loaded.add(origFilename);
         }
@@ -125,18 +125,19 @@ public class LibraryLoader {
     }
 
     public static Class<?> loadNew(byte[] bytes, byte[] serial) {
-        return new IgnoreNameClassLoader(bytes, serial).loadClass();
+        IgnoreNameClassLoader incl = new IgnoreNameClassLoader(bytes, serial);
+        return incl.loadClass();
     }
-    
+
     private static class IgnoreNameClassLoader extends ClassLoader {
         private byte[] bytes;
         private byte[] serial;
-        
+
         public IgnoreNameClassLoader(byte[] bytes, byte[] serial) {
             this.bytes = bytes;
             this.serial = serial;
         }
-        
+
         public Class<?> loadClass() {
             return defineClass(null, this.bytes, 0, this.bytes.length);
         }

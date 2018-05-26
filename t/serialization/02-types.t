@@ -436,7 +436,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     nqp::sethllconfig('foo', nqp::hash(
         'foreign_transform_array', -> $array {
-            'fooifed';
+            nqp::list('fooifed');
          }
     ));
     nqp::sethllconfig('baz', nqp::hash(
@@ -476,7 +476,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     nqp::sethllconfig('somelang', nqp::hash(
         'foreign_transform_array', -> $array {
-            'fooifed';
+            nqp::list('fooifed');
          }
     ));
     my $sc := nqp::createsc('TEST_SC_12_IN');
@@ -495,7 +495,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
 
     my $hllized := nqp::hllizefor($obj, "somelang");
-    ok(nqp::isstr($hllized) && $hllized eq "fooifed", "hll role is preserved correctly");
+    ok(nqp::atpos($hllized, 0) eq "fooifed", "hll role is preserved correctly");
 }
 
 # Setting the type check mode nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved by serialization
@@ -541,4 +541,58 @@ sub add_to_sc($sc, $idx, $obj) {
     ok(nqp::istype(Bar, $dsc_type), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS is preserved after serialization');
     is($dsc_type.HOW.accepts_type_called, 1, 'accepts_type is called when needed');
 
+}
+
+{
+    my $sc := nqp::createsc('TEST_SC_14_IN');
+    my $sh := nqp::list_s();
+
+    my $parameterizer := -> $type, $params {
+        nqp::newtype($type.HOW, 'Uninstantiable');
+    };
+    nqp::scsetcode($sc, 0, $parameterizer);
+    nqp::markcodestatic($parameterizer);
+
+    my $cr := nqp::list($parameterizer);
+
+    my $parametric_type := NQPClassHOW.new_type(:name('Parametric'), :repr('P6opaque'));
+    $parametric_type.HOW.add_parent($parametric_type, NQPMu);
+
+
+    nqp::setparameterizer($parametric_type, $parameterizer);
+    $parametric_type.HOW.compose($parametric_type);
+    add_to_sc($sc, 0, $parametric_type);
+
+    my $param_type := NQPClassHOW.new_type(:name('ParamType'), :repr('P6opaque'));
+    $param_type.HOW.add_parent($param_type, NQPMu);
+    $param_type.HOW.compose($param_type);
+    add_to_sc($sc, 1, $param_type);
+
+    my $serialized := nqp::serialize($sc, $sh);
+
+    my $dsc := nqp::createsc('TEST_SC_14_OUT');
+    nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
+
+    my $dsc_parametric_type := nqp::scgetobj($dsc, 0);
+    my $dsc_param_type := nqp::scgetobj($dsc, 1);
+
+    my $parameterized1 := nqp::parameterizetype($dsc_parametric_type, [$dsc_param_type]);
+
+    my $sc2 := nqp::createsc('TEST_SC_15_IN');
+    my $sh2 := nqp::list_s();
+
+    add_to_sc($sc2, 0, $parameterized1);
+
+    my $serialized2 := nqp::serialize($sc2, $sh2);
+
+    my $cr2 := nqp::list();
+
+    my $dsc2 := nqp::createsc('TEST_SC_15_OUT');
+    nqp::deserialize($serialized2, $dsc2, $sh2, $cr2, nqp::null());
+
+    my $dsc3 := nqp::createsc('TEST_SC_16_OUT');
+    nqp::deserialize($serialized2, $dsc3, $sh2, $cr2, nqp::null());
+
+    my $dsc_parameterized_a := nqp::scgetobj($dsc2, 0);
+    my $dsc_parameterized_b := nqp::scgetobj($dsc3, 0);
 }

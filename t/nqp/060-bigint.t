@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(122);
+plan(134);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -57,17 +57,13 @@ ok(iseq(nqp::bitshiftl_I($one, 3, $one), 8), 'bitshift left');
 ok(iseq($one, 1), 'original not modified by bitshift left');
 ok(iseq(nqp::bitshiftr_I(box(16), 4, $one), 1), 'bitshift right');
 
-if nqp::getcomp('nqp').backend.name eq 'js' {
-    skip("bit shifts are currently broken on the js", 6);
-} else {
-  ok(iseq(nqp::bitshiftl_I(box(-15), -3, $bi_type), -2), '-15 << -3 == -2');
-  ok(iseq(nqp::bitshiftl_I(box(-16), -3, $bi_type), -2), '-16 << -3 == -2');
-  ok(iseq(nqp::bitshiftl_I(box(-17), -3, $bi_type), -3), '-17 << -3 == -3');
+ok(iseq(nqp::bitshiftl_I(box(-15), -3, $bi_type), -2), '-15 << -3 == -2');
+ok(iseq(nqp::bitshiftl_I(box(-16), -3, $bi_type), -2), '-16 << -3 == -2');
+ok(iseq(nqp::bitshiftl_I(box(-17), -3, $bi_type), -3), '-17 << -3 == -3');
 
-  ok(iseq(nqp::bitshiftr_I(box(-15), 3, $bi_type), -2), '-15 >> 3 == -2');
-  ok(iseq(nqp::bitshiftr_I(box(-16), 3, $bi_type), -2), '-16 >> 3 == -2');
-  ok(iseq(nqp::bitshiftr_I(box(-17), 3, $bi_type), -3), '-17 >> 3 == -3');
-}
+ok(iseq(nqp::bitshiftr_I(box(-15), 3, $bi_type), -2), '-15 >> 3 == -2');
+ok(iseq(nqp::bitshiftr_I(box(-16), 3, $bi_type), -2), '-16 >> 3 == -2');
+ok(iseq(nqp::bitshiftr_I(box(-17), 3, $bi_type), -3), '-17 >> 3 == -3');
 
 ok(iseq(nqp::bitand_I(box(0xdead), box(0xbeef), $one), 0x9ead), 'bit and');
 ok(iseq(nqp::bitor_I( box(0xdead), box(0xbeef), $one), 0xfeef), 'bit or');
@@ -130,6 +126,8 @@ ok(nqp::decont_i($box_val_3) == 7, 'can unbox box_target bigint using decont_i')
 my $big := nqp::pow_I($c, box(42), $n_type, $bi_type);
 is(str($big), '5970554685064519004265641008828923248442340700473500698131071806779372733915289638628729', 'pow (int, positive)');
 ok(iseq(nqp::pow_I(box(0), $big, $n_type, $bi_type), 0), 'pow 0 ** large_number');
+
+ok(iseq(nqp::pow_I(box(0), box(0), $n_type, $bi_type), 1), 'pow 0 ** 0');
 
 my $big_even := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870004', $bi_boxer);
 my $big_odd := nqp::fromstr_I('597055468506451900426564100882892324844234070047350069813107180677937273391528963862870003', $bi_boxer);
@@ -204,6 +202,8 @@ is(nqp::base_I(box(-1234), 15), '-574', 'base_I with base 15 for 1234');
 is(nqp::base_I(box(1234), 15), '574', 'base_I with base 15 for 1234');
 is(nqp::base_I(box(-25), 15), '-1A', 'base_I with base 15 for -25');
 
+is(nqp::base_I(nqp::fromstr_I('3126485650003097871900151124153820550731463512387701580', $bi_type), 36), '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0', 'base_I with base 36 using all possible digits');
+
 ok(str(nqp::expmod_I(
     nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type),
     nqp::fromstr_I('2351399303373464486466122544523690094744975233415544072992656881240319', $bi_type),
@@ -211,11 +211,19 @@ ok(str(nqp::expmod_I(
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
 
-ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In santiy');
+ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In sanity');
 my $n := nqp::div_In(
     nqp::pow_I(box(203), box(200), $n_type, $bi_type),
     nqp::pow_I(box(200), box(200), $n_type, $bi_type),
 );
+
+my $huge := nqp::pow_I(box(10), box(300), $n_type, $bi_type);
+
+ok(nqp::div_In(box(1), $huge) == 1e-300, 'super small result from div_In work');
+ok(nqp::div_In(box(-1), box(5)) == -0.2, 'div_In -1 by 5');
+ok(nqp::div_In(box(-1), box(20)) == -0.05, 'div_In -1 by 20');
+ok(nqp::div_In(box(1), box(-200)) == -0.005, 'div_In 1 by -20');
+
 ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
 
 my $maxRand := nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type);
@@ -261,3 +269,20 @@ my sub isnan($n) {
 }
 
 ok(isnan(nqp::div_In(box(0), box(0))), 'nqp::div_In 0/0 == NaN');
+
+is(nqp::decont_i(nqp::fromstr_I('2147483647', $bi_type)), '2147483647',  'nqp::decont_i works on bignums');
+dies-ok({nqp::unbox_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t nqp::unbox_i a too big bignum');
+dies-ok({nqp::decont_i(nqp::fromstr_I('18446744073709551616', $bi_type))}, 'can\'t unqp::decont_i a too big bignum');
+
+
+
+my $other_bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
+$other_bi_type.HOW.compose($other_bi_type);
+
+my $to_be_casted := nqp::box_i(100, $bi_type);
+
+my $casted := nqp::fromI_I($to_be_casted, $other_bi_type);
+
+ok(nqp::istype($to_be_casted, $bi_type), 'fromI_I result has correct type');
+ok(nqp::unbox_i($to_be_casted) == 100, 'fromI_I result has correct value');
+ok(nqp::istype($to_be_casted, $bi_type) && nqp::unbox_i($to_be_casted) == 100, 'fromI_I argument doesn\'t change');

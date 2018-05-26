@@ -26,7 +26,7 @@ public class VMHash extends REPR {
         obj.storage = VMHashInstance.EMPTY_MAP;
         return obj;
     }
-    
+
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         return new StorageSpec();
     }
@@ -48,13 +48,13 @@ public class VMHash extends REPR {
             storage.put(key, value);
         }
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
-        
+
         /* Write out element count. */
         writer.writeInt32(storage.size());
-        
+
         /* Write elements, as key,value,key,value etc. */
         for (String key : storage.keySet()) {
             writer.writeStr(key);

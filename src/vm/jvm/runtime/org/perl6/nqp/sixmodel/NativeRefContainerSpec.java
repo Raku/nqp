@@ -35,7 +35,7 @@ public class NativeRefContainerSpec extends ContainerSpec {
     public String fetch_s(ThreadContext tc, SixModelObject cont) {
         return ((NativeRefInstance)cont).fetch_s(tc);
     }
-    
+
     /* Stores a value in a container. Used for assignment. */
     public void store(ThreadContext tc, SixModelObject cont, SixModelObject obj) {
         NativeRefREPRData rd = (NativeRefREPRData)cont.st.REPRData;
@@ -63,24 +63,24 @@ public class NativeRefContainerSpec extends ContainerSpec {
     public void store_s(ThreadContext tc, SixModelObject cont, String value) {
         ((NativeRefInstance)cont).store_s(tc, value);
     }
-    
+
     /* Stores a value in a container, without any checking of it (this
      * assumes an optimizer or something else already did it). Used for
      * assignment. */
     public void storeUnchecked(ThreadContext tc, SixModelObject cont, SixModelObject obj) {
         store(tc, cont, obj);
     }
-    
+
     /* Name of this container specification. */
     public String name() {
         return "native_ref";
     }
-    
+
     /* Serializes the container data, if any. */
     public void serialize(ThreadContext tc, STable st, SerializationWriter writer) {
         /* Nothing to do. */
     }
-    
+
     /* Deserializes the container data, if any. */
     public void deserialize(ThreadContext tc, STable st, SerializationReader reader) {
         /* Nothing to do. */

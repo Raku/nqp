@@ -13,6 +13,7 @@ knowhow NQPParametricRoleHOW {
     # Attributes and methods.
     has @!attributes;
     has %!methods;
+    has @!method_order;
     has @!multi_methods_to_incorporate;
 
     # Other roles that this one does.
@@ -46,6 +47,7 @@ knowhow NQPParametricRoleHOW {
         $!name := $name;
         @!attributes := nqp::list();
         %!methods := nqp::hash();
+        @!method_order := nqp::list();
         @!multi_methods_to_incorporate := nqp::list();
         @!roles := nqp::list();
         $!composed := 0;
@@ -68,7 +70,7 @@ knowhow NQPParametricRoleHOW {
         if nqp::existskey(%!methods, $name) {
             nqp::die("This role already has a method named " ~ $name);
         }
-        %!methods{$name} := $code_obj;
+        nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
     method add_multi_method($obj, $name, $code_obj) {
@@ -138,11 +140,11 @@ knowhow NQPParametricRoleHOW {
         }
 
         # Capture methods in the correct lexical context.
-        for %!methods {
-            my $name := nqp::iterkey_s($_);
-            my $meth := nqp::can(nqp::iterval($_), 'instantiate_generic')
-                ?? nqp::iterval($_).instantiate_generic($pad)
-                !! nqp::iterval($_).clone();
+        for @!method_order -> $method {
+            my $name := $method.name();
+            my $meth := nqp::can($method, 'instantiate_generic')
+                ?? $method.instantiate_generic($pad)
+                !! $method.clone();
             if nqp::eqat($name, '!!LATENAME!!', 0) {
                 $name := nqp::atkey($pad, nqp::substr($name, 12));
                 $meth.'!set_name'($name);
@@ -169,11 +171,7 @@ knowhow NQPParametricRoleHOW {
     ##
 
     method methods($obj, :$local, :$all) {
-        my @meths;
-        for %!methods {
-            nqp::push(@meths, nqp::iterval($_));
-        }
-        @meths
+        @!method_order
     }
 
     method method_table($obj) {

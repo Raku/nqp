@@ -1,6 +1,6 @@
 #! nqp
 
-plan(25);
+plan(33);
 
 class Foo {
     has $!answer;
@@ -15,6 +15,25 @@ $first.question(42);
 $second.question(23);
 ok($first.answer  == 42, "attributes work");
 ok($second.answer == 23, "... and are not shared among objects");
+
+class Bar {
+}
+
+dies-ok({
+  nqp::getattr(Foo.new, Foo, '$!no_such');
+}, "getting a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::bindattr(Foo.new, Foo, '$!no_such', 123);
+}, "binding a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::getattr(Foo.new, Bar, '$!answer');
+}, "getting a attribute that's not in a class dies");
+
+dies-ok({
+  nqp::bindattr(Foo.new, Bar, '$!answer', 123);
+}, "binding a attribute that's not in a class dies");
 
 class Lowlevel {
     has int $!int;
@@ -64,7 +83,10 @@ ok(nqp::getattr_n($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr_n');
 is(nqp::getattr_s($low, Lowlevel, '$!str'), 'hello world', 'nqp::getattr_s');
 ok(nqp::eqaddr(nqp::getattr($low, Lowlevel, '$!obj'), $obj), 'nqp::getattr');
 
-ok(nqp::getattr($low, Lowlevel, '$!int') == 456, 'nqp::getattr for an int attribute get the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!int') == 456, 'nqp::getattr for an int attribute gets the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!num') == 12.3, 'nqp::getattr for an num attribute gets the correct value');
+ok(nqp::getattr($low, Lowlevel, '$!str') eq 'hello world', 'nqp::getattr for an str attribute gets the correct value');
+
 ok(nqp::isint(nqp::getattr($low, Lowlevel, '$!int')), '...as an int');
 
 class ClassA {
@@ -112,6 +134,12 @@ $partial.get_attr1;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr1'), 'nqp::attrinitied on a attr that has been autovivified');
 $partial.set_attr2;
 ok(nqp::attrinited($partial, AttrInitedTest, '$!attr2'), 'nqp::attrinitied on a attr that has been bound to');
+
+my $in_void := AttrInitedTest.new;
+ok(!nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied before getting attr');
+nqp::getattr($in_void, AttrInitedTest, '$!attr1');
+ok(nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied with nqp::getattr as void');
+
 
 use nqpmo;
 

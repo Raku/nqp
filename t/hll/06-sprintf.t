@@ -22,30 +22,28 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(284);
+plan(286);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
 is(nqp::sprintf('Peter %s', ['Bishop']), 'Peter Bishop', 'one %s directive' );
 is(nqp::sprintf('%s %s', ['William', 'Bell']), 'William Bell', 'two %s directives' );
 
-dies_ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives' );
-is($die_message, 'Your printf-style directives specify 2 arguments, but 3 arguments were supplied',
-    'arguments > directives error message' );
+dies-ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives',
+ :message('Your printf-style directives specify 2 arguments, but 3 arguments were supplied'));
 
-dies_ok({ nqp::sprintf('%s %s %s', ['Olivia', 'Dunham']) }, 'directives > arguments' );
-is($die_message, 'Your printf-style directives specify 3 arguments, but 2 arguments were supplied',
-    'directives > arguments error message' );
+dies-ok({ nqp::sprintf('%s %s', ['Dr.', 'William', 'Bell']) }, 'arguments > directives',
+  :message('Your printf-style directives specify 2 arguments, but 3 arguments were supplied'));
 
-dies_ok({ nqp::sprintf('%s %s', []) }, 'directives > 0 arguments' );
-is($die_message, 'Your printf-style directives specify 2 arguments, but no argument was supplied',
-    'directives > 0 arguments error message' );
+dies-ok({ nqp::sprintf('%s %s %s', ['Olivia', 'Dunham']) }, 'directives > arguments',
+  :message('Your printf-style directives specify 3 arguments, but 2 arguments were supplied'));
+
+dies-ok({ nqp::sprintf('%s %s', []) }, 'directives > 0 arguments',
+  :message('Your printf-style directives specify 2 arguments, but no argument was supplied'));
 
 is(nqp::sprintf('%% %% %%', []), '% % %', '%% escape' );
 
-dies_ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive' );
-is($die_message, "'a' is not valid in sprintf format sequence '%a'",
-    'unknown directive error message' );
+dies-ok({ nqp::sprintf('%a', 'Science') }, 'unknown directive', :message("'a' is not valid in sprintf format sequence '%a'"));
 
 my class SprintfHandler {
     method mine($x) { try nqp::reprname($x) eq "P6bigint" }
@@ -111,10 +109,10 @@ is(nqp::sprintf('%u', [22.01]), '22', 'decimal %u');
 is(nqp::sprintf("%u", [2**32]), "4294967296", "max uint32 to %u");
 
 is(nqp::sprintf('%B', [2**32-1]), '11111111111111111111111111111111', 'simple %B');
-is(nqp::sprintf('%+B', [2**32-1]), '11111111111111111111111111111111', 'simple %B with plus sign');
+is(nqp::sprintf('%+B', [2**32-1]), '+11111111111111111111111111111111', 'simple %B with plus sign');
 is(nqp::sprintf('%#B', [2**32-1]), '0B11111111111111111111111111111111', '%B with 0B prefixed');
 is(nqp::sprintf('%b', [2**32-1]), '11111111111111111111111111111111', 'simple %b');
-is(nqp::sprintf('%+b', [2**32-1]), '11111111111111111111111111111111', 'simple %b with plus sign');
+is(nqp::sprintf('%+b', [2**32-1]), '+11111111111111111111111111111111', 'simple %b with plus sign');
 is(nqp::sprintf('%#b', [2**32-1]), '0b11111111111111111111111111111111', '%b with 0b prefixed');
 is(nqp::sprintf('%34b', [2**32-1]), '  11111111111111111111111111111111', '%b right justified using space chars');
 is(nqp::sprintf('%034b', [2**32-1]), '0011111111111111111111111111111111', '%b right justified, 0-padding');
@@ -123,7 +121,7 @@ is(nqp::sprintf('%-034b', [2**32-1]), '11111111111111111111111111111111  ', '%b 
 is(nqp::sprintf('%6b', [12]), '  1100', 'simple %b, padded');
 is(nqp::sprintf('%6.5b', [12]), ' 01100', '%b, right justified and precision');
 is(nqp::sprintf('%-6.5b', [12]), '01100 ', '%b, left justified and precision');
-is(nqp::sprintf('%+6.5b', [12]), ' 01100', '%b, right justified and precision, plus sign');
+is(nqp::sprintf('%+7.5b', [12]), ' +01100', '%b, right justified and precision, plus sign');
 is(nqp::sprintf('% 6.5b', [12]), ' 01100', '%b, right justified and precision, space char');
 is(nqp::sprintf('%06.5b', [12]), ' 01100', '%b, 0 flag with precision: no effect');
 is(nqp::sprintf('%.5b', [12]), '01100', '%b with precision but no width');
@@ -138,8 +136,8 @@ is(nqp::sprintf('%#3.2b', [0]), ' 00', '%b, width and precision but zero value')
 is(nqp::sprintf('%#3.3b', [0]), '000', '%b, width and precision but zero value');
 is(nqp::sprintf('%#3.4b', [0]), '0000', '%b, width and precision but zero value, overlong');
 is(nqp::sprintf('%.0b', [1]), '1', '%b, precision zero and value');
-is(nqp::sprintf('%+.0b', [1]), '1', '%b, precision zero, plus sign and value');
-is(nqp::sprintf('% .0b', [1]), '1', '%b, precision zero, space char and value');
+is(nqp::sprintf('%+.0b', [1]), '+1', '%b, precision zero, plus sign and value');
+is(nqp::sprintf('% .0b', [1]), ' 1', '%b, precision zero, space char and value');
 is(nqp::sprintf('%-.0b', [1]), '1', '%b, precision zero, hash and value');
 is(nqp::sprintf('%#.0b', [1]), '0b1', '%b, width, zero precision, no value');
 is(nqp::sprintf('%#3.0b', [1]), '0b1', '%b, width, zero precision but value');

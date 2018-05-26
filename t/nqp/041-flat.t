@@ -1,6 +1,6 @@
 # flattened arguments
 
-plan(6);
+plan(12);
 
 sub xyz($x, $y, $z) {
     ok( $x == 7, 'first argument');
@@ -22,3 +22,24 @@ my %a;
 %a<j> := 2;
 %a<k> := 3;
 ijk(|%a);
+
+sub int_args(int $x, int $y) {
+    ok( $x == 7, 'first int argument');
+    ok( $y == 8, 'second int argument');
+}
+my $int_args := nqp::list_i(7, 8);
+int_args(|$int_args);
+
+sub num_args(num $x, num $y) {
+    ok( $x == 7.2, 'first num argument');
+    ok( $y == 8.3, 'second num argument');
+}
+my $num_args := nqp::list_n(7.2, 8.3);
+num_args(|$num_args);
+
+sub str_args(str $x, str $y) {
+    ok( $x eq 'a', 'first str argument');
+    ok( $y eq 'b', 'second str argument');
+}
+my $str_args := nqp::list_s('a', 'b');
+str_args(|$str_args);

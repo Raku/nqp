@@ -1,6 +1,8 @@
 'use strict';
 
-var NQPInt = require('./nqp-int.js');
+const coercions = require('./coercions');
+
+const NQPInt = require('./nqp-int.js');
 
 class CodePair {
   constructor(STable) {
@@ -15,8 +17,8 @@ class CodePair {
   }
 
   setupSTable() {
-    var fetch = this.fetch;
-    var store = this.store;
+    const fetch = this.fetch;
+    const store = this.store;
 
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
@@ -73,8 +75,8 @@ class NativeRef {
   }
 
   setupSTable() {
-    var primitiveType = this.STable.REPR.primitiveType;
-    var STable = this.STable;
+    const primitiveType = this.STable.REPR.primitiveType;
+    const STable = this.STable;
 
     /* TODO - take the hll in account when converting to object */
 
@@ -100,23 +102,35 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_i(ctx, value) {
+        $$decont_i(ctx) {
           return this.get();
         }
 
-        $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+        $$getInt() {
+          return this.get();
+        }
+
+        $$getNum() {
+          return this.get();
+        }
+
+        $$getStr() {
+          return this.get().toString();
+        }
+
+        $$decont(ctx) {
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('int_box');
+          const type = hll.get('int_box');
           if (!type) {
             // HACK - nqp still uses NQPInt instead of the thing in the hll config
             return new NQPInt(this.get());
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setInt(this.get());
             return obj;
           }
@@ -140,23 +154,35 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_n(ctx, value) {
+        $$decont_n(ctx) {
           return this.get();
         }
 
-        $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+        $$getInt() {
+          return this.get()|0;
+        }
+
+        $$getNum() {
+          return this.get();
+        }
+
+        $$getStr() {
+          return coercions.numToStr(this.get());
+        }
+
+        $$decont(ctx) {
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('num_box');
+          const type = hll.get('num_box');
           if (!type) {
             // HACK - nqp still uses raw javascript numbers instead of the thing in the hll config
             return this.get();
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setNum(this.get());
             return obj;
           }
@@ -184,23 +210,35 @@ class NativeRef {
           this.set(value);
         }
 
-        $$decont_s(ctx, value) {
+        $$decont_s(ctx) {
           return this.get();
         }
 
-        $$decont(ctx, value) {
-          var hll = STable.hllOwner;
+        $$getStr() {
+          return this.get();
+        }
+
+        $$getInt() {
+          return coercions.strToInt(this.get());
+        }
+
+        $$getNum() {
+          return coercions.strToNum(this.get());
+        }
+
+        $$decont(ctx) {
+          let hll = STable.hllOwner;
           if (hll === undefined) {
             hll = ctx.codeRef().staticCode.hll;
           }
 
-          var type = hll.get('str_box');
+          const type = hll.get('str_box');
           if (!type) {
             // HACK - nqp still uses raw javascript strings instead of the thing in the hll config
             return this.get();
           } else {
-            var repr = type._STable.REPR;
-            var obj = repr.allocate(type._STable);
+            const repr = type._STable.REPR;
+            const obj = repr.allocate(type._STable);
             obj.$$setStr(this.get());
             return obj;
           }

@@ -113,7 +113,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         $qast := QAST::Regex.new(:rxtype<concat>, $qast, $sigfinal) if $sigfinal;
 
         if $qast {
-            $qast.backtrack('r') if !$qast.backtrack && (%*RX<r> || $<backmod> && ~$<backmod> eq ':');
+            $qast.backtrack('r') if !$qast.backtrack && nqp::if($<backmod>, (~$<backmod> eq ':'), %*RX<r>);
             $qast.node($/);
         }
         make $qast;
@@ -475,23 +475,23 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method cclass_backslash:sym<o>($/) {
         my $octlit :=
             HLL::Actions.ints_to_string( $<octint> || $<octints><octint> );
-        my $ast := $<sym> eq 'O'
-             ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
-                                  :negate(1), :node($/) )
-             !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) );
-        $ast.annotate('codepoint', $<octint> ?? $<octint>.ast !! $<octints><octint>[0].ast);
-        make $ast;
+        make ($<sym> eq 'O'
+          ?? QAST::Regex.new( $octlit, :rxtype('enumcharlist'),
+                              :negate(1), :node($/) )
+          !! QAST::Regex.new( $octlit, :rxtype('literal'), :node($/) )
+        ).annotate_self('codepoint', $<octint>
+          ?? $<octint>.ast !! $<octints><octint>[0].ast)
     }
 
     method cclass_backslash:sym<x>($/) {
         my $hexlit :=
             HLL::Actions.ints_to_string( $<hexint> || $<hexints><hexint> );
-        my $ast := $<sym> eq 'X'
-             ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
-                                  :negate(1), :node($/) )
-             !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) );
-        $ast.annotate('codepoint', $<hexint> ?? $<hexint>.ast !! $<hexints><hexint>[0].ast);
-        make $ast;
+        make ($<sym> eq 'X'
+          ?? QAST::Regex.new( $hexlit, :rxtype('enumcharlist'),
+                              :negate(1), :node($/) )
+          !! QAST::Regex.new( $hexlit, :rxtype('literal'), :node($/) )
+        ).annotate_self('codepoint', $<hexint>
+          ?? $<hexint>.ast !! $<hexints><hexint>[0].ast)
     }
 
     method cclass_backslash:sym<c>($/) {
@@ -765,8 +765,8 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
                                         :subtype($RXm ?? 'ignoremark' !! '') ))
                 if nqp::chars($str);
-            $qast := +@alts == 1 ?? @alts[0] !!
-                $<sign> eq '-' ??
+            $qast := ( my $num := +@alts ) == 1 ?? @alts[0] !!
+                0 < $num && $<sign> eq '-' ??
                     QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
@@ -777,7 +777,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method mod_internal($/) {
         if $<quote_EXPR> {
-            if $<quote_EXPR>[0].ast ~~ QAST::SVal {
+            if nqp::istype($<quote_EXPR>[0].ast, QAST::SVal) {
                 my $key := ~$<mod_ident><sym>;
                 my $val := $<quote_EXPR>[0].ast.value;
                 %*RX{$key} := $val;
@@ -946,7 +946,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 self.alt_nfas($code_obj, $block, $_);
                 nqp::push(@alternatives, QRegex::NFA.new.addnode($_));
             }
-            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ ~nqp::time_n());
+            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ $*W.handle());
             self.store_regex_alt_nfa($code_obj, $block, $ast.name, @alternatives);
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
@@ -993,8 +993,28 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         }
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
-            while +@($qast) { @tmp.push(@($qast).shift) }
-            while @tmp      { @($qast).push(self.flip_ast(@tmp.pop)) }
+            while nqp::elems(@($qast)) { @tmp.push(@($qast).shift) }
+            while @tmp { @($qast).push(self.flip_ast(@tmp.pop)) }
+        }
+        elsif $qast.rxtype eq 'anchor' {
+            if $qast.subtype eq 'rwb' {
+                $qast.subtype("lwb");
+            }
+            elsif $qast.subtype eq 'lwb' {
+                $qast.subtype("rwb");
+            }
+            elsif $qast.subtype eq 'bol' {
+                $qast.subtype("eol");
+            }
+            elsif $qast.subtype eq 'eol' {
+                $qast.subtype("bol");
+            }
+            elsif $qast.subtype eq 'bos' {
+                $qast.subtype("eos");
+            }
+            elsif $qast.subtype eq 'eos' {
+                $qast.subtype("bos");
+            }
         }
         else {
             for @($qast) { self.flip_ast($_) }

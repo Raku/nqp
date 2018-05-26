@@ -1,14 +1,25 @@
 'use strict';
-var NQPInt = require('./nqp-int.js');
-var Null = require('./null.js');
+const NQPInt = require('./nqp-int.js');
+const NQPNum = require('./nqp-num.js');
+const NQPStr = require('./nqp-str.js');
+
+const Null = require('./null.js');
+
+const nativeArgs = require('./native-args.js');
 
 const MAX_ARITY = 4;
 const MAX_PER_ARITY = 16;
 
+const NativeIntArg = nativeArgs.NativeIntArg;
+const NativeNumArg = nativeArgs.NativeNumArg;
+const NativeStrArg = nativeArgs.NativeStrArg;
+
+const reprs = require('./reprs.js');
+
 class MultiCache {
   constructor() {
     this.cache = [];
-    for (var i = 0; i < MAX_ARITY; i++) {
+    for (let i = 0; i < MAX_ARITY; i++) {
       this.cache[i] = [];
     }
   }
@@ -19,49 +30,59 @@ class MultiCache {
 };
 
 async function posTypes(ctx, capture) {
-  var arity = capture.pos.length;
-  var types = new Array(arity);
-  for (var i = 0; i < arity; i++) {
-    var obj = capture.pos[i];
+  const arity = capture.pos.length;
+  const types = new Array(arity);
+  for (let i = 0; i < arity; i++) {
+    const obj = capture.pos[i];
     if (obj._STable) {
-      let deconted = await obj.$$decont(ctx);
+      const deconted = await obj.$$decont(ctx);
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
-        if (deconted.typeObject_) {
-          if (deconted._STable.typeObjectCachedAsRW === undefined) {
-            deconted._STable.typeObjectCachedAsRW = {};
-          }
-          types[i] = deconted._STable.typeObjectCachedAsRW;
+        if (obj._STable.REPR instanceof reprs.NativeRef) {
+          types[i] = obj._STable;
         } else {
-          if (deconted._STable.cachedAsRW === undefined) {
-            deconted._STable.cachedAsRW = {};
+          if (deconted.typeObject_) {
+            if (deconted._STable.typeObjectCachedAsRW === undefined) {
+              deconted._STable.typeObjectCachedAsRW = {};
+            }
+            types[i] = deconted._STable.typeObjectCachedAsRW;
+          } else {
+            if (deconted._STable.cachedAsRW === undefined) {
+              deconted._STable.cachedAsRW = {};
+            }
+            types[i] = deconted._STable.cachedAsRW;
           }
-          types[i] = deconted._STable.cachedAsRW;
         }
       } else {
         types[i] = deconted.typeObject_ ? deconted : deconted._STable;
       }
+    } else if (obj instanceof NativeIntArg) {
+      types[i] = 1;
+    } else if (obj instanceof NativeNumArg) {
+      types[i] = 2;
+    } else if (obj instanceof NativeStrArg) {
+      types[i] = 3;
     } else if (obj instanceof NQPInt) {
       types[i] = 1;
-    } else if (typeof obj == 'number') {
+    } else if (obj instanceof NQPNum) {
       types[i] = 2;
-    } else if (typeof obj == 'string') {
+    } else if (obj instanceof NQPStr) {
       types[i] = 3;
     }
   }
   return types;
 }
 
-var op = {};
+const op = {};
 
 op.multicachefind = async function(ctx, cache, capture) {
   if (!(cache instanceof MultiCache)) return Null;
-  var arity = capture.pos.length;
-  var hasNamed = capture.named ? true : false;
+  const arity = capture.pos.length;
+  if (capture.named) return Null;
 
   if (arity == 0) {
-    if (!hasNamed && cache.zeroArity) {
+    if (cache.zeroArity) {
       return cache.zeroArity;
     } else {
       return Null;
@@ -70,15 +91,14 @@ op.multicachefind = async function(ctx, cache, capture) {
 
   if (arity > MAX_ARITY) return Null;
 
-  var types = await posTypes(ctx, capture);
+  const types = await posTypes(ctx, capture);
 
-  var arityCache = cache.cache[arity - 1];
+  const arityCache = cache.cache[arity - 1];
 
-  CANDIDATES: for (var i = 0; i < arityCache.length; i++) {
-    for (var j = 0; j < arityCache[i].types.length; j++) {
+  CANDIDATES: for (let i = 0; i < arityCache.length; i++) {
+    for (let j = 0; j < arityCache[i].types.length; j++) {
       if (arityCache[i].types[j] !== types[j]) continue CANDIDATES;
     }
-    if (arityCache[i].hasNamed !== hasNamed) continue CANDIDATES;
     return arityCache[i].result;
   }
 
@@ -86,14 +106,12 @@ op.multicachefind = async function(ctx, cache, capture) {
 };
 
 op.multicacheadd = async function(ctx, cache, capture, result) {
-  var c = cache instanceof MultiCache ? cache : new MultiCache();
-  var arity = capture.pos.length;
-  var hasNamed = capture.named ? true : false;
+  const c = cache instanceof MultiCache ? cache : new MultiCache();
+  if (c.named) return c;
+  const arity = capture.pos.length;
 
   if (arity == 0) {
-    if (!hasNamed) {
-      c.zeroArity = result;
-    }
+    c.zeroArity = result;
     return c;
   }
 
@@ -101,7 +119,7 @@ op.multicacheadd = async function(ctx, cache, capture, result) {
     return c;
   }
 
-  c.cache[arity - 1].push({types: await posTypes(ctx, capture), hasNamed: hasNamed, result: result});
+  c.cache[arity - 1].push({types: await posTypes(ctx, capture), result: result});
   return c;
 };
 

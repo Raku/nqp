@@ -15,8 +15,18 @@ role QAST::SpecialArg {
     }
 
     method dump_extra_node_info() {
-        my $parent := self.HOW.parents(self, :local(1))[0];
-        my $info := $parent.HOW.method_table($parent)<dump_extra_node_info>(self);
+        my $info := {
+            my @parents := self.HOW.parents(self);
+            nqp::shift(@parents) if +@parents > 0;
+
+            my $meth;
+            my $invokable := 0;
+            for @parents -> $p {
+                $meth := $p.HOW.method_table($p)<dump_extra_node_info>;
+                last if ( $invokable := nqp::isinvokable($meth) );
+            }
+            $invokable ?? $meth(self) !! ''
+        }();
 
         $info := nqp::chars($info) ?? $info ~ " " !! "";
 

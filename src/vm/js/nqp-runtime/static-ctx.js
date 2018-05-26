@@ -1,4 +1,4 @@
-var Iter = require('./iter.js');
+const Iter = require('./iter.js').Iter;
 class StaticCtx {
   constructor() {
     this.$$outer = null;

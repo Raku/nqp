@@ -1,6 +1,6 @@
 # check hash access methods
 
-plan(18);
+plan(19);
 
 my %h;
 
@@ -42,3 +42,9 @@ ok($h == 2, 'hash can be converted to number');
 
 ok(nqp::istrue(nqp::hash('foo', 1, 'bar', 2)) == 1, 'a hash with 2 elements is true');
 ok(nqp::istrue(nqp::hash()) == 0, 'a hash with 0 elements is false');
+
+sub as_return_value() {
+  %h<missing>;
+}
+
+ok(nqp::eqaddr(as_return_value(), NQPMu), 'getting a NQPMu for a missing hash member when used a s return value');

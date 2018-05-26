@@ -2,7 +2,7 @@
 
 # test named parameters and arguments
 
-plan(9);
+plan(11);
 
 sub f1 ($x, :$y) { $x - $y; }
 is(f1(2, :y(1)), 1, 'named args passable');
@@ -35,3 +35,17 @@ is(f5(), 'bespoke default value', 'the specified default value is used');
 is($default_built, 1, 'the default value is created when needed');
 
 # XXX: test mandatory named args are actually mandatory
+
+sub require_named(:$mandatory!) {
+  'We require ' ~ $mandatory;
+}
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('not yet fixed on the JVM', 1);
+} else {
+  dies-ok({require_named(:mandatory('fun'), :optional('ennui'))}, 'die when an extra argument is passed');
+}
+
+sub foo() {
+}
+dies-ok({foo(:arg(123))}, 'die when a named argument is passed when no are allowed');

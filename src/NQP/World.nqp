@@ -91,13 +91,21 @@ class NQP::World is HLL::World {
             if self.is_precompilation_mode() {
                 self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
                     QAST::Op.new(
-                        :op('loadbytecode'),
-                        QAST::VM.new(
-                            :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
-                            :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                            :js(QAST::SVal.new( :value('ModuleLoader') ))
-                        )),
-                    $set_outer
+                        :op('ifnull'),
+                        QAST::Op.new(
+                            :op('getcurhllsym'),
+                            QAST::SVal.new( :value('ModuleLoader') ),
+                        ),
+                        QAST::Op.new(
+                            :op('loadbytecode'),
+                            QAST::VM.new(
+                                :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
+                                :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
+                                :js(QAST::SVal.new( :value('ModuleLoader') ))
+                            )
+                        ),
+                    ),
+                    $set_outer,
                 )));
             }
             else {
@@ -118,13 +126,6 @@ class NQP::World is HLL::World {
         if self.is_precompilation_mode() {
             self.add_load_dependency_task(:deserialize_ast(QAST::Stmts.new(
                 QAST::Op.new(
-                    :op('loadbytecode'),
-                    QAST::VM.new(
-                        :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
-                        :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                        :js(QAST::SVal.new( :value('ModuleLoader') ))
-                    )),
-                QAST::Op.new(
                    :op('callmethod'), :name('load_module'),
                    QAST::Op.new(
                         :op('getcurhllsym'),
@@ -139,8 +140,8 @@ class NQP::World is HLL::World {
 
     method import($stash) {
         my $target := self.cur_lexpad();
-        for $stash {
-            self.install_lexical_symbol($target, $_.key, $_.value);
+        for sorted_keys($stash) {
+            self.install_lexical_symbol($target, $_, $stash{$_});
         }
     }
 
@@ -197,9 +198,9 @@ class NQP::World is HLL::World {
         # See if NQPRoutine is available to wrap this up in.
         my $code_type;
         my $have_code_type := 0;
-	my $cursor := $*LANG;
-	my $package := $cursor.package;
-	$cursor.check_PACKAGE_oopsies('create_code');
+	    my $cursor := $*LANG;
+	    my $package := $cursor.package;
+	    $cursor.check_PACKAGE_oopsies('create_code');
         try {
             $code_type := self.find_sym([$code_type_name]);
             $have_code_type := $package.HOW.name($package) ne $code_type_name;
@@ -240,7 +241,7 @@ class NQP::World is HLL::World {
 
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
-                    $fixup_stmts.shift() while +@($fixup_stmts);
+                    $fixup_stmts.shift() while nqp::elems(@($fixup_stmts));
                 }
                 $i := $i + 1;
             }
@@ -439,17 +440,17 @@ class NQP::World is HLL::World {
         while $i > 0 {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
-            for %symbols {
-                if !%seen{$_.key} && nqp::existskey($_.value, 'value') || nqp::existskey($_.value, 'lazy_value_from') {
-                    my $value := self.force_value($_.value, $_.key, 0);
+            for sorted_keys(%symbols) {
+                if !%seen{$_} && nqp::existskey(%symbols{$_}, 'value') || nqp::existskey(%symbols{$_}, 'lazy_value_from') {
+                    my $value := self.force_value(%symbols{$_}, $_, 0);
                     unless nqp::isnull(nqp::getobjsc($value)) {
                         $wrapper[0].push(QAST::Op.new(
                             :op('bind'),
-                            QAST::Var.new( :name($_.key), :scope('lexical'), :decl('var') ),
+                            QAST::Var.new( :name($_), :scope('lexical'), :decl('var') ),
                             QAST::WVal.new( :value($value) )
                         ));
                     }
-                    %seen{$_.key} := 1;
+                    %seen{$_} := 1;
                 }
             }
         }
@@ -610,10 +611,10 @@ class NQP::World is HLL::World {
             if nqp::existskey($result.WHO, ~$_) {
                 $result := ($result.WHO){$_};
             }
-	    # XXX temp shim to avoid bootstrapping funniness
-	    elsif nqp::elems(@name) == 1 && @name[0] eq 'NQPCursor' {
-		return self.find_sym(['NQPMatch']);
-	    }
+	        # XXX temp shim to avoid bootstrapping funniness
+	        elsif nqp::elems(@name) == 1 && @name[0] eq 'NQPCursor' {
+		        return self.find_sym(['NQPMatch']);
+	        }
             else {
                 nqp::die("Could not locate compile-time value for symbol " ~
                     join('::', @name));

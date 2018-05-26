@@ -2,7 +2,7 @@
 
 # Test nqp::op file operations.
 
-plan(106);
+plan(109);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
@@ -27,6 +27,10 @@ ok( $credits.eof, 'At EOF after slurp');
 ok( nqp::chars($rest) > 100, 'slurp read a lot');
 ok( nqp::substr($rest,0,4) ne '=pod', 'slurp after get did not read line twice');
 ok( $credits.tell >= nqp::chars($line) + nqp::chars($rest), 'tell end of file');
+
+dies-ok({
+  open('file_does_not_exist_for_sure', :r);
+}, 'open dies on missing file');
 
 ok( nqp::chars($credits.get) == 0, 'get end of file');
 ok( nqp::chars($credits.get) == 0, 'get end of file repeat');
@@ -285,10 +289,7 @@ nqp::unlink($test-file ~ '-linked');
 
 # symlink
 
-my $tmp-file := "tmp";
-spew($tmp-file, "\n");
-my $is-windows := nqp::stat($tmp-file, nqp::const::STAT_FILESIZE) == 2;
-nqp::unlink($tmp-file);
+my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
 
 if $is-windows {
     skip("symlink not tested on Windows", 9);
@@ -464,4 +465,14 @@ my sub create_buf($type) {
     nqp::unlink($dir ~ '/file1');
     nqp::unlink($dir ~ '/file2');
     nqp::rmdir($dir);
+}
+
+# test spurt
+{
+    my $s := "line 1\nline 2";
+    spurt($test-file, $s);
+    my $fh := open($test-file);
+    is($fh.get(), 'line 1', 'read from spurted line 1 ok');
+    is($fh.get(), 'line 2', 'read from spurted line 2 ok');
+    nqp::unlink($test-file);
 }

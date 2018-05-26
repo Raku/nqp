@@ -8,7 +8,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 public class NativeRefInstanceNumLex extends NativeRefInstance {
     public double[] lexicals;
     public int idx;
-    
+
     public long fetch_i(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc,
             "This container does not reference a native integer");

@@ -1,10 +1,12 @@
 package org.perl6.nqp.io;
 
+import com.sun.jna.*;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ProcessBuilder;
 import java.lang.ProcessBuilder.Redirect;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,14 +48,17 @@ public class AsyncProcessHandle implements IIOClosable {
         this.tc = tc;
         this.hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         this.bufType = config.get("buf_type");
-        new Thread(new Runnable() {
+        Thread thread = new Thread(new Runnable() {
             public void run() {
                 try {
                     AsyncProcessHandle.this.proc = pb.start();
 
+                    int pid = (int)getPID(AsyncProcessHandle.this.proc);
+
                     SixModelObject ready = config.get("ready");
-                    if (ready != null)
-                        send(ready);
+                    if (ready != null) {
+                        send(ready, null, boxInt(pid));
+                    }
 
                     SixModelObject outputCallback = config.get("merge_bytes");
                     if (outputCallback == null)
@@ -67,8 +72,9 @@ public class AsyncProcessHandle implements IIOClosable {
 
                     int outcome = AsyncProcessHandle.this.proc.waitFor();
                     SixModelObject done = config.get("done");
+                    /* Return exit code left shifted by 8 for POSIX emulation. */
                     if (done != null)
-                        send(done, boxInt(outcome));
+                        send(done, boxInt(outcome << 8));
                 }
                 catch (Throwable t) {
                     SixModelObject message = boxError(t.getMessage());
@@ -88,7 +94,9 @@ public class AsyncProcessHandle implements IIOClosable {
                                 AsyncProcessHandle.this.hllConfig.strBoxType, message);
                 }
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private List<String> getArgs(ThreadContext tc, SixModelObject argsObj) {
@@ -231,9 +239,49 @@ public class AsyncProcessHandle implements IIOClosable {
         ((ConcBlockingQueueInstance)task.queue).push_boxed(tc, result);
     }
 
+    static interface Kernel32 extends Library {
+        public static Kernel32 INSTANCE = (Kernel32)Native.loadLibrary("kernel32", Kernel32.class);
+        public int GetProcessId(Long hProcess);
+    }
+
+    /* not tested on windows; taken from https://stackoverflow.com/a/6032734 */
+    private long getPID(Process proc) {
+        long result = 0;
+        try {
+            String procName = proc.getClass().getName();
+            /* for unix/linux systems */
+            if (procName.equals("java.lang.UNIXProcess")) {
+                Field f = proc.getClass().getDeclaredField("pid");
+                f.setAccessible(true);
+                result = f.getLong(proc);
+                f.setAccessible(false);
+            }
+            /* for windows */
+            else if (procName.equals("java.lang.Win32Process") ||
+                     procName.equals("java.lang.ProcessImpl")) {
+                Field f = proc.getClass().getDeclaredField("handle");
+                f.setAccessible(true);
+                result = Kernel32.INSTANCE.GetProcessId((Long)f.get(proc));
+                f.setAccessible(false);
+            }
+        }
+        catch (Exception ex) {
+            result = 0;
+        }
+        return result;
+    }
+
     @Override
     public void close(ThreadContext tc) {
         try { this.proc.getOutputStream().close(); }
         catch (Throwable t) { }
+    }
+
+    public void kill(ThreadContext tc) {
+        this.proc.destroy();
+    }
+
+    public void killForcibly(ThreadContext tc) {
+        this.proc.destroyForcibly();
     }
 }

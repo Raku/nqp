@@ -48,6 +48,9 @@ public class NativeRef extends REPR {
             case NativeRefREPRData.REF_POSITIONAL:
                 obj = new NativeRefInstancePositional();
                 break;
+            case NativeRefREPRData.REF_MULTIDIM:
+                obj = new NativeRefInstanceMultidim();
+                break;
             default:
                 throw ExceptionHandling.dieInternal(tc,
                     "Unknown reference kind in native ref allocation");
@@ -74,6 +77,9 @@ public class NativeRef extends REPR {
                     }
                     else if (refkind_s.equals("positional")) {
                         rd.ref_kind = NativeRefREPRData.REF_POSITIONAL;
+                    }
+                    else if (refkind_s.equals("multidim")) {
+                        rd.ref_kind = NativeRefREPRData.REF_MULTIDIM;
                     }
                     else {
                         throw ExceptionHandling.dieInternal(tc,

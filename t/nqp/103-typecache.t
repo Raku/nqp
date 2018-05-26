@@ -1,4 +1,4 @@
-plan(17);
+plan(21);
 
 class IsThisType {
 }
@@ -52,6 +52,8 @@ class TypeCheckConstant {
     }
 }
 
+my $got_accepts_type_type;
+my $got_accepts_type_obj;
 class AcceptingType {
     has int $!accepts_type_called;
 
@@ -61,6 +63,8 @@ class AcceptingType {
         $!accepts_type_called;
     }
     method accepts_type($type, $obj) {
+        $got_accepts_type_type := $type;
+        $got_accepts_type_obj := $obj;
         $!accepts_type_called := $!accepts_type_called + 1;
         $!accepts;
     }
@@ -83,8 +87,17 @@ nqp::settypecheckmode($accepts_true, nqp::const::TYPE_CHECK_NEEDS_ACCEPTS);
 nqp::settypecheckmode($accepts_false, nqp::const::TYPE_CHECK_NEEDS_ACCEPTS);
 nqp::settypecheckmode($accepts_not_called, nqp::const::TYPE_CHECK_NEEDS_ACCEPTS);
 
+$got_accepts_type_obj := NQPMu;
+$got_accepts_type_type := NQPMu;
 ok(nqp::istype($type_check_false, $accepts_true), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS: istype (+)');
+ok(nqp::eqaddr($got_accepts_type_obj, $type_check_false), 'accepts_type got correct obj');
+ok(nqp::eqaddr($got_accepts_type_type, $accepts_true), 'accepts_type got correct type');
+
+$got_accepts_type_obj := NQPMu;
+$got_accepts_type_type := NQPMu;
 ok(!nqp::istype($type_check_false, $accepts_false), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS: istype (-)');
+ok(nqp::eqaddr($got_accepts_type_obj, $type_check_false), 'accepts_type got correct obj');
+ok(nqp::eqaddr($got_accepts_type_type, $accepts_false), 'accepts_type got correct type');
 
 my $not_really_accepting_type := AcceptingType.new(accepts => 1).new_type;
 nqp::settypecheckmode($not_really_accepting_type, nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);

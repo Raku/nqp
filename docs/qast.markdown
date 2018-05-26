@@ -206,7 +206,7 @@ There is a variant of QAST::Stmts, which is QAST::Stmt. While the first has
 no impact on the allocation of temporaries, QAST::Stmt marks a register
 allocation boundary; beyond it, any temporaries are free to be reused. You
 do not need to use QAST::Stmt, but it can lead to better code generation if
-used correct. Incorrect use can, of course, lead to incorrect code generation.
+used correctly. Incorrect use can, of course, lead to incorrect code generation.
 Like QAST::Stmts, it also can have multiple children and supports resultchild.
 
 ## QAST::IVal, QAST::NVal and QAST::SVal
@@ -398,7 +398,7 @@ would not create a sub-node for string context, or else
 
 would work without complaining.
 
-##QAST::ParamTypeCheck
+## QAST::ParamTypeCheck
 
 Used by rakudo to enforce signatures at runtime.
 
@@ -417,3 +417,9 @@ returns 0 the 'bind_error' of the current HLL is called.
 
 
 ## QAST::VM
+
+---------------------------------------
+
+## Third-Party Resources
+
+* [Perl 6 Core Hacking: QASTalicious blog post](https://rakudo.party/post/Perl-6-Core-Hacking-QASTalicious)

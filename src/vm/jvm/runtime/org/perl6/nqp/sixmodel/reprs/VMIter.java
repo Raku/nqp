@@ -23,7 +23,7 @@ public class VMIter extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         return new StorageSpec();
     }

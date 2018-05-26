@@ -1,5 +1,5 @@
 'use strict';
-let NQPObject = require('./nqp-object.js');
+const NQPObject = require('./nqp-object.js');
 class NullS extends NQPObject {
   toString() {
     console.trace('here');

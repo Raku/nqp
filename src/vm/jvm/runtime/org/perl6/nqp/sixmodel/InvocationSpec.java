@@ -7,17 +7,17 @@ public class InvocationSpec {
      * Class handle where we find the attribute to invoke.
      */
     public SixModelObject ClassHandle;
-    
+
     /**
      * Attribute name where we find the attribute to invoke.
      */
     public String AttrName;
-    
+
     /**
      * Attribute lookup hint used in gradual typing.
      */
     public long Hint;
-    
+
     /**
      * Thing that handles invocation.
      */

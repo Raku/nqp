@@ -229,7 +229,7 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
         # :dba('regex atom')
         [
         | \w
-          [ <?before ' ' \w> <!{ %*RX<s> || $*HAS_GOAL }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")> ]?
+          [ <?before ' ' \w <!before <.quantifier>>  > <!{ %*RX<s> || $*HAS_GOAL }> <.worry("Space is not significant here; please use quotes or :s (:sigspace) modifier (or, to suppress this warning, omit the space, or otherwise change the spacing)")> ]?
           <.SIGOK>
         | <metachar>
         ]

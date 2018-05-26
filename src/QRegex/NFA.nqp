@@ -1,9 +1,5 @@
 use QASTNode;
 
-our $nfatime;
-our $lastnfatime;
-our $etctime;
-
 class QRegex::NFA {
     my $EDGE_FATE            := 0;
     my $EDGE_EPSILON         := 1;
@@ -168,7 +164,7 @@ class QRegex::NFA {
     }
 
     method altseq($node, $from, $to) {
-        if +@($node) {
+        if nqp::elems(@($node)) {
             my $indent := dentin();
             my int $st := self.regex_nfa($node[0], $from, $to);
             $to := $st if $to < 0 && $st > 0;
@@ -204,9 +200,6 @@ class QRegex::NFA {
             'CODEPOINT_LL','CODEPOINT_I_LL','CODEPOINT_M','CODEPOINT_M_NEG'];
         # $ind := 0;
         # $indent := '';
-        $nfatime := 0;
-        $etctime := 0;
-        $lastnfatime := nqp::time_n();
     }
 
     method cclass($node, $from, $to) {
@@ -351,7 +344,8 @@ class QRegex::NFA {
         elsif $subtype ne 'zerowidth' &&
                 ($node.name eq 'alpha' ||
                     $subtype eq 'method' &&
-                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'alpha') {
+                    (nqp::istype($node[0][0], QAST::SVal)
+                      ?? $node[0][0].value !! $node[0][0]) eq 'alpha') {
             $to := self.addedge($from, $to, $EDGE_CHARCLASS + $node.negate,
                 nqp::const::CCLASS_ALPHABETIC);
             dentout(self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95));
@@ -359,13 +353,15 @@ class QRegex::NFA {
         elsif !$node.negate &&
                 ($node.name eq 'ws' ||
                     $subtype eq 'method' &&
-                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'ws') {
+                    (nqp::istype($node[0][0], QAST::SVal)
+                      ?? $node[0][0].value !! $node[0][0]) eq 'ws') {
             dentout(self.fate($node, $from, $to));
         }
         elsif !$node.negate && $subtype ne 'zerowidth' &&
                 ($node.name eq 'ident' ||
                     $subtype eq 'method' &&
-                    ($node[0][0] ~~ QAST::SVal ?? $node[0][0].value !! $node[0][0]) eq 'ident') {
+                    (nqp::istype($node[0][0], QAST::SVal)
+                      ?? $node[0][0].value !! $node[0][0]) eq 'ident') {
             my int $beginstate := self.addstate();
             self.addedge($from, $beginstate, $EDGE_EPSILON, 0);
 
@@ -391,8 +387,10 @@ class QRegex::NFA {
             }
         }
         elsif $*vars_as_generic && $subtype eq 'method' &&
-                $node[0][0] ~~ QAST::SVal && $node[0][0].value eq '!INTERPOLATE' &&
-                $node[0][1] ~~ QAST::Var && $node[0][1].scope eq 'lexical' {
+                nqp::istype($node[0][0], QAST::SVal)
+                && $node[0][0].value eq '!INTERPOLATE'
+                && nqp::istype($node[0][1], QAST::Var)
+                && $node[0][1].scope eq 'lexical' {
             $!generic := 1;
             dentout(self.addedge($from, $to, $EDGE_GENERIC_VAR, $node[0][1].name));
         }
@@ -691,15 +689,7 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-#        my $t0 := nqp::time_n();
-#        $etctime := $etctime + $t0 - $lastnfatime;
         my $result := nqp::nfarunproto($!nfa_object, $target, $offset);
-#        my $t1 := nqp::time_n();
-#        $nfatime := $nfatime + $t1 - $t0;
-#        if nqp::chars($target) == $offset {
-#            note( "EOS in proto at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)));
-#        }
-#        $lastnfatime := $t1;
         $result;
     }
 
@@ -710,15 +700,7 @@ class QRegex::NFA {
             $!nfa_object := nqp::nfafromstatelist($!states, NFAType);
             nqp::scwbenable();
         }
-#        my $t0 := nqp::time_n();
-#        $etctime := $etctime + $t0 - $lastnfatime;
         my $result := nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels);
-#        my $t1 := nqp::time_n();
-#        $nfatime := $nfatime + $t1 - $t0;
-#        if nqp::chars($target) == $offset {
-#            note( "EOS in alt at $offset " ~ $nfatime ~ " / " ~ $etctime ~ " " ~ ($nfatime / ($etctime + $nfatime)));
-#        }
-#        $lastnfatime := $t1;
         $result;
     }
 

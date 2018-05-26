@@ -161,7 +161,7 @@ public class CPPStruct extends REPR {
         MethodVisitor constructor = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
         constructor.visitCode();
         constructor.visitVarInsn(Opcodes.ALOAD, 0);
-        constructor.visitMethodInsn(Opcodes.INVOKESPECIAL, 
+        constructor.visitMethodInsn(Opcodes.INVOKESPECIAL,
                 "com/sun/jna/Structure", "<init>", "()V");
         constructor.visitInsn(Opcodes.RETURN);
         constructor.visitMaxs(1, 1);

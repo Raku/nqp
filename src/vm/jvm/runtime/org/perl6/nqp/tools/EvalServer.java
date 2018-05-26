@@ -197,6 +197,7 @@ public class EvalServer {
                 if (entryRef == null)
                     throw new RuntimeException("This class is not an entry point");
                 Ops.invokeMain(gc.mainThread, entryRef, cuType.getName(), argv);
+                gc.exit(0);
             }
         }
 

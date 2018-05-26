@@ -68,9 +68,35 @@ my sub run_command($command, :$stdout) {
   }
 }
 
+my class JSWithSourceMap {
+    has $!js;
+    has $!mapping;
+    has $!p6-source;
+    has $!file;
+    has $!comp_line_directives;
+    method js() {$!js}
+    method mapping() {$!mapping}
+    method p6-source() {$!p6-source}
+    method file() {$!file}
+    method comp_line_directives() {$!comp_line_directives}
+
+    method dump() {
+       "/* With sourcemap for $!file */\n" ~ $!js;
+    }
+}
+
+class QASTWithMatch {
+    has $!ast;
+    has $!match;
+    method ast() {$!ast}
+    method match() {$!match}
+    method dump() {$!ast.dump}
+}
 
 # It can be called HLL::Backend::JavaScript due to problems while merging namespaces
 class JavaScriptBackend {
+    has $!compiler;
+
     method apply_transcodings($s, $transcode) {
         $s
     }
@@ -161,16 +187,29 @@ class JavaScriptBackend {
     }
     
     method is_textual_stage($stage) {
-        $stage eq 'js';
+        0;
     }
 
     method spawn_new_node() {
         my $comp := nqp::getcomp('JavaScript');
         nqp::isnull($comp);
     }
+
+    method ast($source, *%adverbs) {
+        QASTWithMatch.new(ast => $!compiler.ast($source, |%adverbs), match => $source);
+    }
+
+    method optimize($ast_with_match, *%adverbs) {
+        nqp::istype($ast_with_match, QASTWithMatch) ?? QASTWithMatch.new(
+            ast => $!compiler.optimize($ast_with_match.ast, |%adverbs),
+            match => $ast_with_match.match) !! $ast_with_match;
+    }
+
+    method get_ast($got) {
+        nqp::istype($got, QASTWithMatch) ?? $got.ast !! $got;
+    }
     
-    
-    method js($qast, *%adverbs) {
+    method js($parsed, *%adverbs) {
         my $backend := QAST::CompilerJS.new(nyi=>%adverbs<nyi> // 'ignore');
 
         my $substagestats := nqp::defined(%adverbs<substagestats>);
@@ -184,18 +223,76 @@ class JavaScriptBackend {
         if %adverbs<source-map> {
             my @js := nqp::list_s();
             my @mapping := nqp::list_i();
-            $backend.emit_with_source_map($qast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
 
-            my @mapping_str := nqp::list_s();
-            for @mapping -> $offset {
-                nqp::push_s(@mapping_str, $offset);
-            }
-            "\{\"js\": {$backend.quote_string(nqp::join('', @js))}, \"mapping\": [{nqp::join(',', @mapping_str)}]\}";
+            my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
+            $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
+
+            my $sourcemap_and_js := JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file, comp_line_directives => @*comp_line_directives);
+
+            %adverbs<output> ?? self.sourcemap_to_file($sourcemap_and_js, %adverbs<output>) !! $sourcemap_and_js;
         } else {
-            my $code := $backend.emit($qast, :$instant, :$substagestats, :$shebang, :$nqp-runtime);
+            my $code := $backend.emit(self.get_ast($parsed), :$instant, :$substagestats, :$shebang, :$nqp-runtime);
             $code := self.beautify($code) if %adverbs<beautify>;
             $code;
         }
+    }
+
+    method sourcemap_to_file($sourcemap_and_js, $output) {
+        my str $sourcemap_file := "$output.map";
+
+        my str $sourcemap_url;
+
+        if nqp::isnull(nqp::getcomp('JavaScript')) {
+            my @tmp_files;
+            my sub as_tmp_file($content) {
+                my $tmp_file := self.tmp_file();
+                my $fh := open($tmp_file, :w);
+                $fh.print($content);
+                close($fh);
+
+                @tmp_files.push($tmp_file);
+
+                $tmp_file;
+            }
+
+
+            my $mapping := nqp::list_s();
+            for $sourcemap_and_js.mapping -> $offset {
+                nqp::push_s($mapping, ~$offset);
+            }
+
+            $sourcemap_url := run_command(:stdout, [
+                'node',
+                'src/vm/js/bin/build-sourcemap.js',
+                as_tmp_file($sourcemap_and_js.js),
+                as_tmp_file($sourcemap_and_js.p6-source),
+                as_tmp_file(nqp::join(',', $mapping)),
+                $output,
+                $sourcemap_and_js.file,
+                $sourcemap_file
+            ]);
+
+
+            for @tmp_files -> $tmp_file {
+                nqp::unlink($tmp_file);
+            }
+        } else {
+            my $sourcemap := nqp::getcomp('JavaScript').eval('nqp.buildSourceMap')(
+                $sourcemap_and_js.js,
+                $sourcemap_and_js.p6-source,
+                $sourcemap_and_js.mapping,
+                $output,
+                $sourcemap_and_js.file,
+                $sourcemap_and_js.comp_line_directives,
+                $sourcemap_file
+            );
+
+            $sourcemap_url := $sourcemap<url>;
+            spurt($sourcemap_file, $sourcemap<content>);
+        }
+
+        # HACK Add extra ~ so that the literal isn't used as the directive
+        $sourcemap_and_js.js ~ "//# sourceMappingURL" ~ "=" ~ $sourcemap_url;
     }
 
     method beautify($code) {
@@ -217,14 +314,17 @@ class JavaScriptBackend {
 
     method tmp_file() {
         # TODO a better temporary file name
-        'tmp-' ~ nqp::getpid() ~ '.js';
+        'tmp-' ~ nqp::getpid() ~ nqp::rand_n(4) ~ '.js';
     }
     
     method run($js, *%adverbs) {
-        # TODO source map support
 
         if !self.spawn_new_node {
-            return nqp::getcomp('JavaScript').eval($js);
+            if nqp::istype($js, JSWithSourceMap) {
+                return nqp::getcomp('JavaScript').eval($js.js, :mapping($js.mapping), :p6-source($js.p6-source), :file($js.file), :comp_line_directives($js.comp_line_directives));
+            } else {
+                return nqp::getcomp('JavaScript').eval($js);
+            }
         }
         
         my $tmp_file := self.tmp_file;
@@ -234,6 +334,7 @@ class JavaScriptBackend {
         close($code);
 
         sub (*@args) {
+            # TODO source map support
             my @cmd := ["node",$tmp_file];
 
             my $i := 1;
@@ -246,17 +347,6 @@ class JavaScriptBackend {
         
             nqp::unlink($tmp_file); # TODO think about safety
         };
-    }
-
-    method node_module($js, *%adverbs) {
-        my $module := %adverbs<output>;
-        if nqp::stat($module, nqp::const::STAT_EXISTS) == 0 {
-            nqp::mkdir($module, 0o777);
-        }
-
-        spew($module ~ "/main.js", $js);
-        my $package_json := '{ "main": "main.js", "version": "0.0.0", "name": "'~ %adverbs<name> ~ '" }';
-        spew($module ~ '/package.json', $package_json);
     }
 
     # When running on Moar a compunit is just a sub 
@@ -276,5 +366,5 @@ class JavaScriptBackend {
 
 # Role specifying the default backend for this build.
 role HLL::Backend::Default {
-    method default_backend() { JavaScriptBackend }
+    method default_backend() { JavaScriptBackend.new(compiler=>self) }
 }

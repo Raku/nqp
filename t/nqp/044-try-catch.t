@@ -2,7 +2,7 @@
 
 # Tests for try and catch
 
-plan(54);
+plan(60);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -444,4 +444,136 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
         'labeled',
         "a nqp::handle without label doesn't catch  labeled exceptions"
     );
+}
+
+my $*SCOPE := 'outer';
+sub scope0() {
+    my $*SCOPE := 'scope0';
+    nqp::die('foo');
+}
+sub scope1() {
+    my $*SCOPE := 'scope1';
+    scope0();
+}
+sub scope2() {
+    my $*SCOPE := 'scope2';
+    CATCH {
+        is($*SCOPE, 'scope0', 'we get the contextual from the correct scope');
+    }
+    scope1();
+}
+
+scope2();
+
+sub catch_with_control($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+         $throws(),
+        'CONTROL', caught('control')
+    );
+    $caught;
+};
+
+sub catch_labeled($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    my $ret := nqp::handle(
+         $caught := $throws(),
+        'LABELED', Label2,
+        'TAKE', caught('labeled')
+    );
+    $caught;
+};
+
+sub catch_unlabeled($throws) {
+    my $caught;
+    my sub caught($arg) {
+        $caught := $arg;
+    }
+    nqp::handle(
+         $caught := $throws(),
+        'TAKE', caught('unlabeled')
+    );
+    $caught;
+};
+
+is(catch_unlabeled({
+    catch_with_control({
+        THROW(nqp::const::CONTROL_TAKE, nqp::null())
+    });
+}), 'control', 'an unlabeled exception is caught by CONTROL');
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip('catching a labeled exception with CONTROL seems to have a bug on the jvm');
+} else {
+    is(catch_labeled({
+        catch_with_control({
+            THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)
+        });
+    }), 'control', 'a labeled exception is caught by CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CONTROL {$log := $log ~ "#1"; $ex := $!; }
+              }
+              CONTROL { $log := $log ~ "#2" }
+          }
+          nqp::rethrow($ex);
+          CONTROL { $log := $log ~ "#3" }
+      }
+      CONTROL { $log := $log ~ "#4" }
+  }
+  is($log, '#1#3', 'rethrow works from a scope higher then CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CONTROL {$log := $log ~ "#1"; nqp::rethrow($!);$log := $log ~ "!1" }
+              }
+              CONTROL { $log := $log ~ "#2";nqp::rethrow($!);$log := $log ~ "!2" }
+          }
+          nqp::rethrow($ex);
+          CONTROL { $log := $log ~ "#3";nqp::rethrow($!);$log := $log ~ "!3" }
+      }
+      CONTROL { $log := $log ~ "#4" }
+  }
+  is($log, '#1#2#3#4', 'rethrow works from a scope higher then CONTROL');
+}
+
+{
+  my $ex;
+  my $log := '';
+  {
+      {
+          {
+              {
+                  THROW(nqp::const::CONTROL_TAKE, nqp::null());
+                  CATCH { $log := $log ~ "!1" }
+              }
+          }
+          CONTROL { $log := $log ~ "#1"; nqp::die("exception") }
+          CATCH { $log := $log ~ "!2" }
+      }
+      CATCH { $log := $log ~ "!3" }
+  }
+  is($log, '#1!1', 'CATCH and CONTROL interaction');
+  CONTROL { $log := $log ~ "#4"; nqp::die("exception") }
 }

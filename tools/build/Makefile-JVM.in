@@ -59,6 +59,13 @@ EVAL_CLIENT = tools/jvm/eval-client.pl
 NQP_JAR      = nqp.jar
 J_NQP_SOURCES= src/vm/jvm/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
+J_SOURCES = \
+  $(COMMON_SOURCES) \
+  $(J_QAST_SOURCES) \
+  $(J_HLL_SOURCES) \
+  $(J_NQP_SOURCES) \
+  src/vm/jvm/ModuleLoader.nqp \
+
 J_STAGE1_OUTPUT = \
   $(J_STAGE1_DIR)/$(NQP_MO_JAR) \
   $(J_STAGE1_DIR)/$(MODULE_LOADER_JAR) \
@@ -114,7 +121,7 @@ j-install: j-all
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) -MExtUtils::Command -e mkpath bin
-	$(JAVAC) -source 1.7 -cp $(THIRDPARTY_JARS) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
+	$(JAVAC) -source 1.8 -cp $(THIRDPARTY_JARS) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
 	$(PERL) tools/build/gen-jvm-properties.pl . $(THIRDPARTY_JARS) > jvmconfig.properties
 	$(PERL) tools/build/gen-jvm-properties.pl @prefix@ $(THIRDPARTY_JARS) > bin/jvmconfig.properties
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
@@ -186,7 +193,7 @@ $(J_STAGE1_DIR)/$(P6QREGEX_JAR): $(J_STAGE0_DIR) $(P6QREGEX_SOURCES) $(J_STAGE1_
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE1_DIR)/$(P6QREGEX_JAR) $(J_STAGE1_DIR)/$(P6QREGEX_COMBINED)
 
-$(J_STAGE1_DIR)/$(NQP_JAR): $(J_STAGE0_DIR) $(J_NQP_SOURCES) $(J_STAGE1_DIR)/$(P6QREGEX_JAR)
+$(J_STAGE1_DIR)/$(NQP_JAR): $(J_STAGE0_DIR) $(J_STAGE1_DIR)/$(P6QREGEX_JAR) $(J_SOURCES)
 	$(MKPATH) $(J_STAGE1_DIR)
 	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(J_STAGE1_DIR)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE1_DIR)/nqp-config.nqp > $(J_STAGE1_DIR)/$(NQP_COMBINED)
@@ -254,7 +261,7 @@ $(J_STAGE2_DIR)/$(P6QREGEX_JAR): $(J_STAGE1_DIR) $(P6QREGEX_SOURCES) $(J_STAGE2_
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    --output=$(J_STAGE2_DIR)/$(P6QREGEX_JAR) $(J_STAGE2_DIR)/$(P6QREGEX_COMBINED)
 
-$(J_STAGE2_DIR)/$(NQP_JAR): $(J_STAGE1_DIR) $(J_NQP_SOURCES) $(J_STAGE2_DIR)/$(P6QREGEX_JAR)
+$(J_STAGE2_DIR)/$(NQP_JAR): $(J_STAGE1_DIR) $(J_STAGE2_DIR)/$(P6QREGEX_JAR) $(J_SOURCES)
 	$(MKPATH) $(J_STAGE2_DIR)
 	$(PERL) tools/build/gen-version.pl $(PREFIX) $(NQP_LIB_DIR) > $(J_STAGE2_DIR)/nqp-config.nqp
 	$(PERL) tools/build/gen-cat.pl jvm $(J_NQP_SOURCES) $(J_STAGE2_DIR)/nqp-config.nqp > $(J_STAGE2_DIR)/$(NQP_COMBINED)

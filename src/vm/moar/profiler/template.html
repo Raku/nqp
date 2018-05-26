@@ -54,9 +54,10 @@
       <div ng-controller="OverviewController">
         <h3>Time Spent</h3>
         <p>The profiled code ran for <strong>{{TotalTime}}ms</strong>. Of this,
-          <strong>{{OverheadTime}}ms</strong> were spent on garbage collection
-          and dynamic optimization (that's <strong>{{OverheadTimePercent}}%</strong>).
+          <strong>{{GCOverheadTime}}ms</strong> were spent on garbage collection
+          (that's <strong>{{GCOverheadTimePercent}}%</strong>).
         </p>
+        <p>The dynamic optimizer was active for <strong>{{SpeshTimePercent}}%</strong> of the program's run time.
         <table class="table table-striped table-condensed table-bordered">
           <tbody>
             <tr>
@@ -173,6 +174,9 @@
           <span ng-show="{{FullGCRuns > 0}}">
             The average full collection time was <strong>{{FullAverage}}ms</strong>.
           </span>
+          <span ng-show="{{AverageParticipants > 1}}">
+            On average, <strong>{{AverageParticipants}}</strong> threads participated in GC.
+          </span>
         </p>
 
         <h3>Dynamic Optimization</h3>
@@ -217,8 +221,8 @@
             <input ng-model="NameFilter">
           </th>
           <th><a href="" ng-click="reverse = predicate == 'Entries' ? !reverse : true; predicate = 'Entries';">Entries</a></th>
-          <th><a href="" ng-click="reverse = predicate == 'InclusiveTimePercent' ? !reverse : true; predicate = 'InclusiveTimePercent';">Inclusive Time</a></th>
-          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTimePercent' ? !reverse : true; predicate = 'ExclusiveTimePercent';">Exclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'InclusiveTime' ? !reverse : true; predicate = 'InclusiveTime';">Inclusive Time</a></th>
+          <th><a href="" ng-click="reverse = predicate == 'ExclusiveTime' ? !reverse : true; predicate = 'ExclusiveTime';">Exclusive Time</a></th>
           <th>
             <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
             <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
@@ -383,7 +387,7 @@
                 <input ng-model="NameFilter">
               </th>
               <th><a href="" ng-click="reverse = predicate == 'Calls' ? !reverse : true; predicate = 'Calls';">Calls</a></th>
-              <th><a href="" ng-click="reverse = predicate == 'TimePercent' ? !reverse : true; predicate = 'TimePercent';">Time In Callee</a></th>
+              <th><a href="" ng-click="reverse = predicate == 'Time' ? !reverse : true; predicate = 'Time';">Time In Callee</a></th>
               <th>
                 <span class="text-danger" tooltip-placement="bottom" tooltip="Unoptimized interpreted code">Interp</span> /
                 <span class="text-warning" tooltip-placement="bottom" tooltip="Type-specialized interpreted code">Spesh</span> /
@@ -484,7 +488,10 @@
       </table>
       <script type="text/ng-template" id="myModalContent.html">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <button type="button" ng-click="modalInstance.close()"
+                      class="close" data-dismiss="modal">
+                      <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+              </button>
               <h4 class="modal-title" id="allocatingRoutinesModalLabel">
                 Routines Allocating {{CurrentAllocatingRoutine}}
               </h4>
@@ -524,7 +531,8 @@
               </table>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" ng-click="modalInstance.close()"
+                      class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
       </script>
       </div>
@@ -534,6 +542,9 @@
       <div ng-controller="GCController">
       <table class="table table-striped table-condensed table-bordered">
         <thead>
+          <th>
+            <a href="" ng-click="reverse = predicate == 'StartTime' ? !reverse : false; predicate = 'StartTime';">Start Time</a>
+          </th>
           <th>
             <a href="" ng-click="reverse = predicate == 'Run' ? !reverse : false; predicate = 'Run';">Run</a>
           </th>
@@ -550,6 +561,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="gc in GCs | orderBy:predicate:reverse">
+            <td>{{gc.StartTime}}ms</td>
             <td><strong>{{gc.Run}}</strong></td>
             <td>
               <span class="text-success" ng-show="gc.Full">
@@ -731,8 +743,41 @@
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
     }());
+
+    var maxSeqNum      = 0;
+    var gcParticipants = [];
+    var gcTimings      = [];
+    (function() {
+        rawData.forEach(function (data, index) {
+            gcs = data.gcs;
+            if (gcs.length == 0)
+                return;
+            let seq = gcs[gcs.length - 1].sequence;
+            if (seq > maxSeqNum)
+                maxSeqNum = seq;
+            gcs.forEach(function (data) {
+                if (typeof gcParticipants[data.sequence] == "undefined")
+                    gcParticipants[data.sequence] = [];
+                if (typeof gcTimings[data.sequence] == "undefined")
+                    gcTimings[data.sequence] = { start: Infinity, end: -Infinity, full: 0 };
+                gcParticipants[data.sequence].push(index);
+                if (data.start_time < gcTimings[data.sequence].start)
+                    gcTimings[data.sequence].start = data.start_time;
+                if (data.start_time + data.time > gcTimings[data.sequence].end)
+                    gcTimings[data.sequence].end = data.start_time + data.time;
+                gcTimings[data.sequence].full = data.full;
+            });
+        });
+        gcTimings.forEach(function (data) {
+            data.total = data.end - data.start;
+        });
+    }());
+
 
     // Register application and add controllers, increase recursion depth for callGraphController
     var moarProfApp = angular.module('moarProfApp', ['ui.bootstrap']).config(function($rootScopeProvider) {
@@ -744,6 +789,12 @@
     });
 
     moarProfApp.controller('OverviewController', function ($scope) {
+        /* It's okay to take only the first thread's data here:
+         * - the total time of the main thread should be the maximum
+         *   anyway, since all other threads are spawned from it.
+         * - Spesh time is stashed in the main thread's profile data,
+         *   even though it's actually spent in another thread.
+         */
         var totalTime     = rawData[0].total_time;
         var speshTime     = rawData[0].spesh_time;
         var gcTime        = 0;
@@ -758,15 +809,23 @@
         var deoptOnes     = 0;
         var deoptAlls     = 0;
         var osrs          = 0;
-        rawData[0].gcs.map(function (gc) {
-            gcTime += gc.time;
+        var numThreads    = rawData.length;
+
+        var averageParticipants = 0;
+        gcParticipants.forEach(function (run) {
+            averageParticipants += run.length;
+        });
+
+        averageParticipants = averageParticipants / gcParticipants.length;
+        gcTimings.map(function (gc) {
+            gcTime += gc.total;
             if (gc.full) {
                 gcFull++;
-                gcFullTime += gc.time;
+                gcFullTime += gc.total;
             }
             else {
                 gcNursery++;
-                gcNurseryTime += gc.time;
+                gcNurseryTime += gc.total;
             }
         });
         function walkCallGraphNode(node) {
@@ -780,20 +839,25 @@
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
+
+        $scope.NumThreads            = numThreads;
 
         // Time spent
-        var overheadTime            = speshTime + gcTime;
-        var executingTime           = totalTime - overheadTime;
-        $scope.TotalTime            = +(totalTime / 1000).toFixed(2);
-        $scope.OverheadTime         = +(overheadTime / 1000).toFixed(2);
-        $scope.OverheadTimePercent  = +(100 * overheadTime / totalTime).toFixed(2);
-        $scope.ExecutingTime        = +(executingTime / 1000).toFixed(2);
-        $scope.ExecutingTimePercent = +(100 * executingTime / totalTime).toFixed(2);
-        $scope.GCTime               = +(gcTime / 1000).toFixed(2);
-        $scope.GCTimePercent        = +(100 * gcTime / totalTime).toFixed(2);
-        $scope.SpeshTime            = +(speshTime / 1000).toFixed(2);
-        $scope.SpeshTimePercent     = +(100 * speshTime / totalTime).toFixed(2);
+        var overheadTime             = gcTime;
+        var executingTime            = totalTime - overheadTime;
+        $scope.TotalTime             = +(totalTime / 1000).toFixed(2);
+        $scope.GCOverheadTime        = +(overheadTime / 1000).toFixed(2);
+        $scope.GCOverheadTimePercent = +(100 * overheadTime / totalTime).toFixed(2);
+        $scope.ExecutingTime         = +(executingTime / 1000).toFixed(2);
+        $scope.ExecutingTimePercent  = +(100 * executingTime / totalTime).toFixed(2);
+        $scope.GCTime                = +(gcTime / 1000).toFixed(2);
+        $scope.GCTimePercent         = +(100 * gcTime / totalTime).toFixed(2);
+        $scope.SpeshTime             = +(speshTime / 1000).toFixed(2);
+        $scope.SpeshTimePercent      = +(100 * speshTime / totalTime).toFixed(2);
 
         // Routines
         var interpEntries           = totalEntries - (jitEntries + speshEntries);
@@ -812,6 +876,7 @@
         $scope.FullGCRuns     = gcFull;
         $scope.NurseryAverage = +((gcNurseryTime / 1000) / gcNursery).toFixed(2);
         $scope.FullAverage    = +((gcFullTime / 1000) / gcFull).toFixed(2);
+        $scope.AverageParticipants = averageParticipants.toFixed(2);
 
         // Dynamic optimization
         var optimizedFrames    = speshEntries + jitEntries;
@@ -858,7 +923,10 @@
                 idRecDepth[node.id]--;
             }
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
 
         // Build object list per routine.
         var routineList = [];
@@ -883,7 +951,7 @@
             routineList.push(entry);
         }
         $scope.Routines  = routineList;
-        $scope.predicate = "InclusiveTimePercent";
+        $scope.predicate = "InclusiveTime";
         $scope.reverse   = true;
     });
 
@@ -892,7 +960,7 @@
         $scope.total_time    = rawData[0].total_time;
         $scope.SuchCallers   = false;
         $scope.RecentCallers = [];
-        $scope.predicate     = "TimePercent";
+        $scope.predicate     = "Time";
         $scope.reverse       = true;
         var all_callers      = [];
         updateCurrentData();
@@ -1037,7 +1105,10 @@
                 node.callees.map(walkCallGraphNode);
             }
         }
-        walkCallGraphNode(rawData[0].call_graph);
+        rawData.forEach(function (thread) {
+            if (typeof thread.call_graph != "undefined")
+                walkCallGraphNode(thread.call_graph);
+        });
 
         // Build allocation summary.
         var allocationSummary = [];
@@ -1078,11 +1149,12 @@
         $scope.routineReverse    = true;
 
         // Allocating routines handlng.
+        $scope.modalInstance = null;
         $scope.showAllocatingRoutines = function (alloc) {
             // Show modal dialog with data.
             $scope.CurrentAllocatingRoutine      = alloc.Name;
             $scope.CurrentAllocatingRoutineStats = alloc.RoutineStats;
-            var modalInstance = $uibModal.open({
+            $scope.modalInstance = $uibModal.open({
                 templateUrl: 'myModalContent.html',
                 scope: $scope
             });
@@ -1092,9 +1164,9 @@
     moarProfApp.controller('GCController', function ($scope) {
         // Find longest GC run.
         var longestGC = 0;
-        rawData[0].gcs.map(function (gc) {
-            if (gc.time > longestGC)
-                longestGC = gc.time;
+        gcTimings.map(function (timing) {
+            if (timing.total > longestGC)
+                longestGC = timing.total;
         });
 
         // Produce something nice to render.
@@ -1103,6 +1175,7 @@
             var totalBytes = gc.cleared_bytes + gc.retained_bytes + gc.promoted_bytes;
             return {
                 Run:               ++run,
+                StartTime:         +(gc.start_time / 1000).toFixed(2),
                 Time:              +(gc.time / 1000).toFixed(2),
                 Full:              (gc.full != 0),
                 TimePercent:       +(100 * gc.time / longestGC).toFixed(2),

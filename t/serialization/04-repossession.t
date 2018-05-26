@@ -1,6 +1,6 @@
 use nqpmo;
 
-my $plan := 23;
+my $plan := 25;
 plan($plan);
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
@@ -126,12 +126,16 @@ sub fresh_sc_name() {
     my $new_obj := nqp::scgetobj($old_dsc, 0);
     is($new_obj.get, 123, 'the object deserializes and has the value from before the repossesion');
 
+    ok(nqp::eqaddr(nqp::getobjsc($new_obj), $old_dsc), "the object stars out in the old sc");
+
     my $new_dsc := nqp::createsc($sc2);
 
     my $conflicts := nqp::list();
     nqp::deserialize($new_serialized, $new_dsc, $new_sh, nqp::list(), $conflicts);
 
     is($new_obj.get, 246, "the reposses object has a correct value");
+
+    ok(nqp::eqaddr(nqp::getobjsc($new_obj), $new_dsc), "the object is repossesed into the new sc");
 
     is(nqp::elems($conflicts), 0, "we don't have any conflicts");
 }

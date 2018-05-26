@@ -13,7 +13,7 @@ public class ArgsExpectation {
     public static final short NO_ARGS    = 1;
     public static final short OBJ        = 2;
     public static final short OBJ_OBJ    = 3;
-    
+
     public static void invokeByExpectation(ThreadContext tc, CodeRef cr,
             CallSiteDescriptor csd, Object[] args) throws Throwable {
         switch (cr.staticInfo.argsExpectation) {

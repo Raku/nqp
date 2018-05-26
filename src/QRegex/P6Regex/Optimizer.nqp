@@ -32,7 +32,7 @@ class QRegex::Optimizer {
     }
 
     method first_non_concat_child($node) {
-        while +@($node) >= 1 {
+        while nqp::elems(@($node)) >= 1 {
             if nqp::istype($node, QAST::Regex) {
                 if $node.rxtype eq 'concat' {
                     if $node[0].rxtype eq 'qastnode' && $node[0].subtype eq 'declarative' {
@@ -52,7 +52,7 @@ class QRegex::Optimizer {
     }
 
     method dont_scan($node) {
-        while +@($node) >= 1 {
+        while nqp::elems(@($node)) >= 1 {
             if nqp::istype($node, QAST::Regex) {
                 if nqp::istype($node[0], QAST::Regex) && $node[0].rxtype eq 'scan' {
                     $node.shift;
@@ -72,9 +72,10 @@ class QRegex::Optimizer {
     method visit_concat($node) {
         # a single-child concat can become the child itself
         self.visit_children($node);
-        if +@($node) == 1 && $!level >= 1 {
+        if nqp::elems(@($node)) == 1 && $!level >= 1 {
             return $node[0];
-        } elsif nqp::istype($node[0], QAST::Regex) && +@($node) >= 2 && $!level >= 2 {
+        } elsif nqp::istype($node[0], QAST::Regex)
+        && nqp::elems(@($node)) >= 2 && $!level >= 2 {
             # we may have a scan followed by a begin-of-string assertion.
             # in that case we just shouldn't scan.
             if $node[0].rxtype eq 'scan'
@@ -193,4 +194,3 @@ class QRegex::Optimizer {
         }
     }
 }
-

@@ -4,8 +4,13 @@ sudo: false
 dist: trusty
 
 install: "echo"
+#install: travis_wait 30 mvn install
 
-script: "perl Configure.pl $NQP_OPTIONS; make test"
+#script: "perl Configure.pl $NQP_OPTIONS; make test"
+script: 
+    - perl Configure.pl $NQP_OPTIONS
+    - make
+    - travis_wait 30 make test
 
 branches:
    only:

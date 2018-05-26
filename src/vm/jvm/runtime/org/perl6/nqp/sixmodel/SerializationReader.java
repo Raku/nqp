@@ -302,7 +302,7 @@ public class SerializationReader {
                 /* Ensure we aren't already trying to repossess the object. */
                 /* XXX TODO */
 
-                /* Put it into objects root set at the apporpriate slot. */
+                /* Put it into objects root set at the appropriate slot. */
                 sc.addObject(origObj, objIdx);
                 origObj.sc = sc;
 

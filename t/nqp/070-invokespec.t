@@ -1,4 +1,4 @@
-plan(11);
+plan(13);
 class Foo {
     has $!here_we_keep_the_code_ref;
     has $!other_place_we_could_keep_the_code_ref_in;
@@ -30,6 +30,15 @@ class Baz {
 
 ok(nqp::isinvokable(Foo) == 1, "nqp::isinvokable works on objects that have a set invokespec");
 ok(nqp::isinvokable(Baz) == 0, "nqp::isinvokable works on objects that don't have a set invokespec");
+
+my $with_args := Foo.new();
+$with_args.set_code_ref(sub (*@args) {
+  is(nqp::elems(@args), 2, 'correct number of elements with setinvokespec');
+  ok(@args[0] eq 'fooarg' && @args[1] eq 'bararg', '...with correct values');
+});
+$with_args('fooarg', 'bararg');
+
+
 
 class Second {
     has $!attr;

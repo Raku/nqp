@@ -25,7 +25,7 @@ my @clo := $nqpcomp.commandline_options();
 @clo.push('custom-regex-lib=s');
 @clo.push('module-path=s');
 @clo.push('no-regex-lib');
-@clo.push('stable-sc');
+@clo.push('stable-sc=s');
 @clo.push('optimize=s');
 #?if jvm
 @clo.push('javaclass=s');

@@ -9,7 +9,7 @@
 # * Resolving references to objects, within or between compilation units
 #
 # Just as there is one AST produced per compilation unit, there is also a
-# world produce per compilation unit.
+# world produced per compilation unit.
 #
 # A world includes a serialization context. This contains a bunch of
 # objects - often meta-objects - that we want to persist across the
@@ -81,9 +81,6 @@ class HLL::World {
     has @!load_dependency_tasks;
 
     has $!is_nested;
-
-    # List of any line number/filename directives in the file.
-    my @*comp_line_directives := nqp::hash();
 
     method BUILD(:$handle!, :$description = '<unknown>', :$context) {
         if $context {
@@ -186,9 +183,10 @@ class HLL::World {
     }
 
     method add_comp_line_directive(@directive) {
-        my int $elems := nqp::elems(@*comp_line_directives);
-        if $elems == 0 || !(@*comp_line_directives[$elems - 1][0] eq @directive[0]) {
-            nqp::push(@*comp_line_directives, @directive);
+        my @clds := @*comp_line_directives;
+        my int $elems := nqp::elems(@clds);
+        if $elems == 0 || !(@clds[$elems - 1][0] eq @directive[0]) {
+            nqp::push(@clds, @directive);
         }
     }
 }

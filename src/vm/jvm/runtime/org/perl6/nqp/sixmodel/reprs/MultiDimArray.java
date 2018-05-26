@@ -66,7 +66,7 @@ public class MultiDimArray extends REPR {
                  "Cannot allocate a multi-dim array type before it is composed");
         }
     }
-    
+
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject arrayInfo = repr_info.at_key_boxed(tc, "array");
         if (arrayInfo != null) {
@@ -144,7 +144,7 @@ public class MultiDimArray extends REPR {
         obj.st = st;
         return obj;
     }
-    
+
     public void deserialize_finish(ThreadContext tc, STable st,
             SerializationReader reader, SixModelObject obj) {
         MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
@@ -154,14 +154,14 @@ public class MultiDimArray extends REPR {
             mda.dimensions[i] = reader.readLong();
         mda.deserializeValues(tc, reader);
     }
-    
+
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
         for (int i = 0; i < mda.dimensions.length; i++)
             writer.writeInt(mda.dimensions[i]);
         mda.serializeValues(tc, writer);
     }
-    
+
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
@@ -177,7 +177,7 @@ public class MultiDimArray extends REPR {
             writer.writeInt(0);
         }
     }
-    
+
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
