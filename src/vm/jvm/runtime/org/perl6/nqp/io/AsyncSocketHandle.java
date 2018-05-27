@@ -7,6 +7,7 @@ import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.nio.channels.ClosedChannelException;
 
 import org.perl6.nqp.runtime.Buffers;
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -18,7 +19,7 @@ import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 
-public class AsyncSocketHandle implements IIOClosable {
+public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
     private AsynchronousSocketChannel channel;
 
     public AsyncSocketHandle(ThreadContext tc) {
@@ -42,6 +43,7 @@ public class AsyncSocketHandle implements IIOClosable {
             HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
             final SixModelObject IOType = hllConfig.ioType;
             final SixModelObject Array = hllConfig.listType;
+            final SixModelObject Int = hllConfig.intBoxType;
             final SixModelObject Str = hllConfig.strBoxType;
 
             @Override
@@ -51,20 +53,33 @@ public class AsyncSocketHandle implements IIOClosable {
                 IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
                         IOType.st);
                 ioHandle.handle = task.handle;
-                callback(curTC, task, ioHandle, Str);
+                callback(curTC, task, ioHandle, Str,
+                    Ops.box_s(host, Str, curTC),
+                    Ops.box_i(port, Int, curTC),
+                    Ops.box_s(host, Str, curTC),  // TODO send socketHost
+                    Ops.box_i(port, Int, curTC)   // TODO send socketPort
+                );
             }
 
             @Override
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                callback(curTC, task, IOType, Ops.box_s(t.toString(), Str, curTC));
+                callback(curTC, task, IOType,
+                    Ops.box_s(t.toString(), Str, curTC), Str, Int, Str, Int);
             }
 
-            protected void callback(ThreadContext tc, AsyncTaskInstance task, SixModelObject ioHandle, SixModelObject err) {
+            protected void callback(ThreadContext tc, AsyncTaskInstance task,
+                    SixModelObject ioHandle, SixModelObject err,
+                    SixModelObject peerHost, SixModelObject peerPort,
+                    SixModelObject socketHost, SixModelObject socketPort) {
                 SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
                 result.push_boxed(tc, task.schedulee);
                 result.push_boxed(tc, ioHandle);
                 result.push_boxed(tc, err);
+                result.push_boxed(tc, peerHost);
+                result.push_boxed(tc, peerPort);
+                result.push_boxed(tc, socketHost);
+                result.push_boxed(tc, socketPort);
                 ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
             }
         };
@@ -173,7 +188,8 @@ public class AsyncSocketHandle implements IIOClosable {
             @Override
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
-                SixModelObject err = (t instanceof AsynchronousCloseException)
+                SixModelObject err = (t instanceof AsynchronousCloseException
+                    || t instanceof ClosedChannelException)
                         ? Str : Ops.box_s(t.toString(), Str, curTC);
                 callback(curTC, task, -1, Str, err);
             }
@@ -202,5 +218,10 @@ public class AsyncSocketHandle implements IIOClosable {
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
+    }
+
+    @Override
+    public void cancel(ThreadContext tc) {
+        close(tc);
     }
 }

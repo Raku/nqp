@@ -50,11 +50,36 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
             final SixModelObject IOType = hllConfig.ioType;
             final SixModelObject Array = hllConfig.listType;
             final SixModelObject Null = hllConfig.nullValue;
+            final SixModelObject Int = hllConfig.intBoxType;
             final SixModelObject Str = hllConfig.strBoxType;
 
             @Override
             public void completed(AsynchronousSocketChannel channel, AsyncTaskInstance task) {
                 listenChan.accept(task, this);
+
+                InetSocketAddress localAddress;
+                InetSocketAddress remoteAddress;
+
+                try {
+                    localAddress = (InetSocketAddress) channel.getLocalAddress();
+                } catch (IOException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                }
+                String socketHost = localAddress.getAddress().getHostAddress();
+                if (socketHost.equals("0:0:0:0:0:0:0:1"))
+                    socketHost = "::1";
+                int socketPort = localAddress.getPort();
+
+                try {
+                    remoteAddress = (InetSocketAddress) channel.getRemoteAddress();
+                } catch (IOException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                }
+                String peerHost = remoteAddress.getAddress().getHostAddress();
+                if (peerHost.equals("0:0:0:0:0:0:0:1"))
+                    peerHost = "::1";
+                int peerPort = localAddress.getPort();
+
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
                 AsyncSocketHandle handle = new AsyncSocketHandle(curTC, channel);
@@ -66,6 +91,10 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 result.push_boxed(curTC, task.schedulee);
                 result.push_boxed(curTC, ioHandle);
                 result.push_boxed(curTC, Null);
+                result.push_boxed(curTC, Ops.box_s(socketHost, Str, curTC));
+                result.push_boxed(curTC, Ops.box_i(socketPort, Int, curTC));
+                result.push_boxed(curTC, Ops.box_s(peerHost, Str, curTC));
+                result.push_boxed(curTC, Ops.box_i(peerPort, Int, curTC));
 
                 ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
             }
