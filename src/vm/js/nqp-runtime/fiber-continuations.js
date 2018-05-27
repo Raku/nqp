@@ -2,6 +2,7 @@ const op = {};
 exports.op = op;
 
 const fibers = require('fibers');
+const nqp = require('nqp-runtime');
 
 function runTagged(currentHLL, tag, fiber, val, ctx) {
   let arg = val;
