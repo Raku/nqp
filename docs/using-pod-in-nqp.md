@@ -14,5 +14,4 @@ Any word (other than 'cut') is accepted as an identifier. The entry may be used 
     ...any text
     =end ...optional identifier...
 
-If the ```=begin``` has an identifier, the ```=end``` should have the same identifier (not
-yet enforced).
+If the ```=begin``` has an identifier, the ```=end``` must have the same identifier.
