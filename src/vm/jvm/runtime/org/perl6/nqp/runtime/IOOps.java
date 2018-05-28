@@ -36,44 +36,32 @@ public final class IOOps {
         }
     }
 
-    private static class SigSupported {
-        private static List<String> supported = Arrays.asList("SIGINT", "SIGKILL");
-        public static Map<String, Integer> build() {
-            Map<String, Integer> m = new HashMap<String, Integer>();
-            for ( String k : supported ) { m.put(k, 1); }
-            return m;
+    private static class SigProcess {
+        private static final int SIGNUM_HIGHEST = 32;
+
+        private static class SigSupported {
+            private static List<String> supported = Arrays.asList("SIGINT", "SIGKILL");
+            public static Map<String, Integer> build() {
+                Map<String, Integer> m = new HashMap<String, Integer>();
+                for ( String k : supported ) { m.put(k, 1); }
+                return m;
+            }
         }
-    }
-    private static final Map<String, Integer> sigSupported = SigSupported.build();
-    private static final List<String> sigKeys = Arrays.asList(
-        "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
-        "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
-        "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
-        "SIGCONT", "SIGCHLD",   "SIGTTIN",   "SIGTTOU",  "SIGIO",   "SIGXCPU",
-        "SIGXFSZ", "SIGVTALRM", "SIGPROF",   "SIGWINCH", "SIGINFO", "SIGUSR1",
-        "SIGUSR2", "SIGTHR",    "SIGSTKFLT", "SIGPWR",   "SIGBREAK"
-    );
+        private static final Map<String, Integer> sigSupported = SigSupported.build();
 
-    private static SixModelObject sigCache = null;
-    public static SixModelObject getsignals(ThreadContext tc) {
-        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
-        SixModelObject intType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
-        SixModelObject res      = hashType.st.REPR.allocate(tc, hashType.st);
+        private static final List<String> sigKeys = Arrays.asList(
+            "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
+            "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
+            "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
+            "SIGCONT", "SIGCHLD",   "SIGTTIN",   "SIGTTOU",  "SIGIO",   "SIGXCPU",
+            "SIGXFSZ", "SIGVTALRM", "SIGPROF",   "SIGWINCH", "SIGINFO", "SIGUSR1",
+            "SIGUSR2", "SIGTHR",    "SIGSTKFLT", "SIGPWR",   "SIGBREAK"
+        );
 
-        if (sigCache != null) return sigCache;
-
-        Map<String, Integer> sigWanted = new HashMap<String, Integer>();
-        for ( String k : sigKeys ) { sigWanted.put(k, 0); }
-
-        // Get available signals on host system
-        String os = System.getProperty("os.name").toLowerCase();
-        if ( os.indexOf("win") >= 0 ) {
-            // Use same sigs defined for _WIN32 in MoarVM
-            sigWanted.put("SIGHUP",    1);
-            sigWanted.put("SIGKILL",   9);
-            sigWanted.put("SIGWINCH", 28);
-        } else {
-            ProcessBuilder pb = new ProcessBuilder("/bin/kill", "-l");
+        private static String getNameFromVal(int signum) {
+            // Use sh kill builtin, seems most portable across MacOSX, and Linux and BSD variants
+            final String SH_ARG = "kill -l " + Integer.toString(signum);
+            ProcessBuilder pb = new ProcessBuilder("sh", "-c", SH_ARG);
             try {
                 int     retval    = -1;
                 boolean finished  = false;
@@ -90,31 +78,70 @@ public final class IOOps {
                     BufferedReader br = new BufferedReader(
                         new InputStreamReader( process.getInputStream() )
                     );
-                    String l;
-                    int i = 1;
-                    while ( (l = br.readLine()) != null ) {
-                        String[] sigs = l.split("\\s+");
-                        for (String s : sigs) {
-                            if ( s.length() > 0 && !Character.isDigit(s.charAt(0))
-                                 && !Character.isWhitespace(s.charAt(0)) )
-                            {
-                                String sig = "SIG" + s.trim().toUpperCase();
-                                if ( sigWanted.containsKey(sig) ) {
-                                    sigWanted.put(sig, i);
-                                }
-                            }
-                            i++;
-                        }
+                    String s;
+                    if ( (s = br.readLine()) != null ) {
+                        return "SIG" + s.trim().toUpperCase();
                     }
                 }
             } catch (IOException e) { }
+            return null;
         }
 
-        for (String sig : sigWanted.keySet()) {
-            long signum      = (long)sigWanted.get(sig);
-            long signumFinal = sigSupported.containsKey(sig) ? signum : -signum;
+        private static void retrieveValsWin(Map<String, Integer> sigWanted) {
+            // Use same sigs defined for _WIN32 in MoarVM
+            sigWanted.put("SIGHUP",    1);
+            sigWanted.put("SIGKILL",   9);
+            sigWanted.put("SIGWINCH", 28);
+        }
 
-            res.bind_key_boxed( tc, sig, Ops.box_i(signumFinal, intType, tc) );
+        private static void retrieveValsPosix(Map<String, Integer> sigWanted) {
+            String sigval = "";
+            int i         = 1;
+            while (sigval != null && i <= SIGNUM_HIGHEST) {
+                sigval = getNameFromVal(i);
+                if (sigval != null && sigWanted.containsKey(sigval)) {
+                    sigWanted.put(sigval, i);
+                }
+                i++;
+            }
+        }
+
+        public static Map<String, Integer> process() {
+            Map<String, Integer> sigWanted = new HashMap<String, Integer>();
+            for ( String k : sigKeys ) { sigWanted.put(k, 0); }
+
+            // Get available signals on host system
+            String os = System.getProperty("os.name").toLowerCase();
+            if ( os.indexOf("win") >= 0 ) {
+                retrieveValsWin(sigWanted);
+            } else {
+                retrieveValsPosix(sigWanted);
+            }
+
+            // Negate sigs not supported by backend
+            for (String sig : sigWanted.keySet()) {
+                int signum      = sigWanted.get(sig);
+                int signumFinal = sigSupported.containsKey(sig) ? signum : -signum;
+                sigWanted.put(sig, signumFinal);
+            }
+            return sigWanted;
+        }
+    }
+
+    private static SixModelObject sigCache = null;
+    public static SixModelObject getsignals(ThreadContext tc) {
+        if (sigCache != null) return sigCache;
+
+        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject intType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+        SixModelObject res      = hashType.st.REPR.allocate(tc, hashType.st);
+
+        Map<String, Integer> sigWanted = SigProcess.process();
+
+        // Box the hash values for HLL
+        for (String sig : sigWanted.keySet()) {
+            long signum = (long)sigWanted.get(sig);
+            res.bind_key_boxed( tc, sig, Ops.box_i(signum, intType, tc) );
         }
         sigCache = res;
         return res;
