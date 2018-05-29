@@ -105,7 +105,7 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
                 result.push_boxed(curTC, task.schedulee);
                 result.push_boxed(curTC, IOType);
-                result.push_boxed(curTC, Ops.box_s(exc.getMessage(), Str, curTC));
+                result.push_boxed(curTC, Ops.box_s(exc.toString(), Str, curTC));
             }
         };
 

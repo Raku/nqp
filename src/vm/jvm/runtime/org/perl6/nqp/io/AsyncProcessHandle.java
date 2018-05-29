@@ -77,7 +77,7 @@ public class AsyncProcessHandle implements IIOClosable {
                         send(done, boxInt(outcome << 8));
                 }
                 catch (Throwable t) {
-                    SixModelObject message = boxError(t.getMessage());
+                    SixModelObject message = boxError(t.toString());
 
                     SixModelObject error = config.get("error");
                     if (error != null)
@@ -197,7 +197,7 @@ public class AsyncProcessHandle implements IIOClosable {
                 }
                 catch (Throwable t) {
                     send(callback, boxInt(-1), AsyncProcessHandle.this.hllConfig.strBoxType,
-                            boxError(t.getMessage()));
+                            boxError(t.toString()));
                 }
             }
         }).start();
@@ -234,7 +234,7 @@ public class AsyncProcessHandle implements IIOClosable {
         }
         catch (Throwable t) {
             result.push_boxed(tc, this.hllConfig.strBoxType);
-            result.push_boxed(tc, boxError(t.getMessage()));
+            result.push_boxed(tc, boxError(t.toString()));
         }
         ((ConcBlockingQueueInstance)task.queue).push_boxed(tc, result);
     }
