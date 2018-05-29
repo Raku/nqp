@@ -31,6 +31,7 @@ public class AsyncProcessHandle implements IIOClosable {
     private SixModelObject bufType;
     private int outSeq = 0;
     private int errSeq = 0;
+    private boolean procStarted = false;
 
     public AsyncProcessHandle(ThreadContext tc, SixModelObject queue, SixModelObject argsObj,
             String cwd, SixModelObject envObj, SixModelObject configObj) {
@@ -52,6 +53,7 @@ public class AsyncProcessHandle implements IIOClosable {
             public void run() {
                 try {
                     AsyncProcessHandle.this.proc = pb.start();
+                    procStarted = true;
 
                     int pid = (int)getPID(AsyncProcessHandle.this.proc);
 
@@ -219,13 +221,18 @@ public class AsyncProcessHandle implements IIOClosable {
         return Ops.box_i(value, this.hllConfig.intBoxType, this.tc);
     }
 
-    public void writeBytes(ThreadContext tc, AsyncTaskInstance task, SixModelObject toWrite) {
+    public synchronized void writeBytes(ThreadContext tc, AsyncTaskInstance task, SixModelObject toWrite) {
         ByteBuffer buffer = Buffers.unstashBytes(toWrite, tc);
-        OutputStream stream = this.proc.getOutputStream();
         SixModelObject Array = this.hllConfig.listType;
         SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
         result.push_boxed(tc, task.schedulee);
         try {
+            /* wait up to one second for proc */
+            for (int counter = 0; !procStarted && counter < 100; counter++)
+                wait(10);
+            /* TODO: is it better to check if proc is null and
+             * throw an Exception with a fitting message? */
+            OutputStream stream = this.proc.getOutputStream();
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             stream.write(bytes);
