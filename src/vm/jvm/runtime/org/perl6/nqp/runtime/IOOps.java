@@ -1,5 +1,14 @@
 package org.perl6.nqp.runtime;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.perl6.nqp.io.AsyncProcessHandle;
 import org.perl6.nqp.io.AsyncServerSocketHandle;
 import org.perl6.nqp.io.AsyncSocketHandle;
@@ -26,6 +35,118 @@ public final class IOOps {
                 new Object[] { Ops.box_i(signum, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc) });
         }
     }
+
+    private static class SigProcess {
+        private static final int SIGNUM_HIGHEST = 32;
+
+        private static class SigSupported {
+            private static List<String> supported = Arrays.asList("SIGINT", "SIGKILL");
+            public static Map<String, Integer> build() {
+                Map<String, Integer> m = new HashMap<String, Integer>();
+                for ( String k : supported ) { m.put(k, 1); }
+                return m;
+            }
+        }
+        private static final Map<String, Integer> sigSupported = SigSupported.build();
+
+        private static final List<String> sigKeys = Arrays.asList(
+            "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
+            "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
+            "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
+            "SIGCONT", "SIGCHLD",   "SIGTTIN",   "SIGTTOU",  "SIGIO",   "SIGXCPU",
+            "SIGXFSZ", "SIGVTALRM", "SIGPROF",   "SIGWINCH", "SIGINFO", "SIGUSR1",
+            "SIGUSR2", "SIGTHR",    "SIGSTKFLT", "SIGPWR",   "SIGBREAK"
+        );
+
+        private static String getNameFromVal(int signum) {
+            // Use sh kill builtin, seems most portable across MacOSX, and Linux and BSD variants
+            final String SH_ARG = "kill -l " + Integer.toString(signum);
+            ProcessBuilder pb = new ProcessBuilder("sh", "-c", SH_ARG);
+            try {
+                int     retval    = -1;
+                boolean finished  = false;
+
+                Process process = pb.start();
+                do {
+                    try {
+                        retval   = process.waitFor();
+                        finished = true;
+                    } catch (InterruptedException e) {
+                    }
+                } while (!finished);
+                if (retval == 0) {
+                    BufferedReader br = new BufferedReader(
+                        new InputStreamReader( process.getInputStream() )
+                    );
+                    String s;
+                    if ( (s = br.readLine()) != null ) {
+                        return "SIG" + s.trim().toUpperCase();
+                    }
+                }
+            } catch (IOException e) { }
+            return null;
+        }
+
+        private static void retrieveValsWin(Map<String, Integer> sigWanted) {
+            // Use same sigs defined for _WIN32 in MoarVM
+            sigWanted.put("SIGHUP",    1);
+            sigWanted.put("SIGKILL",   9);
+            sigWanted.put("SIGWINCH", 28);
+        }
+
+        private static void retrieveValsPosix(Map<String, Integer> sigWanted) {
+            String sigval = "";
+            int i         = 1;
+            while (sigval != null && i <= SIGNUM_HIGHEST) {
+                sigval = getNameFromVal(i);
+                if (sigval != null && sigWanted.containsKey(sigval)) {
+                    sigWanted.put(sigval, i);
+                }
+                i++;
+            }
+        }
+
+        public static Map<String, Integer> process() {
+            Map<String, Integer> sigWanted = new HashMap<String, Integer>();
+            for ( String k : sigKeys ) { sigWanted.put(k, 0); }
+
+            // Get available signals on host system
+            String os = System.getProperty("os.name").toLowerCase();
+            if ( os.indexOf("win") >= 0 ) {
+                retrieveValsWin(sigWanted);
+            } else {
+                retrieveValsPosix(sigWanted);
+            }
+
+            // Negate sigs not supported by backend
+            for (String sig : sigWanted.keySet()) {
+                int signum      = sigWanted.get(sig);
+                int signumFinal = sigSupported.containsKey(sig) ? signum : -signum;
+                sigWanted.put(sig, signumFinal);
+            }
+            return sigWanted;
+        }
+    }
+
+    private static SixModelObject sigCache = null;
+    public static SixModelObject getsignals(ThreadContext tc) {
+        if (sigCache != null) return sigCache;
+
+        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject intType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+        SixModelObject res      = hashType.st.REPR.allocate(tc, hashType.st);
+
+        Map<String, Integer> sigWanted = SigProcess.process();
+
+        // Box the hash values for HLL
+        for (String sig : sigWanted.keySet()) {
+            long signum = (long)sigWanted.get(sig);
+            res.bind_key_boxed( tc, sig, Ops.box_i(signum, intType, tc) );
+        }
+        sigCache = res;
+        return res;
+    }
+
     public static SixModelObject signal(SixModelObject queue, SixModelObject schedulee,
             long signalNum, SixModelObject asyncType, ThreadContext tc) {
         switch((int)signalNum) {

@@ -546,3 +546,39 @@ op.permit = function(handle, channel, permits) {
   // TODO Implement permit handling properly
   return handle;
 };
+
+let sigCache = null;
+op.getsignals = function() {
+  if (sigCache) {
+    return sigCache;
+  }
+
+  const osSigs = (function() {
+    if (os.platform() === 'win32') {
+      // Use same sigs defined for _WIN32 in MoarVM
+      return {
+        SIGHUP:    1,
+        SIGKILL:   9,
+        SIGWINCH: 28,
+      };
+    }
+    else {
+      return os.constants.signals;
+    }
+  })();
+  const sigWanted = [
+    'SIGHUP',  'SIGINT',    'SIGQUIT',   'SIGILL',   'SIGTRAP', 'SIGABRT',
+    'SIGEMT',  'SIGFPE',    'SIGKILL',   'SIGBUS',   'SIGSEGV', 'SIGSYS',
+    'SIGPIPE', 'SIGALRM',   'SIGTERM',   'SIGURG',   'SIGSTOP', 'SIGTSTP',
+    'SIGCONT', 'SIGCHLD',   'SIGTTIN',   'SIGTTOU',  'SIGIO',   'SIGXCPU',
+    'SIGXFSZ', 'SIGVTALRM', 'SIGPROF',   'SIGWINCH', 'SIGINFO', 'SIGUSR1',
+    'SIGUSR2', 'SIGTHR',    'SIGSTKFLT', 'SIGPWR',   'SIGBREAK',
+  ];
+
+  const res = new Hash();
+  for (const k of sigWanted) {
+    res.content.set( k, new NQPInt(k in osSigs ? osSigs[k] : 0) );
+  }
+  sigCache = res;
+  return res;
+};

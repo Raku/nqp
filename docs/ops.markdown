@@ -296,6 +296,7 @@
   * [debugnoop `jvm`](#debugnoop-jvm)
   * [exit](#exit)
   * [getenvhash](#getenvhash)
+  * [getsignals](#getsignals)
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
   * [getppid `moar`](#getppid)
@@ -2460,47 +2461,6 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * TYPE_CHECK_CACHE_THEN_METHOD
     * TYPE_CHECK_NEEDS_ACCEPTS
 
-The JVM only supports SIG_INT and SIG_KILL.
-
-On the MoarVM all of those signal constants below are defined.
-
-    * SIG_HUP
-    * SIG_INT
-    * SIG_QUIT
-    * SIG_ILL
-    * SIG_TRAP
-    * SIG_ABRT
-    * SIG_EMT
-    * SIG_FPE
-    * SIG_KILL
-    * SIG_BUS
-    * SIG_SEGV
-    * SIG_SYS
-    * SIG_PIPE
-    * SIG_ALRM
-    * SIG_TERM
-    * SIG_URG
-    * SIG_STOP
-    * SIG_TSTP
-    * SIG_CONT
-    * SIG_CHLD
-    * SIG_TTIN
-    * SIG_TTOU
-    * SIG_IO
-    * SIG_XCPU
-    * SIG_XFSZ
-    * SIG_VTALRM
-    * SIG_PROF
-    * SIG_WINCH
-    * SIG_INFO
-    * SIG_USR1
-    * SIG_USR2
-    * SIG_THR
-    * SIG_STKFLT
-    * SIG_PWR
-    * SIG_BREAK
-
-
 ## debugnoop `jvm`
 * `debugnoop(Mu $a)`
 
@@ -2517,6 +2477,56 @@ Exit nqp, using the given status as the compiler's exit value.
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
+
+## getsignals
+* `getsignals(--> Mu)`
+
+Returns a hash containing signal names mapped to the proper signum integer on
+the host platform (MacOSX, Linux, BSD, etc).
+
+If the current backend does not support the registering of a signal handler for
+a given signal, the hash value will be a negative integer. For instance, the JVM
+only supports signal handlers for SIGINT and SIGKILL, so all the values will be
+negative except 2 (SIGINT) and 9 (SIGKILL). If a signal is not available on the
+host system, the hash value will be set to 0.
+
+The complete list of hash keys is as follows:
+
+    * SIGHUP
+    * SIGINT
+    * SIGQUIT
+    * SIGILL
+    * SIGTRAP
+    * SIGABRT
+    * SIGEMT
+    * SIGFPE
+    * SIGKILL
+    * SIGBUS
+    * SIGSEGV
+    * SIGSYS
+    * SIGPIPE
+    * SIGALRM
+    * SIGTERM
+    * SIGURG
+    * SIGSTOP
+    * SIGTSTP
+    * SIGCONT
+    * SIGCHLD
+    * SIGTTIN
+    * SIGTTOU
+    * SIGIO
+    * SIGXCPU
+    * SIGXFSZ
+    * SIGVTALRM
+    * SIGPROF
+    * SIGWINCH
+    * SIGINFO
+    * SIGUSR1
+    * SIGUSR2
+    * SIGTHR
+    * SIGSTKFLT
+    * SIGPWR
+    * SIGBREAK
 
 ## backendconfig
 * `backendconfig(--> Mu)`
