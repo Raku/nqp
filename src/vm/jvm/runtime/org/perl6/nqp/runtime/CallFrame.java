@@ -1,5 +1,6 @@
 package org.perl6.nqp.runtime;
 
+import java.util.BitSet;
 import java.util.HashMap;
 
 import org.perl6.nqp.sixmodel.InvocationSpec;
@@ -149,7 +150,7 @@ public class CallFrame implements Cloneable {
                 case 2:
                     if (cr.oLexState == null) {
                         cr.oLexState = new SixModelObject[sci.oLexStatic.length];
-                        cr.oLexStateIsHllInit = new boolean[sci.oLexStatic.length];
+                        cr.oLexStateIsHllInit = new BitSet(sci.oLexStatic.length);
                         this.stateInit = true;
                     }
                     if (cr.oLexState[i] == null)
