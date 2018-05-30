@@ -20,6 +20,8 @@ public class TruffleCompiler {
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
             case "say":
                 return new NQPSayNode(build(node.at_pos_boxed(tc, 1), tc));
+            case "print":
+                return new NQPPrintNode(build(node.at_pos_boxed(tc, 1), tc));
             case "stmts":
                 int elems = (int) node.elems(tc);
                 NQPExpressionNode children[] = new NQPExpressionNode[elems - 1];

@@ -26,6 +26,8 @@ class QAST::TruffleCompiler {
     multi method as_truffle(QAST::Op $node, :$want) {
         if $node.op eq 'say' {
             ['say', self.as_truffle($node[0])];
+        } elsif $node.op eq 'print' {
+            ['print', self.as_truffle($node[0])];
         } else {
             nqp::die('NYI op: ' ~ $node.op);
         }

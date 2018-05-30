@@ -129,7 +129,7 @@ Look at L<http://www.graalvm.org/docs/getting-started/> for how to set it up.
 
 For now it's built together with the old JVM backend.
 
-    $ perl Configure --backends=jvm
+    $ perl Configure.pl --backends=jvm
     $ make
 
 Currently it needs to be run like:
