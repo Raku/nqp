@@ -89,7 +89,7 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     public void shift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
     }
-    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long start, long end) {
+    public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
         throw ExceptionHandling.dieInternal(tc, "Cannot slice a multidim array");
     }
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {

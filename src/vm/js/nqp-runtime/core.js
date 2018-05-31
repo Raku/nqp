@@ -1661,6 +1661,13 @@ op.getuniname = function(codePoint) {
     return '<control-' + formatCodePoint(codePoint) + '>';
   } else if ( (0xFDD0 <= codePoint && codePoint <= 0xFDEF) || (0xFFFE & codePoint) == 0xFFFE) {
     return '<noncharacter-' + formatCodePoint(codePoint) + '>';
+  } else if (0xE000 <= codePoint && codePoint <= 0xF8FF
+            || 0xF0000 <= codePoint && codePoint <= 0xFFFFD
+            || 0x100000 <= codePoint && codePoint <= 0x10FFFD) {
+    return '<private-use-' + formatCodePoint(codePoint) + '>'
+  } else if (0xD800 <= codePoint && codePoint <= 0xDBFF
+            || 0xDC00 <= codePoint && codePoint <= 0xDFFF) {
+    return '<surrogate-' + formatCodePoint(codePoint) + '>'
   } else {
     return ucd.codePointToName(codePoint) || 'missing';
   }
