@@ -35,6 +35,7 @@ MAIN: {
                'no-clean',
                'with-moar=s', 'gen-moar:s', 'moar-option=s@',
                'with-asm=s', 'with-asm-tree=s', 'with-jline=s', 'with-jna=s',
+                'with-truffle-api=s',
                'make-install!', 'makefile-timing!',
                'git-protocol=s', 'ignore-errors',
                'link',
@@ -75,6 +76,13 @@ MAIN: {
         }
     } else {
         $config{'jna'} = "3rdparty/jna/jna-4.0.0.jar";
+    }
+    if ($options{'with-truffle-api'}) {
+        if ($options{'with-truffle-api'} ne '-') {
+            $config{'truffleapi'} = $options{'with-truffle-api'};
+        }
+    } else {
+        $config{'truffleapi'} = "3rdparty/truffle/truffle-api-1.0.0-rc1.jar";
     }
 
     if ($^O eq 'MSWin32') {
@@ -318,6 +326,7 @@ General Options:
     --with-asm-tree='/path/to/jar'
     --with-jline='/path/to/jar'
     --with-jna='/path/to/jar'
+    --with-truffle-api='/path/to/jar'
                        Provide paths to already installed jars
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https

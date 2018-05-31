@@ -1256,15 +1256,17 @@ op.typeparameterized = function(type) {
   return st.parametricType ? st.parametricType : Null;
 };
 
-let generator = Math;
-op.rand_n = function(limit) {
-  return generator.random() * limit;
-};
+exports.generator = Math;
+exports.isXorShiftGenerator = false;
 
+op.rand_n = function(limit) {
+  return exports.generator.random() * limit;
+};
 
 op.srand = function(seed) {
   const XorShift = require('xorshift').constructor;
-  generator = new XorShift([seed, 0, 0, 0]);
+  exports.generator = new XorShift([seed, 0, 0, 0]);
+  exports.isXorShiftGenerator = true;
   return seed;
 };
 

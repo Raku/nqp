@@ -2,8 +2,6 @@
 
 /* Used when evaling runtime compiled methods */
 const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
-const bignum = require('bignum-browserify');
-const ZERO = bignum(0);  // eslint-disable-line no-unused-vars
 
 const Null = require('./null.js');
 

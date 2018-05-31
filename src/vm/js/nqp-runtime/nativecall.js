@@ -2,7 +2,6 @@
 const op = {};
 const ffi = require('ffi');
 const ref = require('ref');
-const bignum = require('bignum-browserify');
 
 const Null = require('./null.js');
 exports.op = op;
@@ -88,7 +87,7 @@ op.nativecall = function(returns, callObject, args) {
       return boxed;
   } else if (callObject.$$ret in longInts) {
       const boxed = returns._STable.REPR.allocate(returns._STable);
-      boxed.$$setBignum(bignum(ret));
+      boxed.$$setBignum(BigInt(ret));
       return boxed;
   } else if (callObject.$$ret in floats) {
       const boxed = returns._STable.REPR.allocate(returns._STable);
