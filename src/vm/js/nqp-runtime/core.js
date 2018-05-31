@@ -418,8 +418,8 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
-op.findmethod = async function(ctx, obj, name) {
-  const method = await sixmodel.findMethod(ctx, obj, name);
+op.findmethod = /*async*/ function(ctx, obj, name) {
+  const method = /*await*/ sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
     throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
   }
@@ -598,10 +598,10 @@ class WrappedFunction extends NQPObject {
     this.func = func;
   }
 
-  async $$apply(args) {
+  /*async*/ $$apply(args) {
     const converted = [];
     for (let i = 2; i < args.length; i++) {
-      converted.push(await toJS(args[i]));
+      converted.push(/*await*/ toJS(args[i]));
     }
     return fromJS(this.func.apply(null, converted));
   }
@@ -1166,7 +1166,7 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   return type;
 };
 
-op.parameterizetype = async function(ctx, type, params) {
+op.parameterizetype = /*async*/ function(ctx, type, params) {
   /* Ensure we have a parametric type. */
   const st = type._STable;
   if (!st.parameterizer) {
@@ -1180,7 +1180,7 @@ op.parameterizetype = async function(ctx, type, params) {
     return found;
   }
 
-  const result = await st.parameterizer.$$call(ctx, {}, st.WHAT, params);
+  const result = /*await*/ st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
   const newSTable = result._STable;
   newSTable.parametricType = type;

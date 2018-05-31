@@ -93,8 +93,8 @@ loadOps(nativecall);
 const CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
-const asyncContinuations = require('./async-continuations.js');
-loadOps(asyncContinuations);
+const continuations = require('./fiber-continuations.js');
+loadOps(continuations);
 
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
@@ -127,7 +127,7 @@ exports.libpath = function(paths) {
 
 exports.loaderCtx = null;
 
-op.loadbytecode = async function(ctx, file) {
+op.loadbytecode = /*async*/ function(ctx, file) {
   // HACK - temporary hack for rakudo-js
   if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
     file = 'Perl6::BOOTSTRAP';
@@ -148,7 +148,7 @@ op.loadbytecode = async function(ctx, file) {
   let found = false;
   for (const prefix of prefixes) {
     try {
-      await loadFrom.require(prefix + mangled);
+      /*await*/ loadFrom.require(prefix + mangled);
 
       found = true;
       break;
@@ -210,13 +210,13 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
   }
 };
 
-exports.toStr = async function(arg_, ctx) {
+exports.toStr = /*async*/ function(arg_, ctx) {
   if (!arg_.$$decont) {
     console.log('#2');
     console.log(arg_);
     console.trace('got raw promise');
   }
-  const arg = await arg_.$$decont(ctx);
+  const arg = /*await*/ arg_.$$decont(ctx);
 
   if (arg instanceof NQPStr) {
     return arg.value;
@@ -229,8 +229,8 @@ exports.toStr = async function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    const ret = await arg.Str(ctx, null, arg); // eslint-disable-line new-cap
-    return (typeof ret === 'string' ? ret : (await ret.$$decont(ctx)).$$getStr());
+    const ret = /*await*/ arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+    return (typeof ret === 'string' ? ret : (/*await*/ ret.$$decont(ctx)).$$getStr());
   } else if (arg.$$getNum) {
     return coercions.numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
@@ -241,17 +241,17 @@ exports.toStr = async function(arg_, ctx) {
 };
 
 
-exports.toNum = async function(arg_, ctx) {
+exports.toNum = /*async*/ function(arg_, ctx) {
   if (!arg_.$$decont) {
     console.log('there');
   }
-  const arg = await arg_.$$decont(ctx);
+  const arg = /*await*/ arg_.$$decont(ctx);
   if (arg === Null) {
     return 0;
   } else if (arg instanceof NQPStr) {
     return coercions.strToNum(arg.value);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    const result = await arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    const result = /*await*/ arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (typeof result === 'number') {
       return result;
     } else if (result.$$getNum) {
@@ -274,8 +274,8 @@ exports.toNum = async function(arg_, ctx) {
   }
 };
 
-exports.toInt = async function(arg, ctx) {
-  return ((await exports.toNum(arg, ctx)) | 0);
+exports.toInt = /*async*/ function(arg, ctx) {
+  return ((/*await*/ exports.toNum(arg, ctx)) | 0);
 };
 
 exports.retval = function(currentHLL, arg) {

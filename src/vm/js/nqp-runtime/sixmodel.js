@@ -20,7 +20,7 @@ const NQPException = require('./nqp-exception.js');
 const nativeArgs = require('./native-args.js');
 const NativeStrArg = nativeArgs.NativeStrArg;
 
-async function findMethod(ctx, obj, name) {
+/*async*/ function findMethod(ctx, obj, name) {
   if (obj._STable.methodCache) {
     const method = obj._STable.methodCache.get(name);
     if (method !== undefined) {
@@ -31,8 +31,8 @@ async function findMethod(ctx, obj, name) {
     }
   }
 
-  if (await obj._STable.HOW.$$can(ctx, 'find_method')) {
-    return await obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, new NativeStrArg(name));
+  if (/*await*/ obj._STable.HOW.$$can(ctx, 'find_method')) {
+    return /*await*/ obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, new NativeStrArg(name));
   } else {
     return Null;
   }
@@ -90,7 +90,7 @@ class STable {
       }
     };
 
-    this.ObjConstructor.prototype.$$istype = async function(ctx, type) {
+    this.ObjConstructor.prototype.$$istype = /*async*/ function(ctx, type) {
       const cache = this._STable.typeCheckCache;
       if (cache) {
         for (let i = 0; i < cache.length; i++) {
@@ -104,11 +104,11 @@ class STable {
 
         const HOW = this._STable.HOW;
         /* This "hack" is stolen from the JVM */
-        if (!await HOW.$$can(ctx, 'type_check')) {
+        if (!/*await*/ HOW.$$can(ctx, 'type_check')) {
           return 0;
         }
 
-        const typeCheckResult = await HOW.type_check(ctx, null, HOW, this, type);
+        const typeCheckResult = /*await*/ HOW.type_check(ctx, null, HOW, this, type);
         if (typeof typeCheckResult === 'number' ? typeCheckResult : typeCheckResult.$$toBool(ctx)) {
           return 1;
         }
@@ -116,14 +116,14 @@ class STable {
 
       const TYPE_CHECK_NEEDS_ACCEPTS = 2;
       if (type._STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
-        return (await type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this)).$$toBool(ctx);
+        return (/*await*/ type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this)).$$toBool(ctx);
       }
 
       return 0;
     };
 
-    this.ObjConstructor.prototype.$$can = async function(ctx, name) {
-      return (await findMethod(ctx, this, name)) === Null ? 0 : 1;
+    this.ObjConstructor.prototype.$$can = /*async*/ function(ctx, name) {
+      return (/*await*/ findMethod(ctx, this, name)) === Null ? 0 : 1;
     };
 
     if (this.REPR.setupSTable) {
@@ -154,8 +154,8 @@ class STable {
   setboolspec(mode, method) {
     this.boolificationSpec = {mode: mode, method: method};
     if (mode == 0) {
-      this.ObjConstructor.prototype.$$toBool = async function(ctx) {
-        const ret = await method.$$call(ctx, {}, this);
+      this.ObjConstructor.prototype.$$toBool = /*async*/ function(ctx) {
+        const ret = /*await*/ method.$$call(ctx, {}, this);
         return (typeof ret === 'number' ? (ret === 0 ? 0 : 1) : ret.$$decont().$$toBool(ctx));
       };
     } else if (mode == 1) {

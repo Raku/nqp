@@ -1,12 +1,19 @@
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has $!nyi;
+    has $!async;
 
     method await($expr = NO_VALUE) {
-        $expr =:= NO_VALUE ?? 'await ' !! '(await ' ~ $expr ~ ')';
+         $expr =:= NO_VALUE ?? '/*await*/ ' !! '(/*await*/ ' ~ $expr ~ ')';
+#        if $!async {
+#            $expr =:= NO_VALUE ?? 'await ' !! '(await ' ~ $expr ~ ')';
+#        } else {
+#            $expr =:= NO_VALUE ?? '' !! $expr;
+#        }
     }
 
     method async() {
-        'async ';
+        #$!async ?? 'async ' !! '';
+        '/*async*/ ';
     }
 
     #= If the env var NQPJS_LOG is set log to nqpjs.log
@@ -1710,7 +1717,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
 
-        @setup.unshift((!$instant ?? '' !! "module.exports = ") ~ "nqp.run(async function() \{\n");
+        @setup.unshift((!$instant ?? '' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
         @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }

@@ -101,10 +101,10 @@ function basicConstructor(STable) {
     }
 
 
-    return async function() {
+    return /*async*/ function() {
       const how = this._STable.HOW;
 
-      const method = await how.find_method(null, null, how, this, new NativeStrArg(name));
+      const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
 
       if (method === Null) {
         return methodNotFoundError(arguments[0], arguments[2], name);
@@ -1845,7 +1845,7 @@ class Decoder extends REPR {
         return this;
       }
 
-      async $$decodersetlineseps(ctx, seps) {
+      /*async*/ $$decodersetlineseps(ctx, seps) {
         this.$$check();
         this.$$seps = seps.array;
       }

@@ -484,29 +484,29 @@ function wrapBuffer(buffer, type) {
   return wrapped;
 }
 
-async function stringifyEnv(ctx, hash) {
+/*async*/ function stringifyEnv(ctx, hash) {
   const stringifed = {};
 
   for (let key of hash.content.keys()) {
-    stringifed[key] = await nqp.toStr(hash.content.get(key), ctx);
+    stringifed[key] = /*await*/ nqp.toStr(hash.content.get(key), ctx);
   }
 
   return stringifed;
 }
 
-async function stringifyArray(ctx, array) {
+/*async*/ function stringifyArray(ctx, array) {
   const stringified = [];
   for (const element of array.array) {
-    stringified.push(await nqp.toStr(element, ctx));
+    stringified.push(/*await*/ nqp.toStr(element, ctx));
   }
   return stringified;
 }
 
-op.spawnprocasync = async function(ctx, queue, args, cwd, env, config) {
+op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
   const options = {
     shell: false,
     cwd: cwd,
-    env: await stringifyEnv(ctx, env),
+    env: /*await*/ stringifyEnv(ctx, env),
     stdio: [
       process.stdin,
       config.content.get('stdout_bytes') ? 'pipe' : process.stdout,
@@ -514,12 +514,12 @@ op.spawnprocasync = async function(ctx, queue, args, cwd, env, config) {
     ],
   };
 
-  const stringified = await stringifyArray(ctx, args);
+  const stringified = /*await*/ stringifyArray(ctx, args);
 
   const result = child_process.spawnSync(stringified.shift(), stringified, options);
 
   if (config.content.get('ready')) {
-    await config.content.get('ready').$$call(ctx, null);
+    /*await*/ config.content.get('ready').$$call(ctx, null);
   }
 
 
@@ -528,17 +528,17 @@ op.spawnprocasync = async function(ctx, queue, args, cwd, env, config) {
   if (str_box === undefined) str_box = Null;
 
   if (config.content.get('stdout_bytes')) {
-    await config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
-    await config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
+    /*await*/ config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
+    /*await*/ config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('stderr_bytes')) {
-    await config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
-    await config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
+    /*await*/ config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
+    /*await*/ config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('done')) {
-    await config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
+    /*await*/ config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
   }
 };
 

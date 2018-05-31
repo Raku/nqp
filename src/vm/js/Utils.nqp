@@ -23,6 +23,9 @@ sub quote_string($str) {
             elsif ($c eq "\x[2029]") {
                 $out := $out ~ "\\u2029";
             }
+            elsif ($c eq "*") { # need for /*async*/ and /*await*/
+                $out := $out ~ "\\u002A";
+            }
             else {
                 $out := $out ~ $c;
             }
