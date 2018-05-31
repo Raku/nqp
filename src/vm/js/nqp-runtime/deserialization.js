@@ -48,7 +48,7 @@ module.exports.wval = function(handle, idx) {
 };
 
 op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, setupWVals) {
-  const buffer = new Buffer(blob, 'base64');
+  const buffer = Buffer.from(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
   for (let i = 0; i < sc.codeRefs.length; i++) {

@@ -996,7 +996,7 @@ op.encodeconf = function(str, encoding_, output, permissive) {
   if (encoding in codecs) {
     buffer = codecs[encoding].encode(str, permissive);
   } else {
-    buffer = new Buffer(str, encoding);
+    buffer = Buffer.from(str, encoding);
   }
 
   writeBuffer(output, buffer);

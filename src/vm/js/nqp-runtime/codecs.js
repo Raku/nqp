@@ -307,7 +307,7 @@ class NativeEncoding {
     }
 
     encode(str) {
-      return new Buffer(str, this.encoding);
+      return Buffer.from(str, this.encoding);
     }
 
     encodeWithReplacement(str, replacement) {
