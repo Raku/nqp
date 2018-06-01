@@ -114,7 +114,11 @@ nqp::sethllconfig('nqp', nqp::hash(
     'list', NQPArray,
     'slurpy_array', NQPArray,
     'array_iter', NQPArrayIter,
-    'hash_iter', NQPHashIter
+    'hash_iter', NQPHashIter,
+    'foreign_transform_hash', -> $hash {
+        # BOOTHashes don't actually need transformation
+        nqp::ishash($hash) ?? $hash !! $hash.FLATTENABLE_HASH
+    },
 ));
 
 my class NQPLabel { }
