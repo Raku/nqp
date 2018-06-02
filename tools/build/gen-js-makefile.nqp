@@ -227,5 +227,5 @@ rule('js-deps', '',
 deps("js-all", "js-deps", "js-cross", $nqp-bootstrapped);
 
 sub MAIN($program, $output-file) {
-    spew($output-file, $out);
+    spurt($output-file, $out);
 }
