@@ -2481,8 +2481,8 @@ Changing the hash doesn't affect the environment variables
 ## getsignals
 * `getsignals(--> Mu)`
 
-Returns a hash containing signal names mapped to the proper signum integer on
-the host platform (MacOSX, Linux, BSD, etc).
+Returns a list containing signal names interleaved with the associated signum
+integer on the host platform (MacOSX, Linux, BSD, etc).
 
 If the current backend does not support the registering of a signal handler for
 a given signal, the hash value will be a negative integer. For instance, the JVM
@@ -2490,7 +2490,7 @@ only supports signal handlers for SIGINT and SIGKILL, so all the values will be
 negative except 2 (SIGINT) and 9 (SIGKILL). If a signal is not available on the
 host system, the hash value will be set to 0.
 
-The complete list of hash keys is as follows:
+The complete list of signal entries is as follows:
 
     * SIGHUP
     * SIGINT
