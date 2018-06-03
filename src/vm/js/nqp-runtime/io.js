@@ -9,6 +9,8 @@ const Hash = require('./hash.js');
 
 const core = require('./core.js');
 
+const hll = require('./hll.js');
+
 const child_process = require('child_process');
 
 const NQPObject = require('./nqp-object.js');
@@ -548,7 +550,7 @@ op.permit = function(handle, channel, permits) {
 };
 
 let sigCache = null;
-op.getsignals = function() {
+op.getsignals = function(currentHLL) {
   if (sigCache) {
     return sigCache;
   }
@@ -575,10 +577,12 @@ op.getsignals = function() {
     'SIGUSR2', 'SIGTHR',    'SIGSTKFLT', 'SIGPWR',   'SIGBREAK',
   ];
 
-  const res = new Hash();
+  const arr = [];
   for (const k of sigWanted) {
-    res.content.set( k, new NQPInt(k in osSigs ? osSigs[k] : 0) );
+    arr.push( new NQPStr(k), new NQPInt(k in osSigs ? osSigs[k] : 0) );
   }
+
+  const res = hll.slurpyArray(currentHLL, arr);
   sigCache = res;
   return res;
 };
