@@ -180,7 +180,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         }
         @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '^' ) ))
             if nqp::chars($str);
-        $qast := +@alts == 1 ?? @alts[0] !!
+        $qast := nqp::elems(@alts) == 1 ?? @alts[0] !!
             $<sign> eq '^' ??
                 QAST::Regex.new( :rxtype<concat>, :node($/),
                     QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),

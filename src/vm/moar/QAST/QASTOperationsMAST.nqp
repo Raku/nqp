@@ -119,7 +119,7 @@ class QAST::MASTOperations {
             nqp::die("MoarVM op '$op' is unknown as a core or extension op");
         }
 
-        my int $num_args := +@args;
+        my int $num_args := nqp::elems(@args);
         my int $operand_num := 0;
         my int $result_kind := $MVM_reg_void;
         my $result_reg := MAST::VOID;
@@ -210,7 +210,7 @@ class QAST::MASTOperations {
             }
 
             # put the arg expression's generation code in the instruction list
-            nqp::splice(@all_ins, $arg.instructions, +@all_ins, 0)
+            nqp::splice(@all_ins, $arg.instructions, nqp::elems(@all_ins), 0)
                 unless $constant_operand;
             if @deconts[$arg_num] &&
                     (!$_.has_compile_time_value || nqp::iscont($_.compile_time_value)) {
@@ -1101,7 +1101,7 @@ for ('', 'repeat_') -> $repness {
             }
 
             # Check operand count.
-            my $operands := +@comp_ops;
+            my $operands := nqp::elems(@comp_ops);
             nqp::die("The '$repness$op_name' op needs 2 or 3 operands, got $operands")
                 if $operands != 2 && $operands != 3;
 
@@ -1237,8 +1237,8 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         else { @operands.push($_) }
     }
 
-    if +@operands != 2 {
-        nqp::die("The 'for' op needs 2 operands, got " ~ +@operands);
+    if nqp::elems(@operands) != 2 {
+        nqp::die("The 'for' op needs 2 operands, got " ~ nqp::elems(@operands));
     }
     unless nqp::istype(@operands[1], QAST::Block) {
         nqp::die("The 'for' op expects a block as its second operand, got " ~ @operands[1].HOW.name(@operands[1]));
@@ -1449,7 +1449,7 @@ my $call_gen := sub ($qastcomp, $op) {
             ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
             !! QAST::Var.new( :name($op.name), :scope('lexical') ));
     }
-    elsif +@args {
+    elsif nqp::elems(@args) {
         @args := nqp::clone(@args);
         $callee := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
         if $op.op eq 'nativeinvoke' {
@@ -1528,7 +1528,7 @@ QAST::MASTOperations.add_core_moarop_mapping('getarg_i', 'getarg_i');
 
 QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my @args := nqp::clone($op.list);
-    if +@args == 0 {
+    if nqp::elems(@args) == 0 {
         nqp::die('Method call node requires at least one child');
     }
     my $invocant := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
@@ -1536,7 +1536,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     if $op.name {
         # great!
     }
-    elsif +@args >= 1 {
+    elsif nqp::elems(@args) >= 1 {
         $methodname_expr := @args.shift();
     }
     else {
@@ -1627,8 +1627,8 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 QAST::MASTOperations.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
-    if +@children != 2 {
-        nqp::die("The 'bind' op needs 2 children, got " ~ +@children);
+    if nqp::elems(@children) != 2 {
+        nqp::die("The 'bind' op needs 2 children, got " ~ nqp::elems(@children));
     }
     unless nqp::istype(@children[0], QAST::Var) {
         nqp::die("First child of a 'bind' op must be a QAST::Var, got " ~ @children[0].HOW.name(@children[0]));
@@ -1772,7 +1772,7 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $op) {
     my @children := $op.list;
     if @children != 3 {
-        nqp::die("The 'handlepayload' op needs 3 children, got " ~ +@children);
+        nqp::die("The 'handlepayload' op needs 3 children, got " ~ nqp::elems(@children));
     }
     my str $type := @children[1];
     unless nqp::existskey(%handler_names, $type) {
@@ -2300,8 +2300,8 @@ QAST::MASTOperations.add_core_moarop_mapping('indexingoptimized', 'indexingoptim
 
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;
-    unless +@operands == 1 {
-        nqp::die("The 'tclc' op needs 1 argument, got " ~ +@operands);
+    unless nqp::elems(@operands) == 1 {
+        nqp::die("The 'tclc' op needs 1 argument, got " ~ nqp::elems(@operands));
     }
     $qastcomp.as_mast(
             QAST::Op.new( :op('concat'),
@@ -2322,27 +2322,27 @@ QAST::MASTOperations.add_core_moarop_mapping('eqaticim', 'eqaticim_s');
 
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
-    if +@operands == 2 { nqp::push(@operands, QAST::IVal.new( :value(-1) )) }
+    if nqp::elems(@operands) == 2 { nqp::push(@operands, QAST::IVal.new( :value(-1) )) }
     $qastcomp.as_mast(QAST::Op.new( :op('substr_s'), |@operands ));
 });
 
 QAST::MASTOperations.add_core_op('ord',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_mast(+@operands == 1
+    $qastcomp.as_mast(nqp::elems(@operands) == 1
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
 });
 
 QAST::MASTOperations.add_core_op('index',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_mast(+@operands == 2
+    $qastcomp.as_mast(nqp::elems(@operands) == 2
         ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0)) )
         !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
 
 QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_mast(+@operands == 2
+    $qastcomp.as_mast(nqp::elems(@operands) == 2
         ?? QAST::Op.new( :op('rindexfrom'), |@operands, QAST::IVal.new( :value(-1) ) )
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
@@ -2717,8 +2717,8 @@ sub try_get_bind_scope($var) {
 sub add_native_assign_op($op_name, $kind) {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         my @operands := $op.list;
-        unless +@operands == 2 {
-            nqp::die("The '$op' op needs 2 arguments, got " ~ +@operands);
+        unless nqp::elems(@operands) == 2 {
+            nqp::die("The '$op' op needs 2 arguments, got " ~ nqp::elems(@operands));
         }
         my $target := @operands[0];
         if try_get_bind_scope($target) -> $bind_scope {
@@ -2974,7 +2974,7 @@ sub push_op(@dest, str $op, *@args) {
 }
 
 sub push_ilist(@dest, $src) is export {
-    nqp::splice(@dest, $src.instructions, +@dest, 0);
+    nqp::splice(@dest, $src.instructions, nqp::elems(@dest), 0);
 }
 
 QAST::MASTOperations.add_core_op('js', -> $qastcomp, $op {

@@ -567,7 +567,7 @@ class QRegex::NFA {
         }
         if $nfadeb {
             my int $s := 1;
-            my int $send := +@substates;
+            my int $send := nqp::elems(@substates);
             my int $bad := 0;
             while $s < $send {
                 my $edges := @substates[$s];

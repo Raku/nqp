@@ -95,7 +95,7 @@ class QRegex::Optimizer {
         $block[0] := QAST::Op.new( :op('die_s'),
             QAST::SVal.new( :value('INTERNAL ERROR: Execution of block eliminated by optimizer') ) );
         # rescue the block into the first stmts of our current outer block
-        @!outer[+@!outer - 1][0].push($block);
+        @!outer[nqp::elems(@!outer) - 1][0].push($block);
     }
 
     method simplify_assertion($qast) {

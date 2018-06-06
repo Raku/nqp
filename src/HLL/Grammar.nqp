@@ -484,7 +484,7 @@ An operator precedence parser.
                 }
 
                 while @opstack {
-                    my %opO := @opstack[+@opstack-1]<OPER><O>.made;
+                    my %opO := @opstack[nqp::elems(@opstack)-1]<OPER><O>.made;
 
                     $opprec := nqp::ifnull(nqp::atkey(%opO, 'sub'), nqp::atkey(%opO, 'prec'));
                     last unless $opprec gt $inprec;

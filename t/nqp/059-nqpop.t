@@ -627,14 +627,14 @@ is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars 
     is( &to-str( nqp::slice(@l, -1, -1  )), '4', 'nqp::slice one elem at end');
 
     # Test slice exceptions
-    for ( 3,   2, 'nqp::slice dies; start pos greater than end pos'),
-        ( 8,   2, 'nqp::slice dies; start pos out of bounds'),
-        ( 2,   8, 'nqp::slice dies; end pos out of bounds'),
-        (-2,  -3, 'nqp::slice dies; start pos greater than end pos (relative to end)'),
-        (-8,   2, 'nqp::slice dies; start pos out of bounds (relative to end)'),
-        ( 2,  -8, 'nqp::slice dies; end pos out of bounds (relative to end)'),
-        (-8,   8, 'nqp::slice dies; both out of bounds'),
-        ( 2, +@l, 'nqp::slice dies; using ".elems" is out of bounds')
+    for ( 3,              2, 'nqp::slice dies; start pos greater than end pos'),
+        ( 8,              2, 'nqp::slice dies; start pos out of bounds'),
+        ( 2,              8, 'nqp::slice dies; end pos out of bounds'),
+        (-2,             -3, 'nqp::slice dies; start pos greater than end pos (relative to end)'),
+        (-8,              2, 'nqp::slice dies; start pos out of bounds (relative to end)'),
+        ( 2,             -8, 'nqp::slice dies; end pos out of bounds (relative to end)'),
+        (-8,              8, 'nqp::slice dies; both out of bounds'),
+        ( 2, nqp::elems(@l), 'nqp::slice dies; using ".elems" is out of bounds')
     {
         my $start := $_.shift;
         my $end   := $_.shift;

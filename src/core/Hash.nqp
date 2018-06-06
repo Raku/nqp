@@ -37,14 +37,14 @@ sub sorted_keys($hash) {
         }
     }
 
-    my int $count := +@keys;
+    my int $count := nqp::elems(@keys);
     my int $start := $count / 2 - 1;
     while $start >= 0 {
         sift_down(@keys, $start, $count - 1);
         $start := $start - 1;
     }
 
-    my int $end := +@keys - 1;
+    my int $end := nqp::elems(@keys) - 1;
     while $end > 0 {
         my str $swap := @keys[$end];
         @keys[$end] := @keys[0];

@@ -765,7 +765,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
                                         :subtype($RXm ?? 'ignoremark' !! '') ))
                 if nqp::chars($str);
-            $qast := ( my $num := +@alts ) == 1 ?? @alts[0] !!
+            $qast := ( my $num := nqp::elems(@alts) ) == 1 ?? @alts[0] !!
                 0 < $num && $<sign> eq '-' ??
                     QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),

@@ -202,21 +202,21 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method stages(@value?) {
-        if +@value {
+        if nqp::elems(@value) {
             @!stages := @value;
         }
         @!stages;
     }
 
     method parsegrammar(*@value) {
-        if +@value {
+        if nqp::elems(@value) {
             $!parsegrammar := @value[0];
         }
         $!parsegrammar;
     }
 
     method parseactions(*@value) {
-        if +@value {
+        if nqp::elems(@value) {
             $!parseactions := @value[0];
         }
         $!parseactions;
@@ -235,7 +235,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
 
     method commandline_options(@value?) {
-        if +@value {
+        if nqp::elems(@value) {
             @!cmdoptions := @value;
         }
         @!cmdoptions;

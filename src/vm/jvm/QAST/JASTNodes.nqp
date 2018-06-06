@@ -277,7 +277,7 @@ class JAST::InvokeDynamic is JAST::Node {
         nqp::push(@op_dump, '(' ~ join('', @!arg_types) ~ ')' ~ $!ret_type);
         nqp::push(@op_dump, $!bsm_type);
         nqp::push(@op_dump, $!bsm_name);
-        nqp::push(@op_dump, +@!extra_args);
+        nqp::push(@op_dump, nqp::elems(@!extra_args));
         nqp::push(@dumped, join(" ", @op_dump));
         for @!extra_args {
             $_.dump(@dumped);

@@ -128,7 +128,7 @@ role NQPMatchRole is export {
                 nqp::push(@chunks, '- ');
                 nqp::push(@chunks, ~$key);
                 nqp::push(@chunks, ': ');
-                nqp::push(@chunks, ~+@matches);
+                nqp::push(@chunks, ~nqp::elems(@matches));
                 nqp::push(@chunks, " matches\n");
                 for @matches {
                     nqp::push(@chunks, $_.dump($indent + 2));
