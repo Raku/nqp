@@ -72,24 +72,6 @@ command line.  Each line entered is treated as a separate compilation unit,
 however (which means that subroutines are preserved after they are defined,
 but variables are not).
 
-=head2 Troubleshooting
-
-=head3 OS X
-
-On OS X, it appears that configuration fails in some configurations:
-
-  3rdparty/libuv/include/uv-darwin.h:26:11: fatal error: 'mach/mach.h' file not found
-
-Should this happen to you, then a solution might be the following:
-
-    $ cd MoarVM/3rdparty/libuv/include
-    $ ln -s /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk/usr/include/mach
-    $ cd ../../../..
-    $ # run the Configure again
-
-Note that the 10.9 in the above, represents the major version of OS X being
-used.  On Mavericks use 10.9 (like above), on Yosemite use 10.10.
-
 =head2 Using NQP
 
 B<NOTE:> there's B<no end-user support> for NQP and the behaviour can change without notice. It's a tool
