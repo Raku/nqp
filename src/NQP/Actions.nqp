@@ -1626,12 +1626,9 @@ class NQP::Actions is HLL::Actions {
     method postfix:sym<.>($/) { make $<dotty>.ast; }
 
     method term:sym<return>($/) {
-        # This can go away in favor of nqp::const::CONTROL_RETURN after rebootstrap
-        # of Moar and JVM backends.
-        my $CONTROL_RETURN := 32;
         make QAST::Op.new(
             :op('throwpayloadlex'),
-            QAST::IVal.new( :value($CONTROL_RETURN) ),
+            QAST::IVal.new( :value(nqp::const::CONTROL_RETURN) ),
             $<EXPR> ?? $<EXPR>.ast !!  QAST::WVal.new( :value($*W.find_sym(['NQPMu'])))
         );
     }
