@@ -2,7 +2,7 @@
 
 use nqpmo;
 
-plan(58);
+plan(57);
 
 sub add_to_sc($sc, $idx, $obj) {
     nqp::scsetobj($sc, $idx, $obj);
@@ -416,7 +416,6 @@ sub add_to_sc($sc, $idx, $obj) {
 
     ok(nqp::eqaddr(nqp::typeparameterat($new_with_foo, 0), Foo), "We can parameterize with a type object using a deserialized parameterizer ");
 
-    skip('Fails on JVM', 1);
     #ok(nqp::eqaddr($new_with_foo, $dsc_with_foo), "We get stuff from the type cache");
     ok(!nqp::eqaddr($new_with_bar, $dsc_with_foo), "Parameterizing with a type object that's not in cache");
 
