@@ -351,10 +351,7 @@ class QRegex::NFA {
             dentout(self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95));
         }
         elsif !$node.negate &&
-                ($node.name eq 'ws' ||
-                    $subtype eq 'method' &&
-                    (nqp::istype($node[0][0], QAST::SVal)
-                      ?? $node[0][0].value !! $node[0][0]) eq 'ws') {
+                $node.name eq 'ws' {
             dentout(self.fate($node, $from, $to));
         }
         elsif !$node.negate && $subtype ne 'zerowidth' &&
