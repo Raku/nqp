@@ -3,7 +3,7 @@
 # Tests for extending the MoarVM specializer to guard on new kinds of things
 # from NQP. 
 
-plan(2);
+plan(52);
 
 {
     # Minimal test case: under no threaded contention, should run the resolve just
