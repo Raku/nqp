@@ -238,46 +238,46 @@ grammar NQP::Grammar is HLL::Grammar {
     proto rule statement_control { <...> }
 
     rule statement_control:sym<use> {
-        <sym>\s <name>
+        <sym> <name>
     }
 
     rule statement_control:sym<if> {
-        <sym>\s
+        <sym>
         <xblock>
-        [ 'elsif'\s <xblock> ]*
-        [ 'else'\s <else=.pblock> ]?
+        [ 'elsif' <xblock> ]*
+        [ 'else' <else=.pblock> ]?
     }
 
     rule statement_control:sym<unless> {
-        <sym>\s
+        <sym>
         <xblock>
         [ <!before 'else'> || <.panic: 'unless does not take "else", please rewrite using "if"'> ]
     }
 
     rule statement_control:sym<while> {
         :my $*CONTROL_USED := 0;
-        $<sym>=[while|until]\s
+        $<sym>=[while|until]
         <xblock>
     }
 
     rule statement_control:sym<repeat> {
         :my $*CONTROL_USED := 0;
-        <sym>\s
+        <sym>
         [
-        | $<wu>=[while|until]\s <xblock>
-        | <pblock> $<wu>=[while|until]\s <EXPR>
+        | $<wu>=[while|until] <xblock>
+        | <pblock> $<wu>=[while|until] <EXPR>
         ]
     }
 
     rule statement_control:sym<for> {
         :my $*CONTROL_USED := 0;
-        <sym>\s
+        <sym>
         <xblock>
     }
 
-    rule statement_control:sym<CATCH> { <sym>\s <block> }
+    rule statement_control:sym<CATCH> { <sym> <block> }
 
-    rule statement_control:sym<CONTROL> { <sym>\s <block> }
+    rule statement_control:sym<CONTROL> { <sym> <block> }
 
     proto token statement_prefix { <...> }
     token statement_prefix:sym<BEGIN> { <sym> <blorst> }
@@ -843,8 +843,8 @@ grammar NQP::Grammar is HLL::Grammar {
 
     token infix:sym<,>    { <sym>  <O(|%comma, :op<list>)> }
 
-    token prefix:sym<make>   { <sym> \s <O(|%list_prefix)> }
-    token term:sym<return> { <sym> [\s <EXPR>]? { $*RETURN_USED := 1 } }
+    token prefix:sym<make>   { <sym> \s+ <O(|%list_prefix)> }
+    token term:sym<return> { <sym> [\s+ <EXPR>]? { $*RETURN_USED := 1 } }
 
     method smartmatch($/) {
         # swap rhs into invocant position
