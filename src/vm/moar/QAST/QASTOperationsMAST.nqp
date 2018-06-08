@@ -2972,6 +2972,59 @@ QAST::MASTOperations.add_core_moarop_mapping('force_gc', 'force_gc');
 # MoarVM-specific coverage ops
 QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol');
 
+# MoarVM-specific specializer plugin ops
+QAST::MASTOperations.add_core_moarop_mapping('speshreg', 'speshreg', 2);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardtype', 'speshguardtype', 0);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardconcrete', 'speshguardconcrete', 0);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardtypeobj', 'speshguardtypeobj', 0);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardobj', 'speshguardobj', 0);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardgetattr', 'speshguardgetattr');
+QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
+    # Get the target name.
+    my @args := nqp::clone($op.list);
+    my $target_node := nqp::shift(@args);
+    unless nqp::istype($target_node, QAST::SVal) {
+        nqp::die("speshresolve node must have a first child that is a QAST::SVal");
+    }
+    my $target := MAST::SVal.new( :value($target_node.value) );
+
+    # Compile the arguments
+    my $regalloc := $*REGALLOC;
+    my @ins := nqp::list();
+    my @arg_regs := nqp::list();
+    my @arg_flags := nqp::list();
+    for @args -> $arg {
+        if nqp::can($arg, 'flat') && $arg.flat {
+            nqp::die('The speshresolve op must not have flattening arguments');
+        }
+        elsif nqp::can($arg, 'named') && $arg.named {
+            nqp::die('The speshresolve op must not have named arguments');
+        }
+        my $arg_mast := $qastcomp.as_mast($arg, :want($MVM_reg_obj));
+        nqp::die("Arg code did not result in a MAST::Local")
+            unless $arg_mast.result_reg && $arg_mast.result_reg ~~ MAST::Local;
+        push_ilist(@ins, $arg_mast);
+        nqp::push(@arg_regs, $arg_mast.result_reg);
+        nqp::push(@arg_flags, @kind_to_args[$arg_mast.result_kind]);
+    }
+    for @arg_regs -> $reg {
+        if $reg ~~ MAST::Local {
+            $regalloc.release_register($reg, $MVM_reg_obj);
+        }
+    }
+
+    # Assemble the resolve call.
+    my $res_reg := $regalloc.fresh_register($MVM_reg_obj);
+    nqp::push(@ins, MAST::Call.new(
+        :target($target),
+        :flags(@arg_flags),
+        |@arg_regs,
+        :result($res_reg),
+        :op(2)
+    ));
+    MAST::InstructionList.new(@ins, $res_reg, $MVM_reg_obj)
+});
+
 sub push_op(@dest, str $op, *@args) {
     nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
 }
