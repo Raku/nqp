@@ -22,50 +22,37 @@ class QRegex::Optimizer {
     method all_subtypes($node, $type) {
         my int $res := 0;
         for $node {
-            if $node.rxtype eq $type {
-                $res++
-            } else {
-                return -1;
-            }
+            return -1 if $node.rxtype ne $type;
+            $res++;
         }
         return $res;
     }
 
     method first_non_concat_child($node) {
         while nqp::elems(@($node)) >= 1 {
-            if nqp::istype($node, QAST::Regex) {
-                if $node.rxtype eq 'concat' {
-                    if $node[0].rxtype eq 'qastnode' && $node[0].subtype eq 'declarative' {
-                        # the debugger puts these all over our code; we should pretend we never saw them.
-                        $node := $node[1];
-                    } else {
-                        $node := $node[0];
-                    }
-                } else {
-                    last;
-                }
-            } else {
-                last;
-            }
+            last unless nqp::istype($node, QAST::Regex);
+            last unless $node.rxtype eq 'concat';
+            $node := ($node[0].rxtype eq 'qastnode' && $node[0].subtype eq 'declarative')
+                    ?? $node[1] !! $node[0];
         }
         $node;
     }
 
     method dont_scan($node) {
         while nqp::elems(@($node)) >= 1 {
-            if nqp::istype($node, QAST::Regex) {
-                if nqp::istype($node[0], QAST::Regex) && $node[0].rxtype eq 'scan' {
-                    $node.shift;
-                    last;
-                }
-                if $node.rxtype eq 'concat' {
-                    $node := $node[0];
-                } else {
-                    last;
-                }
+            last unless nqp::istype($node, QAST::Regex);
+
+            if nqp::istype($node[0], QAST::Regex) && $node[0].rxtype eq 'scan' {
+                $node.shift;
+                last;
+            }
+
+            if $node.rxtype eq 'concat' {
+                $node := $node[0];
             } else {
                 last;
             }
+
         }
     }
 
@@ -152,45 +139,47 @@ class QRegex::Optimizer {
     }
 
     method visit_children($node) {
+        if nqp::isstr($node) {
+            return;
+        }
+        
         my int $i := 0;
-        unless nqp::isstr($node) {
-            my int $n := nqp::elems(@($node));
-            while $i < $n {
-                my $visit := $node[$i];
-                if nqp::istype($visit, QAST::Regex) {
-                    my $type := $visit.rxtype;
-                    if $type eq 'concat' {
-                        $node[$i] := self.visit_concat($visit);
-                    } elsif $type eq 'literal' {
-                    } elsif $type eq 'quant' {
-                        self.visit_children($visit);
-                    } elsif $type eq 'subrule' {
-                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
-                        $node[$i] := self.simplify_assertion($visit);
-                    } elsif $type eq 'qastnode' {
-                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
-                    } elsif $type eq 'anchor' {
-                    } elsif $type eq 'enumcharlist' {
-                    } elsif $type eq 'cclass' {
-                    } elsif $type eq 'scan' {
-                    } elsif $type eq 'charrange' {
-                    } elsif $type eq 'dynquant' {
-                        $node[$i] := $!main_opt($node[$i]) if $!main_opt;
-                    } elsif $type eq 'pass' || $type eq 'fail' {
-                    } else {
-                        # alt, altseq, conjseq, conj, quant
-                        self.visit_children($visit);
-                    }
-                } elsif nqp::istype($visit, QAST::Block) {
-                    @!outer.push($visit);
+        my int $n := nqp::elems(@($node));
+        while $i < $n {
+            my $visit := $node[$i];
+            if nqp::istype($visit, QAST::Regex) {
+                my $type := $visit.rxtype;
+                if $type eq 'concat' {
+                    $node[$i] := self.visit_concat($visit);
+                } elsif $type eq 'literal' {
+                } elsif $type eq 'quant' {
                     self.visit_children($visit);
-                    @!outer.pop();
-                }
-                else {
+                } elsif $type eq 'subrule' {
+                    $node[$i] := $!main_opt($node[$i]) if $!main_opt;
+                    $node[$i] := self.simplify_assertion($visit);
+                } elsif $type eq 'qastnode' {
+                    $node[$i] := $!main_opt($node[$i]) if $!main_opt;
+                } elsif $type eq 'anchor' {
+                } elsif $type eq 'enumcharlist' {
+                } elsif $type eq 'cclass' {
+                } elsif $type eq 'scan' {
+                } elsif $type eq 'charrange' {
+                } elsif $type eq 'dynquant' {
+                    $node[$i] := $!main_opt($node[$i]) if $!main_opt;
+                } elsif $type eq 'pass' || $type eq 'fail' {
+                } else {
+                    # alt, altseq, conjseq, conj, quant
                     self.visit_children($visit);
                 }
-                $i := $i + 1;
+            } elsif nqp::istype($visit, QAST::Block) {
+                @!outer.push($visit);
+                self.visit_children($visit);
+                @!outer.pop();
             }
+            else {
+                self.visit_children($visit);
+            }
+            $i := $i + 1;
         }
     }
 }
