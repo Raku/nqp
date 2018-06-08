@@ -3,7 +3,7 @@
 # Tests for extending the MoarVM specializer to guard on new kinds of things
 # from NQP. 
 
-plan(52);
+plan(53);
 
 {
     # Minimal test case: under no threaded contention, should run the resolve just
@@ -262,4 +262,18 @@ plan(52);
     try { typeobj(); CATCH { $msg := nqp::getmessage($_) } }
     ok($msg eq 'Must have a type object', 'Correct result when we trigger type object deopt');
     ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to type object guard failure');
+}
+
+# Recursive spesh plugin setup
+{
+    nqp::speshreg('nqp', 'rec-a', -> $code {
+        $code()
+    });
+    nqp::speshreg('nqp', 'rec-b', -> {
+        42
+    });
+    my $outcome := nqp::speshresolve('rec-a', -> {
+        nqp::speshresolve('rec-b')
+    });
+    ok($outcome == 42, 'Recursive speshresolve calls work out');
 }
