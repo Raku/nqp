@@ -1674,6 +1674,10 @@ class NQP::Actions is HLL::Actions {
         make QAST::Op.new( :op<callmethod>, :name<ACCEPTS>, :node($/) );
     }
 
+    method infix:sym<!~~>($/) {
+        make QAST::Op.new( :op<callmethod>, :name<NOT_ACCEPTS>, :node($/) );
+    }
+
     # Takes a multi-part name that we know is in a package and generates
     # QAST to look it up using NQP package semantics.
     sub lexical_package_lookup(@name, $/) {
