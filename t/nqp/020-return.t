@@ -25,8 +25,12 @@ sub nested() {
     0;
 }
 
+sub blank() {
+    return        5;
+}
+
 ok( foo() == 1 , 'last value in block' );
 ok( bar() == 2 , 'explicit return value in block');
 ok( baz() == 3 , 'explicit return from nested block');
 ok( nested() == 4 , 'explicit return from nested block with declared variables');
-
+ok( blank()  == 5 , 'more than one whitespace between return and expression');
