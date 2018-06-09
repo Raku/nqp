@@ -639,7 +639,7 @@ my $chain_gen := sub ($qastcomp, $op) {
 
     # Check if callee sub in name, if not first child is callee, not arg
     my $arg_idx;
-    my &get_arg_idx := -> $cq { nqp::if( $cq.name, 0, 1 ) };
+    my &get_arg_idx := -> $cq { $cq.name ?? 0 !! 1 };
 
     while nqp::istype($cqast, QAST::Op)
     && ($cqast.op eq 'chain' || $cqast.op eq 'chainstatic') {
@@ -651,7 +651,6 @@ my $chain_gen := sub ($qastcomp, $op) {
     my @ops;
     my $regalloc := $*REGALLOC;
     my $res_reg  := $regalloc.fresh_register($MVM_reg_obj);
-    my $decont_reg  := $regalloc.fresh_register($MVM_reg_obj);
     my $endlabel := MAST::Label.new();
 
     $cqast := nqp::pop(@clist);
@@ -682,10 +681,8 @@ my $chain_gen := sub ($qastcomp, $op) {
             :result($res_reg),
             $acomp.result_reg, $bcomp.result_reg
         ));
-        push_op(@ops, 'decont', $decont_reg, $callee.result_reg);
 
         $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
-        $regalloc.release_register($decont_reg, $MVM_reg_obj);
         $regalloc.release_register($acomp.result_reg, $MVM_reg_obj);
 
         if @clist {
