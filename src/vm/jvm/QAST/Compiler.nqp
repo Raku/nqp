@@ -320,7 +320,7 @@ class QAST::OperationsJAST {
     # including those provided by calling a method and those that are
     # just JVM op invocations.
     sub op_mapper($op, $instruction, @stack_in, $stack_out, :$tc = 0, :$cont = 0) {
-        my int $expected_args := nqp::elems(@stack_in);
+        my int $expected_args := +@stack_in;
         return -> $qastcomp, $node {
             if nqp::elems(@($node)) != $expected_args {
                 nqp::die("Operation '$op' requires $expected_args operands");
@@ -1095,7 +1095,7 @@ for ('', 'repeat_') -> $repness {
                 elsif $_.named eq 'label' { $label := $_; }
                 else { @operands.push($_) }
             }
-            if nqp::elems(@operands) != 2 && nqp::elems(@operands) != 3 {
+            if +@operands != 2 && +@operands != 3 {
                 nqp::die("Operation '$repness$op_name' needs 2 or 3 operands");
             }
 
@@ -1192,7 +1192,7 @@ for ('', 'repeat_') -> $repness {
 
             # If there's a third child, evaluate it as part of the
             # "next".
-            if nqp::elems(@operands) == 3 {
+            if +@operands == 3 {
                 my $next_res := $qastcomp.as_jast_in_handler(@operands[2],
                     $l_handler_id || $*HANDLER_IDX, :want($RT_VOID));
                 $il.append($next_res.jast);
@@ -1237,7 +1237,7 @@ QAST::OperationsJAST.add_core_op('for', -> $qastcomp, $op {
         else { @operands.push($_) }
     }
 
-    if nqp::elems(@operands) != 2 {
+    if +@operands != 2 {
         nqp::die("Operation 'for' needs 2 operands");
     }
     unless nqp::istype(@operands[1], QAST::Block) {
@@ -1400,7 +1400,7 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
     my @callsite;
     my @argnames;
     my int $i := 0;
-    while $i < nqp::elems(@order) {
+    while $i < +@order {
         my $arg_res;
         if $i == 0 && ($obj_first || $inv_first) || $i == 1 && $obj_second {
             $arg_res := $qastcomp.as_jast(@order[$i], :want($RT_OBJ));
@@ -1534,7 +1534,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     # so much for us.
     else {
         # Ensure we have a name, and re-arrange it to come first.
-        if nqp::elems(@children) == 1 {
+        if +@children == 1 {
             nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
         }
         my $inv := nqp::shift(@children);
@@ -1565,7 +1565,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
 QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.
     my @children := $op.list;
-    if nqp::elems(@children) != 2 {
+    if +@children != 2 {
         nqp::die("A 'bind' op must have exactly two children");
     }
     unless nqp::istype(@children[0], QAST::Var) {
@@ -2352,7 +2352,7 @@ QAST::OperationsJAST.map_classlib_core_op('substr2', $TYPE_OPS, 'substr2', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('substr3', $TYPE_OPS, 'substr3', [$RT_STR, $RT_INT, $RT_INT], $RT_STR);
 QAST::OperationsJAST.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_jast(nqp::elems(@operands) == 2
+    $qastcomp.as_jast(+@operands == 2
         ?? QAST::Op.new( :op('substr2'), |@operands )
         !! QAST::Op.new( :op('substr3'), |@operands ));
 });
@@ -2364,7 +2364,7 @@ QAST::OperationsJAST.map_classlib_core_op('ordfirst', $TYPE_OPS, 'ordfirst', [$R
 QAST::OperationsJAST.map_classlib_core_op('ordat',    $TYPE_OPS, 'ordat',    [$RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.add_core_op('ord',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_jast(nqp::elems(@operands) == 1
+    $qastcomp.as_jast(+@operands == 1
         ?? QAST::Op.new( :op('ordfirst'), |@operands )
         !! QAST::Op.new( :op('ordat'), |@operands ));
 });
@@ -2374,7 +2374,7 @@ QAST::OperationsJAST.map_classlib_core_op('ordbaseat', $TYPE_OPS, 'ordbaseat', [
 QAST::OperationsJAST.map_classlib_core_op('indexfrom', $TYPE_OPS, 'indexfrom', [$RT_STR, $RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.add_core_op('index',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_jast(nqp::elems(@operands) == 2
+    $qastcomp.as_jast(+@operands == 2
         ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0)) )
         !! QAST::Op.new( :op('indexfrom'), |@operands ));
 });
@@ -2384,7 +2384,7 @@ QAST::OperationsJAST.map_classlib_core_op('rindexfromend', $TYPE_OPS, 'rindexfro
 QAST::OperationsJAST.map_classlib_core_op('rindexfrom', $TYPE_OPS, 'rindexfrom', [$RT_STR, $RT_STR, $RT_INT], $RT_INT);
 QAST::OperationsJAST.add_core_op('rindex',  -> $qastcomp, $op {
     my @operands := $op.list;
-    $qastcomp.as_jast(nqp::elems(@operands) == 2
+    $qastcomp.as_jast(+@operands == 2
         ?? QAST::Op.new( :op('rindexfromend'), |@operands )
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
@@ -2947,7 +2947,7 @@ class QAST::CompilerJAST {
                 return %!callsite_map{$key};
             }
             else {
-                my $idx := nqp::elems(@!callsites);
+                my $idx := +@!callsites;
                 nqp::push(@!callsites, [@arg_types, @arg_names]);
                 %!callsite_map{$key} := $idx;
                 return $idx;
@@ -2962,7 +2962,7 @@ class QAST::CompilerJAST {
             my $csa := JAST::Method.new( :name('getCallSites'), :returns("[$TYPE_CSD"), :static(0) );
 
             # Create array.
-            $csa.append(JAST::PushIndex.new( :value(nqp::elems(@!callsites)) ));
+            $csa.append(JAST::PushIndex.new( :value(+@!callsites) ));
             $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CSD ));
 
             # All all the callsites
@@ -2974,7 +2974,7 @@ class QAST::CompilerJAST {
                 $csa.append(JAST::PushIndex.new( :value($i++) )); # Index.
                 $csa.append(JAST::Instruction.new( :op('new'), $TYPE_CSD ));
                 $csa.append($DUP);
-                $csa.append(JAST::PushIndex.new( :value(nqp::elems(@cs_flags)) ));
+                $csa.append(JAST::PushIndex.new( :value(+@cs_flags) ));
                 $csa.append(JAST::Instruction.new( :op('newarray'), 'Byte' ));
                 my int $j := 0;
                 for @cs_flags {
@@ -2985,7 +2985,7 @@ class QAST::CompilerJAST {
                     $csa.append($BASTORE);
                 }
                 if @cs_names {
-                    $csa.append(JAST::PushIndex.new( :value(nqp::elems(@cs_names)) ));
+                    $csa.append(JAST::PushIndex.new( :value(+@cs_names) ));
                     $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_STR ));
                     $j := 0;
                     for @cs_names {
@@ -3049,7 +3049,7 @@ class QAST::CompilerJAST {
             else {
                 self.add_lexical($var);
             }
-            @!params[nqp::elems(@!params)] := $var;
+            @!params[+@!params] := $var;
         }
 
         method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
@@ -3081,7 +3081,7 @@ class QAST::CompilerJAST {
                 $tempify[0] := [ $local, $type ];
             } else {
                 self.register_local($var);
-                @!locals[nqp::elems(@!locals)] := $var;
+                @!locals[+@!locals] := $var;
             }
         }
 
@@ -3304,12 +3304,12 @@ class QAST::CompilerJAST {
             }
 
             # See if the things we need are all on the stack.
-            my int $sp        := @!stack - nqp::elems(@things);
+            my int $sp        := @!stack - +@things;
             my int $tp        := 0;
             my int $ok        := 1;
             my int $all_stack := 1;
             my int $all_local := 1;
-            while $tp < nqp::elems(@things) {
+            while $tp < +@things {
                 unless nqp::istype(@things[$tp], Result) {
                     nqp::die("Should only look up Result objects on the stack");
                 }
@@ -3645,7 +3645,7 @@ class QAST::CompilerJAST {
 
         # Which of our methods need to be serialized?
         my $count_meth := JAST::Method.new( :name('serializedCodeRefCount'), :returns('I'), :static(0) );
-        $count_meth.append(JAST::PushIndex.new( :value(nqp::elems(@code_ref_blocks)) ));
+        $count_meth.append(JAST::PushIndex.new( :value(+@code_ref_blocks) ));
         $count_meth.append($IRETURN);
         $*JCLASS.add_method($count_meth);
 
@@ -4055,9 +4055,9 @@ class QAST::CompilerJAST {
                 for $*JMETH.locals { nqp::push(@merged, $_) unless $_[0] eq 'cf' }
 
                 my int $i := 0;
-                my int $ict := nqp::elems(@merged);
+                my int $ict := +@merged;
 
-                $saver.append(JAST::PushIndex.new( :value(nqp::elems(@merged)) ));
+                $saver.append(JAST::PushIndex.new( :value(+@merged) ));
                 $saver.append(JAST::Instruction.new( :op('anewarray'), $TYPE_OBJ ));
 
                 $resume.append(JAST::Label.new( :name( 'RESUME' ) ));
@@ -4224,7 +4224,7 @@ class QAST::CompilerJAST {
         my $last_res;
         my $il := JAST::InstructionList.new();
         my int $i := 0;
-        my int $n := nqp::elems(@stmts);
+        my int $n := +@stmts;
         my $all_void := $*WANT == $RT_VOID;
         my $res_temp;
         my $res_type;
@@ -4682,7 +4682,7 @@ class QAST::CompilerJAST {
         elsif $scope eq 'attribute' {
             # Ensure we have object and class handle.
             my @args := $node.list;
-            if nqp::elems(@args) != 2 {
+            if +@args != 2 {
                 nqp::die("An attribute lookup needs an object and a class handle");
             }
 
@@ -4727,7 +4727,7 @@ class QAST::CompilerJAST {
         elsif $scope eq 'attributeref' {
             # Ensure we have object and class handle, and aren't binding.
             my @args := $node.list;
-            if nqp::elems(@args) != 2 {
+            if +@args != 2 {
                 nqp::die("An attribute lookup needs an object and a class handle");
             }
             if $*BINDVAL {

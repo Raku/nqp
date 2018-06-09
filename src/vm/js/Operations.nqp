@@ -33,7 +33,7 @@ class QAST::OperationsJS {
         }
 
         if $node.list > @argument_types {
-            nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {nqp::elems(@argument_types)}");
+            nqp::die("{+$node.list} arguments for {$node.op}, the maximum is {+@argument_types}");
         }
 
         my int $i := 0;
@@ -582,7 +582,7 @@ class QAST::OperationsJS {
 
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
-        if nqp::elems(@children) != 2 {
+        if +@children != 2 {
             nqp::die("A 'bind' op must have exactly two children");
         }
         unless nqp::istype(@children[0], QAST::Var) {
@@ -1219,7 +1219,7 @@ class QAST::OperationsJS {
             else { @operands.push($_) }
         }
 
-        if nqp::elems(@operands) != 2 {
+        if +@operands != 2 {
             nqp::die("Operation 'for' needs 2 operands");
         }
         unless nqp::istype(@operands[1], QAST::Block) {
@@ -1289,7 +1289,7 @@ class QAST::OperationsJS {
                 else { @operands.push($_) }
             }
 
-            return $comp.NYI("3 argument $op") if nqp::elems(@operands) == 3 && $op ne 'while';
+            return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
 
             my $loop := $handler ?? LoopInfo.new($*LOOP, :$label) !! $*LOOP;
 
@@ -1336,7 +1336,7 @@ class QAST::OperationsJS {
 
             my str $last_exception;
 
-            if nqp::elems(@operands) == 3 {
+            if +@operands == 3 {
                 my $ctx := $*CTX;
 
                 if $*HLL eq 'nqp' {
@@ -1439,8 +1439,8 @@ class QAST::OperationsJS {
 
         # TODO actually call p6typecheckrv rather than treat it as a noop
 
-        if nqp::elems(@toplevels) {
-            my $last := @toplevels[nqp::elems(@toplevels) - 1];
+        if +@toplevels {
+            my $last := @toplevels[+@toplevels - 1];
             $is_last_toplevel := nqp::eqaddr($last, $node)
                 || ($last.op eq 'p6typecheckrv' && nqp::eqaddr($last[0], $node));
         }

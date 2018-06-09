@@ -374,7 +374,7 @@ class NQP::Optimizer {
                         self.visit_children($visit, :skip_selectors)
                     } elsif nqp::istype($visit, QAST::Regex) {
                         QRegex::Optimizer.new().optimize($visit,
-                            @!block_stack[nqp::elems(@!block_stack) - 1],
+                            @!block_stack[+@!block_stack - 1],
                             :main_lang_optimizer(sub ($node) {
                                 if nqp::istype($node, QAST::Regex) {
                                     if $node.rxtype eq 'subrule' {
@@ -410,7 +410,7 @@ class NQP::Optimizer {
     }
 
     method find_lex($name) {
-        my int $i := nqp::elems(@!block_stack);
+        my int $i := +@!block_stack;
         while $i > 0 {
             $i := $i - 1;
             my %sym := @!block_stack[$i].symbol($name);
@@ -422,7 +422,7 @@ class NQP::Optimizer {
     }
 
     method find_lex_scope_level($name) {
-        my int $i := nqp::elems(@!block_stack);
+        my int $i := +@!block_stack;
         while $i > 0 {
             $i := $i - 1;
             my %sym := @!block_stack[$i].symbol($name);

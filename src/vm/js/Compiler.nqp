@@ -374,7 +374,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @groups[0].unshift($invocant);
         }
 
-        if nqp::elems(@named_groups) > 1 {
+        if +@named_groups > 1 {
             @groups[0].unshift('nqp.named([' ~ nqp::join(',', @named_groups) ~ '])');
         }
         else {
@@ -384,7 +384,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         @groups[0].unshift($*CTX);
 
 
-        if nqp::elems(@groups) == 1 {
+        if +@groups == 1 {
             return Chunk.new($T_ARGS, nqp::join(',', @groups[0]), @setup);
         }
 
@@ -432,7 +432,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 }
                 else {
                     $pos_slurpy := 1;
-                    set_variable($param, "nqp.slurpyPos(HLL, arguments, {nqp::elems(@sig)})");
+                    set_variable($param, "nqp.slurpyPos(HLL, arguments, {+@sig})");
                 }
             } else {
                 my int $type := self.type_from_typeobj($param.returns);
@@ -493,7 +493,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         $pos_optional := $pos_optional + 1;
                         my $default_value := self.as_js($param.default, :want($type));
                         @setup.push(Chunk.void(
-                            "if (arguments.length < {nqp::elems(@sig)}) \{\n",
+                            "if (arguments.length < {+@sig}) \{\n",
                              $default_value,
                              "$set {$default_value.expr};\n\} else \{\n$set {unpack($tmp)};\n\}\n"
                         ));
@@ -520,7 +520,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         if !$named_slurpy {
-            if nqp::elems(@known_named) {
+            if +@known_named {
                 @setup.unshift("if (_NAMED !== null) \{nqp.checkNamed({known_named(@known_named)}, _NAMED)\}\n");
             } else {
                 @setup.unshift("if (_NAMED !== null) \{nqp.noNamed(_NAMED)\}\n");
@@ -786,7 +786,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
     method declare_js_vars(@vars) {
-        if nqp::elems(@vars) {
+        if +@vars {
             'var '~nqp::join(",\n",@vars)~";\n";
         }
         else {
@@ -1307,12 +1307,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             my $static_lexicals;
-            if nqp::elems(@static) {
+            if +@static {
                $static_lexicals := '{' ~ nqp::join(',', @static) ~ '}';
             }
 
             my $contvar_lexicals;
-            if nqp::elems(@contvar) {
+            if +@contvar {
                $contvar_lexicals := '{' ~ nqp::join(',', @contvar) ~ '}';
             }
 

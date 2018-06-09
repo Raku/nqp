@@ -124,7 +124,7 @@ class HLL::Actions {
         if %*QUOTEMOD<w> {
             if nqp::istype($ast, QAST::SVal) {
                 my @words := HLL::Grammar::split_words($/, $ast.value);
-                if nqp::elems(@words) != 1 {
+                if +@words != 1 {
                     $ast := QAST::Op.new( :op('list'), :node($/) );
                     for @words { $ast.push(QAST::SVal.new( :value($_) )); }
                 }

@@ -39,7 +39,7 @@ class NQP::World is HLL::World {
     method push_lexpad($/) {
         # Create pad, link to outer and add to stack.
         my $pad := QAST::Block.new( QAST::Stmts.new(), :node($/) );
-        @!BLOCKS[nqp::elems(@!BLOCKS)] := $pad;
+        @!BLOCKS[+@!BLOCKS] := $pad;
         $pad
     }
 
@@ -50,7 +50,7 @@ class NQP::World is HLL::World {
 
     # Gets the top lexpad.
     method cur_lexpad() {
-        @!BLOCKS[nqp::elems(@!BLOCKS) - 1]
+        @!BLOCKS[+@!BLOCKS - 1]
     }
 
     # XXX This goes away really soon...after the multi refactor.
@@ -436,7 +436,7 @@ class NQP::World is HLL::World {
             $ast
         );
         my %seen;
-        my $i := nqp::elems(@!BLOCKS);
+        my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
             my %symbols := @!BLOCKS[$i].symtable();
@@ -533,7 +533,7 @@ class NQP::World is HLL::World {
     # Checks if a given name is known in the lexpad anywhere
     # with the specified scope.
     method is_scope(str $name, $wanted_scope) {
-        my $i := nqp::elems(@!BLOCKS);
+        my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
             my %sym := @!BLOCKS[$i].symbol($name);
@@ -546,7 +546,7 @@ class NQP::World is HLL::World {
 
     # Gets the type of a lexical.
     method lexical_type(str $name) {
-        my $i := nqp::elems(@!BLOCKS);
+        my $i := +@!BLOCKS;
         while $i > 0 {
             $i := $i - 1;
             my %sym := @!BLOCKS[$i].symbol($name);
@@ -572,13 +572,13 @@ class NQP::World is HLL::World {
     # that fails tries package lookup.
     method find_sym(@name) {
         # Make sure it's not an empty name.
-        unless nqp::elems(@name) { nqp::die("Cannot look up empty name"); }
+        unless +@name { nqp::die("Cannot look up empty name"); }
 
         # If it's a single-part name, look through the lexical
         # scopes.
-        if nqp::elems(@name) == 1 {
+        if +@name == 1 {
             my str $final_name := ~@name[0];
-            my $i := nqp::elems(@!BLOCKS);
+            my $i := +@!BLOCKS;
             while $i > 0 {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($final_name);
@@ -592,9 +592,9 @@ class NQP::World is HLL::World {
         # is a lexical somewhere. Otherwise we fall back to looking
         # in GLOBALish.
         my $result := $*GLOBALish;
-        if nqp::elems(@name) >= 2 {
+        if +@name >= 2 {
             my str $first := ~@name[0];
-            my int $i := nqp::elems(@!BLOCKS);
+            my int $i := +@!BLOCKS;
             while $i > 0 {
                 $i := $i - 1;
                 my %sym := @!BLOCKS[$i].symbol($first);

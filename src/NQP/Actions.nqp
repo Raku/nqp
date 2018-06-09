@@ -486,7 +486,7 @@ class NQP::Actions is HLL::Actions {
         }
         else {
             my @name := NQP::Compiler.parse_name(~$/);
-            if nqp::elems(@name) > 1 {
+            if +@name > 1 {
                 if $<twigil> {
                     $/.panic("Twigil not allowed on multi-part name");
                 }
@@ -1678,7 +1678,7 @@ class NQP::Actions is HLL::Actions {
     # QAST to look it up using NQP package semantics.
     sub lexical_package_lookup(@name, $/) {
         # Catch empty names and die helpfully.
-        if nqp::elems(@name) == 0 { $/.panic("Cannot compile empty name"); }
+        if +@name == 0 { $/.panic("Cannot compile empty name"); }
 
         # The final lookup will always be just a keyed access to a
         # symbol table.
@@ -1690,7 +1690,7 @@ class NQP::Actions is HLL::Actions {
 
         # If there's no explicit qualification, then look it up in the
         # current package, and fall back to looking in GLOBAL.
-        if nqp::elems(@name) == 0 {
+        if +@name == 0 {
             $lookup.unshift(QAST::Op.new(
                 :op('who'),
                 QAST::Var.new( :name('$?PACKAGE'), :scope('lexical') )

@@ -20,7 +20,7 @@ class QAST::InlinePlaceholder is QAST::Node {
     }
 
     method substitute_inline_placeholders(@fillers) {
-        if $!position < nqp::elems(@fillers) {
+        if $!position < +@fillers {
             my $result := @fillers[$!position];
             if self.named || self.flat {
                 $result := $result.shallow_clone();

@@ -64,16 +64,15 @@ my module sprintf {
             my @statements;
             @statements.push( $_.made ) for $<statement>;
 
-            if ($assert_used_args && $*ARGS_USED < nqp::elems(@*ARGS_HAVE))
-                || ($*ARGS_USED > nqp::elems(@*ARGS_HAVE)) {
+            if ($assert_used_args && $*ARGS_USED < +@*ARGS_HAVE) || ($*ARGS_USED > +@*ARGS_HAVE) {
                 panic("Your printf-style directives specify "
                     ~ ($*ARGS_USED == 1 ?? "1 argument, but "
                                         !! "$*ARGS_USED arguments, but ")
-                    ~ (nqp::elems(@*ARGS_HAVE) < 1      ?? "no argument was"
-                        !! nqp::elems(@*ARGS_HAVE) == 1 ?? "1 argument was"
-                                             !! nqp::elems(@*ARGS_HAVE) ~ " arguments were")
+                    ~ (+@*ARGS_HAVE < 1      ?? "no argument was"
+                        !! +@*ARGS_HAVE == 1 ?? "1 argument was"
+                                             !! +@*ARGS_HAVE ~ " arguments were")
                     ~ " supplied", nqp::hash('DIRECTIVES_COUNT',
-                            nqp::hash('ARGS_HAVE', nqp::elems(@*ARGS_HAVE), 'ARGS_USED', $*ARGS_USED)))
+                            nqp::hash('ARGS_HAVE', +@*ARGS_HAVE, 'ARGS_USED', $*ARGS_USED)))
             }
             make nqp::join('', @statements);
         }

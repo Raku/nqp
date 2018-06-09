@@ -271,7 +271,7 @@ class QAST::MASTRegexCompiler {
         }
         merge_ins(@ins, [
             $jumplabel,
-            op('jumplist', ival(nqp::elems(@!rxjumps)), $itmp)
+            op('jumplist', ival(+@!rxjumps), $itmp)
         ]);
         nqp::push(@ins, op('goto', $_)) for @!rxjumps;
         merge_ins(@ins, [
@@ -1511,13 +1511,13 @@ class QAST::MASTRegexCompiler {
     }
 
     method rxjump() {
-        my $index := nqp::elems(@!rxjumps);
+        my $index := +@!rxjumps;
         @!rxjumps[$index] := MAST::Label.new();
         $index
     }
 
     sub merge_ins(@dest, @src) {
-        nqp::splice(@dest, @src, nqp::elems(@dest), 0);
+        nqp::splice(@dest, @src, +@dest, 0);
     }
 
     sub op(str $op, *@args) {

@@ -168,7 +168,7 @@ my class MASTCompilerInstance {
         }
 
         method add_param($var) {
-            @!params[nqp::elems(@!params)] := $var;
+            @!params[+@!params] := $var;
             if $var.scope eq 'local' {
                 self.register_local($var);
             }
@@ -1362,7 +1362,7 @@ my class MASTCompilerInstance {
         my $result_stmt;
         my $result_count := 0;
         $resultchild := $resultchild // -1;
-        my $final_stmt_idx := nqp::elems(@stmts) - 1;
+        my $final_stmt_idx := +@stmts - 1;
         my $WANT := $*WANT;
         my $all_void := nqp::defined($WANT) && $WANT == $MVM_reg_void;
         for @stmts {
@@ -1398,7 +1398,7 @@ my class MASTCompilerInstance {
                     :$file, :$line, :instructions($last_stmt.instructions) ));
             }
             else {
-                nqp::splice(@all_ins, $last_stmt.instructions, nqp::elems(@all_ins), 0);
+                nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
             }
 
             if $use_result {
@@ -1809,8 +1809,8 @@ my class MASTCompilerInstance {
         elsif $scope eq 'attribute' {
             # Ensure we have object and class handle.
             my @args := $node.list();
-            if nqp::elems(@args) != 2 {
-                nqp::die("An attribute lookup needs 2 args (an object and a class handle), got " ~ nqp::elems(@args));
+            if +@args != 2 {
+                nqp::die("An attribute lookup needs 2 args (an object and a class handle), got " ~ +@args);
             }
 
             # Compile object and handle.
@@ -1862,8 +1862,8 @@ my class MASTCompilerInstance {
         elsif $scope eq 'attributeref' {
             # Ensure we have object and class handle, and aren't binding.
             my @args := $node.list();
-            if nqp::elems(@args) != 2 {
-                nqp::die("An attribute reference needs 2 args (an object and a class handle), got" ~ nqp::elems(@args));
+            if +@args != 2 {
+                nqp::die("An attribute reference needs 2 args (an object and a class handle), got" ~ +@args);
             }
             if $*BINDVAL {
                 nqp::die("Cannot bind to QAST::Var '{$name}' with scope attributeref");
