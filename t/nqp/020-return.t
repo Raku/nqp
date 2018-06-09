@@ -2,7 +2,7 @@
 
 # implicit and explicit returns from subs
 
-plan(4);
+plan(5);
 
 sub foo() { 1; }
 
