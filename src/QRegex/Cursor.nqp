@@ -1368,7 +1368,7 @@ class NQPRegexMethod {
     multi method ACCEPTS(NQPRegexMethod:D $self: $target) {
         NQPMatch.parse($target, :rule(self))
     }
-    multi method NOT_ACCEPTS(NQPRegexMethod:D $self: $target) {
+    multi method NOT-ACCEPTS(NQPRegexMethod:D $self: $target) {
         nqp::isfalse(NQPMatch.parse($target, :rule(self)))
     }
     method name() {
@@ -1384,7 +1384,7 @@ class NQPRegex is NQPRegexMethod {
     multi method ACCEPTS(NQPRegex:D $self: $target) {
         NQPMatch.parse($target, :rule(self), :c(0))
     }
-    multi method NOT_ACCEPTS(NQPRegex:D $self: $target) {
+    multi method NOT-ACCEPTS(NQPRegex:D $self: $target) {
         nqp::isfalse(NQPMatch.parse($target, :rule(self), :c(0)))
     }
 }

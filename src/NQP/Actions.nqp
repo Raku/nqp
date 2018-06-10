@@ -1675,7 +1675,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method infix:sym<!~~>($/) {
-        make QAST::Op.new( :op<callmethod>, :name<NOT_ACCEPTS>, :node($/) );
+        make QAST::Op.new( :op<callmethod>, :name<NOT-ACCEPTS>, :node($/) );
     }
 
     # Takes a multi-part name that we know is in a package and generates
