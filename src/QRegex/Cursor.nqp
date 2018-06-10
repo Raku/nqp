@@ -1368,6 +1368,9 @@ class NQPRegexMethod {
     multi method ACCEPTS(NQPRegexMethod:D $self: $target) {
         NQPMatch.parse($target, :rule(self))
     }
+    multi method NOT-ACCEPTS(NQPRegexMethod:D $self: $target) {
+        nqp::isfalse(NQPMatch.parse($target, :rule(self)))
+    }
     method name() {
         nqp::getcodename($!code)
     }
@@ -1380,6 +1383,9 @@ nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
 class NQPRegex is NQPRegexMethod {
     multi method ACCEPTS(NQPRegex:D $self: $target) {
         NQPMatch.parse($target, :rule(self), :c(0))
+    }
+    multi method NOT-ACCEPTS(NQPRegex:D $self: $target) {
+        nqp::isfalse(NQPMatch.parse($target, :rule(self), :c(0)))
     }
 }
 nqp::setinvokespec(NQPRegex, NQPRegexMethod, '$!code', nqp::null);

@@ -1,6 +1,6 @@
 #! nqp
 
-plan(10);
+plan(12);
 
 my $match := 'cde' ~~ regex abc { c(.)e };
 
@@ -21,3 +21,8 @@ is( $match, 'cde', "match has correct string value" );
 $match := 'abcdef' ~~ / '' /;
 ok( $match, "successfully match empty string (TT #1376)");
 
+$match := '42' !~~ / 0 /;
+is( $match, 1, "negate smartmatch can work 0" );
+
+$match := '42' !~~ / 42 /;
+is( $match, 0, "negate smartmatch can work 1" );

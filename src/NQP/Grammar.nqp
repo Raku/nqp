@@ -821,6 +821,7 @@ grammar NQP::Grammar is HLL::Grammar {
     token infix:sym«gt»   { <sym>  <O(|%relational, :op<isgt_s>)> }
     token infix:sym«=:=»  { <sym>  <O(|%relational, :op<eqaddr>)> }
     token infix:sym<~~>   { <sym>  <O(|%relational, :reducecheck<smartmatch>)> }
+    token infix:sym<!~~>  { <sym>  <O(|%relational, :reducecheck<smartmatch>)> }
 
     token infix:sym<&&>   { <sym>  <O(|%tight_and, :op<if>)> }
 

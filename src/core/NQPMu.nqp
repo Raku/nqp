@@ -88,6 +88,11 @@ my class NQPMu {
         nqp::istype($topic, self.WHAT)
     }
 
+    proto method NOT-ACCEPTS($topic) { * }
+    multi method NOT-ACCEPTS(NQPMu:U $self: $topic) {
+        nqp::isfalse(nqp::istype($topic, self.WHAT))
+    }
+
     method isa($type) {
         self.HOW.isa(self, $type)
     }
