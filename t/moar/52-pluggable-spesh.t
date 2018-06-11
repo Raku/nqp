@@ -3,7 +3,7 @@
 # Tests for extending the MoarVM specializer to guard on new kinds of things
 # from NQP. 
 
-plan(53);
+plan(57);
 
 {
     # Minimal test case: under no threaded contention, should run the resolve just
@@ -262,6 +262,54 @@ plan(53);
     try { typeobj(); CATCH { $msg := nqp::getmessage($_) } }
     ok($msg eq 'Must have a type object', 'Correct result when we trigger type object deopt');
     ok($times-run == 1, 'Ran the plugin another time if we had to deopt due to type object guard failure');
+}
+
+# Deopt by attribute guard.
+{
+    my class TestWithAttr {
+        has $!attr;
+        method new($attr) {
+            my $self := nqp::create(self);
+            nqp::bindattr($self, TestWithAttr, '$!attr', $attr);
+            $self
+        }
+    }
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'attr-type-and-definedness-counter-spesh', -> $obj {
+        nqp::speshguardtype($obj, TestWithAttr);
+        nqp::speshguardconcrete($obj);
+        my $attr := nqp::speshguardgetattr($obj, TestWithAttr, '$!attr');
+        nqp::speshguardtype($attr, $attr.WHAT);
+        nqp::isconcrete($attr)
+            ?? nqp::speshguardconcrete($attr)
+            !! nqp::speshguardtypeobj($attr);
+        ++$times-run
+    });
+    my @obj;
+    sub test() {
+        nqp::speshresolve('attr-type-and-definedness-counter-spesh',
+            TestWithAttr.new(nqp::atpos(@obj, 0)))
+    }
+
+    my class A { }
+    sub hot-loop() {
+        my int $i := 0;
+        my int $total := 0;
+        while $i++ < 1_000_000 {
+            $total := $total + test();
+        }
+        return $total;
+    }
+    @obj[0] := A;
+    my $result := hot-loop();
+    ok($times-run == 1, 'Only ran the attribute type-based plugin once in hot code');
+    ok($result == 1_000_000, 'Correct result from hot code');
+
+    my class B { }
+    @obj[0] := B;
+    ok(test() == 2, 'Correct result when we trigger attr type deopt');
+    ok($times-run == 2,
+        'Ran the plugin another time if we had to deopt due to attr type guard failure');
 }
 
 # Recursive spesh plugin setup
