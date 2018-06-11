@@ -19,10 +19,6 @@ knowhow NQPClassHOW {
     has @!roles;
     has $!default_parent;
 
-    # Vtable and mapping of method names to slots.
-    has @!vtable;
-    has %!method-vtable-slots;
-
     # Have we been composed?
     has $!composed;
 
@@ -71,8 +67,6 @@ knowhow NQPClassHOW {
         @!multi_methods_to_incorporate := nqp::list();
         @!parents := nqp::list();
         @!roles := nqp::list();
-        @!vtable := nqp::list();
-        %!method-vtable-slots := nqp::hash();
         @!mro := nqp::list();
         @!done := nqp::list();
         @!BUILDALLPLAN := nqp::list();
