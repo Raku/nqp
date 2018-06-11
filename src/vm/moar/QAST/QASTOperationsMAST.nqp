@@ -2753,6 +2753,12 @@ QAST::MASTOperations.add_core_moarop_mapping('typeparameters', 'typeparameters',
 QAST::MASTOperations.add_core_moarop_mapping('typeparameterat', 'typeparameterat', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setdebugtypename', 'setdebugtypename', 0);
 
+# object ops that don't do the usual decontainerization
+QAST::MASTOperations.add_core_moarop_mapping('what_nd', 'getwhat');
+QAST::MASTOperations.add_core_moarop_mapping('isconcrete_nd', 'isconcrete');
+QAST::MASTOperations.add_core_moarop_mapping('clone_nd', 'clone');
+QAST::MASTOperations.add_core_moarop_mapping('how_nd', 'gethow');
+
 # defined - overridden by HLL, but by default same as .DEFINITE.
 QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete', :decont(0));
 
