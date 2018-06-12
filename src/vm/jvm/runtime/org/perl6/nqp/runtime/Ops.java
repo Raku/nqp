@@ -2461,8 +2461,14 @@ public final class Ops {
     public static SixModelObject what(SixModelObject o, ThreadContext tc) {
         return decont(o, tc).st.WHAT;
     }
+    public static SixModelObject what_nd(SixModelObject o, ThreadContext tc) {
+        return o.st.WHAT;
+    }
     public static SixModelObject how(SixModelObject o, ThreadContext tc) {
         return decont(o, tc).st.HOW;
+    }
+    public static SixModelObject how_nd(SixModelObject o, ThreadContext tc) {
+        return o.st.HOW;
     }
     public static SixModelObject who(SixModelObject o, ThreadContext tc) {
         return decont(o, tc).st.WHO;
@@ -2491,8 +2497,14 @@ public final class Ops {
     public static SixModelObject clone(SixModelObject obj, ThreadContext tc) {
         return decont(obj, tc).clone(tc);
     }
+    public static SixModelObject clone_nd(SixModelObject obj, ThreadContext tc) {
+        return obj.clone(tc);
+    }
     public static long isconcrete(SixModelObject obj, ThreadContext tc) {
         return obj == null || decont(obj, tc) instanceof TypeObject ? 0 : 1;
+    }
+    public static long isconcrete_nd(SixModelObject obj, ThreadContext tc) {
+        return obj == null || obj instanceof TypeObject ? 0 : 1;
     }
     public static SixModelObject knowhow(ThreadContext tc) {
         return tc.gc.KnowHOW;
