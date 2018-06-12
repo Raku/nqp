@@ -49,7 +49,7 @@ public final class IOOps {
         }
         private static final Map<String, Integer> sigSupported = SigSupported.build();
 
-        private static final List<String> sigKeys = Arrays.asList(
+        public static final List<String> sigKeys = Arrays.asList(
             "SIGHUP",  "SIGINT",    "SIGQUIT",   "SIGILL",   "SIGTRAP", "SIGABRT",
             "SIGEMT",  "SIGFPE",    "SIGKILL",   "SIGBUS",   "SIGSEGV", "SIGSYS",
             "SIGPIPE", "SIGALRM",   "SIGTERM",   "SIGURG",   "SIGSTOP", "SIGTSTP",
@@ -132,16 +132,18 @@ public final class IOOps {
     public static SixModelObject getsignals(ThreadContext tc) {
         if (sigCache != null) return sigCache;
 
-        SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
+        SixModelObject listType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
+        SixModelObject strType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
         SixModelObject intType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
-        SixModelObject res      = hashType.st.REPR.allocate(tc, hashType.st);
+        SixModelObject res      = listType.st.REPR.allocate(tc, listType.st);
 
         Map<String, Integer> sigWanted = SigProcess.process();
 
-        // Box the hash values for HLL
-        for (String sig : sigWanted.keySet()) {
+        // Box the list values for HLL
+        for (String sig : SigProcess.sigKeys) {
             long signum = (long)sigWanted.get(sig);
-            res.bind_key_boxed( tc, sig, Ops.box_i(signum, intType, tc) );
+            res.push_boxed( tc, Ops.box_s(sig,    strType, tc) );
+            res.push_boxed( tc, Ops.box_i(signum, intType, tc) );
         }
         sigCache = res;
         return res;
