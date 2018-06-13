@@ -2951,6 +2951,8 @@ QAST::MASTOperations.add_core_moarop_mapping('atomicload_i', 'atomicload_i');
 QAST::MASTOperations.add_core_moarop_mapping('atomicstore', 'atomicstore_o', 1, :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('atomicstore_i', 'atomicstore_i', 1);
 QAST::MASTOperations.add_core_moarop_mapping('barrierfull', 'barrierfull');
+QAST::MASTOperations.add_core_moarop_mapping('atomicbindattr', 'atomicbindattr_o', 3);
+QAST::MASTOperations.add_core_moarop_mapping('casattr', 'casattr_o');
 
 # MoarVM-specific compilation ops
 QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
