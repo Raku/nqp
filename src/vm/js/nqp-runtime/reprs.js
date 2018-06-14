@@ -2348,9 +2348,6 @@ class CREPR extends REPRWithAttributes {
 
           this.slotTypes[curAttr] = attrType;
 
-/*          console.log('attrType');
-          require('nqp-runtime').dumpObj(attrType);*/
-
           if (!attrType._STable.REPR.asRefType) {
             throw new NQPException(`CUnion: Can't use attr ${attr.get('name').$$getStr()} as CUnion attr`);
           }
