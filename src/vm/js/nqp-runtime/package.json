@@ -20,7 +20,6 @@
     "node-int64": "^0.4.0",
     "nqp-js-ucd": "0.0.1",
     "nqp-unicode-data": "^2.0.0",
-    "qrusage": "^1.4.0",
     "ref": "^1.3.4",
     "ref-struct": "^1.1.0",
     "ref-union": "^1.0.1",

@@ -1841,7 +1841,7 @@ op.cleardispatcher = function(ctx) {
   }
 };
 
-const getrusage = require('qrusage');
+const getrusage = null; //require('qrusage');
 op.getrusage = function() {
   const usage = getrusage();
   const stable = BOOT.IntArray._STable;
