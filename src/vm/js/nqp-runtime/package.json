@@ -12,7 +12,7 @@
   "dependencies": {
     "char-props": "0.1.5",
     "escape-string-regexp": "^1.0.5",
-    "ffi": "^2.2.0",
+    "ffi-napi": "^2.4.3",
     "fibers": "^2.0.0",
     "fold-case": "^1.0.0",
     "fs-ext": "^0.6.0",

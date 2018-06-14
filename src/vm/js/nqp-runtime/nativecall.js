@@ -1,6 +1,6 @@
 'use strict';
 const op = {};
-const ffi = require('ffi');
+const ffi = require('ffi-napi');
 const ref = require('ref');
 
 const Null = require('./null.js');
