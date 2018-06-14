@@ -33,7 +33,7 @@ const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
 const graphemes = require('./graphemes.js');
 
-const fs = require('fs');
+const fs = process.browser ? null : require('fs');
 
 
 exports.NQPInt = NQPInt;
@@ -63,8 +63,12 @@ exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
-const io = require('./io.js');
-loadOps(io);
+if (!process.browser) {
+  const io = require('./io.js');
+  loadOps(io);
+} else {
+  loadOps(require('./browser.js'));
+}
 
 const bignum = require('./bignum.js');
 loadOps(bignum);
@@ -87,13 +91,15 @@ loadOps(deserialization);
 const serialization = require('./serialization.js');
 loadOps(serialization);
 
-const nativecall = require('./nativecall.js');
-loadOps(nativecall);
+if (!process.browser) {
+  const nativecall = require('./nativecall.js');
+  loadOps(nativecall);
+}
 
 const CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
 
-const continuations = require('./fiber-continuations.js');
+const continuations = process.browser ? require('./async-continuations.js') : require('./fiber-continuations.js');
 loadOps(continuations);
 
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');

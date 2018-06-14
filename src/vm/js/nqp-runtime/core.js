@@ -3,7 +3,7 @@
 const op = {};
 exports.op = op;
 
-const os = require('os');
+const os = process.browser ? null : require('os');
 
 const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
@@ -57,9 +57,9 @@ const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
 const unicodeData = require('nqp-unicode-data');
 
-const resolveSourceMap = require('./resolve-sourcemap.js');
+const resolveSourceMap = process.browser ? null : require('./resolve-sourcemap.js');
 
-const path = require('path');
+const path = process.browser ? null : require('path');
 
 const nullStr = require('./null_s.js');
 
@@ -649,7 +649,7 @@ function toJS(obj) {
 
 const nqp = require('./runtime.js');
 
-const Script = require('vm').Script;
+const Script = process.browser ? null : require('vm').Script;
 
 const sourceMaps = {};
 const evaledP6Sources = {};
@@ -865,7 +865,7 @@ op.getcomp = function(language) {
   return compilerRegistry.has(language) ? compilerRegistry.get(language) : Null;
 };
 
-const child_process = require('child_process');
+const child_process = process.browser ? null : require('child_process');
 
 function getConfigFromPerl() {
   const perlScript = `
@@ -1325,8 +1325,8 @@ op.replace = function(str, offset, count, repl) {
   return str.substr(0, offset) + repl + str.substr(offset + count);
 };
 
-const fs = require('fs');
-const sourceMapResolve = require('source-map-resolve');
+const fs = process.browser ? null : require('fs');
+const sourceMapResolve = process.browser ? null : require('source-map-resolve');
 
 op.getcodelocation = function(code) {
   let sourcePath;

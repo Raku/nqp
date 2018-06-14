@@ -13,10 +13,10 @@ const nqp = require('./runtime.js');
 
 const constants = require('./constants.js');
 
-const ref = require('ref');
+const ref = process.browser ? null : require('ref');
 
-const Union = require('ref-union');
-const StructType = require('ref-struct');
+const Union = process.browser ? null : require('ref-union');
+const StructType = process.browser ? null : require('ref-struct');
 
 const codecs = require('./codecs.js');
 

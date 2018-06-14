@@ -1,4 +1,4 @@
-const fibers = require('fibers');
+const fibers = process.browser ? {} : require('fibers');
 const globalStack = [];
 module.exports = function() {
   if (fibers.current === undefined) {
