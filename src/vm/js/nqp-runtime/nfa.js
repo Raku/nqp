@@ -3,7 +3,7 @@ const op = {};
 exports.op = op;
 
 const iscclass = require('./cclass.js').op.iscclass;
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 const Null = require('./null.js');
 const BOOT = require('./BOOT.js');

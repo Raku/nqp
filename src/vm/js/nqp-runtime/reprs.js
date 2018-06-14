@@ -9,7 +9,7 @@ const nullStr = require('./null_s.js');
 const iter = require('./iter.js');
 const BOOT = require('./BOOT.js');
 const core = require('./core.js');
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 const constants = require('./constants.js');
 

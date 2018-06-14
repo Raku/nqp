@@ -17,7 +17,7 @@ const mkdirp = require('mkdirp');
 
 const NQPException = require('./nqp-exception.js');
 
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 const Null = require('./null.js');
 

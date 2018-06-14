@@ -647,7 +647,7 @@ function toJS(obj) {
   }
 }
 
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 const Script = require('vm').Script;
 

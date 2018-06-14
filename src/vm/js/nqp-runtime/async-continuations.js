@@ -4,7 +4,7 @@ exports.op = op;
 
 const Null = require('./null.js');
 const Ctx = require('./ctx.js');
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 class CtxJustReset extends Ctx {
   $$skipHandlers() {
