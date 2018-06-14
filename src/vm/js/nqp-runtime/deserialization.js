@@ -4,7 +4,7 @@ module.exports.op = op;
 
 const reprs = require('./reprs.js');
 const sixmodel = require('./sixmodel.js');
-const SerializationContext = require('./serialization-context');
+const SerializationContext = require('./serialization-context.js');
 const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
 const constants = require('./constants.js');

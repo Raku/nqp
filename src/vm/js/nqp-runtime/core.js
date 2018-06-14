@@ -45,7 +45,7 @@ const stripMarks = require('./strip-marks.js');
 
 const codecs = require('./codecs.js');
 
-const graphemeRegexp = require('./graphemes').regexp;
+const graphemeRegexp = require('./graphemes.js').regexp;
 
 const foldCase = require('fold-case');
 

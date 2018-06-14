@@ -48,7 +48,7 @@ function loadOps(module) {
 
 exports.loadOps = loadOps;
 
-const core = require('./core');
+const core = require('./core.js');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
@@ -115,7 +115,7 @@ for (const name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
-const coercions = require('./coercions');
+const coercions = require('./coercions.js');
 
 exports.strToNum = coercions.strToNum;
 exports.numToStr = coercions.numToStr;
@@ -425,8 +425,8 @@ exports.list_s = function lowlevelList(array) {
 };
 
 exports.slurpyArray = hll.slurpyArray;
-exports.createArray = require('./BOOT').createArray;
-exports.createIntArray = require('./BOOT').createIntArray;
+exports.createArray = require('./BOOT.js').createArray;
+exports.createIntArray = require('./BOOT.js').createIntArray;
 
 exports.dumpObj = function(obj) {
   console.log(typeof obj);

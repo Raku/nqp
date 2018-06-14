@@ -1,4 +1,4 @@
-const NQPException = require('./nqp-exception');
+const NQPException = require('./nqp-exception.js');
 class NQPExceptionWithCtx extends NQPException {
   constructor(message, ctx, stack) {
     super(message);

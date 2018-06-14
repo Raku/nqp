@@ -20,7 +20,7 @@ const StructType = require('ref-struct');
 
 const codecs = require('./codecs.js');
 
-const graphemeRegexp = require('./graphemes').regexp;
+const graphemeRegexp = require('./graphemes.js').regexp;
 
 const nativeArgs = require('./native-args.js');
 

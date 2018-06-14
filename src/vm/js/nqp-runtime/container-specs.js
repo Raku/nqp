@@ -1,6 +1,6 @@
 'use strict';
 
-const coercions = require('./coercions');
+const coercions = require('./coercions.js');
 
 const NQPInt = require('./nqp-int.js');
 
