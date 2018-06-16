@@ -290,7 +290,6 @@ class NQP::Optimizer {
             if nqp::istype($op[0], QAST::Var) {
                 my $sigil := nqp::substr($op[0].name, 0, 1);
                 if $sigil eq '@' || $sigil eq '%' {
-                    $op.op('elems');
                     $op.returns(int)
                 }
             }
