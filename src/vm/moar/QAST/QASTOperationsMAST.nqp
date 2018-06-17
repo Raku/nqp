@@ -2461,6 +2461,7 @@ QAST::MASTOperations.add_core_moarop_mapping('multidimref_n', 'multidimref_n');
 QAST::MASTOperations.add_core_moarop_mapping('multidimref_s', 'multidimref_s');
 QAST::MASTOperations.add_core_moarop_mapping('atkey', 'atkey_o');
 QAST::MASTOperations.add_core_moarop_mapping('atkey_i', 'atkey_i');
+QAST::MASTOperations.add_core_moarop_mapping('atkey_u', 'atkey_u');
 QAST::MASTOperations.add_core_moarop_mapping('atkey_n', 'atkey_n');
 QAST::MASTOperations.add_core_moarop_mapping('atkey_s', 'atkey_s');
 QAST::MASTOperations.add_core_moarop_mapping('bindpos', 'bindpos_o', 2);

@@ -56,17 +56,54 @@ class HLL::Actions {
                         my str $key := ~$_;
                         unless $block.symbol($key) {
                             my $lextype := nqp::lexprimspec($pad, $key);
+                            # obj
                             if $lextype == 0 {
                                 $block.symbol($key, :scope<lexical>, :lazy_value_from($pad));
                             }
+                            # int
                             elsif $lextype == 1 {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int));
                             }
+                            # num
                             elsif $lextype == 2 {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_n($pad, $key)), :type(num));
                             }
+                            # str
                             elsif $lextype == 3 {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_s($pad, $key)), :type(str));
+                            }
+                            # int8
+                            elsif $lextype == 4 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int8));
+                            }
+                            # int16
+                            elsif $lextype == 5 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int16));
+                            }
+                            # int32
+                            elsif $lextype == 6 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int32));
+                            }
+#?if moar
+                            # uint8
+                            elsif $lextype == 7 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint8));
+                            }
+                            # uint16
+                            elsif $lextype == 8 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint16));
+                            }
+                            # uint32
+                            elsif $lextype == 9 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint32));
+                            }
+                            # uint64
+                            elsif $lextype == 10 {
+                                $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint64));
+                            }
+#?endif
+                            else {
+                                die("Unhandled lexical type")
                             }
                         }
                     }
@@ -132,7 +169,7 @@ class HLL::Actions {
                     $ast := QAST::SVal.new( :value(~@words[0]) );
                 }
             }
-            else {            
+            else {
                 $/.panic("Can't form :w list from non-constant strings (yet)");
             }
         }
