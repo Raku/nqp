@@ -15,7 +15,7 @@ public class NQPSayNode extends NQPExpressionNode {
 
     @Override
     public Object executeGeneric(VirtualFrame frame) {
-        String value = (String) this.arg.executeGeneric(frame);
+        String value = this.arg.executeString(frame);
         System.out.println(value);
         return value;
     }

@@ -51,8 +51,7 @@ public final class NQPSVal extends NQPExpressionNode {
         this.value = value;
     }
 
-    @Override
-    public Object executeGeneric(VirtualFrame frame) {
+    public String executeString(VirtualFrame frame) {
         return value;
     }
 }

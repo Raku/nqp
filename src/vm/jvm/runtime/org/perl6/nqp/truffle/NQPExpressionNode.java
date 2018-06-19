@@ -46,5 +46,10 @@ import org.perl6.nqp.truffle.NQPNode;
 
 @TypeSystemReference(NQPTypes.class)
 public abstract class NQPExpressionNode extends NQPNode {
-    public abstract Object executeGeneric(VirtualFrame frame);
+    public Object executeGeneric(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an object");
+    }
+    public String executeString(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a str");
+    }
 }
