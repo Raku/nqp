@@ -38,10 +38,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle;
-import com.oracle.truffle.api.dsl.TypeSystem;
-import org.perl6.nqp.truffle.runtime.NQPNull;
-import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-@TypeSystem({String.class, NQPCodeRef.class, NQPNull.class})
-public abstract class NQPTypes {
+package org.perl6.nqp.truffle.runtime;
+
+public final class NQPNull {
+
+    /**
+     * The canonical value to represent {@code null} in NQP.
+     */
+    public static final NQPNull SINGLETON = new NQPNull();
+
+    /**
+     * Disallow instantiation from outside to ensure that the {@link #SINGLETON} is the only
+     * instance.
+     */
+    private NQPNull() {
+    }
 }

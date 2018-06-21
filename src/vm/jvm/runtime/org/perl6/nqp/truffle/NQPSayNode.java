@@ -1,6 +1,6 @@
 package org.perl6.nqp.truffle;
 
-import org.perl6.nqp.truffle.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.NodeChild;

@@ -84,6 +84,13 @@ MAIN: {
     } else {
         $config{'truffleapi'} = "3rdparty/truffle/truffle-api-1.0.0-rc1.jar";
     }
+    if ($options{'with-truffle-dsl-processor'}) {
+        if ($options{'with-truffle-dsl-processor'} ne '-') {
+            $config{'truffledslprocessor'} = $options{'with-truffle-dsl-processor'};
+        }
+    } else {
+        $config{'truffledslprocessor'} = "3rdparty/truffle/truffle-dsl-processor-1.0.0-rc1.jar";
+    }
 
     if ($^O eq 'MSWin32') {
         $config{'asmfile'} = $config{'asm'};

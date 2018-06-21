@@ -49,6 +49,8 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+
 @NodeInfo(shortName = "stmts", description = "The node implementing a QAST::Stmts")
 public final class NQPStmts extends NQPExpressionNode {
     @Children private final NQPExpressionNode[] bodyNodes;

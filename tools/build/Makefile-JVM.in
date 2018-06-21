@@ -10,6 +10,9 @@ JVM_BUILD_DIR = gen/jvm
 RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/io/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java \
@@ -23,7 +26,8 @@ ASMTREE = @asmtree@
 JLINE = @jline@
 JNA = @jna@
 TRUFFLE_API = @truffleapi@
-THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(TRUFFLE_API)
+TRUFFLE_DSL_PROCESSOR = @truffledslprocessor@
+THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(TRUFFLE_API)@cpsep@$(TRUFFLE_DSL_PROCESSOR)
 J_STAGE0_DIR = src/vm/jvm/stage0
 J_STAGE1_DIR = $(JVM_BUILD_DIR)/stage1
 J_STAGE2_DIR = $(JVM_BUILD_DIR)/stage2

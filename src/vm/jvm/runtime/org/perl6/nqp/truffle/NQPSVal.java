@@ -42,6 +42,7 @@
 package org.perl6.nqp.truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 
 @NodeInfo(shortName = "const")
 public final class NQPSVal extends NQPExpressionNode {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -38,10 +38,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle;
-import com.oracle.truffle.api.dsl.TypeSystem;
-import org.perl6.nqp.truffle.runtime.NQPNull;
-import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-@TypeSystem({String.class, NQPCodeRef.class, NQPNull.class})
-public abstract class NQPTypes {
+package org.perl6.nqp.truffle.runtime;
+
+import com.oracle.truffle.api.Truffle;
+import com.oracle.truffle.api.RootCallTarget;
+import com.oracle.truffle.api.nodes.RootNode;
+import org.perl6.nqp.truffle.NQPLanguage;
+
+
+public final class NQPCodeRef  {
+
+    /** The current implementation of this function. */
+    private RootCallTarget callTarget;
+
+
+    public NQPCodeRef(RootNode root) {
+        this.callTarget = Truffle.getRuntime().createCallTarget(root);
+    }
+
+    public RootCallTarget getCallTarget() {
+        return callTarget;
+    }
 }

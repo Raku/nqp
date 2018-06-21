@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -38,10 +38,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle;
-import com.oracle.truffle.api.dsl.TypeSystem;
-import org.perl6.nqp.truffle.runtime.NQPNull;
-import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-@TypeSystem({String.class, NQPCodeRef.class, NQPNull.class})
-public abstract class NQPTypes {
+
+package org.perl6.nqp.truffle.nodes;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.dsl.TypeSystemReference;
+import org.perl6.nqp.truffle.NQPNode;
+import org.perl6.nqp.truffle.NQPTypes;
+import org.perl6.nqp.truffle.MalformedAstException;
+
+@TypeSystemReference(NQPTypes.class)
+public abstract class NQPExpressionNode extends NQPNode {
+    public Object executeGeneric(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an object");
+    }
+    public String executeString(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a str");
+    }
 }

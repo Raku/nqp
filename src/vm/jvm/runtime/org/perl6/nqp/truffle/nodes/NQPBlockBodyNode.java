@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -38,18 +38,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package org.perl6.nqp.truffle.nodes;
 
-package org.perl6.nqp.truffle;
+import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.dsl.TypeSystemReference;
-import org.perl6.nqp.truffle.NQPNode;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeInfo;
 
-@TypeSystemReference(NQPTypes.class)
-public abstract class NQPExpressionNode extends NQPNode {
-    public Object executeGeneric(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an object");
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+
+@NodeInfo(shortName = "block body", description = "The node implementing the inside of a QAST::Block")
+public final class NQPBlockBodyNode extends NQPExpressionNode {
+    @Children private final NQPExpressionNode[] bodyNodes;
+
+    public NQPBlockBodyNode(NQPExpressionNode[] bodyNodes) {
+        this.bodyNodes = bodyNodes;
     }
-    public String executeString(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a str");
+
+    @Override
+    @ExplodeLoop
+    public Object executeGeneric(VirtualFrame frame) {
+        Object ret = null;
+
+        CompilerAsserts.compilationConstant(bodyNodes.length);
+
+        for (NQPExpressionNode statement : bodyNodes) {
+            ret = statement.executeGeneric(frame);
+        }
+
+        return ret;
     }
 }

@@ -1,6 +1,21 @@
 class QAST::TruffleCompiler {
+
+    method sexpr($thing) {
+      if nqp::islist($thing) {
+          my @ret;
+          for $thing -> $element {
+              nqp::push(@ret, self.sexpr($element));
+          }
+          '(' ~ nqp::join(' ', @ret) ~ ')';
+      } elsif nqp::isstr($thing) {
+          $thing;
+      }
+    }
+
     method run(QAST::CompUnit $cu) {
-        nqp::runtruffle(self.as_truffle($cu, :want(0)));
+        my $compiled := self.as_truffle($cu, :want(0));
+
+        nqp::runtruffle($compiled);
     }
 
     proto method as_truffle($node, :$want) {
@@ -12,10 +27,18 @@ class QAST::TruffleCompiler {
     }
 
     multi method as_truffle(QAST::Stmts $node, :$want) {
-        my $ret := ['stmts']; 
+        my $ret := ['stmts'];
         for $node.list -> $child {
             nqp::push($ret, self.as_truffle($child));
-        } 
+        }
+        $ret;
+    }
+
+    multi method as_truffle(QAST::Block $node, :$want) {
+        my $ret := ['block'];
+        for $node.list -> $child {
+            nqp::push($ret, self.as_truffle($child));
+        }
         $ret;
     }
 
@@ -28,9 +51,21 @@ class QAST::TruffleCompiler {
             ['say', self.as_truffle($node[0])];
         } elsif $node.op eq 'print' {
             ['print', self.as_truffle($node[0])];
+        } elsif $node.op eq 'call' {
+            my $ret := ['call'];
+            for $node.list -> $child {
+                nqp::push($ret, self.as_truffle($child));
+            }
+            $ret;
+        } elsif $node.op eq 'takeclosure' {
+            return self.as_truffle($node[0], :$want);
         } else {
             nqp::die('NYI op: ' ~ $node.op);
         }
+    }
+
+    multi method as_truffle(QAST::Node $node, :$want) {
+        nqp::die('NYI QAST node: ' ~ $node.HOW.name($node));
     }
 }
 
@@ -69,6 +104,7 @@ class TruffleBackend {
         nqp::isinvokable($cuish) || nqp::iscompunit($cuish);
     }
 }
+
 
 sub MAIN(*@ARGS, *%ARGS) {
     my $nqpcomp-orig := nqp::getcomp('nqp');

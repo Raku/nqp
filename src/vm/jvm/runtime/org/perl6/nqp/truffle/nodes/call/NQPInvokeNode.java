@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2015, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -38,10 +38,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle;
-import com.oracle.truffle.api.dsl.TypeSystem;
-import org.perl6.nqp.truffle.runtime.NQPNull;
+package org.perl6.nqp.truffle.nodes.call;
+
+import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.instrumentation.StandardTags;
+import com.oracle.truffle.api.instrumentation.Tag;
+import com.oracle.truffle.api.nodes.ExplodeLoop;
+import com.oracle.truffle.api.nodes.NodeInfo;
+
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-@TypeSystem({String.class, NQPCodeRef.class, NQPNull.class})
-public abstract class NQPTypes {
+
+@NodeInfo(shortName = "invoke")
+public final class NQPInvokeNode extends NQPExpressionNode {
+
+    @Child private NQPExpressionNode functionNode;
+    @Children private final NQPExpressionNode[] argumentNodes;
+    @Child private NQPDispatchNode dispatchNode;
+
+    public NQPInvokeNode(NQPExpressionNode functionNode, NQPExpressionNode[] argumentNodes) {
+        this.functionNode = functionNode;
+        this.argumentNodes = argumentNodes;
+        this.dispatchNode = NQPDispatchNodeGen.create();
+    }
+
+    @ExplodeLoop
+    @Override
+    public Object executeGeneric(VirtualFrame frame) {
+        Object function = functionNode.executeGeneric(frame);
+
+        /*
+         * The number of arguments is constant for one invoke node. During compilation, the loop is
+         * unrolled and the execute methods of all arguments are inlined. This is triggered by the
+         * ExplodeLoop annotation on the method. The compiler assertion below illustrates that the
+         * array length is really constant.
+         */
+        CompilerAsserts.compilationConstant(argumentNodes.length);
+
+        Object[] argumentValues = new Object[argumentNodes.length];
+        for (int i = 0; i < argumentNodes.length; i++) {
+            argumentValues[i] = argumentNodes[i].executeGeneric(frame);
+        }
+        return dispatchNode.executeDispatch(function, argumentValues);
+    }
 }
