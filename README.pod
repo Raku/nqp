@@ -136,4 +136,10 @@ Currently it needs to be run like:
 
 ./nqp-j nqp-truffle.nqp -e 'nqp::say("Hello World")'
 
+
+To understand how the Truffle framework works the
+L<"One VM to Rule Them All, One VM to Bind Them"|https://www.youtube.com/watch?v=FJY96_6Y3a4> talk is useful. <Slides|https://lafo.ssw.uni-linz.ac.at/pub/papers/2016_PLDI_Truffle.pdf>
+
+L<A bunch of publications about Truffle/GraalVM are also worth reading|http://www.graalvm.org/community/publications/>
+
 =cut
