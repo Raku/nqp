@@ -2575,6 +2575,9 @@ QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
     MAST::InstructionList.new($expr.instructions, $res_reg, $MVM_reg_obj)
 });
 QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
+QAST::MASTOperations.add_core_op('wantdecont', -> $qastcomp, $op {
+    $qastcomp.as_mast($op[0], :want-decont)
+});
 QAST::MASTOperations.add_core_moarop_mapping('decont_i', 'decont_i');
 QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');
 QAST::MASTOperations.add_core_moarop_mapping('decont_s', 'decont_s');
