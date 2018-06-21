@@ -136,10 +136,15 @@ Currently it needs to be run like:
 
 ./nqp-j nqp-truffle.nqp -e 'nqp::say("Hello World")'
 
-
 To understand how the Truffle framework works the
 L<"One VM to Rule Them All, One VM to Bind Them"|https://www.youtube.com/watch?v=FJY96_6Y3a4> talk is useful. <Slides|https://lafo.ssw.uni-linz.ac.at/pub/papers/2016_PLDI_Truffle.pdf>
 
 L<A bunch of publications about Truffle/GraalVM are also worth reading|http://www.graalvm.org/community/publications/>
+
+The current workflow in the Truffle backend is that first NQP is turned into QAST.
+Afterwords it's turned into a form that's easily passed to Java.
+That's passed to nqp::runtruffle.
+Inside the TruffleCompiler (src/vm/jvm/runtime/org/perl6/nqp/truffle/TruffleCompiler.java) that intermediate form is turned into the Truffle tree nodes.
+Those are then interpreted and JITed by the Truffle framework.
 
 =cut
