@@ -3,6 +3,31 @@ my $T_INT  := 1;
 my $T_NUM  := 2;
 my $T_STR  := 3;
 
+class TAST {
+    has $!tree;
+    method run() {
+        nqp::runtruffle($!tree);
+    }
+
+    sub sexpr(int $unquoted, $thing) {
+      if nqp::islist($thing) {
+          my @ret;
+          my int $first := 1;
+          for $thing -> $element {
+              nqp::push(@ret, sexpr($first, $element));
+              $first := 0;
+          }
+          '(' ~ nqp::join(' ', @ret) ~ ')';
+      } elsif nqp::isstr($thing) {
+          $unquoted ?? $thing !! '"' ~ nqp::escape($thing) ~ '"';
+      }
+    }
+
+    method dump() {
+        sexpr(0, $!tree) ~ "\n";
+    }
+}
+
 class QAST::OperationsTruffle {
     my %ops;
     my %hll_ops;
@@ -81,23 +106,8 @@ class QAST::OperationsTruffle {
 }
 
 class QAST::TruffleCompiler {
-    method sexpr($thing) {
-      if nqp::islist($thing) {
-          my @ret;
-          for $thing -> $element {
-              nqp::push(@ret, self.sexpr($element));
-          }
-          '(' ~ nqp::join(' ', @ret) ~ ')';
-      } elsif nqp::isstr($thing) {
-          $thing;
-      }
-    }
-
-    method run(QAST::CompUnit $cu) {
-        my $compiled := self.as_truffle($cu, :want($T_OBJ));
-
-        say(self.sexpr($compiled));
-        nqp::runtruffle($compiled);
+    method compile(QAST::CompUnit $cu) {
+        TAST.new(tree => self.as_truffle($cu, :want($T_OBJ)));
     }
 
     proto method as_truffle($node, :$want) {
@@ -144,12 +154,16 @@ class QAST::TruffleCompiler {
 
 class TruffleBackend {
     method stages() {
-        'truffle'
+        'tast truffle'
     }
 
-    method truffle($qast, *%adverbs) {
+    method tast($qast, *%adverbs) {
+        QAST::TruffleCompiler.compile($qast);
+    }
+
+    method truffle($tast, *%adverbs) {
         sub (*@args) {
-            QAST::TruffleCompiler.run($qast);
+            $tast.run();
         }
     }
 
