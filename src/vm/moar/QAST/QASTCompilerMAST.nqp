@@ -518,6 +518,9 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_void {
                     push_op($il, 'const_s', $res_reg, MAST::SVal.new( :value('') ));
                 }
+                elsif $got == $MVM_reg_uint64 {
+                    push_op($il, 'coerce_us', $res_reg, $reg);
+                }
                 else {
                     nqp::die("Unknown coercion case for str; got: "~$got);
                 }
