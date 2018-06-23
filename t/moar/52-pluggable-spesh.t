@@ -3,7 +3,7 @@
 # Tests for extending the MoarVM specializer to guard on new kinds of things
 # from NQP. 
 
-plan(57);
+plan(66);
 
 {
     # Minimal test case: under no threaded contention, should run the resolve just
@@ -129,6 +129,38 @@ plan(57);
     ok(test(B) == 2, 'Third run with B type attr holding object is correct result');
     ok(test(A.new) == 3, 'Third run with A attr holding instance is correct result');
     ok(test(B.new) == 4, 'Third run with B attr holding instance is correct result');
+}
+
+# Guard for "any object except this one"
+{
+    my $do-not-want := NQPMu.new;
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'not-the-unwanted', -> $obj {
+        $times-run++;
+        if nqp::eqaddr($obj, $do-not-want) {
+            nqp::speshguardobj($obj);
+            2
+        }
+        else {
+            nqp::speshguardnotobj($obj, $do-not-want);
+            4
+        }
+    });
+    sub try-with-obj($obj) {
+        nqp::speshresolve('not-the-unwanted', $obj);
+    }
+    my $total := 0;
+    for NQPMu.new, NQPMu.new, NQPMu.new {
+        $total := $total + try-with-obj($_);
+    }
+    ok($times-run > 0, 'Ran the spesh plugin with any object except guard');
+    ok($times-run == 1, 'Ran the spesh registered block once per static resolve');
+    ok($total == 12, 'Resolve gave expected result');
+
+    # Check that the object guard is enforced.
+    $times-run := 0;
+    ok(try-with-obj($do-not-want) == 2, 'We get different value when any object except guard not met');
+    ok($times-run == 1, 'Ran the spesh registered block again');
 }
 
 # Many calls, to exercise specialization, with an exact match guard that'd trigger
@@ -310,6 +342,38 @@ plan(57);
     ok(test() == 2, 'Correct result when we trigger attr type deopt');
     ok($times-run == 2,
         'Ran the plugin another time if we had to deopt due to attr type guard failure');
+}
+
+# Deopt for "any object except this one"
+{
+    my $do-not-want := NQPMu.new;
+    my $times-run := 0;
+    nqp::speshreg('nqp', 'not-the-unwanted-spesh', -> $obj {
+        $times-run++;
+        if nqp::eqaddr($obj, $do-not-want) {
+            nqp::speshguardobj($obj);
+            2
+        }
+        else {
+            nqp::speshguardnotobj($obj, $do-not-want);
+            4
+        }
+    });
+    sub try-with-obj($obj) {
+        nqp::speshresolve('not-the-unwanted-spesh', $obj);
+    }
+    my int $i := 0;
+    my int $total := 0;
+    while $i++ < 1_000_000 {
+        $total := $total + try-with-obj(NQPMu.new);
+    }
+    ok($times-run == 1, 'Ran the spesh plugin with not object guard one time even when hot');
+    ok($total == 4_000_000, 'Correct result from the plugin every time');
+
+    # Check that it will deopt OK.
+    $times-run := 0;
+    ok(try-with-obj($do-not-want) == 2, 'We did deopt when expected');
+    ok($times-run == 1, 'Ran the spesh registered block again to recover from deopt');
 }
 
 # Recursive spesh plugin setup
