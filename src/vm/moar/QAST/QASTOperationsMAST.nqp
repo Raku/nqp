@@ -2987,6 +2987,7 @@ QAST::MASTOperations.add_core_moarop_mapping('speshguardtype', 'speshguardtype',
 QAST::MASTOperations.add_core_moarop_mapping('speshguardconcrete', 'speshguardconcrete', 0);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardtypeobj', 'speshguardtypeobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardobj', 'speshguardobj', 0);
+QAST::MASTOperations.add_core_moarop_mapping('speshguardnotobj', 'speshguardnotobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardgetattr', 'speshguardgetattr');
 QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     # Get the target name.
