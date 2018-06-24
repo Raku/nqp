@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -39,25 +39,20 @@
  * SOFTWARE.
  */
 
-package org.perl6.nqp.truffle.nodes;
+package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.dsl.TypeSystemReference;
-import org.perl6.nqp.truffle.NQPNode;
-import org.perl6.nqp.truffle.NQPTypes;
-import org.perl6.nqp.truffle.MalformedAstException;
+import com.oracle.truffle.api.nodes.NodeInfo;
+import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 
-@TypeSystemReference(NQPTypes.class)
-public abstract class NQPExpressionNode extends NQPNode {
-    public Object executeGeneric(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an object");
+@NodeInfo(shortName = "const")
+public final class NQPIValNode extends NQPExpressionNode {
+    private final long value;
+
+    public NQPIValNode(long value) {
+        this.value = value;
     }
-    public String executeString(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a int");
-    }
+
     public long executeInteger(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a int");
-    }
-    public double executeNumber(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a num");
+        return value;
     }
 }
