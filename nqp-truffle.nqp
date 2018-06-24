@@ -85,6 +85,10 @@ class QAST::OperationsTruffle {
     # TODO :$want
     add_op('call', :!inlinable, sub ($comp, $node, :$want) {
         my $ret := ['call'];
+
+        if $node.name {
+            nqp::push($ret, ['get-lexical', $node.name]);
+        }
         for $node.list -> $child {
             nqp::push($ret, $comp.as_truffle($child));
         }
