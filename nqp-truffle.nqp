@@ -138,7 +138,7 @@ class QAST::TruffleCompiler {
             $*HLL := $node.hll;
         }
 
-       self.as_truffle($node[0][3]);
+        ['stmts',self.as_truffle($node[0][1]), self.as_truffle($node[0][3])];
     }
 
     multi method as_truffle(QAST::Stmts $node, :$want) {
@@ -176,7 +176,8 @@ class QAST::TruffleCompiler {
             if $node.decl eq '' {
                 return $action;
             }
-            elsif $node.decl eq 'var' {
+            # TODO static should do deserialization
+            elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 return ['declare-lexical', $node.name, $action];
             }
             else {
