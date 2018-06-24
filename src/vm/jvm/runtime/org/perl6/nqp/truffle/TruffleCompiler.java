@@ -12,6 +12,12 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
+
+import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
+
+import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
+import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
+
 import org.perl6.nqp.truffle.nodes.call.NQPInvokeNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNodeGen;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNodeGen;
@@ -54,7 +60,7 @@ public class TruffleCompiler {
                 return new NQPStmts(children);
             }
             case "sval":
-                return new NQPSVal(node.at_pos_boxed(tc, 1).get_str(tc));
+                return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
             case "call":
                 NQPExpressionNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
                 NQPExpressionNode args[] = expressions(node, 2, scope, tc);

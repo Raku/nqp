@@ -39,16 +39,16 @@
  * SOFTWARE.
  */
 
-package org.perl6.nqp.truffle;
+package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 
 @NodeInfo(shortName = "const")
-public final class NQPSVal extends NQPExpressionNode {
+public final class NQPSValNode extends NQPExpressionNode {
     private final String value;
 
-    public NQPSVal(String value) {
+    public NQPSValNode(String value) {
         this.value = value;
     }
 
