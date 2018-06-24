@@ -52,10 +52,10 @@ public abstract class NQPExpressionNode extends NQPNode {
         throw new MalformedAstException("Expected an AST node that produces an object");
     }
     public String executeString(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a int");
+        throw new MalformedAstException("Expected an AST node that produces a str");
     }
     public long executeInteger(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a int");
+        throw new MalformedAstException("Expected an AST node that produces an int");
     }
     public double executeNumber(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces a num");

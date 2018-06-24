@@ -21,6 +21,10 @@ import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
 
 import org.perl6.nqp.truffle.nodes.call.NQPInvokeNode;
+import org.perl6.nqp.truffle.nodes.call.NQPIntArgNode;
+import org.perl6.nqp.truffle.nodes.call.NQPStrArgNode;
+import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
+
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNodeGen;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNodeGen;
 import org.perl6.nqp.truffle.NQPRootNode;
@@ -61,12 +65,18 @@ public class TruffleCompiler {
                 NQPExpressionNode children[] = expressions(node, scope, tc);
                 return new NQPStmts(children);
             }
-            case "sval":
-                return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
-            case "nval":
-                return new NQPNValNode(node.at_pos_boxed(tc, 1).get_num(tc));
             case "ival":
                 return new NQPIValNode(node.at_pos_boxed(tc, 1).get_int(tc));
+            case "nval":
+                return new NQPNValNode(node.at_pos_boxed(tc, 1).get_num(tc));
+            case "sval":
+                return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
+            case "int-arg":
+                return new NQPIntArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "num-arg":
+                return new NQPNumArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "str-arg":
+                return new NQPStrArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "call":
                 NQPExpressionNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
                 NQPExpressionNode args[] = expressions(node, 2, scope, tc);

@@ -172,6 +172,22 @@ class QAST::TruffleCompiler {
                 return TAST.new($T_VOID, $tast.tree);
             }
 
+            if $desired == $T_CALL_ARG {
+                if $got == $T_INT {
+                    return TAST.new($T_CALL_ARG, ['int-arg', $tast.tree]);
+                }
+                elsif $got == $T_NUM {
+                    return TAST.new($T_CALL_ARG, ['num-arg', $tast.tree]);
+                }
+                elsif $got == $T_STR {
+                    return TAST.new($T_CALL_ARG, ['str-arg', $tast.tree]);
+                }
+                elsif $got == $T_OBJ {
+                    return TAST.new($T_CALL_ARG, $tast.tree);
+                }
+            }
+
+
             say("Can't coerce $got to $desired");
             $tast;
         } else {
