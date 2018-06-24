@@ -38,48 +38,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle.nodes;
+package org.perl6.nqp.truffle.nodes.variables;
 
-import com.oracle.truffle.api.CompilerAsserts;
-import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.NodeInfo;
-import com.oracle.truffle.api.frame.Frame;
+import com.oracle.truffle.api.CompilerDirectives;
+import com.oracle.truffle.api.dsl.NodeField;
+import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.dsl.Introspectable;
 import com.oracle.truffle.api.frame.FrameSlot;
-
+import com.oracle.truffle.api.frame.FrameSlotKind;
+import com.oracle.truffle.api.frame.FrameUtil;
+import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.NQPTypes;
 
-import java.util.Map;
+@NodeField(name = "slot", type = FrameSlot.class)
+public abstract class NQPReadLocalVariableNode extends NQPExpressionNode {
+    protected abstract FrameSlot getSlot();
 
-@NodeInfo(shortName = "block body", description = "The node implementing the inside of a QAST::Block")
-public final class NQPBlockBodyNode extends NQPExpressionNode {
-    @Children private final NQPExpressionNode[] bodyNodes;
+    public abstract Object executeGeneric(VirtualFrame frame);
 
-    private Map<String, FrameSlot> varSlots;
-
-    public NQPBlockBodyNode(NQPExpressionNode[] bodyNodes) {
-        this.bodyNodes = bodyNodes;
-    }
-
-    public void addVar(String name, FrameSlot slot) {
-        varSlots.put(name, slot);
-    }
-
-    public FrameSlot lookupVar(String name) {
-        return varSlots.get(name);
-    }
-
-    @Override
-    @ExplodeLoop
-    public Object executeGeneric(VirtualFrame frame) {
-        Object ret = null;
-
-        CompilerAsserts.compilationConstant(bodyNodes.length);
-
-        for (NQPExpressionNode statement : bodyNodes) {
-            ret = statement.executeGeneric(frame);
-        }
-
-        return ret;
+    @Specialization
+    public Object run(VirtualFrame frame) {
+        return FrameUtil.getObjectSafe(frame, getSlot());
     }
 }

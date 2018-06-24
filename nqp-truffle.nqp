@@ -91,6 +91,19 @@ class QAST::OperationsTruffle {
         $ret;
     });
 
+    add_op('bind', sub ($comp, $node, :$want) {
+        my @children := $node.list;
+        if +@children != 2 {
+            nqp::die("A 'bind' op must have exactly two children");
+        }
+        unless nqp::istype(@children[0], QAST::Var) {
+            nqp::die("First child of a 'bind' op must be a QAST::Var");
+        }
+
+        my $*BINDVAL := @children[1];
+        $comp.as_truffle(@children[0], :want($want));
+    });
+
     method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%hll_ops, $hll) && nqp::existskey(%hll_ops{$hll}, $name) {
@@ -109,6 +122,7 @@ class QAST::TruffleCompiler {
     method compile(QAST::CompUnit $cu) {
         TAST.new(tree => self.as_truffle($cu, :want($T_OBJ)));
     }
+
 
     proto method as_truffle($node, :$want) {
         {*}
@@ -132,6 +146,7 @@ class QAST::TruffleCompiler {
     }
 
     multi method as_truffle(QAST::Block $node, :$want) {
+        my $*BINDVAL := 0;
         my $ret := ['block'];
         for $node.list -> $child {
             nqp::push($ret, self.as_truffle($child));
@@ -143,12 +158,47 @@ class QAST::TruffleCompiler {
         ['sval', $node.value];
     }
 
+    multi method as_truffle(QAST::Var $node, :$want) {
+        my $action;
+
+        if $node.scope eq 'lexical' {
+            if $*BINDVAL {
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($T_OBJ));
+                $action := ['bind-lexical', $node.name, $value];
+            } else {
+                $action := ['get-lexical', $node.name];
+            }
+
+            if $node.decl eq '' {
+                return $action;
+            }
+            elsif $node.decl eq 'var' {
+                return ['declare-lexical', $node.name, $action];
+            }
+            else {
+                nqp::die("Unimplemented var declaration type {$node.decl}");
+            }
+        }
+        else {
+            nqp::die("Unimplemented var scope {$node.scope}");
+        }
+    }
+
     multi method as_truffle(QAST::Op $node, :$want) {
         QAST::OperationsTruffle.compile_op(self, $node, $*HLL, :$want);
     }
 
+    method as_truffle_clear_bindval($node, :$want) {
+        my $*BINDVAL := 0;
+        self.as_truffle($node, :$want);
+    }
+
     multi method as_truffle(QAST::Node $node, :$want) {
-        nqp::die('NYI QAST node: ' ~ $node.HOW.name($node));
+        self.NYI('QAST node: ' ~ $node.HOW.name($node));
+    }
+
+    method NYI($msg) {
+        nqp::die("NYI: $msg");
     }
 }
 
