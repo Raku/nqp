@@ -38,6 +38,10 @@ class TAST {
               $first := 0;
           }
           '(' ~ nqp::join(' ', @ret) ~ ')';
+      } elsif nqp::isint($thing) {
+          ~$thing;
+      } elsif nqp::isnum($thing) {
+          ~$thing;
       } elsif nqp::isstr($thing) {
           $unquoted ?? $thing !! '"' ~ nqp::escape($thing) ~ '"';
       }
