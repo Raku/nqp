@@ -25,8 +25,8 @@ import org.perl6.nqp.truffle.nodes.call.NQPIntArgNode;
 import org.perl6.nqp.truffle.nodes.call.NQPStrArgNode;
 import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
 
-import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNodeGen;
-import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNodeGen;
+import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
+import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
 import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
@@ -86,12 +86,12 @@ public class TruffleCompiler {
                 return build(node.at_pos_boxed(tc, 2), scope, tc);
             case "get-lexical": {
                 FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                return NQPReadLocalVariableNodeGen.create(frameSlot);
+                return new NQPReadLocalVariableNode(frameSlot);
             }
             case "bind-lexical": {
                 FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 NQPExpressionNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
-                return NQPBindLocalVariableNodeGen.create(valueNode, frameSlot);
+                return new NQPBindLocalVariableNode(frameSlot, valueNode);
             }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();

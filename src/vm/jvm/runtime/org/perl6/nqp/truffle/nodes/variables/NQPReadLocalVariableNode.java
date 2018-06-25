@@ -52,14 +52,14 @@ import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 import org.perl6.nqp.truffle.NQPTypes;
 
-@NodeField(name = "slot", type = FrameSlot.class)
-public abstract class NQPReadLocalVariableNode extends NQPExpressionNode {
-    protected abstract FrameSlot getSlot();
+public class NQPReadLocalVariableNode extends NQPExpressionNode {
+    private final FrameSlot slot;
 
-    public abstract Object executeGeneric(VirtualFrame frame);
+    public NQPReadLocalVariableNode(FrameSlot slot) {
+        this.slot = slot;
+    }
 
-    @Specialization
-    public Object run(VirtualFrame frame) {
-        return FrameUtil.getObjectSafe(frame, getSlot());
+    public Object executeGeneric(VirtualFrame frame) {
+        return FrameUtil.getObjectSafe(frame, slot);
     }
 }

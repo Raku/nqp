@@ -50,16 +50,19 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
 
 @NodeField(name = "slot", type = FrameSlot.class)
-@NodeChild("valueNode")
-public abstract class NQPBindLocalVariableNode extends NQPExpressionNode {
-    protected abstract FrameSlot getSlot();
+public class NQPBindLocalVariableNode extends NQPExpressionNode {
+    final private FrameSlot slot;
+    @Child private NQPExpressionNode valueNode;
+
+    public NQPBindLocalVariableNode(FrameSlot slot, NQPExpressionNode valueNode) {
+        this.slot = slot;
+        this.valueNode = valueNode;
+    }
 
     @Override
-    public abstract Object executeGeneric(VirtualFrame frame);
-
-    @Specialization()
-    protected Object write(VirtualFrame frame, Object value) {
-        frame.setObject(getSlot(), value);
+    public Object executeGeneric(VirtualFrame frame) {
+        Object value = valueNode.executeGeneric(frame);
+        frame.setObject(slot, value);
         return value;
     }
 }
