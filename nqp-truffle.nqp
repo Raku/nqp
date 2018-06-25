@@ -352,7 +352,22 @@ class QAST::TruffleCompiler {
     }
 }
 
+
+my $mini_setting := '
+sub say($arg) {
+    nqp::say($arg);
+}
+
+sub print($arg) {
+    nqp::print($arg);
+}
+';
+
 class TruffleBackend {
+    method start($source, *%adverbs) {
+        $mini_setting ~ $source;
+    }
+
     method stages() {
         'tast truffle'
     }
@@ -391,7 +406,6 @@ class TruffleBackend {
         nqp::isinvokable($cuish) || nqp::iscompunit($cuish);
     }
 }
-
 
 sub MAIN(*@ARGS, *%ARGS) {
     my $nqpcomp-orig := nqp::getcomp('nqp');
