@@ -16,6 +16,7 @@ import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPIValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPNValNode;
+import org.perl6.nqp.truffle.nodes.expression.NQPSmartStringifyNode;
 
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
@@ -27,6 +28,7 @@ import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
 
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
+import org.perl6.nqp.truffle.nodes.variables.NQPGetPositionalNode;
 import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
@@ -71,6 +73,8 @@ public class TruffleCompiler {
                 return new NQPNValNode(node.at_pos_boxed(tc, 1).get_num(tc));
             case "sval":
                 return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
+            case "smart-stringify":
+                return new NQPSmartStringifyNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "int-arg":
                 return new NQPIntArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "num-arg":
@@ -92,6 +96,12 @@ public class TruffleCompiler {
                 FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 NQPExpressionNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
                 return new NQPBindLocalVariableNode(frameSlot, valueNode);
+            }
+            case "get-lexical-positional": {
+                scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
+                int index = (int) node.at_pos_boxed(tc, 2).get_int(tc);
+                FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
+                return new NQPGetPositionalNode(frameSlot, index);
             }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();

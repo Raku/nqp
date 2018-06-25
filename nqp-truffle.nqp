@@ -147,6 +147,30 @@ class QAST::OperationsTruffle {
 }
 
 class QAST::TruffleCompiler {
+    my class BlockInfo {
+        has $!qast; # The QAST::Block
+        has $!outer; # Outer block's BlockInfo
+        has @!params; # the parameters the block takes
+
+        method new($qast, $outer) {
+            my $obj := nqp::create(self);
+            $obj.BUILD($qast, $outer);
+            $obj
+        }
+
+        method BUILD($qast, $outer) {
+            $!qast := $qast;
+            $!outer := $outer;
+            @!params := nqp::list();
+        }
+
+        method add_param($param) {
+            @!params.push($param);
+        }
+
+        method params() { @!params }
+    }
+
     method compile(QAST::CompUnit $cu) {
         self.as_truffle($cu, :want($T_VOID));
     }
@@ -184,6 +208,15 @@ class QAST::TruffleCompiler {
                 }
                 elsif $got == $T_OBJ {
                     return TAST.new($T_CALL_ARG, $tast.tree);
+                }
+            }
+
+            # TODO - Perl 6 proper does it differently than nqp
+            if $got == $T_OBJ {
+                if $desired == $T_STR {
+                    return TAST.new($T_CALL_ARG, ['smart-stringify', $tast.tree]);
+                } elsif $desired == $T_INT {
+                    return TAST.new($T_CALL_ARG, ['smart-intify', $tast.tree]);
                 }
             }
 
@@ -226,13 +259,35 @@ class QAST::TruffleCompiler {
         TAST.new($T_VOID, $ret);
     }
 
-    multi method as_truffle(QAST::Block $node, :$want) {
-        my $*BINDVAL := 0;
-        my $ret := ['block'];
-        for $node.list -> $child {
-            nqp::push($ret, self.as_truffle($child, :want($T_VOID)).tree);
+    method compile_params(@params) {
+        my @ret;
+        my int $index := 0;
+        for @params -> $param {
+            nqp::push(@ret, ['get-lexical-positional', $param.name, $index]);
+            $index := $index + 1;
         }
-        TAST.new($T_OBJ, $ret);
+        @ret;
+    }
+
+    multi method as_truffle(QAST::Block $node, :$want) {
+        my $outer := try $*BLOCK;
+        my $block := BlockInfo.new($node, $outer);
+        {
+            my $*BLOCK := $block;
+            my $*BINDVAL := 0;
+            my @ret := ['block'];
+
+
+            for $node.list -> $child {
+                nqp::push(@ret, self.as_truffle($child, :want($T_VOID)).tree);
+            }
+
+            my @compiled_params := self.compile_params($*BLOCK.params);
+
+            nqp::splice(@ret, @compiled_params, 1, 0);
+
+            TAST.new($T_OBJ, @ret);
+        }
     }
 
     multi method as_truffle(QAST::SVal $node, :$want) {
@@ -265,6 +320,10 @@ class QAST::TruffleCompiler {
             # TODO static should do deserialization
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 return TAST.new($T_OBJ, ['declare-lexical', $node.name, $action]);
+            }
+            elsif $node.decl eq 'param' {
+                $*BLOCK.add_param($node);
+                return TAST.new($T_OBJ, $action);
             }
             else {
                 nqp::die("Unimplemented var declaration type {$node.decl}");
