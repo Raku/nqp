@@ -443,5 +443,5 @@ sub MAIN(*@ARGS, *%ARGS) {
 
     $nqpcomp-cc.language('nqp-cc');
     $nqpcomp-cc.command_line(@ARGS,:module-path('gen/js/stage2'),
-        :encoding('utf8'), :transcode('ascii iso-8859-1'));
+        :encoding('utf8'), :transcode('ascii iso-8859-1'), :setting('NULL'));
 }
