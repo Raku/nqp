@@ -46,13 +46,15 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
 @NodeInfo(shortName = "if")
-public final class NQPIf2Node extends NQPNode {
+public final class NQPIfNode extends NQPNode {
     @Child private NQPNode condNode;
     @Child private NQPNode thenNode;
+    @Child private NQPNode elseNode;
 
-    public NQPIf2Node(NQPNode condNode, NQPNode thenNode) {
+    public NQPIfNode(NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
         this.condNode = condNode;
         this.thenNode = thenNode;
+        this.elseNode = elseNode;
     }
 
     @Override
@@ -61,7 +63,11 @@ public final class NQPIf2Node extends NQPNode {
         if (toBoolean(cond)) {
             return thenNode.execute(frame);
         } else {
-            return cond;
+            if (elseNode != null) {
+                return elseNode.execute(frame);
+            } else {
+                return cond;
+            }
         }
     }
 
