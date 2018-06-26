@@ -16,9 +16,7 @@ close($fh);
 # ensure we use the correct executable
 my $cmd := nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
 my $cmdargs := $fname;
-my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
-my $args := $is-windows ?? nqp::list($cmd, $cmdargs)
-                        !! nqp::list($cmd, $cmdargs);
+my $args := nqp::list($cmd, $cmdargs)
 
 # expected first line output to stderr:
 #   Obsolete pod format ... , please use =begin/=end instead at line 4, near "\n"
