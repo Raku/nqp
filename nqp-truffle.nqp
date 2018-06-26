@@ -132,6 +132,24 @@ class QAST::OperationsTruffle {
         $comp.as_truffle(@children[0], :want($want));
     });
 
+    add_op('if', sub ($comp, $node, :$want) {
+        my int $operands := +$node.list;
+        if $operands == 2 {
+            my int $result_type := $want == $T_VOID ?? $T_VOID !! $T_OBJ;
+
+            my $cond := $comp.as_truffle($node[0], :want($T_OBJ));
+            my $then := $comp.as_truffle($node[1], :want($result_type));
+            TAST.new($result_type, ['if2', $cond.tree, $then.tree]);
+        }
+        elsif $operands == 3 {
+            $comp.NYI("3 argument if");
+        }
+        else {
+            nqp::die("Operation 'if' needs either 2 or 3 operands")
+                if $operands < 2 || $operands > 3;
+        }
+    });
+
     method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%hll_ops, $hll) && nqp::existskey(%hll_ops{$hll}, $name) {

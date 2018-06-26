@@ -28,6 +28,8 @@ import org.perl6.nqp.truffle.nodes.call.NQPIntArgNode;
 import org.perl6.nqp.truffle.nodes.call.NQPStrArgNode;
 import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
 
+import org.perl6.nqp.truffle.nodes.control.NQPIf2Node;
+
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPGetPositionalNode;
@@ -87,6 +89,10 @@ public class TruffleCompiler {
                 return new NQPBoxNQPInt(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "box-nqp-str":
                 return new NQPBoxNQPStr(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "if2":
+                return new NQPIf2Node(
+                    build(node.at_pos_boxed(tc, 1), scope, tc),
+                    build(node.at_pos_boxed(tc, 2), scope, tc));
             case "call":
                 NQPNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
                 NQPNode args[] = expressions(node, 2, scope, tc);
