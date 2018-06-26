@@ -42,12 +42,11 @@
 package org.perl6.nqp.truffle.nodes;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
-import org.perl6.nqp.truffle.NQPNode;
 import org.perl6.nqp.truffle.NQPTypes;
 import org.perl6.nqp.truffle.MalformedAstException;
 
 @TypeSystemReference(NQPTypes.class)
-public abstract class NQPExpressionNode extends NQPNode {
+public abstract class NQPExpressionNode extends NQPBaseNode {
     public Object executeGeneric(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces an object");
     }
