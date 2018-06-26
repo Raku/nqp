@@ -9,7 +9,7 @@ import com.oracle.truffle.api.frame.FrameSlot;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
 
@@ -44,27 +44,27 @@ public class TruffleCompiler {
         callTarget.call();
     }
 
-    private NQPExpressionNode[] expressions(SixModelObject node, NQPScope scope, ThreadContext tc) {
+    private NQPNode[] expressions(SixModelObject node, NQPScope scope, ThreadContext tc) {
         return expressions(node, 1, scope, tc);
     }
 
-    private NQPExpressionNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
+    private NQPNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
         int elems = (int) node.elems(tc);
-        NQPExpressionNode children[] = new NQPExpressionNode[elems - from];
+        NQPNode children[] = new NQPNode[elems - from];
         for (int i = from; i < elems; i++) {
            children[i-from] =  build(node.at_pos_boxed(tc, i), scope, tc);
         }
         return children;
     }
 
-    public NQPExpressionNode build(SixModelObject node, NQPScope scope, ThreadContext tc) {
+    public NQPNode build(SixModelObject node, NQPScope scope, ThreadContext tc) {
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
             case "say":
                 return new NQPSayNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "print":
                 return new NQPPrintNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "stmts": {
-                NQPExpressionNode children[] = expressions(node, scope, tc);
+                NQPNode children[] = expressions(node, scope, tc);
                 return new NQPStmts(children);
             }
             case "ival":
@@ -82,8 +82,8 @@ public class TruffleCompiler {
             case "str-arg":
                 return new NQPStrArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "call":
-                NQPExpressionNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
-                NQPExpressionNode args[] = expressions(node, 2, scope, tc);
+                NQPNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
+                NQPNode args[] = expressions(node, 2, scope, tc);
                 return new NQPInvokeNode(codeRef, args);
             case "declare-lexical":
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
@@ -94,7 +94,7 @@ public class TruffleCompiler {
             }
             case "bind-lexical": {
                 FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                NQPExpressionNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
+                NQPNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
                 return new NQPBindLocalVariableNode(frameSlot, valueNode);
             }
             case "get-lexical-positional": {
@@ -105,7 +105,7 @@ public class TruffleCompiler {
             }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();
-                NQPExpressionNode children[] = expressions(node, new NQPScopeWithFrame(frameDescriptor), tc);
+                NQPNode children[] = expressions(node, new NQPScopeWithFrame(frameDescriptor), tc);
                 return new NQPNotClosureNode(new NQPCodeRef(
                     new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
                 ));

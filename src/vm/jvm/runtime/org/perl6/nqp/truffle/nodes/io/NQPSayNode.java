@@ -1,15 +1,15 @@
 package org.perl6.nqp.truffle.nodes.io;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.NodeChild;
 
 @NodeChildren({@NodeChild("arg")})
-public class NQPSayNode extends NQPExpressionNode {
-    @Child private NQPExpressionNode arg;
+public class NQPSayNode extends NQPNode {
+    @Child private NQPNode arg;
 
-    public NQPSayNode(NQPExpressionNode arg) {
+    public NQPSayNode(NQPNode arg) {
       this.arg = arg;
     }
 

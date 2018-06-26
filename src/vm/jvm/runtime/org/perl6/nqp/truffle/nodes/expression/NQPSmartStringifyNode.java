@@ -44,15 +44,15 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
 @NodeInfo(shortName = "smart stringify")
-public final class NQPSmartStringifyNode extends NQPExpressionNode {
-    @Child private NQPExpressionNode valueNode;
+public final class NQPSmartStringifyNode extends NQPNode {
+    @Child private NQPNode valueNode;
 
-    public NQPSmartStringifyNode(NQPExpressionNode valueNode) {
+    public NQPSmartStringifyNode(NQPNode valueNode) {
         this.valueNode = valueNode;
     }
 

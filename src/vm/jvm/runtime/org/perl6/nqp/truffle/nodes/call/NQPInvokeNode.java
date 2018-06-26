@@ -47,18 +47,18 @@ import com.oracle.truffle.api.instrumentation.Tag;
 import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
 @NodeInfo(shortName = "invoke")
-public final class NQPInvokeNode extends NQPExpressionNode {
+public final class NQPInvokeNode extends NQPNode {
 
-    @Child private NQPExpressionNode functionNode;
-    @Children private final NQPExpressionNode[] argumentNodes;
+    @Child private NQPNode functionNode;
+    @Children private final NQPNode[] argumentNodes;
     @Child private NQPDispatchNode dispatchNode;
 
-    public NQPInvokeNode(NQPExpressionNode functionNode, NQPExpressionNode[] argumentNodes) {
+    public NQPInvokeNode(NQPNode functionNode, NQPNode[] argumentNodes) {
         this.functionNode = functionNode;
         this.argumentNodes = argumentNodes;
         this.dispatchNode = NQPDispatchNodeGen.create();

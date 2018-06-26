@@ -45,19 +45,19 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.NQPLanguage;
 
 @NodeInfo(language = "NQP", description = "The root of all NQP execution trees")
 public class NQPRootNode extends RootNode {
     /** The function body that is executed, and specialized during execution. */
-    @Child private NQPExpressionNode bodyNode;
-    public NQPRootNode(NQPLanguage language, FrameDescriptor frameDescriptor, NQPExpressionNode bodyNode) {
+    @Child private NQPNode bodyNode;
+    public NQPRootNode(NQPLanguage language, FrameDescriptor frameDescriptor, NQPNode bodyNode) {
         super(language, frameDescriptor);
         this.bodyNode = bodyNode;
     }
 
-    public NQPRootNode(NQPLanguage language, NQPExpressionNode bodyNode) {
+    public NQPRootNode(NQPLanguage language, NQPNode bodyNode) {
         super(language);
         this.bodyNode = bodyNode;
     }

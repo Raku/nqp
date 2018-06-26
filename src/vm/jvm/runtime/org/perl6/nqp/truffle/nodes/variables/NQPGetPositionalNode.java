@@ -47,9 +47,9 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
-public class NQPGetPositionalNode extends NQPExpressionNode {
+public class NQPGetPositionalNode extends NQPNode {
     private final FrameSlot slot;
     private final int index;
 

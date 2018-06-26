@@ -49,10 +49,10 @@ import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.NQPTypes;
 
-public class NQPReadLocalVariableNode extends NQPExpressionNode {
+public class NQPReadLocalVariableNode extends NQPNode {
     private final FrameSlot slot;
 
     public NQPReadLocalVariableNode(FrameSlot slot) {

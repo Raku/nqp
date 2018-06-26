@@ -47,17 +47,17 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.frame.Frame;
 import com.oracle.truffle.api.frame.FrameSlot;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import java.util.Map;
 
 @NodeInfo(shortName = "block body", description = "The node implementing the inside of a QAST::Block")
-public final class NQPBlockBodyNode extends NQPExpressionNode {
-    @Children private final NQPExpressionNode[] bodyNodes;
+public final class NQPBlockBodyNode extends NQPNode {
+    @Children private final NQPNode[] bodyNodes;
 
     private Map<String, FrameSlot> varSlots;
 
-    public NQPBlockBodyNode(NQPExpressionNode[] bodyNodes) {
+    public NQPBlockBodyNode(NQPNode[] bodyNodes) {
         this.bodyNodes = bodyNodes;
     }
 
@@ -76,7 +76,7 @@ public final class NQPBlockBodyNode extends NQPExpressionNode {
 
         CompilerAsserts.compilationConstant(bodyNodes.length);
 
-        for (NQPExpressionNode statement : bodyNodes) {
+        for (NQPNode statement : bodyNodes) {
             ret = statement.executeGeneric(frame);
         }
 

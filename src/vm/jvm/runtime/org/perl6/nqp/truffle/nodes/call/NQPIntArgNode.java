@@ -44,15 +44,15 @@ import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
 @NodeInfo(shortName = "int arg")
-public final class NQPIntArgNode extends NQPExpressionNode {
-    @Child private NQPExpressionNode valueNode;
+public final class NQPIntArgNode extends NQPNode {
+    @Child private NQPNode valueNode;
 
-    public NQPIntArgNode(NQPExpressionNode valueNode) {
+    public NQPIntArgNode(NQPNode valueNode) {
         this.valueNode = valueNode;
     }
 

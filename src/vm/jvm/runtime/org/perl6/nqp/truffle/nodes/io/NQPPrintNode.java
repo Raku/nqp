@@ -3,13 +3,13 @@ package org.perl6.nqp.truffle.nodes.io;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.NodeChild;
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 @NodeChildren({@NodeChild("arg")})
-public class NQPPrintNode extends NQPExpressionNode {
-    @Child private NQPExpressionNode arg;
+public class NQPPrintNode extends NQPNode {
+    @Child private NQPNode arg;
 
-    public NQPPrintNode(NQPExpressionNode arg) {
+    public NQPPrintNode(NQPNode arg) {
       this.arg = arg;
     }
 

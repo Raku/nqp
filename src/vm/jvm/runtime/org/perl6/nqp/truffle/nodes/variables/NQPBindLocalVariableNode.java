@@ -47,14 +47,14 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import org.perl6.nqp.truffle.nodes.NQPExpressionNode;
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 @NodeField(name = "slot", type = FrameSlot.class)
-public class NQPBindLocalVariableNode extends NQPExpressionNode {
+public class NQPBindLocalVariableNode extends NQPNode {
     final private FrameSlot slot;
-    @Child private NQPExpressionNode valueNode;
+    @Child private NQPNode valueNode;
 
-    public NQPBindLocalVariableNode(FrameSlot slot, NQPExpressionNode valueNode) {
+    public NQPBindLocalVariableNode(FrameSlot slot, NQPNode valueNode) {
         this.slot = slot;
         this.valueNode = valueNode;
     }
