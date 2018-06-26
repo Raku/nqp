@@ -136,23 +136,25 @@ class QAST::OperationsTruffle {
         $comp.as_truffle(@children[0], :want($want));
     });
 
-    add_op('if', sub ($comp, $node, :$want) {
-        my int $operands := +$node.list;
+    for <if unless> -> $op_name {
+        add_op($op_name, sub ($comp, $node, :$want) {
+            my int $operands := +$node.list;
 
-        nqp::die("Operation 'if' needs either 2 or 3 operands")
-            if $operands < 2 || $operands > 3;
+            nqp::die("Operation 'if' needs either 2 or 3 operands")
+                if $operands < 2 || $operands > 3;
 
-        my int $result_type := $want == $T_VOID ?? $T_VOID !! $T_OBJ;
+            my int $result_type := $want == $T_VOID ?? $T_VOID !! $T_OBJ;
 
-        my $cond := $comp.as_truffle($node[0], :want($T_OBJ));
-        my $then := $comp.as_truffle($node[1], :want($result_type));
+            my $cond := $comp.as_truffle($node[0], :want($T_OBJ));
+            my $then := $comp.as_truffle($node[1], :want($result_type));
 
-        my @tree := ['if', $cond.tree, $then.tree];
+            my @tree := [$op_name, $cond.tree, $then.tree];
 
-        nqp::push(@tree, $comp.as_truffle($node[2], :want($result_type)).tree) if $operands == 3;
+            nqp::push(@tree, $comp.as_truffle($node[2], :want($result_type)).tree) if $operands == 3;
 
-        return TAST.new($result_type, @tree);
-    });
+            return TAST.new($result_type, @tree);
+        });
+    }
 
     method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;

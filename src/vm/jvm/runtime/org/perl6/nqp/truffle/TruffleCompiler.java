@@ -91,8 +91,10 @@ public class TruffleCompiler {
                 return new NQPBoxNQPInt(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "box-nqp-str":
                 return new NQPBoxNQPStr(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "unless":
             case "if":
                 return new NQPIfNode(
+                    node.at_pos_boxed(tc, 0).get_str(tc) == "unless",
                     build(node.at_pos_boxed(tc, 1), scope, tc),
                     build(node.at_pos_boxed(tc, 2), scope, tc),
                     node.elems(tc) == 4 ? build(node.at_pos_boxed(tc, 3), scope, tc) : null);

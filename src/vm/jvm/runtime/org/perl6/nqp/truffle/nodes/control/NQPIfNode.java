@@ -47,11 +47,13 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 
 @NodeInfo(shortName = "if")
 public final class NQPIfNode extends NQPNode {
+    final private boolean isUnless;
     @Child private NQPNode condNode;
     @Child private NQPNode thenNode;
     @Child private NQPNode elseNode;
 
-    public NQPIfNode(NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
+    public NQPIfNode(boolean isUnless, NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
+        this.isUnless = isUnless;
         this.condNode = condNode;
         this.thenNode = thenNode;
         this.elseNode = elseNode;
@@ -60,7 +62,8 @@ public final class NQPIfNode extends NQPNode {
     @Override
     public Object execute(VirtualFrame frame) {
         Object cond = condNode.execute(frame);
-        if (toBoolean(cond)) {
+        boolean check = toBoolean(cond);
+        if (this.isUnless ? !check : check) {
             return thenNode.execute(frame);
         } else {
             if (elseNode != null) {
