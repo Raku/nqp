@@ -44,6 +44,8 @@ class TAST {
           ~$thing;
       } elsif nqp::isstr($thing) {
           $unquoted ?? $thing !! '"' ~ nqp::escape($thing) ~ '"';
+      } else {
+          nqp::die("Can't dump: $thing.HOW.name($thing)");
       }
     }
 
