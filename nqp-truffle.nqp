@@ -211,6 +211,15 @@ class QAST::TruffleCompiler {
                 }
             }
 
+            if $desired == $T_OBJ {
+                if $got == $T_INT {
+                    return TAST.new($T_OBJ, ['box-nqp-int', $tast.tree]);
+                }
+                if $got == $T_STR {
+                    return TAST.new($T_OBJ, ['box-nqp-str', $tast.tree]);
+                }
+            }
+
             # TODO - Perl 6 proper does it differently than nqp
             if $got == $T_OBJ {
                 if $desired == $T_STR {
