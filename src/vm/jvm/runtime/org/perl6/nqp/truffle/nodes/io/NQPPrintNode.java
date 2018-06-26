@@ -14,7 +14,7 @@ public class NQPPrintNode extends NQPNode {
     }
 
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         String value = this.arg.executeString(frame);
         System.out.print(value);
         return value;

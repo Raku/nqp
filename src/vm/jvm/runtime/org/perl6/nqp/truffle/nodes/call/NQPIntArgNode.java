@@ -57,7 +57,7 @@ public final class NQPIntArgNode extends NQPNode {
     }
 
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         return valueNode.executeInteger(frame);
     }
 }

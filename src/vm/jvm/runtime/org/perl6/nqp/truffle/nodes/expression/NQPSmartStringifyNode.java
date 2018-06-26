@@ -58,7 +58,7 @@ public final class NQPSmartStringifyNode extends NQPNode {
 
     @Override
     public String executeString(VirtualFrame frame) {
-        Object value = valueNode.executeGeneric(frame);
+        Object value = valueNode.execute(frame);
         if (value instanceof String) {
             return (String) value;
         } else if (value instanceof Long) {

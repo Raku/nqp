@@ -61,7 +61,7 @@ public final class NQPStmts extends NQPNode {
 
     @Override
     @ExplodeLoop
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         /*
          * This assertion illustrates that the array length is really a constant during compilation.
          */
@@ -71,7 +71,7 @@ public final class NQPStmts extends NQPNode {
         CompilerAsserts.compilationConstant(bodyNodes.length);
 
         for (NQPNode statement : bodyNodes) {
-            ret = statement.executeGeneric(frame);
+            ret = statement.execute(frame);
         }
 
         return ret;

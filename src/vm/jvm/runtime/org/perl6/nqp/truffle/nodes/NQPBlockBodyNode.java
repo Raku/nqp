@@ -71,13 +71,13 @@ public final class NQPBlockBodyNode extends NQPNode {
 
     @Override
     @ExplodeLoop
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         Object ret = null;
 
         CompilerAsserts.compilationConstant(bodyNodes.length);
 
         for (NQPNode statement : bodyNodes) {
-            ret = statement.executeGeneric(frame);
+            ret = statement.execute(frame);
         }
 
         return ret;

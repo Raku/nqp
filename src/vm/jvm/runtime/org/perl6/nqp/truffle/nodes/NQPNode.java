@@ -47,7 +47,7 @@ import org.perl6.nqp.truffle.MalformedAstException;
 
 @TypeSystemReference(NQPTypes.class)
 public abstract class NQPNode extends NQPBaseNode {
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces an object");
     }
     public String executeString(VirtualFrame frame) {

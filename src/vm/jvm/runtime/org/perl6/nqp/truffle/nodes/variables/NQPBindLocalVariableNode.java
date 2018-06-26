@@ -60,8 +60,8 @@ public class NQPBindLocalVariableNode extends NQPNode {
     }
 
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
-        Object value = valueNode.executeGeneric(frame);
+    public Object execute(VirtualFrame frame) {
+        Object value = valueNode.execute(frame);
         frame.setObject(slot, value);
         return value;
     }

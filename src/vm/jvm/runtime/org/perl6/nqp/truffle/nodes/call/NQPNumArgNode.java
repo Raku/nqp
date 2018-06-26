@@ -57,7 +57,7 @@ public final class NQPNumArgNode extends NQPNode {
     }
 
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         return valueNode.executeNumber(frame);
     }
 }

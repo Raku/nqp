@@ -66,8 +66,8 @@ public final class NQPInvokeNode extends NQPNode {
 
     @ExplodeLoop
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
-        Object function = functionNode.executeGeneric(frame);
+    public Object execute(VirtualFrame frame) {
+        Object function = functionNode.execute(frame);
 
         /*
          * The number of arguments is constant for one invoke node. During compilation, the loop is
@@ -79,7 +79,7 @@ public final class NQPInvokeNode extends NQPNode {
 
         Object[] argumentValues = new Object[argumentNodes.length];
         for (int i = 0; i < argumentNodes.length; i++) {
-            argumentValues[i] = argumentNodes[i].executeGeneric(frame);
+            argumentValues[i] = argumentNodes[i].execute(frame);
         }
         return dispatchNode.executeDispatch(function, argumentValues);
     }

@@ -59,7 +59,7 @@ public class NQPReadLocalVariableNode extends NQPNode {
         this.slot = slot;
     }
 
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         return FrameUtil.getObjectSafe(frame, slot);
     }
 }

@@ -14,7 +14,7 @@ public class NQPSayNode extends NQPNode {
     }
 
     @Override
-    public Object executeGeneric(VirtualFrame frame) {
+    public Object execute(VirtualFrame frame) {
         String value = this.arg.executeString(frame);
         System.out.println(value);
         return value;
