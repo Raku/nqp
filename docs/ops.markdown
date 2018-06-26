@@ -186,6 +186,8 @@
   * [seekfh](#seekfh)
   * [tellfh](#tellfh)
   * [writefh](#writefh)
+- [External command Opcodes](#extern)
+  * [execname](#execname)
 - [File / Directory / Network Opcodes](#-file--directory--network-opcodes)
   * [chdir](#chdir)
   * [chmod](#chmod)
@@ -1667,6 +1669,17 @@ Return current access position for an open filehandle.
 * `writefh(Handle $fh, Mu $str)`
 
 Output the given object to the filehandle. Returns the number of bytes written.
+
+# <a id="extern"></a> External command Opcodes
+## execname
+* `execname()`
+
+It's used to implement `$*EXECUTABLE` in Perl 6, and is the name of the
+current "executable". So if you run `./perl6-m ....` then it'll be the
+`./perl6-m`. It's actually set at present by passing a `--execname=` argument
+to MoarVM, since `perl6` is actually a shell script. But when we do get to
+providing a fake executable for `perl6` instead, then it'd just initialize it
+to `argv[0]`.
 
 # <a id="filedirnet"></a> File / Directory / Network Opcodes
 
