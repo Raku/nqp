@@ -19,6 +19,7 @@ import org.perl6.nqp.truffle.nodes.expression.NQPNValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPSmartStringifyNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPInt;
 import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPStr;
+import org.perl6.nqp.truffle.nodes.expression.NQPNullNode;
 
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
@@ -67,6 +68,7 @@ public class TruffleCompiler {
                 return new NQPSayNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "print":
                 return new NQPPrintNode(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "null": return new NQPNullNode();
             case "stmts": {
                 NQPNode children[] = expressions(node, scope, tc);
                 return new NQPStmts(children);
