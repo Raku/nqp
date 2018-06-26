@@ -316,6 +316,9 @@ j-bootstrap-files: $(J_STAGE2_OUTPUT)
 j-test: j-all
 	$(PROVE) -r --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
+t-test: j-all
+	$(PERL) src/vm/jvm/bin/run_tests.pl
+
 j-test-loud: j-all
 	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) t/nqp t/hll t/qregex t/p5regex t/qast t/serialization t/jvm t/nativecall
 
