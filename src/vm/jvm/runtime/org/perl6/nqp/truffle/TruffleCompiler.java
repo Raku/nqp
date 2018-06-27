@@ -13,6 +13,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
 
+import org.perl6.nqp.truffle.nodes.expression.NQPConcatNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPIValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPNValNode;
@@ -68,6 +69,10 @@ public class TruffleCompiler {
                 return new NQPSayNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "print":
                 return new NQPPrintNode(build(node.at_pos_boxed(tc, 1), scope, tc));
+            case "concat":
+                return new NQPConcatNode(
+                    build(node.at_pos_boxed(tc, 1), scope, tc),
+                    build(node.at_pos_boxed(tc, 2), scope, tc));
             case "null": return new NQPNullNode();
             case "stmts": {
                 NQPNode children[] = expressions(node, scope, tc);
