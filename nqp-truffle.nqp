@@ -389,12 +389,23 @@ class QAST::TruffleCompiler {
 
 
 my $mini_setting := '
+sub print($arg) {
+    nqp::print($arg);
+}
 sub say($arg) {
     nqp::say($arg);
 }
 
-sub print($arg) {
-    nqp::print($arg);
+sub plan($quantity) {
+    nqp::say("1..$quantity");
+}
+
+sub ok($condition) {
+    if $condition {
+        nqp::say("ok");
+    } else {
+        nqp::say("not ok");
+    }
 }
 ';
 
