@@ -91,5 +91,5 @@ sub add_simple_op($name, $return_type, $args) {
 }
 
 
-add_simple_op('concat', $T_STR, [$T_STR, $T_STR]);
+add_simple_op('CoerceIntToStr', $T_STR, [$T_INT]);
 

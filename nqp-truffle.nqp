@@ -250,6 +250,12 @@ class QAST::TruffleCompiler {
                 }
             }
 
+            if $desired == $T_STR {
+                if $got == $T_INT {
+                    return TAST.new($T_OBJ, ['coerce-int-to-num', $tast.tree]);
+                }
+            }
+
             # TODO - Perl 6 proper does it differently than nqp
             if $got == $T_OBJ {
                 if $desired == $T_STR {
