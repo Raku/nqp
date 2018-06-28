@@ -159,7 +159,7 @@ class QAST::Node {
         nqp::push(@anns, self.dump_flags);
         if nqp::ishash(%!annotations) {
             for sorted_keys(%!annotations) -> $k {
-                my $v := %!annotations{$_};
+                my $v := %!annotations{$k};
                 try {
                     if nqp::isconcrete($v) {
                         if $k eq 'IN_DECL' || $k eq 'BY' || $k eq 'statement_id' {
