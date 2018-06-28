@@ -28,13 +28,6 @@ public class Processor extends AbstractProcessor {
     Messager messager;
     String prefix = "NQP";
 
-    @Override
-    public void init(ProcessingEnvironment env) {
-        super.init(env);
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "doing some init...");
-        System.out.println("here");
-    }
-
     private String opNameFromClassName(String className) {
         return className.replaceFirst("^" + Pattern.quote(prefix), "")
           .replaceFirst("Node$", "")
@@ -51,7 +44,6 @@ public class Processor extends AbstractProcessor {
             ExecutableElement constructor = (ExecutableElement) element;
             TypeElement type = (TypeElement) element.getEnclosingElement();
 
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "enclosing type: " + type.getSimpleName());
 
 
             String opName = opNameFromClassName(type.getSimpleName().toString());
@@ -62,7 +54,6 @@ public class Processor extends AbstractProcessor {
 
             for (VariableElement param : constructor. getParameters()) {
                 TypeMirror paramType = param.asType();
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "param name: " + paramType.toString());
 
                 if (i != 0) {
                     writer.append(",");
@@ -116,8 +107,6 @@ public class Processor extends AbstractProcessor {
             String generatedClassSimple = type.getSimpleName().toString() + "Gen";
 
             String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "we have builder " + generatedClassQualified);
 
             try {
                 JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(generatedClassQualified);
