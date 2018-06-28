@@ -39,13 +39,14 @@ import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPGetPositionalNode;
 import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.dsl.AstBuilder;
 
-public class TruffleCompiler {
-    public static void run(SixModelObject node, ThreadContext tc) {
-        TruffleCompiler compiler = new TruffleCompiler();
+@AstBuilder(nodeClass = NQPNode.class)
 
+abstract class TruffleCompiler {
+    public void run(SixModelObject node, ThreadContext tc) {
         FrameDescriptor frameDescriptor = new FrameDescriptor();
-        RootNode rootNode = new NQPRootNode(null, frameDescriptor, compiler.build(node, new NQPScopeWithFrame(frameDescriptor), tc));
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, build(node, new NQPScopeWithFrame(frameDescriptor), tc));
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
@@ -65,17 +66,13 @@ public class TruffleCompiler {
         return children;
     }
 
+    abstract protected NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc);
+
     public NQPNode build(SixModelObject node, NQPScope scope, ThreadContext tc) {
+        NQPNode trySimple = buildSimple(node, scope, tc);
+        if (trySimple != null) return trySimple;
+
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            case "say":
-                return new NQPSayNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "print":
-                return new NQPPrintNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "concat":
-                return new NQPConcatNode(
-                    build(node.at_pos_boxed(tc, 1), scope, tc),
-                    build(node.at_pos_boxed(tc, 2), scope, tc));
-            case "null": return new NQPNullNode();
             case "stmts": {
                 NQPNode children[] = expressions(node, scope, tc);
                 return new NQPStmts(children);
@@ -135,10 +132,6 @@ public class TruffleCompiler {
                     new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
                 ));
             }
-            case "lc":
-                return new NQPLcNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "uc":
-                return new NQPUcNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             default:
                 throw new IllegalArgumentException("Wrong node type: " + node.at_pos_boxed(tc, 0).get_str(tc));
         }

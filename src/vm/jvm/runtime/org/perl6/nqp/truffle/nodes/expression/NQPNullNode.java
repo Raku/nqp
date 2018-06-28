@@ -44,10 +44,14 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.runtime.NQPNull;
+import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "null")
 public final class NQPNullNode extends NQPNode {
     public Object execute(VirtualFrame frame) {
         return NQPNull.SINGLETON;
     }
+
+    @Deserializer
+    public NQPNullNode() {}
 }

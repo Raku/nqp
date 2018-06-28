@@ -21,6 +21,7 @@ sub add_simple_op($name, $return_type, $args) {
     $out := $out ~ 'import com.oracle.truffle.api.frame.VirtualFrame;' ~ "\n";
     $out := $out ~ 'import com.oracle.truffle.api.nodes.NodeInfo;' ~ "\n";
     $out := $out ~ 'import org.perl6.nqp.truffle.nodes.NQPNode;' ~ "\n";
+    $out := $out ~ 'import org.perl6.nqp.dsl.Deserializer;' ~ "\n";
     $out := $out ~ '' ~ "\n";
 
     $out := $out ~ "@NodeInfo(shortName = \"$name\")" ~ "\n"; 
@@ -51,6 +52,9 @@ sub add_simple_op($name, $return_type, $args) {
     for @children -> $child {
         @sig.push("NQPNode $child");
     }
+
+    $out := $out ~ "\n";
+    $out := $out ~ "@Deserializer\n";
 
     $out := $out ~ "    public $jvm_name({nqp::join(', ', @sig)}) \{" ~ "\n";
     for @children -> $child {

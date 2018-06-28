@@ -5,11 +5,13 @@ import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 import com.oracle.truffle.api.dsl.NodeChildren;
 import com.oracle.truffle.api.dsl.NodeChild;
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.dsl.Deserializer;
 
 @NodeChildren({@NodeChild("arg")})
 public class NQPPrintNode extends NQPNode {
     @Child private NQPNode arg;
 
+    @Deserializer
     public NQPPrintNode(NQPNode arg) {
       this.arg = arg;
     }

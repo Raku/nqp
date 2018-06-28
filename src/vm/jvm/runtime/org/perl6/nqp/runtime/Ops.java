@@ -75,7 +75,7 @@ import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTCompiler;
-import org.perl6.nqp.truffle.TruffleCompiler;
+import org.perl6.nqp.truffle.TruffleCompilerGen;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
@@ -7149,7 +7149,7 @@ public final class Ops {
     }
 
     public static SixModelObject runtruffle(SixModelObject node, ThreadContext tc) {
-        TruffleCompiler.run(node, tc);
+        (new TruffleCompilerGen()).run(node, tc);
         return null;
     }
 

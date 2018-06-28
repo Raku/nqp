@@ -53,4 +53,5 @@ nqp-runtime.jar
 MoarVM
 MANIFEST
 /bin
+/bin-dsl
 /nqp.bat

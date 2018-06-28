@@ -19,7 +19,12 @@ RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/tools/*.java \
 
+DSL_JAVAS = src/vm/jvm/dsl/org/perl6/nqp/dsl/*.java
+
+DSL_JAR = dsl-processor.jar
 RUNTIME_JAR = nqp-runtime.jar
+
+
 
 ASM = @asm@
 ASMTREE = @asmtree@
@@ -125,9 +130,14 @@ j-install: j-all
 	$(CHMOD) 0755 $(DESTDIR)$(BIN_DIR)/eval-client.pl
 	$(PERL) tools/build/install-jvm-runner.pl "$(DESTDIR)" $(PREFIX)
 
-$(RUNTIME_JAR): $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
+$(DSL_JAR): $(DSL_JAVAS)
+	$(PERL) -MExtUtils::Command -e mkpath bin-dsl
+	$(JAVAC) -d bin-dsl $(DSL_JAVAS)
+	$(JAR) cf $(DSL_JAR) -C src/vm/jvm/dsl/ META-INF -C bin-dsl .
+
+$(RUNTIME_JAR): $(DSL_JAR) $(RUNTIME_JAVAS) tools/build/gen-jvm-properties.pl
 	$(PERL) -MExtUtils::Command -e mkpath bin
-	$(JAVAC) -source 1.8 -cp $(THIRDPARTY_JARS) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
+	$(JAVAC) -source 1.8 -cp $(THIRDPARTY_JARS):$(DSL_JAR) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
 	$(PERL) tools/build/gen-jvm-properties.pl . $(THIRDPARTY_JARS) > jvmconfig.properties
 	$(PERL) tools/build/gen-jvm-properties.pl @prefix@ $(THIRDPARTY_JARS) > bin/jvmconfig.properties
 	$(JAR) cf0 nqp-runtime.jar -C bin/ .
