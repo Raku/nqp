@@ -54,7 +54,7 @@ sub add_simple_op($name, $return_type, $args) {
     }
 
     $out := $out ~ "\n";
-    $out := $out ~ "@Deserializer\n";
+    $out := $out ~ "    @Deserializer\n";
 
     $out := $out ~ "    public $jvm_name({nqp::join(', ', @sig)}) \{" ~ "\n";
     for @children -> $child {
@@ -77,37 +77,6 @@ sub add_simple_op($name, $return_type, $args) {
 
     $out := $out ~ "\}" ~ "\n";
 
-    
-    my $build := "import org.perl6.nqp.truffle.nodes.$package.$jvm_name;\n";
-
-    $build := $build ~ "case \"$name\":\n";
-    $build := $build ~ "    return new $jvm_name(";
-
-    my @build_args;
-
-
-    if @children > 1 {
-        $build := $build ~ "\n";
-    }
-
-    my $child_index := 1;
-    for @children {
-        @build_args.push((@children > 1 ?? '        ' !! '') ~ "build(node.at_pos_boxed(tc, $child_index), scope, tc)");
-        $child_index := $child_index + 1;
-    }
-
-    $build := $build ~ nqp::join(",\n", @build_args);
-#    if nqp::elems(@build_args) == 1 {
-#    }
-#    else {
-#        $build := $build ~ @build_args[0]
-#        for @build_args -> $build_arg {
-#            $build := $build ~ '    ' ~ $build_arg;
-#        }
-#    }
-            
-    $build := $build ~ ");\n";
-    
     my $path := "src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/$package/$jvm_name.java";
     if (nqp::stat($path, nqp::const::STAT_EXISTS) == 1) {
         say("Did NOT OVERWRITE $path");
@@ -115,9 +84,6 @@ sub add_simple_op($name, $return_type, $args) {
         say("Wrote $path");
         spurt($path, $out);
     }
-
-    say("Put in TruffleCompiler:");
-    print($build);
 }
 
 
