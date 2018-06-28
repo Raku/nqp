@@ -6,14 +6,14 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "lc")
 public final class NQPLcNode extends NQPNode {
-    @Child private NQPNode aNode;
+    @Child private NQPNode argNode;
 
     @Deserializer
     public NQPLcNode(NQPNode aNode) {
-        this.aNode = aNode;
+        this.argNode = argNode;
     }
 
     public String executeString(VirtualFrame frame) {
-        return aNode.executeString(frame).toLowerCase();
+        return argNode.executeString(frame).toLowerCase();
     }
 }

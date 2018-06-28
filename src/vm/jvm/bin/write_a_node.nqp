@@ -32,7 +32,10 @@ sub add_simple_op($name, $return_type, $args) {
     my @children;
 
 
-    if nqp::elems($args) == 2 {
+    if nqp::elems($args) == 1 {
+        @children := ['argNode'];
+    }
+    elsif nqp::elems($args) == 2 {
         @children := ['leftNode', 'rightNode'];
     }
     else {
