@@ -21,6 +21,7 @@ import org.perl6.nqp.truffle.nodes.expression.NQPSmartStringifyNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPInt;
 import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPStr;
 import org.perl6.nqp.truffle.nodes.expression.NQPNullNode;
+import org.perl6.nqp.truffle.nodes.expression.NQPLcNode;
 
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
@@ -133,6 +134,8 @@ public class TruffleCompiler {
                     new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
                 ));
             }
+            case "lc":
+                return new NQPLcNode(build(node.at_pos_boxed(tc, 1), scope, tc));
             default:
                 throw new IllegalArgumentException("Wrong node type: " + node.at_pos_boxed(tc, 0).get_str(tc));
         }
