@@ -83,18 +83,6 @@ abstract class TruffleCompiler {
                 return new NQPNValNode(node.at_pos_boxed(tc, 1).get_num(tc));
             case "sval":
                 return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
-            case "smart-stringify":
-                return new NQPSmartStringifyNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "int-arg":
-                return new NQPIntArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "num-arg":
-                return new NQPNumArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "str-arg":
-                return new NQPStrArgNode(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "box-nqp-int":
-                return new NQPBoxNQPInt(build(node.at_pos_boxed(tc, 1), scope, tc));
-            case "box-nqp-str":
-                return new NQPBoxNQPStr(build(node.at_pos_boxed(tc, 1), scope, tc));
             case "unless":
             case "if":
                 return new NQPIfNode(

@@ -44,9 +44,11 @@ public class Processor extends AbstractProcessor {
             ExecutableElement constructor = (ExecutableElement) element;
             TypeElement type = (TypeElement) element.getEnclosingElement();
 
+            String gotOpName = ((Deserializer)element.getAnnotation(Deserializer.class)).value();
 
-
-            String opName = opNameFromClassName(type.getSimpleName().toString());
+            String opName = gotOpName.equals("")
+              ? opNameFromClassName(type.getSimpleName().toString())
+              : gotOpName;
 
             writer.append("           case \"" + opName + "\": return new " + type.getQualifiedName() + "(");
 

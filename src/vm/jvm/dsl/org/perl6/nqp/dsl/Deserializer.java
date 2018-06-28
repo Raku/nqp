@@ -8,4 +8,5 @@ import java.lang.annotation.RetentionPolicy;
 @Target(ElementType.CONSTRUCTOR)
 @Retention(RetentionPolicy.CLASS)
 public @interface Deserializer {
+    String value() default "";
 }

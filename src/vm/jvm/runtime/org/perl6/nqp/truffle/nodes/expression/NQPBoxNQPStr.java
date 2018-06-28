@@ -53,7 +53,7 @@ import org.perl6.nqp.dsl.Deserializer;
 public final class NQPBoxNQPStr extends NQPNode {
     @Child private NQPNode valueNode;
 
-    @Deserializer
+    @Deserializer("box-nqp-str")
     public NQPBoxNQPStr(NQPNode valueNode) {
         this.valueNode = valueNode;
     }
