@@ -80,7 +80,7 @@ sub add_simple_op($name, $return_type, $args) {
 
     $out := $out ~ "    @Override\n";
     $out := $out ~ "    public String execute{@types[$return_type]}(VirtualFrame frame) \{" ~ "\n";
-    $out := $out ~ "        //return $name({nqp::join(', ', @args)})" ~ "\n";
+    $out := $out ~ "        //return $name({nqp::join(', ', @args)})" ~ ";\n";
     $out := $out ~ "    \}" ~ "\n";
 
     $out := $out ~ "\}" ~ "\n";
