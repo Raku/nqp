@@ -252,7 +252,7 @@ class QAST::TruffleCompiler {
 
             if $desired == $STR {
                 if $got == $INT {
-                    return TAST.new($OBJ, ['coerce-int-to-num', $tast.tree]);
+                    return TAST.new($OBJ, ['coerce-int-to-str', $tast.tree]);
                 }
             }
 
