@@ -109,6 +109,8 @@ class QAST::OperationsTruffle {
 
     add_simple_op('lc', $T_STR, [$T_STR]);
 
+    add_simple_op('uc', $T_STR, [$T_STR]);
+
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($want));
