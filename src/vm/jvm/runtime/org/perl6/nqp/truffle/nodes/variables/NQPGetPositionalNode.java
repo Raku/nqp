@@ -58,6 +58,7 @@ public class NQPGetPositionalNode extends NQPNode {
         this.index = index;
     }
 
+    @Override
     public Object execute(VirtualFrame frame) {
         Object[] args = frame.getArguments();
         Object value = args[index];

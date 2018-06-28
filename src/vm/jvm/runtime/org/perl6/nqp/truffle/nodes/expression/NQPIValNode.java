@@ -52,6 +52,7 @@ public final class NQPIValNode extends NQPNode {
         this.value = value;
     }
 
+    @Override
     public long executeInt(VirtualFrame frame) {
         return value;
     }

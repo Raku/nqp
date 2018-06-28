@@ -52,6 +52,7 @@ public final class NQPNValNode extends NQPNode {
         this.value = value;
     }
 
+    @Override
     public double executeNum(VirtualFrame frame) {
         return value;
     }

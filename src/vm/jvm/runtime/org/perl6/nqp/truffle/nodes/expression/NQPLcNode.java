@@ -13,6 +13,7 @@ public final class NQPLcNode extends NQPNode {
         this.argNode = argNode;
     }
 
+    @Override
     public String executeStr(VirtualFrame frame) {
         return argNode.executeStr(frame).toLowerCase();
     }

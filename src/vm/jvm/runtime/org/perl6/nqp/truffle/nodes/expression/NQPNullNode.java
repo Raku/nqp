@@ -48,6 +48,7 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "null")
 public final class NQPNullNode extends NQPNode {
+    @Override
     public Object execute(VirtualFrame frame) {
         return NQPNull.SINGLETON;
     }
