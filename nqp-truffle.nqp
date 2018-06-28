@@ -1,10 +1,10 @@
-my $T_OBJ  := 0;
-my $T_INT  := 1;
-my $T_NUM  := 2;
-my $T_STR  := 3;
-my $T_VOID := -1; # Value of this type shouldn't exist
-my $T_CALL_ARG := 5; # Something that will be passed to a sub/method call
-my $T_RETVAL := 8; # Something that will be returned from a sub/method call
+my $OBJ  := 0;
+my $INT  := 1;
+my $NUM  := 2;
+my $STR  := 3;
+my $VOID := -1; # Value of this type shouldn't exist
+my $CALL_ARG := 5; # Something that will be passed to a sub/method call
+my $RETVAL := 8; # Something that will be returned from a sub/method call
 
 
 class TAST {
@@ -100,16 +100,16 @@ class QAST::OperationsTruffle {
         }, :$inlinable, :$hll);
     }
 
-    add_simple_op('say', $T_STR, [$T_STR], :side_effects);
-    add_simple_op('print', $T_STR, [$T_STR], :side_effects);
+    add_simple_op('say', $STR, [$STR], :side_effects);
+    add_simple_op('print', $STR, [$STR], :side_effects);
 
-    add_simple_op('null', $T_OBJ, []);
+    add_simple_op('null', $OBJ, []);
 
-    add_simple_op('concat', $T_STR, [$T_STR, $T_STR]);
+    add_simple_op('concat', $STR, [$STR, $STR]);
 
-    add_simple_op('lc', $T_STR, [$T_STR]);
+    add_simple_op('lc', $STR, [$STR]);
 
-    add_simple_op('uc', $T_STR, [$T_STR]);
+    add_simple_op('uc', $STR, [$STR]);
 
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
@@ -124,9 +124,9 @@ class QAST::OperationsTruffle {
             nqp::push($ret, ['get-lexical', $node.name]);
         }
         for $node.list -> $child {
-            nqp::push($ret, $comp.as_truffle($child, :want($T_CALL_ARG)).tree);
+            nqp::push($ret, $comp.as_truffle($child, :want($CALL_ARG)).tree);
         }
-        TAST.new($T_VOID, $ret);
+        TAST.new($VOID, $ret);
     });
 
     add_op('bind', sub ($comp, $node, :$want) {
@@ -149,9 +149,9 @@ class QAST::OperationsTruffle {
             nqp::die("Operation 'if' needs either 2 or 3 operands")
                 if $operands < 2 || $operands > 3;
 
-            my int $result_type := $want == $T_VOID ?? $T_VOID !! $T_OBJ;
+            my int $result_type := $want == $VOID ?? $VOID !! $OBJ;
 
-            my $cond := $comp.as_truffle($node[0], :want($T_OBJ));
+            my $cond := $comp.as_truffle($node[0], :want($OBJ));
             my $then := $comp.as_truffle($node[1], :want($result_type));
 
             my @tree := [$op_name, $cond.tree, $then.tree];
@@ -202,10 +202,10 @@ class QAST::TruffleCompiler {
     }
 
     method compile(QAST::CompUnit $cu) {
-        self.as_truffle($cu, :want($T_VOID));
+        self.as_truffle($cu, :want($VOID));
     }
 
-    my %want_char := nqp::hash($T_INT, 'I', $T_NUM, 'N', $T_STR, 'S', $T_VOID, 'v');
+    my %want_char := nqp::hash($INT, 'I', $NUM, 'N', $STR, 'S', $VOID, 'v');
     sub want($node, $type) {
         my @possibles := nqp::clone($node.list);
         my $best := @possibles.shift;
@@ -222,46 +222,46 @@ class QAST::TruffleCompiler {
     method coerce(TAST $tast, $desired) {
         my int $got := $tast.type;
         if $got != $desired {
-            if $desired == $T_VOID {
-                return TAST.new($T_VOID, $tast.tree);
+            if $desired == $VOID {
+                return TAST.new($VOID, $tast.tree);
             }
 
-            if $desired == $T_CALL_ARG {
-                if $got == $T_INT {
-                    return TAST.new($T_CALL_ARG, ['int-arg', $tast.tree]);
+            if $desired == $CALL_ARG {
+                if $got == $INT {
+                    return TAST.new($CALL_ARG, ['int-arg', $tast.tree]);
                 }
-                elsif $got == $T_NUM {
-                    return TAST.new($T_CALL_ARG, ['num-arg', $tast.tree]);
+                elsif $got == $NUM {
+                    return TAST.new($CALL_ARG, ['num-arg', $tast.tree]);
                 }
-                elsif $got == $T_STR {
-                    return TAST.new($T_CALL_ARG, ['str-arg', $tast.tree]);
+                elsif $got == $STR {
+                    return TAST.new($CALL_ARG, ['str-arg', $tast.tree]);
                 }
-                elsif $got == $T_OBJ {
-                    return TAST.new($T_CALL_ARG, $tast.tree);
-                }
-            }
-
-            if $desired == $T_OBJ {
-                if $got == $T_INT {
-                    return TAST.new($T_OBJ, ['box-nqp-int', $tast.tree]);
-                }
-                if $got == $T_STR {
-                    return TAST.new($T_OBJ, ['box-nqp-str', $tast.tree]);
+                elsif $got == $OBJ {
+                    return TAST.new($CALL_ARG, $tast.tree);
                 }
             }
 
-            if $desired == $T_STR {
-                if $got == $T_INT {
-                    return TAST.new($T_OBJ, ['coerce-int-to-num', $tast.tree]);
+            if $desired == $OBJ {
+                if $got == $INT {
+                    return TAST.new($OBJ, ['box-nqp-int', $tast.tree]);
+                }
+                if $got == $STR {
+                    return TAST.new($OBJ, ['box-nqp-str', $tast.tree]);
+                }
+            }
+
+            if $desired == $STR {
+                if $got == $INT {
+                    return TAST.new($OBJ, ['coerce-int-to-num', $tast.tree]);
                 }
             }
 
             # TODO - Perl 6 proper does it differently than nqp
-            if $got == $T_OBJ {
-                if $desired == $T_STR {
-                    return TAST.new($T_CALL_ARG, ['smart-stringify', $tast.tree]);
-                } elsif $desired == $T_INT {
-                    return TAST.new($T_CALL_ARG, ['smart-intify', $tast.tree]);
+            if $got == $OBJ {
+                if $desired == $STR {
+                    return TAST.new($CALL_ARG, ['smart-stringify', $tast.tree]);
+                } elsif $desired == $INT {
+                    return TAST.new($CALL_ARG, ['smart-intify', $tast.tree]);
                 }
             }
 
@@ -293,15 +293,15 @@ class QAST::TruffleCompiler {
             $*HLL := $node.hll;
         }
 
-        TAST.new($T_VOID, ['stmts', self.as_truffle($node[0][1], :want($T_VOID)).tree, self.as_truffle($node[0][3], :want($T_VOID)).tree]);
+        TAST.new($VOID, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($VOID)).tree]);
     }
 
     multi method as_truffle(QAST::Stmts $node, :$want) {
         my $ret := ['stmts'];
         for $node.list -> $child {
-            nqp::push($ret, self.as_truffle($child, :want($T_VOID)).tree);
+            nqp::push($ret, self.as_truffle($child, :want($VOID)).tree);
         }
-        TAST.new($T_VOID, $ret);
+        TAST.new($VOID, $ret);
     }
 
     method compile_params(@params) {
@@ -324,27 +324,27 @@ class QAST::TruffleCompiler {
 
 
             for $node.list -> $child {
-                nqp::push(@ret, self.as_truffle($child, :want($T_VOID)).tree);
+                nqp::push(@ret, self.as_truffle($child, :want($VOID)).tree);
             }
 
             my @compiled_params := self.compile_params($*BLOCK.params);
 
             nqp::splice(@ret, @compiled_params, 1, 0);
 
-            TAST.new($T_OBJ, @ret);
+            TAST.new($OBJ, @ret);
         }
     }
 
     multi method as_truffle(QAST::SVal $node, :$want) {
-        TAST.new($T_STR, ['sval', $node.value]);
+        TAST.new($STR, ['sval', $node.value]);
     }
 
     multi method as_truffle(QAST::IVal $node, :$want) {
-        TAST.new($T_INT, ['ival', $node.value]);
+        TAST.new($INT, ['ival', $node.value]);
     }
 
     multi method as_truffle(QAST::NVal $node, :$want) {
-        TAST.new($T_NUM, ['nval', $node.value]);
+        TAST.new($NUM, ['nval', $node.value]);
     }
 
     # TODO native types for variables
@@ -353,22 +353,22 @@ class QAST::TruffleCompiler {
 
         if $node.scope eq 'lexical' {
             if $*BINDVAL {
-                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($T_OBJ));
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($OBJ));
                 $action := ['bind-lexical', $node.name, $value.tree];
             } else {
                 $action := ['get-lexical', $node.name];
             }
 
             if $node.decl eq '' {
-                return TAST.new($T_OBJ, $action);
+                return TAST.new($OBJ, $action);
             }
             # TODO static should do deserialization
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
-                return TAST.new($T_OBJ, ['declare-lexical', $node.name, $action]);
+                return TAST.new($OBJ, ['declare-lexical', $node.name, $action]);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);
-                return TAST.new($T_OBJ, $action);
+                return TAST.new($OBJ, $action);
             }
             else {
                 nqp::die("Unimplemented var declaration type {$node.decl}");

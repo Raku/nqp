@@ -1,13 +1,13 @@
-my $T_OBJ  := 0;
-my $T_INT  := 1;
-my $T_NUM  := 2;
-my $T_STR  := 3;
+my $OBJ  := 0;
+my $INT  := 1;
+my $NUM  := 2;
+my $STR  := 3;
 
 my @types;
-@types[$T_OBJ] := '';
-@types[$T_INT] := 'Int';
-@types[$T_NUM] := 'Num';
-@types[$T_STR] := 'Str';
+@types[$OBJ] := '';
+@types[$INT] := 'Int';
+@types[$NUM] := 'Num';
+@types[$STR] := 'Str';
 
 my sub ucfirst($str) {
     nqp::uc(nqp::substr($str, 0, 1)) ~ nqp::substr($str, 1);
@@ -91,5 +91,5 @@ sub add_simple_op($name, $return_type, $args) {
 }
 
 
-add_simple_op('CoerceIntToStr', $T_STR, [$T_INT]);
+add_simple_op('CoerceIntToStr', $STR, [$INT]);
 
