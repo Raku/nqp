@@ -60,7 +60,7 @@ public final class NQPBoxNQPInt extends NQPNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        long value = valueNode.executeInteger(frame);
+        long value = valueNode.executeInt(frame);
         return value;
     }
 }

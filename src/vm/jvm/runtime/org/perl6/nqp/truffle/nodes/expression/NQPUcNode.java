@@ -13,7 +13,7 @@ public final class NQPUcNode extends NQPNode {
         this.argNode = argNode;
     }
 
-    public String executeString(VirtualFrame frame) {
-        return argNode.executeString(frame).toUpperCase();
+    public String executeStr(VirtualFrame frame) {
+        return argNode.executeStr(frame).toUpperCase();
     }
 }

@@ -5,9 +5,9 @@ my $T_STR  := 3;
 
 my @types;
 @types[$T_OBJ] := '';
-@types[$T_INT] := 'Integer';
-@types[$T_NUM] := 'Number';
-@types[$T_STR] := 'String';
+@types[$T_INT] := 'Int';
+@types[$T_NUM] := 'Num';
+@types[$T_STR] := 'Str';
 
 my sub ucfirst($str) {
     nqp::uc(nqp::substr($str, 0, 1)) ~ nqp::substr($str, 1);
@@ -74,6 +74,7 @@ sub add_simple_op($name, $return_type, $args) {
         $i := $i + 1;
     }
 
+    $out := $out ~ "    @Override\n";
     $out := $out ~ "    public String execute{@types[$return_type]}(VirtualFrame frame) \{" ~ "\n";
     $out := $out ~ "        //return $name({nqp::join(', ', @args)})" ~ "\n";
     $out := $out ~ "    \}" ~ "\n";

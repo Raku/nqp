@@ -60,6 +60,6 @@ public final class NQPStrArgNode extends NQPNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return valueNode.executeString(frame);
+        return valueNode.executeStr(frame);
     }
 }

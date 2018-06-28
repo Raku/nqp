@@ -60,7 +60,7 @@ public final class NQPBoxNQPStr extends NQPNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        String value = valueNode.executeString(frame);
+        String value = valueNode.executeStr(frame);
         return value;
     }
 }

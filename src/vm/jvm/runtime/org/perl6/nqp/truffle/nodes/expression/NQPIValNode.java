@@ -52,7 +52,7 @@ public final class NQPIValNode extends NQPNode {
         this.value = value;
     }
 
-    public long executeInteger(VirtualFrame frame) {
+    public long executeInt(VirtualFrame frame) {
         return value;
     }
 }

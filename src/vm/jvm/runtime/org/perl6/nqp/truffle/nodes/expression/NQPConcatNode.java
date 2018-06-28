@@ -15,7 +15,7 @@ public final class NQPConcatNode extends NQPNode {
         this.rightNode = rightNode;
     }
 
-    public String executeString(VirtualFrame frame) {
-        return leftNode.executeString(frame) + rightNode.executeString(frame);
+    public String executeStr(VirtualFrame frame) {
+        return leftNode.executeStr(frame) + rightNode.executeStr(frame);
     }
 }

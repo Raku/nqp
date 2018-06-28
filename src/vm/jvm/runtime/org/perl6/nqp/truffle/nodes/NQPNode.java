@@ -50,13 +50,13 @@ public abstract class NQPNode extends NQPBaseNode {
     public Object execute(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces an object");
     }
-    public String executeString(VirtualFrame frame) {
+    public String executeStr(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces a str");
     }
-    public long executeInteger(VirtualFrame frame) {
+    public long executeInt(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces an int");
     }
-    public double executeNumber(VirtualFrame frame) {
+    public double executeNum(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces a num");
     }
 }

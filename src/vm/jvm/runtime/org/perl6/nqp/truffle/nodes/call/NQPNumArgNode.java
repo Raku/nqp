@@ -60,6 +60,6 @@ public final class NQPNumArgNode extends NQPNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return valueNode.executeNumber(frame);
+        return valueNode.executeNum(frame);
     }
 }
