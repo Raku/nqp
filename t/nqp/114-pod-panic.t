@@ -14,7 +14,8 @@ $fh.print($pod);
 close($fh);
 
 # ensure we use the correct executable
-my $cmd := nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
+my $cmd := (nqp::stat('./nqp', nqp::const::STAT_EXISTS) == 1) ?? './nqp'
+  !! nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
 my $cmdargs := $fname;
 my $args := nqp::list($cmd, $cmdargs);
 
