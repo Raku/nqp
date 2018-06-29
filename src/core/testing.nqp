@@ -114,6 +114,12 @@ sub run-command($command, :$stdout, :$stderr) {
             ++$read-all2;
         }
     };
+    $config<error> := -> $err {
+      my $ex := nqp::newexception();
+      nqp::setmessage($ex, $err);
+      nqp::setpayload($ex, nqp::null());
+      nqp::throw($ex)
+    }
 
     # define the task
     my $task := nqp::spawnprocasync($queue, $command, nqp::cwd(),
