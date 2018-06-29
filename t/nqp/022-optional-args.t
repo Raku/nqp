@@ -11,8 +11,6 @@ ok(f1(2, 2, 2), 'optional args passable');
 sub f2 ($x?, $y?) { 1 }
 ok(f2(), 'only optional args');
 
-# XXX: Maybe replace nqp::isconcrete with .defined()
-# But .defined() does not work now
 sub f3 ($x, $y?) {
   nqp::isconcrete($y)
     ?? 'optional args get passed values'
