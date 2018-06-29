@@ -23,6 +23,7 @@ import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPStr;
 import org.perl6.nqp.truffle.nodes.expression.NQPNullNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPLcNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPUcNode;
+import org.perl6.nqp.truffle.nodes.expression.NQPCharsNode;
 
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
