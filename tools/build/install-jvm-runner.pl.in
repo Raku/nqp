@@ -21,7 +21,7 @@ if ($^O eq 'MSWin32') {
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh '@java -Xss1m -Xmx1324m -Xbootclasspath/a:' . $jar_dir . '\\nqp-runtime.jar;' .
-              "$jar_dir\\@asmfile@;$jar_dir\\@jlinefile@;$lib_dir\\nqp.jar -cp $lib_dir nqp %*\n";
+              "$jar_dir\\@asmfile@;$jar_dir\\@jlinefile@;$lib_dir\\nqp.jar -Dperl6.execname=\"\$0\" -cp $lib_dir nqp %*\n";
     close $fh
         or die "Could not close $install_to: $!";
 }
@@ -37,7 +37,7 @@ else {
     print $fh "#!/bin/sh\n";
     print $fh ": \${NQP_DIR:=\"$nqp_dir\"}\n";
     print $fh ": \${NQP_JARS:=\"$jars\"}\n";
-    print $fh "exec java -Xss1m -Xmx1324m -Xbootclasspath/a:\${NQP_JARS} -cp $lib_dir nqp \"\$\@\"\n";
+    print $fh "exec java -Xss1m -Xmx1324m -Xbootclasspath/a:\${NQP_JARS} -Dperl6.execname=\"\$0\" -cp $lib_dir nqp \"\$\@\"\n";
     close $fh
         or die "Could not close $install_to: $!";
     chmod 0755, $install_to;

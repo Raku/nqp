@@ -9,10 +9,10 @@ use File::Spec;
 my ($moar) = @ARGV;
 
 if ($^O eq 'MSWin32') {
-    my $install_to = 'nqp-m.bat';    
+    my $install_to = 'nqp-m.bat';
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
-    print $fh '@ "' . $moar . '" nqp.moarvm %*' . "\n";
+    print $fh '@ "' . $moar . '" --execname="%%\~dpf0" nqp.moarvm %*' . "\n";
     close $fh
         or die "Could not close $install_to: $!";
 }
@@ -22,7 +22,7 @@ else {
         or die "Could not open $install_to: $!";
     printf $fh <<'EOS', $moar;
 #!/bin/sh
-exec %s nqp.moarvm "$@"
+exec %s --execname="$0" nqp.moarvm "$@"
 EOS
     close $fh
         or die "Could not close $install_to: $!";
