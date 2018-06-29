@@ -14,7 +14,16 @@ $fh.print($pod);
 close($fh);
 
 # ensure we use the correct executable
+#?if moar
 my $cmd := nqp::execname();
+#?endif
+#?if js
+my $cmd := nqp::execname();
+#?endif
+#?if jvm
+my $cmd := './nqp-j';
+#?endif
+
 my $cmdargs := $fname;
 my $args := nqp::list($cmd, $cmdargs);
 
