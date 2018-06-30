@@ -36,6 +36,7 @@ public class Processor extends AbstractProcessor {
           .replaceFirst("BigintNode$", "_I")
           .replaceFirst("UIntNode$", "_u")
           .replaceFirst("CodeBlock$", "_b")
+          .replaceFirst("Node$", "")
           .toLowerCase();
     }
 
