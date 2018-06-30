@@ -1,8 +1,8 @@
-#! nqp
+#!/usr/bin/env nqp
 
 # test optional arguments and parameters
 
-plan(5);
+plan(7);
 
 sub f1 ($x, $y!, $z?) { 1 }
 ok(f1(1, 2), 'optional args ignorable');
@@ -19,5 +19,7 @@ sub f3 ($x, $y?) {
 is(f3(2), 'unpassed optional args are undef', 'unpassed optional args are undef');
 is(f3(8, 3), 'optional args get passed values', 'optional args get passed values');
 
-# XXX: need to be able to test that the following is illegal
-#sub f4 ($x?, $y) { $y; }
+my $comp := nqp::getcomp('nqp');
+dies-ok({ $comp.eval('sub f4 ($x?, $y) { $y; }') },
+  'illegal optional args dies ok',
+  :message('Required positionals must come before all optional positionals'));
