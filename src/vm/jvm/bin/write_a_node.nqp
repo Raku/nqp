@@ -25,9 +25,13 @@ sub add_simple_op($name, $return_type, $args) {
     $out := $out ~ '' ~ "\n";
 
     $out := $out ~ "@NodeInfo(shortName = \"$name\")" ~ "\n"; 
-    my $jvm_name := 'NQP' ~ ucfirst(subst($name, /_(\w)/, -> $match {nqp::uc($match[0])})) ~ 'Node';
+    my $java_name := 'NQP' ~ ucfirst($name) ~ 'Node';
 
-    $out := $out ~ "public final class $jvm_name extends NQPNode \{" ~ "\n";
+    for <_i Int _n Num _s Str _I Bigint _u UInt _b CodeBlock> -> $suffix, $java_suffix {
+        $java_name := subst($java_name, /$suffix/, $java_suffix);
+    }
+
+    $out := $out ~ "public final class $java_name extends NQPNode \{" ~ "\n";
 
     my @children;
 
@@ -59,7 +63,7 @@ sub add_simple_op($name, $return_type, $args) {
     $out := $out ~ "\n";
     $out := $out ~ "    @Deserializer\n";
 
-    $out := $out ~ "    public $jvm_name({nqp::join(', ', @sig)}) \{" ~ "\n";
+    $out := $out ~ "    public $java_name({nqp::join(', ', @sig)}) \{" ~ "\n";
     for @children -> $child {
     $out := $out ~ "        this.$child = $child;" ~ "\n";
     }
@@ -81,7 +85,7 @@ sub add_simple_op($name, $return_type, $args) {
 
     $out := $out ~ "\}" ~ "\n";
 
-    my $path := "src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/$package/$jvm_name.java";
+    my $path := "src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/$package/$java_name.java";
     if (nqp::stat($path, nqp::const::STAT_EXISTS) == 1) {
         say("Did NOT OVERWRITE $path");
     } else {
@@ -91,5 +95,5 @@ sub add_simple_op($name, $return_type, $args) {
 }
 
 
-add_simple_op('CoerceIntToStr', $STR, [$INT]);
+add_simple_op('add_i', $INT, [$INT, $INT]);
 

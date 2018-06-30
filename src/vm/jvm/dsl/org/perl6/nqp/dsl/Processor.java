@@ -30,7 +30,12 @@ public class Processor extends AbstractProcessor {
 
     private String opNameFromClassName(String className) {
         return className.replaceFirst("^" + Pattern.quote(prefix), "")
-          .replaceFirst("Node$", "")
+          .replaceFirst("IntNode$", "_i")
+          .replaceFirst("NumNode$", "_n")
+          .replaceFirst("StrNode$", "_s")
+          .replaceFirst("BigintNode$", "_I")
+          .replaceFirst("UIntNode$", "_u")
+          .replaceFirst("CodeBlock$", "_b")
           .toLowerCase();
     }
 
