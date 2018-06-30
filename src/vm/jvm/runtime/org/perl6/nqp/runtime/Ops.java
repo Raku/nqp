@@ -139,7 +139,7 @@ import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 
 /**
- * Contains complex operations that are more involved that the simple ops that the
+ * Contains complex operations that are more involved than the simple ops that the
  * JVM makes available.
  */
 public final class Ops {
@@ -1200,7 +1200,7 @@ public final class Ops {
                 throw ExceptionHandling.dieInternal(tc, e);
             }
         }
-        /* run immediatly */
+        /* run immediately */
         else {
             try {
                 boolean finished = false;
@@ -3905,7 +3905,7 @@ public final class Ops {
             return result_n(tc.curFrame);
         }
 
-        // If it's a type object, empty string.
+        // If it's a type object, zero.
         if (obj instanceof TypeObject)
             return 0.0;
 
@@ -4968,7 +4968,7 @@ public final class Ops {
             : target.substring(iOffset, iOffset + 1);
         int[] derived = derivedProps.get(propName);
         if (derived != null) {
-            /* It's one of the derived properties; see of the codepoint is
+            /* It's one of the derived properties; see if the codepoint is
              * in it. */
             int cp = check.codePointAt(0);
             for (int i = 0; i < derived.length; i += 2)
@@ -6969,7 +6969,7 @@ public final class Ops {
 
     public static double div_In(SixModelObject a, SixModelObject b, ThreadContext tc) {
         BigInteger divisor = getBI(tc, b);
-	// Use IEEE 754-2008 semantics for division by zero
+        // Use IEEE 754-2008 semantics for division by zero
         return (divisor.compareTo(BigInteger.ZERO) == 0)
             ? getBI(tc, a).doubleValue() / 0
             : new BigDecimal(getBI(tc, a)).divide(new BigDecimal(divisor), 309, RoundingMode.HALF_UP).doubleValue();
@@ -7259,7 +7259,7 @@ public final class Ops {
                 } else {
                     if (run instanceof ResumeStatus) {
                         /* Got a continuation to invoke immediately (done by
-                         * Rakudo cope with lack of tail calls). */
+                         * Rakudo to cope with lack of tail calls). */
                         ResumeStatus.Frame root = ((ResumeStatus)run).top;
                         fixupContinuation(tc, root, null);
                         root.resume();
