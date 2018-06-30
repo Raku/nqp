@@ -13,17 +13,9 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
 
-import org.perl6.nqp.truffle.nodes.expression.NQPConcatNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPIValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPNValNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPSmartStringifyNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPInt;
-import org.perl6.nqp.truffle.nodes.expression.NQPBoxNQPStr;
-import org.perl6.nqp.truffle.nodes.expression.NQPNullNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPLcNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPUcNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPCharsNode;
 
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
