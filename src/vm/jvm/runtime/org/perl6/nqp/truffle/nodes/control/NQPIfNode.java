@@ -44,9 +44,11 @@ package org.perl6.nqp.truffle.nodes.control;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPNodeWithBoolification;
+
 
 @NodeInfo(shortName = "if")
-public final class NQPIfNode extends NQPNode {
+public final class NQPIfNode extends NQPNodeWithBoolification {
     final private boolean isUnless;
     @Child private NQPNode condNode;
     @Child private NQPNode thenNode;
@@ -72,10 +74,5 @@ public final class NQPIfNode extends NQPNode {
                 return cond;
             }
         }
-    }
-
-    /* TODO - proper checking */
-    protected boolean toBoolean(Object operand) {
-        return ((long) operand) != 0 ? true : false;
     }
 }
