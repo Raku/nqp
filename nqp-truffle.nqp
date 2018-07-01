@@ -124,6 +124,15 @@ class QAST::OperationsTruffle {
     add_op('numify', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($NUM));
     });
+
+    for ['_i', $INT, '_n', $NUM, '_s', $STR] -> $suffix, $type {
+        for <le lt gt ge eq ne> -> $cmp {
+            add_simple_op('is' ~ $cmp ~ $suffix, $INT, [$type, $type]);
+        }
+    }
+
+    add_simple_op('eqaddr', $INT, [$OBJ, $OBJ]);
+
     for ['_i', $INT, '', $OBJ, '_s', $STR, '_n', $NUM] -> $suffix, $type {
         my str $op_name := 'list' ~ $suffix;
         add_op($op_name, sub ($comp, $node, :$want) {
