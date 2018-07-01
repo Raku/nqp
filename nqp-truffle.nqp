@@ -118,6 +118,12 @@ class QAST::OperationsTruffle {
     add_simple_op('falsey', $INT, [$OBJ]);
     add_simple_op('istrue', $INT, [$OBJ]);
 
+    add_op('stringify', sub ($comp, $node, :$want) {
+        $comp.as_truffle($node[0], :want($STR));
+    });
+    add_op('numify', sub ($comp, $node, :$want) {
+        $comp.as_truffle($node[0], :want($NUM));
+    });
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($want));
@@ -257,9 +263,21 @@ class QAST::TruffleCompiler {
                 }
             }
 
+            if $desired == $NUM {
+                if $got == $INT {
+                    return TAST.new($NUM, ['coerce-int-to-num', $tast.tree]);
+                }
+                if $got == $STR {
+                    return TAST.new($NUM, ['coerce-str-to-num', $tast.tree]);
+                }
+            }
+
             if $desired == $STR {
                 if $got == $INT {
-                    return TAST.new($OBJ, ['coerce-int-to-str', $tast.tree]);
+                    return TAST.new($STR, ['coerce-int-to-str', $tast.tree]);
+                }
+                if $got == $NUM {
+                    return TAST.new($STR, ['coerce-num-to-str', $tast.tree]);
                 }
             }
 
