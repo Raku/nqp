@@ -27,6 +27,8 @@ import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
 
 import org.perl6.nqp.truffle.nodes.control.NQPIfNode;
 
+import org.perl6.nqp.truffle.nodes.expression.NQPListNode;
+
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPGetPositionalNode;
@@ -70,6 +72,7 @@ abstract class TruffleCompiler {
                 NQPNode children[] = expressions(node, scope, tc);
                 return new NQPStmts(children);
             }
+            case "list": return new NQPListNode(expressions(node, scope, tc));
             case "ival":
                 return new NQPIValNode(node.at_pos_boxed(tc, 1).get_int(tc));
             case "nval":

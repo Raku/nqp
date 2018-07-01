@@ -124,6 +124,21 @@ class QAST::OperationsTruffle {
     add_op('numify', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($NUM));
     });
+    for ['_i', $INT, '', $OBJ, '_s', $STR, '_n', $NUM] -> $suffix, $type {
+        my str $op_name := 'list' ~ $suffix;
+        add_op($op_name, sub ($comp, $node, :$want) {
+
+           my @tree := [$op_name];
+
+           for $node.list -> $elem {
+               my $tast := $comp.as_truffle($elem, :want($type));
+               @tree.push($tast.tree);
+           }
+
+           TAST.new($OBJ, @tree);
+        });
+    }
+
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($want));
