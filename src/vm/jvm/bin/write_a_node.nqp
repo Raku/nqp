@@ -9,6 +9,12 @@ my @types;
 @types[$NUM] := 'Num';
 @types[$STR] := 'Str';
 
+my @return_type;
+@return_type[$OBJ] := 'Object';
+@return_type[$INT] := 'long';
+@return_type[$NUM] := 'double';
+@return_type[$STR] := 'String';
+
 my sub ucfirst($str) {
     nqp::uc(nqp::substr($str, 0, 1)) ~ nqp::substr($str, 1);
 }
@@ -79,7 +85,7 @@ sub add_simple_op($name, $return_type, $args) {
     }
 
     $out := $out ~ "    @Override\n";
-    $out := $out ~ "    public String execute{@types[$return_type]}(VirtualFrame frame) \{" ~ "\n";
+    $out := $out ~ "    public {@return_type[$return_type]} execute{@types[$return_type]}(VirtualFrame frame) \{" ~ "\n";
     $out := $out ~ "        //return $name({nqp::join(', ', @args)})" ~ ";\n";
     $out := $out ~ "    \}" ~ "\n";
 
@@ -95,5 +101,6 @@ sub add_simple_op($name, $return_type, $args) {
 }
 
 
-add_simple_op('add_i', $INT, [$INT, $INT]);
+add_simple_op('falsey', $INT, [$OBJ]);
+add_simple_op('istrue', $INT, [$OBJ]);
 
