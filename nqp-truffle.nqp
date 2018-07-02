@@ -179,6 +179,23 @@ class QAST::OperationsTruffle {
         add_simple_op($math-op ~ '_i', $INT, [$INT, $INT]);
     }
 
+    for <postinc postdec> -> $op {
+        add_op($op, sub ($comp, $node, :$want) {
+            my $old_value := $comp.as_truffle($node[0], :want($INT));
+            my str $action := $op eq 'postinc' ?? 'add_i' !! 'sub_i';
+            my $do_action := $comp.as_truffle(
+                QAST::Op.new(
+                    :op('bind'),
+                    $node[0],
+                    QAST::Op.new(:op($action),$node[0],QAST::IVal.new(:value(1)))
+                ),
+                :want($VOID)
+            );
+
+            TAST.new($INT, ['old-int-value', $old_value.tree, $do_action.tree]);
+       });
+    }
+
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($want));
