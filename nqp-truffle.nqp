@@ -326,9 +326,9 @@ class QAST::TruffleCompiler {
             # TODO - Perl 6 proper does it differently than nqp
             if $got == $OBJ {
                 if $desired == $STR {
-                    return TAST.new($CALL_ARG, ['smart-stringify', $tast.tree]);
+                    return TAST.new($OBJ, ['smart-stringify', $tast.tree]);
                 } elsif $desired == $INT {
-                    return TAST.new($CALL_ARG, ['smart-intify', $tast.tree]);
+                    return TAST.new($OBJ, ['smart-intify', $tast.tree]);
                 }
             }
 
