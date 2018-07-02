@@ -512,6 +512,14 @@ sub plan($quantity) {
     nqp::say("1..$quantity");
 }
 
+sub is($got, $expected) {
+    if $got eq $expected {
+        nqp::say("ok");
+    } else {
+        nqp::say("not ok");
+    }
+}
+
 sub ok($condition) {
     if $condition {
         nqp::say("ok");
