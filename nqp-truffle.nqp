@@ -333,6 +333,9 @@ class QAST::TruffleCompiler {
                 if $got == $STR {
                     return TAST.new($OBJ, ['box-nqp-str', $tast.tree]);
                 }
+                if $got == $NUM {
+                    return TAST.new($OBJ, ['box-nqp-num', $tast.tree]);
+                }
             }
 
             if $desired == $NUM {
@@ -359,6 +362,8 @@ class QAST::TruffleCompiler {
                     return TAST.new($OBJ, ['smart-stringify', $tast.tree]);
                 } elsif $desired == $INT {
                     return TAST.new($OBJ, ['smart-intify', $tast.tree]);
+                } elsif $desired == $NUM {
+                    return TAST.new($OBJ, ['smart-numify', $tast.tree]);
                 }
             }
 
