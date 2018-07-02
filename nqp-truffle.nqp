@@ -38,15 +38,15 @@ class TAST {
         nqp::runtruffle($!tree);
     }
 
-    sub sexpr(int $unquoted, $thing) {
+    sub sexpr(int $unquoted, $thing, int $indent = 0) {
       if nqp::islist($thing) {
           my @ret;
           my int $first := 1;
           for $thing -> $element {
-              nqp::push(@ret, sexpr($first, $element));
+              nqp::push(@ret, ($first ?? '' !! nqp::x('  ', $indent+1)) ~ sexpr($first, $element, $indent + 1));
               $first := 0;
           }
-          '(' ~ nqp::join(' ', @ret) ~ ')';
+          '(' ~ nqp::join("\n", @ret) ~ ')';
       } elsif nqp::isint($thing) {
           ~$thing;
       } elsif nqp::isnum($thing) {
