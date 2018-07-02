@@ -150,6 +150,22 @@ class QAST::OperationsTruffle {
 
     add_simple_op('tclc', $STR, [$STR]);
 
+    for ['_i', $INT, '_n', $NUM] -> $suffix, $type {
+        for <add div mod mul sub> -> $math-op {
+            add_simple_op($math-op ~ $suffix, $type, [$type, $type]);
+        }
+    }
+
+    for ['_i', $INT, '_n', $NUM] -> $suffix, $type {
+        for <abs neg> -> $math-op {
+            add_simple_op($math-op ~ $suffix, $type, [$type]);
+        }
+    }
+
+    for <gcd lcm> -> $math-op {
+        add_simple_op($math-op ~ '_i', $INT, [$INT, $INT]);
+    }
+
     # explicit takeclosure is used by the JVM backend we no-op it.
     add_op('takeclosure', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($want));
