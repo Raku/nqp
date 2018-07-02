@@ -162,6 +162,10 @@ class QAST::OperationsTruffle {
         }
     }
 
+    add_simple_op('bitor_i', $INT, [$INT, $INT]);
+    add_simple_op('bitand_i', $INT, [$INT, $INT]);
+    add_simple_op('bitxor_i', $INT, [$INT, $INT]);
+
     for <gcd lcm> -> $math-op {
         add_simple_op($math-op ~ '_i', $INT, [$INT, $INT]);
     }
