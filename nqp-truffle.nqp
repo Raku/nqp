@@ -189,6 +189,11 @@ class QAST::OperationsTruffle {
 
     add_simple_op('pow_n', $NUM, [$NUM, $NUM]);
 
+    for <asec asin acos atan cos cosh sin sinh sec sech tan tanh> -> $math-op {
+        add_simple_op($math-op ~ '_n', $NUM, [$NUM]);
+    }
+
+    add_simple_op('atan2_n', $NUM, [$NUM, $NUM]);
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $old_value := $comp.as_truffle($node[0], :want($INT));
