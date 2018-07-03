@@ -342,6 +342,9 @@ class QAST::TruffleCompiler {
                 elsif $got == $OBJ {
                     return TAST.new($CALL_ARG, $tast.tree);
                 }
+                elsif $got == $VOID {
+                    return TAST.new($CALL_ARG, $tast.tree);
+                }
             }
 
             if $desired == $OBJ {
