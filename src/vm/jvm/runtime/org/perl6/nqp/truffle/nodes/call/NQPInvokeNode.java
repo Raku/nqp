@@ -50,6 +50,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.truffle.runtime.NQPArguments;
 
 @NodeInfo(shortName = "invoke")
 public final class NQPInvokeNode extends NQPNode {
@@ -77,9 +78,9 @@ public final class NQPInvokeNode extends NQPNode {
          */
         CompilerAsserts.compilationConstant(argumentNodes.length);
 
-        Object[] argumentValues = new Object[argumentNodes.length];
+        Object[] argumentValues = NQPArguments.createInitial(argumentNodes.length);
         for (int i = 0; i < argumentNodes.length; i++) {
-            argumentValues[i] = argumentNodes[i].execute(frame);
+            NQPArguments.setUserArgument(argumentValues, i, argumentNodes[i].execute(frame));
         }
         return dispatchNode.executeDispatch(function, argumentValues);
     }

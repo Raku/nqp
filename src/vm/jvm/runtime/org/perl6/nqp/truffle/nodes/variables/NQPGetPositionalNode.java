@@ -47,6 +47,8 @@ import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
+
+import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
 public class NQPGetPositionalNode extends NQPNode {
@@ -61,7 +63,7 @@ public class NQPGetPositionalNode extends NQPNode {
     @Override
     public Object execute(VirtualFrame frame) {
         Object[] args = frame.getArguments();
-        Object value = args[index];
+        Object value = NQPArguments.getUserArgument(args, index);
         frame.setObject(slot, value);
         return value;
     }
