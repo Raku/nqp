@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 # Copyright (C) 2009 The Perl Foundation
 
-use 5.008;
+use 5.10.0;
 use strict;
 use warnings;
 use Text::ParseWords;
@@ -89,6 +89,34 @@ MAIN: {
         $config{'jlinefile'} =~ s/.*\///;
     }
 
+
+    my $VERSION = '0.0-0';
+    # get version
+    if (open(my $fh, '<', 'VERSION')) {
+        $VERSION = <$fh>;
+        close($fh);
+    }
+    # .git is a file and not a directory in submodule
+    if (-e '.git' && open(my $GIT, '-|', "git describe")) {
+        $VERSION = <$GIT>;
+        close($GIT);
+    }
+    chomp $VERSION;
+    $config{version} = $VERSION;
+    if ($VERSION =~ m{ ^      (?<major>\d+)
+                       (?: \. (?<minor>\d+))
+                       (?: \. (?<patch>\d+))?
+                       (?: \- (?<commitnum>\d+))?
+                       (?: \-g(?<commithash>\w+))? $ }x
+    ) {
+        $config{versionmajor}      = exists $+{major}      ? $+{major}      : 0;
+        $config{versionminor}      = exists $+{minor}      ? $+{minor}      : 0;
+        $config{versionpatch}      = exists $+{patch}      ? $+{patch}      : 0;
+        $config{versioncommitnum}  = exists $+{commitnum}  ? $+{commitnum}  : 0;
+        $config{versioncommithash} = exists $+{commithash} ? $+{commithash} : 0;
+    }
+
+
     fill_template_file(
         'tools/build/install-jvm-runner.pl.in',
         'tools/build/install-jvm-runner.pl',
@@ -131,8 +159,8 @@ MAIN: {
     my $prefix      = $options{'prefix'}
                     ? abs_path($options{'prefix'})
                     : ($options{sysroot}
-		      ? '/usr'
-		      : File::Spec->catdir(cwd, 'install'));
+                      ? '/usr'
+                      : File::Spec->catdir(cwd, 'install'));
     $config{prefix}    = $prefix;
     $config{nqplibdir} = $options{libdir} ? "$options{libdir}/nqp" : '$(NQP_LANG_DIR)/lib';
     $config{sysroot}   = $options{sysroot};

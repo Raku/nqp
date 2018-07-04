@@ -148,7 +148,7 @@ rule('js-clean', '', '$(RM_RF) gen/js/stage1 gen/js/stage2 gen/js/qregex.t gen/j
 
 my $ModuleLoader := "$nqp-js-on-js/ModuleLoader.js";
 
-deps("js-cross", 'm-all', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader, '$(JS_RUNNER)');
+deps("js-cross", 'm-all', '.showversion', 'js-stage1-compiler', $nqpcore-moarvm, $nqpcore-combined, $QASTNode-moarvm, $QRegex-moarvm, $sprintf-moarvm, $ModuleLoader, '$(JS_RUNNER)');
 
 # Enforce the google coding standards
 out("js-lint:
