@@ -48,16 +48,16 @@ import org.perl6.nqp.truffle.MalformedAstException;
 @TypeSystemReference(NQPTypes.class)
 public abstract class NQPNode extends NQPBaseNode {
     public Object execute(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an object");
+        throw new MalformedAstException("Expected an AST node that produces an object, got " + getClass().getName());
     }
     public String executeStr(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a str");
+        throw new MalformedAstException("Expected an AST node that produces a str, got " + getClass().getName());
     }
     public long executeInt(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an int");
+        throw new MalformedAstException("Expected an AST node that produces an int, got " + getClass().getName());
     }
     public double executeNum(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a num");
+        throw new MalformedAstException("Expected an AST node that produces a num, got " + getClass().getName());
     }
 
     abstract public void executeVoid(VirtualFrame frame);
