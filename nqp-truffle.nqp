@@ -481,7 +481,8 @@ class QAST::TruffleCompiler {
 
             nqp::splice(@ret, @compiled_params, 1, 0);
 
-            TAST.new($OBJ, @ret);
+            TAST.new($OBJ,
+                $node.blocktype eq 'immediate' ?? ['call', @ret] !! @ret);
         }
     }
 
