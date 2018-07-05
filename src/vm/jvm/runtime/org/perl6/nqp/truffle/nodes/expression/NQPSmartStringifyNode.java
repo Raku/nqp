@@ -66,7 +66,10 @@ public final class NQPSmartStringifyNode extends NQPStrNode {
             return (String) value;
         } else if (value instanceof Long) {
             return ((Long) value).toString();
+        } else if (value instanceof Double) {
+            return NQPCoerceNumToStrNode.coerce((double) value);
+        } else {
+            throw new RuntimeException("can't smart stringify: " + value.getClass().getCanonicalName());
         }
-        throw new RuntimeException("can't smart stringify: " + value.getClass().getCanonicalName());
     }
 }

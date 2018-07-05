@@ -14,9 +14,8 @@ public final class NQPCoerceNumToStrNode extends NQPStrNode {
         this.argNode = argNode;
     }
 
-    @Override
-    public String executeStr(VirtualFrame frame) {
-        double in = argNode.executeNum(frame);
+
+    public static String coerce(double in) {
         if (in == (long)in) {
             if (in == 0 && Double.toString(in).equals("-0.0")) {
                 return "-0";
@@ -32,5 +31,11 @@ public final class NQPCoerceNumToStrNode extends NQPStrNode {
                 return "NaN";
             return Double.toString(in);
         }
+    }
+
+    @Override
+    public String executeStr(VirtualFrame frame) {
+        double in = argNode.executeNum(frame);
+        return coerce(in);
     }
 }
