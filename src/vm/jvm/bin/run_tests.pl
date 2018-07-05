@@ -9,6 +9,6 @@ my $harness = TAP::Harness->new({
     }
 });
 
-my @nqp_tests = glob "t/nqp/{001,002,003,004,005,008,010,013,016,083}*.t";
+my @nqp_tests = glob "t/nqp/{001,002,003,004,005,008,010,013,016,036,083}*.t";
 
 $harness->runtests(@nqp_tests);
