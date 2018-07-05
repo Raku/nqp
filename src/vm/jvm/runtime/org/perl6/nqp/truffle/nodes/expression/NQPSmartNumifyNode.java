@@ -64,7 +64,10 @@ public final class NQPSmartNumifyNode extends NQPNumNode {
         Object value = valueNode.execute(frame);
         if (value instanceof Long) {
             return (long) value;
+        } else if (value instanceof Double) {
+            return (double) value;
+        } else {
+            throw new RuntimeException("can't smart numify: "  + value.getClass().getCanonicalName());
         }
-        throw new RuntimeException("can't smart numify");
     }
 }
