@@ -9,6 +9,9 @@ my @types;
 @types[$NUM] := 'Num';
 @types[$STR] := 'Str';
 
+my @node_types := nqp::clone(@types);
+@node_types[$OBJ] := 'Obj';
+
 my @return_type;
 @return_type[$OBJ] := 'Object';
 @return_type[$INT] := 'long';
@@ -27,6 +30,7 @@ sub add_simple_op($name, $return_type, $args) {
     $out := $out ~ 'import com.oracle.truffle.api.frame.VirtualFrame;' ~ "\n";
     $out := $out ~ 'import com.oracle.truffle.api.nodes.NodeInfo;' ~ "\n";
     $out := $out ~ 'import org.perl6.nqp.truffle.nodes.NQPNode;' ~ "\n";
+    $out := $out ~ "import org.perl6.nqp.truffle.nodes.NQP{@node_types[$return_type]}Node;" ~ "\n";
     $out := $out ~ 'import org.perl6.nqp.dsl.Deserializer;' ~ "\n";
     $out := $out ~ '' ~ "\n";
 
@@ -37,7 +41,7 @@ sub add_simple_op($name, $return_type, $args) {
         $java_name := subst($java_name, /$suffix/, $java_suffix);
     }
 
-    $out := $out ~ "public final class $java_name extends NQPNode \{" ~ "\n";
+    $out := $out ~ "public final class $java_name extends NQP{@node_types[$return_type]}Node \{" ~ "\n";
 
     my @children;
 
