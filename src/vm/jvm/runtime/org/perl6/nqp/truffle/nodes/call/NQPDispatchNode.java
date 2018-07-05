@@ -57,8 +57,9 @@ import com.oracle.truffle.api.interop.UnsupportedTypeException;
 import com.oracle.truffle.api.nodes.DirectCallNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import com.oracle.truffle.api.nodes.Node;
+import com.oracle.truffle.api.CompilerAsserts;
 
-
+import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.NQPTypes;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
@@ -106,6 +107,10 @@ public abstract class NQPDispatchNode extends Node {
                     @Cached("create(cachedTarget)") DirectCallNode callNode) {
 
         /* Inline cache hit, we are safe to execute the cached call target. */
+
+
+        CompilerAsserts.compilationConstant(function.getOuterFrame());
+        NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
         return callNode.call(arguments);
     }
 
@@ -121,6 +126,8 @@ public abstract class NQPDispatchNode extends Node {
          * SL has a quite simple call lookup: just ask the function for the current call target, and
          * call it.
          */
+
+        NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
         return callNode.call(function.getCallTarget(), arguments);
     }
 

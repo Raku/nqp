@@ -50,11 +50,12 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
 @NodeField(name = "slot", type = FrameSlot.class)
-public class NQPBindLocalVariableNode extends NQPNode {
+public class NQPBindLocalVariableNode extends FrameLookupNode {
     final private FrameSlot slot;
     @Child private NQPNode valueNode;
 
-    public NQPBindLocalVariableNode(FrameSlot slot, NQPNode valueNode) {
+    public NQPBindLocalVariableNode(FrameSlot slot, int depth, NQPNode valueNode) {
+        super(depth);
         this.slot = slot;
         this.valueNode = valueNode;
     }
@@ -62,7 +63,7 @@ public class NQPBindLocalVariableNode extends NQPNode {
     @Override
     public Object execute(VirtualFrame frame) {
         Object value = valueNode.execute(frame);
-        frame.setObject(slot, value);
+        getFrame(frame).setObject(slot, value);
         return value;
     }
 }

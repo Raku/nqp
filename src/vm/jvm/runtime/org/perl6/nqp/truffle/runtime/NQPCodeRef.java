@@ -43,20 +43,27 @@ package org.perl6.nqp.truffle.runtime;
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.nodes.RootNode;
+import com.oracle.truffle.api.frame.MaterializedFrame;
 import org.perl6.nqp.truffle.NQPLanguage;
 
 
 public final class NQPCodeRef  {
 
     /** The current implementation of this function. */
-    private RootCallTarget callTarget;
+    private final RootCallTarget callTarget;
+    private final MaterializedFrame outer;
 
 
-    public NQPCodeRef(RootNode root) {
+    public NQPCodeRef(RootNode root, MaterializedFrame outer) {
         this.callTarget = Truffle.getRuntime().createCallTarget(root);
+        this.outer = outer;
     }
 
     public RootCallTarget getCallTarget() {
         return callTarget;
+    }
+
+    public MaterializedFrame getOuterFrame() {
+        return outer;
     }
 }

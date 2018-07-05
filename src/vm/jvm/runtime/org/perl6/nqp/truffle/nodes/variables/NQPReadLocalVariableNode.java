@@ -48,19 +48,21 @@ import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.Frame;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.NQPTypes;
 
-public class NQPReadLocalVariableNode extends NQPNode {
+public class NQPReadLocalVariableNode extends FrameLookupNode {
     private final FrameSlot slot;
 
-    public NQPReadLocalVariableNode(FrameSlot slot) {
+    public NQPReadLocalVariableNode(FrameSlot slot, int depth) {
+        super(depth);
         this.slot = slot;
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return FrameUtil.getObjectSafe(frame, slot);
+        return FrameUtil.getObjectSafe(getFrame(frame), slot);
     }
 }

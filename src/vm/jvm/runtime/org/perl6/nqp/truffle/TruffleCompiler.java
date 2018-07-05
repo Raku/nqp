@@ -11,7 +11,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
-import org.perl6.nqp.truffle.nodes.NQPNotClosureNode;
+import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 
 import org.perl6.nqp.truffle.nodes.expression.NQPIValNode;
 import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
@@ -41,7 +41,7 @@ import org.perl6.nqp.dsl.AstBuilder;
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
         FrameDescriptor frameDescriptor = new FrameDescriptor();
-        RootNode rootNode = new NQPRootNode(null, frameDescriptor, build(node, new NQPScopeWithFrame(frameDescriptor), tc));
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, build(node, new NQPScopeWithFrame(frameDescriptor, null), tc));
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
@@ -95,26 +95,27 @@ abstract class TruffleCompiler {
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 return build(node.at_pos_boxed(tc, 2), scope, tc);
             case "get-lexical": {
-                FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                return new NQPReadLocalVariableNode(frameSlot);
+                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
+                return new NQPReadLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth());
             }
             case "bind-lexical": {
-                FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
+                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 NQPNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
-                return new NQPBindLocalVariableNode(frameSlot, valueNode);
+                return new NQPBindLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
             }
             case "get-lexical-positional": {
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 int index = (int) node.at_pos_boxed(tc, 2).get_int(tc);
-                FrameSlot frameSlot = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                return new NQPGetPositionalNode(frameSlot, index);
+                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
+                assert foundLexical.getDepth() == 0;
+                return new NQPGetPositionalNode(foundLexical.getFrameSlot(), index);
             }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();
-                NQPNode children[] = expressions(node, new NQPScopeWithFrame(frameDescriptor), tc);
-                return new NQPNotClosureNode(new NQPCodeRef(
+                NQPNode children[] = expressions(node, new NQPScopeWithFrame(frameDescriptor, scope), tc);
+                return new NQPBlockNode(
                     new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
-                ));
+                );
             }
             default:
                 throw new IllegalArgumentException("Wrong node type: " + node.at_pos_boxed(tc, 0).get_str(tc));
