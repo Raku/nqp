@@ -76,10 +76,24 @@ public final class NQPBlockBodyNode extends NQPNode {
 
         CompilerAsserts.compilationConstant(bodyNodes.length);
 
+        int i = 0;
         for (NQPNode statement : bodyNodes) {
-            ret = statement.execute(frame);
+            if (i == bodyNodes.length - 1) {
+                ret = statement.execute(frame);
+            } else {
+                statement.executeVoid(frame);
+            }
+            i++;
         }
 
         return ret;
+    }
+
+    @Override
+    @ExplodeLoop
+    public void executeVoid(VirtualFrame frame) {
+        for (NQPNode statement : bodyNodes) {
+            statement.executeVoid(frame);
+        }
     }
 }

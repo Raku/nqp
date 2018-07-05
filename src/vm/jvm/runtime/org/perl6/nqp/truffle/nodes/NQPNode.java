@@ -59,4 +59,6 @@ public abstract class NQPNode extends NQPBaseNode {
     public double executeNum(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces a num");
     }
+
+    abstract public void executeVoid(VirtualFrame frame);
 }

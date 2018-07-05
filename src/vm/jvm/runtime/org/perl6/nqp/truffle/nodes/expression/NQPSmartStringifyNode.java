@@ -45,12 +45,13 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPStrNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "smart stringify")
-public final class NQPSmartStringifyNode extends NQPNode {
+public final class NQPSmartStringifyNode extends NQPStrNode {
     @Child private NQPNode valueNode;
 
     @Deserializer("smart-stringify")

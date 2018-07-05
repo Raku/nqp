@@ -65,4 +65,8 @@ public class NQPReadLocalVariableNode extends FrameLookupNode {
     public Object execute(VirtualFrame frame) {
         return FrameUtil.getObjectSafe(getFrame(frame), slot);
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+    }
 }

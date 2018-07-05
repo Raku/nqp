@@ -15,4 +15,8 @@ public class NQPNotClosureNode extends NQPNode {
     public Object execute(VirtualFrame frame) {
         return codeRef;
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+    }
 }

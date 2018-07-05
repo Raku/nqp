@@ -6,10 +6,11 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.runtime.NQPList;
 
 @NodeInfo(shortName = "list")
-public final class NQPListNode extends NQPNode {
+public final class NQPListNode extends NQPObjNode {
     @Children private final NQPNode[] bodyNodes;
 
     public NQPListNode(NQPNode[] bodyNodes) {

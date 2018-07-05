@@ -62,4 +62,9 @@ public final class NQPIntArgNode extends NQPNode {
     public Object execute(VirtualFrame frame) {
         return valueNode.executeInt(frame);
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+        throw new RuntimeException("IntArgNode shouldn't be used as void");
+    }
 }

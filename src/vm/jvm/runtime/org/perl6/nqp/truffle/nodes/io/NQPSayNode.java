@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle.nodes.io;
 
+import org.perl6.nqp.truffle.nodes.NQPStrNode;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
@@ -9,7 +10,7 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeChildren({@NodeChild("arg")})
 
-public class NQPSayNode extends NQPNode {
+public class NQPSayNode extends NQPStrNode {
     @Child private NQPNode arg;
 
     @Deserializer
@@ -18,7 +19,7 @@ public class NQPSayNode extends NQPNode {
     }
 
     @Override
-    public Object execute(VirtualFrame frame) {
+    public String executeStr(VirtualFrame frame) {
         String value = this.arg.executeStr(frame);
         doSay(value);
         return value;

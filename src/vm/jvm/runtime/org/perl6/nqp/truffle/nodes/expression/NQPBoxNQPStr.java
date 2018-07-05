@@ -45,12 +45,13 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "box nqp str")
-public final class NQPBoxNQPStr extends NQPNode {
+public final class NQPBoxNQPStr extends NQPObjNode {
     @Child private NQPNode valueNode;
 
     @Deserializer("box-nqp-str")

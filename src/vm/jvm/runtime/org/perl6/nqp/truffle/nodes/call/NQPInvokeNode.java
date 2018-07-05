@@ -48,12 +48,13 @@ import com.oracle.truffle.api.nodes.ExplodeLoop;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
 
 @NodeInfo(shortName = "invoke")
-public final class NQPInvokeNode extends NQPNode {
+public final class NQPInvokeNode extends NQPObjNode {
 
     @Child private NQPNode functionNode;
     @Children private final NQPNode[] argumentNodes;

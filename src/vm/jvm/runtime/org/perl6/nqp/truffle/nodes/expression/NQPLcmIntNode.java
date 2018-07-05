@@ -2,12 +2,13 @@ package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPIntNode;
 import org.perl6.nqp.dsl.Deserializer;
 
 import java.math.BigInteger;
 
 @NodeInfo(shortName = "lcm_i")
-public final class NQPLcmIntNode extends NQPNode {
+public final class NQPLcmIntNode extends NQPIntNode {
     @Child private NQPNode leftNode;
     @Child private NQPNode rightNode;
 

@@ -16,4 +16,8 @@ public class NQPBlockNode extends NQPNode {
     public Object execute(VirtualFrame frame) {
         return new NQPCodeRef(rootNode, frame.materialize());
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+    }
 }

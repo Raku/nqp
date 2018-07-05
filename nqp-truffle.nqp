@@ -356,6 +356,21 @@ class QAST::TruffleCompiler {
                 }
             }
 
+            if $desired == $RETVAL {
+                if $got == $INT {
+                    return TAST.new($RETVAL, ['retval-int', $tast.tree]);
+                }
+                if $got == $STR {
+                    return TAST.new($RETVAL, ['retval-str', $tast.tree]);
+                }
+                if $got == $NUM {
+                    return TAST.new($RETVAL, ['retval-num', $tast.tree]);
+                }
+                elsif $got == $OBJ {
+                    return TAST.new($RETVAL, $tast.tree);
+                }
+            }
+
             if $desired == $NUM {
                 if $got == $INT {
                     return TAST.new($NUM, ['coerce-int-to-num', $tast.tree]);
@@ -417,11 +432,9 @@ class QAST::TruffleCompiler {
     }
 
     multi method as_truffle(QAST::Stmts $node, :$want) {
-        my $ret := ['stmts'];
-        for $node.list -> $child {
-            nqp::push($ret, self.as_truffle($child, :want($VOID)).tree);
-        }
-        TAST.new($VOID, $ret);
+        my @tree := ['stmts'];
+        self.compile_all_the_children($node, $want, @tree);
+        TAST.new($want, @tree);
     }
 
     method compile_params(@params) {
@@ -434,6 +447,24 @@ class QAST::TruffleCompiler {
         @ret;
     }
 
+    method compile_all_the_children($node, $want, @tree, :$result_child) {
+        my @stmts := $node.list;
+
+        if $want == $VOID {
+            $result_child := -1;
+        }
+        elsif !nqp::defined($result_child) {
+            $result_child := +@stmts - 1;
+        }
+
+        my int $i := 0;
+        for @stmts -> $stmt {
+            my $tast := self.as_truffle(@stmts[$i], :want($i == $result_child ?? $want !! $VOID));
+            nqp::push(@tree, $tast.tree);
+            $i := $i + 1;
+        }
+    }
+
     multi method as_truffle(QAST::Block $node, :$want) {
         my $outer := try $*BLOCK;
         my $block := BlockInfo.new($node, $outer);
@@ -442,10 +473,7 @@ class QAST::TruffleCompiler {
             my $*BINDVAL := 0;
             my @ret := ['block'];
 
-
-            for $node.list -> $child {
-                nqp::push(@ret, self.as_truffle($child, :want($VOID)).tree);
-            }
+            self.compile_all_the_children($node, $RETVAL, @ret);
 
             my @compiled_params := self.compile_params($*BLOCK.params);
 

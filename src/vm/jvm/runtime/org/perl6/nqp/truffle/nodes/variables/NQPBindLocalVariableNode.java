@@ -66,4 +66,9 @@ public class NQPBindLocalVariableNode extends FrameLookupNode {
         getFrame(frame).setObject(slot, value);
         return value;
     }
+
+    @Override 
+    public void executeVoid(VirtualFrame frame) {
+        execute(frame);
+    }
 }

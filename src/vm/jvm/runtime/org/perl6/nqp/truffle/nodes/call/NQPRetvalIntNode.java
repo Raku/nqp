@@ -45,26 +45,23 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.Deserializer;
 
-@NodeInfo(shortName = "num arg")
-public final class NQPNumArgNode extends NQPNode {
+@NodeInfo(shortName = "return int")
+public final class NQPRetvalIntNode extends NQPObjNode {
     @Child private NQPNode valueNode;
 
-    @Deserializer("num-arg")
-    public NQPNumArgNode(NQPNode valueNode) {
+    @Deserializer("retval-int")
+    public NQPRetvalIntNode(NQPNode valueNode) {
         this.valueNode = valueNode;
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return valueNode.executeNum(frame);
-    }
-
-    @Override
-    public void executeVoid(VirtualFrame frame) {
-        throw new RuntimeException("NumArgNode shouldn't be used as void");
+        long value = valueNode.executeInt(frame);
+        return value;
     }
 }

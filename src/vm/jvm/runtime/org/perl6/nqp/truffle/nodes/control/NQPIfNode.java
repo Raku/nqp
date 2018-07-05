@@ -75,4 +75,17 @@ public final class NQPIfNode extends NQPNodeWithBoolification {
             }
         }
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+        Object cond = condNode.execute(frame);
+        boolean check = toBoolean(cond);
+        if (this.isUnless ? !check : check) {
+            thenNode.executeVoid(frame);
+        } else {
+            if (elseNode != null) {
+                elseNode.executeVoid(frame);
+            }
+        }
+    }
 }

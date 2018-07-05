@@ -62,4 +62,9 @@ public final class NQPStrArgNode extends NQPNode {
     public Object execute(VirtualFrame frame) {
         return valueNode.executeStr(frame);
     }
+
+    @Override
+    public void executeVoid(VirtualFrame frame) {
+        throw new RuntimeException("StrArgNode shouldn't be used as void");
+    }
 }

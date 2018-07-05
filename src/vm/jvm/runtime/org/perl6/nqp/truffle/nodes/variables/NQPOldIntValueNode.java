@@ -21,4 +21,8 @@ public final class NQPOldIntValueNode extends NQPNode {
         this.bindNewValueNode.execute(frame);
         return oldValue;
     }
+
+    public void executeVoid(VirtualFrame frame) {
+        this.bindNewValueNode.executeVoid(frame);
+    }
 }
