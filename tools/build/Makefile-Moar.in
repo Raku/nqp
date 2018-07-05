@@ -255,7 +255,7 @@ $(M_STAGE2_DIR)/$(NQP_MOAR): $(M_STAGE1_DIR) $(M_STAGE2_DIR)/$(P6QREGEX_MOAR) $(
 	    --setting=NQPCORE --target=mbc --no-regex-lib \
 	    --output=$(M_STAGE2_DIR)/$(NQP_MOAR) $(M_STAGE2_DIR)/$(NQP_COMBINED)
 
-$(NQP_MOAR): .showversion $(M_STAGE2_OUTPUT)
+$(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) $(M_STAGE2_DIR)/$(NQP_MO_MOAR) .
 	$(CP) $(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR) .
 	$(CP) $(M_STAGE2_DIR)/$(CORE_SETTING_MOAR) .

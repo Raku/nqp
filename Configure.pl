@@ -115,6 +115,7 @@ MAIN: {
         $config{versioncommitnum}  = exists $+{commitnum}  ? $+{commitnum}  : 0;
         $config{versioncommithash} = exists $+{commithash} ? $+{commithash} : 0;
     }
+    print "Configuring NQP version $VERSION...\n\n";
 
 
     fill_template_file(
