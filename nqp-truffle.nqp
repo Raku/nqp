@@ -229,7 +229,7 @@ class QAST::OperationsTruffle {
         for $node.list -> $child {
             nqp::push($ret, $comp.as_truffle($child, :want($CALL_ARG)).tree);
         }
-        TAST.new($VOID, $ret);
+        TAST.new($OBJ, $ret);
     });
 
     add_op('bind', sub ($comp, $node, :$want) {
