@@ -7,12 +7,12 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "neginf")
 public final class NQPNeginfNode extends NQPNumNode {
-
     @Deserializer
     public NQPNeginfNode() {
     }
 
-    public double executeNum() {
+    @Override
+    public double executeNum(VirtualFrame frame) {
         return Double.NEGATIVE_INFINITY;
     }
 }

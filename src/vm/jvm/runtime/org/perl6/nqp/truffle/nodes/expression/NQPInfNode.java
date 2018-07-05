@@ -7,12 +7,12 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "inf")
 public final class NQPInfNode extends NQPNumNode {
-
     @Deserializer
     public NQPInfNode() {
     }
 
-    public double executeNum() {
+    @Override
+    public double executeNum(VirtualFrame frame) {
         return Double.POSITIVE_INFINITY;
     }
 }
