@@ -68,6 +68,7 @@ P5QREGEX_JAR      = NQPP5QRegex.jar
 EVAL_CLIENT = tools/jvm/eval-client.pl
 
 NQP_JAR      = nqp.jar
+TRUFFLE_JAR  = Truffle.jar
 J_NQP_SOURCES= src/vm/jvm/NQP/Ops.nqp $(COMMON_NQP_SOURCES)
 
 J_SOURCES = \
@@ -113,7 +114,7 @@ ALL_OUTPUT = \
   $(P6QREGEX_JAR) \
   $(NQP_JAR) \
 
-j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR)
+j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR) $(TRUFFLE_JAR)
 
 j-install: j-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
@@ -308,6 +309,9 @@ $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(J_STAGE2_DIR)/$(P5QREGEX_COMBINED)
 	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    $(J_STAGE2_DIR)/$(P5QREGEX_COMBINED)
+
+$(TRUFFLE_JAR): $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR)
+	.@slash@$(J_RUNNER) --target=jar --output=$(TRUFFLE_JAR) src/vm/jvm/Truffle.nqp
 
 j-bootstrap-files: $(J_STAGE2_OUTPUT)
 	$(CP) $(J_STAGE2_DIR)/$(NQP_MO_JAR) $(J_STAGE0_DIR)
