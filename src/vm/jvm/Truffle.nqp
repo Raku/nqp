@@ -401,7 +401,7 @@ class QAST::TruffleCompiler {
                 } elsif $desired == $INT {
                     return TAST.new($OBJ, ['smart-intify', $tast.tree]);
                 } elsif $desired == $NUM {
-                    return TAST.new($OBJ, ['smart-numify', $tast.tree]);
+                    return TAST.new($NUM, ['smart-numify', $tast.tree]);
                 }
             }
 
