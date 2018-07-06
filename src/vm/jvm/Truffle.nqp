@@ -525,11 +525,11 @@ class QAST::TruffleCompiler {
                 return TAST.new($OBJ, $action);
             }
             else {
-                nqp::die("Unimplemented var declaration type {$node.decl}");
+                self.NYI("var declaration type {$node.decl}");
             }
         }
         else {
-            nqp::die("Unimplemented var scope {$node.scope}");
+            self.NYI("var scope {$node.scope}");
         }
     }
 
