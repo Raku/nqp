@@ -155,7 +155,23 @@ class QAST::OperationsTruffle {
 
            TAST.new($OBJ, @tree);
         });
+
+        add_simple_op('atkey' ~ $suffix, $type, [$OBJ, $STR]);
+        add_simple_op('bindkey' ~ $suffix, $type, [$OBJ, $STR, $type], :side_effects);
     }
+
+    add_op('hash', sub ($comp, $node, :$want) {
+        my @tree := ['hash'];
+        for $node.list -> $key, $val {
+            my $key_tast := $comp.as_truffle($key, :want($STR));
+            my $val_tast := $comp.as_truffle($val, :want($OBJ));
+            @tree.push($key_tast.tree);
+            @tree.push($val_tast.tree);
+         }
+         TAST.new($OBJ, @tree);
+    });
+
+    add_simple_op('elems', $INT, [$OBJ]);
 
     add_simple_op('tclc', $STR, [$STR]);
 
