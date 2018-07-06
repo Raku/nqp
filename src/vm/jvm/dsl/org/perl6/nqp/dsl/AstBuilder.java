@@ -9,4 +9,5 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.CLASS)
 public @interface AstBuilder {
     Class nodeClass();
+    Class nodesClass();
 }

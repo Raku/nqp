@@ -36,7 +36,7 @@ import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.AstBuilder;
 
-@AstBuilder(nodeClass = NQPNode.class)
+@AstBuilder(nodeClass = NQPNode.class, nodesClass = NQPNode[].class)
 
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
@@ -52,7 +52,7 @@ abstract class TruffleCompiler {
         return expressions(node, 1, scope, tc);
     }
 
-    private NQPNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
+    protected NQPNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
         int elems = (int) node.elems(tc);
         NQPNode children[] = new NQPNode[elems - from];
         for (int i = from; i < elems; i++) {
@@ -68,11 +68,6 @@ abstract class TruffleCompiler {
         if (trySimple != null) return trySimple;
 
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            case "stmts": {
-                NQPNode children[] = expressions(node, scope, tc);
-                return new NQPStmts(children);
-            }
-            case "list": return new NQPListNode(expressions(node, scope, tc));
             case "ival":
                 return new NQPIValNode(node.at_pos_boxed(tc, 1).get_int(tc));
             case "nval":
@@ -86,11 +81,6 @@ abstract class TruffleCompiler {
                     build(node.at_pos_boxed(tc, 1), scope, tc),
                     build(node.at_pos_boxed(tc, 2), scope, tc),
                     node.elems(tc) == 4 ? build(node.at_pos_boxed(tc, 3), scope, tc) : null);
-
-            case "call":
-                NQPNode codeRef = build(node.at_pos_boxed(tc, 1), scope, tc);
-                NQPNode args[] = expressions(node, 2, scope, tc);
-                return new NQPInvokeNode(codeRef, args);
             case "declare-lexical":
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 return build(node.at_pos_boxed(tc, 2), scope, tc);

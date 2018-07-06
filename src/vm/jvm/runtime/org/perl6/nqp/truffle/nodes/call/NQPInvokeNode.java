@@ -52,6 +52,7 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
+import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "invoke")
 public final class NQPInvokeNode extends NQPObjNode {
@@ -60,6 +61,7 @@ public final class NQPInvokeNode extends NQPObjNode {
     @Children private final NQPNode[] argumentNodes;
     @Child private NQPDispatchNode dispatchNode;
 
+    @Deserializer("call")
     public NQPInvokeNode(NQPNode functionNode, NQPNode[] argumentNodes) {
         this.functionNode = functionNode;
         this.argumentNodes = argumentNodes;

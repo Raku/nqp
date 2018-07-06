@@ -51,10 +51,13 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
+import org.perl6.nqp.dsl.Deserializer;
+
 @NodeInfo(shortName = "stmts", description = "The node implementing a QAST::Stmts")
 public final class NQPStmts extends NQPNode {
     @Children private final NQPNode[] bodyNodes;
 
+    @Deserializer
     public NQPStmts(NQPNode[] bodyNodes) {
         this.bodyNodes = bodyNodes;
     }

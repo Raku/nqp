@@ -40,7 +40,7 @@ public class Processor extends AbstractProcessor {
           .toLowerCase();
     }
 
-    private void writeBuildMethod(TypeMirror nodeClass, PrintWriter writer, RoundEnvironment roundEnv) {
+    private void writeBuildMethod(TypeMirror nodeClass, TypeMirror nodesClass, PrintWriter writer, RoundEnvironment roundEnv) {
         writer.append("    public NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
 
         writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
@@ -69,6 +69,8 @@ public class Processor extends AbstractProcessor {
 
                 if (paramType.equals(nodeClass)) {
                     writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
+                } else if (paramType.equals(nodesClass)) {
+                    writer.append("expressions(node, " + (i+1) + ", scope, tc)");
                 } else {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
                 }
@@ -103,11 +105,18 @@ public class Processor extends AbstractProcessor {
             AstBuilder annotation = element.getAnnotation(AstBuilder.class);
 
             TypeMirror nodeClass = null;
+            TypeMirror nodesClass = null;
 
             try {
                 annotation.nodeClass();
             } catch (MirroredTypeException e) {
                 nodeClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.nodesClass();
+            } catch (MirroredTypeException e) {
+                nodesClass = e.getTypeMirror();
             }
 
             String builderClass =  type.getQualifiedName().toString();
@@ -127,7 +136,7 @@ public class Processor extends AbstractProcessor {
 
                     writer.append("public class " + generatedClassSimple + " extends " + builderClass + " {\n");
 
-                    writeBuildMethod(nodeClass, writer, roundEnv);
+                    writeBuildMethod(nodeClass, nodesClass, writer, roundEnv);
 
                     writer.append("}\n");
                 }
