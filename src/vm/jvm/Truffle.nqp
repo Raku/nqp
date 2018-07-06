@@ -528,6 +528,16 @@ class QAST::TruffleCompiler {
                 self.NYI("var declaration type {$node.decl}");
             }
         }
+        elsif $node.scope eq 'positional' {
+            return self.as_truffle_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('bindpos'), $node[0], $node[1], $*BINDVAL)
+                !! QAST::Op.new( :op('atpos'), $node[0], $node[1]), :$want);
+        }
+        elsif $node.scope eq 'associative' {
+            return self.as_truffle_clear_bindval($*BINDVAL
+                ?? QAST::Op.new( :op('bindkey'), $node[0], $node[1], $*BINDVAL)
+                !! QAST::Op.new( :op('atkey'), $node[0], $node[1]), :$want);
+        }
         else {
             self.NYI("var scope {$node.scope}");
         }
