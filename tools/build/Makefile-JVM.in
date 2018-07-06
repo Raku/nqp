@@ -310,7 +310,7 @@ $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    $(J_STAGE2_DIR)/$(P5QREGEX_COMBINED)
 
-$(TRUFFLE_JAR): $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR)
+$(TRUFFLE_JAR): $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR) src/vm/jvm/Truffle.nqp
 	.@slash@$(J_RUNNER) --target=jar --output=$(TRUFFLE_JAR) src/vm/jvm/Truffle.nqp
 
 j-bootstrap-files: $(J_STAGE2_OUTPUT)
