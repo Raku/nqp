@@ -218,6 +218,8 @@ class QAST::OperationsTruffle {
     add_simple_op('isnull', $INT, [$OBJ]);
     add_simple_op('ifnull', $OBJ, [$OBJ, $OBJ]);
 
+    add_simple_op('x', $STR, [$STR, $INT]);
+
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $old_value := $comp.as_truffle($node[0], :want($INT));
