@@ -918,7 +918,7 @@ Returns the codepoint for the given unicode character name, or -1 if no
 match was found.
 
 ## getstrfromname
-* `getstrfromname(str $name --> str)` (Currently only on MoarVM)
+* `getstrfromname(str $name --> str)`
 
 Like `codepointfromname` except it returns a string instead of a codepoint.
 This function is able to return not just Unicode codepoints by name, but also
