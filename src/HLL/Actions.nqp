@@ -242,7 +242,7 @@ class HLL::Actions {
     method charname($/) {
         my $codepoint := $<integer>
                          ?? nqp::chr($<integer>.made)
-                         !! nqp::getstrfromname(~$/);
+                         !! nqp::strfromname(~$/);
         $/.panic("Unrecognized character name '$/'") if $codepoint eq '';
         make $codepoint;
     }

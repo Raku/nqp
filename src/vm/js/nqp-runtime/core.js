@@ -1624,7 +1624,7 @@ op.tclc = function(string) {
 
 const ucd = require('nqp-js-ucd');
 
-op.getstrfromname = function(name) {
+op.strfromname = function(name) {
   const uppercased = name.toUpperCase();
 
   let codePoint;

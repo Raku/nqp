@@ -1771,7 +1771,7 @@ class QAST::OperationsJS {
 
     add_simple_op('sleep', $T_NUM, [$T_NUM], :side_effects);
 
-    add_simple_op('getstrfromname', $T_STR, [$T_STR]);
+    add_simple_op('strfromname', $T_STR, [$T_STR]);
     add_simple_op('codepointfromname', $T_INT, [$T_STR]);
 
     add_op('js', sub ($comp, $node, :$want) {
