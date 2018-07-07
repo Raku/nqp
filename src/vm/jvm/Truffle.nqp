@@ -449,7 +449,7 @@ class QAST::TruffleCompiler {
             $*HLL := $node.hll;
         }
 
-        TAST.new($VOID, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($VOID)).tree]);
+        TAST.new($OBJ, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]);
     }
 
     multi method as_truffle(QAST::Stmts $node, :$want) {
