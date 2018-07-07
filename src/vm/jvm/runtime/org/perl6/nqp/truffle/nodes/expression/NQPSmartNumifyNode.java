@@ -48,7 +48,9 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
 
 import org.perl6.nqp.truffle.runtime.Coercions;
+
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.truffle.runtime.NQPNull;
 
 import org.perl6.nqp.dsl.Deserializer;
 
@@ -70,6 +72,8 @@ public final class NQPSmartNumifyNode extends NQPNumNode {
             return Coercions.strToNum((String) value);
         } else if (value instanceof Double) {
             return (double) value;
+        } else if (value == NQPNull.SINGLETON) {
+            return 0;
         } else if (value == null) {
             throw new RuntimeException("can't smart numify raw null");
         } else {

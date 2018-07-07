@@ -48,6 +48,8 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPStrNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.truffle.runtime.NQPNull;
+
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.Coercions;
 
@@ -69,6 +71,8 @@ public final class NQPSmartStringifyNode extends NQPStrNode {
             return ((Long) value).toString();
         } else if (value instanceof Double) {
             return Coercions.numToStr((double) value);
+        } else if (value == NQPNull.SINGLETON) {
+            return "";
         } else {
             throw new RuntimeException("can't smart stringify: " + value.getClass().getCanonicalName());
         }
