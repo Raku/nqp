@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle.runtime;
 
+import org.perl6.nqp.truffle.runtime.NQPNull;
 import java.util.HashMap;
 
 public final class NQPHash {
@@ -10,7 +11,12 @@ public final class NQPHash {
     }
 
     public Object atkey(String key) {
-        return contents.get(key);
+        Object value = contents.get(key);
+        if (value == null) {
+            return NQPNull.SINGLETON;
+        } else {
+            return value;
+        }
     }
 
     public Object bindkey(String key, Object value) {
