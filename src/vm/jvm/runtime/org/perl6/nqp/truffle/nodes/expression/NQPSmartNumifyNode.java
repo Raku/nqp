@@ -47,7 +47,9 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
 
+import org.perl6.nqp.truffle.runtime.Coercions;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "smart numify")
@@ -64,8 +66,12 @@ public final class NQPSmartNumifyNode extends NQPNumNode {
         Object value = valueNode.execute(frame);
         if (value instanceof Long) {
             return (long) value;
+        } else if (value instanceof String) {
+            return Coercions.strToNum((String) value);
         } else if (value instanceof Double) {
             return (double) value;
+        } else if (value == null) {
+            throw new RuntimeException("can't smart numify raw null");
         } else {
             throw new RuntimeException("can't smart numify: "  + value.getClass().getCanonicalName());
         }
