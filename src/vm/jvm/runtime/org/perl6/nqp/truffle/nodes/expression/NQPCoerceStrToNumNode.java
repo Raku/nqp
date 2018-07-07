@@ -4,6 +4,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.truffle.runtime.Coercions;
 
 @NodeInfo(shortName = "coerce an str to num")
 public final class NQPCoerceStrToNumNode extends NQPNumNode {
@@ -16,24 +17,6 @@ public final class NQPCoerceStrToNumNode extends NQPNumNode {
 
     @Override
     public double executeNum(VirtualFrame frame) {
-        String in = argNode.executeStr(frame);
-        try {
-            // remove valid underscores
-            in = in.replaceAll("(?<=\\d)_+(?=\\d)", "");
-            // replace unicode minus U+2212 with ascii version
-            in = in.replaceAll("\u2212", "-");
-            return Double.parseDouble(in);
-        }
-        catch (NumberFormatException e) {
-            if (in.equals("Inf"))
-                return Double.POSITIVE_INFINITY;
-            if (in.equals("+Inf"))
-                return Double.POSITIVE_INFINITY;
-            if (in.equals("-Inf"))
-                return Double.NEGATIVE_INFINITY;
-            if (in.equals("NaN"))
-                return Double.NaN;
-            return 0.0;
-        }
+        return Coercions.strToNum(argNode.executeStr(frame));
     }
 }

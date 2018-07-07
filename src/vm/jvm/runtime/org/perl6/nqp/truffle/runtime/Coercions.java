@@ -18,4 +18,25 @@ public class Coercions {
             return Double.toString(value);
         }
     }
+
+    public static double strToNum(String value) {
+        try {
+            // remove valid underscores
+            value = value.replaceAll("(?<=\\d)_+(?=\\d)", "");
+            // replace unicode minus U+2212 with ascii version
+            value = value.replaceAll("\u2212", "-");
+            return Double.parseDouble(value);
+        }
+        catch (NumberFormatException e) {
+            if (value.equals("Inf"))
+                return Double.POSITIVE_INFINITY;
+            if (value.equals("+Inf"))
+                return Double.POSITIVE_INFINITY;
+            if (value.equals("-Inf"))
+                return Double.NEGATIVE_INFINITY;
+            if (value.equals("NaN"))
+                return Double.NaN;
+            return 0.0;
+        }
+    }
 }
