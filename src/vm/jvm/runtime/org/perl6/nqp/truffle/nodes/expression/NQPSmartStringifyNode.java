@@ -49,6 +49,7 @@ import org.perl6.nqp.truffle.nodes.NQPStrNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.truffle.runtime.Coercions;
 
 @NodeInfo(shortName = "smart stringify")
 public final class NQPSmartStringifyNode extends NQPStrNode {
@@ -67,7 +68,7 @@ public final class NQPSmartStringifyNode extends NQPStrNode {
         } else if (value instanceof Long) {
             return ((Long) value).toString();
         } else if (value instanceof Double) {
-            return NQPCoerceNumToStrNode.coerce((double) value);
+            return Coercions.numToStr((double) value);
         } else {
             throw new RuntimeException("can't smart stringify: " + value.getClass().getCanonicalName());
         }
