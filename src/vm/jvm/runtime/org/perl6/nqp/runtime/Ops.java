@@ -52,6 +52,8 @@ import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import java.lang.StackTraceElement;
+
 import org.perl6.nqp.io.AsyncFileHandle;
 import org.perl6.nqp.io.FileHandle;
 import org.perl6.nqp.io.IIOAsyncReadable;
@@ -7149,7 +7151,17 @@ public final class Ops {
     }
 
     public static SixModelObject runtruffle(SixModelObject node, ThreadContext tc) {
-        (new TruffleCompilerGen()).run(node, tc);
+        try {
+            (new TruffleCompilerGen()).run(node, tc);
+        } catch (Throwable e) {
+            StackTraceElement[] elements = e.getStackTrace();
+            System.err.println(e.toString());
+            for (int i = 0; i < elements.length; i++) {
+                if (elements[i].getFileName() == "Ops.java"
+                    && elements[i].getMethodName() == "runtruffle") break;
+                System.err.println("    at " + elements[i].toString());
+            }
+        }
         return null;
     }
 
