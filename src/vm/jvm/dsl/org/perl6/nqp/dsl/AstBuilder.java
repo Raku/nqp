@@ -13,4 +13,5 @@ public @interface AstBuilder {
     Class intClass();
     Class numClass();
     Class strClass();
+    Class scopeClass();
 }

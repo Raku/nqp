@@ -27,7 +27,8 @@ import org.perl6.nqp.dsl.AstBuilder;
     nodesClass = NQPNode[].class,
     intClass = long.class,
     numClass = double.class,
-    strClass = String.class
+    strClass = String.class,
+    scopeClass = NQPScope.class
 )
 
 abstract class TruffleCompiler {
@@ -66,22 +67,6 @@ abstract class TruffleCompiler {
             case "declare-lexical":
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 return build(node.at_pos_boxed(tc, 2), scope, tc);
-            case "get-lexical": {
-                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                return new NQPReadLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth());
-            }
-            case "bind-lexical": {
-                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                NQPNode valueNode = build(node.at_pos_boxed(tc, 2), scope, tc);
-                return new NQPBindLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
-            }
-            case "get-lexical-positional": {
-                scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                int index = (int) node.at_pos_boxed(tc, 2).get_int(tc);
-                FoundLexical foundLexical = scope.findLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                assert foundLexical.getDepth() == 0;
-                return new NQPGetPositionalNode(foundLexical.getFrameSlot(), index);
-            }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();
                 NQPNode children[] = expressions(node, 1, new NQPScopeWithFrame(frameDescriptor, scope), tc);

@@ -52,6 +52,11 @@ import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
+import org.perl6.nqp.dsl.Deserializer;
+
+import org.perl6.nqp.truffle.NQPScope;
+import org.perl6.nqp.truffle.FoundLexical;
+
 public class NQPGetPositionalNode extends NQPObjNode {
     private final FrameSlot slot;
     private final int index;
@@ -59,6 +64,14 @@ public class NQPGetPositionalNode extends NQPObjNode {
     public NQPGetPositionalNode(FrameSlot slot, int index) {
         this.slot = slot;
         this.index = index;
+    }
+
+    @Deserializer("get-lexical-positional")
+    public static NQPGetPositionalNode create(NQPScope scope, String name, long index) {
+        scope.addLexical(name);
+        FoundLexical foundLexical = scope.findLexical(name);
+        assert foundLexical.getDepth() == 0;
+        return new NQPGetPositionalNode(foundLexical.getFrameSlot(), (int) index);
     }
 
     @Override

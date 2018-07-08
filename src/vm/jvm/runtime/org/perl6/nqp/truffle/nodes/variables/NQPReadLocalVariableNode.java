@@ -52,6 +52,10 @@ import com.oracle.truffle.api.frame.Frame;
 import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.NQPTypes;
+import org.perl6.nqp.dsl.Deserializer;
+
+import org.perl6.nqp.truffle.NQPScope;
+import org.perl6.nqp.truffle.FoundLexical;
 
 public class NQPReadLocalVariableNode extends FrameLookupNode {
     private final FrameSlot slot;
@@ -59,6 +63,13 @@ public class NQPReadLocalVariableNode extends FrameLookupNode {
     public NQPReadLocalVariableNode(FrameSlot slot, int depth) {
         super(depth);
         this.slot = slot;
+    }
+
+
+    @Deserializer("get-lexical")
+    public static NQPReadLocalVariableNode create(NQPScope scope, String name) {
+        FoundLexical foundLexical = scope.findLexical(name);
+        return new NQPReadLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth());
     }
 
     @Override

@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.io.IOException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.TypeMirror;
@@ -28,6 +29,53 @@ public class Processor extends AbstractProcessor {
     Messager messager;
     String prefix = "NQP";
 
+    static class AstTypes {
+        TypeMirror nodeClass;
+        TypeMirror nodesClass;
+        TypeMirror intClass;
+        TypeMirror numClass;
+        TypeMirror strClass;
+        TypeMirror scopeClass;
+
+        AstTypes(AstBuilder annotation) {
+            try {
+                annotation.nodeClass();
+            } catch (MirroredTypeException e) {
+                nodeClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.nodesClass();
+            } catch (MirroredTypeException e) {
+                nodesClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.intClass();
+            } catch (MirroredTypeException e) {
+                intClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.numClass();
+            } catch (MirroredTypeException e) {
+                numClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.strClass();
+            } catch (MirroredTypeException e) {
+                strClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.scopeClass();
+            } catch (MirroredTypeException e) {
+                scopeClass = e.getTypeMirror();
+            }
+        }
+    }
+
     private String opNameFromClassName(String className) {
         return className.replaceFirst("^" + Pattern.quote(prefix), "")
           .replaceFirst("IntNode$", "_i")
@@ -40,43 +88,55 @@ public class Processor extends AbstractProcessor {
           .toLowerCase();
     }
 
-    private void writeBuildMethod(TypeMirror nodeClass, TypeMirror nodesClass, TypeMirror intClass, TypeMirror numClass, TypeMirror strClass, PrintWriter writer, RoundEnvironment roundEnv) {
+    private void writeBuildMethod(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
         writer.append("    public NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
 
         writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
 
-            ExecutableElement constructor = (ExecutableElement) element;
+            ExecutableElement executableElement = (ExecutableElement) element;
             TypeElement type = (TypeElement) element.getEnclosingElement();
 
             String gotOpName = ((Deserializer)element.getAnnotation(Deserializer.class)).value();
+
+            String typeName = type.getQualifiedName().toString();
+
+            String call = element.getKind() == ElementKind.CONSTRUCTOR
+                ? "new " + typeName
+                : typeName + "." + executableElement.getSimpleName().toString();
 
             String opName = gotOpName.equals("")
               ? opNameFromClassName(type.getSimpleName().toString())
               : gotOpName;
 
-            writer.append("           case \"" + opName + "\": return new " + type.getQualifiedName() + "(");
+            writer.append("           case \"" + opName + "\": return " + call + "(");
 
+            boolean first = true;;
             int i = 0;
 
-            for (VariableElement param : constructor. getParameters()) {
+            for (VariableElement param : executableElement.getParameters()) {
                 TypeMirror paramType = param.asType();
 
-                if (i != 0) {
+                if (first) {
+                    first = false;
+                } else {
                     writer.append(",");
                 }
 
-                if (paramType.equals(nodeClass)) {
+                if (paramType.equals(astTypes.nodeClass)) {
                     writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
-                } else if (paramType.equals(nodesClass)) {
+                } else if (paramType.equals(astTypes.nodesClass)) {
                     writer.append("expressions(node, " + (i+1) + ", scope, tc)");
-                } else if (paramType.equals(intClass)) {
+                } else if (paramType.equals(astTypes.intClass)) {
                     writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc)");
-                } else if (paramType.equals(numClass)) {
+                } else if (paramType.equals(astTypes.numClass)) {
                     writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_num(tc)");
-                } else if (paramType.equals(strClass)) {
+                } else if (paramType.equals(astTypes.strClass)) {
                     writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc)");
+                } else if (paramType.equals(astTypes.scopeClass)) {
+                    writer.append("scope");
+                    i--;
                 } else {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
                 }
@@ -108,43 +168,8 @@ public class Processor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(AstBuilder.class)) {
             TypeElement type = (TypeElement) element;
 
-            AstBuilder annotation = element.getAnnotation(AstBuilder.class);
+            AstTypes astTypes = new AstTypes(element.getAnnotation(AstBuilder.class));
 
-            TypeMirror nodeClass = null;
-            TypeMirror nodesClass = null;
-            TypeMirror intClass = null;
-            TypeMirror numClass = null;
-            TypeMirror strClass = null;
-
-            try {
-                annotation.nodeClass();
-            } catch (MirroredTypeException e) {
-                nodeClass = e.getTypeMirror();
-            }
-
-            try {
-                annotation.nodesClass();
-            } catch (MirroredTypeException e) {
-                nodesClass = e.getTypeMirror();
-            }
-
-            try {
-                annotation.intClass();
-            } catch (MirroredTypeException e) {
-                intClass = e.getTypeMirror();
-            }
-
-            try {
-                annotation.numClass();
-            } catch (MirroredTypeException e) {
-                numClass = e.getTypeMirror();
-            }
-
-            try {
-                annotation.strClass();
-            } catch (MirroredTypeException e) {
-                strClass = e.getTypeMirror();
-            }
 
             String builderClass =  type.getQualifiedName().toString();
             String generatedClassQualified = builderClass + "Gen";
@@ -163,7 +188,7 @@ public class Processor extends AbstractProcessor {
 
                     writer.append("public class " + generatedClassSimple + " extends " + builderClass + " {\n");
 
-                    writeBuildMethod(nodeClass, nodesClass, intClass, numClass, strClass, writer, roundEnv);
+                    writeBuildMethod(astTypes, writer, roundEnv);
 
                     writer.append("}\n");
                 }
