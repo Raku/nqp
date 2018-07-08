@@ -14,7 +14,13 @@ $fh.print($pod);
 close($fh);
 
 # ensure we use the correct executable
-my $cmd := nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
+my $cmd;
+if ((nqp::stat('./nqp-m', nqp::const::STAT_EXISTS) == 0)
+    && (nqp::stat('./nqp-j', nqp::const::STAT_EXISTS) == 0)) {
+    $cmd := './nqp';
+} else {
+    $cmd := nqp::getcomp('nqp').backend.name eq 'jvm' ?? './nqp-j' !! './nqp-m';
+}
 
 my $cmdargs := $fname;
 my $args := nqp::list($cmd, $cmdargs);
