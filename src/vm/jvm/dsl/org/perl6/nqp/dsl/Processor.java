@@ -40,7 +40,7 @@ public class Processor extends AbstractProcessor {
           .toLowerCase();
     }
 
-    private void writeBuildMethod(TypeMirror nodeClass, TypeMirror nodesClass, PrintWriter writer, RoundEnvironment roundEnv) {
+    private void writeBuildMethod(TypeMirror nodeClass, TypeMirror nodesClass, TypeMirror intClass, TypeMirror numClass, TypeMirror strClass, PrintWriter writer, RoundEnvironment roundEnv) {
         writer.append("    public NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
 
         writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
@@ -71,6 +71,12 @@ public class Processor extends AbstractProcessor {
                     writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
                 } else if (paramType.equals(nodesClass)) {
                     writer.append("expressions(node, " + (i+1) + ", scope, tc)");
+                } else if (paramType.equals(intClass)) {
+                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc)");
+                } else if (paramType.equals(numClass)) {
+                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_num(tc)");
+                } else if (paramType.equals(strClass)) {
+                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc)");
                 } else {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
                 }
@@ -106,6 +112,9 @@ public class Processor extends AbstractProcessor {
 
             TypeMirror nodeClass = null;
             TypeMirror nodesClass = null;
+            TypeMirror intClass = null;
+            TypeMirror numClass = null;
+            TypeMirror strClass = null;
 
             try {
                 annotation.nodeClass();
@@ -117,6 +126,24 @@ public class Processor extends AbstractProcessor {
                 annotation.nodesClass();
             } catch (MirroredTypeException e) {
                 nodesClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.intClass();
+            } catch (MirroredTypeException e) {
+                intClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.numClass();
+            } catch (MirroredTypeException e) {
+                numClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.strClass();
+            } catch (MirroredTypeException e) {
+                strClass = e.getTypeMirror();
             }
 
             String builderClass =  type.getQualifiedName().toString();
@@ -136,7 +163,7 @@ public class Processor extends AbstractProcessor {
 
                     writer.append("public class " + generatedClassSimple + " extends " + builderClass + " {\n");
 
-                    writeBuildMethod(nodeClass, nodesClass, writer, roundEnv);
+                    writeBuildMethod(nodeClass, nodesClass, intClass, numClass, strClass, writer, roundEnv);
 
                     writer.append("}\n");
                 }

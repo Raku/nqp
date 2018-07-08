@@ -13,10 +13,6 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 
-import org.perl6.nqp.truffle.nodes.expression.NQPIValNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPSValNode;
-import org.perl6.nqp.truffle.nodes.expression.NQPNValNode;
-
 import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
 import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
 
@@ -36,7 +32,13 @@ import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.AstBuilder;
 
-@AstBuilder(nodeClass = NQPNode.class, nodesClass = NQPNode[].class)
+@AstBuilder(
+    nodeClass = NQPNode.class,
+    nodesClass = NQPNode[].class,
+    intClass = long.class,
+    numClass = double.class,
+    strClass = String.class
+)
 
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
@@ -68,12 +70,6 @@ abstract class TruffleCompiler {
         if (trySimple != null) return trySimple;
 
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            case "ival":
-                return new NQPIValNode(node.at_pos_boxed(tc, 1).get_int(tc));
-            case "nval":
-                return new NQPNValNode(node.at_pos_boxed(tc, 1).get_num(tc));
-            case "sval":
-                return new NQPSValNode(node.at_pos_boxed(tc, 1).get_str(tc));
             case "unless":
             case "if":
                 return new NQPIfNode(

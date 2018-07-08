@@ -44,11 +44,13 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
+import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "const")
 public final class NQPNValNode extends NQPNumNode {
     private final double value;
 
+    @Deserializer
     public NQPNValNode(double value) {
         this.value = value;
     }
