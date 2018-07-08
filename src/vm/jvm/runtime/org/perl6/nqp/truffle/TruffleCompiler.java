@@ -13,17 +13,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 
-import org.perl6.nqp.truffle.nodes.io.NQPSayNode;
-import org.perl6.nqp.truffle.nodes.io.NQPPrintNode;
-
-import org.perl6.nqp.truffle.nodes.call.NQPInvokeNode;
-import org.perl6.nqp.truffle.nodes.call.NQPIntArgNode;
-import org.perl6.nqp.truffle.nodes.call.NQPStrArgNode;
-import org.perl6.nqp.truffle.nodes.call.NQPNumArgNode;
-
 import org.perl6.nqp.truffle.nodes.control.NQPIfNode;
-
-import org.perl6.nqp.truffle.nodes.expression.NQPListNode;
 
 import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
 import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
