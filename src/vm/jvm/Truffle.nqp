@@ -222,6 +222,7 @@ class QAST::OperationsTruffle {
 
     add_simple_op('chr', $STR, [$INT]);
     add_simple_op('codepointfromname', $INT, [$STR]);
+    add_simple_op('strfromname', $STR, [$STR]);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
