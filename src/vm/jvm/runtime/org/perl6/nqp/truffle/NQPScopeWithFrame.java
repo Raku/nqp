@@ -30,5 +30,9 @@ public class NQPScopeWithFrame extends NQPScope {
         }
         return new FoundLexical(found, depth);
     }
+
+    public FrameDescriptor getFrameDescriptor() {
+        return this.frameDescriptor;
+    }
 }
 

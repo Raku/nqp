@@ -6,6 +6,7 @@ import javax.annotation.processing.AbstractProcessor;
 import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.regex.Pattern;
 import java.io.IOException;
@@ -88,61 +89,92 @@ public class Processor extends AbstractProcessor {
           .toLowerCase();
     }
 
+    String getOpName(TypeElement type, String gotOpName) {
+        return gotOpName.equals("")
+          ? opNameFromClassName(type.getSimpleName().toString())
+          : gotOpName;
+    }
+
+    private void writeParams(ExecutableElement executableElement, AstTypes astTypes, PrintWriter writer) {
+        boolean first = true;;
+        int i = 0;
+
+        for (VariableElement param : executableElement.getParameters()) {
+            TypeMirror paramType = param.asType();
+
+            if (first) {
+                first = false;
+            } else {
+                writer.append(",");
+            }
+
+            if (paramType.equals(astTypes.nodeClass)) {
+                writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
+            } else if (paramType.equals(astTypes.nodesClass)) {
+                writer.append("expressions(node, " + (i+1) + ", scope, tc)");
+            } else if (paramType.equals(astTypes.intClass)) {
+                writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc)");
+            } else if (paramType.equals(astTypes.numClass)) {
+                writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_num(tc)");
+            } else if (paramType.equals(astTypes.strClass)) {
+                writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc)");
+            } else if (paramType.equals(astTypes.scopeClass)) {
+                writer.append("scope");
+                i--;
+            } else {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
+            }
+
+            i++;
+        }
+    }
+
+
+    private String getElementCall(ExecutableElement element) {
+        TypeElement type = (TypeElement) element.getEnclosingElement();
+        String typeName = type.getQualifiedName().toString();
+        return element.getKind() == ElementKind.CONSTRUCTOR
+            ? "new " + typeName
+            : typeName + "." + element.getSimpleName().toString();
+    }
+
     private void writeBuildMethod(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
         writer.append("    public NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
 
         writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
 
-        for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
+        HashMap<String, ExecutableElement> predeserializers = new HashMap<String, ExecutableElement>();
 
+        for (Element element : roundEnv.getElementsAnnotatedWith(Predeserializer.class)) {
             ExecutableElement executableElement = (ExecutableElement) element;
+
+            String opName = ((Predeserializer)element.getAnnotation(Predeserializer.class)).value();
+
+            predeserializers.put(opName, executableElement);
+
+        }
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
+            ExecutableElement executableElement = (ExecutableElement) element;
+
+
             TypeElement type = (TypeElement) element.getEnclosingElement();
 
-            String gotOpName = ((Deserializer)element.getAnnotation(Deserializer.class)).value();
+            String opName = getOpName(type, ((Deserializer)element.getAnnotation(Deserializer.class)).value());
 
-            String typeName = type.getQualifiedName().toString();
+            writer.append("           case \"" + opName + "\":\n");
 
-            String call = element.getKind() == ElementKind.CONSTRUCTOR
-                ? "new " + typeName
-                : typeName + "." + executableElement.getSimpleName().toString();
-
-            String opName = gotOpName.equals("")
-              ? opNameFromClassName(type.getSimpleName().toString())
-              : gotOpName;
-
-            writer.append("           case \"" + opName + "\": return " + call + "(");
-
-            boolean first = true;;
-            int i = 0;
-
-            for (VariableElement param : executableElement.getParameters()) {
-                TypeMirror paramType = param.asType();
-
-                if (first) {
-                    first = false;
-                } else {
-                    writer.append(",");
-                }
-
-                if (paramType.equals(astTypes.nodeClass)) {
-                    writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
-                } else if (paramType.equals(astTypes.nodesClass)) {
-                    writer.append("expressions(node, " + (i+1) + ", scope, tc)");
-                } else if (paramType.equals(astTypes.intClass)) {
-                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc)");
-                } else if (paramType.equals(astTypes.numClass)) {
-                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_num(tc)");
-                } else if (paramType.equals(astTypes.strClass)) {
-                    writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc)");
-                } else if (paramType.equals(astTypes.scopeClass)) {
-                    writer.append("scope");
-                    i--;
-                } else {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
-                }
-
-                i++;
+            if (predeserializers.containsKey(opName)) {
+                ExecutableElement predeserializer = predeserializers.get(opName);
+                writer.append("scope = " + getElementCall(predeserializer) + "(");
+                writeParams(predeserializer, astTypes, writer);
+                writer.append(");\n");
             }
+
+            writer.append("                return " + getElementCall(executableElement) + "(");
+
+            writeParams(executableElement, astTypes, writer);
+
 
             writer.append(");\n");
         }

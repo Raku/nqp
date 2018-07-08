@@ -22,6 +22,9 @@ import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.AstBuilder;
 
+import org.perl6.nqp.dsl.Predeserializer;
+import org.perl6.nqp.dsl.Deserializer;
+
 @AstBuilder(
     nodeClass = NQPNode.class,
     nodesClass = NQPNode[].class,
@@ -57,19 +60,34 @@ abstract class TruffleCompiler {
         if (trySimple != null) return trySimple;
 
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            case "declare-lexical":
-                scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
-                return build(node.at_pos_boxed(tc, 2), scope, tc);
-            case "block": {
-                FrameDescriptor frameDescriptor = new FrameDescriptor();
-                NQPNode children[] = expressions(node, 1, new NQPScopeWithFrame(frameDescriptor, scope), tc);
-                return new NQPBlockNode(
-                    new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
-                );
-            }
             default:
                 throw new IllegalArgumentException("Wrong node type: " + node.at_pos_boxed(tc, 0).get_str(tc));
         }
+    }
+
+    @Predeserializer("block")
+    public static NQPScope createNewScope(NQPScope scope) {
+        FrameDescriptor frameDescriptor = new FrameDescriptor();
+        return new NQPScopeWithFrame(frameDescriptor, scope);
+    }
+
+    @Deserializer("block")
+    public static NQPNode createBlock(NQPScope scope, NQPNode[] children) {
+        FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
+        return new NQPBlockNode(
+            new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
+        );
+    }
+
+    @Predeserializer("declare-lexical")
+    public static NQPScope declareLexical(NQPScope scope, String name) {
+        scope.addLexical(name);
+        return scope;
+    }
+
+    @Deserializer("declare-lexical")
+    public static NQPNode createDeclareLexical(NQPScope scope, String name, NQPNode inner) {
+        return inner;
     }
 }
 
