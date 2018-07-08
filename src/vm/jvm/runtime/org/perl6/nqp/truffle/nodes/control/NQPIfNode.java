@@ -46,6 +46,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNodeWithBoolification;
 
+import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "if")
 public final class NQPIfNode extends NQPNodeWithBoolification {
@@ -87,5 +88,20 @@ public final class NQPIfNode extends NQPNodeWithBoolification {
                 elseNode.executeVoid(frame);
             }
         }
+    }
+
+    @Deserializer("if")
+    public static NQPIfNode createIf(NQPNode condNode, NQPNode thenNode) {
+        return new NQPIfNode(false, condNode, thenNode, null);
+    }
+
+    @Deserializer("unless")
+    public static NQPIfNode createUnless(NQPNode condNode, NQPNode thenNode) {
+        return new NQPIfNode(true, condNode, thenNode, null);
+    }
+
+    @Deserializer("if-else")
+    public static NQPIfNode createIfElse(NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
+        return new NQPIfNode(false, condNode, thenNode, elseNode);
     }
 }

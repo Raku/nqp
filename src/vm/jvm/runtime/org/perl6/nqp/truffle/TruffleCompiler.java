@@ -57,13 +57,6 @@ abstract class TruffleCompiler {
         if (trySimple != null) return trySimple;
 
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            case "unless":
-            case "if":
-                return new NQPIfNode(
-                    node.at_pos_boxed(tc, 0).get_str(tc) == "unless",
-                    build(node.at_pos_boxed(tc, 1), scope, tc),
-                    build(node.at_pos_boxed(tc, 2), scope, tc),
-                    node.elems(tc) == 4 ? build(node.at_pos_boxed(tc, 3), scope, tc) : null);
             case "declare-lexical":
                 scope.addLexical(node.at_pos_boxed(tc, 1).get_str(tc));
                 return build(node.at_pos_boxed(tc, 2), scope, tc);

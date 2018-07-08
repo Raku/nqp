@@ -280,9 +280,9 @@ class QAST::OperationsTruffle {
             my $cond := $comp.as_truffle($node[0], :want($OBJ));
             my $then := $comp.as_truffle($node[1], :want($result_type));
 
-            my @tree := [$op_name, $cond.tree, $then.tree];
-
-            nqp::push(@tree, $comp.as_truffle($node[2], :want($result_type)).tree) if $operands == 3;
+            my @tree := $operands == 3
+                  ?? [$op_name ~ '-else', $cond.tree, $then.tree, $comp.as_truffle($node[2], :want($result_type)).tree]
+                  !! [$op_name, $cond.tree, $then.tree];
 
             return TAST.new($result_type, @tree);
         });
