@@ -40,10 +40,6 @@ abstract class TruffleCompiler {
         callTarget.call();
     }
 
-    private NQPNode[] expressions(SixModelObject node, NQPScope scope, ThreadContext tc) {
-        return expressions(node, 1, scope, tc);
-    }
-
     protected NQPNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
         int elems = (int) node.elems(tc);
         NQPNode children[] = new NQPNode[elems - from];
@@ -88,7 +84,7 @@ abstract class TruffleCompiler {
             }
             case "block": {
                 FrameDescriptor frameDescriptor = new FrameDescriptor();
-                NQPNode children[] = expressions(node, new NQPScopeWithFrame(frameDescriptor, scope), tc);
+                NQPNode children[] = expressions(node, 1, new NQPScopeWithFrame(frameDescriptor, scope), tc);
                 return new NQPBlockNode(
                     new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
                 );
