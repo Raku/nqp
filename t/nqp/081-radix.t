@@ -1,4 +1,4 @@
-plan(32*3*2 + 3);
+plan(32*3*2 + 3 + 5);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -48,7 +48,7 @@ test_radix_both(10,"000123",0,2,  123,1000000,6,  "base-10 with zeros at the fro
 test_radix_both(10,"1_2_3",0,2,  123,1000,5,  "base-10 with underscores");
 test_radix_both(10,"not_a_number",0,2,  0,1,-1,  "no digits consumed");
 
-test_radix_I(10,"9883481620585741369158_914214988194663201633129_26952423791023078876139",0,2, 
+test_radix_I(10,"9883481620585741369158_914214988194663201633129_26952423791023078876139",0,2,
         "988348162058574136915891421498819466320163312926952423791023078876139",
         "1000000000000000000000000000000000000000000000000000000000000000000000",
         71,  "converting a huge number with radix_I");
@@ -78,3 +78,10 @@ test_radix_both(8,"1238321",0,2, 83,512,3, "no digits consumed with digit outsid
 test_radix_both(8,"-1238321",1,2, 83,512,4, "no digits consumed with digit outside radix");
 
 test_radix_both(10,'⁰',0,0, 0,1,-1, 'unsupported by radix');
+
+# Putting the number in nqp doesn't work since it may store it as a num in between
+# so use coerce_si to test coerce_is
+my @strings := ('9223372036854775807', '0', '-1', '1', '-9223372036854775808');
+for @strings {
+    is(nqp::coerce_is(nqp::coerce_si($_)), $_, "coerce_si and coerce_is round trip '$_'");
+}
