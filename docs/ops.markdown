@@ -116,8 +116,7 @@
   * [substr](#substr)
   * [tc](#tc)
   * [uc](#uc)
-  * [unicmp_s](#unicmp_s)
-      - [Parameters:](#parameters)
+  * [unicmp_s `js` `moar`](#unicmp_s)
   * [x](#x)
 - [Unicode Property Opcodes](#-unicode-property-opcodes)
   * [getuniname](#getuniname)
@@ -1210,17 +1209,16 @@ Return titlecase copy of string.
 
 Return uppercase copy of string.
 
-## unicmp_s
-* `unicmp_s(str, str, int, int, int --> int)`
-(Currently only on MoarVM)
+## unicmp_s `js` `moar`
+* `unicmp_s(str $str1, str Str2, int $mode, int $iso639, int $iso3166 --> int)`
 
 Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
 #### Parameters:
 ```
-str, str, # strings to compare
-int,      # collation mode (bitmask)
-int,      # ISO 639 Language code
-int       # ISO 3166 Country code
+$str1, $str2  # strings to compare
+$mode         # collation mode (bitmask)
+$iso639       # ISO 639 Language code
+$iso3166      # ISO 3166 Country code
 ```
 
 The collation mode defines whether we use Primary, Secondary, Tertiary and/or
