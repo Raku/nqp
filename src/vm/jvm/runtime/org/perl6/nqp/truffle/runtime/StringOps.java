@@ -41,4 +41,9 @@ public class StringOps {
         }
         return found == null ? -1 : found;
     }
+
+    public static String codepointToTitleCase(int codepoint) {
+        if (codepoint == 223) return "Ss";
+        return new String(Character.toChars(Character.toTitleCase(codepoint)));
+    }
 }
