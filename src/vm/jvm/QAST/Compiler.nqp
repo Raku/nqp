@@ -2672,6 +2672,10 @@ QAST::OperationsJAST.map_classlib_core_op('iscont_n', $TYPE_OPS, 'iscont_n', [$R
 QAST::OperationsJAST.map_classlib_core_op('iscont_s', $TYPE_OPS, 'iscont_s', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('isrwcont', $TYPE_OPS, 'isrwcont', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont', $TYPE_OPS, 'decont', [$RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.add_core_op('wantdecont', -> $qastcomp, $op {
+    # Currently, no optimization for this on JVM backend. 
+    $qastcomp.as_jast($op[0])
+});
 QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_n', $TYPE_OPS, 'decont_n', [$RT_OBJ], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_s', $TYPE_OPS, 'decont_s', [$RT_OBJ], $RT_STR, :tc);
