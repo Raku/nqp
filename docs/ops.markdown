@@ -107,7 +107,6 @@
   * [radix](#radix)
   * [replace](#replace)
   * [rindex](#rindex)
-  * [rindexfromend `jvm`](#rindexfromend-jvm)
   * [split](#split)
   * [sprintf](#sprintf)
   * [sprintfdirectives](#sprintfdirectives)
@@ -115,8 +114,6 @@
   * [strfromcodes](#strfromcodes)
   * [strtocodes](#strtocodes)
   * [substr](#substr)
-  * [substr2 `jvm`](#substr2-jvm)
-  * [substr3 `jvm`](#substr3-jvm)
   * [tc](#tc)
   * [uc](#uc)
   * [unicmp_s](#unicmp_s)
@@ -1133,11 +1130,7 @@ Searching backwards through the `$haystack`, return the position at which
 specified, otherwise start from the last position.
 
 * `rindexfrom(str $haystack, str $needle, int $pos)` _Internal_
-
-`rindex` is converted to this internal opcode by the compiler.
-
-## rindexfromend `jvm`
-* `rindexfromend(str $haystack, str $needle)` _Internal_
+* `rindexfromend(str $haystack, str $needle)` `jvm` _Internal_
 
 `rindex` is converted to this internal opcode by the compiler.
 
@@ -1202,15 +1195,10 @@ If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
 
-## substr2 `jvm`
-* `substr2(str $str, int $position)` _Internal_
+* `substr2(str $str, int $position)` `jvm` _Internal_
+* `substr3(str $str, int $position, int $length)` `jvm` _Internal_
 
-A JVM specific internal opcode for `substr`.
-
-## substr3 `jvm`
-* `substr3(str $str, int $position, int $length)` _Internal_
-
-A JVM specific internal opcode for `substr`.
+JVM specific internal opcodes for `substr`.
 
 ## tc
 * `tc(str $str --> str)`
