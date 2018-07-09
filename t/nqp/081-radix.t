@@ -81,12 +81,7 @@ test_radix_both(10,'⁰',0,0, 0,1,-1, 'unsupported by radix');
 
 # Putting the number in nqp doesn't work since it may store it as a num in between
 # so use coerce_si to test coerce_is
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("coerce_is and coerce_si not enabled", 5);
-}
-else {
-    my @strings := ('9223372036854775807', '0', '-1', '1', '-9223372036854775808');
-    for @strings {
-        is(nqp::coerce_is(nqp::coerce_si($_)), $_, "coerce_si and coerce_is round trip '$_'");
-    }
+my @strings := ('9223372036854775807', '0', '-1', '1', '-9223372036854775808');
+for @strings {
+    is(nqp::coerce_is(nqp::coerce_si($_)), $_, "coerce_si and coerce_is round trip '$_'");
 }

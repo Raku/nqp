@@ -7448,4 +7448,12 @@ public final class Ops {
         System.gc();
         return null;
     }
+
+    public static long coerce_si(String s, ThreadContext tc) {
+        return Long.parseLong(s);
+    }
+
+    public static String coerce_is(long l, ThreadContext tc) {
+        return Long.toString(l);
+    }
 }
