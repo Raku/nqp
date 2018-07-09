@@ -109,9 +109,9 @@ public class Processor extends AbstractProcessor {
             }
 
             if (paramType.equals(astTypes.nodeClass)) {
-                writer.append("build(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
+                writer.append("tastToNode(node.at_pos_boxed(tc, " + (i+1) + "), scope, tc)");
             } else if (paramType.equals(astTypes.nodesClass)) {
-                writer.append("expressions(node, " + (i+1) + ", scope, tc)");
+                writer.append("tastToNodeArray(node, " + (i+1) + ", scope, tc)");
             } else if (paramType.equals(astTypes.intClass)) {
                 writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc)");
             } else if (paramType.equals(astTypes.numClass)) {
@@ -139,7 +139,7 @@ public class Processor extends AbstractProcessor {
     }
 
     private void writeBuildMethod(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
-        writer.append("    public NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
+        writer.append("    public NQPNode tastToNode(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
 
         writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
 
@@ -179,7 +179,7 @@ public class Processor extends AbstractProcessor {
             writer.append(");\n");
         }
 
-        writer.append("            default: return null;\n");
+        writer.append("            default: throw new IllegalArgumentException(\"Wrong node type: \" + node.at_pos_boxed(tc, 0).get_str(tc));\n");
 
         writer.append("        }\n");
 

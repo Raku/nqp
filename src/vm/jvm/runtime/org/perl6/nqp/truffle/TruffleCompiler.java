@@ -37,33 +37,23 @@ import org.perl6.nqp.dsl.Deserializer;
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
         FrameDescriptor frameDescriptor = new FrameDescriptor();
-        RootNode rootNode = new NQPRootNode(null, frameDescriptor, build(node, new NQPScopeWithFrame(frameDescriptor, null), tc));
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, tastToNode(node, new NQPScopeWithFrame(frameDescriptor, null), tc));
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
         callTarget.call();
     }
 
-    protected NQPNode[] expressions(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
+    protected NQPNode[] tastToNodeArray(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {
         int elems = (int) node.elems(tc);
         NQPNode children[] = new NQPNode[elems - from];
         for (int i = from; i < elems; i++) {
-           children[i-from] =  build(node.at_pos_boxed(tc, i), scope, tc);
+           children[i-from] =  tastToNode(node.at_pos_boxed(tc, i), scope, tc);
         }
         return children;
     }
 
-    abstract protected NQPNode buildSimple(SixModelObject node, NQPScope scope, ThreadContext tc);
-
-    public NQPNode build(SixModelObject node, NQPScope scope, ThreadContext tc) {
-        NQPNode trySimple = buildSimple(node, scope, tc);
-        if (trySimple != null) return trySimple;
-
-        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
-            default:
-                throw new IllegalArgumentException("Wrong node type: " + node.at_pos_boxed(tc, 0).get_str(tc));
-        }
-    }
+    abstract protected NQPNode tastToNode(SixModelObject node, NQPScope scope, ThreadContext tc);
 
     @Predeserializer("block")
     public static NQPScope createNewScope(NQPScope scope) {
