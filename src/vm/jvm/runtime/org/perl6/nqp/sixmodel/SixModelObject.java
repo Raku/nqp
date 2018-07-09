@@ -45,6 +45,14 @@ public abstract class SixModelObject implements Cloneable {
             String name, long hint) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support attributes");
     }
+    public SixModelObject cas_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+            String name, SixModelObject expected, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support cas of attributes");
+    }
+    public void atomic_bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+            String name, SixModelObject value) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support atomic binding to attributes");
+    }
 
     /**
      * Boxing related functions.

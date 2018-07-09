@@ -5859,6 +5859,15 @@ public final class Ops {
                 "Cannot atomic store to an immutable value");
         }
     }
+    public static SixModelObject casattr(SixModelObject obj, SixModelObject class_handle,
+            String name, SixModelObject expected, SixModelObject value, ThreadContext tc) {
+        return obj.cas_attribute_boxed(tc, class_handle, name, expected, value);
+    }
+    public static SixModelObject atomicbindattr(SixModelObject obj, SixModelObject class_handle,
+            String name, SixModelObject value, ThreadContext tc) {
+        obj.atomic_bind_attribute_boxed(tc, class_handle, name, value);
+        return value;
+    }
 
     /* Asynchronousy operations. */
 

@@ -5,6 +5,9 @@ import org.perl6.nqp.sixmodel.SerializationReader;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.TypeObject;
 
+import java.lang.reflect.Field;
+import sun.misc.Unsafe;
+
 public class P6OpaqueBaseInstance extends SixModelObject {
     // If this is not null, all operations are delegate to it. Used when we
     // load the object from an SC or when we mix in and it causes a resize.
@@ -104,6 +107,51 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             return this.delegate.is_attribute_initialized(tc, class_handle, name, hint);
         else
             return super.is_attribute_initialized(tc, class_handle, name, hint);
+    }
+
+    private Unsafe unsafe;
+    private long scalarValueOffset;
+
+    @SuppressWarnings("restriction")
+    private void ensureAtomicsReady() {
+        if (unsafe == null) {
+            try {
+                Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+                unsafeField.setAccessible(true);
+                unsafe = (Unsafe)unsafeField.get(null);
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public SixModelObject cas_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+            String name, SixModelObject expected, SixModelObject value) {
+        ensureAtomicsReady();
+        try {
+            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
+                "field_" + resolveAttribute(class_handle, name)));
+            return unsafe.compareAndSwapObject(this, offset, expected, value)
+                ? expected
+                : (SixModelObject)unsafe.getObjectVolatile(this, offset);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void atomic_bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+            String name, SixModelObject value) {
+        ensureAtomicsReady();
+        try {
+            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
+                "field_" + resolveAttribute(class_handle, name)));
+            unsafe.putObjectVolatile(this, offset, value);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public SixModelObject posDelegate() {
