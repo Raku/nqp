@@ -89,7 +89,9 @@ public class Processor extends AbstractProcessor {
           .toLowerCase();
     }
 
-    String getOpName(TypeElement type, String gotOpName) {
+    String getOpName(Element element) {
+        TypeElement type = (TypeElement) element.getEnclosingElement();
+        String gotOpName = ((Deserializer)element.getAnnotation(Deserializer.class)).value();
         return gotOpName.equals("")
           ? opNameFromClassName(type.getSimpleName().toString())
           : gotOpName;
@@ -138,11 +140,25 @@ public class Processor extends AbstractProcessor {
             : typeName + "." + element.getSimpleName().toString();
     }
 
-    private void writeBuildMethod(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
-        writer.append("    public NQPNode tastToNode(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
+    private HashMap<String, Integer> calculateOpCodes(RoundEnvironment roundEnv) {
+        HashMap<String, Integer> opCodes = new HashMap<String, Integer>();
+        List<String> opNames = new ArrayList<String>();
 
-        writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
+        for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
+            opNames.add(getOpName(element));
+        }
 
+        opNames.sort(null);
+
+        int id = 1;
+        for (String opName : opNames) {
+            opCodes.put(opName, id++);
+        }
+
+        return opCodes;
+    }
+
+    private HashMap<String, ExecutableElement> getPredeserializers(RoundEnvironment roundEnv) {
         HashMap<String, ExecutableElement> predeserializers = new HashMap<String, ExecutableElement>();
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Predeserializer.class)) {
@@ -154,13 +170,22 @@ public class Processor extends AbstractProcessor {
 
         }
 
+        return predeserializers;
+    }
+
+    private void writeTastToNode(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
+        HashMap<String, ExecutableElement> predeserializers = getPredeserializers(roundEnv);
+
+        writer.append("    public NQPNode tastToNode(SixModelObject node, NQPScope scope, ThreadContext tc) {\n");
+
+        writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
+
+
         for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
             ExecutableElement executableElement = (ExecutableElement) element;
 
 
-            TypeElement type = (TypeElement) element.getEnclosingElement();
-
-            String opName = getOpName(type, ((Deserializer)element.getAnnotation(Deserializer.class)).value());
+            String opName = getOpName(element);
 
             writer.append("           case \"" + opName + "\":\n");
 
@@ -185,6 +210,134 @@ public class Processor extends AbstractProcessor {
 
         writer.append("    }\n");
     }
+
+    private void writeArgumentsToByteCode(ExecutableElement executableElement, AstTypes astTypes, PrintWriter writer) {
+        int i = 0;
+
+        String indent = "               ";
+
+        for (VariableElement param : executableElement.getParameters()) {
+            TypeMirror paramType = param.asType();
+
+            if (paramType.equals(astTypes.nodeClass)) {
+                writer.append(indent + "tastToByteCode(node.at_pos_boxed(tc, " + (i+1) + "), writer, tc);\n");
+            } else if (paramType.equals(astTypes.nodesClass)) {
+                writer.append(indent + "childrenToByteCode(node, " + (i+1) + ", writer, tc);\n");
+            } else if (paramType.equals(astTypes.intClass)) {
+                writer.append(indent + "writer.writeInt(node.at_pos_boxed(tc, " + (i+1) + ").get_int(tc));\n");
+            } else if (paramType.equals(astTypes.numClass)) {
+                writer.append(indent + "writer.writeNum(node.at_pos_boxed(tc, " + (i+1) + ").get_num(tc));\n");
+            } else if (paramType.equals(astTypes.strClass)) {
+                writer.append("writer.writeStr(node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc));\n");
+            } else if (paramType.equals(astTypes.scopeClass)) {
+                i--;
+            } else {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
+            }
+
+            i++;
+        }
+    }
+
+    private void writeByteCodeParams(ExecutableElement executableElement, String reader, AstTypes astTypes, PrintWriter writer) {
+        boolean first = true;;
+
+        for (VariableElement param : executableElement.getParameters()) {
+            TypeMirror paramType = param.asType();
+
+            if (first) {
+                first = false;
+            } else {
+                writer.append(",");
+            }
+
+            if (paramType.equals(astTypes.nodeClass)) {
+                writer.append("byteCodeToNode(" + reader + ", scope)");
+            } else if (paramType.equals(astTypes.nodesClass)) {
+                writer.append("byteCodeToNodeArray(" + reader + ", scope)");
+            } else if (paramType.equals(astTypes.intClass)) {
+                writer.append(reader + ".readInt()");
+            } else if (paramType.equals(astTypes.numClass)) {
+                writer.append(reader + ".readNum()");
+            } else if (paramType.equals(astTypes.strClass)) {
+                writer.append(reader + ".readStr()");
+            } else if (paramType.equals(astTypes.scopeClass)) {
+                writer.append("scope");
+            } else {
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
+            }
+
+        }
+    }
+
+    private void writeTastToByteCode(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
+        HashMap<String, Integer> opIds = calculateOpCodes(roundEnv);
+
+        writer.append("    public void tastToByteCode(SixModelObject node, ByteCodeWriter writer, ThreadContext tc) {\n");
+        writer.append("        switch (node.at_pos_boxed(tc, 0).get_str(tc)) {\n");
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
+            ExecutableElement executableElement = (ExecutableElement) element;
+
+            String opName = getOpName(element);
+
+            writer.append("           case \"" + opName + "\":\n");
+            writer.append("               writer.writeOpCode(" + opIds.get(opName).toString() + ");\n");
+            writeArgumentsToByteCode(executableElement, astTypes, writer);
+
+            writer.append("               break;\n");
+        }
+
+
+        writer.append("            default: throw new IllegalArgumentException(\"Wrong node type: \" + node.at_pos_boxed(tc, 0).get_str(tc));\n");
+
+        writer.append("        }\n");
+
+        writer.append("    }\n");
+    }
+
+    private void writeByteCodeToNode(AstTypes astTypes, PrintWriter writer, RoundEnvironment roundEnv) {
+        HashMap<String, ExecutableElement> predeserializers = getPredeserializers(roundEnv);
+
+        HashMap<String, Integer> opIds = calculateOpCodes(roundEnv);
+
+        writer.append("    public NQPNode byteCodeToNode(ByteCodeReader reader, NQPScope scope) {\n");
+
+        writer.append("        switch (reader.readOpCode()) {\n");
+
+
+        for (Element element : roundEnv.getElementsAnnotatedWith(Deserializer.class)) {
+            ExecutableElement executableElement = (ExecutableElement) element;
+
+
+            String opName = getOpName(element);
+
+            writer.append("           case " + opIds.get(opName).toString()+ ":\n");
+
+            if (predeserializers.containsKey(opName)) {
+                ExecutableElement predeserializer = predeserializers.get(opName);
+                writer.append("{\n");
+                writer.append("ByteCodeReader readerClone = reader.duplicate();\n");
+                writer.append("scope = " + getElementCall(predeserializer) + "(");
+                writeByteCodeParams(predeserializer, "readerClone", astTypes, writer);
+                writer.append(");\n");
+                writer.append("}\n");
+            }
+
+            writer.append("                return " + getElementCall(executableElement) + "(");
+
+            writeByteCodeParams(executableElement, "reader", astTypes, writer);
+
+            writer.append(");\n");
+        }
+
+        writer.append("            default: throw new IllegalArgumentException(\"Wrong op code \");\n");
+
+        writer.append("        }\n");
+
+        writer.append("    }\n");
+    }
+
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -214,13 +367,19 @@ public class Processor extends AbstractProcessor {
                 try (PrintWriter writer = new PrintWriter(builderFile.openWriter())) {
                     writer.append("package " + packageName + ";\n");
 
+
                     writer.append("import org.perl6.nqp.truffle.nodes.NQPNode;\n");
+                    writer.append("import org.perl6.nqp.truffle.ByteCodeWriter;\n");
+                    writer.append("import org.perl6.nqp.truffle.ByteCodeReader;\n");
                     writer.append("import org.perl6.nqp.runtime.ThreadContext;\n");
                     writer.append("import org.perl6.nqp.sixmodel.SixModelObject;\n");
 
                     writer.append("public class " + generatedClassSimple + " extends " + builderClass + " {\n");
+                    writeTastToByteCode(astTypes, writer, roundEnv);
 
-                    writeBuildMethod(astTypes, writer, roundEnv);
+                    writeTastToNode(astTypes, writer, roundEnv);
+
+                    writeByteCodeToNode(astTypes, writer, roundEnv);
 
                     writer.append("}\n");
                 }

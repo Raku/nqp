@@ -7165,6 +7165,16 @@ public final class Ops {
         return null;
     }
 
+    public static String runtrufflebytecode(String file, ThreadContext tc) {
+        (new TruffleCompilerGen()).runByteCode(file);
+        return file;
+    }
+
+    public static SixModelObject tasttobytecode(SixModelObject tast, String output, ThreadContext tc) {
+          (new TruffleCompilerGen()).writeByteCode(tast, output, tc);
+          return tast;
+    }
+
     public static SixModelObject compilejasttofile(SixModelObject jast, SixModelObject jastNodes, String filename, ThreadContext tc) {
         JASTCompiler.writeClass(jast, jastNodes, filename, tc);
         return jast;

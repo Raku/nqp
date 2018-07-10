@@ -38,6 +38,10 @@ class TAST {
         nqp::runtruffle($!tree);
     }
 
+    method write_bytecode($output) {
+        nqp::tasttobytecode($!tree, $output);
+    }
+
     sub sexpr(int $unquoted, $thing, int $indent = 0) {
       if nqp::islist($thing) {
           my @ret;
@@ -619,7 +623,17 @@ class TruffleBackend {
     }
 
     method stages() {
-        'tast truffle'
+        'tast bytecode truffle'
+    }
+
+    method bytecode($tast, *%adverbs) {
+        if (%adverbs<target> eq 'bytecode') && %adverbs<output> {
+            $tast.write_bytecode(%adverbs<output>);
+            nqp::null;
+        }
+        else {
+            $tast;
+        }
     }
 
     method tast($qast, *%adverbs) {
@@ -653,6 +667,6 @@ class TruffleBackend {
     }
 
     method is_compunit($cuish) {
-        nqp::isinvokable($cuish) || nqp::iscompunit($cuish);
+        !nqp::isnull($cuish) && (nqp::isinvokable($cuish) || nqp::iscompunit($cuish));
     }
 }
