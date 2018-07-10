@@ -30,11 +30,6 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 
-import org.perl6.nqp.truffle.nodes.control.NQPIfNode;
-
-import org.perl6.nqp.truffle.nodes.variables.NQPReadLocalVariableNode;
-import org.perl6.nqp.truffle.nodes.variables.NQPBindLocalVariableNode;
-import org.perl6.nqp.truffle.nodes.variables.NQPGetPositionalNode;
 import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.AstBuilder;
