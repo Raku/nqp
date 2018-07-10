@@ -78,6 +78,7 @@ import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTCompiler;
 import org.perl6.nqp.truffle.TruffleCompilerGen;
+import org.perl6.nqp.truffle.ByteCodeRunnerGen;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
 import org.perl6.nqp.sixmodel.ContainerSpec;
@@ -7166,7 +7167,7 @@ public final class Ops {
     }
 
     public static String runtrufflebytecode(String file, ThreadContext tc) {
-        (new TruffleCompilerGen()).runByteCode(file);
+        (new ByteCodeRunnerGen()).runByteCode(file);
         return file;
     }
 

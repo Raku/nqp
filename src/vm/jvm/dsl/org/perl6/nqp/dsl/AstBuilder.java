@@ -14,4 +14,7 @@ public @interface AstBuilder {
     Class numClass();
     Class strClass();
     Class scopeClass();
+    boolean tastToByteCode();
+    boolean tastToNode();
+    boolean byteCodeToNode();
 }

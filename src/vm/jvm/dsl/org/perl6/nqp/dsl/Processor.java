@@ -353,7 +353,8 @@ public class Processor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(AstBuilder.class)) {
             TypeElement type = (TypeElement) element;
 
-            AstTypes astTypes = new AstTypes(element.getAnnotation(AstBuilder.class));
+            AstBuilder astBuilder = element.getAnnotation(AstBuilder.class);
+            AstTypes astTypes = new AstTypes(astBuilder);
 
 
             String builderClass =  type.getQualifiedName().toString();
@@ -369,17 +370,33 @@ public class Processor extends AbstractProcessor {
 
 
                     writer.append("import org.perl6.nqp.truffle.nodes.NQPNode;\n");
-                    writer.append("import org.perl6.nqp.truffle.ByteCodeWriter;\n");
-                    writer.append("import org.perl6.nqp.truffle.ByteCodeReader;\n");
-                    writer.append("import org.perl6.nqp.runtime.ThreadContext;\n");
-                    writer.append("import org.perl6.nqp.sixmodel.SixModelObject;\n");
+
+                    if (astBuilder.tastToByteCode()) {
+                        writer.append("import org.perl6.nqp.truffle.ByteCodeWriter;\n");
+                    }
+
+                    if (astBuilder.tastToByteCode() || astBuilder.tastToNode()) {
+                        writer.append("import org.perl6.nqp.runtime.ThreadContext;\n");
+                        writer.append("import org.perl6.nqp.sixmodel.SixModelObject;\n");
+                    }
+
+
+                    if (astBuilder.byteCodeToNode()) {
+                        writer.append("import org.perl6.nqp.truffle.ByteCodeReader;\n");
+                    }
 
                     writer.append("public class " + generatedClassSimple + " extends " + builderClass + " {\n");
-                    writeTastToByteCode(astTypes, writer, roundEnv);
+                    if (astBuilder.tastToByteCode()) {
+                        writeTastToByteCode(astTypes, writer, roundEnv);
+                    }
 
-                    writeTastToNode(astTypes, writer, roundEnv);
+                    if (astBuilder.tastToNode()) {
+                        writeTastToNode(astTypes, writer, roundEnv);
+                    }
 
-                    writeByteCodeToNode(astTypes, writer, roundEnv);
+                    if (astBuilder.byteCodeToNode()) {
+                        writeByteCodeToNode(astTypes, writer, roundEnv);
+                    }
 
                     writer.append("}\n");
                 }
