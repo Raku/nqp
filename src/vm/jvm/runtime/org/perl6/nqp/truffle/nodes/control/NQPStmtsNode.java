@@ -38,11 +38,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle;
-
-/*import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;*/
+package org.perl6.nqp.truffle.nodes;
 
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -54,21 +50,17 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "stmts", description = "The node implementing a QAST::Stmts")
-public final class NQPStmts extends NQPNode {
+public final class NQPStmtsNode extends NQPNode {
     @Children private final NQPNode[] bodyNodes;
 
     @Deserializer
-    public NQPStmts(NQPNode[] bodyNodes) {
+    public NQPStmtsNode(NQPNode[] bodyNodes) {
         this.bodyNodes = bodyNodes;
     }
 
     @Override
     @ExplodeLoop
     public Object execute(VirtualFrame frame) {
-        /*
-         * This assertion illustrates that the array length is really a constant during compilation.
-         */
-
         Object ret = null;
 
         CompilerAsserts.compilationConstant(bodyNodes.length);
