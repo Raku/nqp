@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class ByteCodeWriter {
+    static byte[] MAGIC = new byte[] {'T', 'R', 'U', 'F', 'F', 'L', 'E', '6', '\r', '\n'};
     private ByteBuffer buffer;
 
     ByteCodeWriter() {
@@ -27,6 +28,11 @@ public class ByteCodeWriter {
             replacement.position(position);
             buffer = replacement;
         }
+    }
+
+    public void writeMagicString() {
+        growToHold(MAGIC.length);
+        buffer.put(MAGIC);
     }
 
     public void writeOpCode(int opCode) {

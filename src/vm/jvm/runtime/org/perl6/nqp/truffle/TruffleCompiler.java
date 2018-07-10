@@ -109,7 +109,10 @@ abstract class TruffleCompiler {
 
     public void writeByteCode(SixModelObject tast, String output, ThreadContext tc) {
         ByteCodeWriter writer = new ByteCodeWriter();
+
+        writer.writeMagicString();
         writer.writeVersion(0);
+
         tastToByteCode(tast, writer, tc);
 
         try {
@@ -145,6 +148,10 @@ abstract class TruffleCompiler {
             buffer.order(ByteOrder.LITTLE_ENDIAN);
 
             ByteCodeReader reader = new ByteCodeReader(buffer);
+
+            if (!reader.hasMagicString()) {
+                throw new RuntimeException("Bytecode stream corrupt (missing magic string)");
+            }
             long version = reader.readVersion();
 
             FrameDescriptor frameDescriptor = new FrameDescriptor();

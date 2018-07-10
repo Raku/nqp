@@ -3,6 +3,7 @@ package org.perl6.nqp.truffle;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 public class ByteCodeReader {
     private ByteBuffer buffer;
@@ -29,6 +30,13 @@ public class ByteCodeReader {
 
     public double readNum() {
         return buffer.getDouble();
+    }
+
+    public boolean hasMagicString() {
+        if (buffer.remaining() < ByteCodeWriter.MAGIC.length) return false;
+        byte maybeMagic[] = new byte[ByteCodeWriter.MAGIC.length];
+        buffer.get(maybeMagic);
+        return Arrays.equals(maybeMagic, ByteCodeWriter.MAGIC);
     }
 
     public String readStr() {
