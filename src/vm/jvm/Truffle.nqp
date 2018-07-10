@@ -227,6 +227,11 @@ class QAST::OperationsTruffle {
     add_simple_op('chr', $STR, [$INT]);
     add_simple_op('codepointfromname', $INT, [$STR]);
     add_simple_op('strfromname', $STR, [$STR]);
+    add_simple_op('escape', $STR, [$STR]);
+    add_simple_op('flip', $STR, [$STR]);
+    add_simple_op('findcclass', $INT, [$INT, $STR, $INT, $INT]);
+    add_simple_op('findnotcclass', $INT, [$INT, $STR, $INT, $INT]);
+    add_simple_op('iscclass', $INT, [$INT, $STR, $INT]);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
