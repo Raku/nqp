@@ -232,6 +232,8 @@ class QAST::OperationsTruffle {
     add_simple_op('findcclass', $INT, [$INT, $STR, $INT, $INT]);
     add_simple_op('findnotcclass', $INT, [$INT, $STR, $INT, $INT]);
     add_simple_op('iscclass', $INT, [$INT, $STR, $INT]);
+    add_simple_op('ordbaseat', $INT, [$STR, $INT]);
+    add_simple_op('replace', $STR, [$STR, $INT, $INT, $STR]);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
