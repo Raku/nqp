@@ -19,7 +19,7 @@ if ($^O eq 'MSWin32') {
     my $install_to = File::Spec->catfile($realpath, 'bin', 'nqp-m.bat');
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
-    print $fh '@ "' . $moar . '" --libpath="' . $lib_dir . '" "' . $nqp_mvm . '" %*' . "\n";
+    print $fh '@ "' . $moar . '" --execname="%%\~dpf0" --libpath="' . $lib_dir . '" "' . $nqp_mvm . '" %*' . "\n";
     close $fh
         or die "Could not close $install_to: $!";
 }
@@ -28,7 +28,7 @@ else {
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     print $fh "#!/bin/sh\n";
-    print $fh "exec $moar --libpath=$lib_dir $nqp_mvm \"\$\@\"\n";
+    print $fh "exec $moar --execname=\"\$0\" --libpath=$lib_dir $nqp_mvm \"\$\@\"\n";
     close $fh
         or die "Could not close $install_to: $!";
     chmod 0755, $install_to;
