@@ -14,6 +14,7 @@ RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/adapters/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java \
