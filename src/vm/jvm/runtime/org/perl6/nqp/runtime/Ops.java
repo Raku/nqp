@@ -2760,17 +2760,26 @@ public final class Ops {
     }
 
     /* HLL aware boxing operations */
+    public static SixModelObject hllboxtype_i(ThreadContext tc) {
+        return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+    }
     public static SixModelObject hllboxtype_i(long value, ThreadContext tc) {
         SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
         res.set_int(tc, value);
         return res;
     }
+    public static SixModelObject hllboxtype_n(ThreadContext tc) {
+        return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType;
+    }
     public static SixModelObject hllboxtype_n(double value, ThreadContext tc) {
         SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType;
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
         res.set_num(tc, value);
         return res;
+    }
+    public static SixModelObject hllboxtype_s(ThreadContext tc) {
+        return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
     }
     public static SixModelObject hllboxtype_s(String value, ThreadContext tc) {
         SixModelObject type = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;

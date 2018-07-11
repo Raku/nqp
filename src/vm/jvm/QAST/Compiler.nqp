@@ -2630,6 +2630,9 @@ QAST::OperationsJAST.map_classlib_core_op('unbox_s', $TYPE_OPS, 'unbox_s', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('box_i', $TYPE_OPS, 'box_i', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_n', $TYPE_OPS, 'box_n', [$RT_NUM, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_s', $TYPE_OPS, 'box_s', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('hllboxtype_i', $TYPE_OPS, 'hllboxtype_i', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('hllboxtype_n', $TYPE_OPS, 'hllboxtype_n', [], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('hllboxtype_s', $TYPE_OPS, 'hllboxtype_s', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('can', $TYPE_OPS, 'can', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('reprname', $TYPE_OPS, 'reprname', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('newtype', $TYPE_OPS, 'newtype', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
