@@ -1,4 +1,4 @@
-package org.perl6.nqp.truffle;
+package org.perl6.nqp.truffle.adapters;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.CallTarget;
@@ -18,7 +18,9 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 
 
-import org.perl6.nqp.truffle.ByteCodeReader;
+import org.perl6.nqp.truffle.ByteCodeWriter;
+import org.perl6.nqp.truffle.NQPScope;
+import org.perl6.nqp.truffle.NQPScopeWithFrame;
 
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;

@@ -8,7 +8,7 @@ public class ByteCodeWriter {
     static byte[] MAGIC = new byte[] {'T', 'R', 'U', 'F', 'F', 'L', 'E', '6', '\r', '\n'};
     private ByteBuffer buffer;
 
-    ByteCodeWriter() {
+    public ByteCodeWriter() {
         buffer = ByteBuffer.allocate(0);
     }
 

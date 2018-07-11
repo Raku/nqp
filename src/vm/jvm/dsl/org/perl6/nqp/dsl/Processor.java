@@ -370,6 +370,7 @@ public class Processor extends AbstractProcessor {
 
 
                     writer.append("import org.perl6.nqp.truffle.nodes.NQPNode;\n");
+                    writer.append("import org.perl6.nqp.truffle.NQPScope;");
 
                     if (astBuilder.tastToByteCode()) {
                         writer.append("import org.perl6.nqp.truffle.ByteCodeWriter;\n");

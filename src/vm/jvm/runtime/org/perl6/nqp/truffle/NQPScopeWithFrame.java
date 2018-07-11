@@ -7,7 +7,7 @@ public class NQPScopeWithFrame extends NQPScope {
     final FrameDescriptor frameDescriptor;
     final NQPScope outer;
 
-    NQPScopeWithFrame(FrameDescriptor frameDescriptor, NQPScope outer) {
+    public NQPScopeWithFrame(FrameDescriptor frameDescriptor, NQPScope outer) {
         this.frameDescriptor = frameDescriptor;
         this.outer = outer;
     }

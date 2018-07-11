@@ -77,7 +77,7 @@ import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.io.StandardReadHandle;
 import org.perl6.nqp.io.StandardWriteHandle;
 import org.perl6.nqp.jast2bc.JASTCompiler;
-import org.perl6.nqp.truffle.TruffleCompilerGen;
+import org.perl6.nqp.truffle.adapters.TruffleCompilerGen;
 import org.perl6.nqp.truffle.ByteCodeRunnerGen;
 import org.perl6.nqp.sixmodel.BoolificationSpec;
 import org.perl6.nqp.sixmodel.ContainerConfigurer;
