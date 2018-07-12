@@ -1,6 +1,9 @@
 package org.perl6.nqp.truffle.runtime;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
 public class Coercions {
+    @TruffleBoundary
     public static String numToStr(double value) {
         if (value == (long)value) {
             if (value == 0 && Double.toString(value).equals("-0.0")) {
@@ -19,6 +22,7 @@ public class Coercions {
         }
     }
 
+    @TruffleBoundary
     public static double strToNum(String value) {
         try {
             // remove valid underscores

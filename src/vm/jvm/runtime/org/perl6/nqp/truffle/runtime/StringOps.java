@@ -1,10 +1,13 @@
 package org.perl6.nqp.truffle.runtime;
 import java.util.HashMap;
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class StringOps {
     /* Brute force, but not normally needed for most programs. */
     private static volatile HashMap<String, Integer> cpNameMap;
     private static volatile Boolean cpNameMapAboveBMP;
+
+    @TruffleBoundary
     public static long codepointfromname(String name) {
         HashMap<String, Integer> names = cpNameMap;
         /* Gets the first half (the BMP) */
@@ -42,6 +45,7 @@ public class StringOps {
         return found == null ? -1 : found;
     }
 
+    @TruffleBoundary
     public static String codepointToTitleCase(int codepoint) {
         if (codepoint == 223) return "Ss";
         return new String(Character.toChars(Character.toTitleCase(codepoint)));
