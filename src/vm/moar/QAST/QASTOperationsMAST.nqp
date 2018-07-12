@@ -1500,19 +1500,27 @@ my $call_gen := sub ($qastcomp, $op) {
     }
 
     # Figure out result register type
-    my $res_kind := $qastcomp.type_to_register_kind($op.returns);
-
-    # and allocate a register for it. Probably reuse an arg's or the callee's.
-    my $res_reg := $regalloc.fresh_register($res_kind);
-
-    nqp::unshift(@arg_regs, $return_type.result_reg) if $op.op eq 'nativeinvoke';
+    my %result;
+    my $res_reg;
+    my $res_kind;
+    my int $is_nativecall := $op.op eq 'nativeinvoke';
+    if !$is_nativecall && nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+        $res_reg := MAST::VOID;
+        $res_kind := $MVM_reg_void;
+    }
+    else {
+        $res_kind := $qastcomp.type_to_register_kind($op.returns);
+        $res_reg := $regalloc.fresh_register($res_kind);
+        nqp::unshift(@arg_regs, $return_type.result_reg) if $is_nativecall;
+        %result<result> := $res_reg;
+    }
 
     # Generate call.
     nqp::push(@ins, MAST::Call.new(
         :target($decont_reg),
         :flags(@arg_flags),
         |@arg_regs,
-        :result($res_reg),
+        |%result,
         :op($op.op eq 'nativeinvoke' ?? 1 !! 0),
     ));
 
