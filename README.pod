@@ -134,7 +134,7 @@ For now it's built together with the old JVM backend.
 
 Currently it needs to be run like:
 
-./nqp-j nqp-truffle.nqp -e 'nqp::say("Hello World")'
+    $ ./nqp-j nqp-truffle.nqp -e 'nqp::say("Hello World")'
 
 To understand how the Truffle framework works the
 L<"One VM to Rule Them All, One VM to Bind Them"|https://www.youtube.com/watch?v=FJY96_6Y3a4> talk is useful. <Slides|https://lafo.ssw.uni-linz.ac.at/pub/papers/2016_PLDI_Truffle.pdf>
@@ -151,16 +151,16 @@ Those are then interpreted and JITed by the Truffle framework.
 
 To build the truffle6 vm: (Also see https://github.com/oracle/graal/issues/540)
 
-make nqp-truffle-impl.jar
-mkdir <graalvm_root>/jre/languages/nqp
-cp -r nqp-truffle-impl.jar <graalvm_root>/jre/languages/nqp
-cp -r src/vm/jvm/native-image.properties <graalvm_root>/jre/languages/nqp
-native-image --language:nqp org.perl6.nqp.truffle.svm.Truffle6
-cp org.perl6.nqp.truffle.svm.Truffle6 truffle6
+    $ make nqp-truffle-impl.jar
+    $ mkdir <graalvm_root>/jre/languages/nqp
+    $ cp -r nqp-truffle-impl.jar <graalvm_root>/jre/languages/nqp
+    $ cp -r src/vm/jvm/native-image.properties <graalvm_root>/jre/languages/nqp
+    $ native-image --language:nqp org.perl6.nqp.truffle.svm.Truffle6
+    $ cp org.perl6.nqp.truffle.svm.truffle6 truffle6
 
 To run it
 
-./nqp-j nqp-truffle.nqp --target=bytecode --output=literals.truffle6 t/nqp/001-literals.nqp
-./truffle6 literals.truffle6
+    $ ./nqp-j nqp-truffle.nqp --target=bytecode --output=literals.truffle6 t/nqp/001-literals.nqp
+    $ ./truffle6 literals.truffle6
 
 =cut
