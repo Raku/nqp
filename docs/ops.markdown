@@ -81,6 +81,7 @@
   * [chars](#chars)
   * [chr](#chr)
   * [codepointfromname](#codepointfromname)
+  * [codes](#codes)
   * [getstrfromname](#getstrfromname)
   * [concat](#concat)
   * [decode](#decode)
@@ -912,6 +913,11 @@ throw an exception on invalid codepoints.
 
 Returns the codepoint for the given unicode character name, or -1 if no
 match was found.
+
+## codes
+* `chars(str $str --> int)`
+
+Return the number of codepoints in the string.
 
 ## getstrfromname
 * `getstrfromname(str $name --> str)`
