@@ -20,6 +20,13 @@ RUNTIME_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/tools/*.java \
 
+TRUFFLE6_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/svm/*.java \
+
 DSL_JAVAS = src/vm/jvm/dsl/org/perl6/nqp/dsl/*.java
 
 DSL_JAR = dsl-processor.jar
@@ -34,6 +41,8 @@ JNA = @jna@
 TRUFFLE_API = @truffleapi@
 TRUFFLE_DSL_PROCESSOR = @truffledslprocessor@
 THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(TRUFFLE_API)@cpsep@$(TRUFFLE_DSL_PROCESSOR)
+THIRDPARY_TRUFFLE6_JARS = $(TRUFFLE_API)@cpsep@$(TRUFFLE_DSL_PROCESSOR)
+
 J_STAGE0_DIR = src/vm/jvm/stage0
 J_STAGE1_DIR = $(JVM_BUILD_DIR)/stage1
 J_STAGE2_DIR = $(JVM_BUILD_DIR)/stage2
@@ -310,6 +319,12 @@ $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(PERL) tools/build/gen-cat.pl jvm $(P5QREGEX_SOURCES) > $(J_STAGE2_DIR)/$(P5QREGEX_COMBINED)
 	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    $(J_STAGE2_DIR)/$(P5QREGEX_COMBINED)
+
+
+nqp-truffle-impl.jar: $(TRUFFLE6_JAVAS) $(DSL_JAR)
+	$(MKPATH) bin-truffle6
+	$(JAVAC) -source 1.8 -cp $(THIRDPARY_TRUFFLE6_JARS):$(DSL_JAR) -g -d bin-truffle6 -encoding UTF8 $(TRUFFLE6_JAVAS)
+	$(JAR) cfe0 nqp-truffle-impl.jar org.perl6.nqp.truffle.svm.Truffle6  -C bin-truffle6/ .
 
 $(TRUFFLE_JAR): $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR) src/vm/jvm/Truffle.nqp
 	.@slash@$(J_RUNNER) --target=jar --output=$(TRUFFLE_JAR) src/vm/jvm/Truffle.nqp

@@ -147,4 +147,20 @@ That's passed to nqp::runtruffle.
 Inside the TruffleCompiler (src/vm/jvm/runtime/org/perl6/nqp/truffle/TruffleCompiler.java) that intermediate form is turned into the Truffle tree nodes.
 Those are then interpreted and JITed by the Truffle framework.
 
+=head3 Running on SubstrateVM
+
+To build the truffle6 vm: (Also see https://github.com/oracle/graal/issues/540)
+
+make nqp-truffle-impl.jar
+mkdir <graalvm_root>/jre/languages/nqp
+cp -r nqp-truffle-impl.jar <graalvm_root>/jre/languages/nqp
+cp -r src/vm/jvm/native-image.properties <graalvm_root>/jre/languages/nqp
+native-image --language:nqp org.perl6.nqp.truffle.svm.Truffle6
+cp org.perl6.nqp.truffle.svm.Truffle6 truffle6
+
+To run it
+
+./nqp-j nqp-truffle.nqp --target=bytecode --output=literals.truffle6 t/nqp/001-literals.nqp
+./truffle6 literals.truffle6
+
 =cut
