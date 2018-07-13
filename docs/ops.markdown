@@ -1653,18 +1653,18 @@ Output the given string to stdout, followed by a newline.
 Seek in the filehandle to the location specified by the offset and whence.
 
 ## tellfh
-* `tellfh(Handle $fh)`
+* `tellfh(Handle $fh --> int)`
 
 Return current access position for an open filehandle.
 
 ## writefh
-* `writefh(Handle $fh, Mu $str)`
+* `writefh(Handle $fh, Mu $str --> int)`
 
 Output the given object to the filehandle. Returns the number of bytes written.
 
 # <a id="extern"></a> External command Opcodes
 ## execname
-* `execname()`
+* `execname(--> str)`
 
 It's used to implement `$*EXECUTABLE` in Perl 6, and is the name of the
 current "executable". So if you run `./perl6-m ....` then it'll be the
@@ -1681,7 +1681,7 @@ to `argv[0]`.
 Change the working directory to the given path.
 
 ## chmod
-* `chmod(str $path, int $mode)`
+* `chmod(str $path, int $mode --> int)`
 
 Change the permissions of `$path` to the posix style permissions of `$mode`.
 Returns 0 on success, throws an exception on failure.
@@ -1692,7 +1692,7 @@ Returns 0 on success, throws an exception on failure.
 Close the given directory handle.
 
 ## copy
-* `copy(str $from, str $to)`
+* `copy(str $from, str $to --> int)`
 
 Copy file `$from` to file `$to`. Return 0 on success, throw an exception
 on failure.
@@ -1727,12 +1727,12 @@ If the specified filename refers to a writeable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
 
 ## link
-* `link(str $before, str $after)`
+* `link(str $before, str $after --> int)`
 
 Create a link from `$after` to `$before`
 
 ## mkdir
-* `mkdir(str $name, int $mode)`
+* `mkdir(str $name, int $mode --> int)`
 
 Create a directory of the given name. Use posix-style mode
 on non-windows platforms. Returns 0, or throws an exception.
@@ -1744,25 +1744,25 @@ Given the result of an opendir, return the next path from that directory.
 When no more items are available, return a null string. (check with `null_s`)
 
 ## opendir
-* `opendir(str $path)`
+* `opendir(str $path --> Mu)`
 
 Return a directory handle on the given directory path. Throw an exception
 if `$path` is not a directory.
 
 ## rename
-* `rename(str $from, str $to)`
+* `rename(str $from, str $to --> int)`
 
 Rename file `$from` to file `$to`. Return 0 on success, throw an exception
 on failure.
 
 ## rmdir
-* `rmdir(str $path)`
+* `rmdir(str $path --> int)`
 
 Delete the given directory $path. Returns 0 on success, -2 if the
 directory didn't exist. May throw an exception.
 
 ## stat
-* `stat(str $path, int $code)`
+* `stat(str $path, int $code --> int)`
 
 Given a path and a code, return an int describing that path using the OS's
 stat() function. Any of these variants may throw an exception if the platform
@@ -1845,19 +1845,19 @@ Returns preferred I/O size in bytes for interacting with the file.
 Returns number of system-specific blocks allocated on disk.
 
 ## stat_time
-* `stat_time(str $path, int $code)`
+* `stat_time(str $path, int $code --> num)`
 
 Given a path and one of the `STAT_*TIME` codes, return that time attribute as
 a num, using the OS's stat() function.
 
 ## lstat
-* `lstat(str $path, int $code)`
+* `lstat(str $path, int $code --> int)`
 
 Same as stat, but internally uses the OS's lstat() function, which does *not*
 follow symlinks.
 
 ## lstat_time
-* `stat_time(str $path, int $code)`
+* `stat_time(str $path, int $code --> num)`
 
 Same as stat_time, but internally uses the OS's lstat() function, which does
 *not* follow symlinks.
@@ -1869,7 +1869,7 @@ Same as stat_time, but internally uses the OS's lstat() function, which does
 Create a symbolic link from `$after` to `$before`
 
 ## unlink
-* `unlink(str $path)`
+* `unlink(str $path --> int)`
 
 Delete the given file $path. Returns 0 on success, -2 if the file
 didn't exist. May throw an exception.
