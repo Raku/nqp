@@ -915,7 +915,7 @@ Returns the codepoint for the given unicode character name, or -1 if no
 match was found.
 
 ## codes
-* `chars(str $str --> int)`
+* `codes(str $str --> int)`
 
 Return the number of codepoints in the string.
 
