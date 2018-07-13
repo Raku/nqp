@@ -156,7 +156,7 @@ To build the truffle6 vm: (Also see https://github.com/oracle/graal/issues/540)
     $ cp -r nqp-truffle-impl.jar <graalvm_root>/jre/languages/nqp
     $ cp -r src/vm/jvm/native-image.properties <graalvm_root>/jre/languages/nqp
     $ native-image --language:nqp org.perl6.nqp.truffle.svm.Truffle6
-    $ cp org.perl6.nqp.truffle.svm.truffle6 truffle6
+    $ cp org.perl6.nqp.truffle.svm.Truffle6 truffle6
 
 To run it
 
