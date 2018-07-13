@@ -236,6 +236,11 @@ class QAST::OperationsTruffle {
     add_simple_op('replace', $STR, [$STR, $INT, $INT, $STR]);
     add_simple_op('codes', $INT, [$STR]);
 
+    add_simple_op('stat', $INT, [$STR, $INT]);
+    add_simple_op('lstat', $INT, [$STR, $INT]);
+    add_simple_op('stat_time', $NUM, [$STR, $INT]);
+    add_simple_op('lstat_time', $NUM, [$STR, $INT]);
+
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $old_value := $comp.as_truffle($node[0], :want($INT));
