@@ -195,6 +195,7 @@
   * [fileislink](#fileislink)
   * [filereadable](#filereadable)
   * [filewritable](#filewritable)
+  * [gethostname](#gethostname)
   * [link](#link)
   * [mkdir](#mkdir)
   * [nextfiledir](#nextfiledir)
@@ -1725,6 +1726,11 @@ If not, returns 0. If an error occurs, return -1.
 
 If the specified filename refers to a writeable file, returns 1.
 If not, returns 0. If an error occurs, return -1.
+
+## gethostname
+* `gethostname(str $str --> str)`
+
+Returns the hostname of the system where it is run.
 
 ## link
 * `link(str $before, str $after --> int)`
