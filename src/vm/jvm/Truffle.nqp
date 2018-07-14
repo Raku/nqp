@@ -257,6 +257,7 @@ class QAST::OperationsTruffle {
     add_simple_op('ordbaseat', $INT, [$STR, $INT]);
     add_simple_op('replace', $STR, [$STR, $INT, $INT, $STR]);
     add_simple_op('codes', $INT, [$STR]);
+    add_simple_op('join', $STR, [$STR, $OBJ]);
 
     add_simple_op('stat', $INT, [$STR, $INT]);
     add_simple_op('lstat', $INT, [$STR, $INT]);
