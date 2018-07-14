@@ -5,6 +5,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.NQPHash;
+import org.perl6.nqp.truffle.runtime.NQPList;
 
 @NodeInfo(shortName = "elems")
 public final class NQPElemsNode extends NQPIntNode {
@@ -17,6 +18,13 @@ public final class NQPElemsNode extends NQPIntNode {
 
     @Override
     public long executeInt(VirtualFrame frame) {
-        return ((NQPHash)argNode.execute(frame)).elems();
+        Object arg = argNode.execute(frame);
+        if (arg instanceof NQPList) {
+            return ((NQPList)arg).elems();
+        } else if (arg instanceof NQPHash) {
+            return ((NQPHash)arg).elems();
+        } else {
+            throw new RuntimeException(arg.getClass().getCanonicalName() + " does not implement elems");
+        }
     }
 }

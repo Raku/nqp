@@ -10,6 +10,27 @@ public final class NQPList {
     }
 
     public void push(Object element) {
-        this.contents.add(element);       
+        contents.add(element);       
+    }
+
+    public Object pop() {
+        return contents.remove(contents.size() - 1);
+    }
+
+    public Object atpos(long pos) {
+        Object value = contents.get((int)pos);
+        if (value == null) {
+            return NQPNull.SINGLETON;
+        } else {
+            return value;
+        }
+    }
+
+    public Object bindpos(long pos, Object value) {
+        return contents.set((int)pos, value);
+    }
+
+    public int elems() {
+        return contents.size();
     }
 }
