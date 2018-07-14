@@ -113,6 +113,28 @@ class QAST::OperationsTruffle {
         }, :$inlinable, :$hll);
     }
 
+
+    for <while until repeat_while repeat_until> -> $op {
+        add_op($op, sub ($comp, $node, :$want) {
+            my $label;
+            my int $handler := 1;
+            my @operands;
+            for $node.list {
+                if $_.named eq 'nohandler' { $handler := 0; }
+                elsif $_.named eq 'label' { $label := $_; }
+                else { @operands.push($_) }
+            }
+
+            return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
+
+            TAST.new($VOID, [
+                'while',
+                $comp.as_truffle(@operands[0], :want($OBJ)).tree,
+                $comp.as_truffle(@operands[1], :want($VOID)).tree
+            ]);
+        });
+    }
+
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
 
