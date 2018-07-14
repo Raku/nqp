@@ -620,6 +620,11 @@ class QAST::TruffleCompiler {
         self.NYI('QAST node: ' ~ $node.HOW.name($node));
     }
 
+    # HACK before we deserialize objects
+    multi method as_truffle(QAST::WVal $node, :$want) {
+        TAST.new($OBJ, ['null']);
+    }
+
     method NYI($msg) {
         nqp::die("NYI: $msg");
     }
