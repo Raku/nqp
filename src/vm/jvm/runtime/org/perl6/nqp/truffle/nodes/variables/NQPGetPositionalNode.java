@@ -67,11 +67,17 @@ public class NQPGetPositionalNode extends NQPObjNode {
     }
 
     @Deserializer("get-lexical-positional")
-    public static NQPGetPositionalNode create(NQPScope scope, String name, long index) {
+    public static NQPGetPositionalNode getLexicalPositional(NQPScope scope, String name, long index) {
         scope.addLexical(name);
         FoundLexical foundLexical = scope.findLexical(name);
         assert foundLexical.getDepth() == 0;
         return new NQPGetPositionalNode(foundLexical.getFrameSlot(), (int) index);
+    }
+
+    @Deserializer("get-local-positional")
+    public static NQPGetPositionalNode getLocalPositional(NQPScope scope, String name, long index) {
+        scope.addLocal(name);
+        return new NQPGetPositionalNode(scope.findLocal(name), (int) index);
     }
 
     @Override

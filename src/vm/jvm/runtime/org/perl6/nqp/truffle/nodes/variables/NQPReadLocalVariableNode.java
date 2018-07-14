@@ -67,9 +67,14 @@ public class NQPReadLocalVariableNode extends FrameLookupNode {
 
 
     @Deserializer("get-lexical")
-    public static NQPReadLocalVariableNode create(NQPScope scope, String name) {
+    public static NQPReadLocalVariableNode getLexical(NQPScope scope, String name) {
         FoundLexical foundLexical = scope.findLexical(name);
         return new NQPReadLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth());
+    }
+
+    @Deserializer("get-local")
+    public static NQPReadLocalVariableNode getLocal(NQPScope scope, String name) {
+        return new NQPReadLocalVariableNode(scope.findLocal(name), 0);
     }
 
     @Override

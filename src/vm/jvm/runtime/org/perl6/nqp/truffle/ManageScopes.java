@@ -35,5 +35,16 @@ public class ManageScopes {
     public static NQPNode createDeclareLexical(NQPScope scope, String name, NQPNode inner) {
         return inner;
     }
+
+    @Predeserializer("declare-local")
+    public static NQPScope declareLocal(NQPScope scope, String name) {
+        scope.addLocal(name);
+        return scope;
+    }
+
+    @Deserializer("declare-local")
+    public static NQPNode createDeclareLocal(NQPScope scope, String name, NQPNode inner) {
+        return inner;
+    }
 }
 

@@ -4,6 +4,27 @@ import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.FrameSlot;
 
 public class NQPScopeWithFrame extends NQPScope {
+
+    static class NQPLocalVariable {
+        final String name;
+
+        NQPLocalVariable(String name) {
+            this.name = name;
+        }
+
+        public int hashCode() {
+            return name.hashCode();
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof NQPLocalVariable) {
+                return ((NQPLocalVariable) obj).name.equals(name);
+            } else {
+                return false;
+            }
+        }
+    }
+
     final FrameDescriptor frameDescriptor;
     final NQPScope outer;
 
@@ -15,7 +36,6 @@ public class NQPScopeWithFrame extends NQPScope {
     public void addLexical(String name) {
         frameDescriptor.addFrameSlot(name, FrameSlotKind.Object);
     }
-
 
     @Override
     public FoundLexical findLexical(String name, int depth) {
@@ -29,6 +49,21 @@ public class NQPScopeWithFrame extends NQPScope {
             }
         }
         return new FoundLexical(found, depth);
+    }
+
+    public void addLocal(String name) {
+        frameDescriptor.addFrameSlot(new NQPLocalVariable(name), FrameSlotKind.Object);
+    }
+
+    @Override
+    public FrameSlot findLocal(String name) {
+        FrameSlot found = frameDescriptor.findFrameSlot(new NQPLocalVariable(name));
+
+        if (found == null) {
+            throw new RuntimeException("Can't find local: " + name);
+        }
+
+        return found;
     }
 
     public FrameDescriptor getFrameDescriptor() {

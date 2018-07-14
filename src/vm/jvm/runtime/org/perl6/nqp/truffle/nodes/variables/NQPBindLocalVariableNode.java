@@ -73,9 +73,14 @@ public class NQPBindLocalVariableNode extends FrameLookupNode {
     }
 
     @Deserializer("bind-lexical")
-    public static NQPBindLocalVariableNode create(NQPScope scope, String name, NQPNode valueNode) {
+    public static NQPBindLocalVariableNode bindLexical(NQPScope scope, String name, NQPNode valueNode) {
         FoundLexical foundLexical = scope.findLexical(name);
         return new NQPBindLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
+    }
+
+    @Deserializer("bind-local")
+    public static NQPBindLocalVariableNode bindLocal(NQPScope scope, String name, NQPNode valueNode) {
+        return new NQPBindLocalVariableNode(scope.findLocal(name), 0, valueNode);
     }
 
     @Override 

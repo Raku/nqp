@@ -509,7 +509,7 @@ class QAST::TruffleCompiler {
         my @ret;
         my int $index := 0;
         for @params -> $param {
-            nqp::push(@ret, ['get-lexical-positional', $param.name, $index]);
+            nqp::push(@ret, ["get-{$param.scope}-positional", $param.name, $index]);
             $index := $index + 1;
         }
         @ret;
@@ -568,12 +568,13 @@ class QAST::TruffleCompiler {
     multi method as_truffle(QAST::Var $node, :$want) {
         my $action;
 
-        if $node.scope eq 'lexical' {
+        if $node.scope eq 'lexical' || $node.scope eq 'local' {
+            my str $scope := $node.scope;
             if $*BINDVAL {
                 my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($OBJ));
-                $action := ['bind-lexical', $node.name, $value.tree];
+                $action := ["bind-$scope", $node.name, $value.tree];
             } else {
-                $action := ['get-lexical', $node.name];
+                $action := ["get-$scope", $node.name];
             }
 
             if $node.decl eq '' {
@@ -581,7 +582,7 @@ class QAST::TruffleCompiler {
             }
             # TODO static should do deserialization
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
-                return TAST.new($OBJ, ['declare-lexical', $node.name, $action]);
+                return TAST.new($OBJ, ["declare-$scope", $node.name, $action]);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);
