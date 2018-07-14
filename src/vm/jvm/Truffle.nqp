@@ -298,6 +298,8 @@ class QAST::OperationsTruffle {
         TAST.new($OBJ, $ret);
     });
 
+    %ops<callstatic> := %ops<call>;
+
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
         if +@children != 2 {
