@@ -1677,7 +1677,7 @@ to `argv[0]`.
 # <a id="filedirnet"></a> File / Directory / Network Opcodes
 
 ## chdir
-* `chdir(str $path)`
+* `chdir(str $path --> str)`
 
 Change the working directory to the given path.
 
@@ -1867,7 +1867,6 @@ follow symlinks.
 
 Same as stat_time, but internally uses the OS's lstat() function, which does
 *not* follow symlinks.
-
 
 ## symlink
 * `symlink(str $before, str $after)`
