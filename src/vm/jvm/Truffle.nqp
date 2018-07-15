@@ -263,6 +263,20 @@ class QAST::OperationsTruffle {
     add_simple_op('lstat', $INT, [$STR, $INT]);
     add_simple_op('stat_time', $NUM, [$STR, $INT]);
     add_simple_op('lstat_time', $NUM, [$STR, $INT]);
+    add_simple_op('chdir', $STR, [$STR]);
+    add_simple_op('chmod', $INT, [$STR, $INT]);
+    add_simple_op('copy', $INT, [$STR, $STR]);
+    add_simple_op('cwd', $STR, []);
+    add_simple_op('fileexecutable', $INT, [$STR]);
+    add_simple_op('fileislink', $INT, [$STR]);
+    add_simple_op('filereadable', $INT, [$STR]);
+    add_simple_op('filewritable', $INT, [$STR]);
+    add_simple_op('link', $INT, [$STR, $STR]);
+    add_simple_op('mkdir', $INT, [$STR, $INT]);
+    add_simple_op('rename', $INT, [$STR, $STR]);
+    add_simple_op('rmdir', $INT, [$STR]);
+    add_simple_op('symlink', $INT, [$STR, $STR]);
+    add_simple_op('unlink', $INT, [$STR]);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {

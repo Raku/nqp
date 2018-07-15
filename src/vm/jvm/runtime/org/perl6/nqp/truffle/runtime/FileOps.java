@@ -8,6 +8,9 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class FileOps {
@@ -221,5 +224,20 @@ public class FileOps {
         } catch (Exception e) {
             return -1;
         }
+    }
+
+    @TruffleBoundary
+    public static Set<PosixFilePermission> modeToPosixFilePermission(long mode) {
+        Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+        if ((mode & 0001) != 0) perms.add(PosixFilePermission.OTHERS_EXECUTE);
+        if ((mode & 0002) != 0) perms.add(PosixFilePermission.OTHERS_WRITE);
+        if ((mode & 0004) != 0) perms.add(PosixFilePermission.OTHERS_READ);
+        if ((mode & 0010) != 0) perms.add(PosixFilePermission.GROUP_EXECUTE);
+        if ((mode & 0020) != 0) perms.add(PosixFilePermission.GROUP_WRITE);
+        if ((mode & 0040) != 0) perms.add(PosixFilePermission.GROUP_READ);
+        if ((mode & 0100) != 0) perms.add(PosixFilePermission.OWNER_EXECUTE);
+        if ((mode & 0200) != 0) perms.add(PosixFilePermission.OWNER_WRITE);
+        if ((mode & 0400) != 0) perms.add(PosixFilePermission.OWNER_READ);
+        return perms;
     }
 }
