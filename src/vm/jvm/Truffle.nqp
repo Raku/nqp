@@ -437,6 +437,9 @@ class QAST::TruffleCompiler {
                 if $got == $NUM {
                     return TAST.new($OBJ, ['box-nqp-num', $tast.tree]);
                 }
+                if $got == $VOID {
+                    return TAST.new($OBJ, ['coerce-void-to-obj', $tast.tree]);
+                }
             }
 
             if $desired == $RETVAL {
