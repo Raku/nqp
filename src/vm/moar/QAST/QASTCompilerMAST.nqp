@@ -812,7 +812,9 @@ my class MASTCompilerInstance {
         if nqp::defined($cu.load) {
             my $load_block := QAST::Block.new(
                 :blocktype('raw'), :name('<load>'),
-                $cu.load
+                QAST::Op.new( :op('scwbdisable') ),
+                $cu.load,
+                QAST::Op.new( :op('scwbenable') )
             );
             self.as_mast($load_block);
             $!mast_compunit.load_frame(%!mast_frames{$load_block.cuid});
