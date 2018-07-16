@@ -80,6 +80,66 @@ public final class NQPStmtsNode extends NQPNode {
 
     @Override
     @ExplodeLoop
+    public String executeStr(VirtualFrame frame) {
+        String ret = ""; // TODO: think if this value is correct
+
+        CompilerAsserts.compilationConstant(bodyNodes.length);
+
+        int i = 0;
+        for (NQPNode statement : bodyNodes) {
+            if (i == bodyNodes.length - 1) {
+                ret = statement.executeStr(frame);
+            } else {
+                statement.executeVoid(frame);
+            }
+            i++;
+        }
+
+        return ret;
+    }
+
+    @Override
+    @ExplodeLoop
+    public long executeInt(VirtualFrame frame) {
+        long ret = 0;
+
+        CompilerAsserts.compilationConstant(bodyNodes.length);
+
+        int i = 0;
+        for (NQPNode statement : bodyNodes) {
+            if (i == bodyNodes.length - 1) {
+                ret = statement.executeInt(frame);
+            } else {
+                statement.executeVoid(frame);
+            }
+            i++;
+        }
+
+        return ret;
+    }
+
+    @Override
+    @ExplodeLoop
+    public double executeNum(VirtualFrame frame) {
+        double ret = 0;
+
+        CompilerAsserts.compilationConstant(bodyNodes.length);
+
+        int i = 0;
+        for (NQPNode statement : bodyNodes) {
+            if (i == bodyNodes.length - 1) {
+                ret = statement.executeNum(frame);
+            } else {
+                statement.executeVoid(frame);
+            }
+            i++;
+        }
+
+        return ret;
+    }
+
+    @Override
+    @ExplodeLoop
     public void executeVoid(VirtualFrame frame) {
         for (NQPNode statement : bodyNodes) {
             statement.executeVoid(frame);
