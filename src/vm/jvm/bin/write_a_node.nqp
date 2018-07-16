@@ -108,3 +108,6 @@ sub add_simple_op($name, $return_type, $args) {
 add_simple_op('falsey', $INT, [$OBJ]);
 add_simple_op('istrue', $INT, [$OBJ]);
 
+add_simple_op('atpos', $OBJ, [$OBJ, $INT]);
+add_simple_op('bindpos', $OBJ, [$OBJ, $INT, $OBJ]);
+

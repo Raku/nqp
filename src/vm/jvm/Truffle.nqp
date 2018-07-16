@@ -182,9 +182,13 @@ class QAST::OperationsTruffle {
            TAST.new($OBJ, @tree);
         });
 
+        add_simple_op('atkey' ~ $suffix, $type, [$OBJ, $INT]);
+        add_simple_op('bindpos' ~ $suffix, $type, [$OBJ, $INT]);
+
         add_simple_op('atkey' ~ $suffix, $type, [$OBJ, $STR]);
         add_simple_op('bindkey' ~ $suffix, $type, [$OBJ, $STR, $type], :side_effects);
         add_simple_op('shift' ~ $suffix, $type, [$OBJ]);
+
     }
 
     add_simple_op('iterator', $OBJ, [$OBJ]);
