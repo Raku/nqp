@@ -50,6 +50,7 @@ import org.perl6.nqp.truffle.nodes.NQPNumNode;
 import org.perl6.nqp.truffle.runtime.Coercions;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 
 import org.perl6.nqp.dsl.Deserializer;
@@ -74,6 +75,8 @@ public final class NQPSmartNumifyNode extends NQPNumNode {
             return (double) value;
         } else if (value == NQPNull.SINGLETON) {
             return 0;
+        } else if (value instanceof NQPList) {
+            return ((NQPList) value).elems();
         } else if (value == null) {
             throw new RuntimeException("can't smart numify raw null");
         } else {
