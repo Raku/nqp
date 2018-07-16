@@ -184,7 +184,10 @@ class QAST::OperationsTruffle {
 
         add_simple_op('atkey' ~ $suffix, $type, [$OBJ, $STR]);
         add_simple_op('bindkey' ~ $suffix, $type, [$OBJ, $STR, $type], :side_effects);
+        add_simple_op('shift' ~ $suffix, $type, [$OBJ]);
     }
+
+    add_simple_op('iterator', $OBJ, [$OBJ]);
 
     add_op('hash', sub ($comp, $node, :$want) {
         my @tree := ['hash'];
