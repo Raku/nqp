@@ -133,42 +133,55 @@ exports.libpath = function(paths) {
 
 exports.loaderCtx = null;
 
-op.loadbytecode = /*async*/ function(ctx, file) {
-  // HACK - temporary hack for rakudo-js
-  if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
-    file = 'Perl6::BOOTSTRAP';
-  }
+/* dependencies */
 
-  let loadFrom;
-  if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
-  } else {
-    loadFrom = module;
-  }
+if (process.browser) {
+  op.loadbytecode = /*async*/ function(ctx, file) {
+      const oldLoaderCtx = exports.loaderCtx;
+      exports.loaderCtx = ctx;
+      file = file.replace(/\.setting$/, '_setting');
+      file = file.replace(/::/g, '-');
+      require('./' + file + '.nqp-raw-runtime');
+      exports.loaderCtx = oldLoaderCtx;
+  };
+} else {
+  op.loadbytecode = /*async*/ function(ctx, file) {
+    // HACK - temporary hack for rakudo-js
+    if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
+      file = 'Perl6::BOOTSTRAP';
+    }
 
-  const oldLoaderCtx = exports.loaderCtx;
-  exports.loaderCtx = ctx;
-  const mangled = file.replace(/::/g, '-');
+    let loadFrom;
+    if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
+    } else {
+      loadFrom = module;
+    }
 
-  const prefixes = libpath.slice();
-  prefixes.push('./', './nqp-js-on-js/');
-  let found = false;
-  for (const prefix of prefixes) {
-    try {
-      /*await*/ loadFrom.require(prefix + mangled);
+    const oldLoaderCtx = exports.loaderCtx;
+    exports.loaderCtx = ctx;
+    const mangled = file.replace(/::/g, '-');
 
-      found = true;
-      break;
-    } catch (e) {
-      if (e.code !== 'MODULE_NOT_FOUND') {
-        throw e;
+    const prefixes = libpath.slice();
+    prefixes.push('./', './nqp-js-on-js/');
+    let found = false;
+    for (const prefix of prefixes) {
+      try {
+        /*await*/ loadFrom.require(prefix + mangled);
+
+        found = true;
+        break;
+      } catch (e) {
+        if (e.code !== 'MODULE_NOT_FOUND') {
+          throw e;
+        }
       }
     }
-  }
-  if (!found) throw `can't find: ${file}, looking in: ${prefixes.join(', ')} from ${loadFrom.filename}`;
-  exports.loaderCtx = oldLoaderCtx;
+    if (!found) throw `can't find: ${file}, looking in: ${prefixes.join(', ')} from ${loadFrom.filename}`;
+    exports.loaderCtx = oldLoaderCtx;
 
-  return file;
-};
+    return file;
+  };
+}
 
 op.loadbytecodefh = function(ctx, fh, file) {
   const oldLoaderCtx = exports.loaderCtx;
