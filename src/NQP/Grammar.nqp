@@ -316,13 +316,9 @@ grammar NQP::Grammar is HLL::Grammar {
     token term:sym<package_declarator> { <package_declarator> }
     token term:sym<scope_declarator>   { <scope_declarator> }
     token term:sym<routine_declarator> { <routine_declarator> }
-    token term:sym<multi_declarator>   {
-        <?before 'multi'|'proto'|'only'>
-        <!before 'proto' <.ws> ['regex'|'token'|'rule']>
-        <multi_declarator>
-    }
     token term:sym<regex_declarator>   { <regex_declarator> }
-	
+    token term:sym<multi_declarator>   { <multi_declarator> }
+
     token term:sym<statement_prefix>   { <statement_prefix> }
     token term:sym<lambda>             { <?lambda> <pblock> }
     token term:sym<last>               { <sym> [<.ws> <identifier> <?{ $*W.is_lexical(~$<identifier>) }>]? { $*CONTROL_USED := 1 } }
