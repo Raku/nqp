@@ -4,6 +4,8 @@ exports.op = op;
 const fibers = require('fibers');
 const nqp = require('./runtime.js');
 
+const Null = require('./null.js');
+
 function runTagged(currentHLL, tag, fiber, val, ctx) {
   let arg = val;
   while (1) {
