@@ -1353,7 +1353,7 @@ class QAST::OperationsJS {
                     $last_exception := $*BLOCK.add_tmp;
 
                     $post := Chunk.void(
-                        '{$comp.await} ({$comp.async}function() {',
+                        "{$comp.await} ({$comp.async}function() \{",
                         "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
                         "$*CTX.\$\$LAST = function() \{\};",
                         "$last_exception = \{\};\n",
