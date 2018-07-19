@@ -23,6 +23,10 @@ public final class NQPHash {
         return contents.put(key, value);
     }
 
+    public int existskey(String key) {
+        return contents.containsKey(key) ? 1 : 0;
+    }
+
     public int elems() {
         return contents.size();
     }

@@ -190,6 +190,8 @@ class QAST::OperationsTruffle {
         add_simple_op('shift' ~ $suffix, $type, [$OBJ]);
     }
 
+    add_simple_op('existskey', $INT, [$OBJ, $STR]);
+
     add_simple_op('islist', $INT, [$OBJ]);
 
     add_simple_op('iterator', $OBJ, [$OBJ]);
