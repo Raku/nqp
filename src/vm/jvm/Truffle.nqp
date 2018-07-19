@@ -335,6 +335,15 @@ class QAST::OperationsTruffle {
 
     %ops<callstatic> := %ops<call>;
 
+    add_op('callmethod', :!inlinable, sub ($comp, $node, :$want) {
+        # HACK till we get proper callmethod
+        if $node.name eq 'name' && nqp::istype($node[0], QAST::Op) && $node[0].op eq 'callmethod' && $node[0].name eq 'backend' && nqp::istype($node[0][0], QAST::Op) && $node[0][0].op eq 'getcomp' {
+            TAST.new($STR, ['sval', 'truffle'])
+        } else {
+            $comp.NYI("unimplemented QAST::Op {$node.op}");
+        }
+    });
+
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
         if +@children != 2 {
