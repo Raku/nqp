@@ -10,6 +10,10 @@ public final class NQPHash {
         this.contents = new HashMap<String, Object>();
     }
 
+    public NQPHash(HashMap<String, Object> contents) {
+        this.contents = contents;
+    }
+
     public Object atkey(String key) {
         Object value = contents.get(key);
         if (value == null) {

@@ -35,6 +35,10 @@ public final class NQPArguments {
         return ((HashMap<String, Object>) arguments[NAMED_ARGUMENTS_INDEX]).get(key);
     }
 
+    public static HashMap<String, Object> getNamedArguments(Object[] arguments) {
+        return (HashMap<String, Object>) arguments[NAMED_ARGUMENTS_INDEX];
+    }
+
     public static void setOuterFrame(Object[] arguments, MaterializedFrame outer) {
         arguments[OUTER_FRAME_INDEX] = outer;
     }
@@ -46,5 +50,9 @@ public final class NQPArguments {
     public static Object[] createInitial(int userArgumentCount) {
         Object[] result = new Object[RUNTIME_ARGUMENT_COUNT + userArgumentCount];
         return result;
+    }
+
+    public static int getUserArgumentCount(Object[] arguments) {
+        return arguments.length - RUNTIME_ARGUMENT_COUNT;
     }
 }

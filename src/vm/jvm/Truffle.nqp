@@ -546,10 +546,12 @@ class QAST::TruffleCompiler {
     method compile_params(@params) {
         my @ret;
         my int $index := 0;
+        my @known_keys;
+
         for @params -> $param {
             if $param.slurpy {
                 if $param.named {
-                    nqp::push(@ret, ["get-{$param.scope}-slurpy-named", $param.name]);
+                    nqp::push(@ret, ["get-{$param.scope}-slurpy-named", $param.name, @known_keys]);
                 }
                 else {
                     nqp::push(@ret, ["get-{$param.scope}-slurpy-positionals", $param.name, $index]);
@@ -559,6 +561,10 @@ class QAST::TruffleCompiler {
                 my $type := $OBJ; # TODO native params
                 if $param.named {
                     my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
+                    for @names -> $name {
+                        @known_keys.push($name);
+                    }
+
                     if $param.default {
                         my $default := self.as_truffle($param.default, :want($type)).tree;
                         nqp::push(@ret, [
