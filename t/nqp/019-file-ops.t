@@ -1,4 +1,4 @@
-#! nqp
+#!/usr/bin/env nqp
 
 # Test nqp::op file operations.
 
