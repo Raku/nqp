@@ -706,11 +706,13 @@ class QAST::TruffleCompiler {
 
 
 my $mini_setting := '
-sub print($arg) {
-    nqp::print($arg);
+sub print(*@args) {
+    nqp::print(nqp::join("", @args));
+    1;
 }
-sub say($arg) {
-    nqp::say($arg);
+sub say(*@args) {
+    nqp::say(nqp::join("", @args));
+    1;
 }
 
 sub plan($quantity) {
