@@ -36,6 +36,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     intClass = long.class,
     numClass = double.class,
     strClass = String.class,
+    strsClass = String[].class,
     scopeClass = NQPScope.class,
     tastToByteCode = false,
     tastToNode = false,

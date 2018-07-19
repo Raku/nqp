@@ -71,4 +71,11 @@ public class ByteCodeWriter {
             throw new RuntimeException("serious trouble: UTF8 encoding not recognized");
         }
     }
+
+    public void writeStrs(String[] values) {
+        writeCount(values.length);
+        for (String str : values) {
+            writeStr(str);
+        }
+    }
 }

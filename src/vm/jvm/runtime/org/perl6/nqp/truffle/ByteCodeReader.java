@@ -52,6 +52,15 @@ public class ByteCodeReader {
         }
     }
 
+    public String[] readStrs() {
+        int count = readCount();
+        String[] strs = new String[count];
+        for (int i = 0; i < count; i++) {
+            strs[i] = readStr();
+        }
+        return strs;
+    }
+
     public ByteCodeReader duplicate() {
         ByteBuffer duplicateBuffer = buffer.duplicate();
         duplicateBuffer.order(ByteOrder.LITTLE_ENDIAN);

@@ -36,6 +36,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     intClass = long.class,
     numClass = double.class,
     strClass = String.class,
+    strsClass = String[].class,
     scopeClass = NQPScope.class,
     tastToByteCode = true,
     tastToNode = true,
@@ -58,6 +59,18 @@ abstract class TruffleCompiler {
            children[i-from] =  tastToNode(node.at_pos_boxed(tc, i), scope, tc);
         }
         return children;
+    }
+
+    protected String[] tastToStrArray(SixModelObject node, int where, ThreadContext tc) {
+        SixModelObject strs = node.at_pos_boxed(tc, where);
+
+        int elems = (int) strs.elems(tc);
+        String[] ret = new String[elems];
+        for (int i = 0; i < elems; i++) {
+           ret[i] = strs.at_pos_boxed(tc, i).get_str(tc);
+        }
+
+        return ret;
     }
 
     abstract protected NQPNode tastToNode(SixModelObject node, NQPScope scope, ThreadContext tc);
