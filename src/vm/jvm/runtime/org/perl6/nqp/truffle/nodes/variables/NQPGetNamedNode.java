@@ -69,31 +69,31 @@ public class NQPGetNamedNode extends NQPObjNode {
     }
 
     @Deserializer("get-local-optional-named")
-    public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String varName, String names[], NQPNode defaultValueNode) {
-        scope.addLocal(varName);
-        return new NQPGetNamedNode(scope.findLocal(varName), names, defaultValueNode);
+    public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String variableName, String names[], NQPNode defaultValueNode) {
+        scope.addLocal(variableName);
+        return new NQPGetNamedNode(scope.findLocal(variableName), names, defaultValueNode);
     }
 
     @Deserializer("get-lexical-optional-named")
-    public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String varName, String names[], NQPNode defaultValueNode) {
-        scope.addLexical(name);
-        FoundLexical foundLexical = scope.findLexical(name);
+    public static NQPGetNamedNode getLexicalOptionalNamed(NQPScope scope, String variableName, String names[], NQPNode defaultValueNode) {
+        scope.addLexical(variableName);
+        FoundLexical foundLexical = scope.findLexical(variableName);
         assert foundLexical.getDepth() == 0;
-        return new NQPGetNamedNode(scope.findLocal(varName), names, defaultValueNode);
+        return new NQPGetNamedNode(scope.findLocal(variableName), names, defaultValueNode);
     }
 
     @Deserializer("get-local-required-named")
-    public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String varName, String names[]) {
-        scope.addLocal(varName);
-        return new NQPGetNamedNode(scope.findLocal(varName), names, null);
+    public static NQPGetNamedNode getLocalRequiredNamed(NQPScope scope, String variableName, String names[]) {
+        scope.addLocal(variableName);
+        return new NQPGetNamedNode(scope.findLocal(variableName), names, null);
     }
 
     @Deserializer("get-lexical-required-named")
-    public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String varName, String names[]) {
-        scope.addLexical(name);
-        FoundLexical foundLexical = scope.findLexical(name);
+    public static NQPGetNamedNode getLexicalRequiredNamed(NQPScope scope, String variableName, String names[]) {
+        scope.addLexical(variableName);
+        FoundLexical foundLexical = scope.findLexical(variableName);
         assert foundLexical.getDepth() == 0;
-        return new NQPGetNamedNode(scope.findLocal(varName), names, null);
+        return new NQPGetNamedNode(scope.findLocal(variableName), names, null);
     }
 
 

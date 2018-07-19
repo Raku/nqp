@@ -52,20 +52,39 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
+import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "invoke")
 public final class NQPInvokeNode extends NQPObjNode {
 
     @Child private NQPNode functionNode;
+
     @Children private final NQPNode[] argumentNodes;
+
+    private final int positionalCount;
+
+    @CompilationFinal(dimensions = 1)
+    private final String[] argumentNames;
+
     @Child private NQPDispatchNode dispatchNode;
 
     @Deserializer("call")
-    public NQPInvokeNode(NQPNode functionNode, NQPNode[] argumentNodes) {
+    public NQPInvokeNode(NQPNode functionNode, String[] argumentNames, NQPNode[] argumentNodes) {
         this.functionNode = functionNode;
+        this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
         this.dispatchNode = NQPDispatchNodeGen.create();
+
+        int count = 0;
+
+        for (String name : argumentNames) {
+            if (name == "") {
+                count++;
+            }
+        }
+
+        positionalCount = count;
     }
 
     @ExplodeLoop
@@ -81,10 +100,16 @@ public final class NQPInvokeNode extends NQPObjNode {
          */
         CompilerAsserts.compilationConstant(argumentNodes.length);
 
-        Object[] argumentValues = NQPArguments.createInitial(argumentNodes.length);
+        Object[] arguments =  NQPArguments.createInitial(positionalCount);
+
+        int positional = 0;
         for (int i = 0; i < argumentNodes.length; i++) {
-            NQPArguments.setUserArgument(argumentValues, i, argumentNodes[i].execute(frame));
+            if (argumentNames[i] == "") {
+                NQPArguments.setUserArgument(arguments, positional++, argumentNodes[i].execute(frame));
+            } else {
+                NQPArguments.setNamedArgument(arguments, argumentNames[i], argumentNodes[i].execute(frame));
+            }
         }
-        return dispatchNode.executeDispatch(function, argumentValues);
+        return dispatchNode.executeDispatch(function, arguments);
     }
 }

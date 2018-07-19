@@ -312,12 +312,22 @@ class QAST::OperationsTruffle {
     add_op('call', :!inlinable, sub ($comp, $node, :$want) {
         my $ret := ['call'];
 
+        my @args := $node.list;
+
         if $node.name {
             nqp::push($ret, ['get-lexical', $node.name]);
         }
-        for $node.list -> $child {
-            nqp::push($ret, $comp.as_truffle($child, :want($CALL_ARG)).tree);
+        else {
+            nqp::push($ret, $comp.as_truffle(nqp::shift(@args), :want($OBJ)).tree);
         }
+
+        my @names;
+        for @args -> $arg {
+            @names.push($arg.named ?? $arg.named !! '');
+            nqp::push($ret, $comp.as_truffle($arg, :want($CALL_ARG)).tree);
+        }
+        nqp::splice($ret, [@names], 2, 0);
+
         TAST.new($OBJ, $ret);
     });
 
@@ -535,8 +545,38 @@ class QAST::TruffleCompiler {
         my @ret;
         my int $index := 0;
         for @params -> $param {
-            nqp::push(@ret, ["get-{$param.scope}-positional", $param.name, $index]);
-            $index := $index + 1;
+            if $param.slurpy {
+                if $param.named {
+                    nqp::push(@ret, ["get-{$param.scope}-slurpy-named", $param.name]);
+                }
+                else {
+                    nqp::push(@ret, ["get-{$param.scope}-slurpy-positionals", $param.name, $index]);
+                }
+            }
+            else {
+                my $type := $OBJ; # TODO native params
+                if $param.named {
+                    my @names := nqp::islist($param.named) ?? $param.named !! nqp::list($param.named);
+                    if $param.default {
+                        my $default := self.as_truffle($param.default, :want($type)).tree;
+                        nqp::push(@ret, [
+                            "get-{$param.scope}-optional-named",
+                            $param.name,
+                            @names,
+                            $default]);
+                    }
+                    else {
+                        nqp::push(@ret, [
+                            "get-{$param.scope}-required-named",
+                             $param.name,
+                             @names]);
+                    }
+                }
+                else {
+                    nqp::push(@ret, ["get-{$param.scope}-positional", $param.name, $index]);
+                    $index := $index + 1;
+                }
+            }
         }
         @ret;
     }
