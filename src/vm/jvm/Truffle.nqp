@@ -731,7 +731,7 @@ sub ok($condition) {
     } else {
         nqp::say("not ok");
     }
-}
+};
 ';
 
 class TruffleBackend {
