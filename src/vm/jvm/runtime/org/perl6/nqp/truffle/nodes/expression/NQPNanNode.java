@@ -12,7 +12,8 @@ public final class NQPNanNode extends NQPNumNode {
     public NQPNanNode() {
     }
 
-    public double executeNum() {
+    @Override
+    public double executeNum(VirtualFrame frame) {
         return Double.NaN;
     }
 }
