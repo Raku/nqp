@@ -1,5 +1,3 @@
-#!/usr/bin/env nqp
-
 # Test nqp::op file operations.
 
 plan(112);
