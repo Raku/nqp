@@ -1,3 +1,5 @@
+#!/usr/bin/env perl
+
 use TAP::Harness;
 
 my ($skip_qregex) = @ARGV;
