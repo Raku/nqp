@@ -61,26 +61,46 @@ public class NQPGetPositionalNode extends NQPObjNode {
     private final FrameSlot slot;
     private final int index;
 
-    public NQPGetPositionalNode(FrameSlot slot, int index) {
+    private final NQPNode defaultValueNode;
+
+    public NQPGetPositionalNode(FrameSlot slot, int index, NQPNode defaultValueNode) {
         this.slot = slot;
         this.index = index;
+        this.defaultValueNode = defaultValueNode;
     }
 
     @Deserializer("get-lexical-positional")
     public static NQPGetPositionalNode getLexicalPositional(NQPScope scope, String name, long index) {
-        return new NQPGetPositionalNode(scope.addLexical(name), (int) index);
+        return new NQPGetPositionalNode(scope.addLexical(name), (int) index, null);
     }
 
     @Deserializer("get-local-positional")
     public static NQPGetPositionalNode getLocalPositional(NQPScope scope, String name, long index) {
-        scope.addLocal(name);
-        return new NQPGetPositionalNode(scope.findLocal(name), (int) index);
+        return new NQPGetPositionalNode(scope.addLocal(name), (int) index, null);
+    }
+
+    @Deserializer("get-lexical-positional-optional")
+    public static NQPGetPositionalNode getLexicalPositional(NQPScope scope, String name, long index, NQPNode defaultValueNode) {
+        return new NQPGetPositionalNode(scope.addLexical(name), (int) index, defaultValueNode);
+    }
+
+    @Deserializer("get-local-positional-optional")
+    public static NQPGetPositionalNode getLocalPositional(NQPScope scope, String name, long index, NQPNode defaultValueNode) {
+        return new NQPGetPositionalNode(scope.addLocal(name), (int) index, defaultValueNode);
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
         Object[] args = frame.getArguments();
-        Object value = NQPArguments.getUserArgument(args, index);
+        Object value;
+        if (defaultValueNode != null) {
+            value = NQPArguments.hasUserArgument(args, index)
+                ? NQPArguments.getUserArgument(args, index)
+                : defaultValueNode.execute(frame);
+        } else {
+            value = NQPArguments.getUserArgument(args, index);
+        }
+
         frame.setObject(slot, value);
         return value;
     }

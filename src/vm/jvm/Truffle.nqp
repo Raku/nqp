@@ -310,8 +310,12 @@ class QAST::OperationsTruffle {
         $comp.as_truffle($node[0], :want($want));
     });
 
+
     # TODO :$want
     add_op('call', :!inlinable, sub ($comp, $node, :$want) {
+        my int $NAMED := 1;
+        my int $FLAT := 2;
+
         my $ret := ['call'];
 
         my @args := $node.list;
@@ -324,11 +328,23 @@ class QAST::OperationsTruffle {
         }
 
         my @names;
+        my @flags;
         for @args -> $arg {
-            @names.push($arg.named ?? $arg.named !! '');
+            my int $flags := 0;
+
+            if $arg.named {
+                $flags := $flags +| $NAMED;
+                @names.push($arg.named);
+            }
+            if $arg.flat {
+                $flags := $flags +| $FLAT;
+            }
+
+            nqp::push(@flags, $flags);
+
             nqp::push($ret, $comp.as_truffle($arg, :want($CALL_ARG)).tree);
         }
-        nqp::splice($ret, [@names], 2, 0);
+        nqp::splice($ret, [@flags, @names], 2, 0);
 
         TAST.new($OBJ, $ret);
     });
@@ -590,7 +606,20 @@ class QAST::TruffleCompiler {
                     }
                 }
                 else {
-                    nqp::push(@ret, ["get-{$param.scope}-positional", $param.name, $index]);
+                    if $param.default {
+                        my $default := self.as_truffle($param.default, :want($type)).tree;
+                        nqp::push(@ret, [
+                            "get-{$param.scope}-positional-optional",
+                            $param.name,
+                            $index,
+                            $default]);
+                    }
+                    else {
+                        nqp::push(@ret, [
+                            "get-{$param.scope}-positional",
+                            $param.name,
+                            $index]);
+                    }
                     $index := $index + 1;
                 }
             }
@@ -631,7 +660,7 @@ class QAST::TruffleCompiler {
             nqp::splice(@ret, @compiled_params, 1, 0);
 
             TAST.new($OBJ,
-                $node.blocktype eq 'immediate' ?? ['call', @ret, []] !! @ret);
+                $node.blocktype eq 'immediate' ?? ['call', @ret, [], []] !! @ret);
         }
     }
 

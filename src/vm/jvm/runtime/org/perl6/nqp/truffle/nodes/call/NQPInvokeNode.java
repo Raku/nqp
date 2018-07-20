@@ -52,17 +52,24 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
+import org.perl6.nqp.truffle.runtime.NQPList;
+
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;
 
+
 @NodeInfo(shortName = "invoke")
 public final class NQPInvokeNode extends NQPObjNode {
+
+    public static final long NAMED = 1;
+    public static final long FLAT = 2;
 
     @Child private NQPNode functionNode;
 
     @Children private final NQPNode[] argumentNodes;
 
-    private final int positionalCount;
+    @CompilationFinal(dimensions = 1)
+    private final long[] argumentFlags;
 
     @CompilationFinal(dimensions = 1)
     private final String[] argumentNames;
@@ -70,21 +77,12 @@ public final class NQPInvokeNode extends NQPObjNode {
     @Child private NQPDispatchNode dispatchNode;
 
     @Deserializer("call")
-    public NQPInvokeNode(NQPNode functionNode, String[] argumentNames, NQPNode[] argumentNodes) {
+    public NQPInvokeNode(NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
         this.functionNode = functionNode;
+        this.argumentFlags = argumentFlags;
         this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
         this.dispatchNode = NQPDispatchNodeGen.create();
-
-        int count = 0;
-
-        for (String name : argumentNames) {
-            if (name == "") {
-                count++;
-            }
-        }
-
-        positionalCount = count;
     }
 
     @ExplodeLoop
@@ -92,24 +90,38 @@ public final class NQPInvokeNode extends NQPObjNode {
     public Object execute(VirtualFrame frame) {
         Object function = functionNode.execute(frame);
 
-        /*
-         * The number of arguments is constant for one invoke node. During compilation, the loop is
-         * unrolled and the execute methods of all arguments are inlined. This is triggered by the
-         * ExplodeLoop annotation on the method. The compiler assertion below illustrates that the
-         * array length is really constant.
-         */
         CompilerAsserts.compilationConstant(argumentNodes.length);
 
-        Object[] arguments =  NQPArguments.createInitial(positionalCount);
-
-        int positional = 0;
+        int count = 0;
+        Object[] values = new Object[argumentNodes.length];
         for (int i = 0; i < argumentNodes.length; i++) {
-            if (argumentNames[i] == "") {
-                NQPArguments.setUserArgument(arguments, positional++, argumentNodes[i].execute(frame));
+            values[i] = argumentNodes[i].execute(frame);
+            if ((argumentFlags[i] & NAMED) != 0) {
+            } else if ((argumentFlags[i] & FLAT) != 0) {
+                count += ((NQPList) values[i]).elems();
             } else {
-                NQPArguments.setNamedArgument(arguments, argumentNames[i], argumentNodes[i].execute(frame));
+                count++;
             }
         }
+
+        Object[] arguments =  NQPArguments.createInitial(count);
+
+        int positional = 0;
+        int nameIndex = 0;
+
+        for (int i = 0; i < argumentNodes.length; i++) {
+            if ((argumentFlags[i] & NAMED) != 0) {
+                NQPArguments.setNamedArgument(arguments, argumentNames[nameIndex++], values[i]);
+            } else if ((argumentFlags[i] & FLAT) != 0) {
+                NQPList array = (NQPList) values[i];
+                for (int j = 0; j < array.elems(); j++) {
+                    NQPArguments.setUserArgument(arguments, positional++, array.atpos(j));
+                }
+            } else {
+                NQPArguments.setUserArgument(arguments, positional++, values[i]);
+            }
+        }
+
         return dispatchNode.executeDispatch(function, arguments);
     }
 }

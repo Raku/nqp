@@ -11,6 +11,10 @@ public final class NQPArguments {
         return arguments[index + RUNTIME_ARGUMENT_COUNT];
     }
 
+    public static boolean hasUserArgument(Object[] arguments, int index) {
+        return index + RUNTIME_ARGUMENT_COUNT < arguments.length;
+    }
+
     public static void setUserArgument(Object[] arguments, int index, Object value) {
         arguments[index + RUNTIME_ARGUMENT_COUNT] = value;
     }
