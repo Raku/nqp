@@ -34,6 +34,7 @@ public class Processor extends AbstractProcessor {
         TypeMirror nodeClass;
         TypeMirror nodesClass;
         TypeMirror intClass;
+        TypeMirror intsClass;
         TypeMirror numClass;
         TypeMirror strClass;
         TypeMirror strsClass;
@@ -74,6 +75,12 @@ public class Processor extends AbstractProcessor {
                 annotation.strsClass();
             } catch (MirroredTypeException e) {
                 strsClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.intsClass();
+            } catch (MirroredTypeException e) {
+                intsClass = e.getTypeMirror();
             }
 
             try {
@@ -129,6 +136,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc)");
             } else if (paramType.equals(astTypes.strsClass)) {
                 writer.append("tastToStrArray(node, " + (i+1) + ", tc)");
+            } else if (paramType.equals(astTypes.intsClass)) {
+                writer.append("tastToIntArray(node, " + (i+1) + ", tc)");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 writer.append("scope");
                 i--;
@@ -240,6 +249,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("writer.writeStr(node.at_pos_boxed(tc, " + (i+1) + ").get_str(tc));\n");
             } else if (paramType.equals(astTypes.strsClass)) {
                 writer.append("writer.writeStrs(tastToStrArray(node," + (i+1) + ", tc));\n");
+            } else if (paramType.equals(astTypes.intsClass)) {
+                writer.append("writer.writeInts(tastToIntArray(node," + (i+1) + ", tc));\n");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 i--;
             } else {
@@ -274,6 +285,8 @@ public class Processor extends AbstractProcessor {
                 writer.append(reader + ".readStr()");
             } else if (paramType.equals(astTypes.strsClass)) {
                 writer.append(reader + ".readStrs()");
+            } else if (paramType.equals(astTypes.intsClass)) {
+                writer.append(reader + ".readInts()");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 writer.append("scope");
             } else {

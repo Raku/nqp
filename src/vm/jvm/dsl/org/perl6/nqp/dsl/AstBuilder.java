@@ -11,10 +11,11 @@ public @interface AstBuilder {
     Class nodeClass();
     Class nodesClass();
     Class intClass();
+    Class intsClass();
     Class numClass();
     Class strClass();
-    Class scopeClass();
     Class strsClass();
+    Class scopeClass();
 
     boolean tastToByteCode();
     boolean tastToNode();

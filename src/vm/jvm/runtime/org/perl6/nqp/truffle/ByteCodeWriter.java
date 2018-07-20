@@ -78,4 +78,11 @@ public class ByteCodeWriter {
             writeStr(str);
         }
     }
+
+    public void writeInts(long[] values) {
+        writeCount(values.length);
+        for (long value : values) {
+            writeInt(value);
+        }
+    }
 }

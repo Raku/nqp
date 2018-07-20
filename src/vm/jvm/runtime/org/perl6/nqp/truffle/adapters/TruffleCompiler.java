@@ -34,6 +34,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     nodeClass = NQPNode.class,
     nodesClass = NQPNode[].class,
     intClass = long.class,
+    intsClass = long[].class,
     numClass = double.class,
     strClass = String.class,
     strsClass = String[].class,
@@ -68,6 +69,18 @@ abstract class TruffleCompiler {
         String[] ret = new String[elems];
         for (int i = 0; i < elems; i++) {
            ret[i] = strs.at_pos_boxed(tc, i).get_str(tc);
+        }
+
+        return ret;
+    }
+
+    protected long[] tastToIntArray(SixModelObject node, int where, ThreadContext tc) {
+        SixModelObject ints = node.at_pos_boxed(tc, where);
+
+        int elems = (int) ints.elems(tc);
+        long[] ret = new long[elems];
+        for (int i = 0; i < elems; i++) {
+           ret[i] = ints.at_pos_boxed(tc, i).get_int(tc);
         }
 
         return ret;

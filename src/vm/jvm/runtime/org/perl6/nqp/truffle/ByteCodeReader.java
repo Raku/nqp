@@ -61,6 +61,15 @@ public class ByteCodeReader {
         return strs;
     }
 
+    public long[] readInts() {
+        int count = readCount();
+        long[] ints = new long[count];
+        for (int i = 0; i < count; i++) {
+            ints[i] = readInt();
+        }
+        return ints;
+    }
+
     public ByteCodeReader duplicate() {
         ByteBuffer duplicateBuffer = buffer.duplicate();
         duplicateBuffer.order(ByteOrder.LITTLE_ENDIAN);

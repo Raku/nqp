@@ -34,6 +34,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     nodeClass = NQPNode.class,
     nodesClass = NQPNode[].class,
     intClass = long.class,
+    intsClass = long[].class,
     numClass = double.class,
     strClass = String.class,
     strsClass = String[].class,
