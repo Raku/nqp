@@ -76,17 +76,12 @@ public class NQPGetSlurpyNamedNode extends NQPObjNode {
 
     @Deserializer("get-lexical-slurpy-named")
     public static NQPGetSlurpyNamedNode getLocalSlurpyPositionals(NQPScope scope, String name, String[] knownKeys) {
-        scope.addLexical(name);
-        FoundLexical foundLexical = scope.findLexical(name);
-        assert foundLexical.getDepth() == 0;
-
-        return new NQPGetSlurpyNamedNode(foundLexical.getFrameSlot(), knownKeys);
+        return new NQPGetSlurpyNamedNode(scope.addLexical(name), knownKeys);
     }
 
     @Deserializer("get-local-slurpy-named")
     public static NQPGetSlurpyNamedNode getLexicalSlurpyPositionals(NQPScope scope, String name, String[] knownKeys) {
-        scope.addLocal(name);
-        return new NQPGetSlurpyNamedNode(scope.findLocal(name), knownKeys);
+        return new NQPGetSlurpyNamedNode(scope.addLocal(name), knownKeys);
     }
 
     @Override

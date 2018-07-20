@@ -70,30 +70,22 @@ public class NQPGetNamedNode extends NQPObjNode {
 
     @Deserializer("get-local-optional-named")
     public static NQPGetNamedNode getLocalOptionalNamed(NQPScope scope, String variableName, String names[], NQPNode defaultValueNode) {
-        scope.addLocal(variableName);
-        return new NQPGetNamedNode(scope.findLocal(variableName), names, defaultValueNode);
+        return new NQPGetNamedNode(scope.addLocal(variableName), names, defaultValueNode);
     }
 
     @Deserializer("get-lexical-optional-named")
     public static NQPGetNamedNode getLexicalOptionalNamed(NQPScope scope, String variableName, String names[], NQPNode defaultValueNode) {
-        scope.addLexical(variableName);
-        FoundLexical foundLexical = scope.findLexical(variableName);
-        assert foundLexical.getDepth() == 0;
-        return new NQPGetNamedNode(scope.findLocal(variableName), names, defaultValueNode);
+        return new NQPGetNamedNode(scope.addLexical(variableName), names, defaultValueNode);
     }
 
     @Deserializer("get-local-required-named")
     public static NQPGetNamedNode getLocalRequiredNamed(NQPScope scope, String variableName, String names[]) {
-        scope.addLocal(variableName);
-        return new NQPGetNamedNode(scope.findLocal(variableName), names, null);
+        return new NQPGetNamedNode(scope.addLocal(variableName), names, null);
     }
 
     @Deserializer("get-lexical-required-named")
     public static NQPGetNamedNode getLexicalRequiredNamed(NQPScope scope, String variableName, String names[]) {
-        scope.addLexical(variableName);
-        FoundLexical foundLexical = scope.findLexical(variableName);
-        assert foundLexical.getDepth() == 0;
-        return new NQPGetNamedNode(scope.findLocal(variableName), names, null);
+        return new NQPGetNamedNode(scope.addLexical(variableName), names, null);
     }
 
 

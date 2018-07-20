@@ -68,10 +68,7 @@ public class NQPGetPositionalNode extends NQPObjNode {
 
     @Deserializer("get-lexical-positional")
     public static NQPGetPositionalNode getLexicalPositional(NQPScope scope, String name, long index) {
-        scope.addLexical(name);
-        FoundLexical foundLexical = scope.findLexical(name);
-        assert foundLexical.getDepth() == 0;
-        return new NQPGetPositionalNode(foundLexical.getFrameSlot(), (int) index);
+        return new NQPGetPositionalNode(scope.addLexical(name), (int) index);
     }
 
     @Deserializer("get-local-positional")

@@ -70,16 +70,12 @@ public class NQPGetSlurpyPositionalsNode extends NQPObjNode {
 
     @Deserializer("get-lexical-slurpy-positionals")
     public static NQPGetSlurpyPositionalsNode getLexicalPositional(NQPScope scope, String name, long index) {
-        scope.addLexical(name);
-        FoundLexical foundLexical = scope.findLexical(name);
-        assert foundLexical.getDepth() == 0;
-        return new NQPGetSlurpyPositionalsNode(foundLexical.getFrameSlot(), (int) index);
+        return new NQPGetSlurpyPositionalsNode(scope.addLexical(name), (int) index);
     }
 
     @Deserializer("get-local-slurpy-positionals")
     public static NQPGetSlurpyPositionalsNode getLocalSlurpyPositionals(NQPScope scope, String name, long index) {
-        scope.addLocal(name);
-        return new NQPGetSlurpyPositionalsNode(scope.findLocal(name), (int) index);
+        return new NQPGetSlurpyPositionalsNode(scope.addLocal(name), (int) index);
     }
 
     @Override

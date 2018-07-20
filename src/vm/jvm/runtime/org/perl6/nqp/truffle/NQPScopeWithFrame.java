@@ -33,8 +33,8 @@ public class NQPScopeWithFrame extends NQPScope {
         this.outer = outer;
     }
 
-    public void addLexical(String name) {
-        frameDescriptor.addFrameSlot(name, FrameSlotKind.Object);
+    public FrameSlot addLexical(String name) {
+        return frameDescriptor.addFrameSlot(name, FrameSlotKind.Object);
     }
 
     @Override
@@ -51,8 +51,9 @@ public class NQPScopeWithFrame extends NQPScope {
         return new FoundLexical(found, depth);
     }
 
-    public void addLocal(String name) {
-        frameDescriptor.addFrameSlot(new NQPLocalVariable(name), FrameSlotKind.Object);
+    @Override
+    public FrameSlot addLocal(String name) {
+        return frameDescriptor.addFrameSlot(new NQPLocalVariable(name), FrameSlotKind.Object);
     }
 
     @Override
