@@ -757,19 +757,19 @@ sub plan($quantity) {
     nqp::say("1..$quantity");
 }
 
-sub is($got, $expected) {
-    if $got eq $expected {
-        nqp::say("ok");
-    } else {
-        nqp::say("not ok");
-    }
+sub is($got, $expected, $desc?) {
+    nqp::say(($got eq $expected ?? "ok" !! "not ok") ~ ($desc ?? " - $desc" !! ""));
 }
 
-sub ok($condition) {
-    if $condition {
-        nqp::say("ok");
-    } else {
-        nqp::say("not ok");
+sub ok($condition, $desc?) {
+    nqp::say(($condition ?? "ok" !! "not ok") ~ ($desc ?? " - $desc" !! ""));
+}
+
+sub skip($desc, $count=1) {
+    my $i := 0;
+    while $i < $count {
+        say("ok# SKIP $desc");
+        $i := $i + 1;
     }
 };
 ';
