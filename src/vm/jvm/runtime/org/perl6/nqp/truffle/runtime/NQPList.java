@@ -27,7 +27,15 @@ public final class NQPList {
     }
 
     public Object bindpos(long pos, Object value) {
-        return contents.set((int)pos, value);
+        if (pos >= contents.size()) {
+            for (int i = contents.size(); i < pos; i++) {
+                contents.add(NQPNull.SINGLETON);
+            }
+            contents.add(value);
+            return value;
+        } else {
+            return contents.set((int)pos, value);
+        }
     }
 
     public int elems() {
