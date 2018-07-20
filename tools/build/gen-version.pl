@@ -1,4 +1,4 @@
-#! perl
+#!/usr/bin/env perl
 
 =head1 TITLE
 
