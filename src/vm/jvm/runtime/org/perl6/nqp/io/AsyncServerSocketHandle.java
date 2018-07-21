@@ -114,6 +114,43 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
         };
 
         try {
+            InetSocketAddress localAddress;
+
+            HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+            final SixModelObject IOType = hllConfig.ioType;
+            final SixModelObject Array = hllConfig.listType;
+            final SixModelObject Null = hllConfig.nullValue;
+            final SixModelObject Int = hllConfig.intBoxType;
+            final SixModelObject Str = hllConfig.strBoxType;
+
+            try {
+                localAddress = (InetSocketAddress) listenChan.getLocalAddress();
+            } catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+
+            String socketHost = localAddress.getAddress().getHostAddress();
+            if (socketHost.equals("0:0:0:0:0:0:0:1"))
+                socketHost = "::1";
+            int socketPort = localAddress.getPort();
+
+            SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+
+            result.push_boxed(tc, task.schedulee);
+            result.push_boxed(tc, IOType);
+            result.push_boxed(tc, Null);
+            result.push_boxed(tc, Str);
+            result.push_boxed(tc, Int);
+            result.push_boxed(tc, Ops.box_s(socketHost, Str, tc));
+            result.push_boxed(tc, Ops.box_i(socketPort, Int, tc));
+
+            ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
+        }
+        catch (Exception e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+
+        try {
             listenChan.accept(task, handler);
         } catch (NotYetBoundException e) {
             throw ExceptionHandling.dieInternal(tc, e);
