@@ -55,6 +55,7 @@ public class StaticCodeInfo implements Cloneable {
 
     /**
      * Flags for each static lexical usage.
+     * 0 = static, 1 = clone, 2 = state
      */
     public byte[] oLexStaticFlags;
 
