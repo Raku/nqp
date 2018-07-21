@@ -91,10 +91,10 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 result.push_boxed(curTC, task.schedulee);
                 result.push_boxed(curTC, ioHandle);
                 result.push_boxed(curTC, Null);
-                result.push_boxed(curTC, Ops.box_s(socketHost, Str, curTC));
-                result.push_boxed(curTC, Ops.box_i(socketPort, Int, curTC));
                 result.push_boxed(curTC, Ops.box_s(peerHost, Str, curTC));
                 result.push_boxed(curTC, Ops.box_i(peerPort, Int, curTC));
+                result.push_boxed(curTC, Ops.box_s(socketHost, Str, curTC));
+                result.push_boxed(curTC, Ops.box_i(socketPort, Int, curTC));
 
                 ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
             }
