@@ -106,6 +106,10 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 result.push_boxed(curTC, task.schedulee);
                 result.push_boxed(curTC, IOType);
                 result.push_boxed(curTC, Ops.box_s(exc.toString(), Str, curTC));
+                result.push_boxed(curTC, Str);
+                result.push_boxed(curTC, Int);
+                result.push_boxed(curTC, Str);
+                result.push_boxed(curTC, Int);
             }
         };
 
