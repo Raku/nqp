@@ -18,7 +18,7 @@ public class Coercions {
                 return "-Inf";
             if (value != value)
                 return "NaN";
-            return Double.toString(value);
+            return Double.toString(value).replaceFirst("E(?![+-])", "e+").replaceFirst("E", "e");
         }
     }
 
