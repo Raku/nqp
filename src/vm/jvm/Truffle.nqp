@@ -153,6 +153,8 @@ class QAST::OperationsTruffle {
     add_simple_op('falsey', $INT, [$OBJ]);
     add_simple_op('istrue', $INT, [$OBJ]);
 
+    add_simple_op('split', $OBJ, [$STR, $STR]);
+
     add_op('stringify', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($STR));
     });
