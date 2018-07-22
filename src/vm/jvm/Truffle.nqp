@@ -762,13 +762,21 @@ sub plan($quantity) {
     nqp::say("1..$quantity");
 }
 
-sub is($got, $expected, $desc?) {
-    nqp::say(($got eq $expected ?? "ok" !! "not ok") ~ ($desc ?? " - $desc" !! ""));
-}
-
 sub ok($condition, $desc?) {
     nqp::say(($condition ?? "ok" !! "not ok") ~ ($desc ?? " - $desc" !! ""));
 }
+
+sub is($got, $expected, $desc?) {
+    ok($got eq $expected, $desc);
+    if $got ne $expected {
+        my $out := "";
+        for nqp::split("\n", "     got: \'$got\'\nexpected: \'$expected\'") -> $line {
+            $out := $out ~ "# $line\n";
+        }
+        print($out);
+    }
+}
+
 
 sub skip($desc, $count=1) {
     my $i := 0;
