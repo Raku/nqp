@@ -57,7 +57,8 @@ public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
                     Ops.box_s(host, Str, curTC),
                     Ops.box_i(port, Int, curTC),
                     Ops.box_s(host, Str, curTC),  // TODO send socketHost
-                    Ops.box_i(port, Int, curTC)   // TODO send socketPort
+                    Ops.box_i(port, Int, curTC),  // TODO send socketPort
+                    Ops.box_i(-1,   Int, curTC)   // TODO send socketHandle
                 );
             }
 
@@ -65,13 +66,14 @@ public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
             public void failed(Throwable t, AsyncTaskInstance task) {
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
                 callback(curTC, task, IOType,
-                    Ops.box_s(t.toString(), Str, curTC), Str, Int, Str, Int);
+                    Ops.box_s(t.toString(), Str, curTC), Str, Int, Str, Int, Int);
             }
 
             protected void callback(ThreadContext tc, AsyncTaskInstance task,
                     SixModelObject ioHandle, SixModelObject err,
                     SixModelObject peerHost, SixModelObject peerPort,
-                    SixModelObject socketHost, SixModelObject socketPort) {
+                    SixModelObject socketHost, SixModelObject socketPort,
+                    SixModelObject socketHandle) {
                 SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
                 result.push_boxed(tc, task.schedulee);
                 result.push_boxed(tc, ioHandle);
@@ -80,6 +82,7 @@ public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
                 result.push_boxed(tc, peerPort);
                 result.push_boxed(tc, socketHost);
                 result.push_boxed(tc, socketPort);
+                result.push_boxed(tc, socketHandle);
                 ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
             }
         };
