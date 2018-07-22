@@ -1,4 +1,4 @@
-plan(18);
+plan(19);
 
 my sub isnan($n) {
     nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
@@ -27,4 +27,5 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     skip('num to str conversion still needs to be standardized on the jvm backend', 1);
 } else {
   is(~1.01e100, '1.01e+100', 'stringifing 1.01e100');
+  is(~1.01e-100, '1.01e-100', 'stringifing 1.01e-100');
 }
