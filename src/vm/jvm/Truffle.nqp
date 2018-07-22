@@ -499,8 +499,11 @@ class QAST::TruffleCompiler {
                 if $got == $NUM {
                     return TAST.new($RETVAL, ['retval-num', $tast.tree]);
                 }
-                elsif $got == $OBJ {
+                if $got == $OBJ {
                     return TAST.new($RETVAL, $tast.tree);
+                }
+                if $got == $VOID {
+                    return TAST.new($RETVAL, ['coerce-void-to-obj', $tast.tree]);
                 }
             }
 
