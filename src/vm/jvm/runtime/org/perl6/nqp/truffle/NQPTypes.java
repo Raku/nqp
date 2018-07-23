@@ -42,6 +42,6 @@ package org.perl6.nqp.truffle;
 import com.oracle.truffle.api.dsl.TypeSystem;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-@TypeSystem({String.class, NQPCodeRef.class, NQPNull.class})
+@TypeSystem
 public abstract class NQPTypes {
 }

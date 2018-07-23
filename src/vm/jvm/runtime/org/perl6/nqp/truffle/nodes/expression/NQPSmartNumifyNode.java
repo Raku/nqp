@@ -43,6 +43,9 @@ package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.NodeChild;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
@@ -53,35 +56,53 @@ import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 
+
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.Debug;
 
-@NodeInfo(shortName = "smart numify")
-public final class NQPSmartNumifyNode extends NQPNumNode {
-    @Child private NQPNode valueNode;
+import org.perl6.nqp.truffle.MalformedAstException;
 
-    @Deserializer("smart-numify")
-    public NQPSmartNumifyNode(NQPNode valueNode) {
-        this.valueNode = valueNode;
+@NodeInfo(shortName = "smart numify")
+@NodeChildren({@NodeChild(value="valueNode", type=NQPNode.class)})
+public class NQPSmartNumifyNode extends NQPNumNode {
+
+    @Specialization
+    protected double numifyLong(Long value) {
+        return (long) value;
     }
 
-    @Override
-    public double executeNum(VirtualFrame frame) {
-        Object value = valueNode.execute(frame);
-        if (value instanceof Long) {
-            return (long) value;
-        } else if (value instanceof String) {
-            return Coercions.strToNum((String) value);
-        } else if (value instanceof Double) {
-            return (double) value;
-        } else if (value == NQPNull.SINGLETON) {
-            return 0;
-        } else if (value instanceof NQPList) {
-            return ((NQPList) value).elems();
-        } else if (value == null) {
-            throw new RuntimeException("can't smart numify raw null");
-        } else {
-            throw Debug.wrongThing("can't smart numify", value);
-        }
+    @Specialization
+    protected double numifyString(String value) {
+        return Coercions.strToNum(value);
+    }
+
+    @Specialization(guards = "isNull(value)")
+    protected double numifyNull(Object value) {
+        return 0;
+    }
+
+    @Specialization
+    protected double numifyList(NQPList value) {
+        return value.elems();
+    }
+
+    protected double wrongThing(Object value) {
+        throw Debug.wrongThing("can't smart numify", value);
+    }
+
+    protected final boolean isNull(Object value) {
+        return value == NQPNull.SINGLETON;
+    }
+
+    public final Object execute(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an obj");
+    }
+
+    public final String executeStr(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a str");
+    }
+
+    public final long executeInt(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an int");
     }
 }
