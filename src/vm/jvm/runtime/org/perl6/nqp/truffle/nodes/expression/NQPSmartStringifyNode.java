@@ -52,6 +52,7 @@ import org.perl6.nqp.truffle.runtime.NQPNull;
 
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.Coercions;
+import org.perl6.nqp.truffle.Debug;
 
 @NodeInfo(shortName = "smart stringify")
 public final class NQPSmartStringifyNode extends NQPStrNode {
@@ -74,7 +75,7 @@ public final class NQPSmartStringifyNode extends NQPStrNode {
         } else if (value == NQPNull.SINGLETON) {
             return "";
         } else {
-            throw new RuntimeException("can't smart stringify: " + value.getClass().getCanonicalName());
+            throw Debug.wrongThing("can't smart stringify", value);
         }
     }
 }
