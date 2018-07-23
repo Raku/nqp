@@ -67,6 +67,11 @@ import org.perl6.nqp.truffle.MalformedAstException;
 public class NQPSmartNumifyNode extends NQPNumNode {
 
     @Specialization
+    protected double numifyDouble(Double value) {
+        return value;
+    }
+
+    @Specialization
     protected double numifyLong(Long value) {
         return (long) value;
     }
