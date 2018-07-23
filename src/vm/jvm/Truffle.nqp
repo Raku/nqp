@@ -289,6 +289,9 @@ class QAST::OperationsTruffle {
     add_simple_op('rmdir', $INT, [$STR]);
     add_simple_op('symlink', $INT, [$STR, $STR]);
     add_simple_op('unlink', $INT, [$STR]);
+    
+    add_simple_op('time_i', $INT, []);
+    add_simple_op('time_n', $NUM, []);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
