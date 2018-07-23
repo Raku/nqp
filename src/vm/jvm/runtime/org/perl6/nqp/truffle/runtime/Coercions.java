@@ -18,7 +18,19 @@ public class Coercions {
                 return "-Inf";
             if (value != value)
                 return "NaN";
-            return Double.toString(value).replaceFirst("E(?![+-])", "e+").replaceFirst("E", "e");
+
+            String coerced = Double.toString(value);
+
+            int index = coerced.indexOf('E');
+            if (index == -1) {
+                return coerced;
+            } else {
+                if (coerced.charAt(index+1) == '-') {
+                   return coerced.substring(0, index) + "e" + coerced.substring(index+1);
+                } else {
+                   return coerced.substring(0, index) + "e+" + coerced.substring(index+1);
+                }
+            }
         }
     }
 
