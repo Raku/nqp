@@ -40,49 +40,45 @@
  */
 package org.perl6.nqp.truffle.nodes.variables;
 
-import com.oracle.truffle.api.CompilerDirectives;
-import com.oracle.truffle.api.dsl.NodeField;
-import com.oracle.truffle.api.dsl.Specialization;
-import com.oracle.truffle.api.dsl.Introspectable;
 import com.oracle.truffle.api.frame.FrameSlot;
-import com.oracle.truffle.api.frame.FrameSlotKind;
-import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.frame.Frame;
-import com.oracle.truffle.api.dsl.TypeSystemReference;
 import org.perl6.nqp.truffle.nodes.NQPNode;
-import org.perl6.nqp.truffle.NQPTypes;
+
 import org.perl6.nqp.dsl.Deserializer;
 
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.FoundLexical;
 
-public class NQPReadLocalVariableNode extends FrameLookupNode {
-    private final FrameSlot slot;
+public class NQPBindStrVariableNode extends FrameLookupNode {
+    final private FrameSlot slot;
+    @Child private NQPNode valueNode;
 
-    public NQPReadLocalVariableNode(FrameSlot slot, int depth) {
+    public NQPBindStrVariableNode(FrameSlot slot, int depth, NQPNode valueNode) {
         super(depth);
         this.slot = slot;
+        this.valueNode = valueNode;
     }
 
+    @Override
+    public String executeStr(VirtualFrame frame) {
+        String value = valueNode.executeStr(frame);
+        getFrame(frame).setObject(slot, value);
+        return value;
+    }
 
-    @Deserializer("get-lexical")
-    public static NQPReadLocalVariableNode getLexical(NQPScope scope, String name) {
+    @Deserializer("bind-str-lexical")
+    public static NQPBindStrVariableNode bindLexical(NQPScope scope, String name, NQPNode valueNode) {
         FoundLexical foundLexical = scope.findLexical(name);
-        return new NQPReadLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth());
+        return new NQPBindStrVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
     }
 
-    @Deserializer("get-local")
-    public static NQPReadLocalVariableNode getLocal(NQPScope scope, String name) {
-        return new NQPReadLocalVariableNode(scope.findLocal(name), 0);
+    @Deserializer("bind-str-local")
+    public static NQPBindStrVariableNode bindLocal(NQPScope scope, String name, NQPNode valueNode) {
+        return new NQPBindStrVariableNode(scope.findLocal(name), 0, valueNode);
     }
 
-    @Override
-    public Object execute(VirtualFrame frame) {
-        return FrameUtil.getObjectSafe(getFrame(frame), slot);
-    }
-
-    @Override
+    @Override 
     public void executeVoid(VirtualFrame frame) {
+        executeStr(frame);
     }
 }

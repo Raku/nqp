@@ -49,11 +49,11 @@ import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.FoundLexical;
 
-public class NQPBindLocalVariableNode extends FrameLookupNode {
+public class NQPBindVariableNode extends FrameLookupNode {
     final private FrameSlot slot;
     @Child private NQPNode valueNode;
 
-    public NQPBindLocalVariableNode(FrameSlot slot, int depth, NQPNode valueNode) {
+    public NQPBindVariableNode(FrameSlot slot, int depth, NQPNode valueNode) {
         super(depth);
         this.slot = slot;
         this.valueNode = valueNode;
@@ -66,15 +66,15 @@ public class NQPBindLocalVariableNode extends FrameLookupNode {
         return value;
     }
 
-    @Deserializer("bind-lexical")
-    public static NQPBindLocalVariableNode bindLexical(NQPScope scope, String name, NQPNode valueNode) {
+    @Deserializer("bind-obj-lexical")
+    public static NQPBindVariableNode bindLexical(NQPScope scope, String name, NQPNode valueNode) {
         FoundLexical foundLexical = scope.findLexical(name);
-        return new NQPBindLocalVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
+        return new NQPBindVariableNode(foundLexical.getFrameSlot(), foundLexical.getDepth(), valueNode);
     }
 
-    @Deserializer("bind-local")
-    public static NQPBindLocalVariableNode bindLocal(NQPScope scope, String name, NQPNode valueNode) {
-        return new NQPBindLocalVariableNode(scope.findLocal(name), 0, valueNode);
+    @Deserializer("bind-obj-local")
+    public static NQPBindVariableNode bindLocal(NQPScope scope, String name, NQPNode valueNode) {
+        return new NQPBindVariableNode(scope.findLocal(name), 0, valueNode);
     }
 
     @Override 

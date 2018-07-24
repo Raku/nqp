@@ -44,7 +44,7 @@ public final class NQPWhileNode extends NQPNode {
         public boolean executeRepeating(VirtualFrame frame) {
             if (toBoolean(condNode.execute(frame))) {
                 try {
-                    bodyNode.execute(frame);
+                    bodyNode.executeVoid(frame);
                 } catch (ContinueException ex) {
                     // the body might throw a continue control-flow exception
                     // continue loop invocation

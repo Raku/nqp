@@ -417,6 +417,14 @@ class QAST::TruffleCompiler {
         has $!qast; # The QAST::Block
         has $!outer; # Outer block's BlockInfo
         has @!params; # the parameters the block takes
+        has $!var_types; # Mapping of variables types
+
+        method var_type($var) {
+            $!var_types{$var.scope}{$var.name};
+        }
+        method register_var_type($var, $type) {
+            $!var_types{$var.scope}{$var.name} := $type;
+        }
 
         method new($qast, $outer) {
             my $obj := nqp::create(self);
@@ -428,6 +436,7 @@ class QAST::TruffleCompiler {
             $!qast := $qast;
             $!outer := $outer;
             @!params := nqp::list();
+            $!var_types := nqp::hash('local', nqp::hash(), 'lexical', nqp::hash());
         }
 
         method add_param($param) {
@@ -435,6 +444,7 @@ class QAST::TruffleCompiler {
         }
 
         method params() { @!params }
+        method outer() { $!outer }
     }
 
     method compile(QAST::CompUnit $cu) {
@@ -547,6 +557,37 @@ class QAST::TruffleCompiler {
         }
     }
 
+    my @types := [$OBJ, $INT, $NUM, $STR];
+    method type_from_typeobj($typeobj) {
+        my int $type := nqp::objprimspec($typeobj);
+        @types[$type];
+    }
+
+    method figure_out_type(QAST::Var $var) {
+        my $type := $*BLOCK.var_type($var);
+        if nqp::defined($type) {
+            return $type;
+        }
+
+        if $var.scope eq 'lexical' || $var.scope eq 'typevar' {
+            # Try to find it in an outer scope.
+            my $cur_block := $*BLOCK.outer();
+            while nqp::istype($cur_block, BlockInfo) {
+                $type := $cur_block.var_type($var);
+                if nqp::defined($type) {
+                    return $type;
+                }
+                else {
+                    $cur_block := $cur_block.outer();
+                }
+            }
+        }
+
+        # TODO var not found and has .returns
+
+        $OBJ;
+    }
+
     proto method as_truffle($node, :$want) {
         if nqp::defined($want) {
             if nqp::istype($node, QAST::Want) {
@@ -566,6 +607,8 @@ class QAST::TruffleCompiler {
         if $node.hll {
             $*HLL := $node.hll;
         }
+
+        my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
 
         TAST.new($OBJ, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]);
     }
@@ -688,21 +731,25 @@ class QAST::TruffleCompiler {
     multi method as_truffle(QAST::Var $node, :$want) {
         my $action;
 
+        my $type := self.figure_out_type($node);
+
         if $node.scope eq 'lexical' || $node.scope eq 'local' {
             my str $scope := $node.scope;
             if $*BINDVAL {
-                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($OBJ));
-                $action := ["bind-$scope", $node.name, $value.tree];
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($type));
+                $action := ["bind-{nqp::lc(%type_names{$type})}-$scope", $node.name, $value.tree];
             } else {
                 $action := ["get-$scope", $node.name];
             }
 
             if $node.decl eq '' {
-                return TAST.new($OBJ, $action);
+                return TAST.new($type, $action);
             }
             # TODO static should do deserialization
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
-                return TAST.new($OBJ, ["declare-$scope", $node.name, $action]);
+                my int $type := self.type_from_typeobj($node.returns);
+                $*BLOCK.register_var_type($node, $type);
+                return TAST.new($type, ["declare-$scope", $type, $node.name, $action]);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);

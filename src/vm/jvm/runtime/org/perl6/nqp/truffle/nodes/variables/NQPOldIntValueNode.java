@@ -18,7 +18,7 @@ public final class NQPOldIntValueNode extends NQPNode {
     @Override
     public long executeInt(VirtualFrame frame) {
         long oldValue = this.oldValueNode.executeInt(frame);
-        this.bindNewValueNode.execute(frame);
+        this.bindNewValueNode.executeVoid(frame);
         return oldValue;
     }
 
