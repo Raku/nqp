@@ -40,12 +40,7 @@
  */
 package org.perl6.nqp.truffle.nodes.variables;
 
-import com.oracle.truffle.api.dsl.Fallback;
-import com.oracle.truffle.api.dsl.NodeChild;
-import com.oracle.truffle.api.dsl.NodeField;
-import com.oracle.truffle.api.dsl.Specialization;
 import com.oracle.truffle.api.frame.FrameSlot;
-import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
@@ -54,7 +49,6 @@ import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.FoundLexical;
 
-@NodeField(name = "slot", type = FrameSlot.class)
 public class NQPBindLocalVariableNode extends FrameLookupNode {
     final private FrameSlot slot;
     @Child private NQPNode valueNode;
