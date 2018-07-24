@@ -110,4 +110,9 @@ public class NQPSmartNumifyNode extends NQPNumNode {
     public final long executeInt(VirtualFrame frame) {
         throw new MalformedAstException("Expected an AST node that produces an int");
     }
+
+    @Deserializer("smart-numify")
+    public static NQPNode deserialize(NQPNode valueNode) {
+        return NQPSmartNumifyNodeGen.create(valueNode);
+    }
 }
