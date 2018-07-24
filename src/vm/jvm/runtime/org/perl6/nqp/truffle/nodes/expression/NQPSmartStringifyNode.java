@@ -41,6 +41,9 @@
 package org.perl6.nqp.truffle.nodes.expression;
 
 import com.oracle.truffle.api.CompilerAsserts;
+import com.oracle.truffle.api.dsl.Specialization;
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.NodeChild;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 
@@ -52,30 +55,52 @@ import org.perl6.nqp.truffle.runtime.NQPNull;
 
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.Coercions;
+
+import org.perl6.nqp.truffle.MalformedAstException;
+
 import org.perl6.nqp.truffle.Debug;
 
 @NodeInfo(shortName = "smart stringify")
-public final class NQPSmartStringifyNode extends NQPStrNode {
+@NodeChildren({@NodeChild(value="valueNode", type=NQPNode.class)})
+public class NQPSmartStringifyNode extends NQPStrNode {
     @Child private NQPNode valueNode;
 
-    @Deserializer("smart-stringify")
-    public NQPSmartStringifyNode(NQPNode valueNode) {
-        this.valueNode = valueNode;
+    @Specialization
+    protected String doString(String value) {
+        return value;
+    }
+
+    @Specialization
+    protected String doLong(Long value) {
+        return value.toString();
+    }
+
+    @Specialization
+    protected String doDouble(Double value) {
+        return Coercions.numToStr((double) value);
+    }
+
+    @Specialization(guards = "isNull(value)")
+    protected String doNull(Object value) {
+        return "";
+    }
+
+    protected final boolean isNull(Object value) {
+        return value == NQPNull.SINGLETON;
     }
 
     @Override
-    public String executeStr(VirtualFrame frame) {
-        Object value = valueNode.execute(frame);
-        if (value instanceof String) {
-            return (String) value;
-        } else if (value instanceof Long) {
-            return ((Long) value).toString();
-        } else if (value instanceof Double) {
-            return Coercions.numToStr((double) value);
-        } else if (value == NQPNull.SINGLETON) {
-            return "";
-        } else {
-            throw Debug.wrongThing("can't smart stringify", value);
-        }
+    public final long executeInt(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a in");
+    }
+
+    @Override
+    public final double executeNum(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a num");
+    }
+
+    @Deserializer("smart-stringify")
+    public static NQPNode deserialize(NQPNode valueNode) {
+        return NQPSmartStringifyNodeGen.create(valueNode);
     }
 }
