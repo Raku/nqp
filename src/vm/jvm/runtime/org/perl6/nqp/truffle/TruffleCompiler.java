@@ -20,13 +20,6 @@ public class TruffleCompiler {
         switch (node.at_pos_boxed(tc, 0).get_str(tc)) {
             case "say":
                 return new NQPSayNode(build(node.at_pos_boxed(tc, 1), tc));
-            case "stmts":
-                int elems = (int) node.elems(tc);
-                NQPExpressionNode children[] = new NQPExpressionNode[elems - 1];
-                for (int i = 1; i < elems; i++) {
-                   children[i-1] =  build(node.at_pos_boxed(tc, i), tc);
-                }
-                return new NQPStmts(children);
             case "sval":
                 return new NQPSVal(node.at_pos_boxed(tc, 1).get_str(tc));
             default:
