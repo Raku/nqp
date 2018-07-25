@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle.runtime;
 
+import org.perl6.nqp.truffle.runtime.doubleconv.DoubleConversion;
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class Coercions {
@@ -19,18 +20,7 @@ public class Coercions {
             if (value != value)
                 return "NaN";
 
-            String coerced = Double.toString(value);
-
-            int index = coerced.indexOf('E');
-            if (index == -1) {
-                return coerced;
-            } else {
-                if (coerced.charAt(index+1) == '-') {
-                   return coerced.substring(0, index) + "e" + coerced.substring(index+1);
-                } else {
-                   return coerced.substring(0, index) + "e+" + coerced.substring(index+1);
-                }
-            }
+            return DoubleConversion.toShortestString(value);
         }
     }
 

@@ -7,25 +7,26 @@ J_RUNNER = nqp-j$(BAT)
 NQP_JAR_DIR = $(NQP_LANG_DIR)/runtime
 JVM_BUILD_DIR = gen/jvm
 
-RUNTIME_JAVAS = \
-  src/vm/jvm/runtime/org/perl6/nqp/io/*.java \
-  src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
+TRUFFLE_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/doubleconv/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
-  src/vm/jvm/runtime/org/perl6/nqp/truffle/adapters/*.java \
+
+RUNTIME_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/io/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/tools/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/adapters/*.java \
+  $(TRUFFLE_JAVAS) \
 
 TRUFFLE6_JAVAS = \
-  src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/*.java \
-  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
-  src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
-  src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/svm/*.java \
+  $(TRUFFLE_JAVAS) \
 
 DSL_JAVAS = src/vm/jvm/dsl/org/perl6/nqp/dsl/*.java
 
