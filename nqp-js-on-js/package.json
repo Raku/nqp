@@ -1,9 +1,10 @@
 {
-  "version": "0.1.0",
+  "version": "0.4.0",
   "name": "nqp-js-on-js",
   "bin": {
-      "nqp-js-on-js": "nqp-bootstrapped.js"
+    "nqp-js-on-js": "nqp-bootstrapped.js"
   },
+  "files": ["*.js"],
   "licenses": [
     {
       "type": "Artistic 2",
@@ -11,6 +12,6 @@
     }
   ],
   "dependencies": {
-    "nqp-runtime": "0.1.0"
+    "nqp-runtime": "0.2.0"
   }
 }
