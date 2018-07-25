@@ -58,6 +58,7 @@ public class NQPRootNode extends RootNode {
     }
 
     public Object execute(VirtualFrame frame) {
-        return bodyNode.executeGeneric(frame);
+        bodyNode.executeVoid(frame);
+        return null;
     }
 }

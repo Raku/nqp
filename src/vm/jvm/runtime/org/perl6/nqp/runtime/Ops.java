@@ -7152,8 +7152,8 @@ public final class Ops {
         return res;
     }
 
-    public static SixModelObject runtruffle(SixModelObject node, ThreadContext tc) {
-        TruffleCompiler.run(node, tc);
+    public static SixModelObject runtruffle(SixModelObject nodes, ThreadContext tc) {
+        TruffleCompiler.run();
         return null;
     }
 
