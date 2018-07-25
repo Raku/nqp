@@ -19,7 +19,7 @@ const mkdirp = require('mkdirp');
 
 const NQPException = require('./nqp-exception.js');
 
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
 const Null = require('./null.js');
 
@@ -291,10 +291,10 @@ op.open = function(name, mode) {
 
 op.seekfh = function(ctx, fh, offset, whence) {
   if (whence == 0 && offset < 0) {
-    ctx.die(`Can't seek to position: ${offset}`);
+    throw new NQPException(`Can't seek to position: ${offset}`);
   }
   if (!(whence == 0 || whence == 1 || whence == 2)) {
-    ctx.die('Invalid whence passed to seekfh: ' + whence);
+    throw new NQPException('Invalid whence passed to seekfh: ' + whence);
   }
   return fs.seekSync(fh.fd, offset, whence);
 };
@@ -486,29 +486,29 @@ function wrapBuffer(buffer, type) {
   return wrapped;
 }
 
-function stringifyEnv(ctx, hash) {
+/*async*/ function stringifyEnv(ctx, hash) {
   const stringifed = {};
 
-  hash.content.forEach(function(value, key, map) {
-    stringifed[key] = nqp.toStr(value, ctx);
-  });
+  for (let key of hash.content.keys()) {
+    stringifed[key] = /*await*/ nqp.toStr(hash.content.get(key), ctx);
+  }
 
   return stringifed;
 }
 
-function stringifyArray(ctx, array) {
+/*async*/ function stringifyArray(ctx, array) {
   const stringified = [];
   for (const element of array.array) {
-    stringified.push(nqp.toStr(element, ctx));
+    stringified.push(/*await*/ nqp.toStr(element, ctx));
   }
   return stringified;
 }
 
-op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
+op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
   const options = {
     shell: false,
     cwd: cwd,
-    env: stringifyEnv(ctx, env),
+    env: /*await*/ stringifyEnv(ctx, env),
     stdio: [
       process.stdin,
       config.content.get('stdout_bytes') ? 'pipe' : process.stdout,
@@ -516,12 +516,12 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
     ],
   };
 
-  const stringified = stringifyArray(ctx, args);
+  const stringified = /*await*/ stringifyArray(ctx, args);
 
   const result = child_process.spawnSync(stringified.shift(), stringified, options);
 
   if (config.content.get('ready')) {
-    config.content.get('ready').$$call(ctx, null);
+    /*await*/ config.content.get('ready').$$call(ctx, null);
   }
 
 
@@ -530,17 +530,17 @@ op.spawnprocasync = function(ctx, queue, args, cwd, env, config) {
   if (str_box === undefined) str_box = Null;
 
   if (config.content.get('stdout_bytes')) {
-    config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
-    config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
+    /*await*/ config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[1], config.content.get('buf_type')), str_box);
+    /*await*/ config.content.get('stdout_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('stderr_bytes')) {
-    config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
-    config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
+    /*await*/ config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(0), wrapBuffer(result.output[2], config.content.get('buf_type')), str_box);
+    /*await*/ config.content.get('stderr_bytes').$$call(ctx, null, new NQPInt(1), str_box, str_box);
   }
 
   if (config.content.get('done')) {
-    config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
+    /*await*/ config.content.get('done').$$call(ctx, null, new NQPInt(result.status << 8));
   }
 };
 

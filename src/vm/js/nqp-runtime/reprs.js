@@ -9,22 +9,18 @@ const nullStr = require('./null_s.js');
 const iter = require('./iter.js');
 const BOOT = require('./BOOT.js');
 const core = require('./core.js');
-const nqp = require('nqp-runtime');
-
-const bignum = require('bignum-browserify');
-// disable for eval
-const ZERO = bignum(0); // eslint-disable-line no-unused-vars
+const nqp = require('./runtime.js');
 
 const constants = require('./constants.js');
 
-const ref = require('ref');
+const ref = process.browser ? null : require('ref');
 
-const Union = require('ref-union');
-const StructType = require('ref-struct');
+const Union = process.browser ? null : require('ref-union');
+const StructType = process.browser ? null : require('ref-struct');
 
 const codecs = require('./codecs.js');
 
-const graphemeRegexp = require('./graphemes').regexp;
+const graphemeRegexp = require('./graphemes.js').regexp;
 
 const nativeArgs = require('./native-args.js');
 
@@ -72,7 +68,7 @@ function methodNotFoundError(ctx, obj, name) {
   if (handler === undefined) {
     throw new NQPException(`Cannot find method '${name}' on object of type ${obj._STable.debugName}`);
   } else {
-    handler.$$call(ctx, null, obj, new NativeStrArg(name));
+    return handler.$$call(ctx, null, obj, new NativeStrArg(name));
   }
 }
 
@@ -89,24 +85,25 @@ function basicConstructor(STable) {
     }
 
     /* are we trying to access an internal property? */
-    if (name.substr(0, 2) === '$$') {
+    /* HACK with then, we likely need to prefix p6 methods to avoid this problem */
+    if (name.substr(0, 2) === '$$' || name == 'then') {
       return undefined;
     }
 
     if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return function(ctx, _NAMED, obj) {
-        methodNotFoundError(ctx, obj, name);
+        return methodNotFoundError(ctx, obj, name);
       };
     }
 
 
-    return function() {
+    return /*async*/ function() {
       const how = this._STable.HOW;
 
-      const method = how.find_method(null, null, how, this, new NativeStrArg(name));
+      const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
 
       if (method === Null) {
-        methodNotFoundError(arguments[0], arguments[2], name);
+        return methodNotFoundError(arguments[0], arguments[2], name);
       }
 
       const args = [];
@@ -1599,12 +1596,13 @@ function getBI(obj) {
   return obj.$$getBignum();
 }
 
+
 function getIntFromBI(bignum) {
-  const bits = bignum.bitLength();
-  if (bits >= 64) {
-    throw new NQPException(`Cannot unbox ${bits} bit wide bigint into native integer`);
+  if (bignum < -(2n**64n) || 2n**64n <= bignum) {
+    // TODO - put exact number of bits into exception
+    throw new NQPException(`Cannot unbox too big bigint into native integer`);
   } else {
-    return bignum.toNumber() | 0;
+    return Number(bignum) | 0;
   }
 }
 
@@ -1612,7 +1610,7 @@ class P6bigint extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this.value = bignum(value);
+        this.value = BigInt(value);
       }
 
       $$getInt() {
@@ -1637,7 +1635,7 @@ class P6bigint extends REPR {
     const attr = slotToAttr(slot);
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      const value = this[attr] || bignum(0);
+      const value = this[attr] || 0n;
       return makeBI(attrContentSTable, value);
     });
 
@@ -1649,17 +1647,17 @@ class P6bigint extends REPR {
 
   deserializeFinish(obj, data) {
     if (data.varint() == 1) { /* Is it small int? */
-      obj.value = bignum(data.varint());
+      obj.value = BigInt(data.varint());
     } else {
-      obj.value = bignum(data.str());
+      obj.value = BigInt(data.str());
     }
   }
 
   deserializeInline(data) {
     if (data.varint() == 1) { /* Is it small int? */
-      return bignum(data.varint());
+      return BigInt(data.varint());
     } else {
-      return bignum(data.str());
+      return BigInt(data.str());
     }
   }
 
@@ -1688,7 +1686,7 @@ class P6bigint extends REPR {
   generateBoxingMethods(STable, name) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this[name] = bignum(value);
+        this[name] = BigInt(value);
       }
 
       $$getInt() {
@@ -1711,7 +1709,7 @@ class P6bigint extends REPR {
 };
 
 P6bigint.prototype.flattenSTable = true;
-P6bigint.prototype.flattenedDefault = 'ZERO';
+P6bigint.prototype.flattenedDefault = '0n';
 
 
 reprs.P6bigint = P6bigint;
@@ -1844,7 +1842,7 @@ class Decoder extends REPR {
         return this;
       }
 
-      $$decodersetlineseps(ctx, seps) {
+      /*async*/ $$decodersetlineseps(ctx, seps) {
         this.$$check();
         this.$$seps = seps.array;
       }
@@ -2349,9 +2347,6 @@ class CREPR extends REPRWithAttributes {
           const attrType = attr.get('type');
 
           this.slotTypes[curAttr] = attrType;
-
-/*          console.log('attrType');
-          require('nqp-runtime').dumpObj(attrType);*/
 
           if (!attrType._STable.REPR.asRefType) {
             throw new NQPException(`CUnion: Can't use attr ${attr.get('name').$$getStr()} as CUnion attr`);

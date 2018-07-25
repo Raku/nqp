@@ -33,7 +33,7 @@ const stripMarks = require('./strip-marks.js');
 const foldCase = require('fold-case');
 const graphemes = require('./graphemes.js');
 
-const fs = require('fs');
+const fs = process.browser ? null : require('fs');
 
 
 exports.NQPInt = NQPInt;
@@ -48,7 +48,7 @@ function loadOps(module) {
 
 exports.loadOps = loadOps;
 
-const core = require('./core');
+const core = require('./core.js');
 loadOps(core);
 exports.hash = core.hash;
 exports.slurpyNamed = core.slurpyNamed;
@@ -63,8 +63,12 @@ exports.strToObj = core.strToObj;
 
 exports.EvalResult = core.EvalResult;
 
-const io = require('./io.js');
-loadOps(io);
+if (!process.browser) {
+  const io = require('./io.js');
+  loadOps(io);
+} else {
+  loadOps(require('./browser.js'));
+}
 
 const bignum = require('./bignum.js');
 loadOps(bignum);
@@ -87,11 +91,16 @@ loadOps(deserialization);
 const serialization = require('./serialization.js');
 loadOps(serialization);
 
-const nativecall = require('./nativecall.js');
-loadOps(nativecall);
+if (!process.browser) {
+  const nativecall = require('./nativecall.js');
+  loadOps(nativecall);
+}
 
 const CodeRef = require('./code-ref.js');
 exports.CodeRef = CodeRef;
+
+const continuations = process.browser ? require('./async-continuations.js') : require('./fiber-continuations.js');
+loadOps(continuations);
 
 exports.CodeRefWithStateVars = require('./code-ref-with-statevars.js');
 
@@ -112,7 +121,7 @@ for (const name in refs.helpers) {
   exports[name] = refs.helpers[name];
 }
 
-const coercions = require('./coercions');
+const coercions = require('./coercions.js');
 
 exports.strToNum = coercions.strToNum;
 exports.numToStr = coercions.numToStr;
@@ -124,41 +133,55 @@ exports.libpath = function(paths) {
 
 exports.loaderCtx = null;
 
-op.loadbytecode = function(ctx, file) {
-  // HACK - temporary hack for rakudo-js
-  if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
-    file = 'Perl6::BOOTSTRAP';
-  }
+/* dependencies */
 
-  let loadFrom;
-  if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
-  } else {
-    loadFrom = module;
-  }
+if (process.browser) {
+  op.loadbytecode = /*async*/ function(ctx, file) {
+      const oldLoaderCtx = exports.loaderCtx;
+      exports.loaderCtx = ctx;
+      file = file.replace(/\.setting$/, '_setting');
+      file = file.replace(/::/g, '-');
+      require('./' + file + '.nqp-raw-runtime');
+      exports.loaderCtx = oldLoaderCtx;
+  };
+} else {
+  op.loadbytecode = /*async*/ function(ctx, file) {
+    // HACK - temporary hack for rakudo-js
+    if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
+      file = 'Perl6::BOOTSTRAP';
+    }
 
-  const oldLoaderCtx = exports.loaderCtx;
-  exports.loaderCtx = ctx;
-  const mangled = file.replace(/::/g, '-');
+    let loadFrom;
+    if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
+    } else {
+      loadFrom = module;
+    }
 
-  const prefixes = libpath.slice();
-  prefixes.push('./', './nqp-js-on-js/');
-  let found = false;
-  for (const prefix of prefixes) {
-    try {
-      loadFrom.require(prefix + mangled);
-      found = true;
-      break;
-    } catch (e) {
-      if (e.code !== 'MODULE_NOT_FOUND') {
-        throw e;
+    const oldLoaderCtx = exports.loaderCtx;
+    exports.loaderCtx = ctx;
+    const mangled = file.replace(/::/g, '-');
+
+    const prefixes = libpath.slice();
+    prefixes.push('./', './nqp-js-on-js/');
+    let found = false;
+    for (const prefix of prefixes) {
+      try {
+        /*await*/ loadFrom.require(prefix + mangled);
+
+        found = true;
+        break;
+      } catch (e) {
+        if (e.code !== 'MODULE_NOT_FOUND') {
+          throw e;
+        }
       }
     }
-  }
-  if (!found) throw `can't find: ${file}, looking in: ${prefixes.join(', ')} from ${loadFrom.filename}`;
-  exports.loaderCtx = oldLoaderCtx;
+    if (!found) throw `can't find: ${file}, looking in: ${prefixes.join(', ')} from ${loadFrom.filename}`;
+    exports.loaderCtx = oldLoaderCtx;
 
-  return file;
-};
+    return file;
+  };
+}
 
 op.loadbytecodefh = function(ctx, fh, file) {
   const oldLoaderCtx = exports.loaderCtx;
@@ -206,8 +229,13 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
   }
 };
 
-exports.toStr = function(arg_, ctx) {
-  const arg = arg_.$$decont(ctx);
+exports.toStr = /*async*/ function(arg_, ctx) {
+  if (!arg_.$$decont) {
+    console.log('#2');
+    console.log(arg_);
+    console.trace('got raw promise');
+  }
+  const arg = /*await*/ arg_.$$decont(ctx);
 
   if (arg instanceof NQPStr) {
     return arg.value;
@@ -220,8 +248,8 @@ exports.toStr = function(arg_, ctx) {
   } else if (arg.$$getStr) {
     return arg.$$getStr();
   } else if (arg.Str) {
-    const ret = arg.Str(ctx, null, arg); // eslint-disable-line new-cap
-    return (typeof ret === 'string' ? ret : ret.$$decont(ctx).$$getStr());
+    const ret = /*await*/ arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+    return (typeof ret === 'string' ? ret : (/*await*/ ret.$$decont(ctx)).$$getStr());
   } else if (arg.$$getNum) {
     return coercions.numToStr(arg.$$getNum());
   } else if (arg.$$getInt) {
@@ -232,14 +260,17 @@ exports.toStr = function(arg_, ctx) {
 };
 
 
-exports.toNum = function(arg_, ctx) {
-  const arg = arg_.$$decont(ctx);
+exports.toNum = /*async*/ function(arg_, ctx) {
+  if (!arg_.$$decont) {
+    console.log('there');
+  }
+  const arg = /*await*/ arg_.$$decont(ctx);
   if (arg === Null) {
     return 0;
   } else if (arg instanceof NQPStr) {
     return coercions.strToNum(arg.value);
   } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
-    const result = arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    const result = /*await*/ arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (typeof result === 'number') {
       return result;
     } else if (result.$$getNum) {
@@ -262,8 +293,8 @@ exports.toNum = function(arg_, ctx) {
   }
 };
 
-exports.toInt = function(arg, ctx) {
-  return (exports.toNum(arg, ctx) | 0);
+exports.toInt = /*async*/ function(arg, ctx) {
+  return ((/*await*/ exports.toNum(arg, ctx)) | 0);
 };
 
 exports.retval = function(currentHLL, arg) {
@@ -413,8 +444,8 @@ exports.list_s = function lowlevelList(array) {
 };
 
 exports.slurpyArray = hll.slurpyArray;
-exports.createArray = require('./BOOT').createArray;
-exports.createIntArray = require('./BOOT').createIntArray;
+exports.createArray = require('./BOOT.js').createArray;
+exports.createIntArray = require('./BOOT.js').createIntArray;
 
 exports.dumpObj = function(obj) {
   console.log(typeof obj);
@@ -462,6 +493,10 @@ exports.exitHandler = function(ctx, currentHLL, value) {
 exports.NativeRef = require('./reprs.js').NativeRef;
 
 exports.getHLL = hll.getHLL;
+
+exports.run = function(code) {
+  return code();
+};
 
 exports.tooFewPos = function(got, expected) {
   throw new NQPException(`Too few positionals passed; expected ${expected-2} arguments but got ${got-2}`);

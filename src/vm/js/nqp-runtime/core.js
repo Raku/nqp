@@ -3,7 +3,7 @@
 const op = {};
 exports.op = op;
 
-const os = require('os');
+const os = process.browser ? null : require('os');
 
 const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
@@ -45,7 +45,7 @@ const stripMarks = require('./strip-marks.js');
 
 const codecs = require('./codecs.js');
 
-const graphemeRegexp = require('./graphemes').regexp;
+const graphemeRegexp = require('./graphemes.js').regexp;
 
 const foldCase = require('fold-case');
 
@@ -57,9 +57,9 @@ const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
 const unicodeData = require('nqp-unicode-data');
 
-const resolveSourceMap = require('./resolve-sourcemap.js');
+const resolveSourceMap = process.browser ? null : require('./resolve-sourcemap.js');
 
-const path = require('path');
+const path = process.browser ? null : require('path');
 
 const nullStr = require('./null_s.js');
 
@@ -418,8 +418,8 @@ op.newtype = function(how, repr) {
   return REPR.typeObjectFor(how);
 };
 
-op.findmethod = function(ctx, obj, name) {
-  const method = sixmodel.findMethod(ctx, obj, name);
+op.findmethod = /*async*/ function(ctx, obj, name) {
+  const method = /*await*/ sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
     throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
   }
@@ -598,10 +598,10 @@ class WrappedFunction extends NQPObject {
     this.func = func;
   }
 
-  $$apply(args) {
+  /*async*/ $$apply(args) {
     const converted = [];
     for (let i = 2; i < args.length; i++) {
-      converted.push(toJS(args[i]));
+      converted.push(/*await*/ toJS(args[i]));
     }
     return fromJS(this.func.apply(null, converted));
   }
@@ -647,9 +647,9 @@ function toJS(obj) {
   }
 }
 
-const nqp = require('nqp-runtime');
+const nqp = require('./runtime.js');
 
-const Script = require('vm').Script;
+const Script = process.browser ? null : require('vm').Script;
 
 const sourceMaps = {};
 const evaledP6Sources = {};
@@ -865,7 +865,7 @@ op.getcomp = function(language) {
   return compilerRegistry.has(language) ? compilerRegistry.get(language) : Null;
 };
 
-const child_process = require('child_process');
+const child_process = process.browser ? null : require('child_process');
 
 function getConfigFromPerl() {
   const perlScript = `
@@ -996,7 +996,7 @@ op.encodeconf = function(str, encoding_, output, permissive) {
   if (encoding in codecs) {
     buffer = codecs[encoding].encode(str, permissive);
   } else {
-    buffer = new Buffer(str, encoding);
+    buffer = Buffer.from(str, encoding);
   }
 
   writeBuffer(output, buffer);
@@ -1150,10 +1150,10 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   const st = type._STable;
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
-    ctx.die('This type is already parametric');
+    throw new NQPException('This type is already parametric');
     return Null;
   } else if (st.parametricType) {
-    ctx.die('Cannot make a parameterized type also be parametric');
+    throw new NQPException('Cannot make a parameterized type also be parametric');
     return Null;
   }
 
@@ -1166,11 +1166,11 @@ op.setparameterizer = function(ctx, type, parameterizer) {
   return type;
 };
 
-op.parameterizetype = function(ctx, type, params) {
+op.parameterizetype = /*async*/ function(ctx, type, params) {
   /* Ensure we have a parametric type. */
   const st = type._STable;
   if (!st.parameterizer) {
-    ctx.die('This type is not parametric');
+    throw new NQPException('This type is not parametric');
   }
 
   const unpackedParams = params.array;
@@ -1180,7 +1180,7 @@ op.parameterizetype = function(ctx, type, params) {
     return found;
   }
 
-  const result = st.parameterizer.$$call(ctx, {}, st.WHAT, params);
+  const result = /*await*/ st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
   const newSTable = result._STable;
   newSTable.parametricType = type;
@@ -1239,7 +1239,7 @@ op.isnanorinf = function(n) {
 function typeparameters(ctx, type) {
   const st = type._STable;
   if (!st.parametricType) {
-    ctx.die('This type is not parameterized');
+    throw new NQPException('This type is not parameterized');
   }
 
   return st.parameters;
@@ -1256,72 +1256,17 @@ op.typeparameterized = function(type) {
   return st.parametricType ? st.parametricType : Null;
 };
 
-const fibers = require('fibers');
+exports.generator = Math;
+exports.isXorShiftGenerator = false;
 
-function runTagged(currentHLL, tag, fiber, val, ctx) {
-  let arg = val;
-  while (1) {
-    const control = fiber.run(arg);
-    if (control.tag == tag || control.tag === Null) {
-      if (control.value) {
-        return control.value;
-      } else {
-        const cont = new Cont(tag, fiber);
-        const value = nqp.retval(currentHLL, control.closure.$$call(ctx, null, cont));
-        return value;
-      }
-    } else {
-      arg = fibers.yield(control);
-    }
-  }
-}
-
-class Cont {
-  constructor(tag, fiber) {
-    this.tag = tag;
-    this.fiber = fiber;
-  }
-
-  $$decont(ctx) {
-    return this;
-  }
-
-  $$toBool(ctx) {
-    return 1;
-  }
-};
-
-op.continuationreset = function(ctx, currentHLL, tag, block) {
-  if (block instanceof Cont) {
-    return runTagged(currentHLL, tag, block.fiber, Null, ctx);
-  } else {
-    const fiber = fibers(function() {
-      return {value: nqp.retval(currentHLL, block.$$call(ctx, null)), tag: tag};
-    });
-    fiber.tag = tag;
-    return runTagged(currentHLL, tag, fiber, Null, ctx);
-  }
-};
-
-
-op.continuationcontrol = function(ctx, currentHLL, protect, tag, closure) {
-  return nqp.retval(currentHLL, fibers.yield({closure: closure, tag: tag}));
-};
-
-op.continuationinvoke = function(ctx, currentHLL, cont, inject) {
-  const val = nqp.retval(currentHLL, inject.$$call(ctx, null));
-  return runTagged(currentHLL, cont.tag, cont.fiber, val, ctx);
-};
-
-let generator = Math;
 op.rand_n = function(limit) {
-  return generator.random() * limit;
+  return exports.generator.random() * limit;
 };
-
 
 op.srand = function(seed) {
   const XorShift = require('xorshift').constructor;
-  generator = new XorShift([seed, 0, 0, 0]);
+  exports.generator = new XorShift([seed, 0, 0, 0]);
+  exports.isXorShiftGenerator = true;
   return seed;
 };
 
@@ -1380,8 +1325,8 @@ op.replace = function(str, offset, count, repl) {
   return str.substr(0, offset) + repl + str.substr(offset + count);
 };
 
-const fs = require('fs');
-const sourceMapResolve = require('source-map-resolve');
+const fs = process.browser ? null : require('fs');
+const sourceMapResolve = process.browser ? null : require('source-map-resolve');
 
 op.getcodelocation = function(code) {
   let sourcePath;
@@ -1461,7 +1406,7 @@ op.throwextype = function(ctx, category) {
   const exType = BOOT.Exception;
   const ex = exType._STable.REPR.allocate(exType._STable);
   ex.$$category = category;
-  ctx.throw(ex);
+  return ctx.throw(ex);
 };
 
 function EvalResult(mainline, codeRefs) {
@@ -1896,7 +1841,7 @@ op.cleardispatcher = function(ctx) {
   }
 };
 
-const getrusage = require('qrusage');
+const getrusage = null; //require('qrusage');
 op.getrusage = function() {
   const usage = getrusage();
   const stable = BOOT.IntArray._STable;

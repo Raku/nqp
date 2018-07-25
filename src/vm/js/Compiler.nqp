@@ -1,5 +1,20 @@
 class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     has $!nyi;
+    has $!async;
+
+    method await($expr = NO_VALUE) {
+         $expr =:= NO_VALUE ?? '/*await*/ ' !! '(/*await*/ ' ~ $expr ~ ')';
+#        if $!async {
+#            $expr =:= NO_VALUE ?? 'await ' !! '(await ' ~ $expr ~ ')';
+#        } else {
+#            $expr =:= NO_VALUE ?? '' !! $expr;
+#        }
+    }
+
+    method async() {
+        #$!async ?? 'async ' !! '';
+        '/*async*/ ';
+    }
 
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
@@ -307,7 +322,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my str $unpacked :=
           $want == $T_VOID
             ?? $expr
-            !! "nqp.retval$suffix({$unpack_as_type == $T_OBJ ?? 'HLL' !! $*CTX}, $expr)";
+            !! self.await("nqp.retval$suffix({$unpack_as_type == $T_OBJ ?? 'HLL' !! $*CTX}, $expr)");
 
         self.stored_result(Chunk.new($unpack_as_type, $unpacked, @setup, :$node), :$want);
     }
@@ -647,9 +662,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             if $got == $T_OBJ {
                 if $desired == $T_BOOL {
-                    return Chunk.new($desired, "{$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)", $chunk);
+                    return Chunk.new($desired, self.await(self.await("{$chunk.expr}.\$\$decont($*CTX)") ~ ".\$\$toBool($*CTX)"), $chunk);
                 }
-
                 return QAST::OperationsJS.unbox(self, $*HLL, $desired, $chunk);
             }
 
@@ -1207,7 +1221,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my str $save_args := $*BLOCK.has_own_variable('$*DISPATCHER') ?? "$*CTX.\$\$args = Array.prototype.slice.call(arguments);\n" !! '';
 
             my @function := [
-                "function {self.mangled_cuid($node.cuid)}({$sig.expr}) \{\n" ,
+                self.async ~ "function {self.mangled_cuid($node.cuid)}({$sig.expr}) \{\n" ,
                 $first_time_marker ?? "let {$first_time_marker}Init = $first_time_marker;\n" !! '',
                 $first_time_marker ?? "$first_time_marker = 0;\n" !! '',
                 self.declare_js_vars($*BLOCK.tmps),
@@ -1340,7 +1354,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 @args.push($arg);
             }
 
-            self.stored_result(Chunk.new($want, $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
+            self.stored_result(Chunk.new($want, self.await ~ $cloned_block~".\$\$call({nqp::join(',', @args)})", $setup, :$node), :$want);
         }
         elsif $node.blocktype eq 'declaration' ||  $node.blocktype eq '' {
             if $want == $T_VOID {
@@ -1560,7 +1574,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
                     else {
                         $loop.handle($type);
-                        return Chunk.void("$*CTX.$type();\n");
+                        return Chunk.void("{self.await}$*CTX.$type();\n");
                     }
                 }
             }
@@ -1572,7 +1586,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         if $label {
             my $compiled_label := self.as_js($label, :want($T_OBJ));
-            Chunk.void($compiled_label, "$*CTX.{$type}Labeled({$compiled_label.expr});\n");
+            Chunk.void($compiled_label, "{self.await}$*CTX.{$type}Labeled({$compiled_label.expr});\n");
         }
         else {
             self.NYI("can't find surrounding loop for $type");
@@ -1618,6 +1632,10 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method suffix_from_type($type) {
         self.is_fancy_int($type) ?? '_i' !! @suffix[$type];
+    }
+
+    method run_with_module($code) {
+        self.await ~ $code ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n";
     }
 
     multi method as_js(QAST::CompUnit $node, :$want) {
@@ -1677,11 +1695,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my $main := self.as_js($main_block, :want($T_OBJ));
 
-            $body := $instant ?? Chunk.void($block_js, $main, $main.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $main;
-
+            $body := $instant ?? Chunk.void($block_js, $main, self.run_with_module($main.expr)) !! $main;
+            
         }
         else {
-            $body := $instant ?? Chunk.void($block_js, $block_js.expr ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n") !! $block_js;
+            $body := $instant ?? Chunk.void($block_js, self.run_with_module($block_js.expr)) !! $block_js;
         }
 
 
@@ -1695,8 +1713,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $create_sc := $comp_mode ?? self.create_sc($node) !! '';
         my @setup := [$pre , self.declare_js_vars($*BLOCK.js_lexicals), $create_sc, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
+            @setup.push('return ');
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
+
+        @setup.unshift((!$instant ?? '' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
+        @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }
 

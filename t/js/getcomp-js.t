@@ -8,5 +8,5 @@ ok($square(4) == 16, "passing integers to a js func");
 
 my $twice := $comp.eval('(function(func) {return function(x) {return func(func(x))}})');
 my $twiced := $twice(sub ($x) {"[$x]"})("abc");
-ok($twiced eq '[[abc]]', 'passing an calling a NQP function on the JavaScript side');
+ok($twiced eq '[[abc]]', 'passing and calling a NQP function on the JavaScript side');
 

@@ -29,13 +29,13 @@ class MultiCache {
   }
 };
 
-function posTypes(ctx, capture) {
+/*async*/ function posTypes(ctx, capture) {
   const arity = capture.pos.length;
   const types = new Array(arity);
   for (let i = 0; i < arity; i++) {
     const obj = capture.pos[i];
     if (obj._STable) {
-      const deconted = obj.$$decont(ctx);
+      const deconted = /*await*/ obj.$$decont(ctx);
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
@@ -76,7 +76,7 @@ function posTypes(ctx, capture) {
 
 const op = {};
 
-op.multicachefind = function(ctx, cache, capture) {
+op.multicachefind = /*async*/ function(ctx, cache, capture) {
   if (!(cache instanceof MultiCache)) return Null;
   const arity = capture.pos.length;
   if (capture.named) return Null;
@@ -91,7 +91,7 @@ op.multicachefind = function(ctx, cache, capture) {
 
   if (arity > MAX_ARITY) return Null;
 
-  const types = posTypes(ctx, capture);
+  const types = /*await*/ posTypes(ctx, capture);
 
   const arityCache = cache.cache[arity - 1];
 
@@ -105,7 +105,7 @@ op.multicachefind = function(ctx, cache, capture) {
   return Null;
 };
 
-op.multicacheadd = function(ctx, cache, capture, result) {
+op.multicacheadd = /*async*/ function(ctx, cache, capture, result) {
   const c = cache instanceof MultiCache ? cache : new MultiCache();
   if (c.named) return c;
   const arity = capture.pos.length;
@@ -119,7 +119,7 @@ op.multicacheadd = function(ctx, cache, capture, result) {
     return c;
   }
 
-  c.cache[arity - 1].push({types: posTypes(ctx, capture), result: result});
+  c.cache[arity - 1].push({types: /*await*/ posTypes(ctx, capture), result: result});
   return c;
 };
 

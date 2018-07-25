@@ -18,7 +18,7 @@ class QAST::OperationsJS {
         %inlinable{$op} := $inlinable;
     }
 
-    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$takes_hll) {
+    sub op_template($comp, $node, $return_type, @argument_types, $cb, :$ctx, :$decont, :$method_call, :$takes_hll, :$await) {
         my @exprs;
         my @setup;
 
@@ -39,7 +39,7 @@ class QAST::OperationsJS {
         my int $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push(@decont[$i] ?? "{$chunk.expr}.\$\$decont($*CTX)" !! $chunk.expr);
+            @exprs.push(@decont[$i] ?? $comp.await("{$chunk.expr}.\$\$decont($*CTX)") !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -60,7 +60,8 @@ class QAST::OperationsJS {
             }
         }
 
-        Chunk.new($return_type, $cb(|@exprs), @setup, :$node);
+        my $expr := $cb(|@exprs);
+        Chunk.new($return_type, $await ?? $comp.await($expr) !! $expr, @setup, :$node);
     }
 
     sub runtime_op($op) {
@@ -75,11 +76,11 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$takes_hll, :$hll) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$takes_hll, :$hll, :$await) {
 
         add_op($op, sub ($comp, $node, :$want) {
             my $gen_code := $method_call ?? method_call($op) !! $cb;
-            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$takes_hll);
+            my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$takes_hll, :$await);
             $side_effects ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable, :$hll);
 
@@ -165,11 +166,11 @@ class QAST::OperationsJS {
             my $cont := $comp.as_js($node[0], :want($T_OBJ));
             my $value := $comp.as_js($node[1], :want($value_kind));
 
-            my $decont := $value_kind == $T_OBJ ?? ".\$\$decont($*CTX)" !! "";
+            my $deconted := $value_kind == $T_OBJ ?? $comp.await("{$value.expr}.\$\$decont($*CTX)") !! $value.expr;
             Chunk.new($T_OBJ, $cont.expr, [
                 $cont,
                 $value,
-                $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $value.expr ~ $decont ~ ");\n"
+                $comp.await ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
             ]);
         });
     }
@@ -182,11 +183,11 @@ class QAST::OperationsJS {
     add_assign_op('assign_s', $T_STR);
 
 
-    add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx, :await);
 
-    add_simple_op('decont_i', $T_INT, [$T_OBJ], :method_call, :ctx);
-    add_simple_op('decont_n', $T_NUM, [$T_OBJ], :method_call, :ctx);
-    add_simple_op('decont_s', $T_STR, [$T_OBJ], :method_call, :ctx);
+    add_simple_op('decont_i', $T_INT, [$T_OBJ], :method_call, :ctx, :await);
+    add_simple_op('decont_n', $T_NUM, [$T_OBJ], :method_call, :ctx, :await);
+    add_simple_op('decont_s', $T_STR, [$T_OBJ], :method_call, :ctx, :await);
 
     add_simple_op('iscont', $T_INT, [$T_OBJ]);
     add_simple_op('isrwcont', $T_INT, [$T_OBJ]);
@@ -665,7 +666,7 @@ class QAST::OperationsJS {
 
         my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
-        $comp.get_return_value($callee.expr ~ ".\$\$decont($*CTX)" ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node, :$want);
+        $comp.get_return_value($comp.await ~ $comp.await($callee.expr ~ ".\$\$decont($*CTX)") ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node, :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -702,7 +703,7 @@ class QAST::OperationsJS {
 
     # Ops for NFA
 
-    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('nfafromstatelist', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :await);
     add_simple_op('nfarunproto', $T_OBJ, [$T_OBJ, $T_STR, $T_INT], :side_effects);
     add_simple_op('nfarunalt', $T_OBJ, [$T_OBJ, $T_STR, $T_INT, $T_OBJ, $T_OBJ, $T_OBJ]);
 
@@ -734,7 +735,7 @@ class QAST::OperationsJS {
 
         @setup.push($compiled_args);
 
-        $comp.get_return_value("{$invocant.expr}.\$\$decont($*CTX)" ~ $method ~ $call ~ $compiled_args.expr ~ ')', @setup, :$want, :$node);
+        $comp.get_return_value($comp.await ~ $comp.await("{$invocant.expr}.\$\$decont($*CTX)") ~ $method ~ $call ~ $compiled_args.expr ~ ')', @setup, :$want, :$node);
 
     });
 
@@ -777,7 +778,7 @@ class QAST::OperationsJS {
                 else {
                     my $*CTX := '$$sourceCtx';
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                    @setup.push("$handler_ctx.\$\${$type} = function(\$\$sourceCtx) \{\n");
+                    @setup.push("$handler_ctx.\$\${$type} = {$comp.async}function(\$\$sourceCtx) \{\n");
                     @setup.push("\$\$sourceCtx.\$\${$type eq 'CATCH' ?? 'catch' !! 'control'}HandlerOuter = $outer_ctx;\n");
                     @setup.push($catch_body);
                     @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
@@ -792,8 +793,8 @@ class QAST::OperationsJS {
                 my $*CTX := $handler_ctx;
                 my $body := $comp.as_js($protected, :$want);
 
-                my str $catch_wrapped_exception := "$handler_ctx.catchException(nqp.wrapException(e))";
-                my str $catch_exception := "$handler_ctx.catchException(e)";
+                my str $catch_wrapped_exception := "{$comp.await}$handler_ctx.catchException(nqp.wrapException(e))";
+                my str $catch_exception := "{$comp.await}$handler_ctx.catchException(e)";
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
@@ -805,8 +806,8 @@ class QAST::OperationsJS {
                     %convert{$T_NUM} := 'toNum';
                     %convert{$T_INT} := 'toInt';
                     if nqp::existskey(%convert, $want) {
-                        $catch_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
-                        $catch_wrapped_exception := 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
+                      $catch_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
+                      $catch_wrapped_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
                     }
 
                     $catch_exception := "$try_ret = $catch_exception";
@@ -814,18 +815,18 @@ class QAST::OperationsJS {
                 }
 
                 my $catch_unresumable := $has_catch
-                    ?? "\} else if (e instanceof nqp.NQPException) \{\n"
-                    ~ "$catch_exception\n"
-                    ~ "\} else if (e instanceof TypeError) \{\n" # HACK - we should catch more exceptions
-                    ~ "$catch_wrapped_exception;\n"
-                    !! '';
+                  ?? "\} else if (e instanceof nqp.NQPException) \{\n"
+                  ~ "$catch_exception\n"
+                  ~ "\} else if (e instanceof TypeError) \{\n" # HACK - we should catch more exceptions
+                  ~ "$catch_wrapped_exception;\n"
+                  !! '';
 
                 return Chunk.new($want, $try_ret, [
                     "var $handler_ctx = new nqp.CtxJustHandler($outer_ctx, $outer_ctx, $outer_ctx.\$\$callThis);\n",
                     Chunk.void(|@setup),
                     "try \{",
                     $body,
-                    # HACK we need to check $body.type if we handle something like return
+# HACK we need to check $body.type if we handle something like return
                     (($want == $T_VOID || $body.type == $T_VOID) ?? '' !! "$try_ret = {$body.expr};\n"),
                     "\} catch (e) \{if (e === $unwind_marker) \{",
                     $set_try_ret,
@@ -842,9 +843,9 @@ class QAST::OperationsJS {
 
 
     add_simple_op('exception', $T_OBJ, []);
-    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side_effects);
+    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side_effects, :await);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :side_effects);
-    add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"{$*CTX}.throw($exception)"});
+    add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"{$*CTX}.throw($exception)"}, :await);
 
     add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('getpayload', $T_OBJ, [$T_OBJ, $T_OBJ]);
@@ -862,12 +863,12 @@ class QAST::OperationsJS {
     add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ], :takes_hll);
     add_simple_op('backtrace', $T_OBJ, [$T_OBJ], :takes_hll);
 
-    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
-    add_simple_op('tryfindmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx);
+    add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :await);
+    add_simple_op('tryfindmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :await);
 
-    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :method_call);
+    add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :method_call, :await);
 
-    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1), :method_call);
+    add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1), :method_call, :await);
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :takes_hll);
 
@@ -1016,7 +1017,7 @@ class QAST::OperationsJS {
     add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
 
-    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects);
+    add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects, :await);
 
     add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side_effects, sub ($ctx, $obj) {
         "nqp.op.hllizefor($ctx, $obj, {quote_string($*HLL)})"
@@ -1026,7 +1027,7 @@ class QAST::OperationsJS {
     add_simple_op('getcomp', $T_OBJ, [$T_STR], :side_effects);
 
     add_simple_op('setparameterizer', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
-    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1));
+    add_simple_op('parameterizetype', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0,1), :await);
     add_simple_op('typeparameterized', $T_OBJ, [$T_OBJ], :decont(0));
     add_simple_op('typeparameters', $T_OBJ, [$T_OBJ], :ctx, :decont(0));
     add_simple_op('typeparameterat', $T_OBJ, [$T_OBJ, $T_INT], :ctx, :decont(0));
@@ -1107,9 +1108,15 @@ class QAST::OperationsJS {
                 $result := $*BLOCK.add_tmp();
             }
 
-            my $check_cond := $is_withy
-                ?? Chunk.new($T_INT, "nqp.retval(HLL, {$cond.expr}.\$\$decont($*CTX).defined($*CTX, null, {$cond.expr})).\$\$decont($*CTX).\$\$toBool($*CTX)", $cond)
-                !! $comp.coerce($cond, $T_BOOL);
+            my $check_cond;
+            if $is_withy {
+                my $defined := $comp.await("{$cond.expr}.defined($*CTX, null, {$cond.expr})");
+                my $retvaled := "nqp.retval(HLL, $defined)";
+                my $deconted := $comp.await("$retvaled.\$\$decont($*CTX)");
+                $check_cond := Chunk.new($T_INT, $comp.await("$deconted.\$\$toBool($*CTX)"), $cond);
+            } else {
+                $check_cond := $comp.coerce($cond, $T_BOOL);
+            }
 
             my $cond_without_sideeffects := Chunk.new($cond.type, $cond.expr);
 
@@ -1340,14 +1347,14 @@ class QAST::OperationsJS {
                 my $ctx := $*CTX;
 
                 if $*HLL eq 'nqp' {
-                    $post := Chunk.void('(function() {', $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                    $post := Chunk.void("{$comp.await} ({$comp.async}function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
                 } else {
                     my $*CTX := $comp.unique_var('ctx');
 
                     $last_exception := $*BLOCK.add_tmp;
 
                     $post := Chunk.void(
-                        '(function() {',
+                        "{$comp.await} ({$comp.async}function() \{",
                         "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
                         "$*CTX.\$\$LAST = function() \{\};",
                         "$last_exception = \{\};\n",
@@ -1466,7 +1473,7 @@ class QAST::OperationsJS {
                 Chunk.new($T_OBJ, $result, [
                     "$unwind_marker = \{\};\n",
                     "$*CTX.\$\$unwind = $unwind_marker;\n",
-                    "$*CTX.\$\${$type} = function() \{\n",
+                    "$*CTX.\$\${$type} = {$comp.async}function() \{\n",
                         $handle_result,
                         "$result = {$handle_result.expr};\n",
                     "\};\n",
@@ -1491,7 +1498,7 @@ class QAST::OperationsJS {
             && $category.name eq 'CONTROL_RETURN';
     }
 
-    add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable,
+    add_simple_op('throwpayloadlexcaller', $T_VOID, [$T_INT, $T_OBJ], :side_effects, :!inlinable, :await,
        sub ($category, $payload) {"$*CTX.throwpayloadlexcaller($category, $payload)"});
 
     add_op('throwpayloadlex', :!inlinable, sub ($comp, $node, :$want) {
@@ -1507,10 +1514,10 @@ class QAST::OperationsJS {
         }
 
         my $category := $comp.as_js(:want($T_INT), $node[0]);
-        Chunk.void($category, $payload, "$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
+        Chunk.void($category, $payload, "{$comp.await}$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
     });
 
-    add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx);
+    add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx, :await);
 
     add_simple_op('lastexpayload', $T_OBJ, [], :!inlinable);
 
@@ -1521,7 +1528,7 @@ class QAST::OperationsJS {
 
     add_simple_op('create', $T_OBJ, [$T_OBJ], :side_effects);
 
-    add_simple_op('die', $T_VOID, [$T_STR], :side_effects, sub ($msg) {"{$*CTX}.die($msg)"});
+    add_simple_op('die', $T_VOID, [$T_STR], :side_effects, sub ($msg) {"{$*CTX}.die($msg)"}, :await);
     %ops<die_s> := %ops<die>;
 
 
@@ -1595,13 +1602,17 @@ class QAST::OperationsJS {
 
     add_simple_op('captureinnerlex', $T_OBJ, [$T_OBJ], :!inlinable, :side_effects);
 
-    add_simple_op('invokewithcapture', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($invokee, $capture) {
-        "nqp.retval(HLL, $invokee.\$\$apply([{$*CTX}].concat($capture.named, $capture.pos)))"
-    }, :side_effects);
+    # TODO - make the async optional
 
+    add_op('invokewithcapture', sub ($comp, $node, :$want) {
+        my $invokee := $comp.as_js($node[0], :want($T_OBJ));
+        my $capture := $comp.as_js($node[1], :want($T_OBJ));
+        my $chunk := Chunk.new($T_OBJ, "nqp.retval(HLL, {$comp.await} {$invokee.expr}.\$\$apply([{$*CTX}].concat({$capture.expr}.named, {$capture.expr}.pos)))", [$invokee, $capture]);
+        $comp.stored_result($chunk, :$want);
+    });
 
-    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx);
-    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx);
+    add_simple_op('multicachefind', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :await);
+    add_simple_op('multicacheadd', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx, :await);
 
     add_simple_op('settypecache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0));
     add_simple_op('setmethcache', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0));
@@ -1700,10 +1711,10 @@ class QAST::OperationsJS {
 
     # Continuations
 
-    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
-    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
+    add_simple_op('continuationreset', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll, :await);
+    add_simple_op('continuationinvoke', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll, :await);
 
-    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll);
+    add_simple_op('continuationcontrol', $T_OBJ, [$T_INT, $T_OBJ, $T_OBJ], :side_effects, :ctx, :takes_hll, :await);
 
 
     # Dealing with compiled compunits
@@ -1780,13 +1791,13 @@ class QAST::OperationsJS {
         Chunk.void($code.value ~ ";\n");
     });
 
-    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects);
+    add_simple_op('loadbytecode', $T_STR, [$T_STR], :ctx, :side_effects, :await);
     add_simple_op('loadbytecodefh', $T_VOID, [$T_OBJ, $T_STR], :ctx, :side_effects);
 
     add_simple_op('execname', $T_STR, []);
 
     add_simple_op('decoderconfigure', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :ctx, :side_effects, :method_call);
-    add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :method_call);
+    add_simple_op('decodersetlineseps', $T_OBJ, [$T_OBJ, $T_OBJ], :ctx, :side_effects, :method_call, :await);
     add_simple_op('decoderaddbytes', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :method_call);
     add_simple_op('decodertakechars', $T_STR, [$T_OBJ, $T_INT], :side_effects, :method_call);
     add_simple_op('decodertakeallchars', $T_STR, [$T_OBJ], :side_effects, :method_call);
@@ -1812,7 +1823,7 @@ class QAST::OperationsJS {
     add_simple_op('asynclisten', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_INT, $T_OBJ], :side_effects);
     add_simple_op('asyncwritebytes', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('asyncreadbyte', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
-    add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects);
+    add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects, :await);
     add_simple_op('killprocasync', $T_OBJ, [$T_OBJ, $T_INT], :side_effects);
 
     add_simple_op('permit', $T_OBJ, [$T_OBJ, $T_INT, $T_INT], :side_effects);
@@ -1875,7 +1886,7 @@ class QAST::OperationsJS {
         my int $is_fancy_int := $comp.is_fancy_int($desired);
         nqp::die("Can't coerce OBJ to $desired") unless nqp::existskey(%convert, $desired) || $is_fancy_int;
 
-        my str $rough_convert := 'nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})";
+        my str $rough_convert := $comp.await('nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})");
         my str $convert := $is_fancy_int
             ?? $comp.int_to_fancy_int($desired, $rough_convert)
             !! $rough_convert;

@@ -6,11 +6,11 @@
 
 const NQPException = require('./nqp-exception.js');
 
-const graphemes = require('./graphemes');
+const graphemes = require('./graphemes.js');
 
 const StringDecoder = require('string_decoder').StringDecoder;
 
-const completeGrapheme = require('./graphemes').completeGrapheme;
+const completeGrapheme = require('./graphemes.js').completeGrapheme;
 
 function isSurrogate(unit) {
   return false;
@@ -307,7 +307,7 @@ class NativeEncoding {
     }
 
     encode(str) {
-      return new Buffer(str, this.encoding);
+      return Buffer.from(str, this.encoding);
     }
 
     encodeWithReplacement(str, replacement) {

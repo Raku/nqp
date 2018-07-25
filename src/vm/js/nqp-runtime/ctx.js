@@ -64,34 +64,34 @@ class Ctx extends NQPObject {
   }
 
   last() {
-    this.controlException(LAST);
+    return this.controlException(LAST);
   }
 
   lastLabeled(label) {
-    this.controlExceptionLabeled(label, LAST);
+    return this.controlExceptionLabeled(label, LAST);
   }
 
   next() {
-    this.controlException(NEXT);
+    return this.controlException(NEXT);
   }
 
   nextLabeled(label) {
-    this.controlExceptionLabeled(label, NEXT);
+    return this.controlExceptionLabeled(label, NEXT);
   }
 
   redo() {
-    this.controlException(REDO);
+    return this.controlException(REDO);
   }
 
   redoLabeled(label) {
-    this.controlExceptionLabeled(label, REDO);
+    return this.controlExceptionLabeled(label, REDO);
   }
 
   controlException(category) {
     const exType = BOOT.Exception;
     const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category;
-    this.propagateControlException(exception);
+    return this.propagateControlException(exception);
   }
 
   controlExceptionLabeled(label, category) {
@@ -99,10 +99,10 @@ class Ctx extends NQPObject {
     const exception = exType._STable.REPR.allocate(exType._STable);
     exception.$$category = category | LABELED;
     exception.$$payload = label;
-    this.propagateControlException(exception);
+    return this.propagateControlException(exception);
   }
 
-  propagateControlException(exception) {
+  /*async*/ propagateControlException(exception) {
     const handler = '$$' + categoryToName[exception.$$category & ~LABELED];
     const labeled = exception.$$category & LABELED;
 
@@ -123,7 +123,7 @@ class Ctx extends NQPObject {
           if (ctx[handler]) {
             ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.$$unwind.ret = ctx.$$CONTROL(wrapped);
+            ctx.$$unwind.ret = /*await*/ ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -143,9 +143,9 @@ class Ctx extends NQPObject {
     throw exception;
   }
 
-  propagateException(exception) {
+  /*async*/ propagateException(exception) {
     if (exception.$$category) {
-      this.propagateControlException(exception);
+      return this.propagateControlException(exception);
       return;
     }
 
@@ -163,7 +163,7 @@ class Ctx extends NQPObject {
         exceptionsStack().push(exception);
         try {
           const wrapped = new Ctx(this, this, null);
-          ctx.$$unwind.ret = ctx.$$CATCH(wrapped);
+          ctx.$$unwind.ret = /*await*/ ctx.$$CATCH(wrapped);
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
             return;
@@ -182,23 +182,23 @@ class Ctx extends NQPObject {
     throw exception;
   }
 
-  catchException(exception) {
+  /*async*/ catchException(exception) {
     this.exception = exception;
     exceptionsStack().push(exception);
     try {
       // we don't have access to the most correct ctx in case of this sort of exception
-      return this.$$CATCH(this);
+      return /*await*/ this.$$CATCH(this);
     } finally {
       exceptionsStack().pop();
     }
   }
 
   rethrow(exception) {
-    this.propagateException(exception);
+    return this.propagateException(exception);
   }
 
   die(msg) {
-    this.propagateException(new NQPExceptionWithCtx(msg, this, stackTrace.get()));
+    return this.propagateException(new NQPExceptionWithCtx(msg, this, stackTrace.get()));
   }
 
   resume(exception) {
@@ -208,7 +208,7 @@ class Ctx extends NQPObject {
   throw(exception) {
     exception.$$stack = stackTrace.get();
     exception.$$ctx = this;
-    this.propagateException(exception);
+    return this.propagateException(exception);
   }
 
   throwpayloadlexcaller(category, payload) {
@@ -218,16 +218,17 @@ class Ctx extends NQPObject {
       ctx = ctx.$$caller;
     }
 
-    this.$$throwLexicalException(ctx, category, payload);
+    return this.$$throwLexicalException(ctx, category, payload);
   }
 
   throwpayloadlex(category, payload) {
-    this.$$throwLexicalException(this, category, payload);
+    return this.$$throwLexicalException(this, category, payload);
   }
 
-  $$throwLexicalException(lookFrom, category, payload) {
+  /*async*/ $$throwLexicalException(lookFrom, category, payload) {
     const exType = BOOT.Exception;
     const exception = exType._STable.REPR.allocate(exType._STable);
+
     exception.$$category = category;
     exception.$$payload = payload;
     const handler = '$$' + categoryToName[category];
@@ -250,7 +251,7 @@ class Ctx extends NQPObject {
           if (ctx[handler]) {
             ctx.$$unwind.ret = ctx[handler](wrapped);
           } else {
-            ctx.$$unwind.ret = ctx.$$CONTROL(wrapped);
+            ctx.$$unwind.ret = /*await*/ ctx.$$CONTROL(wrapped);
           }
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {

@@ -4,7 +4,7 @@ module.exports.op = op;
 
 const reprs = require('./reprs.js');
 const sixmodel = require('./sixmodel.js');
-const SerializationContext = require('./serialization-context');
+const SerializationContext = require('./serialization-context.js');
 const Hash = require('./hash.js');
 const CodeRef = require('./code-ref.js');
 const constants = require('./constants.js');
@@ -48,7 +48,7 @@ module.exports.wval = function(handle, idx) {
 };
 
 op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, setupWVals) {
-  const buffer = new Buffer(blob, 'base64');
+  const buffer = Buffer.from(blob, 'base64');
   sc.codeRefs = codeRefs.array;
 
   for (let i = 0; i < sc.codeRefs.length; i++) {

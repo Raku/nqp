@@ -1,6 +1,6 @@
 'use strict';
 
-const coercions = require('./coercions');
+const coercions = require('./coercions.js');
 
 const NQPInt = require('./nqp-int.js');
 
@@ -22,11 +22,11 @@ class CodePair {
 
     this.STable.addInternalMethods(class {
       $$assignunchecked(ctx, value) {
-        store.$$call(ctx, {}, this, value);
+        return store.$$call(ctx, {}, this, value);
       }
 
       $$assign(ctx, value) {
-        store.$$call(ctx, {}, this, value);
+        return store.$$call(ctx, {}, this, value);
       }
 
       $$iscont() {
