@@ -47,24 +47,39 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
 
+import org.perl6.nqp.truffle.MalformedAstException;
+
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+
+import com.oracle.truffle.api.dsl.Specialization;
+
+import com.oracle.truffle.api.dsl.NodeChildren;
+import com.oracle.truffle.api.dsl.NodeChild;
+
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "smart intify")
-public final class NQPSmartIntifyNode extends NQPIntNode {
-    @Child private NQPNode valueNode;
-
-    @Deserializer("smart-intify")
-    public NQPSmartIntifyNode(NQPNode valueNode) {
-        this.valueNode = valueNode;
+@NodeChildren({@NodeChild(value="valueNode", type=NQPNode.class)})
+public class NQPSmartIntifyNode extends NQPIntNode {
+    @Specialization
+    protected long doLong(Long value) {
+        return (long) value;
     }
 
-    @Override
-    public long executeInt(VirtualFrame frame) {
-        Object value = valueNode.execute(frame);
-        if (value instanceof Long) {
-            return (long) value;
-        }
-        throw new RuntimeException("can't smart intify");
+    public final Object execute(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an obj");
+    }
+
+    public final String executeStr(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces a str");
+    }
+
+    public final double executeNum(VirtualFrame frame) {
+        throw new MalformedAstException("Expected an AST node that produces an int");
+    }
+
+    @Deserializer("smart-intify")
+    public static NQPNode deserialize(NQPNode valueNode) {
+        return NQPSmartIntifyNodeGen.create(valueNode);
     }
 }
