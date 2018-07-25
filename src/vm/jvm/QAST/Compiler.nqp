@@ -2859,9 +2859,6 @@ QAST::OperationsJAST.map_classlib_core_op('atomicload', $TYPE_OPS, 'atomicload',
 QAST::OperationsJAST.map_classlib_core_op('atomicstore', $TYPE_OPS, 'atomicstore', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
 # JVM-specific ops for compilation unit handling
-
-QAST::OperationsJAST.map_classlib_core_op('runtruffle', $TYPE_OPS, 'runtruffle', [$RT_OBJ], $RT_OBJ, :tc);
-
 QAST::OperationsJAST.map_classlib_core_op('compilejast', $TYPE_OPS, 'compilejast', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('compilejasttofile', $TYPE_OPS, 'compilejasttofile', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('loadcompunit', $TYPE_OPS, 'loadcompunit', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
