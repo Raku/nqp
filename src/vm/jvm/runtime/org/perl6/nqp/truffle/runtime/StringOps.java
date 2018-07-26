@@ -75,6 +75,7 @@ public class StringOps {
         (1 << Character.LINE_SEPARATOR) | (1 << Character.PARAGRAPH_SEPARATOR);
 
 
+    @TruffleBoundary
     public static long iscclass(long cclass, String target, long offset) {
         if (offset < 0 || offset >= target.length())
             return 0;
@@ -122,5 +123,23 @@ public class StringOps {
         default:
             return 0;
         }
+    }
+
+    // does haystack have needle as a substring at offset?
+    @TruffleBoundary
+    public static long string_equal_at(boolean ignoreCase, String haystack, String needle, long offset) {
+        long haylen = haystack.length();
+        long needlelen = needle.length();
+
+        if (offset < 0) {
+            offset += haylen;
+            if (offset < 0) {
+                offset = 0;
+            }
+        }
+        if (haylen - offset < needlelen) {
+            return 0;
+        }
+        return haystack.regionMatches(ignoreCase, (int)offset, needle, 0, (int)needlelen) ? 1 : 0;
     }
 }
