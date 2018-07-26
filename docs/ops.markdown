@@ -624,17 +624,17 @@ and 1 if $r is greater than $l.
 Return 1 if the string `$haystack` has the string `$needle` at position `$pos`,
 otherwise return 0.
 
-## eqatic `moar`
+## eqatic
 * `eqatic(str haystack, str $needle, int $pos --> int)`
 Case-insensitive `eqat`
 
-## eqatim `moar`
+## eqatim `js moar`
 * `eqatim(str haystack, str $needle, int $pos --> int)`
 Ignore-mark `eqat`, NFD decomposes and matches the base codepoint
 
 Example: `eqat("á", "a", 0) → 1`
 
-## eqaticim `moar`
+## eqaticim `js moar`
 * `eqaticim(str haystack, str $needle, int $pos --> int)`
 Case-insensitive and ignore-mark `eqat`
 
