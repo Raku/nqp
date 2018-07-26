@@ -18,23 +18,24 @@ class QAST::VM is QAST::Node does QAST::Children {
     }
 
     method dump_children(int $indent, @onto) {
-        for %!alternatives {
+        for sorted_keys(%!alternatives) -> $k {
+            my $v := %!alternatives{$k}; 
             nqp::push(@onto, nqp::x(' ', $indent));
             nqp::push(@onto, '[');
-            nqp::push(@onto, $_.key);
+            nqp::push(@onto, $k);
             nqp::push(@onto, "]\n");
 
-            if nqp::istype($_.value, QAST::Node) {
-                nqp::push(@onto, $_.value.dump($indent+2));
+            if nqp::istype($v, QAST::Node) {
+                nqp::push(@onto, $v.dump($indent+2));
             }
             else {
                 nqp::push(@onto, nqp::x(' ', $indent+2));
                 nqp::push(@onto, '- ');
-                if $_.key eq 'loadlibs' {
-                    nqp::push(@onto, nqp::join(' ',$_.value));
+                if $k eq 'loadlibs' {
+                    nqp::push(@onto, nqp::join(' ',$v));
                 }
                 else {
-                    nqp::push(@onto, ~$_.value);
+                    nqp::push(@onto, ~$v);
                 }
                 nqp::push(@onto, "\n");
             }
