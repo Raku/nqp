@@ -74,7 +74,7 @@ ok(nqp::rindex('hi', '', 3) == -1, 'nqp::rindex does not find empty string at gr
 ok(nqp::index('hi', '', 2) == 2, 'nqp::index finds empty string after last index');
 ok(nqp::index('hi', '', 0) == 0, 'nqp::index finds empty string at start');
 ok(nqp::index('hi', '', 1) == 1, 'nqp::index finds empty string in the middle');
-ok(nqp::index('hi', '', 3) == -1, 'nqp::dindex does not find empty string at graphs + 1');
+ok(nqp::index('hi', '', 3) == -1, 'nqp::index does not find empty string at graphs + 1');
 
 is( nqp::chr(120), 'x', 'nqp::chr');
 is( nqp::ord('xyz'),120, 'nqp::ord');
@@ -321,9 +321,9 @@ ok(nqp::isge_i(10, 10) == 1, "isge_i =");
 ok(nqp::isge_i(9, 10) == 0, "isge_i <");
 ok(nqp::isge_i(11, 10) == 1, "isge_i >");
 
-ok(nqp::isgt_i(10, 10) == 0, "isge_i =");
-ok(nqp::isgt_i(9, 10) == 0, "isge_i <");
-ok(nqp::isgt_i(11, 10) == 1, "isge_i >");
+ok(nqp::isgt_i(10, 10) == 0, "isgt_i =");
+ok(nqp::isgt_i(9, 10) == 0, "isgt_i <");
+ok(nqp::isgt_i(11, 10) == 1, "isgt_i >");
 
 ok(nqp::islt_i(10, 10) == 0, "islt_i =");
 ok(nqp::islt_i(9, 10) == 1, "islt_i <");
@@ -341,29 +341,29 @@ ok(nqp::iseq_i(10, 10) == 1, "iseq_i =");
 ok(nqp::iseq_i(9, 10) == 0, "iseq_i <");
 ok(nqp::iseq_i(11, 10) == 0, "iseq_i >");
 
-ok(nqp::isle_s('aaa', 'aab'), 'nqp::isle');
-ok(nqp::isle_s('a', 'aa'), 'nqp::isle');
-ok(nqp::isle_s('abcdaz', 'abcdbzefg'), 'nqp::isle');
-ok(nqp::isle_s('abc', 'abc'), 'nqp::isle - both string equal');
-ok(!nqp::isle_s('abcdbzefg', 'abcdaz'), 'nqp::isle left string greater');
+ok(nqp::isle_s('aaa', 'aab'), 'nqp::isle_s');
+ok(nqp::isle_s('a', 'aa'), 'nqp::isle_s');
+ok(nqp::isle_s('abcdaz', 'abcdbzefg'), 'nqp::isle_s');
+ok(nqp::isle_s('abc', 'abc'), 'nqp::isle_s - both string equal');
+ok(!nqp::isle_s('abcdbzefg', 'abcdaz'), 'nqp::isle_s left string greater');
 
-ok(nqp::isge_s('aab', 'aaa', ), 'nqp::isge');
-ok(nqp::isge_s('aa', 'a'), 'nqp::isge');
-ok(nqp::isge_s('abcdbzefg', 'abcdaz',), 'nqp::isge');
-ok(nqp::isge_s('abc', 'abc'), 'nqp::isge - both string equal');
-ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
+ok(nqp::isge_s('aab', 'aaa', ), 'nqp::isge_s');
+ok(nqp::isge_s('aa', 'a'), 'nqp::isge_s');
+ok(nqp::isge_s('abcdbzefg', 'abcdaz',), 'nqp::isge_s');
+ok(nqp::isge_s('abc', 'abc'), 'nqp::isge_s - both string equal');
+ok(!nqp::isge_s('abcdaz', 'abcdbzefg'), 'nqp::isge_s left string greater');
 
-ok(nqp::islt_s('aaa', 'aab'), 'nqp::isle');
-ok(nqp::islt_s('a', 'aa'), 'nqp::isle');
-ok(nqp::islt_s('abcdaz', 'abcdbzefg'), 'nqp::isle');
-ok(!nqp::islt_s('abc', 'abc'), 'nqp::isle - both string equal');
-ok(!nqp::islt_s('abcdbzefg', 'abcdaz'), 'nqp::isle left string greater');
+ok(nqp::islt_s('aaa', 'aab'), 'nqp::islt_s');
+ok(nqp::islt_s('a', 'aa'), 'nqp::islt_s');
+ok(nqp::islt_s('abcdaz', 'abcdbzefg'), 'nqp::islt_s');
+ok(!nqp::islt_s('abc', 'abc'), 'nqp::islt_s - both string equal');
+ok(!nqp::islt_s('abcdbzefg', 'abcdaz'), 'nqp::islt_s left string greater');
 
-ok(nqp::isgt_s('aab', 'aaa', ), 'nqp::isge');
-ok(nqp::isgt_s('aa', 'a'), 'nqp::isge');
-ok(nqp::isgt_s('abcdbzefg', 'abcdaz',), 'nqp::isge');
-ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isge - both string equal');
-ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isge left string greater');
+ok(nqp::isgt_s('aab', 'aaa', ), 'nqp::isgt_s');
+ok(nqp::isgt_s('aa', 'a'), 'nqp::isgt_s');
+ok(nqp::isgt_s('abcdbzefg', 'abcdaz',), 'nqp::isgt_s');
+ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isgt_s - both string equal');
+ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isgt_s left string greater');
 
 ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
 ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)');
@@ -376,7 +376,7 @@ ok(-12.5 % -5 == -2.5, '% test');
 ok(20 % 7 == 6, '% with integer arguments');
 
 is(nqp::sha1("Hello World"), '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
-is( nqp::sha1("ab\x[0]c"), "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5", "nqp::sha1 null bytes");
+is(nqp::sha1("ab\x[0]c"), "DBDD4F85D8A56500AA5C9C8A0D456F96280C92E5", "nqp::sha1 null bytes");
 
 nqp::bindcomp("noSuchLanguageEver1", nqp::list("compiler1"));
 is(nqp::bindcomp("noSuchLanguageEver2", "compiler2"), "compiler2", "correct return value for bindcomp");
@@ -397,7 +397,7 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
 
 
     ok(nqp::shift_i($a) == 10, "shift_i");
-    ok(nqp::elems($a) == 1, 'nqp::shit_i reduces the number of elements correctly');
+    ok(nqp::elems($a) == 1, 'nqp::shift_i reduces the number of elements correctly');
 
     ok(nqp::unshift_i($a, 100) == 100, "unshift_i");
 
@@ -430,7 +430,7 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_s())');
 
     is(nqp::shift_s($a), "A", "shift_s");
-    ok(nqp::elems($a) == 1, 'nqp::shit_s reduces the number of elements correctly');
+    ok(nqp::elems($a) == 1, 'nqp::shift_s reduces the number of elements correctly');
 
     is(nqp::unshift_s($a, "X"), "X", "unshift_s");
 
@@ -476,14 +476,14 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
 
 ok(nqp::isnanorinf(nqp::nan()) == 1, "nqp::isnanorinf - nan");
 ok(nqp::isnanorinf(nqp::inf()) == 1, "nqp::isnanorinf - inf");
-ok(nqp::isnanorinf(nqp::neginf()) == 1, "nqp::isnanorinf - inf");
+ok(nqp::isnanorinf(nqp::neginf()) == 1, "nqp::isnanorinf - neginf");
 ok(nqp::isnanorinf(123.5) == 0, "nqp::isnanorinf - normal number");
 
 ok(nqp::inf() == nqp::inf(), "nqp::inf() equals itself");
 ok(nqp::nan() != nqp::nan(), "nqp::nan() doesn't equal itself");
 ok(nqp::neginf() < 0, "nqp::neginf() is negative");
 ok(nqp::inf() > 0, "nqp::inf() is positive");
-ok(nqp::inf()+123 == nqp::inf()-123, "nqp::neginf() doesn't change after adding or substracting");
+ok(nqp::inf()+123 == nqp::inf()-123, "nqp::inf() doesn't change after adding or substracting");
 ok(nqp::neginf()+123 == nqp::neginf()-123, "nqp::neginf() doesn't change after adding or substracting");
 ok(nqp::neginf() == -nqp::inf(), "nqp::neginf() is negated nqp::inf()");
 
@@ -512,7 +512,7 @@ my $value_say := nqp::say("#comment from say");
 my $value_print := nqp::print("#comment from print\n");
 
 is($value_say, "#comment from say", "nqp::say returns correct value");
-is($value_print, "#comment from print\n", "nqp::say returns correct value");
+is($value_print, "#comment from print\n", "nqp::print returns correct value");
 
 is(nqp::indexingoptimized("foobar"), "foobar", "nqp::indexingoptimized result is equal to it's argument");
 ok(nqp::isstr(nqp::indexingoptimized(123)), "nqp::indexingoptimized returns a string");
@@ -520,7 +520,7 @@ ok(nqp::isstr(nqp::indexingoptimized(123)), "nqp::indexingoptimized returns a st
 ok(!nqp::isnull(nqp::null_s()), "null_s isn't null");
 ok(!nqp::isnull_s(nqp::null()), "null isn't null_s");
 ok(nqp::isstr(nqp::null_s()), "null_s is still a str");
-ok(nqp::null() eq '', "null_s is and empty str");
+ok(nqp::null() eq '', "null is an empty str");
 {
     my $var := nqp::null_s();
     ok(nqp::isnull_s($var), "null_s can be stuck into a var and stays null_s");
