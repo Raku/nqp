@@ -1,4 +1,4 @@
-plan(23);
+plan(33);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -130,4 +130,57 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     $flag := 1;
 
     $cont.check_self();
+}
+
+{
+    my class SimpleCont {
+        has $!content;
+    }
+
+    sub fetch($cont) { nqp::getattr($cont, SimpleCont, '$!content') }
+    sub store($cont, $value) {nqp::bindattr($cont, SimpleCont, '$!content', $value) }
+
+    nqp::setcontspec(SimpleCont, 'code_pair', nqp::hash(
+        'fetch', &fetch,
+        'store', &store
+    ));
+
+    my $cont := nqp::create(SimpleCont);
+
+    my class Value {
+        has $!attr;
+        method attr() { $!attr }
+        method set_attr($value) { $!attr := $value }
+    }
+
+    nqp::assign($cont, Value);
+
+    ok(nqp::eqaddr(nqp::how_nd($cont), SimpleCont.HOW), 'nqp::how_nd does not decont');
+    ok(nqp::eqaddr(nqp::how($cont), Value.HOW), 'nqp::how deconts');
+
+    ok(nqp::isconcrete_nd($cont), 'nqp::isconcrete_nd does not decont');
+    ok(!nqp::isconcrete($cont), 'nqp::isconcrete does decont');
+
+    ok(nqp::eqaddr(nqp::what_nd($cont), SimpleCont), 'nqp::what_nd does not decont');
+    ok(nqp::eqaddr(nqp::what($cont), Value), 'nqp::what deconts');
+
+    nqp::assign($cont, Value.new(attr => 123));
+
+    my $clone_of_value := nqp::clone($cont);
+
+    $clone_of_value.set_attr(456);
+
+    is($cont.attr, 123, 'nqp::cloned cloned content');
+
+    my $clone_of_cont := nqp::clone_nd($cont);
+
+    is($clone_of_cont.attr, 123, 'clone_nd container start with right value');
+
+    $clone_of_cont.set_attr(678);
+
+    nqp::assign($clone_of_cont, $clone_of_value);
+
+    is($clone_of_cont.attr, 456, 'clone_nd container can be assigned to');
+
+    is($cont.attr, 678, 'original container is independent of clone but had shared value');
 }
