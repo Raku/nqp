@@ -291,6 +291,7 @@ class QAST::OperationsJS {
     %ops<chainstatic> := %ops<chain>;
 
     add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0), :method_call, :side_effects);
+    add_simple_op('clone_nd', $T_OBJ, [$T_OBJ], method_call('clone'), :side_effects);
 
     my sub static_hint($node) {
         my int $hint := -1;
@@ -997,6 +998,8 @@ class QAST::OperationsJS {
     add_simple_op('defined', $T_INT, [$T_OBJ], :decont(0));
     %ops<isconcrete> := %ops<defined>;
 
+    add_simple_op('isconcrete_nd', $T_INT, [$T_OBJ], runtime_op('defined'));
+
     add_simple_op('scwbenable', $T_INT, [], :side_effects);
     add_simple_op('scwbdisable', $T_INT, [], :side_effects);
 
@@ -1533,6 +1536,7 @@ class QAST::OperationsJS {
 
 
     add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"}, :decont(0));
+    add_simple_op('how_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.HOW"});
     add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj._STable.WHO"}, :decont(0));
     add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj._STable.WHO = $who, $obj)"}, :side_effects, :decont(0));
 
@@ -1552,6 +1556,7 @@ class QAST::OperationsJS {
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT
     add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : nqp.Null)"}, :decont(0));
+    add_simple_op('what_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj._STable ? $obj._STable.WHAT : nqp.Null)"});
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});
