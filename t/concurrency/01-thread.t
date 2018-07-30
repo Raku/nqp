@@ -16,7 +16,7 @@ plan(24);
     my $t     := nqp::newthread({ nqp::sleep(10.0) }, 1);
     ok(nqp::defined($t), 'Can create a new app-lifetime thread');
     nqp::threadrun($t);
-    ok(nqp::time_n() - $start < 10.0,
+    ok(nqp::islt_n(nqp::sub_n(nqp::time_n(), $start), 10.0),
        'Sleeping app-lifetime thread does not block main thread');
 }
 

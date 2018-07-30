@@ -26,8 +26,8 @@ $num_boxer.HOW.compose($num_boxer);
 # Try some basic operations with it.
 my $box_val_2 := nqp::box_n(3.14, $num_boxer);
 
-ok(nqp::unbox_n($box_val_2) == 3.14);
-ok(nqp::decont_n($box_val_2) == 3.14);
+ok(nqp::iseq_n(nqp::unbox_n($box_val_2), 3.14));
+ok(nqp::iseq_n(nqp::decont_n($box_val_2), 3.14));
 
 my $str_boxer := NQPClassHOW.new_type(:name('boxing_str'), :repr('P6opaque'));
 $str_boxer.HOW.add_attribute($str_boxer, NQPAttribute.new(
@@ -57,8 +57,8 @@ is(nqp::decont_s($box_val_3), 'hello');
     }
     my $value := nqp::box_n(4.14, Direct);
 
-    ok(nqp::unbox_n($value) == 4.14);
-    ok(nqp::decont_n($value) == 4.14);
+    ok(nqp::iseq_n(nqp::unbox_n($value), 4.14));
+    ok(nqp::iseq_n(nqp::decont_n($value), 4.14));
 };
 
 

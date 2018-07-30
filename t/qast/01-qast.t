@@ -1881,7 +1881,7 @@ test_qast_result(
         :name('$!value'), :type(num), :box_target(1)
     ));
     $num_boxer.HOW.add_parent($num_boxer, NQPMu);
-    $num_boxer.HOW.add_method($num_boxer, 'twice', method () {~(nqp::getattr_n(self, $num_boxer, '$!value')*2)});
+    $num_boxer.HOW.add_method($num_boxer, 'twice', method () {~(nqp::mul_n(nqp::getattr_n(self, $num_boxer, '$!value'), 2.0))});
     $num_boxer.HOW.compose($num_boxer);
 
     my $str_boxer := NQPClassHOW.new_type(:name('boxing_str'), :repr('P6opaque'));
@@ -2045,7 +2045,7 @@ test_qast_result(
 
             my $boxed_num := $block($num);
             ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as arg is boxed to the correct type');
-            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+            ok(nqp::iseq_n(nqp::unbox_n($boxed_num), 10.5), '...and has the right value');
 
             my $boxed_str := $block($str);
             ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as arg is boxed to the correct type');
@@ -2088,7 +2088,7 @@ test_qast_result(
 
             my $boxed_num := $block($num)[0];
             ok(nqp::istype($boxed_num, $num_boxer), 'the native num passed as slurpy arg is boxed to the correct type');
-            is(nqp::unbox_n($boxed_num), 10.5, '...and has the right value');
+            ok(nqp::iseq_n(nqp::unbox_n($boxed_num), 10.5), '...and has the right value');
 
             my $boxed_str := $block($str)[0];
             ok(nqp::istype($boxed_str, $str_boxer), 'the native str passed as slurpy arg is boxed to the correct type');

@@ -29,10 +29,10 @@ ok(nqp::bitxor_i(0xdead, 0xbeef) == 0x6042, 'nqp::bitxor_i');
 
 ok(nqp::bitand_i(nqp::bitneg_i(0xdead), 0xffff) == 0x2152, 'nqp::bitneg_i');
 
-ok( nqp::add_n(5,2) == 7, 'nqp::add_n');
-ok( nqp::sub_n(5,2) == 3, 'nqp::sub_n');
-ok( nqp::mul_n(5,2) == 10, 'nqp::mul_n');
-ok( nqp::div_n(5,2) == 2.5e0, 'nqp::div_n');
+ok( nqp::iseq_n(nqp::add_n(5.0, 2.0), 7.0), 'nqp::add_n');
+ok( nqp::iseq_n(nqp::sub_n(5.0, 2.0), 3.0), 'nqp::sub_n');
+ok( nqp::iseq_n(nqp::mul_n(5.0, 2.0), 10.0), 'nqp::mul_n');
+ok( nqp::iseq_n(nqp::div_n(5.0, 2.0), 2.5), 'nqp::div_n');
 
 ok( nqp::chars('hello') == 5, 'nqp::chars');
 is( nqp::concat('hello ', 'world'), 'hello world', 'nqp::concat');
@@ -98,8 +98,8 @@ ok( nqp::cmp_i(2, 0) ==  1, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 2) ==  0, 'nqp::cmp_i');
 ok( nqp::cmp_i(2, 5) == -1, 'nqp::cmp_i');
 
-ok( nqp::cmp_n(10, nqp::nan) ==  0, 'nqp::cmp_n with nan as left argument');
-ok( nqp::cmp_n(nqp::nan, 10) ==  0, 'nqp::cmp_n with nan as right argument');
+ok( nqp::cmp_n(10.0, nqp::nan) ==  0, 'nqp::cmp_n with nan as left argument');
+ok( nqp::cmp_n(nqp::nan, 10.0) ==  0, 'nqp::cmp_n with nan as right argument');
 
 ok( nqp::cmp_n(2.5, 0.5) ==  1, 'nqp::cmp_n');
 ok( nqp::cmp_n(2.5, 2.5) ==  0, 'nqp::cmp_n');
@@ -122,30 +122,30 @@ my $a := 10;
 ok( nqp::if(0, ($a++), ($a--)) == 10, 'nqp::if shortcircuit');
 ok( $a == 9, 'nqp::if shortcircuit');
 
-ok( nqp::pow_n(1, nqp::nan) == 1, 'nqp::pow_n(1, nqp::nan)');
-ok( nqp::pow_n(1, nqp::inf) == 1, 'nqp::pow_n(1, nqp::inf)');
-ok( nqp::pow_n(1, nqp::neginf) == 1, 'nqp::pow_n(1, nqp::neginf)');
-ok( nqp::pow_n(2.0, 4) == 16.0, 'nqp::pow_n');
+ok( nqp::iseq_n(nqp::pow_n(1.0, nqp::nan), 1.0), 'nqp::pow_n(1.0, nqp::nan)');
+ok( nqp::iseq_n(nqp::pow_n(1.0, nqp::inf), 1.0), 'nqp::pow_n(1.0, nqp::inf)');
+ok( nqp::iseq_n(nqp::pow_n(1.0, nqp::neginf), 1.0), 'nqp::pow_n(1.0, nqp::neginf)');
+ok( nqp::iseq_n(nqp::pow_n(2.0, 4.0), 16.0), 'nqp::pow_n');
 
 ok( nqp::neg_i(5) == -5, 'nqp::neg_i');
 ok( nqp::neg_i(-10) == 10, 'nqp::neg_i');
-ok( nqp::neg_n(5.2) == -5.2, 'nqp::neg_n');
-ok( nqp::neg_n(-10.3) == 10.3, 'nqp::neg_n');
+ok( nqp::iseq_n(nqp::neg_n(5.2), -5.2), 'nqp::neg_n');
+ok( nqp::iseq_n(nqp::neg_n(-10.3), 10.3), 'nqp::neg_n');
 ok( nqp::abs_i(5) == 5, 'nqp::abs_i');
 ok( nqp::abs_i(-10) == 10, 'nqp::abs_i');
-ok( nqp::abs_n(5.2) == 5.2, 'nqp::abs_n');
-ok( nqp::abs_n(-10.3) == 10.3, 'nqp::abs_n');
+ok( nqp::iseq_n(nqp::abs_n(5.2), 5.2), 'nqp::abs_n');
+ok( nqp::iseq_n(nqp::abs_n(-10.3), 10.3), 'nqp::abs_n');
 
-ok( nqp::ceil_n(5.2) == 6.0, 'nqp::ceil_n');
-ok( nqp::ceil_n(-5.2) == -5.0, 'nqp::ceil_n');
-ok( nqp::ceil_n(5.0) == 5.0, 'nqp::ceil_n');
-ok( nqp::ceil_n(-5.0) == -5.0, 'nqp::ceil_n');
-ok( nqp::floor_n(5.2) == 5.0, 'nqp::floor_n');
-ok( nqp::floor_n(-5.2) == -6.0, 'nqp::floor_n');
-ok( nqp::floor_n(5.0) == 5.0, 'nqp::floor_n');
-ok( nqp::floor_n(-5.0) == -5.0, 'nqp::floor_n');
+ok( nqp::iseq_n(nqp::ceil_n(5.2), 6.0), 'nqp::ceil_n');
+ok( nqp::iseq_n(nqp::ceil_n(-5.2), -5.0), 'nqp::ceil_n');
+ok( nqp::iseq_n(nqp::ceil_n(5.0), 5.0), 'nqp::ceil_n');
+ok( nqp::iseq_n(nqp::ceil_n(-5.0), -5.0), 'nqp::ceil_n');
+ok( nqp::iseq_n(nqp::floor_n(5.2), 5.0), 'nqp::floor_n');
+ok( nqp::iseq_n(nqp::floor_n(-5.2), -6.0), 'nqp::floor_n');
+ok( nqp::iseq_n(nqp::floor_n(5.0), 5.0), 'nqp::floor_n');
+ok( nqp::iseq_n(nqp::floor_n(-5.0), -5.0), 'nqp::floor_n');
 
-ok( nqp::sqrt_n(6.25) == 2.5, 'nqp::sqrt_n');
+ok( nqp::iseq_n(nqp::sqrt_n(6.25), 2.5), 'nqp::sqrt_n');
 
 is( nqp::substr('rakudo', 1, 3), 'aku', 'nqp::substr');
 is( nqp::substr('rakudo', 1), 'akudo', 'nqp::substr');
@@ -217,7 +217,7 @@ my $iter_i := nqp::iterator($list_i);
 is(nqp::shift($iter_i), 1);
 is(nqp::shift($iter_i), 2);
 
-my $list_n := nqp::list_n(1, 2);
+my $list_n := nqp::list_n(1.0, 2.0);
 my $iter_n := nqp::iterator($list_n);
 is(nqp::shift($iter_n), 1);
 is(nqp::shift($iter_n), 2);
@@ -262,7 +262,7 @@ ok(nqp::isnull_s(nqp::null_s()), 'test for isnull_s with a null_s');
 
 ok(nqp::isnull_s(nqp::decont(nqp::null_s())), 'null_s survives nqp::decont');
 
-ok(nqp::time_n() != 0, 'time_n is not zero');
+ok(nqp::isne_n(nqp::time_n(), 0.0), 'time_n is not zero');
 ok(nqp::time_i() != 0, 'time_i is not zero');
 
 my $time_a := nqp::time_i();
@@ -363,14 +363,14 @@ ok(nqp::isgt_s('abcdbzefg', 'abcdaz',), 'nqp::isgt_s');
 ok(!nqp::isgt_s('abc', 'abc'), 'nqp::isgt_s - both string equal');
 ok(!nqp::isgt_s('abcdaz', 'abcdbzefg'), 'nqp::isgt_s left string greater');
 
-ok((1.1 != 1) == 1, '!= between floating point numbers (not equal)');
-ok((1.1 != 1.1) == 0,'!= between floating point numbers (equal)');
+ok(nqp::isne_n(1.1, 1) == 1, '!= between floating point numbers (not equal)');
+ok(nqp::isne_n(1.1, 1.1) == 0,'!= between floating point numbers (equal)');
 
-ok(12.5 % 5 == 2.5, '% test');
-ok(3 % 2.5 == 0.5, '% test');
-ok(-12.5 % 5 == 2.5, '% test');
-ok(12.5 % -5 == -2.5, '% test');
-ok(-12.5 % -5 == -2.5, '% test');
+ok(nqp::iseq_n(nqp::mod_n(12.5, 5.0), 2.5), '% test');
+ok(nqp::iseq_n(nqp::mod_n(3.0, 2.5), 0.5), '% test');
+ok(nqp::iseq_n(nqp::mod_n(-12.5, 5.0), 2.5), '% test');
+ok(nqp::iseq_n(nqp::mod_n(12.5, -5.0), -2.5), '% test');
+ok(nqp::iseq_n(nqp::mod_n(-12.5, -5.0), -2.5), '% test');
 ok(20 % 7 == 6, '% with integer arguments');
 
 is(nqp::sha1("Hello World"), '0A4D55A8D778E5022FAB701977C5D840BBC486D0', "sha1");
@@ -445,24 +445,24 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
 {
     my $a := nqp::list_n();
     nqp::push_n($a, 10.4);
-    nqp::push_n($a, 11);
-    nqp::push_n($a, 12);
+    nqp::push_n($a, 11.0);
+    nqp::push_n($a, 12.0);
     ok(nqp::elems($a) == 3, 'nqp::elems/nqp::push_n');
-    ok(nqp::pop_n($a) == 12, 'nqp::pop_n');
+    ok(nqp::iseq_n(nqp::pop_n($a), 12.0), 'nqp::pop_n');
     ok(nqp::elems($a) == 2, 'nqp::pop_n reduces the number of elements correctly');
     ok(nqp::islist($a) == 1, 'nqp::islist(nqp::list_n())');
 
-    my $b := nqp::list_n(1,2,30.4);
-    ok(nqp::atpos_n($b,2) == 30.4, 'atpos_n');
+    my $b := nqp::list_n(1.0, 2.0, 30.4);
+    ok(nqp::iseq_n(nqp::atpos_n($b,2), 30.4), 'atpos_n');
 
 
     my $c := nqp::list_n();
-    nqp::bindpos_n($c, 1, 102);
+    nqp::bindpos_n($c, 1, 102.0);
     nqp::bindpos_n($c, 1, 103.5);
-    nqp::bindpos_n($c, 0, 101);
-    ok(nqp::atpos_n($c, 1) == 103.5, 'bindpos_n works');
-    ok(nqp::atpos_n($c, -1) == 103.5, 'nqp::atpos_n with negative index');
-    ok(nqp::atpos_n($c, 10) == 0.0, 'atpos_n with element outside of the array');
+    nqp::bindpos_n($c, 0, 101.0);
+    ok(nqp::iseq_n(nqp::atpos_n($c, 1), 103.5), 'bindpos_n works');
+    ok(nqp::iseq_n(nqp::atpos_n($c, -1), 103.5), 'nqp::atpos_n with negative index');
+    ok(nqp::iseq_n(nqp::atpos_n($c, 10), 0.0), 'atpos_n with element outside of the array');
 
 }
 
@@ -477,25 +477,25 @@ ok(nqp::isnanorinf(nqp::inf()) == 1, "nqp::isnanorinf - inf");
 ok(nqp::isnanorinf(nqp::neginf()) == 1, "nqp::isnanorinf - neginf");
 ok(nqp::isnanorinf(123.5) == 0, "nqp::isnanorinf - normal number");
 
-ok(nqp::inf() == nqp::inf(), "nqp::inf() equals itself");
-ok(nqp::nan() != nqp::nan(), "nqp::nan() doesn't equal itself");
-ok(nqp::neginf() < 0, "nqp::neginf() is negative");
-ok(nqp::inf() > 0, "nqp::inf() is positive");
-ok(nqp::inf()+123 == nqp::inf()-123, "nqp::inf() doesn't change after adding or substracting");
-ok(nqp::neginf()+123 == nqp::neginf()-123, "nqp::neginf() doesn't change after adding or substracting");
-ok(nqp::neginf() == -nqp::inf(), "nqp::neginf() is negated nqp::inf()");
+ok(nqp::iseq_n(nqp::inf(), nqp::inf()), "nqp::inf() equals itself");
+ok(nqp::isne_n(nqp::nan(), nqp::nan()), "nqp::nan() doesn't equal itself");
+ok(nqp::islt_n(nqp::neginf(), 0.0), "nqp::neginf() is negative");
+ok(nqp::isgt_n(nqp::inf(), 0.0), "nqp::inf() is positive");
+ok(nqp::iseq_n(nqp::add_n(nqp::inf(), 123.0), nqp::sub_n(nqp::inf(), 123.0)), "nqp::inf() doesn't change after adding or substracting");
+ok(nqp::iseq_n(nqp::add_n(nqp::neginf(), 123.0), nqp::sub_n(nqp::neginf(), 123.0)), "nqp::neginf() doesn't change after adding or substracting");
+ok(nqp::iseq_n(nqp::neginf(), nqp::neg_n(nqp::inf())), "nqp::neginf() is negated nqp::inf()");
 
-my $n := nqp::rand_n(4);
-ok($n >= 0 && $n < 4, "generating number before calling srand");
+my $n := nqp::rand_n(4.0);
+ok(nqp::isge_n($n, 0.0) && nqp::islt_n($n, 4.0), "generating number before calling srand");
 nqp::srand(100);
-my $a1 := nqp::rand_n(4);
-my $b1 := nqp::rand_n(4);
+my $a1 := nqp::rand_n(4.0);
+my $b1 := nqp::rand_n(4.0);
 nqp::srand(100);
-ok($a1 >= 0 && $a1 < 4, "the generated number is in the wanted range");
-my $a2 := nqp::rand_n(4);
-my $b2 := nqp::rand_n(4);
-ok($a1 == $a2, "after calling srand the first generated number is the same");
-ok($b1 == $b2, "after calling srand the second generated number is the same");
+ok(nqp::isge_n($a1, 0.0) && nqp::islt_n($a1, 4.0), "the generated number is in the wanted range");
+my $a2 := nqp::rand_n(4.0);
+my $b2 := nqp::rand_n(4.0);
+ok(nqp::iseq_n($a1, $a2), "after calling srand the first generated number is the same");
+ok(nqp::iseq_n($b1, $b2), "after calling srand the second generated number is the same");
 
 is(nqp::replace("0123456789", 2, 4, "abc"), "01abc6789", "nqp::replace");
 
