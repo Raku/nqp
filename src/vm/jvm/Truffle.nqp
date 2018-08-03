@@ -273,6 +273,19 @@ class QAST::OperationsTruffle {
     add_simple_op('findnotcclass', $INT, [$INT, $STR, $INT, $INT]);
     add_simple_op('iscclass', $INT, [$INT, $STR, $INT]);
     add_simple_op('ordbaseat', $INT, [$STR, $INT]);
+
+    add_simple_op('ordbaseat', $INT, [$STR, $INT]);
+
+    add_simple_op('ordfirst', $INT, [$STR]);
+    add_simple_op('ordat', $INT, [$STR, $INT]);
+
+    add_op('ord', sub ($comp, $node, :$want) {
+        my @operands := $node.list;
+        $comp.as_truffle(+@operands == 1
+            ?? QAST::Op.new( :op('ordfirst'), |@operands )
+            !! QAST::Op.new( :op('ordat'), |@operands ), :$want);
+    });
+
     add_simple_op('replace', $STR, [$STR, $INT, $INT, $STR]);
     add_simple_op('codes', $INT, [$STR]);
     add_simple_op('join', $STR, [$STR, $OBJ]);
