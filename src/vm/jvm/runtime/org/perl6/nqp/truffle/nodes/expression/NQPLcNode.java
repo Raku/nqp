@@ -10,7 +10,7 @@ public final class NQPLcNode extends NQPStrNode {
     @Child private NQPNode argNode;
 
     @Deserializer
-    public NQPLcNode(NQPNode aNode) {
+    public NQPLcNode(NQPNode argNode) {
         this.argNode = argNode;
     }
 
