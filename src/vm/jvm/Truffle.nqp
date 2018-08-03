@@ -219,7 +219,7 @@ class QAST::OperationsTruffle {
     add_simple_op('tclc', $STR, [$STR]);
 
     for ['_i', $INT, '_n', $NUM] -> $suffix, $type {
-        for <add div mod mul sub> -> $math-op {
+        for <add div mod mul sub pow> -> $math-op {
             add_simple_op($math-op ~ $suffix, $type, [$type, $type]);
         }
     }
@@ -233,6 +233,9 @@ class QAST::OperationsTruffle {
     add_simple_op('bitor_i', $INT, [$INT, $INT]);
     add_simple_op('bitand_i', $INT, [$INT, $INT]);
     add_simple_op('bitxor_i', $INT, [$INT, $INT]);
+    add_simple_op('bitneg_i', $INT, [$INT]);
+    add_simple_op('bitshiftl_i', $INT, [$INT, $INT]);
+    add_simple_op('bitshiftr_i', $INT, [$INT, $INT]);
 
     for <gcd lcm> -> $math-op {
         add_simple_op($math-op ~ '_i', $INT, [$INT, $INT]);
@@ -245,8 +248,6 @@ class QAST::OperationsTruffle {
     for <inf nan neginf> -> $math-op {
         add_simple_op($math-op, $NUM, []);
     }
-
-    add_simple_op('pow_n', $NUM, [$NUM, $NUM]);
 
     for <asec asin acos atan cos cosh sin sinh sec sech tan tanh> -> $math-op {
         add_simple_op($math-op ~ '_n', $NUM, [$NUM]);
