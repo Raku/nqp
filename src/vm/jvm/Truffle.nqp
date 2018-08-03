@@ -274,8 +274,6 @@ class QAST::OperationsTruffle {
     add_simple_op('iscclass', $INT, [$INT, $STR, $INT]);
     add_simple_op('ordbaseat', $INT, [$STR, $INT]);
 
-    add_simple_op('ordbaseat', $INT, [$STR, $INT]);
-
     add_simple_op('ordfirst', $INT, [$STR]);
     add_simple_op('ordat', $INT, [$STR, $INT]);
 
