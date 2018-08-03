@@ -104,4 +104,9 @@ public final class NQPIfNode extends NQPNodeWithBoolification {
     public static NQPIfNode createIfElse(NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
         return new NQPIfNode(false, condNode, thenNode, elseNode);
     }
+
+    @Deserializer("unless-else")
+    public static NQPIfNode createUnlessElse(NQPNode condNode, NQPNode thenNode, NQPNode elseNode) {
+        return new NQPIfNode(true, condNode, thenNode, elseNode);
+    }
 }
