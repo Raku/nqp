@@ -155,6 +155,25 @@ class QAST::OperationsTruffle {
 
     add_simple_op('split', $OBJ, [$STR, $STR]);
 
+    # index may or may not take a starting position
+    add_simple_op('indexfrom', $INT, [$STR, $STR, $INT]);
+    add_op('index', sub ($comp, $node, :$want) {
+        my @operands := $node.list;
+        $comp.as_truffle(+@operands == 2
+            ?? QAST::Op.new( :op('indexfrom'), |@operands, QAST::IVal.new( :value(0)) )
+            !! QAST::Op.new( :op('indexfrom'), |@operands ), :$want);
+    });
+
+    # rindex may or may not take a starting position
+    add_simple_op('rindexfromend', $INT, [$STR, $STR]);
+    add_simple_op('rindexfrom', $INT, [$STR, $STR, $INT]);
+    add_op('rindex', sub ($comp, $node, :$want) {
+        my @operands := $node.list;
+        $comp.as_truffle(+@operands == 2
+            ?? QAST::Op.new( :op('rindexfromend'), |@operands )
+            !! QAST::Op.new( :op('rindexfrom'), |@operands ), :$want);
+    });
+
     add_op('stringify', sub ($comp, $node, :$want) {
         $comp.as_truffle($node[0], :want($STR));
     });
