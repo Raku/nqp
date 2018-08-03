@@ -538,6 +538,7 @@ Return NaN.
 Return negative infinity.
 
 ## pow
+* `pow_i(int $base, int $exponent --> int)`
 * `pow_n(num $base, num $exponent --> num)`
 * `pow_I(Int $base, Int $exponent, Mu:T $type_num, Mu:T $type_bigint --> Int)`
 
