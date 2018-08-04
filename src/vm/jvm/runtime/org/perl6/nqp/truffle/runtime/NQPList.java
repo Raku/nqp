@@ -18,6 +18,9 @@ public final class NQPList {
     }
 
     public Object atpos(long pos) {
+        if (pos < 0) {
+            pos = pos + contents.size();
+        }
         Object value = contents.get((int)pos);
         if (value == null) {
             return NQPNull.SINGLETON;
