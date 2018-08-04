@@ -2,6 +2,7 @@ package org.perl6.nqp.truffle.nodes;
 
 import com.oracle.truffle.api.dsl.Specialization;
 import org.perl6.nqp.truffle.runtime.NQPListIterator;
+import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 
 public abstract class NQPToBooleanNode extends NQPBaseNode {
@@ -20,6 +21,11 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
     @Specialization
     protected boolean doDouble(Double value) {
         return ((double) value) != 0 ? true : false;
+    }
+
+    @Specialization
+    protected boolean doNQPList(NQPList value) {
+        return value.elems() != 0;
     }
 
     @Specialization
