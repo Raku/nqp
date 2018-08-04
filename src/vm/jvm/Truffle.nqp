@@ -151,6 +151,7 @@ class QAST::OperationsTruffle {
     add_simple_op('tc', $STR, [$STR]);
 
     add_simple_op('falsey', $INT, [$OBJ]);
+    %ops<isfalse> := %ops<falsey>;
     add_simple_op('istrue', $INT, [$OBJ]);
 
     add_simple_op('split', $OBJ, [$STR, $STR]);
