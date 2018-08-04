@@ -228,6 +228,8 @@ class QAST::OperationsTruffle {
     }
 
     add_simple_op('existskey', $INT, [$OBJ, $STR]);
+    add_simple_op('existspos', $INT, [$OBJ, $INT]);
+    add_simple_op('deletekey', $OBJ, [$OBJ, $STR]);
 
     add_simple_op('islist', $INT, [$OBJ]);
 

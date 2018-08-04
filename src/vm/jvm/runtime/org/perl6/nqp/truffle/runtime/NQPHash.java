@@ -31,6 +31,10 @@ public final class NQPHash {
         return contents.containsKey(key) ? 1 : 0;
     }
 
+    public void deletekey(String key) {
+        contents.remove(key);
+    }
+
     public int elems() {
         return contents.size();
     }
