@@ -155,6 +155,17 @@ class QAST::OperationsTruffle {
 
     add_simple_op('split', $OBJ, [$STR, $STR]);
 
+    # substr can take 2 or 3 args, so needs special handling.
+    add_simple_op('substr2', $STR, [$STR, $INT]);
+    add_simple_op('substr3', $STR, [$STR, $INT, $INT]);
+
+    add_op('substr', sub ($comp, $node, :$want) {
+        my @operands := $node.list;
+        $comp.as_truffle(+@operands == 2
+            ?? QAST::Op.new( :op('substr2'), |@operands )
+            !! QAST::Op.new( :op('substr3'), |@operands ), :$want);
+    });
+
     # index may or may not take a starting position
     add_simple_op('indexfrom', $INT, [$STR, $STR, $INT]);
     add_op('index', sub ($comp, $node, :$want) {
@@ -838,7 +849,9 @@ class QAST::TruffleCompiler {
     }
 
     method NYI($msg) {
-        nqp::die("NYI: $msg");
+        #nqp::die("NYI: $msg");
+        note("NYI: $msg");
+        TAST.new($OBJ, ['null']);
     }
 }
 
