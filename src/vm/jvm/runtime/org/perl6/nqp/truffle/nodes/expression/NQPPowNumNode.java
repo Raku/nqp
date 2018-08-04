@@ -7,17 +7,23 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "pow_n")
 public final class NQPPowNumNode extends NQPNumNode {
-    @Child private NQPNode leftNode;
-    @Child private NQPNode rightNode;
+    @Child private NQPNode baseNode;
+    @Child private NQPNode exponentNode;
 
     @Deserializer
-    public NQPPowNumNode(NQPNode leftNode, NQPNode rightNode) {
-        this.leftNode = leftNode;
-        this.rightNode = rightNode;
+    public NQPPowNumNode(NQPNode baseNode, NQPNode exponentNode) {
+        this.baseNode = baseNode;
+        this.exponentNode = exponentNode;
     }
 
     @Override
     public double executeNum(VirtualFrame frame) {
-        return Math.pow(leftNode.executeNum(frame), rightNode.executeNum(frame));
+        double base = baseNode.executeNum(frame);
+        double exponent = exponentNode.executeNum(frame);
+
+        if (base == 1) {
+            return 1.0;
+        }
+        return Math.pow(base, exponent);
     }
 }
