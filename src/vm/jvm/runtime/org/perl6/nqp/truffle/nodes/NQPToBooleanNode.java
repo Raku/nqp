@@ -27,7 +27,7 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
         return ((NQPListIterator) value).boolify();
     }
 
-    @Specialization
+    @Specialization(guards = "isNull(value)")
     protected boolean doNQPNull(Object value) {
         return false;
     }
