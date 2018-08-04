@@ -9,12 +9,22 @@ public final class NQPList {
         this.contents = new ArrayList<Object>();
     }
 
-    public void push(Object element) {
+    public Object push(Object element) {
         contents.add(element);       
+        return element;
     }
 
     public Object pop() {
         return contents.remove(contents.size() - 1);
+    }
+
+    public Object unshift(Object element) {
+        contents.add(0, element);
+        return element;
+    }
+
+    public Object shift() {
+        return contents.remove(0);
     }
 
     public Object atpos(long pos) {
