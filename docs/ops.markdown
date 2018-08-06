@@ -82,7 +82,6 @@
   * [chr](#chr)
   * [codepointfromname](#codepointfromname)
   * [codes](#codes)
-  * [getstrfromname](#getstrfromname)
   * [concat](#concat)
   * [decode](#decode)
   * [decodetocodes `moar`](#decodetocodes-moar)
@@ -113,6 +112,7 @@
   * [sprintfdirectives](#sprintfdirectives)
   * [sprintfaddargumenthandler](#sprintfaddargumenthandler)
   * [strfromcodes](#strfromcodes)
+  * [strfromname](#strfromname)
   * [strtocodes](#strtocodes)
   * [substr](#substr)
   * [tc](#tc)
@@ -921,25 +921,6 @@ match was found.
 
 Return the number of codepoints in the string.
 
-## getstrfromname
-* `getstrfromname(str $name --> str)`
-
-Like `codepointfromname` except it returns a string instead of a codepoint.
-This function is able to return not just Unicode codepoints by name, but also
-Unicode Named Sequences, including Emoji Sequences and Emoji ZWJ Sequences
-and Name Aliases.
-
-In addition it is also case-insensitive, unlike codepointfromname
-
-See these links for a full list of [Named Sequences][Named-Sequences],
-[Emoji Sequences][Emoji-Sequences], [Emoji ZWJ Sequences][Emoji-ZWJ-Sequences]
-and [Name Aliases][Name-Aliases].
-
-[Named-Sequences]: http://www.unicode.org/Public/UCD/latest/ucd/NamedSequences.txt
-[Emoji-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt
-[Emoji-ZWJ-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-zwj-sequences.txt
-[Name-Aliases]: http://www.unicode.org/Public/UCD/latest/ucd/NameAliases.txt
-
 ## concat
 * `concat(str $l, str $r --> str)`
 
@@ -1184,6 +1165,25 @@ my class MyHandler {
 
 Returns an (NFG) string built from the specified codepoints, which must be
 provided as a 32-bit integer array.
+
+## strfromname
+* `strfromname(str $name --> str)`
+
+Like `codepointfromname` except it returns a string instead of a codepoint.
+This function is able to return not just Unicode codepoints by name, but also
+Unicode Named Sequences, including Emoji Sequences and Emoji ZWJ Sequences
+and Name Aliases.
+
+In addition it is also case-insensitive, unlike codepointfromname
+
+See these links for a full list of [Named Sequences][Named-Sequences],
+[Emoji Sequences][Emoji-Sequences], [Emoji ZWJ Sequences][Emoji-ZWJ-Sequences]
+and [Name Aliases][Name-Aliases].
+
+[Named-Sequences]: http://www.unicode.org/Public/UCD/latest/ucd/NamedSequences.txt
+[Emoji-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-sequences.txt
+[Emoji-ZWJ-Sequences]: http://www.unicode.org/Public/emoji/4.0/emoji-zwj-sequences.txt
+[Name-Aliases]: http://www.unicode.org/Public/UCD/latest/ucd/NameAliases.txt
 
 ## strtocodes
 * `strtocodes(str $str, int $normalization, $codes)`

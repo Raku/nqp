@@ -1,48 +1,48 @@
 plan(40);
-is(nqp::getstrfromname('FULL STOP'), '.', 'getstrfromname works');
+is(nqp::strfromname('FULL STOP'), '.', 'strfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
-is(nqp::getstrfromname('super fake not real name'), '',
-  'getstrfromname returns empty string for nonexistant codepoint names');
+is(nqp::strfromname('super fake not real name'), '',
+  'strfromname returns empty string for nonexistant codepoint names');
 
-is(nqp::getstrfromname('LATIN CAPITAL LETTER A'), 'A', 'nqp::getstrfromname with existing character');
+is(nqp::strfromname('LATIN CAPITAL LETTER A'), 'A', 'nqp::strfromname with existing character');
 
-is(nqp::getstrfromname('LaTiN CaPiTaL LeTTeR A'), 'A', 'nqp::getstrfromname is case insensitive');
+is(nqp::strfromname('LaTiN CaPiTaL LeTTeR A'), 'A', 'nqp::strfromname is case insensitive');
 
-is(nqp::getstrfromname('LINE FEED'), nqp::chr(10), 'nqp::getstrfromname with aliased character');
+is(nqp::strfromname('LINE FEED'), nqp::chr(10), 'nqp::strfromname with aliased character');
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("aliases NYI on the JVM");
 }
 else {
-  is(nqp::getstrfromname('NL'), nqp::chr(10), 'nqp::getstrfromname accepts aliases');
+  is(nqp::strfromname('NL'), nqp::chr(10), 'nqp::strfromname accepts aliases');
 }
 
-is(nqp::getstrfromname('BELL'), nqp::chr(0x1F514), 'nqp::getstrfromname with BELL');
+is(nqp::strfromname('BELL'), nqp::chr(0x1F514), 'nqp::strfromname with BELL');
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("named sequences broken on the JVM");
 }
 else {
-  is(nqp::getstrfromname('LATIN SMALL LETTER E WITH OGONEK AND TILDE'), 'ę̃',
-    'nqp::getstrfromname with a Unicode Named Sequence');
+  is(nqp::strfromname('LATIN SMALL LETTER E WITH OGONEK AND TILDE'), 'ę̃',
+    'nqp::strfromname with a Unicode Named Sequence');
 }
-is(nqp::getstrfromname('BOY'), nqp::chr(0x1F466), 'nqp::getstrfromname with an emoji');
+is(nqp::strfromname('BOY'), nqp::chr(0x1F466), 'nqp::strfromname with an emoji');
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("Emoji broken on the JVM", 3);
 }
 else {
-  is(nqp::getstrfromname('PLACE OF WORSHIP'), nqp::chr(0x1F6D0), 'nqp::getstrfromname with an emoji');
+  is(nqp::strfromname('PLACE OF WORSHIP'), nqp::chr(0x1F6D0), 'nqp::strfromname with an emoji');
   my $woman-gesturing-OK := nqp::chr(0x1F646) ~ nqp::chr(0x200D) ~ nqp::chr(0x2640)
     ~ nqp::chr(0xFE0F);
-  is(nqp::getstrfromname('woman gesturing OK'), $woman-gesturing-OK,
+  is(nqp::strfromname('woman gesturing OK'), $woman-gesturing-OK,
     'nqp::getstrfromaname with an Emoji ZWJ Sequences');
-  is(nqp::getstrfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB),
+  is(nqp::strfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB),
     'nqp::getstrfromaname wih an Emoji Sequence');
 
 }
 
 is(nqp::codepointfromname('NULL'), 0, 'nqp::codepointfromname with NULL');
-is(nqp::getstrfromname('NULL'), "\0", 'nqp::getstrfromname with NULL');
+is(nqp::strfromname('NULL'), "\0", 'nqp::strfromname with NULL');
 
 is(nqp::codepointfromname('LATIN CAPITAL LETTER A'), 65, 'nqp::codepointfromname');
 
