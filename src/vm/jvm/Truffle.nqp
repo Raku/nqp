@@ -675,6 +675,15 @@ class QAST::TruffleCompiler {
         TAST.new($OBJ, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]);
     }
 
+    multi method as_truffle(QAST::VM $node, :$want) {
+        if $node.supports('truffle') {
+            self.as_truffle($node.alternative('truffle'), :$want);
+        }
+        else {
+            self.NYI("To compile on the Truffle backend, QAST::VM must have an alternative 'truffle'|" ~ $node.dump);
+        }
+    }
+
     multi method as_truffle(QAST::Stmts $node, :$want) {
         my @tree := ['stmts'];
         self.compile_all_the_children($node, $want, @tree);
