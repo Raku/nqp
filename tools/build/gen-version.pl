@@ -6,12 +6,16 @@ gen-version.pl -- script to generate version information for HLL compilers
 
 =cut
 
+use 5.008;
+use strict;
+use warnings;
+
 use Digest::SHA;
 use File::Find;
 use POSIX 'strftime';
 
-my $prefix = shift;
-my $libdir = shift;
+my $prefix = shift // '';
+my $libdir = shift // '';
 
 open(my $fh, '<', 'VERSION') or die $!;
 my $VERSION = <$fh>;
@@ -28,7 +32,7 @@ chomp $VERSION;
 my $builddate = strftime('%Y-%m-%dT%H:%M:%SZ', gmtime);
 
 my $sha = Digest::SHA->new;
-find(sub { next unless /\.nqp\z/; $sha->addfile($_) }, "src");
+find(sub { return unless /\.nqp\z/; $sha->addfile($_) }, "src");
 my $source_digest = $sha->hexdigest;
 
 print <<"END_VERSION";
