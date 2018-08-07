@@ -11,12 +11,12 @@ class QRegex::P5Regex::World is HLL::World {
         # Tag it as a static code ref and add it to the root code refs set.
         nqp::markcodestatic($dummy);
         self.add_root_code_ref($dummy, $ast);
-        
+
         # Create code object.
         my $code_obj := nqp::create(NQPRegex);
         nqp::bindattr($code_obj, NQPRegex, '$!do', $dummy);
         my $slot := self.add_object($code_obj);
-            
+
         # Add fixup of the code object and the $!do attribute.
         my $fixups := QAST::Stmt.new();
         $fixups.push(QAST::Op.new(
@@ -56,18 +56,18 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         }
         <alternation>
     }
-    
+
     token rxstopper { $ }
-    
+
     token alternation {
         <sequence>+ % '|'
     }
-    
+
     token sequence {
         <.ws>  # XXX assuming old /x here?
         <quantified_atom>*
     }
-    
+
     token quantified_atom {
         <![|)]>
         <!rxstopper>
@@ -75,7 +75,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
         [ <.ws> <!before <.rxstopper> > <quantifier=p5quantifier> ]**0..1
         <.ws>
     }
-    
+
     token atom {
         [
         | \w
@@ -85,7 +85,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     proto token p5metachar { <...> }
-    
+
     token p5metachar:sym<quant> {
         <![(?]>
         <quantifier=p5quantifier>
@@ -109,7 +109,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5metachar:sym<(?: )> { '(?:' {} <nibbler> ')' }
     token p5metachar:sym<( )> { '(' {} <nibbler> ')' }
     token p5metachar:sym<[ ]> { <?before '['> <cclass> }
-    
+
     token cclass {
         :my $astfirst := 0;
         '['
@@ -151,11 +151,11 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     token p5backslash:sym<oops> { <.panic: "Unrecognized Perl 5 regex backslash sequence"> }
 
     proto token p5assertion { <...> }
-    
+
     token p5assertion:sym«<» { <sym> $<neg>=['='|'!'] [ <?before ')'> | <nibbler> ] }
     token p5assertion:sym<=> { <sym> [ <?before ')'> | <nibbler> ] }
     token p5assertion:sym<!> { <sym> [ <?before ')'> | <nibbler> ] }
-    
+
     token p5mod  { <[imsox]>* }
     token p5mods { <on=p5mod> [ '-' <off=p5mod> ]**0..1 }
     token p5assertion:sym<mod> {
@@ -172,17 +172,17 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     proto token p5quantifier { <...> }
-    
+
     token p5quantifier:sym<*>  { <sym> <quantmod> }
     token p5quantifier:sym<+>  { <sym> <quantmod> }
     token p5quantifier:sym<?>  { <sym> <quantmod> }
     token p5quantifier:sym<{ }> {
-        '{' 
-        $<start>=[\d+] 
+        '{'
+        $<start>=[\d+]
         [ $<comma>=',' $<end>=[\d*] ]**0..1
         '}' <quantmod>
     }
-    
+
     token quantmod { [ '?' | '+' ]? }
 
     token ws {

@@ -6,7 +6,7 @@ my knowhow NQPRoutine {
     has $!dispatch_order;
     has $!clone_callback;
     has int $!onlystar;
-    
+
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
         nqp::scwbdisable();
@@ -15,31 +15,31 @@ my knowhow NQPRoutine {
         nqp::push($!dispatchees, $code);
         nqp::scwbenable();
     }
-    
+
     # Checks if this code object is a dispatcher.
     method is_dispatcher() {
         nqp::defined($!dispatchees)
     }
-    
+
     # Derives a new dispatcher.
     method derive_dispatcher() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
-        
+
         # Clone and attach the code object.
         my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::bindattr($der, NQPRoutine, '$!dispatchees', nqp::clone($!dispatchees));
         nqp::setcodeobj($do, $der);
-        
+
         # If needed, arrange for a fixup of the cloned code-ref.
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
-        
+
         $der
     }
-    
+
     # Checks if one type is narrower than the other.
     sub is_narrower_type($a, $b) {
         # If one of the types is null, then we know that's automatically
@@ -48,7 +48,7 @@ my knowhow NQPRoutine {
         elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
         else { nqp::istype($a, $b) }
     }
-    
+
     # Sorts the dispatchees. Puts nulls between groups that are of equal weight.
     # The most specific group comes first.
     my int $SLURPY_ARITY      := nqp::bitshiftl_i(1, 30);
@@ -56,7 +56,7 @@ my knowhow NQPRoutine {
     my int $EDGE_REMOVED      := -2;
     my int $DEFINED_ONLY      := 1;
     my int $UNDEFINED_ONLY    := 2;
-    method sort_dispatchees() {        
+    method sort_dispatchees() {
         # Takes two candidates and determines if the first one is narrower than the
         # second. Returns a true value if they are.
         sub is_narrower(%a, %b) {
@@ -208,17 +208,17 @@ my knowhow NQPRoutine {
                 }
                 $i++;
             }
-            
+
             # Add gap between groups.
             nqp::push(@result, nqp::null());
         }
-        
+
         # Add final null sentinel.
         nqp::push(@result, nqp::null());
 
         return @result;
     }
-    
+
     method dispatch($capture) {
         # Count arguments.
         my int $num_args := nqp::captureposelems($capture);
@@ -243,7 +243,7 @@ my knowhow NQPRoutine {
         my $cur_candidate;
         while 1 {
             $cur_candidate := @candidates[$cur_idx];
-            
+
             if nqp::isnull($cur_candidate) {
                 # If we have some possible candidate(s), we're done in this loop.
                 if nqp::elems(@possibles) {
@@ -319,32 +319,32 @@ my knowhow NQPRoutine {
             nqp::die("Ambiguous dispatch to multi '" ~ self.name ~ "'.")
         }
     }
-    
+
     method clone() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
-        
+
         # Clone and attach the code object.
         my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRoutine, '$!do', $do);
         nqp::setcodeobj($do, $der);
-        
+
         # If needed, arrange for a fixup of the cloned code-ref.
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
-        
+
         $der
     }
-    
+
     method !set_name($name) {
         nqp::setcodename($!do, $name);
     }
-    
+
     method name() {
         nqp::getcodename($!do)
     }
-    
+
     method signature() { $!signature }
 
     method gist() {
@@ -426,17 +426,17 @@ my knowhow NQPRegex {
     method clone() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
-        
+
         # Clone and attach the code object.
         my $der := nqp::clone(self);
         nqp::bindattr($der, NQPRegex, '$!do', $do);
         nqp::setcodeobj($do, $der);
-        
+
         # If needed, arrange for a fixup of the cloned code-ref.
         unless nqp::isnull($!clone_callback) {
             $!clone_callback($!do, $do, $der);
         }
-        
+
         $der
     }
     my $nfa_type;

@@ -142,7 +142,7 @@ class QRegex::Optimizer {
         if nqp::isstr($node) {
             return;
         }
-        
+
         my int $i := 0;
         my int $n := nqp::elems(@($node));
         while $i < $n {
