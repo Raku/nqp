@@ -612,7 +612,7 @@ class NQP::Actions is HLL::Actions {
         my @ns := nqp::clone($<name><identifier>);
         my $name := ~@ns.pop;
         my $how := $/.how($*PKGDECL);
-	my $package := $/.package;
+        my $package := $/.package;
 
         # Get the body code.
         my $ast;
