@@ -238,12 +238,11 @@ role NQPMatchRole is export {
 
     method check_PACKAGE_oopsies($tag?) {
         nqp::die("No braid!") unless $!braid;
-        $tag := "" unless $tag;
         my $value := $*PACKAGE;
         my $bvalue := nqp::getattr($!braid, Braid, '$!package');
         if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
             my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-            note("Out-of-sync package detected in $tag at " ~ nqp::substr($target, $!pos-10, 30) ~ "");
+            note("Out-of-sync package detected in " ~ ($tag || '') ~ " at " ~ nqp::substr($target, $!pos-10, 30) ~ "");
             note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")")
                 unless nqp::isnull($bvalue);
             # nqp::die("croak");
@@ -254,13 +253,12 @@ role NQPMatchRole is export {
 
     method check_LANG_oopsies($tag?) {
         nqp::die("No braid!") unless $!braid;
-        $tag := "" unless $tag;
         for %*LANG {
             my $name := $_.key;
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
-                note("Deprecated use of %*LANG\<$name> assignment detected in $tag; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
+                note("Deprecated use of %*LANG\<$name> assignment detected in " ~ ($tag || '') ~ "; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
                     unless nqp::index($name,"-actions") > 0;
                 note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")")
                     unless nqp::isnull($bvalue);
