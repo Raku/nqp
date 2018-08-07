@@ -88,9 +88,16 @@ public final class IOOps {
         }
 
         private static void retrieveValsWin(Map<String, Integer> sigWanted) {
-            // Use same sigs defined for _WIN32 in MoarVM
+            // Use same sigs defined for _WIN32 in MoarVM and in os.constants.signals on NodeJS
             sigWanted.put("SIGHUP",    1);
+            sigWanted.put("SIGINT",    2);
+            sigWanted.put("SIGILL",    4);
+            sigWanted.put("SIGFPE",    8);
             sigWanted.put("SIGKILL",   9);
+            sigWanted.put("SIGSEGV",  11);
+            sigWanted.put("SIGTERM",  15);
+            sigWanted.put("SIGBREAK", 21);
+            sigWanted.put("SIGABRT",  22);
             sigWanted.put("SIGWINCH", 28);
         }
 
