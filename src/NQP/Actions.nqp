@@ -580,7 +580,11 @@ class NQP::Actions is HLL::Actions {
         # Construct meta-object with specified metaclass, adding it to the
         # serialization context for this compilation unit.
         my $HOW := $*W.find_sym($<metaclass><identifier>);
-        my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>));
+        my %args;
+        if $<repr> {
+            %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
+        }
+        my $PACKAGE := $*W.pkg_create_mo($HOW, :name(~$<name>), |%args);
 
         # Install it in the current package or current lexpad as needed.
         if $*SCOPE eq 'our' || $*SCOPE eq '' {

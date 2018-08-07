@@ -397,6 +397,7 @@ grammar NQP::Grammar is HLL::Grammar {
         :my $*PKGDECL := 'stub';
         <sym> <name>
         'metaclass' <metaclass=.name>
+        [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         '{' '...' '}'
     }
 
