@@ -14,7 +14,7 @@ my class ParseShared is export {
     my %cursors_created;
     my $cursors_total;
     method log_cc($name) {
-        %cursors_created{$name}++;
+        ++%cursors_created{$name};
         $cursors_total++;
     }
     method log_dump() {
@@ -181,7 +181,7 @@ role NQPMatchRole is export {
                 my int $n := 0;
                 for $item {
                     $str := $str ~ dump_array($key ~ "[$n]", $_);
-                    $n++
+                    ++$n
                 }
             }
             $str;
@@ -190,7 +190,7 @@ role NQPMatchRole is export {
         my int $n := 0;
         for self.list {
             $str := $str ~ dump_array($key ~ '[' ~ $n ~ ']', $_);
-            $n++
+            ++$n
         }
         for self.hash {
             $str := $str ~ dump_array($key ~ '<' ~ $_.key ~ '>', $_.value);
@@ -383,7 +383,7 @@ role NQPMatchRole is export {
                         }
                     }
                 }
-                $csi++;
+                ++$csi;
             }
         }
 
@@ -735,7 +735,7 @@ role NQPMatchRole is export {
         my int $fate  := 0;
         for $regex.ALT_NFA($name) {
             $nfa.mergesubstates($start, 0, $fate, $_, self);
-            $fate++;
+            ++$fate;
         }
         $nfa.optimize();
         $nfa
@@ -822,7 +822,7 @@ role NQPMatchRole is export {
                 }
                 $first := $cs_cur;
             }
-            $n--;
+            --$n;
         }
         if nqp::isconcrete($last) {
             my int $from   := $first.from;
@@ -838,7 +838,7 @@ role NQPMatchRole is export {
     method !BACKREF-LATEST-CAPTURE($name) {
         my $cur   := self."!cursor_start_cur"();
         my int $n := $!cstack ?? nqp::elems($!cstack) - 1 !! -1;
-        $n-- while $n >= 0 && (nqp::isnull_s(nqp::getattr_s($!cstack[$n], $?CLASS, '$!name')) ||
+        --$n while $n >= 0 && (nqp::isnull_s(nqp::getattr_s($!cstack[$n], $?CLASS, '$!name')) ||
                                nqp::getattr_s($!cstack[$n], $?CLASS, '$!name') ne $name);
         if $n >= 0 {
             my $subcur     := $!cstack[$n];

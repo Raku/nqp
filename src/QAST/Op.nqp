@@ -33,7 +33,7 @@ class QAST::Op is QAST::Node does QAST::Children {
         my int $elems := nqp::elems(@(self));
         while $i < $elems {
             self[$i].count_inline_placeholder_usages(@usages);
-            $i++;
+            ++$i;
         }
     }
 
@@ -44,7 +44,7 @@ class QAST::Op is QAST::Node does QAST::Children {
         while $i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers)
                 unless nqp::isstr(self[$i]);
-            $i++;
+            ++$i;
         }
         $result
     }

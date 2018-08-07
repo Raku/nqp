@@ -81,15 +81,15 @@ my knowhow NQPRoutine {
                 my $type_obj_a := %a<types>[$i];
                 my $type_obj_b := %b<types>[$i];
                 if nqp::eqaddr($type_obj_a, $type_obj_b) {
-                    $tied++;
+                    ++$tied;
                 }
                 elsif is_narrower_type($type_obj_a, $type_obj_b) {
-                    $narrower++;
+                    ++$narrower;
                 }
                 elsif !is_narrower_type($type_obj_b, $type_obj_a) {
-                    $tied++;
+                    ++$tied;
                 }
-                $i++;
+                ++$i;
             }
 
             # If one is narrower than the other from current analysis, we're done.
@@ -132,15 +132,15 @@ my knowhow NQPRoutine {
             my int $j := 0;
             while $j < $sig_elems {
                 # XXX TODO: Worry about optional and slurpy later.
-                %info<max_arity>++;
-                %info<min_arity>++;
+                ++%info<max_arity>;
+                ++%info<min_arity>;
 
                 # Record type info for this parameter. */
                 nqp::push(%info<types>, @types_list[$j]);
                 nqp::push(%info<definednesses>, @definedness_list[$j]);
-                %info<num_types>++;
-                
-                $j++;
+                ++%info<num_types>;
+
+                ++$j;
             }
 
             # Add it to graph node, and initialize list of edges.
@@ -151,7 +151,7 @@ my knowhow NQPRoutine {
                 'edges_out', 0
             ));
 
-            $i++;
+            ++$i;
         }
 
         # Now analyze type narrowness of the candidates relative to each other
@@ -163,13 +163,13 @@ my knowhow NQPRoutine {
                 if ($i != $j) {
                     if is_narrower(@graph[$i]<info>, @graph[$j]<info>) {
                         @graph[$i]<edges>[@graph[$i]<edges_out>] := @graph[$j];
-                        @graph[$i]<edges_out>++;
-                        @graph[$j]<edges_in>++;
+                        ++@graph[$i]<edges_out>;
+                        ++@graph[$j]<edges_in>;
                     }
                 }
-                $j++;
+                ++$j;
             }
-            $i++;
+            ++$i;
         }
 
         # Perform the topological sort.
@@ -185,10 +185,10 @@ my knowhow NQPRoutine {
                 if @graph[$i]<edges_in> == 0 {
                     # Add to results.
                     nqp::push(@result, @graph[$i]<info>);
-                    $candidates_to_sort--;
+                    --$candidates_to_sort;
                     @graph[$i]<edges_in> := $EDGE_REMOVAL_TODO;
                 }
-                $i++;
+                ++$i;
             }
             if $rem_results == nqp::elems(@result) {
                 nqp::die("Circularity detected in multi sub types");
@@ -201,12 +201,12 @@ my knowhow NQPRoutine {
                 if @graph[$i]<edges_in> == $EDGE_REMOVAL_TODO {
                     my int $j := 0;
                     while $j < @graph[$i]<edges_out> {
-                        @graph[$i]<edges>[$j]<edges_in>--;
-                        $j++;
+                        --@graph[$i]<edges>[$j]<edges_in>;
+                        ++$j;
                     }
                     @graph[$i]<edges_in> := $EDGE_REMOVED;
                 }
-                $i++;
+                ++$i;
             }
 
             # Add gap between groups.
@@ -251,8 +251,7 @@ my knowhow NQPRoutine {
                 }
 
                 # Otherwise, we keep looping and looking, unless we really hit the end.
-                $cur_idx++;
-                if nqp::isnull(@candidates[$cur_idx]) {
+                if nqp::isnull(@candidates[++$cur_idx]) {
                     last;
                 }
                 else {
@@ -262,7 +261,7 @@ my knowhow NQPRoutine {
 
             # Check if it's admissible by arity.
             if $num_args < $cur_candidate<min_arity> || $num_args > $cur_candidate<max_arity> {
-                $cur_idx++;
+                ++$cur_idx;
                 next;
             }
 
@@ -289,17 +288,17 @@ my knowhow NQPRoutine {
                         last;
                     }
                 }
-                $i++;
+                ++$i;
             }
 
             if $type_mismatch {
-                $cur_idx++;
+                ++$cur_idx;
                 next;
             }
 
             # If we get here, it's an admissible candidate; add to list. */
             nqp::push(@possibles, $cur_candidate);
-            $cur_idx++;
+            ++$cur_idx;
         }
 
         # Cache the result if there's a single chosen one and return it.

@@ -121,7 +121,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
                    \s* '-' \s*
                    ( '\\' <backslash=p5backslash> || (<-[\]\\]>) )
                ]**0..1
-               { $astfirst++ }
+               { ++$astfirst }
            )+
            ']'
         || <.panic: "failed to parse character class; unescaped ']'?">
@@ -129,7 +129,7 @@ grammar QRegex::P5Regex::Grammar is HLL::Grammar {
     }
 
     proto token p5backslash { <...> }
-    
+
     token p5backslash:sym<A> { <sym> }
     token p5backslash:sym<b> { $<sym>=[<[bB]>] }
     token p5backslash:sym<r> { <sym> }

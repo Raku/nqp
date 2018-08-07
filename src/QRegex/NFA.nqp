@@ -746,7 +746,7 @@ class QRegex::NFA {
                 }
                 $i := $i + 3;
             }
-            $from++;
+            ++$from;
         }
 
         $copy

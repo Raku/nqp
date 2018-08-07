@@ -193,7 +193,7 @@ class NQP::Optimizer {
                         $itvar := $item;
                         last;
                     }
-                    $i++;
+                    ++$i;
                 }
 
                 # Provided we found it, turn it from param to decl, so it will

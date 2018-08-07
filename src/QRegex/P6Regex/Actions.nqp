@@ -174,7 +174,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $max := -1;
             my $upto := $<upto>;
 
-            if $<from> eq '^' { $min++ }
+            if $<from> eq '^' { ++$min }
 
             if ! $<max> {
                 $max := $min
@@ -182,7 +182,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             elsif $<max> ne '*' {
                 $max := nqp::radix(10, $<max>, 0, 0)[0];
                 if $<upto> eq '^' {
-                    $max--;
+                    --$max;
                 }
                 $/.panic("Empty range") if $min > $max;
             }
@@ -646,7 +646,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             else {
                 $qast := QAST::Regex.new( $qast, $ast, :rxtype<alt>, :node($/));
             }
-            $i++;
+            ++$i;
         }
         make $qast;
     }

@@ -196,18 +196,17 @@ class HLL::CommandLine::Parser {
             if $i == $arg-count - 1 {
                 nqp::die("Option $opt needs a value");
             } else {
-                $i++;
-                @args[$i];
+                @args[++$i];
             }
         }
 
         # called after a terminator that declares the rest
         # as not containing any options
         sub slurp-rest() {
-            $i++;
+            ++$i;
             while $i < $arg-count {
                 $result.add-argument(@args[$i]);
-                $i++;
+                ++$i;
             }
         }
 
@@ -269,7 +268,7 @@ class HLL::CommandLine::Parser {
                             else {
                                 nqp::die("Grouped options '-$opt' contain '$o', which is not a valid option")
                             }
-                            $i++;
+                            ++$i;
                         }
                     }
                 }

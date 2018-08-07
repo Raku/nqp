@@ -285,7 +285,7 @@ class NQP::Actions is HLL::Actions {
         }
         # build if/then/elsif structure
         while $count > 0 {
-            $count--;
+            --$count;
             my $else := $ast;
             $ast := xblock_immediate( $<xblock>[$count].ast );
             $ast.push($else);
@@ -1502,7 +1502,7 @@ class NQP::Actions is HLL::Actions {
                 $ast[$i].named(1) if nqp::istype($ast[$i], QAST::Var)
                     && nqp::eqat($ast[$i].name, '%', 0);
             }
-            $i++;
+            ++$i;
         }
         make $ast;
     }

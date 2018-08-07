@@ -282,7 +282,7 @@ position C<pos>.
             # see if the opening bracket is repeated
             my int $len := 1;
             while nqp::eqat($target, $start, ++$pos) {
-                $len++;
+                ++$len;
             }
             if $len > 1 {
                 $start := nqp::x($start, $len);

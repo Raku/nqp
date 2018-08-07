@@ -23,7 +23,7 @@ class QRegex::Optimizer {
         my int $res := 0;
         for $node {
             return -1 if $node.rxtype ne $type;
-            $res++;
+            ++$res;
         }
         return $res;
     }
