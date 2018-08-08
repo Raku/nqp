@@ -7,17 +7,20 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "mod_n")
 public final class NQPModNumNode extends NQPNumNode {
-    @Child private NQPNode leftNode;
-    @Child private NQPNode rightNode;
+    @Child private NQPNode dividendNode;
+    @Child private NQPNode divisorNode;
 
     @Deserializer
-    public NQPModNumNode(NQPNode leftNode, NQPNode rightNode) {
-        this.leftNode = leftNode;
-        this.rightNode = rightNode;
+    public NQPModNumNode(NQPNode divdendNode, NQPNode divisorNode) {
+        this.dividendNode = divdendNode;
+        this.divisorNode = divisorNode;
     }
 
     @Override
     public double executeNum(VirtualFrame frame) {
-        return leftNode.executeNum(frame) % rightNode.executeNum(frame);
+        double dividend = dividendNode.executeNum(frame);
+        double divisor = divisorNode.executeNum(frame);
+
+        return dividend - Math.floor(dividend / divisor) * divisor;
     }
 }
