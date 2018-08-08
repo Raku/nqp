@@ -61,5 +61,15 @@ public class ManageScopes {
     public static NQPNode createDeclareLocal(NQPScope scope, long type, String name, NQPNode inner) {
         return inner;
     }
+
+    @Predeserializer("comp-unit")
+    public static NQPScope setupCompUnit(NQPScope scope, String hllName) {
+        return new NQPCompUnitScope(scope, GlobalContext.SINGLETON.hlls, hllName);
+    }
+
+    @Deserializer("comp-unit")
+    public static NQPNode compUnitContents(NQPScope scope, String hllName, NQPNode content) {
+        return content;
+    }
 }
 

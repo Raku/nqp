@@ -3,6 +3,10 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.FrameSlot;
 
+import java.util.HashMap;
+
+import org.perl6.nqp.truffle.runtime.HLL;
+
 public class NQPScopeWithFrame extends NQPScope {
 
     static class NQPLocalVariable {
@@ -69,6 +73,24 @@ public class NQPScopeWithFrame extends NQPScope {
 
     public FrameDescriptor getFrameDescriptor() {
         return this.frameDescriptor;
+    }
+
+    @Override
+    public HLL getCurrentHLL() {
+        if (outer != null) {
+            return outer.getCurrentHLL();
+        } else {
+            throw new RuntimeException("Can't get current HLL");
+        }
+    }
+
+    @Override
+    public HashMap<String, HLL> getHLLs() {
+        if (outer != null) {
+            return outer.getHLLs();
+        } else {
+            throw new RuntimeException("Can't get current HLL");
+        }
     }
 }
 

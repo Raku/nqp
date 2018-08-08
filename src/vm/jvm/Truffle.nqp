@@ -135,6 +135,12 @@ class QAST::OperationsTruffle {
         });
     }
 
+    add_simple_op('getcurhllsym', $OBJ, [$STR]);
+    add_simple_op('bindcurhllsym', $OBJ, [$STR, $OBJ]);
+
+    add_simple_op('gethllsym', $OBJ, [$STR, $STR]);
+    add_simple_op('bindhllsym', $OBJ, [$STR, $STR, $OBJ]);
+
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
 
@@ -672,7 +678,7 @@ class QAST::TruffleCompiler {
 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
 
-        TAST.new($OBJ, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]);
+        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
     }
 
     multi method as_truffle(QAST::VM $node, :$want) {
