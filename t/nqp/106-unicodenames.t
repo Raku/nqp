@@ -35,9 +35,9 @@ else {
   my $woman-gesturing-OK := nqp::chr(0x1F646) ~ nqp::chr(0x200D) ~ nqp::chr(0x2640)
     ~ nqp::chr(0xFE0F);
   is(nqp::strfromname('woman gesturing OK'), $woman-gesturing-OK,
-    'nqp::getstrfromaname with an Emoji ZWJ Sequences');
+    'nqp::strfromaname with an Emoji ZWJ Sequences');
   is(nqp::strfromname('princess: light skin tone'), nqp::chr(0x1F478) ~ nqp::chr(0x1F3FB),
-    'nqp::getstrfromaname wih an Emoji Sequence');
+    'nqp::strfromaname wih an Emoji Sequence');
 
 }
 
