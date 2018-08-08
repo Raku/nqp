@@ -30,6 +30,8 @@ import org.perl6.nqp.truffle.NQPRootNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.AstBuilder;
 
+import org.perl6.nqp.truffle.runtime.HLL;
+
 @AstBuilder(
     nodeClass = NQPNode.class,
     nodesClass = NQPNode[].class,
@@ -39,6 +41,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     strClass = String.class,
     strsClass = String[].class,
     scopeClass = NQPScope.class,
+    hllClass = HLL.class,
     tastToByteCode = false,
     tastToNode = false,
     byteCodeToNode = true

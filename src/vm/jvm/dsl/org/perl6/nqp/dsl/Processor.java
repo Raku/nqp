@@ -39,6 +39,7 @@ public class Processor extends AbstractProcessor {
         TypeMirror strClass;
         TypeMirror strsClass;
         TypeMirror scopeClass;
+        TypeMirror hllClass;
 
         AstTypes(AstBuilder annotation) {
             try {
@@ -87,6 +88,12 @@ public class Processor extends AbstractProcessor {
                 annotation.scopeClass();
             } catch (MirroredTypeException e) {
                 scopeClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.hllClass();
+            } catch (MirroredTypeException e) {
+                hllClass = e.getTypeMirror();
             }
         }
     }
@@ -140,6 +147,9 @@ public class Processor extends AbstractProcessor {
                 writer.append("tastToIntArray(node, " + (i+1) + ", tc)");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 writer.append("scope");
+                i--;
+            } else if (paramType.equals(astTypes.hllClass)) {
+                writer.append("scope.getCurrentHLL()");
                 i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
@@ -253,6 +263,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("writer.writeInts(tastToIntArray(node," + (i+1) + ", tc));\n");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 i--;
+            } else if (paramType.equals(astTypes.hllClass)) {
+                i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }
@@ -289,6 +301,8 @@ public class Processor extends AbstractProcessor {
                 writer.append(reader + ".readInts()");
             } else if (paramType.equals(astTypes.scopeClass)) {
                 writer.append("scope");
+            } else if (paramType.equals(astTypes.hllClass)) {
+                writer.append("scope.getCurrentHLL()");
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }

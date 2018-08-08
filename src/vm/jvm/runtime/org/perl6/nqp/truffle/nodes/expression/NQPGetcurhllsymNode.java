@@ -12,6 +12,7 @@ public final class NQPGetcurhllsymNode extends NQPObjNode {
     private final HLL currentHLL;
     @Child private NQPNode symNode;
 
+    @Deserializer
     public NQPGetcurhllsymNode(HLL currentHLL, NQPNode symNode) {
         this.currentHLL = currentHLL;
         this.symNode = symNode;
@@ -20,10 +21,5 @@ public final class NQPGetcurhllsymNode extends NQPObjNode {
     @Override
     public Object execute(VirtualFrame frame) {
         return currentHLL.getSymbol(symNode.executeStr(frame));
-    }
-
-    @Deserializer("getcurhllsym")
-    public static NQPGetcurhllsymNode deserialize(NQPScope scope, NQPNode symbolNode) {
-        return new NQPGetcurhllsymNode(scope.getCurrentHLL(), symbolNode);
     }
 }

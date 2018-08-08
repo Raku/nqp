@@ -22,6 +22,8 @@ import org.perl6.nqp.truffle.ByteCodeWriter;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.NQPScopeWithFrame;
 
+import org.perl6.nqp.truffle.runtime.HLL;
+
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
@@ -39,6 +41,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     strClass = String.class,
     strsClass = String[].class,
     scopeClass = NQPScope.class,
+    hllClass = HLL.class,
     tastToByteCode = true,
     tastToNode = true,
     byteCodeToNode = false
