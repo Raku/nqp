@@ -1442,13 +1442,20 @@ my $call_gen := sub ($qastcomp, $op) {
     my $return_type;
     my @args := $op.list;
     if $op.name {
-        $callee := $qastcomp.as_mast($op.op eq 'callstatic'
-            ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
-            !! QAST::Var.new( :name($op.name), :scope('lexical') ));
+        $callee := $qastcomp.as_mast(QAST::Op.new(
+            :op('decont'),
+            $op.op eq 'callstatic'
+                ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
+                !! QAST::Var.new( :name($op.name), :scope('lexical') )));
     }
     elsif +@args {
         @args := nqp::clone(@args);
-        $callee := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
+        my $callee_qast := @args.shift;
+        my $no_decont := nqp::istype($callee_qast, QAST::Op) && $callee_qast.op eq 'speshresolve'
+            || nqp::istype($callee_qast, QAST::WVal) && !nqp::iscont($callee_qast.value);
+        $callee := $qastcomp.as_mast(
+            $no_decont ?? $callee_qast !! QAST::Op.new( :op('decont'), $callee_qast ),
+            :want($MVM_reg_obj));
         if $op.op eq 'nativeinvoke' {
             $return_type := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
         }
@@ -1481,14 +1488,9 @@ my $call_gen := sub ($qastcomp, $op) {
         handle_arg($_, $qastcomp, @ins, @arg_regs, @arg_flags, @arg_kinds);
     }
 
-    # Decontainerize the callee.
+    # Release the callee's result register.
     my $regalloc := $*REGALLOC;
-    my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-    push_op(@ins, 'decont', $decont_reg, $callee.result_reg);
-
-    # Release the callee's result register and the decont register.
     $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
-    $regalloc.release_register($decont_reg, $MVM_reg_obj);
 
     # Release each arg's result register
     my $arg_num := 0;
@@ -1517,7 +1519,7 @@ my $call_gen := sub ($qastcomp, $op) {
 
     # Generate call.
     nqp::push(@ins, MAST::Call.new(
-        :target($decont_reg),
+        :target($callee.result_reg),
         :flags(@arg_flags),
         |@arg_regs,
         |%result,
