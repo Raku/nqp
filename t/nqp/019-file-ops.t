@@ -1,6 +1,6 @@
 # Test nqp::op file operations.
 
-plan(111);
+plan(112);
 
 ok( nqp::stat('CREDITS', nqp::const::STAT_EXISTS) == 1, 'nqp::stat exists');
 ok( nqp::stat('AARDVARKS', nqp::const::STAT_EXISTS) == 0, 'nqp::stat not exists');
