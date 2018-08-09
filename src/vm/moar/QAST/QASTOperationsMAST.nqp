@@ -2618,12 +2618,14 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
         push_ilist(@ins, $obj_mast);
         push_ilist(@ins, $type_mast);
         push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
-        if nqp::istype($op[2], QAST::SVal) {
+        my $name := $op[2];
+        $name := $name[2] if nqp::istype($name, QAST::Want) && $name[1] eq 'Ss';
+        if nqp::istype($name, QAST::SVal) {
             if nqp::istype($op[1], QAST::WVal) {
-                $hint := nqp::hintfor($op[1].value, $op[2].value);
+                $hint := nqp::hintfor($op[1].value, $name.value);
             }
             push_op(@ins, $hintedop, $obj_mast.result_reg, $type_mast.result_reg,
-                MAST::SVal.new( :value($op[2].value) ),
+                MAST::SVal.new( :value($name.value) ),
                 $val_mast.result_reg, MAST::IVal.new( :value($hint) ));
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
@@ -2654,12 +2656,14 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
         push_ilist(@ins, $type_mast);
         my $res_reg := $regalloc.fresh_register($want);
         push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
-        if nqp::istype($op[2], QAST::SVal) {
+        my $name := $op[2];
+        $name := $name[2] if nqp::istype($name, QAST::Want) && $name[1] eq 'Ss';
+        if nqp::istype($name, QAST::SVal) {
             if nqp::istype($op[1], QAST::WVal) {
-                $hint := nqp::hintfor($op[1].value, $op[2].value);
+                $hint := nqp::hintfor($op[1].value, $name.value);
             }
             push_op(@ins, $hintedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
-                MAST::SVal.new( :value($op[2].value) ), MAST::IVal.new( :value($hint) ));
+                MAST::SVal.new( :value($name.value) ), MAST::IVal.new( :value($hint) ));
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
             push_ilist(@ins, $name_mast);
