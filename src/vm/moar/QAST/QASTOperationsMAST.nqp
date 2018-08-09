@@ -2611,13 +2611,15 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
         my $regalloc := $*REGALLOC;
         my $val_mast := $qastcomp.as_mast( :$want, $op[3] );
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
-        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[1] );
+        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
+            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1])
+                ?? $op[1]
+                !! QAST::Op.new( :op('decont'), $op[1] ));
         my int $hint := -1;
         my @ins;
         push_ilist(@ins, $val_mast);
         push_ilist(@ins, $obj_mast);
         push_ilist(@ins, $type_mast);
-        push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
         my $name := $op[2];
         $name := $name[2] if nqp::istype($name, QAST::Want) && $name[1] eq 'Ss';
         if nqp::istype($name, QAST::SVal) {
@@ -2649,13 +2651,15 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
     QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
         my $regalloc := $*REGALLOC;
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
-        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[1] );
+        my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
+            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1])
+                ?? $op[1]
+                !! QAST::Op.new( :op('decont'), $op[1] ));
         my int $hint := -1;
         my @ins;
         push_ilist(@ins, $obj_mast);
         push_ilist(@ins, $type_mast);
         my $res_reg := $regalloc.fresh_register($want);
-        push_op(@ins, 'decont', $type_mast.result_reg, $type_mast.result_reg);
         my $name := $op[2];
         $name := $name[2] if nqp::istype($name, QAST::Want) && $name[1] eq 'Ss';
         if nqp::istype($name, QAST::SVal) {
