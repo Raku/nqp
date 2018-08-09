@@ -332,29 +332,28 @@ nqp::unlink($test-file) if nqp::stat($test-file, nqp::const::STAT_EXISTS); # cle
 
 if $is-windows || ($backend ne 'moar' && $backend ne 'js' && $backend ne 'jvm') {
     skip("symlink test not tested on Windows or $backend", 9);
-}
-else {
-
+} else {
     my $symlink := $test-file ~ '-symlink';
     my $file := 't/nqp/019-file-ops.t';
 
     nqp::symlink('t/nqp/019-file-ops.t', $symlink);
 
-
     for [nqp::const::STAT_MODIFYTIME, nqp::const::STAT_ACCESSTIME, nqp::const::STAT_CHANGETIME] -> $flag {
       ok(nqp::stat_time($file, $flag) == nqp::lstat_time($file, $flag), 'stat_time works as lstat_time on regular file');
       ok(nqp::stat($file, $flag) == nqp::lstat($file, $flag), 'stat works as lstat on regular file');
       ok(nqp::stat_time($symlink, $flag) == nqp::lstat_time($file, $flag), 'stat_time follows symlink');
-      if ($flag != nqp::const::STAT_CHANGETIME) {
+      if ($flag == nqp::const::STAT_CHANGETIME) {
+        skip("lstat_time doesn\'t follow symlink' doen't work with flag $flag yet.", 1)
+      } elsif ($flag == nqp::const::STAT_ACCESSTIME && $backend eq 'jvm') {
+        skip("lstat_time doesn\'t follow symlink' doen't work with flag $flag on jvm yet.", 1)
+      } else {
           ok(nqp::lstat_time($symlink, $flag) != nqp::lstat_time($file, $flag), 'lstat_time doesn\'t follow symlink');
       }
     }
 
-
     if nqp::lstat($symlink, nqp::const::STAT_EXISTS) {
         nqp::unlink($symlink);
     }
-
 }
 
 {
