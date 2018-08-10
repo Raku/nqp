@@ -148,6 +148,8 @@ class QAST::OperationsTruffle {
 
     add_simple_op('null', $OBJ, []);
 
+    add_simple_op('null_s', $STR, []);
+
     add_simple_op('concat', $STR, [$STR, $STR]);
 
     add_simple_op('lc', $STR, [$STR]);
