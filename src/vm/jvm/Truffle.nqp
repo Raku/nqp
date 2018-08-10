@@ -135,6 +135,9 @@ class QAST::OperationsTruffle {
         });
     }
 
+    add_simple_op('die', $VOID, [$STR]);
+    %ops<die_s> := %ops<die>;
+
     add_simple_op('getenvhash', $OBJ, []);
 
     add_simple_op('getcurhllsym', $OBJ, [$STR]);
