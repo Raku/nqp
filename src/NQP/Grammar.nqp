@@ -423,11 +423,11 @@ grammar NQP::Grammar is HLL::Grammar {
             }
             my $how := self.how($*PKGDECL);
             my $INNER := $*W.cur_lexpad();
-	    my $package := $*W.pkg_create_mo($how, |%args);
-	    $*PACKAGE := $package;
-	    $/.set_package($package);
-	    $/.check_PACKAGE_oopsies('package_def1');
-	    $*LANG := $/;
+            my $package := $*W.pkg_create_mo($how, |%args);
+            $*PACKAGE := $package;
+            $/.set_package($package);
+            $/.check_PACKAGE_oopsies('package_def1');
+            $*LANG := $/;
 
             # these need to be installed early so that they may be referenced from subs in the block
             if nqp::can($how, 'parametric') && $how.parametric($how) {
