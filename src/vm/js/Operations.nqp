@@ -196,6 +196,13 @@ class QAST::OperationsJS {
     add_simple_op('iscont_s', $T_INT, [$T_OBJ]);
     add_simple_op('iscont_n', $T_INT, [$T_OBJ]);
 
+    add_op('coerce_is', sub ($comp, $node, :$want) {
+        $comp.coerce($comp.as_js($node[0], :want($T_INT)), $T_STR);
+    });
+    add_op('coerce_si', sub ($comp, $node, :$want) {
+        $comp.coerce($comp.as_js($node[0], :want($T_STR)), $T_INT);
+    });
+
     add_infix_op('add_n', $T_NUM, '+', $T_NUM, $T_NUM);
     add_infix_op('sub_n', $T_NUM, '-', $T_NUM, $T_NUM);
     add_infix_op('mul_n', $T_NUM, '*', $T_NUM, $T_NUM);
