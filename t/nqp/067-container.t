@@ -1,4 +1,4 @@
-plan(33);
+plan(35);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -165,6 +165,9 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     ok(nqp::eqaddr(nqp::what($cont), Value), 'nqp::what deconts');
 
     nqp::assign($cont, Value.new(attr => 123));
+
+    ok(nqp::istype($cont, Value), 'nqp::istype on container');
+    ok(nqp::istype_nd($cont, SimpleCont), 'nqp::istype_nd on container');
 
     my $clone_of_value := nqp::clone($cont);
 
