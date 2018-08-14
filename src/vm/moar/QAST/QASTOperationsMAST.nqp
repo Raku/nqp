@@ -3064,6 +3064,9 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     MAST::InstructionList.new(@ins, $res_reg, $MVM_reg_obj)
 });
 
+QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
+QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
+
 sub push_op(@dest, str $op, *@args) {
     nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
 }
