@@ -1,6 +1,6 @@
 use QAST;
 
-plan(173);
+plan(176);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1916,6 +1916,24 @@ test_qast_result(
         -> $r {
             ok(nqp::istype($r, $int_boxer), 'an automatically boxed int is of the correct type');
             ok($r.twice eq '246', '...and it has the correct value');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<list>,
+                    QAST::Op.new(:op<hllboxtype_i>),
+                    QAST::Op.new(:op<hllboxtype_n>),
+                    QAST::Op.new(:op<hllboxtype_s>)
+                )
+            )
+        ),
+        -> $r {
+            ok(nqp::eqaddr($r[0], $int_boxer), 'hllboxtype_i works');
+            ok(nqp::eqaddr($r[1], $num_boxer), 'hllboxtype_n works');
+            ok(nqp::eqaddr($r[2], $str_boxer), 'hllboxtype_s works');
         }
     );
 
