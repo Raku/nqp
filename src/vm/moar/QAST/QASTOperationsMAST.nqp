@@ -2612,7 +2612,7 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
         my $val_mast := $qastcomp.as_mast( :$want, $op[3] );
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
         my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
-            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1])
+            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1].value)
                 ?? $op[1]
                 !! QAST::Op.new( :op('decont'), $op[1] ));
         my int $hint := -1;
@@ -2652,7 +2652,7 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
         my $regalloc := $*REGALLOC;
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
         my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
-            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1])
+            nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1].value)
                 ?? $op[1]
                 !! QAST::Op.new( :op('decont'), $op[1] ));
         my int $hint := -1;
