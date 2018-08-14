@@ -300,6 +300,10 @@ class QAST::OperationsJS {
     add_simple_op('clone', $T_OBJ, [$T_OBJ], :decont(0), :method_call, :side_effects);
     add_simple_op('clone_nd', $T_OBJ, [$T_OBJ], method_call('clone'), :side_effects);
 
+    add_op('wantdecont', sub ($comp, $node, :$want) {
+        $comp.as_js($node[0], :want($want));
+    });
+
     my sub static_hint($node) {
         my int $hint := -1;
 
