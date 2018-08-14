@@ -76,10 +76,10 @@ class QAST::OperationsJS {
         }
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, $cb = runtime_op($op), :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$takes_hll, :$hll, :$await) {
+    sub add_simple_op($op, $return_type, @argument_types, $cb?, :$side_effects, :$ctx, :$inlinable = 1, :$decont, :$method_call, :$takes_hll, :$hll, :$await) {
 
         add_op($op, sub ($comp, $node, :$want) {
-            my $gen_code := $method_call ?? method_call($op) !! $cb;
+            my $gen_code := $cb ?? $cb !! ($method_call ?? method_call($op) !! runtime_op($op));
             my $chunk := op_template($comp, $node, $return_type, @argument_types, $gen_code, :$ctx, :$decont, :$method_call, :$takes_hll, :$await);
             $side_effects ?? $comp.stored_result($chunk, :$want) !! $chunk;
         }, :$inlinable, :$hll);
@@ -870,7 +870,7 @@ class QAST::OperationsJS {
     add_simple_op('can', $T_INT, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :method_call, :await);
 
     add_simple_op('istype', $T_INT, [$T_OBJ, $T_OBJ], :side_effects, :ctx, :decont(0, 1), :method_call, :await);
-    add_simple_op('istype_nd', $T_INT, [$T_OBJ, $T_OBJ], method_call('istype'), :side_effects, :ctx, :await);
+    add_simple_op('istype_nd', $T_INT, [$T_OBJ, $T_OBJ], method_call('istype'), :side_effects, :ctx, :await, :method_call);
 
     add_simple_op('split', $T_OBJ, [$T_STR, $T_STR], :takes_hll);
 
