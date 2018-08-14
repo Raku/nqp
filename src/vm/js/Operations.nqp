@@ -1654,6 +1654,10 @@ class QAST::OperationsJS {
     add_simple_op('box_s', $T_OBJ, [$T_STR, $T_OBJ]);
     add_simple_op('unbox_s', $T_STR, [$T_OBJ], :decont(0));
 
+    add_simple_op('hllboxtype_i', $T_OBJ, [], sub () {'HLL.get("int_box")'});
+    add_simple_op('hllboxtype_n', $T_OBJ, [], sub () {'HLL.get("num_box")'});
+    add_simple_op('hllboxtype_s', $T_OBJ, [], sub () {'HLL.get("str_box")'});
+
     add_simple_op('setdebugtypename', $T_OBJ, [$T_OBJ, $T_STR], :side_effects);
 
     add_simple_op('iseq_I', $T_INT, [$T_OBJ, $T_OBJ]);
