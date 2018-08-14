@@ -505,6 +505,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     }
 
                     if $param.default {
+                        if $pos_slurpy {
+                            nqp::die("Optional positionals must come before all slurpy positionals");
+                        }
                         $pos_optional := $pos_optional + 1;
                         my $default_value := self.as_js($param.default, :want($type));
                         @setup.push(Chunk.void(
@@ -514,6 +517,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                         ));
                     }
                     else {
+                        if $pos_optional {
+                            nqp::die("Required positionals must come before all optional positionals");
+                        }
+                        if $pos_slurpy {
+                            nqp::die("Required positionals must come before all slurpy positionals");
+                        }
                         $pos_required := $pos_required + 1;
                         @setup.push($set ~ unpack($tmp) ~ ";\n");
                     }
