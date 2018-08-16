@@ -555,19 +555,14 @@ op.getsignals = function(currentHLL) {
     return sigCache;
   }
 
-  const osSigs = (function() {
-    if (os.platform() === 'win32') {
-      // Use same sigs defined for _WIN32 in MoarVM
-      return {
+  const osSigs = os.platform() === 'win32'
+    ? {
         SIGHUP:    1,
         SIGKILL:   9,
         SIGWINCH: 28,
-      };
-    }
-    else {
-      return os.constants.signals;
-    }
-  })();
+      }
+    : os.constants.signals;
+
   const sigWanted = [
     'SIGHUP',  'SIGINT',    'SIGQUIT',   'SIGILL',   'SIGTRAP', 'SIGABRT',
     'SIGEMT',  'SIGFPE',    'SIGKILL',   'SIGBUS',   'SIGSEGV', 'SIGSYS',
