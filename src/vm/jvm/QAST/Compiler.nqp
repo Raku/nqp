@@ -2666,6 +2666,7 @@ QAST::OperationsJAST.map_classlib_core_op('what_nd', $TYPE_OPS, 'what_nd', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('how_nd', $TYPE_OPS, 'how_nd', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('clone_nd', $TYPE_OPS, 'clone_nd', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('isconcrete_nd', $TYPE_OPS, 'isconcrete_nd', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('istype_nd', $TYPE_OPS, 'istype_nd', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
 
 # container related
 QAST::OperationsJAST.map_classlib_core_op('setcontspec', $TYPE_OPS, 'setcontspec', [$RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);

@@ -2667,9 +2667,9 @@ public final class Ops {
         return obj instanceof CodeRef || obj.st.InvocationSpec != null ? 1 : 0;
     }
     public static long istype(SixModelObject obj, SixModelObject type, ThreadContext tc) {
-        return istype_nodecont(decont(obj, tc), decont(type, tc), tc);
+        return istype_nd(decont(obj, tc), decont(type, tc), tc);
     }
-    public static long istype_nodecont(SixModelObject obj, SixModelObject type, ThreadContext tc) {
+    public static long istype_nd(SixModelObject obj, SixModelObject type, ThreadContext tc) {
         /* Null always type checks false. */
         if (obj == null)
             return 0;
