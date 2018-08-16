@@ -574,7 +574,7 @@ op.getsignals = function(currentHLL) {
 
   const arr = [];
   for (const k of sigWanted) {
-    arr.push( new NQPStr(k), new NQPInt(k in osSigs ? osSigs[k] : 0) );
+    arr.push( core.strToObj(currentHLL, k), core.intToObj(currentHLL, k in osSigs ? osSigs[k] : 0) );
   }
 
   const res = hll.slurpyArray(currentHLL, arr);
