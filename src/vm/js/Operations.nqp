@@ -1870,7 +1870,7 @@ class QAST::OperationsJS {
     add_simple_op('cas', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ], :ctx, :side_effects);
     add_simple_op('cas_i', $T_INT, [$T_OBJ, $T_INT, $T_INT], :ctx, :side_effects);
 
-    add_simple_op('getrusage', $T_OBJ, [], :side_effects);
+    add_simple_op('getrusage', $T_OBJ, [$T_OBJ], :side_effects);
 
     add_simple_op('cpucores', $T_INT, []);
 

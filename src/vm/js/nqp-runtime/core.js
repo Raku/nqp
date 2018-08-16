@@ -1843,6 +1843,7 @@ op.cleardispatcher = function(ctx) {
 
 const getrusage = null; //require('qrusage');
 op.getrusage = function() {
+  throw 'getrusage is currently broken';
   const usage = getrusage();
   const stable = BOOT.IntArray._STable;
   const utime_sec = Math.floor(usage.utime);
