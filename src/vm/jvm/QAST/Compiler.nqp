@@ -2814,6 +2814,8 @@ QAST::OperationsJAST.map_classlib_core_op('settypehll', $TYPE_OPS, 'settypehll',
 QAST::OperationsJAST.map_classlib_core_op('settypehllrole', $TYPE_OPS, 'settypehllrole', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('hllize', $TYPE_OPS, 'hllize', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('hllizefor', $TYPE_OPS, 'hllizefor', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('hllbool', $TYPE_OPS, 'hllbool', [$RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('hllboolfor', $TYPE_OPS, 'hllboolfor', [$RT_INT, $RT_STR], $RT_OBJ, :tc);
 
 # regex engine related opcodes
 QAST::OperationsJAST.map_classlib_core_op('nfafromstatelist', $TYPE_OPS, 'nfafromstatelist', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
