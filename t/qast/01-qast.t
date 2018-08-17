@@ -1,6 +1,6 @@
 use QAST;
 
-plan(176);
+plan(178);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1894,11 +1894,17 @@ test_qast_result(
     });
     $str_boxer.HOW.compose($str_boxer);
 
+    class TrueValue {
+    }
+    class FalseValue {
+    }
 
     nqp::sethllconfig('foo', nqp::hash(
         'int_box', $int_boxer,
         'num_box', $num_boxer,
-        'str_box', $str_boxer
+        'str_box', $str_boxer,
+        'true_value', TrueValue,
+        'false_value', FalseValue
     ));
 
     test_qast_result(
@@ -1934,6 +1940,22 @@ test_qast_result(
             ok(nqp::eqaddr($r[0], $int_boxer), 'hllboxtype_i works');
             ok(nqp::eqaddr($r[1], $num_boxer), 'hllboxtype_n works');
             ok(nqp::eqaddr($r[2], $str_boxer), 'hllboxtype_s works');
+        }
+    );
+
+    test_qast_result(
+        QAST::CompUnit.new(
+            :hll<foo>,
+            QAST::Block.new(
+                QAST::Op.new(:op<list>,
+                    QAST::Op.new(:op<hllbool>, QAST::IVal.new(:value(0))),
+                    QAST::Op.new(:op<hllbool>, QAST::IVal.new(:value(7)))
+                )
+            )
+        ),
+        -> $r {
+            ok(nqp::eqaddr($r[0], FalseValue), 'hllbool works with false');
+            ok(nqp::eqaddr($r[1], TrueValue), 'hllbool works with true');
         }
     );
 

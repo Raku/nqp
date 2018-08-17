@@ -1,4 +1,4 @@
-plan(48);
+plan(50);
 
 is(nqp::bindhllsym("blabla", "key1", "value1"), 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -223,3 +223,14 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     test('method cache', Foo);
     test('find_method', TestHOW.new.new_type);
 }
+
+class TrueValue {}
+class FalseValue {}
+nqp::sethllconfig('true_and_false', nqp::hash(
+    'true_value', TrueValue,
+    'false_value', FalseValue,
+));
+
+
+ok(nqp::eqaddr(nqp::hllboolfor(0, 'true_and_false'), FalseValue), 'hllboolfor with false');
+ok(nqp::eqaddr(nqp::hllboolfor(7, 'true_and_false'), TrueValue), 'hllboolfor with true');
