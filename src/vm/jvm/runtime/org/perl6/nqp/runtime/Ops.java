@@ -6210,6 +6210,10 @@ public final class Ops {
             config.foreignTransformAny = configHash.at_key_boxed(tc, "foreign_transform_any");
         if (configHash.exists_key(tc, "null_value") != 0)
             config.nullValue = configHash.at_key_boxed(tc, "null_value");
+        if (configHash.exists_key(tc, "true_value") != 0)
+            config.trueValue = configHash.at_key_boxed(tc, "true_value");
+        if (configHash.exists_key(tc, "false_value") != 0)
+            config.falseValue = configHash.at_key_boxed(tc, "false_value");
         if (configHash.exists_key(tc, "exit_handler") != 0)
             config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
         if (configHash.exists_key(tc, "int_lex_ref") != 0)
@@ -6312,6 +6316,14 @@ public final class Ops {
             return obj;
         else
             return hllizeInternal(obj, wanted, tc);
+    }
+    public static SixModelObject hllbool(long value, ThreadContext tc) {
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        return value != 0 ? hllConfig.trueValue : hllConfig.falseValue;
+    }
+    public static SixModelObject hllboolfor(long value, String language, ThreadContext tc) {
+        HLLConfig hllConfig = tc.gc.getHLLConfigFor(language);
+        return value != 0 ? hllConfig.trueValue : hllConfig.falseValue;
     }
     private static SixModelObject hllizeInternal(SixModelObject obj, HLLConfig wanted, ThreadContext tc) {
         /* Map nulls to the language's designated null value. */

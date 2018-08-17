@@ -75,6 +75,9 @@ public class HLLConfig {
     public SixModelObject foreignTypeStr;
     public SixModelObject nullValue;
 
+    public SixModelObject trueValue;
+    public SixModelObject falseValue;
+
     /**
      * HLL interop mappers.
      */
