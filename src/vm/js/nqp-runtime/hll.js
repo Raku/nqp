@@ -91,6 +91,8 @@ function getHLL(language) {
     hllConfigs[language] = new Map;
     hllConfigs[language].set('slurpy_array', BOOT.Array);
     hllConfigs[language].set('list', BOOT.Array);
+    hllConfigs[language].set('true_value', Null);
+    hllConfigs[language].set('false_value', Null);
 
     // For serialization purposes
     hllConfigs[language].set('name', language);
@@ -129,4 +131,13 @@ exports.slurpyArray = function(currentHLL, array) {
 exports.list = function(currentHLL, array) {
   const list = currentHLL.get('list');
   return list._STable.REPR.allocateFromArray(list._STable, array);
+};
+
+op.hllbool = function(currentHLL, value) {
+   return value ? currentHLL.get('true_value') : currentHLL.get('false_value');
+};
+
+op.hllboolfor = function(value, hllName) {
+  const hll = getHLL(hllName);
+  return value ? hll.get('true_value') : hll.get('false_value');
 };

@@ -1032,6 +1032,9 @@ class QAST::OperationsJS {
     add_simple_op('bindhllsym', $T_OBJ, [$T_STR, $T_STR, $T_OBJ], :side_effects);
     add_simple_op('gethllsym', $T_OBJ, [$T_STR, $T_STR]);
 
+    add_simple_op('hllbool', $T_OBJ, [$T_INT], :takes_hll);
+    add_simple_op('hllboolfor', $T_OBJ, [$T_INT, $T_STR]);
+
     add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects, :await);
 
     add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side_effects, sub ($ctx, $obj) {
