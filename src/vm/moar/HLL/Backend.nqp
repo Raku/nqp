@@ -117,6 +117,8 @@ class HLL::Backend::MoarVM {
         my $id_remap    := nqp::hash();
         my $id_to_thing := nqp::hash();
 
+        my %type-info   := nqp::hash();
+
         sub post_process_call_graph_node($node) {
             try {
                 if nqp::existskey($id_remap, $node<id>) {
@@ -128,6 +130,7 @@ class HLL::Backend::MoarVM {
                 }
                 if nqp::existskey($node, "allocations") {
                     for $node<allocations> -> %alloc_info {
+                        my $orig-id := %alloc_info<id>;
                         if nqp::existskey($id_remap, %alloc_info<id>) {
                             %alloc_info<id> := $id_remap{%alloc_info<id>};
                         } else {
@@ -138,13 +141,15 @@ class HLL::Backend::MoarVM {
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
                             my $typename;
                             try {
-                                my $type := %alloc_info<type>;
+                                my $type := %type-info{$orig-id}<type>;
                                 $typename := $type.HOW.name($type);
                             }
                             unless $typename {
                                 $typename := "<unknown type>";
                             }
+                            %type-info{$orig-id}<typename> := $typename;
                             $id_to_thing{%alloc_info<id>} := $typename;
+                            %type-info{%alloc_info<id>} := %type-info{$orig-id};
                         }
                         nqp::deletekey(%alloc_info, "type");
                     }
@@ -256,10 +261,13 @@ class HLL::Backend::MoarVM {
                     nqp::push_s($pieces, "INSERT INTO types VALUES ('");
                     nqp::push_s($pieces,
                         nqp::join("','",
-                            nqp::list(
-                                nqp::iterkey_s($k),
-                                literal_subst(~$v, "'", "''")))
-                        ~ "');\n");
+                            nqp::list_s(
+                                $k,
+                                literal_subst(~$v, "'", "''"),
+                            ))
+                        ~ "',"
+                        ~ %type-info{nqp::iterkey_s($k)}<managed_size>
+                        ~ ");\n");
                 }
                 if nqp::elems($pieces) > 500 {
                     $profile_fh.say(nqp::join("", $pieces));
@@ -342,6 +350,17 @@ class HLL::Backend::MoarVM {
             nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
         }
 
+        # The actual first entry in the profile data is an array that
+        # stores type information as a list of hashes with a "key"
+        # key.
+
+        {
+            my @type-infos := nqp::shift($data);
+            for @type-infos {
+                %type-info{$_<id>} := $_
+            }
+        }
+
         # Post-process the call data, turning objects into flat data.
         for $data {
             if nqp::existskey($_, "call_graph") {
@@ -382,7 +401,7 @@ class HLL::Backend::MoarVM {
         }
         elsif $want_sql {
             $profile_fh.say('BEGIN;');
-            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT);');
+            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, managed_size INT);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
