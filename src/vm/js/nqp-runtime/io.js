@@ -355,6 +355,14 @@ class DirHandle {
 
   $$closedir() {
   }
+
+  $$istype(type) {
+    return 0;
+  }
+
+  $$toBool(ctx) {
+    return 1;
+  }
 };
 
 op.opendir = function(path) {
