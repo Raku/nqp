@@ -899,10 +899,14 @@ function getConfigFromPerl() {
 op.backendconfig = function() {
   const config = new Hash();
   config.content.set('intvalsize', new NQPInt(4));
-  config.content.set('osname', new NQPStr(os.platform()));
-  const nativecallConfig = getConfigFromPerl();
-  for (const key of Object.keys(nativecallConfig)) {
-    config.content.set(key, new NQPStr(nativecallConfig[key]));
+  if (process.browser) {
+    config.content.set('osname', new NQPStr('browser'));
+  } else {
+    config.content.set('osname', new NQPStr(os.platform()));
+    const nativecallConfig = getConfigFromPerl();
+    for (const key of Object.keys(nativecallConfig)) {
+      config.content.set(key, new NQPStr(nativecallConfig[key]));
+    }
   }
   return config;
 };
