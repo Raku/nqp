@@ -62,3 +62,11 @@ op.getstderr = function(arg) {
 op.getenvhash = function() {
   return new Hash();
 };
+
+op.getpid = function() {
+  return -1;
+};
+
+op.getppid = function() {
+  return -1;
+};

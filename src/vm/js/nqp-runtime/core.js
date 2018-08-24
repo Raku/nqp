@@ -913,14 +913,6 @@ op.ordbaseat = function(str, index) {
   return str.substr(index, 1).normalize('NFD').codePointAt(0);
 };
 
-op.getpid = function() {
-  return process.pid;
-};
-
-op.getppid = function() {
-  return process.ppid;
-};
-
 op.getmessage = function(exception) {
   return (exception.$$message === undefined ? null_s : exception.$$message);
 };

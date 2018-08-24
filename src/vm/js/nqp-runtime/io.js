@@ -589,3 +589,11 @@ op.getsignals = function(currentHLL) {
   sigCache = res;
   return res;
 };
+
+op.getpid = function() {
+  return process.pid;
+};
+
+op.getppid = function() {
+  return process.ppid;
+};
