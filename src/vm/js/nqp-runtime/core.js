@@ -160,8 +160,8 @@ function radixHelper(radix, str, zpos, flags) {
   }
 
 
-  if (flags & 0x01) number = '-' + number;
   if (flags & 0x04) number = number.replace(/0+$/, '');
+  if (flags & 0x01 && number != '') number = '-' + number;
 
   const power = number[0] == '-' ? number.length - 1 : number.length;
   return {power: power, offset: zpos + (error == undefined ? search[0].length : error), number: number};
