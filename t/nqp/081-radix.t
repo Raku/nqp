@@ -1,4 +1,4 @@
-plan(32*3*2 + 3 + 7);
+plan(33*3*2 + 3 + 7);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -94,3 +94,5 @@ else {
 for @strings {
     is(nqp::coerce_is(nqp::coerce_si($_)), $_, "coerce_si and coerce_is round trip '$_'");
 }
+
+test_radix_both(10,'-1.0',3,5 ,0,1,4, 'bug when negating nothing');
