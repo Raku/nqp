@@ -187,7 +187,10 @@ if (process.browser) {
   };
 }
 
+const realModule = module;
 op.loadbytecodefh = function(ctx, fh, file) {
+  // HACK - loadbytecodefh shouldn't use eval
+  const module = {require: function(path) {return realModule.require(path)}};
   const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
   const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
