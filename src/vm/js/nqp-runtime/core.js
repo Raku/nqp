@@ -861,7 +861,38 @@ class NQPStub extends NQPObject {
 
 compilerRegistry.set('nqp', new NQPStub());
 
+// Needed for standalone compiled Perl 6 script to work
+
+class FakePerl6 extends NQPObject {
+    config() {
+        return new Hash();
+    }
+
+    language_version() {
+        return 'v6.d';
+    }
+}
+
+FakePerl6.prototype['cli-options'] = function() {
+    return new Hash();
+};
+
+class FakePerl6HOW extends NQPObject {
+    add_method() {
+        return Null;
+    }
+}
+
+FakePerl6.prototype._STable = {};
+FakePerl6.prototype._STable.HOW = new FakePerl6HOW;
+
+const fakePerl6 = new FakePerl6();
+
 op.getcomp = function(language) {
+  if (language === 'perl6' && !compilerRegistry.has(language)) {
+    return fakePerl6;
+  }
+
   return compilerRegistry.has(language) ? compilerRegistry.get(language) : Null;
 };
 
