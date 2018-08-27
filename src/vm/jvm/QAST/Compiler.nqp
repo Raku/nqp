@@ -2888,9 +2888,6 @@ QAST::OperationsJAST.map_classlib_core_op('continuationcontrol', $TYPE_OPS, 'con
 QAST::OperationsJAST.map_classlib_core_op('continuationinvoke', $TYPE_OPS, 'continuationinvoke', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc, :cont);
 
 # JVM interop ops
-QAST::OperationsJAST.map_classlib_core_op('jvmeqaddr', $TYPE_OPS, 'jvmeqaddr', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('jvmisnull', $TYPE_OPS, 'jvmisnull', [$RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('jvmbootinterop', $TYPE_OPS, 'jvmbootinterop', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('backendconfig', $TYPE_OPS, 'jvmgetconfig', [], $RT_OBJ, :tc);
 
 # Native call ops

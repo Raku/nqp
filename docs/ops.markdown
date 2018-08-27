@@ -239,7 +239,6 @@
   * [istrue](#istrue)
   * [istype](#istype)
   * [null](#null)
-  * [jvmisnull `jvm`](#jvmisnull-jvm)
   * [tostr](#tostr)
   * [tonum](#tonum)
   * [unbox](#unbox)
@@ -2050,12 +2049,6 @@ Generate a null value.
 
 The value returned by `null_s` is VM dependant. Notably, it may stringify
 differently depending on the backend.
-
-## jvmisnull `jvm`
-* `jvmisnull(Mu $obj)`
-
-Returns a 1 if the object is an NQP Type object *or*  the underlying
-JVM object is null. Returns 0 otherwise.
 
 ## tostr
 * `tostr_I(Int $val --> str)`

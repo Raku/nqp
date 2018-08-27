@@ -7361,26 +7361,6 @@ public final class Ops {
         return in;
     }
 
-    public static long jvmeqaddr(SixModelObject a, SixModelObject b, ThreadContext tc) {
-        if (a instanceof TypeObject) {
-            return (b instanceof TypeObject) ? 1 : 0;
-        } else {
-            return (b instanceof TypeObject || ((JavaObjectWrapper)a).theObject != ((JavaObjectWrapper)b).theObject) ? 0 : 1;
-        }
-    }
-
-    public static long jvmisnull(SixModelObject a, ThreadContext tc) {
-        if (a instanceof TypeObject) {
-            return 1;
-        } else {
-            return ((JavaObjectWrapper)a).theObject == null ? 1 : 0;
-        }
-    }
-
-    public static SixModelObject jvmbootinterop(ThreadContext tc) {
-        return BootJavaInterop.RuntimeSupport.boxJava(tc.gc.bootInterop, tc.gc.bootInterop.getSTableForClass(BootJavaInterop.class));
-    }
-
     public static SixModelObject jvmgetconfig(ThreadContext tc) {
         SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
         SixModelObject strType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
