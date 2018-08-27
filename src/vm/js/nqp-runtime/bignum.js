@@ -252,8 +252,13 @@ op.fromnum_I = function(num, type) {
 
   // TODO - don't do the string conversion for smaller ones
   const stringy = intified.toFixed(0);
-  const expanded = stringy.replace(/\.(\d+)e\+(\d+)/, function(match, floating, exponent) {
+
+  let expanded = stringy.replace(/\.(\d+)e\+(\d+)/, function(match, floating, exponent) {
     return floating + '0'.repeat(parseInt(exponent - floating.length));
+  })
+
+  expanded = expanded.replace(/e\+(\d+)/, function(match, exponent) {
+    return '0'.repeat(parseInt(exponent));
   })
 
   return makeBI(type, BigInt(expanded));
