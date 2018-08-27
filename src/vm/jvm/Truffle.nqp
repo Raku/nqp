@@ -370,6 +370,9 @@ class QAST::OperationsTruffle {
     add_simple_op('eqat', $INT, [$STR, $STR, $INT]);
     add_simple_op('eqatic', $INT, [$STR, $STR, $INT]);
 
+    add_simple_op('sleep', $NUM, [$NUM]);
+    add_simple_op('getpid', $INT, []);
+
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $old_value := $comp.as_truffle($node[0], :want($INT));
