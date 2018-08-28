@@ -279,9 +279,12 @@ class QAST::OperationsTruffle {
         }
     }
 
-    add_simple_op('bitor_i', $INT, [$INT, $INT]);
-    add_simple_op('bitand_i', $INT, [$INT, $INT]);
-    add_simple_op('bitxor_i', $INT, [$INT, $INT]);
+    for ['_i', $INT, '_s', $STR] -> $suffix, $type {
+        for <bitand bitor bitxor> -> $bit-op {
+            add_simple_op($bit-op ~ $suffix, $type, [$type, $type]);
+        }
+    }
+
     add_simple_op('bitneg_i', $INT, [$INT]);
     add_simple_op('bitshiftl_i', $INT, [$INT, $INT]);
     add_simple_op('bitshiftr_i', $INT, [$INT, $INT]);
