@@ -7,7 +7,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.dsl.Deserializer;
 
-@NodeInfo(shortName = "invoke")
+@NodeInfo(shortName = "callmethod")
 public final class NQPCallmethodNode extends NQPObjNode {
 
     public static final long NAMED = 1;

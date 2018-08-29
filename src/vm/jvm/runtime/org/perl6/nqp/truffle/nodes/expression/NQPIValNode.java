@@ -47,7 +47,7 @@ import org.perl6.nqp.truffle.nodes.NQPIntNode;
 import org.perl6.nqp.truffle.runtime.Coercions;
 import org.perl6.nqp.dsl.Deserializer;
 
-@NodeInfo(shortName = "const")
+@NodeInfo(shortName = "ival")
 public final class NQPIValNode extends NQPIntNode {
     private final long value;
 

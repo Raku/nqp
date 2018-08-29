@@ -46,7 +46,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPNumNode;
 import org.perl6.nqp.dsl.Deserializer;
 
-@NodeInfo(shortName = "const")
+@NodeInfo(shortName = "nval")
 public final class NQPNValNode extends NQPNumNode {
     private final double value;
 
