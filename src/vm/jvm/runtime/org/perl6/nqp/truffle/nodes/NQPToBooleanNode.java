@@ -4,6 +4,7 @@ import com.oracle.truffle.api.dsl.Specialization;
 import org.perl6.nqp.truffle.runtime.NQPListIterator;
 import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
+import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 public abstract class NQPToBooleanNode extends NQPBaseNode {
     public abstract boolean executeBoolean(Object value);
@@ -31,6 +32,11 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
     @Specialization
     protected boolean doNQPListIterator(NQPListIterator value) {
         return ((NQPListIterator) value).boolify();
+    }
+
+    @Specialization
+    protected boolean doSerializationContext(SerializationContext value) {
+        return true;
     }
 
     @Specialization(guards = "isNull(value)")
