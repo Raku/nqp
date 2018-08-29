@@ -135,6 +135,10 @@ class QAST::OperationsTruffle {
         });
     }
 
+    add_simple_op('createsc', $OBJ, [$STR]);
+    add_simple_op('scsetdesc', $STR, [$OBJ, $STR]);
+    add_simple_op('deserialize', $STR, [$STR, $OBJ, $OBJ, $OBJ, $OBJ]);
+
     add_simple_op('die', $VOID, [$STR]);
     %ops<die_s> := %ops<die>;
 
@@ -145,6 +149,9 @@ class QAST::OperationsTruffle {
 
     add_simple_op('gethllsym', $OBJ, [$STR, $STR]);
     add_simple_op('bindhllsym', $OBJ, [$STR, $STR, $OBJ]);
+
+    add_simple_op('loadbytecode', $STR, [$STR]);
+    add_simple_op('forceouterctx', $OBJ, [$OBJ, $OBJ]);
 
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
@@ -398,25 +405,10 @@ class QAST::OperationsTruffle {
         $comp.as_truffle($node[0], :want($want));
     });
 
-
-    # TODO :$want
-    add_op('call', :!inlinable, sub ($comp, $node, :$want) {
+    my sub compile_args($comp, @args, @trees, @flags, @names) {
         my int $NAMED := 1;
         my int $FLAT := 2;
 
-        my $ret := ['call'];
-
-        my @args := $node.list;
-
-        if $node.name {
-            nqp::push($ret, ['get-lexical', $node.name]);
-        }
-        else {
-            nqp::push($ret, $comp.as_truffle(nqp::shift(@args), :want($OBJ)).tree);
-        }
-
-        my @names;
-        my @flags;
         for @args -> $arg {
             my int $flags := 0;
 
@@ -430,23 +422,59 @@ class QAST::OperationsTruffle {
 
             nqp::push(@flags, $flags);
 
-            nqp::push($ret, $comp.as_truffle($arg, :want($CALL_ARG)).tree);
+            nqp::push(@trees, $comp.as_truffle($arg, :want($CALL_ARG)).tree);
         }
+    }
+
+    add_op('callmethod', :!inlinable, sub ($comp, $node, :$want) {
+        my $call := ['callmethod'];
+
+        my @args := nqp::clone($node.list);
+
+        nqp::push($call, $comp.as_truffle(@args.shift, :want($OBJ)).tree);
+
+        if $node.name {
+            nqp::push($call, ['sval', $node.name]);
+        }
+        else {
+            nqp::push($call, $comp.as_truffle(@args.shift, :want($STR)).tree);
+        }
+
+        my @flags;
+        my @names;
+
+        compile_args($comp, @args, $call, @flags, @names);
+
+        nqp::splice($call, [@flags, @names], 3, 0);
+
+        TAST.new($OBJ, $call);
+    });
+
+
+    # TODO :$want
+    add_op('call', :!inlinable, sub ($comp, $node, :$want) {
+        my $ret := ['call'];
+
+        my @args := $node.list;
+
+        if $node.name {
+            nqp::push($ret, ['get-lexical', $node.name]);
+        }
+        else {
+            nqp::push($ret, $comp.as_truffle(nqp::shift(@args), :want($OBJ)).tree);
+        }
+
+        my @flags;
+        my @names;
+
+        compile_args($comp, @args, $ret, @flags, @names);
+
         nqp::splice($ret, [@flags, @names], 2, 0);
 
         TAST.new($OBJ, $ret);
     });
 
     %ops<callstatic> := %ops<call>;
-
-    add_op('callmethod', :!inlinable, sub ($comp, $node, :$want) {
-        # HACK till we get proper callmethod
-        if $node.name eq 'name' && nqp::istype($node[0], QAST::Op) && $node[0].op eq 'callmethod' && $node[0].name eq 'backend' && nqp::istype($node[0][0], QAST::Op) && $node[0][0].op eq 'getcomp' {
-            TAST.new($STR, ['sval', 'truffle'])
-        } else {
-            $comp.NYI("unimplemented QAST::Op {$node.op}");
-        }
-    });
 
     add_op('bind', sub ($comp, $node, :$want) {
         my @children := $node.list;
@@ -495,7 +523,45 @@ class QAST::OperationsTruffle {
     }
 }
 
-class QAST::TruffleCompiler {
+# It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
+role SerializeOnce {
+    method serialize_sc_without_caching($sc) {
+        # Serialize it.
+
+        # HACK - we are avoiding an  MoarVM specific optimalization
+        # On MoarVM if an sc is on top of the compiling_scs stackthread the serialized data is stored on the thread context
+        # We have no way of accessing it, so we try to avoid that
+        # If we put a fake sc on top of the stack it won't be cached
+        # we avoid anything that creates a write barrier while it's on top
+        my $fake_stack_top_sc := nqp::createsc('JS_HACK');
+        nqp::pushcompsc($fake_stack_top_sc);
+
+        my $sh := nqp::list_s();
+        my $serialized := nqp::serialize($sc, $sh);
+
+        # HACK - now we pop our fake sc
+        nqp::popcompsc();
+
+        [$serialized,$sh];
+    }
+
+    method serialize_sc($sc) {
+        if %*SC_CACHE<enabled> {
+            my $handle := nqp::scgethandle($sc);
+            if nqp::existskey(%*SC_CACHE,$handle) {
+              %*SC_CACHE{$handle};
+            }
+            else {
+              %*SC_CACHE{$handle}  := self.serialize_sc_without_caching($sc);
+            }
+        }
+        else {
+          self.serialize_sc_without_caching($sc);
+        }
+    }
+}
+
+class QAST::TruffleCompiler does SerializeOnce {
     my class BlockInfo {
         has $!qast; # The QAST::Block
         has $!outer; # Outer block's BlockInfo
@@ -685,6 +751,78 @@ class QAST::TruffleCompiler {
         }
     }
 
+    method deserialization_code($cu) {
+        # Serialize it.
+
+        my $sc_tuple := self.serialize_sc($cu.sc);
+        my $serialized := $sc_tuple[0];
+        my $sh := $sc_tuple[1];
+
+        # Now it's serialized, pop this SC off the compiling SC stack.
+        nqp::popcompsc();
+
+        # String heap QAST.
+        my $sh_ast := QAST::Op.new( :op('list_s') );
+        my $sh_elems := nqp::elems($sh);
+        my $i := 0;
+        while $i < $sh_elems {
+            $sh_ast.push(nqp::isnull_s(nqp::atpos_s($sh, $i))
+                ?? QAST::Op.new( :op('null_s') )
+                !! QAST::SVal.new( :value(nqp::atpos_s($sh, $i)) ));
+            $i := $i + 1;
+        }
+        $sh_ast := QAST::Block.new( :blocktype('immediate'), $sh_ast );
+
+        my $repo_conflict_resolver;
+
+        # Handle repossession conflict resolution code, if any.
+        if $cu.repo_conflict_resolver {
+            $repo_conflict_resolver := nqp::clone($cu.repo_conflict_resolver);
+            $repo_conflict_resolver.push(QAST::Var.new( :name('conflicts'), :scope('local') ));
+        }
+        else {
+            $repo_conflict_resolver := QAST::Op.new(
+                :op('die_s'),
+                QAST::SVal.new( :value('Repossession conflicts occurred during deserialization') )
+            );
+        }
+
+        # Overall deserialization QAST.
+        QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('cur_sc'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('createsc'), QAST::SVal.new( :value(nqp::scgethandle($cu.sc)) ) )
+            ),
+            QAST::Op.new(
+                :op('scsetdesc'),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                QAST::SVal.new( :value(nqp::scgetdesc($cu.sc)) )
+            ),
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('conflicts'), :scope('local'), :decl('var') ),
+                QAST::Op.new( :op('list') )
+            ),
+            QAST::Op.new(
+                :op('deserialize'),
+                nqp::isnull($serialized) ?? QAST::Op.new( :op('null_s') ) !! QAST::SVal.new( :value($serialized) ),
+                QAST::Var.new( :name('cur_sc'), :scope('local') ),
+                $sh_ast,
+                QAST::Op.new( :op('null') ),
+                QAST::Var.new( :name('conflicts'), :scope('local') )
+            ),
+            QAST::Op.new(
+                :op('if'),
+                QAST::Op.new(
+                    :op('elems'),
+                    QAST::Var.new( :name('conflicts'), :scope('local') )
+                ),
+                $repo_conflict_resolver
+            )
+        );
+    }
+
     multi method as_truffle(QAST::CompUnit $node, :$want) {
         my $*HLL := '';
         if $node.hll {
@@ -693,7 +831,20 @@ class QAST::TruffleCompiler {
 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
 
-        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
+        my $pre_deserialize := ['stmts'];
+
+        my $deserialization_code := $node.compilation_mode
+            ?? self.as_truffle(self.deserialization_code($node), :want($VOID)).tree
+            !! ['stmts'];
+
+
+        if $node.pre_deserialize {
+            for $node.pre_deserialize -> $pre {
+                nqp::push($pre_deserialize, self.as_truffle($pre, :want($VOID)).tree);
+            }
+        }
+
+        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', $pre_deserialize, $deserialization_code, self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
     }
 
     multi method as_truffle(QAST::VM $node, :$want) {
@@ -879,9 +1030,16 @@ class QAST::TruffleCompiler {
         self.NYI('QAST node: ' ~ $node.HOW.name($node));
     }
 
-    # HACK before we deserialize objects
+    multi method as_truffle(QAST::BVal $node, :$want) {
+        TAST.new($OBJ, ['bval', $node.value.cuid]);
+    }
+
     multi method as_truffle(QAST::WVal $node, :$want) {
-        TAST.new($OBJ, ['null']);
+        my $value := $node.value;
+        my $sc     := nqp::getobjsc($value);
+        my str $handle := nqp::scgethandle($sc);
+        my int $idx    := nqp::scgetobjidx($sc, $value);
+        TAST.new($OBJ, ['wval', $handle, $idx]);
     }
 
     method NYI($msg) {
@@ -961,7 +1119,8 @@ class TruffleBackend {
     }
 
     method is_precomp_stage($stage) {
-        0;
+        # Currently, everything is pre-comp since we're a cross-compiler.
+        1;
     }
 
     method is_textual_stage($stage) {

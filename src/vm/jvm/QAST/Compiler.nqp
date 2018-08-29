@@ -3617,10 +3617,19 @@ class QAST::CompilerJAST {
         return 0;
     }
 
-    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
-        # Serialize it.
+    # This method is a hook point so that we can override serialization when cross-compiling
+    method serialize_sc($sc) {
         my $sh := nqp::list_s();
         my $serialized := nqp::serialize($sc, $sh);
+        [$serialized, $sh];
+    }
+
+    method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
+        # Serialize it.
+
+        my $sc_tuple := self.serialize_sc($sc);
+        my $serialized := $sc_tuple[0];
+        my $sh := $sc_tuple[1];
 
         if %*COMPILING<%?OPTIONS><target> eq 'jar' {
             $*JCLASS.serialized($serialized);

@@ -101,7 +101,8 @@ class NQP::World is HLL::World {
                             QAST::VM.new(
                                 :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
                                 :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                                :js(QAST::SVal.new( :value('ModuleLoader') ))
+                                :truffle(QAST::SVal.new( :value('ModuleLoader.truffle6') )),
+                                :js(QAST::SVal.new( :value('ModuleLoader') )),
                             )
                         ),
                     ),
