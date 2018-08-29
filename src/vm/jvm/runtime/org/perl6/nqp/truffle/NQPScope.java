@@ -2,6 +2,7 @@ package org.perl6.nqp.truffle;
 
 import java.util.HashMap;
 import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 import com.oracle.truffle.api.frame.FrameSlot;
 
@@ -17,4 +18,5 @@ public abstract class NQPScope {
 
     public abstract HLL getCurrentHLL();
     public abstract HashMap<String, HLL> getHLLs();
+    public abstract HashMap<String, SerializationContext> getScs();
 }

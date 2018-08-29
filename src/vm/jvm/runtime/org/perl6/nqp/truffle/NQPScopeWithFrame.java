@@ -6,6 +6,7 @@ import com.oracle.truffle.api.frame.FrameSlot;
 import java.util.HashMap;
 
 import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 public class NQPScopeWithFrame extends NQPScope {
 
@@ -89,7 +90,16 @@ public class NQPScopeWithFrame extends NQPScope {
         if (outer != null) {
             return outer.getHLLs();
         } else {
-            throw new RuntimeException("Can't get current HLL");
+            throw new RuntimeException("Can't get HLLs");
+        }
+    }
+
+    @Override
+    public HashMap<String, SerializationContext> getScs() {
+        if (outer != null) {
+            return outer.getScs();
+        } else {
+            throw new RuntimeException("Can't get serialiazation contexts");
         }
     }
 }
