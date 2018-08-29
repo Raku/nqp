@@ -35,6 +35,6 @@ public final class NQPGethllsymNode extends NQPObjNode {
 
     @Deserializer("gethllsym")
     public static NQPGethllsymNode deserialize(NQPScope scope, NQPNode hllNameNode, NQPNode symbolNode) {
-        return new NQPGethllsymNode(scope.getHLLs(), hllNameNode, symbolNode);
+        return new NQPGethllsymNode(scope.getGlobalContext().hlls, hllNameNode, symbolNode);
     }
 }

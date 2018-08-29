@@ -6,6 +6,7 @@ import com.oracle.truffle.api.frame.FrameSlot;
 
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.GlobalContext;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
@@ -13,15 +14,19 @@ public class NQPCompUnitScope extends NQPScope {
     NQPScope outer;
     HLL currentHLL;
 
-    HashMap<String, HLL> hlls;
     HashMap<String, SerializationContext> scs;
 
-    public NQPCompUnitScope(NQPScope outer, HashMap<String, HLL> hlls, String hll, HashMap<String, SerializationContext> scs) {
+    GlobalContext globalContext;
+
+    public NQPCompUnitScope(NQPScope outer, String hll, GlobalContext globalContext) {
         this.outer = outer;
-        this.hlls = hlls;
+
+        this.globalContext = globalContext;
+
+        HashMap<String, HLL> hlls = globalContext.hlls;
         this.scs = scs;
 
-        if (!this.hlls.containsKey(hll)) {
+        if (!hlls.containsKey(hll)) {
             hlls.put(hll, new HLL());
         }
 
@@ -29,13 +34,8 @@ public class NQPCompUnitScope extends NQPScope {
     }
 
     @Override
-    public HashMap<String, HLL> getHLLs() {
-        return hlls;
-    }
-
-    @Override
-    public HashMap<String, SerializationContext> getScs() {
-        return scs;
+    public GlobalContext getGlobalContext() {
+        return globalContext;
     }
 
 

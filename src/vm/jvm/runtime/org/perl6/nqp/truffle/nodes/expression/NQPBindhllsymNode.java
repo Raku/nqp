@@ -38,6 +38,6 @@ public final class NQPBindhllsymNode extends NQPObjNode {
 
     @Deserializer("bindhllsym")
     public static NQPBindhllsymNode deserialize(NQPScope scope, NQPNode hllNameNode, NQPNode symbolNode, NQPNode valueNode) {
-        return new NQPBindhllsymNode(scope.getHLLs(), hllNameNode, symbolNode, valueNode);
+        return new NQPBindhllsymNode(scope.getGlobalContext().hlls, hllNameNode, symbolNode, valueNode);
     }
 }

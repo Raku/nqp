@@ -64,7 +64,7 @@ public class ManageScopes {
 
     @Predeserializer("comp-unit")
     public static NQPScope setupCompUnit(NQPScope scope, String hllName) {
-        return new NQPCompUnitScope(scope, GlobalContext.SINGLETON.hlls, hllName, GlobalContext.SINGLETON.scs);
+        return new NQPCompUnitScope(scope, hllName, GlobalContext.SINGLETON);
     }
 
     @Deserializer("comp-unit")

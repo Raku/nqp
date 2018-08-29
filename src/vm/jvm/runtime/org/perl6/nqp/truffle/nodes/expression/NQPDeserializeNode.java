@@ -34,7 +34,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
 
     @Deserializer("deserialize")
     public static NQPDeserializeNode deserialize(NQPScope scope, NQPNode blobNode, NQPNode scRefNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode) {
-        return new NQPDeserializeNode(blobNode, scRefNode, shNode, crNode, conflictNode, scope.getScs());
+        return new NQPDeserializeNode(blobNode, scRefNode, shNode, crNode, conflictNode, scope.getGlobalContext().scs);
     }
 
     @Override

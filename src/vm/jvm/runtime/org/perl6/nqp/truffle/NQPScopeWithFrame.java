@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+import org.perl6.nqp.truffle.GlobalContext;
 
 public class NQPScopeWithFrame extends NQPScope {
 
@@ -86,20 +87,11 @@ public class NQPScopeWithFrame extends NQPScope {
     }
 
     @Override
-    public HashMap<String, HLL> getHLLs() {
+    public GlobalContext getGlobalContext() {
         if (outer != null) {
-            return outer.getHLLs();
+            return outer.getGlobalContext();
         } else {
             throw new RuntimeException("Can't get HLLs");
-        }
-    }
-
-    @Override
-    public HashMap<String, SerializationContext> getScs() {
-        if (outer != null) {
-            return outer.getScs();
-        } else {
-            throw new RuntimeException("Can't get serialiazation contexts");
         }
     }
 }
