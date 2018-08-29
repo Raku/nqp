@@ -140,6 +140,9 @@ class QAST::OperationsTruffle {
     add_simple_op('scgetdesc', $STR, [$OBJ]);
     add_simple_op('scgethandle', $STR, [$OBJ]);
 
+    add_simple_op('pushcompsc', $OBJ, [$OBJ]);
+    add_simple_op('popcompsc', $OBJ, []);
+
     add_simple_op('deserialize', $STR, [$STR, $OBJ, $OBJ, $OBJ, $OBJ]);
 
     add_simple_op('die', $VOID, [$STR]);
