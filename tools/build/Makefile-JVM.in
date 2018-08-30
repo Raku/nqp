@@ -13,6 +13,7 @@ TRUFFLE_JAVAS = \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/sixmodel/*.java \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/sixmodel/reprs/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/*.java \
 
 RUNTIME_JAVAS = \

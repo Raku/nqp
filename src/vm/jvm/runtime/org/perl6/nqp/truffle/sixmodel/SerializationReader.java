@@ -110,11 +110,11 @@ public class SerializationReader {
 //            sc.addCodeRef(cr[i]);
 //        }
 //
-//        // Handle any STable repossessions, then stub STables.
-//        sc.initSTableList(stTableEntries);
+        // Handle any STable repossessions, then stub STables.
+        sc.initSTableList(stTableEntries);
 //        if (reposTableEntries > 0)
 //            repossess(1);
-//        stubSTables();
+        stubSTables();
 //
 //        // Handle any object repossessions, then stub objects.
 //        sc.initObjectList(objTableEntries);
@@ -335,23 +335,23 @@ public class SerializationReader {
 //        }
 //    }
 //
-//    private void stubSTables() {
-//        for (int i = 0; i < stTableEntries; i++) {
-//            // May already have it, due to repossession.
-//            if (sc.getSTable(i) != null)
-//                continue;
-//
-//            // Look up representation.
-//            orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE);
-//            REPR repr = REPRRegistry.getByName(lookupString(orig.getInt()));
-//
-//            // Create STable stub and add it to the root STable set.
-//            STable st = new STable(repr, null);
-//            st.sc = sc;
-//            sc.setSTable(i, st);
-//        }
-//    }
-//
+    private void stubSTables() {
+        for (int i = 0; i < stTableEntries; i++) {
+            // May already have it, due to repossession.
+            if (sc.getSTable(i) != null)
+                continue;
+
+            // Look up representation.
+            orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE);
+            REPR repr = REPRRegistry.getByName(lookupString(orig.getInt()));
+
+            // Create STable stub and add it to the root STable set.
+            STable st = new STable(repr, null);
+            st.sc = sc;
+            sc.setSTable(i, st);
+        }
+    }
+
 //    private void stubObjects() {
 //        for (int i = 0; i < objTableEntries; i++) {
 //            // May already have it, due to repossession.
