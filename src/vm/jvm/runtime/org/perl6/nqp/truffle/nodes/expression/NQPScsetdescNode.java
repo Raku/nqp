@@ -8,20 +8,20 @@ import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 @NodeInfo(shortName = "scsetdesc")
 public final class NQPScsetdescNode extends NQPStrNode {
-    @Child private NQPNode scRefNode;
+    @Child private NQPNode scNode;
     @Child private NQPNode descriptionNode;
 
     @Deserializer
-    public NQPScsetdescNode(NQPNode scRefNode, NQPNode descriptionNode) {
-        this.scRefNode = scRefNode;
+    public NQPScsetdescNode(NQPNode scNode, NQPNode descriptionNode) {
+        this.scNode = scNode;
         this.descriptionNode = descriptionNode;
     }
 
     @Override
     public String executeStr(VirtualFrame frame) {
-        SerializationContext scRef = (SerializationContext) scRefNode.execute(frame);
+        SerializationContext sc = (SerializationContext) scNode.execute(frame);
         String description = descriptionNode.executeStr(frame); 
-        scRef.description = description;
+        sc.description = description;
         return description;
     }
 }

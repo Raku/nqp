@@ -16,16 +16,16 @@ import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 @NodeInfo(shortName = "deserialize")
 public final class NQPDeserializeNode extends NQPStrNode {
     @Child private NQPNode blobNode;
-    @Child private NQPNode scRefNode;
+    @Child private NQPNode scNode;
     @Child private NQPNode shNode;
     @Child private NQPNode crNode;
     @Child private NQPNode conflictNode;
 
     private final HashMap<String, SerializationContext> scs;
 
-    public NQPDeserializeNode(NQPNode blobNode, NQPNode scRefNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, HashMap<String, SerializationContext> scs) {
+    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, HashMap<String, SerializationContext> scs) {
         this.blobNode = blobNode;
-        this.scRefNode = scRefNode;
+        this.scNode = scNode;
         this.shNode = shNode;
         this.crNode = crNode;
         this.conflictNode = conflictNode;
@@ -33,14 +33,14 @@ public final class NQPDeserializeNode extends NQPStrNode {
     }
 
     @Deserializer("deserialize")
-    public static NQPDeserializeNode deserialize(NQPScope scope, NQPNode blobNode, NQPNode scRefNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode) {
-        return new NQPDeserializeNode(blobNode, scRefNode, shNode, crNode, conflictNode, scope.getGlobalContext().scs);
+    public static NQPDeserializeNode deserialize(NQPScope scope, NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode) {
+        return new NQPDeserializeNode(blobNode, scNode, shNode, crNode, conflictNode, scope.getGlobalContext().scs);
     }
 
     @Override
     public String executeStr(VirtualFrame frame) {
         String blob = blobNode.executeStr(frame);
-        SerializationContext sc = (SerializationContext) scRefNode.execute(frame);
+        SerializationContext sc = (SerializationContext) scNode.execute(frame);
         NQPListStr shList = (NQPListStr) shNode.execute(frame);
         Object cr = crNode.execute(frame);
         Object conflict = conflictNode.execute(frame);

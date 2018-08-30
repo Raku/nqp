@@ -8,16 +8,16 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "scgetdesc")
 public final class NQPScgetdescNode extends NQPStrNode {
-    @Child private NQPNode scRefNode;
+    @Child private NQPNode scNode;
 
     @Deserializer
-    public NQPScgetdescNode(NQPNode scRefNode) {
-        this.scRefNode = scRefNode;
+    public NQPScgetdescNode(NQPNode scNode) {
+        this.scNode = scNode;
     }
 
     @Override
     public String executeStr(VirtualFrame frame) {
-        SerializationContext scRef = (SerializationContext) scRefNode.execute(frame);
-        return scRef.description;
+        SerializationContext sc = (SerializationContext) scNode.execute(frame);
+        return sc.description;
     }
 }
