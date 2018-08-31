@@ -389,10 +389,6 @@ class QAST::OperationsTruffle {
     add_simple_op('sleep', $NUM, [$NUM]);
     add_simple_op('getpid', $INT, []);
 
-    for ['_i', $INT, '', $OBJ, '_s', $STR, '_n', $NUM] -> $suffix, $type {
-        add_simple_op('getlex' ~ $suffix, $type, [$OBJ, $INT]);
-    }
-
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
             my $old_value := $comp.as_truffle($node[0], :want($INT));
