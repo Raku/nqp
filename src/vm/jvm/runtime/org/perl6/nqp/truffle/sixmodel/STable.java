@@ -3,8 +3,7 @@ package org.perl6.nqp.truffle.sixmodel;
 public class STable {
     /** Initializes a new STable.
      */
-    public STable(REPR repr, Object how) {
-        this.repr = repr;
+    public STable(Object how) {
         this.how = how;
     }
 

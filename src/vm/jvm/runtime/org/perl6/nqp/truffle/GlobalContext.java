@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class GlobalContext {
-    static GlobalContext SINGLETON = new GlobalContext();
-
     public HashMap<String, HLL> hlls;
     public HashMap<String, SerializationContext> scs;
     public ArrayList<SerializationContext> compilingSCs;

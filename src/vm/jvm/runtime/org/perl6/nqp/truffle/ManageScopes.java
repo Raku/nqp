@@ -10,6 +10,8 @@ import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 
 import org.perl6.nqp.truffle.MalformedAstException;
 
+import org.perl6.nqp.truffle.sixmodel.Bootstrapper;
+
 
 import org.perl6.nqp.dsl.Predeserializer;
 import org.perl6.nqp.dsl.Deserializer;
@@ -64,7 +66,9 @@ public class ManageScopes {
 
     @Predeserializer("comp-unit")
     public static NQPScope setupCompUnit(NQPScope scope, String hllName) {
-        return new NQPCompUnitScope(scope, hllName, GlobalContext.SINGLETON);
+        GlobalContext globalContext = new GlobalContext();
+        Bootstrapper.bootstrap(globalContext);
+        return new NQPCompUnitScope(scope, hllName, globalContext);
     }
 
     @Deserializer("comp-unit")

@@ -56,4 +56,45 @@ public final class SerializationContext {
     public int stableCount() {
         return rootSTables.size();
     }
+
+    private HashMap<Object, Integer> objectIndexCache = new HashMap<Object, Integer>();
+
+    public void initObjectList(int entries) {
+        rootObjects.ensureCapacity(entries);
+        for (int i = 0; i < entries; i++)
+            rootObjects.add(null);
+    }
+
+    public void addObject(Object obj) {
+        int newIndex = rootObjects.size();
+        rootObjects.add(obj);
+        objectIndexCache.put(obj, new Integer(newIndex));
+    }
+
+    public void addObject(Object obj, int index) {
+        if (index == rootObjects.size()) {
+            rootObjects.add(obj);
+        } else {
+            rootObjects.set(index,  obj);
+        }
+        objectIndexCache.put(obj, new Integer(index));
+    }
+
+    public int getObjectIndex(Object obj) {
+        Integer cachedIndex = objectIndexCache.get(obj);
+        if (cachedIndex != null) {
+            return cachedIndex.intValue();
+        } else {
+            return -1;
+        }
+    }
+
+    public Object getObject(int index) {
+        return rootObjects.get(index);
+    }
+
+    public int objectCount() {
+        return rootObjects.size();
+    }
+
 }

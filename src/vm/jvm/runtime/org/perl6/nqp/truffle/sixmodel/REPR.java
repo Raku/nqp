@@ -5,4 +5,9 @@ package org.perl6.nqp.truffle.sixmodel;
  * are not mandatory.
  */
 public abstract class REPR {
+    public abstract Object deserializeStub();
+    public abstract Object allocate();
+
+    public abstract void setSc(Object obj, SerializationContext sc);
+    public abstract void setSTable(Object obj, STable stable);
 }

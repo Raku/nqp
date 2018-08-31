@@ -116,11 +116,11 @@ public class SerializationReader {
 //            repossess(1);
         stubSTables();
 //
-//        // Handle any object repossessions, then stub objects.
-//        sc.initObjectList(objTableEntries);
+        // Handle any object repossessions, then stub objects.
+        sc.initObjectList(objTableEntries);
 //        if (reposTableEntries > 0)
 //            repossess(0);
-//        stubObjects();
+        stubObjects();
 //
 //        // Do first step of deserializing any closures.
 //        deserializeClosures();
@@ -343,45 +343,47 @@ public class SerializationReader {
 
             // Look up representation.
             orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE);
-            REPR repr = REPRRegistry.getByName(lookupString(orig.getInt()));
 
             // Create STable stub and add it to the root STable set.
-            STable st = new STable(repr, null);
-            st.sc = sc;
-            sc.setSTable(i, st);
+            STable stable = new STable(null);
+            REPR repr = REPRRegistry.createFromName(lookupString(orig.getInt()), stable);
+            stable.repr = repr;
+            stable.sc = sc;
+            sc.setSTable(i, stable);
         }
     }
 
-//    private void stubObjects() {
-//        for (int i = 0; i < objTableEntries; i++) {
-//            // May already have it, due to repossession.
-//            if (sc.getObject(i) != null)
-//                continue;
-//
-//            // Look up STable.
-//            orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE);
-//            STable st = lookupSTable(orig.getInt(), orig.getInt());
-//
-//            // Now go by object flags.
-//            SixModelObject stubObj;
-//            orig.position(orig.position() + 4);
-//            int flags = orig.getInt();
-//            if (flags == 0) {
-//                // Type object.
-//                stubObj = new TypeObject();
-//                stubObj.st = st;
-//            }
-//            else {
-//                // Concrete object; defer to the REPR.
-//                stubObj = st.REPR.deserialize_stub(tc, st);
-//            }
-//
-//            // Place object in SC root set.
-//            stubObj.sc = sc;
-//            sc.addObject(stubObj, i);
-//        }
-//    }
-//
+    private void stubObjects() {
+        for (int i = 0; i < objTableEntries; i++) {
+            // May already have it, due to repossession.
+            if (sc.getObject(i) != null)
+                continue;
+
+            // Look up STable.
+            orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE);
+            STable st = lookupSTable(orig.getInt(), orig.getInt());
+
+            // Now go by object flags.
+            Object stubObj;
+            orig.position(orig.position() + 4);
+            int flags = orig.getInt();
+            if (flags == 0) {
+                // Type object.
+                TypeObject typeObject = new TypeObject(st);
+                typeObject.sc = sc;
+                stubObj = typeObject;
+            }
+            else {
+                // Concrete object; defer to the REPR.
+                stubObj = st.repr.deserializeStub();
+                st.repr.setSc(stubObj, sc);
+            }
+
+            // Place object in SC root set.
+            sc.addObject(stubObj, i);
+        }
+    }
+
 //    private void deserializeClosures() {
 //        for (int i = 0; i < closureTableEntries; i++) {
 //            /* Seek to the closure's table row. */
@@ -710,21 +712,21 @@ public class SerializationReader {
 //        return lookupString(orig.getInt());
 //    }
 //
-//    private STable lookupSTable(int scIdx, int idx) {
-//        SerializationContext sc = locateSC(scIdx);
-//        if (idx < 0 || idx >= sc.stableCount())
-//            throw new RuntimeException("Invalid STable index (scIdx=" + scIdx + ",idx=" + idx + ")");
-//        return sc.getSTable(idx);
-//    }
-//
-//    private SerializationContext locateSC(int scIdx) {
-//        if (scIdx == 0)
-//            return sc;
-//        if (scIdx < 1 || scIdx > dependentSCs.length)
-//            throw new RuntimeException("Invalid dependencies table index encountered (index " + scIdx + ")");
-//        return dependentSCs[scIdx - 1];
-//    }
-//
+    private STable lookupSTable(int scIdx, int idx) {
+        SerializationContext sc = locateSC(scIdx);
+        if (idx < 0 || idx >= sc.stableCount())
+            throw new RuntimeException("Invalid STable index (scIdx=" + scIdx + ",idx=" + idx + ")");
+        return sc.getSTable(idx);
+    }
+
+    private SerializationContext locateSC(int scIdx) {
+        if (scIdx == 0)
+            return sc;
+        if (scIdx < 1 || scIdx > dependentSCs.length)
+            throw new RuntimeException("Invalid dependencies table index encountered (index " + scIdx + ")");
+        return dependentSCs[scIdx - 1];
+    }
+
     private String lookupString(int idx) {
         if (idx >= sh.length)
             throw new RuntimeException("Attempt to read past end of string heap (index " + idx + ")");
