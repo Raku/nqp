@@ -13,6 +13,8 @@ public class Bootstrapper {
          * pass in NULL. */
         STable stable = new STable(null);
 
+        stable.repr = REPRRegistry.createFromName("KnowHOWREPR", stable);
+
         TypeObject knowhow = REPRRegistry.typeObjectFor("KnowHOWREPR", stable);
 
         /* We create a KnowHOW instance that can describe itself. This means
