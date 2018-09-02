@@ -1,4 +1,4 @@
-plan(33*(6 + 4) + 3 + 7);
+plan(33*(6 + 3) + 3 + 7);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
