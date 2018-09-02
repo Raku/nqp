@@ -5,6 +5,8 @@ const hll = require('./hll.js');
 
 const NQPInt = require('./nqp-int.js');
 
+const isPrime = require('bigint-is-prime');
+
 const op = {};
 exports.op = op;
 function intishBool(b) {
@@ -178,14 +180,9 @@ op.cmp_I = function(left, right) {
   return (a === b ? 0 : (a < b ? -1 : 1));
 };
 
-op.isprime_I = function(n) {
+op.isprime_I = function(n, attempts) {
   const unboxed = getBI(n);
-  const x = unboxed < 0n ? -unboxed : unboxed;
-  if (x === 0n || x === 1n) return 0;
-  for (let i = 2n; i*i <= x; i++) {
-    if (x % i === 0n) return 0;
-  }
-  return 1;
+  return isPrime(unboxed) ? 1 : 0;
 };
 
 op.bitshiftl_I = function(a, b, type) {
@@ -252,8 +249,13 @@ op.fromnum_I = function(num, type) {
 
   // TODO - don't do the string conversion for smaller ones
   const stringy = intified.toFixed(0);
-  const expanded = stringy.replace(/\.(\d+)e\+(\d+)/, function(match, floating, exponent) {
+
+  let expanded = stringy.replace(/\.(\d+)e\+(\d+)/, function(match, floating, exponent) {
     return floating + '0'.repeat(parseInt(exponent - floating.length));
+  })
+
+  expanded = expanded.replace(/e\+(\d+)/, function(match, exponent) {
+    return '0'.repeat(parseInt(exponent));
   })
 
   return makeBI(type, BigInt(expanded));

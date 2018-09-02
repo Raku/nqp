@@ -3,10 +3,13 @@ const Null = require('./null.js');
 const Hash = require('./hash.js');
 const core = require('./core.js');
 
+const NQPObject = require('./nqp-object.js');
+
 exports.op = op;
 
-class BufferedConsole {
+class BufferedConsole extends NQPObject {
   constructor(output) {
+    super();
     this.buffered = [];
     this.output = output;
   }
@@ -32,10 +35,21 @@ class BufferedConsole {
       this.buffered.push(lines[lines.length - 1]);
     }
   }
+
+  $$isttyfh() {
+    return 1;
+  }
+}
+
+class BrowserStdin extends NQPObject {
+  $$isttyfh() {
+    return 1;
+  }
 }
 
 const STDOUT = new BufferedConsole(output => console.log(output));
 const STDERR = new BufferedConsole(output => console.error(output));
+const STDIN = new BrowserStdin();
 
 op.say = function(arg) {
   STDOUT.$$write(arg + '\n');
@@ -48,7 +62,7 @@ op.print = function(arg) {
 };
 
 op.getstdin = function(arg) {
-  return Null;
+  return STDIN;
 };
 
 op.getstdout = function(arg) {

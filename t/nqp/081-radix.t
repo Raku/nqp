@@ -1,8 +1,11 @@
-plan(32*3*2 + 3 + 7);
+plan(33*(6 + 3) + 3 + 7);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
     is($result[0], $value,"radix: $desc - correct converted value");
+    ok(nqp::isint($result[0]), 'radix - returned value is an int');
+    ok(nqp::isint($result[1]), 'radix - radix ** (number of digits converted) is int');
+    ok(nqp::isint($result[2]), 'radix - offset is int');
     is($result[1], $mult,"radix: $desc - correct radix ** (number of digits converted)");
     is($result[2], $offset,"radix: $desc - correct offset");
 }
@@ -57,7 +60,7 @@ test_radix_both(3,"3",0,2, 0,1,-1, "no digits consumed with digit outside radix"
 test_radix_both(3,"۳",0,2, 0,1,-1, "no digits consumed with unicode digit outside radix");
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("radix can't yet handle fancy unicode stuff on the jvm", 4*3*2);
+    skip("radix can't yet handle fancy unicode stuff on the jvm", 4*(6 + 3));
 } else {
     test_radix_both(10,"۳",0,2, 3,10,1, "extended arabic-indic digit three");
     test_radix_both(10,"۳۳",0,2, 33,100,2, "extended arabic-indic digit three");
@@ -94,3 +97,5 @@ else {
 for @strings {
     is(nqp::coerce_is(nqp::coerce_si($_)), $_, "coerce_si and coerce_is round trip '$_'");
 }
+
+test_radix_both(10,'-1.0',3,5 ,0,1,4, 'bug when negating nothing');

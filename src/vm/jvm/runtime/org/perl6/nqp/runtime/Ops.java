@@ -3978,11 +3978,11 @@ public final class Ops {
     }
 
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
-        double zvalue = 0.0;
-        double zbase = 1.0;
+        long zvalue = 0;
+        long zbase = 1;
         int chars = str.length();
-        double value = zvalue;
-        double base = zbase;
+        long value = zvalue;
+        long base = zbase;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -4021,9 +4021,9 @@ public final class Ops {
         SixModelObject result = hllConfig.slurpyArrayType.st.REPR.allocate(tc,
                 hllConfig.slurpyArrayType.st);
 
-        result.push_boxed(tc, box_n(value, hllConfig.numBoxType, tc));
-        result.push_boxed(tc, box_n(base, hllConfig.numBoxType, tc));
-        result.push_boxed(tc, box_n(pos, hllConfig.numBoxType, tc));
+        result.push_boxed(tc, box_i(value, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(base, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(pos, hllConfig.intBoxType, tc));
 
         return result;
     }
@@ -7359,26 +7359,6 @@ public final class Ops {
     /* noop, exists only so you can set a breakpoint in it */
     public static SixModelObject debugnoop(SixModelObject in, ThreadContext tc) {
         return in;
-    }
-
-    public static long jvmeqaddr(SixModelObject a, SixModelObject b, ThreadContext tc) {
-        if (a instanceof TypeObject) {
-            return (b instanceof TypeObject) ? 1 : 0;
-        } else {
-            return (b instanceof TypeObject || ((JavaObjectWrapper)a).theObject != ((JavaObjectWrapper)b).theObject) ? 0 : 1;
-        }
-    }
-
-    public static long jvmisnull(SixModelObject a, ThreadContext tc) {
-        if (a instanceof TypeObject) {
-            return 1;
-        } else {
-            return ((JavaObjectWrapper)a).theObject == null ? 1 : 0;
-        }
-    }
-
-    public static SixModelObject jvmbootinterop(ThreadContext tc) {
-        return BootJavaInterop.RuntimeSupport.boxJava(tc.gc.bootInterop, tc.gc.bootInterop.getSTableForClass(BootJavaInterop.class));
     }
 
     public static SixModelObject jvmgetconfig(ThreadContext tc) {

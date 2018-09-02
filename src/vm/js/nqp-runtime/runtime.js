@@ -137,9 +137,13 @@ exports.loaderCtx = null;
 
 if (process.browser) {
   op.loadbytecode = /*async*/ function(ctx, file) {
+      if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
+        file = 'Perl6::BOOTSTRAP';
+      }
+
       const oldLoaderCtx = exports.loaderCtx;
       exports.loaderCtx = ctx;
-      file = file.replace(/\.setting$/, '_setting');
+      file = file.replace(/\.setting(\.js)?$/, '_setting');
       file = file.replace(/::/g, '-');
       require('./' + file + '.nqp-raw-runtime');
       exports.loaderCtx = oldLoaderCtx;
@@ -183,7 +187,10 @@ if (process.browser) {
   };
 }
 
+const realModule = module;
 op.loadbytecodefh = function(ctx, fh, file) {
+  // HACK - loadbytecodefh shouldn't use eval
+  const module = {require: function(path) {return realModule.require(path)}};
   const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
   const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});

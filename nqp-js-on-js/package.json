@@ -4,7 +4,9 @@
   "bin": {
     "nqp-js-on-js": "nqp-bootstrapped.js"
   },
-  "files": ["*.js"],
+  "files": [
+    "*.js"
+  ],
   "licenses": [
     {
       "type": "Artistic 2",
