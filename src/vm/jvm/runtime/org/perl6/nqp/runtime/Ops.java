@@ -3978,11 +3978,11 @@ public final class Ops {
     }
 
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
-        double zvalue = 0.0;
-        double zbase = 1.0;
+        long zvalue = 0;
+        long zbase = 1;
         int chars = str.length();
-        double value = zvalue;
-        double base = zbase;
+        long value = zvalue;
+        long base = zbase;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -4021,9 +4021,9 @@ public final class Ops {
         SixModelObject result = hllConfig.slurpyArrayType.st.REPR.allocate(tc,
                 hllConfig.slurpyArrayType.st);
 
-        result.push_boxed(tc, box_n(value, hllConfig.numBoxType, tc));
-        result.push_boxed(tc, box_n(base, hllConfig.numBoxType, tc));
-        result.push_boxed(tc, box_n(pos, hllConfig.numBoxType, tc));
+        result.push_boxed(tc, box_i(value, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(base, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(pos, hllConfig.intBoxType, tc));
 
         return result;
     }

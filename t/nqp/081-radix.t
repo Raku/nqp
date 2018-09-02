@@ -1,8 +1,11 @@
-plan(33*3*2 + 3 + 7);
+plan(33*(6 + 4) + 3 + 7);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
     is($result[0], $value,"radix: $desc - correct converted value");
+    ok(nqp::isint($result[0]), 'radix - returned value is an int');
+    ok(nqp::isint($result[1]), 'radix - radix ** (number of digits converted) is int');
+    ok(nqp::isint($result[2]), 'radix - offset is int');
     is($result[1], $mult,"radix: $desc - correct radix ** (number of digits converted)");
     is($result[2], $offset,"radix: $desc - correct offset");
 }
