@@ -60,7 +60,7 @@ test_radix_both(3,"3",0,2, 0,1,-1, "no digits consumed with digit outside radix"
 test_radix_both(3,"۳",0,2, 0,1,-1, "no digits consumed with unicode digit outside radix");
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("radix can't yet handle fancy unicode stuff on the jvm", 4*3*2);
+    skip("radix can't yet handle fancy unicode stuff on the jvm", 4*(6 + 3));
 } else {
     test_radix_both(10,"۳",0,2, 3,10,1, "extended arabic-indic digit three");
     test_radix_both(10,"۳۳",0,2, 33,100,2, "extended arabic-indic digit three");
