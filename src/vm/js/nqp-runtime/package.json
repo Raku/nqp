@@ -32,6 +32,7 @@
     "unicharadata": "*",
     "unicode-collation-algorithm": "0.0.3",
     "xorshift": "^1.1.0",
-    "xregexp": "^3.2.0"
+    "xregexp": "^3.2.0",
+    "bigint-is-prime": "^1.0.2"
   }
 }
