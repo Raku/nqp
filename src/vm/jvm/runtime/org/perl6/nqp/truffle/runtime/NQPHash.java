@@ -2,6 +2,8 @@ package org.perl6.nqp.truffle.runtime;
 
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public final class NQPHash {
     HashMap<String, Object> contents;
@@ -37,5 +39,9 @@ public final class NQPHash {
 
     public int elems() {
         return contents.size();
+    }
+
+    public Set<Map.Entry<String, Object>> entrySet() {
+        return contents.entrySet();
     }
 }

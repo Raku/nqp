@@ -424,10 +424,13 @@ class QAST::OperationsTruffle {
 
             if $arg.named {
                 $flags := $flags +| $NAMED;
-                @names.push($arg.named);
             }
             if $arg.flat {
                 $flags := $flags +| $FLAT;
+            }
+
+            if $arg.named && !$arg.flat {
+                @names.push($arg.named);
             }
 
             nqp::push(@flags, $flags);

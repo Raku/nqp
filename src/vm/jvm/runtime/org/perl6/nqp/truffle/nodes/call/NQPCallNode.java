@@ -53,6 +53,10 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.runtime.NQPHash;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;
@@ -110,7 +114,12 @@ public final class NQPCallNode extends NQPObjNode {
         int nameIndex = 0;
 
         for (int i = 0; i < argumentNodes.length; i++) {
-            if ((argumentFlags[i] & NAMED) != 0) {
+            if ((argumentFlags[i] & FLAT) != 0 && (argumentFlags[i] & NAMED) != 0) {
+                NQPHash hash = (NQPHash) values[i];
+                for (Map.Entry<String, Object> entry : hash.entrySet()) {
+                    NQPArguments.setNamedArgument(arguments, entry.getKey(), entry.getValue());
+                }
+            } else if ((argumentFlags[i] & NAMED) != 0) {
                 NQPArguments.setNamedArgument(arguments, argumentNames[nameIndex++], values[i]);
             } else if ((argumentFlags[i] & FLAT) != 0) {
                 NQPList array = (NQPList) values[i];
