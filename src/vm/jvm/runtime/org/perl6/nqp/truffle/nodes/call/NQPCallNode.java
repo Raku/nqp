@@ -58,8 +58,8 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;
 
 
-@NodeInfo(shortName = "invoke")
-public final class NQPInvokeNode extends NQPObjNode {
+@NodeInfo(shortName = "call")
+public final class NQPCallNode extends NQPObjNode {
 
     public static final long NAMED = 1;
     public static final long FLAT = 2;
@@ -77,7 +77,7 @@ public final class NQPInvokeNode extends NQPObjNode {
     @Child private NQPDispatchNode dispatchNode;
 
     @Deserializer("call")
-    public NQPInvokeNode(NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+    public NQPCallNode(NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
         this.functionNode = functionNode;
         this.argumentFlags = argumentFlags;
         this.argumentNames = argumentNames;
