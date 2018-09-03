@@ -465,7 +465,7 @@ class QAST::OperationsTruffle {
     add_op('call', :!inlinable, sub ($comp, $node, :$want) {
         my $ret := ['call'];
 
-        my @args := $node.list;
+        my @args := nqp::clone($node.list);
 
         if $node.name {
             nqp::push($ret, ['get-lexical', $node.name]);
