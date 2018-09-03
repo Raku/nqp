@@ -391,6 +391,7 @@ class QAST::OperationsTruffle {
 
     add_simple_op('istrue_s', $INT, [$STR]);
     add_simple_op('isfalse_s', $INT, [$STR]);
+    add_simple_op('isnull_s', $INT, [$STR]);
 
     for <postinc postdec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
