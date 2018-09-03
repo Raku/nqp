@@ -25,7 +25,7 @@ public final class NQPGetpidNode extends NQPIntNode {
         String name = ManagementFactory.getRuntimeMXBean().getName();
         int offset = name.indexOf('@');
         if (offset == -1) {
-            throw new RuntimeException("Can't get pid");;
+            throw new RuntimeException("Can't get pid");
         }
         try {
             return Long.decode(name.substring(0, offset));
