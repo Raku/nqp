@@ -2,45 +2,47 @@ package org.perl6.nqp.truffle.runtime;
 
 import java.util.ArrayList;
 
-public final class NQPListStr {
-    ArrayList<String> contents;
+public final class NQPListInt {
+    ArrayList<Long> contents;
 
-    public NQPListStr() {
-        this.contents = new ArrayList<String>();
+    public NQPListInt() {
+        this.contents = new ArrayList<Long>();
     }
 
-    public String pushStr(String element) {
+    public long pushInt(long element) {
         contents.add(element);       
         return element;
     }
 
-    public String popStr() {
+    public long popInt() {
         return contents.remove(contents.size() - 1);
     }
 
-    public String unshiftStr(String element) {
+    public long unshiftInt(long element) {
         contents.add(0, element);
         return element;
     }
 
-    public String shiftStr() {
+    public long shiftInt() {
         return contents.remove(0);
     }
 
-    public String atposStr(long pos) {
+    public long atposInt(long pos) {
         if (pos < 0) {
             pos = pos + contents.size();
         }
-        return pos >= contents.size() ? null : contents.get((int)pos);
+
+        return pos >= contents.size() ? 0 : contents.get((int)pos);
     }
 
-    public String bindposStr(long pos, String value) {
+    public long bindposInt(long pos, long value) {
         if (pos < 0) {
             pos = pos + contents.size();
         }
+
         if (pos >= contents.size()) {
             for (int i = contents.size(); i < pos; i++) {
-                contents.add(null);
+                contents.add(0l);
             }
             contents.add(value);
             return value;

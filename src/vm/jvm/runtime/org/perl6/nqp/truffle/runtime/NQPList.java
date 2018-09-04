@@ -31,15 +31,14 @@ public final class NQPList {
         if (pos < 0) {
             pos = pos + contents.size();
         }
-        Object value = contents.get((int)pos);
-        if (value == null) {
-            return NQPNull.SINGLETON;
-        } else {
-            return value;
-        }
+        return pos >= contents.size() ? NQPNull.SINGLETON : contents.get((int)pos);
     }
 
     public Object bindpos(long pos, Object value) {
+        if (pos < 0) {
+            pos = pos + contents.size();
+        }
+
         if (pos >= contents.size()) {
             for (int i = contents.size(); i < pos; i++) {
                 contents.add(NQPNull.SINGLETON);
