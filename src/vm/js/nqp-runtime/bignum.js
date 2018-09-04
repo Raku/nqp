@@ -119,6 +119,11 @@ op.expmod_I = function(a, b, c, type) {
 
   let result = 1n;
 
+
+  if (exponent < 0n && base != 1n) {
+      return makeBI(type, 0n);
+  }
+
   base = base % modulus;
 
   while (exponent > 0n) {
