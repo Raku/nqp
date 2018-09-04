@@ -700,6 +700,12 @@ class QAST::TruffleCompiler does SerializeOnce {
                 }
             }
 
+            if $desired == $INT {
+                if $got == $NUM {
+                    return TAST.new($INT, ['coerce-num-to-int', $tast.tree]);
+                }
+            }
+
             # TODO - Perl 6 proper does it differently than nqp
             if $got == $OBJ {
                 if $desired == $STR {
