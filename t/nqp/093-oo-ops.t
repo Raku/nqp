@@ -1,4 +1,4 @@
-plan(21);
+plan(24);
 class Foo {
     method foo() {
         'bar';
@@ -40,6 +40,10 @@ ok(nqp::istype($foo, Foo3), "nqp::settypecache works");
 nqp::setmethcache(Foo, nqp::hash('baz', sub ($invocant) {'baz method called'}));
 
 is($foo.baz, 'baz method called', "nqp::setmethcache works");
+
+ok(nqp::objprimspec(1) == 1, 'nqp::objprimspec on int literal');
+ok(nqp::objprimspec(12.3) == 2, 'nqp::objprimspec on num literal');
+ok(nqp::objprimspec('foo') == 3, 'nqp::objprimspec on str literal');
 
 ok(nqp::objprimspec(int) == 1, 'nqp::objprimspec on int');
 ok(nqp::objprimspec(str) == 3, 'nqp::objprimspec on str');
