@@ -7013,7 +7013,13 @@ public final class Ops {
     }
 
     public static SixModelObject expmod_I(SixModelObject a, SixModelObject b, SixModelObject c, SixModelObject type, ThreadContext tc) {
-        return makeBI(tc, type, getBI(tc, a, type).modPow(getBI(tc, b, type), getBI(tc, c, type)));
+        BigInteger base = getBI(tc, a, type);
+        BigInteger exponent = getBI(tc, b, type);
+        BigInteger modulus = getBI(tc, c, type);
+        BigInteger result = exponent.compareTo(BigInteger.ZERO) == -1 && !base.equals(BigInteger.ONE)
+            ? BigInteger.ZERO
+            : base.modPow(exponent, modulus);
+        return makeBI(tc, type, result);
     }
 
     public static long isprime_I(SixModelObject a, long certainty, ThreadContext tc) {
