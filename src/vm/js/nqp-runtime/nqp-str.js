@@ -2,6 +2,7 @@
 
 const NQPObject = require('./nqp-object.js');
 const nullStr = require('./null_s.js');
+const FakeStable = require('./fake-stable.js');
 
 class NQPStr extends NQPObject {
   constructor(value) {
@@ -29,5 +30,8 @@ class NQPStr extends NQPObject {
     return this.value;
   }
 };
+
+NQPStr.prototype._STable = new FakeStable('NQPStr');
+NQPStr.prototype._STable.hllRole = 1;
 
 module.exports = NQPStr;

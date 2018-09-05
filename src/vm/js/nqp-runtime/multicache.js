@@ -34,7 +34,10 @@ class MultiCache {
   const types = new Array(arity);
   for (let i = 0; i < arity; i++) {
     const obj = capture.pos[i];
-    if (obj._STable) {
+
+    if (obj instanceof NQPStr) {
+      types[i] = 3;
+    } else if (obj._STable) {
       const deconted = /*await*/ obj.$$decont(ctx);
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
@@ -67,8 +70,6 @@ class MultiCache {
       types[i] = 1;
     } else if (obj instanceof NQPNum) {
       types[i] = 2;
-    } else if (obj instanceof NQPStr) {
-      types[i] = 3;
     }
   }
   return types;
