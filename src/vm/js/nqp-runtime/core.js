@@ -1154,11 +1154,11 @@ op.objprimspec = function(obj) {
       return 1;
     } else if (obj instanceof NQPNum) {
       return 2;
+    } else if (obj instanceof NQPStr) {
+      return 3;
     } else {
       return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
     }
-  } else if (obj instanceof NQPStr) {
-    return 3;
   } else {
     throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);
   }
