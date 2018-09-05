@@ -258,6 +258,7 @@ class HLL::Backend::MoarVM {
                                   ~ "');\n");
                 }
                 else {
+                    my $type-info := %type-info{nqp::iterkey_s($k)};
                     nqp::push_s($pieces, "INSERT INTO types VALUES ('");
                     nqp::push_s($pieces,
                         nqp::join("','",
@@ -266,7 +267,11 @@ class HLL::Backend::MoarVM {
                                 literal_subst(~$v, "'", "''"),
                             ))
                         ~ "',"
-                        ~ %type-info{nqp::iterkey_s($k)}<managed_size>
+                        ~ $type-info<managed_size>
+                        ~ ","
+                        ~ (nqp::existskey($type-info, "has_unmanaged_data") && 
+                            $type-info<has_unmanaged_data>
+                            )
                         ~ ");\n");
                 }
                 if nqp::elems($pieces) > 500 {
@@ -401,7 +406,7 @@ class HLL::Backend::MoarVM {
         }
         elsif $want_sql {
             $profile_fh.say('BEGIN;');
-            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, managed_size INT);');
+            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, managed_size INT, has_unmanaged INT);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
