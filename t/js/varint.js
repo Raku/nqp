@@ -5,7 +5,7 @@ var BinaryCursor = require('nqp-runtime/deserialization').BinaryCursor;
 
 
 function check(n, expected) {
-  expected = new Buffer(expected);
+  expected = Buffer.from(expected);
   var cursor = new BinaryWriteCursor(null);
   cursor.varint(n);
   var got = cursor.buffer.slice(0, cursor.offset);
