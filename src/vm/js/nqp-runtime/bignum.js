@@ -351,7 +351,7 @@ op.rand_I = function(n, type) {
   let candidate;
   do {
     candidate = randomWithSameBitSize(max);
-  } while (candidate > max);
+  } while (candidate >= max);
 
   return makeBI(type, candidate);
 };
