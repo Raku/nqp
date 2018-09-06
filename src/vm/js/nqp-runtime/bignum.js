@@ -334,8 +334,8 @@ function randomWithSameBitSize(n) {
   }
 
 
-  const prefixMask = (1 << needed) - 1;
-  got = got << BigInt(needed) | BigInt(randomBits[unused] & prefixMask);
+  const prefixMask = (2 ** needed) - 1;
+  got = got << BigInt(needed) | BigInt((randomBits[unused] & prefixMask) >>> 0);
 
   return got;
 }
