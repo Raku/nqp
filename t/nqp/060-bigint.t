@@ -1,7 +1,7 @@
 #! nqp
 use nqpmo;
 
-plan(136);
+plan(156);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -232,6 +232,18 @@ ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
 my $maxRand := nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type);
 my $rand := nqp::rand_I($maxRand, $bi_type); 
 ok(nqp::isle_I(box(0), $rand) && nqp::islt_I($rand, $maxRand), 'nqp::rand_I');
+
+sub test_rand_I($times, $max) {
+    my $i := 0;
+    while $i < $times {
+        my $got := nqp::rand_I(box($max), $bi_type);
+        ok(nqp::isge_I($got, box(0)) && nqp::islt_I($got, box($max)), "0 <= rand_I($max) < $max");
+        $i := $i + 1;
+    }
+}
+
+test_rand_I(10, 1);
+test_rand_I(10, 2);
 
 ok(nqp::isprime_I(box(-4), 1) == 0, 'is -4 prime');
 ok(nqp::isprime_I(box(0), 1) == 0, 'is 0 prime');
