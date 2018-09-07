@@ -1303,49 +1303,65 @@ op.getlexrel = function(pad, name) {
 
 
 op.bitand_s = function(a, b) {
-  let ret = '';
-  let i = 0;
-  while (true) {
-    const codepointA = a.codePointAt(i);
-    const codepointB = b.codePointAt(i);
-    if (codepointA === undefined || codepointB == undefined) {
-      return ret;
-    }
-    ret += String.fromCodePoint(codepointA & codepointB);
-    i++;
+  const codePointsA = []
+  const codePointsB = []
+
+  for (const c of a.normalize('NFC')) {
+    codePointsA.push(c.codePointAt(0));
   }
+  for (const c of b.normalize('NFC')) {
+    codePointsB.push(c.codePointAt(0));
+  }
+
+  const ret = [];
+
+  for (let i = 0; i < codePointsA.length && i < codePointsB.length; i++) {
+    ret.push(codePointsA[i] & codePointsB[i]);
+  }
+
+  return String.fromCodePoint.apply(undefined, ret).normalize('NFC');
 };
 
 op.bitor_s = function(a, b) {
-  let ret = '';
-  let i = 0;
-  while (true) {
-    let codepointA = a.codePointAt(i);
-    let codepointB = b.codePointAt(i);
-    if (codepointA === undefined && codepointB == undefined) {
-      return ret;
-    }
-    if (codepointA === undefined) codepointA = 0;
-    if (codepointB === undefined) codepointB = 0;
-    ret += String.fromCodePoint(codepointA | codepointB);
-    i++;
+  const codePointsA = []
+  const codePointsB = []
+
+  for (const c of a.normalize('NFC')) {
+    codePointsA.push(c.codePointAt(0));
   }
+  for (const c of b.normalize('NFC')) {
+    codePointsB.push(c.codePointAt(0));
+  }
+
+  const ret = [];
+
+  for (let i = 0; i < codePointsA.length || i < codePointsB.length; i++) {
+    ret.push((codePointsA[i] || 0) | (codePointsB[i] || 0));
+  }
+
+  return String.fromCodePoint.apply(undefined, ret).normalize('NFC');
 };
 
 op.bitxor_s = function(a, b) {
-  let ret = '';
-  let i = 0;
-  while (true) {
-    let codepointA = a.codePointAt(i);
-    let codepointB = b.codePointAt(i);
-    if (codepointA === undefined && codepointB == undefined) {
-      return ret;
-    }
-    if (codepointA === undefined) codepointA = 0;
-    if (codepointB === undefined) codepointB = 0;
-    ret += String.fromCodePoint(codepointA ^ codepointB);
-    i++;
+  const codePointsA = []
+  const codePointsB = []
+
+  for (const c of a.normalize('NFC')) {
+    codePointsA.push(c.codePointAt(0));
   }
+  for (const c of b.normalize('NFC')) {
+    codePointsB.push(c.codePointAt(0));
+  }
+
+  const ret = [];
+
+  for (let i = 0; i < codePointsA.length || i < codePointsB.length; i++) {
+    ret.push((codePointsA[i] || 0) ^ (codePointsB[i] || 0));
+  }
+
+
+
+  return String.fromCodePoint.apply(undefined, ret).normalize('NFC');
 };
 
 op.replace = function(str, offset, count, repl) {
