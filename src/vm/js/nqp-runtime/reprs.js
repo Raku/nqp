@@ -46,6 +46,8 @@ const EDGE_CODEPOINT_I_LL = 15;
 const reprs = {};
 const reprById = [];
 
+const bignum = require('./bignum.js');
+
 function basicTypeObjectFor(HOW) {
   const st = new sixmodel.STable(this, HOW);
   this._STable = st;
@@ -1597,12 +1599,12 @@ function getBI(obj) {
 }
 
 
-function getIntFromBI(bignum) {
-  if (bignum < -(2n**64n) || 2n**64n <= bignum) {
+function getIntFromBI(n) {
+  if (n < -(2n**63n) || 2n**63n <= n) {
     // TODO - put exact number of bits into exception
-    throw new NQPException(`Cannot unbox too big bigint into native integer`);
+    throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into native integer`);
   } else {
-    return Number(bignum) | 0;
+    return Number(n) | 0;
   }
 }
 

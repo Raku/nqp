@@ -304,12 +304,16 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
 function bitSize(n) {
   let bits = 0;
 
+  if (n < 0) n = -n;
+
   while (n) {
     n = n >> 1n;
     bits++;
   }
   return bits;
 }
+
+exports.bitSize = bitSize;
 
 function randomWithSameBitSize(n) {
   let got = 0n;
