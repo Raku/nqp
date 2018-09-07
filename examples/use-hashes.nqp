@@ -20,10 +20,15 @@ my $k2 := 'k2';
 my $v := nqp::atkey(%h, $k1);
 say("value of key $k1 is $v");
 
-# check existence of a key
+my $k3 := 'k3';
+my $v3 := 3;
 
-if nqp::existskey(%h, $k2) {
-    say("key $k2 exists");
+# add a new pair
+nqp::bindkey(%h, $k3, $v3);
+
+# check existence of a key
+if nqp::existskey(%h, $k3) {
+    say("key $k3 exists");
 }
 
 
