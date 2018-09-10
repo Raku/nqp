@@ -322,4 +322,6 @@ module.exports['windows-1252'] = windows1252;
 module.exports.latin1 = latin1;
 module.exports.ascii = ascii;
 
+module.exports['windows-932'] = require('./dbcs-codec.js')['windows-932'];
+
 module.exports.utf8 = new NativeEncoding('utf8');
