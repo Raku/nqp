@@ -5,9 +5,10 @@
 // Our codec supports UTF-16 surrogates, extensions for GB18030 and unicode sequences.
 // To save memory and loading time, we read table files only when requested.
 
+const NQPException = require('./nqp-exception.js');
+
 // Characters emitted in case of error.
 const defaultCharUnicode = '�';
-const defaultCharSingleByte = '?';
 
 const UNASSIGNED = -1;
 const GB18030_CODE = -2;
@@ -99,11 +100,6 @@ class DBCSCodec {
         }
       }
     }
-
-    this.defCharSB = this.encodeTable[0][defaultCharSingleByte.charCodeAt(0)];
-    if (this.defCharSB === UNASSIGNED) this.defCharSB = this.encodeTable[0]['?'];
-    if (this.defCharSB === UNASSIGNED) this.defCharSB = '?'.charCodeAt(0);
-
 
     // Load & create GB18030 tables when needed.
     if (typeof codecOptions.gb18030 === 'function') {
@@ -294,12 +290,12 @@ class DBCSEncoder {
     // Static data
     this.encodeTable = codec.encodeTable;
     this.encodeTableSeq = codec.encodeTableSeq;
-    this.defaultCharSingleByte = codec.defCharSB;
     this.gb18030 = codec.gb18030;
   }
 
-  write(str) {
-    const newBuf = Buffer.alloc(str.length * (this.gb18030 ? 4 : 3));
+  write(str, replacement) {
+    const perCharBytes = Math.max(replacement ? replacement.length : 0, (this.gb18030 ? 4 : 3));
+    const newBuf = Buffer.alloc(str.length * perCharBytes);
     let leadSurrogate = this.leadSurrogate;
     let seqObj = this.seqObj;
     let nextChar = -1;
@@ -398,7 +394,14 @@ class DBCSEncoder {
 
       // 3. Write dbcsCode character.
       if (dbcsCode === UNASSIGNED) {
-        dbcsCode = this.defaultCharSingleByte;
+        if (replacement) {
+          for (let i = 0; i < replacement.length; i++) {
+            newBuf[j++] = replacement[i];
+          }
+          continue;
+        } else {
+          throw new NQPException('Error encoding shiftjis string: could not encode codepoint');
+        }
       }
 
       if (dbcsCode < 0x100) {
@@ -443,7 +446,7 @@ class DBCSEncoder {
 
     if (this.leadSurrogate !== -1) {
       // Incomplete surrogate pair - only lead surrogate found.
-      newBuf[j++] = this.defaultCharSingleByte;
+      throw new NQPException("Incomplete surrogate pair");
       this.leadSurrogate = -1;
     }
 
@@ -466,7 +469,7 @@ class DBCSDecoder {
     this.gb18030 = codec.gb18030;
   }
 
-  write(buf) {
+  write(buf, replacement) {
     const newBuf = Buffer.alloc(buf.length * 2);
     let nodeIdx = this.nodeIdx;
     let prevBuf = this.prevBuf;
@@ -492,7 +495,11 @@ class DBCSDecoder {
         // TODO: Callback with seq.
         // let curSeq = (seqStart >= 0) ? buf.slice(seqStart, i+1) : prevBuf.slice(seqStart + prevBufOffset, i+1 + prevBufOffset);
         i = seqStart; // Try to parse again, after skipping first byte of the sequence ('i' will be incremented by 'for' cycle).
-        uCode = this.defaultCharUnicode.charCodeAt(0);
+        if (replacement) {
+          uCode = this.defaultCharUnicode.charCodeAt(0);
+        } else {
+          throw new NQPException(`Can't decode unknown byte`);
+        }
       } else if (uCode === GB18030_CODE) {
         const curSeq = (seqStart >= 0) ? buf.slice(seqStart, i + 1) : prevBuf.slice(seqStart + prevBufOffset, i + 1 + prevBufOffset);
         const ptr = (curSeq[0] - 0x81) * 12600 + (curSeq[1] - 0x30) * 1260 + (curSeq[2] - 0x81) * 10 + (curSeq[3] - 0x30);
@@ -535,20 +542,24 @@ class DBCSDecoder {
     return newBuf.slice(0, j).toString('ucs2');
   }
 
-  end() {
+  end(replacement) {
     let ret = '';
 
     // Try to parse all remaining chars.
     while (this.prevBuf.length > 0) {
       // Skip 1 character in the buffer.
-      ret += this.defaultCharUnicode;
+      if (replacement) {
+        ret += this.defaultCharUnicode;
+      } else {
+        throw new NQPException(`Can't decode unknown byte`);
+      }
       const buf = this.prevBuf.slice(1);
 
       // Parse remaining as usual.
       this.prevBuf = Buffer.alloc(0);
       this.nodeIdx = 0;
       if (buf.length > 0) {
-        ret += this.write(buf);
+        ret += this.write(buf, replacement);
       }
     }
 
@@ -587,14 +598,31 @@ class Encoding {
   }
 
   decode(buffer) {
-    const res = this.decoder.write(buffer);
-    const trail = this.decoder.end();
+    const res = this.decoder.write(buffer, false);
+    const trail = this.decoder.end(false);
 
     return trail ? (res + trail) : res;
+
+  }
+
+  decodeWithReplacement(buffer, replacement, permisive) {
+    const res = this.decoder.write(buffer, true);
+    const trail = this.decoder.end(true);
+
+    return (trail ? (res + trail) : res).replace(/�/g, replacement);
   }
 
   encode(str) {
     const res = this.encoder.write(str);
+    const trail = this.encoder.end();
+
+    return (trail && trail.length > 0) ? Buffer.concat([res, trail]) : res;
+  }
+
+  encodeWithReplacement(str, replacement) {
+    const encodedReplacement = this.encode(replacement);
+
+    const res = this.encoder.write(str, encodedReplacement);
     const trail = this.encoder.end();
 
     return (trail && trail.length > 0) ? Buffer.concat([res, trail]) : res;
