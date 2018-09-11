@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(24);
+plan(27);
 
 
 my sub create_buf($type) {
@@ -115,4 +115,31 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
   dies-ok({
     nqp::encoderep('åfooåbar', 'ascii', nqp::null_s, $buf8.new);
   }, 'encoderep dies instead of replacing with a null_s replacement');
+}
+
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("JVM doesn't support windows-932", 3);
+}
+else {
+    {
+      my $original := 'foobar';
+      my $buf := nqp::encode($original, 'windows-932', $buf8.new);
+      my $str := nqp::decode($buf, 'windows-932');
+      is($str, $original, 'round-tripping via shiftjis');
+    }
+
+    {
+      my $original := 'åfooåbar';
+      my $buf := nqp::encoderep($original, 'windows-932', 'replacement', $buf8.new);
+      my $str := nqp::decode($buf, 'windows-932');
+      is($str, 'replacementfooreplacementbar', 'encoderep with shiftjis');
+    }
+
+    {
+
+      my $original := 'åfooåbar';
+      dies-ok({
+        nqp::encode($original, 'windows-932', $buf8.new);
+      }, 'encode dies with missing character');
+    }
 }
