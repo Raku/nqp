@@ -141,15 +141,18 @@ class HLL::Backend::MoarVM {
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
                             my $typename;
                             try {
-                                my $type := %type-info{$orig-id}<type>;
+                                my $type := %type-info{$orig-id}[1]<type>;
                                 $typename := $type.HOW.name($type);
                             }
                             unless $typename {
                                 $typename := "<unknown type>";
                             }
-                            %type-info{$orig-id}<typename> := $typename;
+                            %type-info{$orig-id}[1]<typename> := $typename;
                             $id_to_thing{%alloc_info<id>} := $typename;
-                            %type-info{%alloc_info<id>} := %type-info{$orig-id};
+                            unless nqp::existskey(%type-info, %alloc_info<id>) {
+                                nqp::bindkey(%type-info, %alloc_info<id>, nqp::list());
+                            }
+                            %type-info{%alloc_info<id>}[1] := %type-info{$orig-id}[1];
                         }
                         nqp::deletekey(%alloc_info, "type");
                     }
@@ -238,6 +241,77 @@ class HLL::Backend::MoarVM {
             }
         }
 
+        sub to_sql_json($obj, $pieces?) {
+            my $will-return := !nqp::isconcrete($pieces);
+            unless nqp::isconcrete($obj) {
+                if $will-return {
+                    return "null";
+                }
+                nqp::push_s($pieces, "null");
+                return;
+            }
+            unless nqp::isconcrete($pieces) {
+                $pieces := nqp::list_s;
+            }
+            if nqp::islist($obj) {
+                nqp::push_s($pieces, 'json_array(');
+                my int $first := 1;
+                for $obj {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s($pieces, ',');
+                    }
+                    to_sql_json($_, $pieces);
+                }
+                nqp::push_s($pieces, ')');
+            }
+            elsif nqp::ishash($obj) {
+                nqp::push_s($pieces, 'json_object(');
+                my int $first := 1;
+                for sorted_keys($obj) {
+                    if $first {
+                        $first := 0;
+                    }
+                    else {
+                        nqp::push_s($pieces, ',');
+                    }
+                    nqp::push_s($pieces, "'");
+                    nqp::push_s($pieces, $_);
+                    nqp::push_s($pieces, "', ");
+                    to_sql_json($obj{$_}, $pieces);
+                }
+                nqp::push_s($pieces, ')');
+            }
+            elsif nqp::isstr($obj) { 
+                if nqp::index($obj, '\\') {
+                    $obj := literal_subst($obj, '\\', '\\\\');
+                }
+                if nqp::index($obj, '"') {
+                    $obj := literal_subst($obj, '"', '\\"');
+                }
+                if nqp::index($obj, "'") {
+                    $obj := literal_subst($obj, "'", "\\'");
+                }
+                nqp::push_s($pieces, "'");
+                nqp::push_s($pieces, $obj);
+                nqp::push_s($pieces, "'");
+            }
+            elsif nqp::isint($obj) || nqp::isnum($obj) {
+                nqp::push_s($pieces, ~$obj);
+            }
+            elsif nqp::can($obj, 'Str') {
+                to_sql_json(nqp::unbox_s($obj.Str), $pieces);
+            }
+            else {
+                nqp::push_s($pieces, 'null');
+            }
+            if $will-return {
+                return nqp::join("", $pieces);
+            }
+        }
+
         sub to_sql($obj) {
             my int $node_id := 0;
             #my %profile := nqp::hash();
@@ -267,11 +341,9 @@ class HLL::Backend::MoarVM {
                                 literal_subst(~$v, "'", "''"),
                             ))
                         ~ "',"
-                        ~ $type-info<managed_size>
+                        ~ to_sql_json($type-info[1])
                         ~ ","
-                        ~ (nqp::existskey($type-info, "has_unmanaged_data") && 
-                            $type-info<has_unmanaged_data>
-                            )
+                        ~ "json_object()"
                         ~ ");\n");
                 }
                 if nqp::elems($pieces) > 500 {
@@ -362,7 +434,7 @@ class HLL::Backend::MoarVM {
         {
             my @type-infos := nqp::shift($data);
             for @type-infos {
-                %type-info{$_<id>} := $_
+                %type-info{$_[0]} := $_
             }
         }
 
@@ -406,7 +478,7 @@ class HLL::Backend::MoarVM {
         }
         elsif $want_sql {
             $profile_fh.say('BEGIN;');
-            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, managed_size INT, has_unmanaged INT);');
+            $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, extra_info JSON, type_links JSON);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
             $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
