@@ -140,6 +140,7 @@ class HLL::Backend::MoarVM {
                         }
                         unless nqp::existskey($id_to_thing, %alloc_info<id>) {
                             my $typename;
+                            my $scdesc;
                             try {
                                 my $type := %type-info{$orig-id}[1]<type>;
                                 $typename := $type.HOW.name($type);
@@ -147,7 +148,18 @@ class HLL::Backend::MoarVM {
                             unless $typename {
                                 $typename := "<unknown type>";
                             }
+                            try {
+                                my $type := %type-info{$orig-id}[1]<type>;
+                                my $sc := nqp::getobjsc($type);
+                                if $sc {
+                                    $scdesc := nqp::scgetdesc($sc);
+                                }
+                            }
+                            unless $scdesc {
+                                $scdesc := "";
+                            }
                             %type-info{$orig-id}[1]<typename> := $typename;
+                            %type-info{$orig-id}[1]<scdesc> := $scdesc;
                             $id_to_thing{%alloc_info<id>} := $typename;
                             unless nqp::existskey(%type-info, %alloc_info<id>) {
                                 nqp::bindkey(%type-info, %alloc_info<id>, nqp::list());
