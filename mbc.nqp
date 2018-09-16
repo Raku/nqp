@@ -781,11 +781,14 @@ class MoarVM::BytecodeWriter {
         nqp::writefh($io, $!mbc);
         nqp::closefh($io);
     }
+    method bytecode() {
+        $!mbc
+    }
 }
 
 my $compiler := nqp::getcomp('nqp');
 my @stages := $compiler.stages;
-my $result := '1';
+my $result := 'note("hello world")';
 my %adverbs := nqp::hash;
 %adverbs<target> := 'mbc';
 #%adverbs<compunit_ok> := 0;
@@ -819,12 +822,11 @@ for @cu_frames {
 }
 $writer.assemble;
 $writer.save('test.mbc');
-my $io := nqp::open('test.mbc', 'r');
 class Context {
     method ctxsave() {
         note("ctxsave called!");
     }
 }
 my $*CTXSAVE := Context.new;
-nqp::loadbytecodefh($io, 'test.mbc');
+nqp::loadbytecodebuffer($writer.bytecode);
 $result := $compiler.execute_stage('mbc', $result, %adverbs);
