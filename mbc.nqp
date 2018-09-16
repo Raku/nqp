@@ -17,6 +17,16 @@ nqp::setmethcache($buf, nqp::hash(
         self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
         self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
     },
+    'write_uint64', method (uint64 $i) {
+        self.push($i +& 0xFF);
+        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
+        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
+        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
+        self.push(nqp::bitshiftr_i($i +& 0xFF00000000, 32));
+        self.push(nqp::bitshiftr_i($i +& 0xFF0000000000, 40));
+        self.push(nqp::bitshiftr_i($i +& 0xFF000000000000, 48));
+        self.push(nqp::bitshiftr_i($i +& 0xFF00000000000000, 56));
+    },
     'write_uint32_at', method (uint32 $i, uint16 $pos) {
         nqp::bindpos_i(self, $pos, $i +& 0xFF);
         nqp::bindpos_i(self, $pos + 1, nqp::bitshiftr_i($i +& 0xFF00, 8));
@@ -305,19 +315,33 @@ class MoarVM::Frame {
     method compile_operand($rw, $type, $arg) {
         if $rw == $MVM_operand_literal {
             if $type == $MVM_operand_int64 {
-                nqp::die("literal in64 operand NYI");
+                $!bytecode.write_uint64(nqp::getattr($arg, MAST::IVal, '$!value'));
             }
             elsif $type == $MVM_operand_int16 {
-                nqp::die("literal int16 operand NYI");
+                my $value := nqp::getattr($arg, MAST::IVal, '$!value');
+                if $value < -32768 || 32767 < $value {
+                    nqp::die("Value outside range of 16-bit MAST::IVal");
+                }
+                $!bytecode.write_uint16($value);
             }
             elsif $type == $MVM_operand_num64 {
                 nqp::die("literal num64 operand NYI");
             }
             elsif $type == $MVM_operand_str {
-                nqp::die("literal str operand NYI");
+                $!bytecode.write_uint32(self.add-string(nqp::getattr($arg, MAST::SVal, '$!value')));
             }
             elsif $type == $MVM_operand_ins {
-                nqp::die("literal ins operand NYI");
+                my $key := nqp::objectid($arg);
+                if nqp::existskey(%!labels, $key) {
+                    $!bytecode.write_uint32(%!labels{$key});
+                }
+                else {
+                    my @fixups := nqp::existskey(%!label-fixups, $key)
+                        ?? %!label-fixups{$key}
+                        !! (%!label-fixups{$key} := nqp::list);
+                    nqp::push(@fixups, nqp::elems($!bytecode));
+                    $!bytecode.write_uint32(0);
+                }
             }
             elsif $type == $MVM_operand_coderef {
                 nqp::die("Expected MAST::Frame, but didn't get one")
@@ -467,30 +491,7 @@ class MoarVM::Frame {
         note("Instruction " ~ $i.HOW.name($i) ~ " NYI");
         note($i.dump);
     }
-    proto method write_operand($i, $idx, $o) { * }
-    multi method write_operand($i, $idx, MAST::IVal $o) {
-        $!bytecode.write_uint16(nqp::getattr($o, MAST::IVal, '$!value')); # FIXME need to pick int size from op_info
-    }
-    multi method write_operand($i, $idx, MAST::Local $o) {
-        $!bytecode.write_uint16($o.index);
-    }
-    multi method write_operand($i, $idx, MAST::SVal $o) {
-        $!bytecode.write_uint32(self.add-string(nqp::getattr($o, MAST::SVal, '$!value')));
-    }
-    multi method write_operand($i, $idx, MAST::Label $o) {
-        my $key := nqp::objectid($o);
-        if nqp::existskey(%!labels, $key) {
-            $!bytecode.write_uint32(%!labels{$key});
-        }
-        else {
-            my @fixups := nqp::existskey(%!label-fixups, $key)
-                ?? %!label-fixups{$key}
-                !! (%!label-fixups{$key} := nqp::list);
-            nqp::push(@fixups, nqp::elems($!bytecode));
-            $!bytecode.write_uint32(0);
-        }
-    }
-    multi method write_operand($i, $idx, $o) {
+    method write_operand($i, $idx, $o) {
         my $flags := nqp::atpos_i(@MAST::Ops::values, nqp::atpos_i(@MAST::Ops::offsets, $i.op) + $idx);
         my $rw    := $flags +& $MVM_operand_rw_mask;
         my $type  := $flags +& $MVM_operand_type_mask;
