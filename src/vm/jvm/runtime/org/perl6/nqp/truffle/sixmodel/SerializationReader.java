@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.runtime.NQPNull;
+
 public class SerializationReader {
     /* The current version of the serialization format. */
     private final int CURRENT_VERSION = 11;
@@ -277,9 +279,11 @@ public class SerializationReader {
                 if (desc == null)
                     desc = handle;
 
-                System.out.println("Missing or wrong version of dependency '" + desc + "'");
+                System.out.println("Missing or wrong version of dependency '" + desc + "' with handle " + handle);
                 //throw new RuntimeException(
                 //    "Missing or wrong version of dependency '" + desc + "'");
+            } else {
+                System.out.println("Found " + desc + ": " +  handle);
             }
             dependentSCs[i] = sc;
         }
@@ -404,38 +408,41 @@ public class SerializationReader {
 //        }
 //    }
 //
-//    private void deserializeSTables() {
-//        for (int i = 0; i < stTableEntries; i++) {
-//            // Seek to the right position in the data chunk.
-//            orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE + 4);
-//            orig.position(stDataOffset + orig.getInt());
-//
-//            // Get the STable we need to deserialize into.
-//            STable st = sc.getSTable(i);
-//
-//            // Read the HOW, WHAT and WHO.
-//            st.HOW = readObjRef();
-//            st.WHAT = readObjRef();
-//            st.WHO = readRef();
-//
-//            /* Method cache and v-table. */
-//            SixModelObject methodCache = readRef();
+    private void deserializeSTables() {
+        for (int i = 0; i < stTableEntries; i++) {
+            // Seek to the right position in the data chunk.
+            orig.position(stTableOffset + i * STABLES_TABLE_ENTRY_SIZE + 4);
+            orig.position(stDataOffset + orig.getInt());
+
+            // Get the STable we need to deserialize into.
+            STable st = sc.getSTable(i);
+
+            // Read the HOW, WHAT and WHO.
+            st.how = readObjRef();
+            st.what = readObjRef();
+            st.who = readRef();
+
+            /* Method cache and v-table. */
+            Object methodCache = readRef();
 //            if (methodCache != null)
 //                st.MethodCache = ((VMHashInstance)methodCache).storage;
-//            st.VTable = new SixModelObject[(int)orig.getLong()];
-//            for (int j = 0; j < st.VTable.length; j++)
-//                st.VTable[j] = readRef();
-//
-//            /* Type check cache. */
-//            int tcCacheSize = (int)orig.getLong();
-//            if (tcCacheSize > 0) {
-//                st.TypeCheckCache = new SixModelObject[tcCacheSize];
-//                for (int j = 0; j < st.TypeCheckCache.length; j++)
-//                    st.TypeCheckCache[j] = readRef();
-//            }
-//
-//            /* Mode flags. */
-//            st.ModeFlags = (int)orig.getLong();
+
+            long vtableLength = orig.getLong();
+
+            if (vtableLength != 0) {
+                throw new RuntimeException("VTables shouldn't be ever deserialized");
+            }
+
+            /* Type check cache. */
+            int typeCheckCacheSize = (int)orig.getLong();
+            if (typeCheckCacheSize > 0) {
+                st.typeCheckCache = new Object[typeCheckCacheSize];
+                for (int j = 0; j < st.typeCheckCache.length; j++)
+                    st.typeCheckCache[j] = readRef();
+            }
+
+            /* Mode flags. */
+            st.modeFlags = (int)orig.getLong();
 //
 //            /* Boolification spec. */
 //            if (orig.getLong() != 0) {
@@ -503,8 +510,8 @@ public class SerializationReader {
 //
 //            /* If the REPR has a function to deserialize representation data, call it. */
 //            st.REPR.deserialize_repr_data(tc, st, this);
-//        }
-//    }
+        }
+    }
 //
 //    private void deserializeObjects() {
 //        for (int i = 0; i < objTableEntries; i++) {
@@ -599,15 +606,15 @@ public class SerializationReader {
 //        }
 //    }
 //
-//    public SixModelObject readRef() {
-//        short discrim = orig.getShort();
-//        int elems;
-//        switch (discrim) {
-//        case REFVAR_NULL:
-//        case REFVAR_VM_NULL:
-//            return null;
-//        case REFVAR_OBJECT:
-//            return readObjRef();
+    public Object readRef() {
+        short discrim = orig.getShort();
+        int elems;
+        switch (discrim) {
+        case REFVAR_NULL:
+        case REFVAR_VM_NULL:
+            return NQPNull.SINGLETON;
+        case REFVAR_OBJECT:
+            return readObjRef();
 //        case REFVAR_VM_INT:
 //            SixModelObject BOOTInt = tc.gc.BOOTInt;
 //            SixModelObject iResult = BOOTInt.st.REPR.allocate(tc, BOOTInt.st);
@@ -671,18 +678,18 @@ public class SerializationReader {
 //        case REFVAR_STATIC_CODEREF:
 //        case REFVAR_CLONED_CODEREF:
 //            return readCodeRef();
-//        default:
-//            throw new RuntimeException("Unimplemented case of read_ref");
-//        }
-//    }
-//
-//    public SixModelObject readObjRef() {
-//        SerializationContext sc = locateSC(orig.getInt());
-//        int idx = orig.getInt();
-//        if (idx < 0 || idx >= sc.objectCount())
-//            throw new RuntimeException("Invalid SC object index " + idx);
-//        return sc.getObject(idx);
-//    }
+        default:
+            throw new RuntimeException("Unimplemented case of read_ref: " + discrim);
+        }
+    }
+
+    public Object readObjRef() {
+        SerializationContext sc = locateSC(orig.getInt());
+        int idx = orig.getInt();
+        if (idx < 0 || idx >= sc.objectCount())
+            throw new RuntimeException("Invalid SC object index " + idx);
+        return sc.getObject(idx);
+    }
 //
 //    public STable readSTableRef() {
 //        return lookupSTable(orig.getInt(), orig.getInt());

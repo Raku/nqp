@@ -35,7 +35,9 @@ public final class NQPCallmethodNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        System.out.println("callmethod NYI");
+        Object invocant = invocantNode.execute(frame);
+        String method = this.methodNode.executeStr(frame);
+        System.out.println("callmethod NYI: " + method);
         return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
     }
 }
