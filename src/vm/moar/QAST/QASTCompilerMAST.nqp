@@ -2160,6 +2160,9 @@ nqp::setmethcache($buf, nqp::hash(
         my @subbuf := nqp::encode($s, 'utf8', nqp::create($buf));
         self.write_buf(@subbuf);
     },
+    'write_double', method (num $n) {
+        nqp::writenum(self, nqp::elems(self), $n, 0);
+    },
     'write_uint32', method (uint32 $i) {
         self.push($i +& 0xFF);
         self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
@@ -2474,7 +2477,7 @@ class MoarVM::Frame {
                 $!bytecode.write_uint16($value);
             }
             elsif $type == $MVM_operand_num64 {
-                nqp::die("literal num64 operand NYI");
+                $!bytecode.write_double(nqp::getattr($arg, MAST::NVal, '$!value'));
             }
             elsif $type == $MVM_operand_str {
                 $!bytecode.write_uint32(self.add-string(nqp::getattr($arg, MAST::SVal, '$!value')));
