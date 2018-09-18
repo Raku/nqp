@@ -2260,7 +2260,7 @@ class MoarVM::Callsites {
         for @flags {
             if $_ +& $callsite_arg_named {
                 my $name := @args[$i + $num_nameds++];
-                nqp::push_i(@named_idxs, $!string-heap.add($name));
+                nqp::push(@named_idxs, $!string-heap.add(nqp::getattr($name, MAST::SVal, '$!value')));
             }
             $i++;
         }
@@ -2552,7 +2552,11 @@ class MoarVM::Frame {
         my uint16 $arg_out_pos := 0;
         for @flags -> $flag {
             if $flag +& $Arg::named {
-                nqp::die("named args NYI");
+                $!bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
+                $!bytecode.write_uint16($arg_out_pos);
+                self.compile_operand(0, $MVM_operand_str, @args[$arg_pos], $i);
+                $arg_pos++;
+                $arg_out_pos++;
             }
             elsif $flag +& $Arg::flat {
                 nqp::die("Illegal flat arg to speshresolve") if $op == 2;
