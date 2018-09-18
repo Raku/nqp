@@ -128,7 +128,7 @@ exports.numToStr = coercions.numToStr;
 
 let libpath = [];
 exports.libpath = function(paths) {
-  libpath = paths.map(path => typeof path === 'string' ? path : path.$$getStr());
+  libpath = paths.map(path => (typeof path === 'string' || !path.$$getStr) ? path : path.$$getStr());
 };
 
 exports.loaderCtx = null;
@@ -166,11 +166,18 @@ if (process.browser) {
     const mangled = file.replace(/::/g, '-');
 
     const prefixes = libpath.slice();
+
+    // TODO - think if we should be adding those
     prefixes.push('./', './nqp-js-on-js/');
+
     let found = false;
     for (const prefix of prefixes) {
       try {
-        /*await*/ loadFrom.require(prefix + mangled);
+        if (typeof prefix === 'string') {
+            /*await*/ loadFrom.require(prefix + mangled);
+        } else {
+            /*await*/ prefix.module.require(prefix.prefix + mangled);
+        }
 
         found = true;
         break;
