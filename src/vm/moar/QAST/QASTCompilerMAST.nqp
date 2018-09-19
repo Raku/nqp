@@ -2647,15 +2647,15 @@ class MoarVM::Frame {
                 nqp::die("MAST::Local index out of range");
             }
             my $op_name := $op == 0 ?? 'invoke_' !! 'nativeinvoke_';
-            if @local_types[$index].isa(int) {
+            if nqp::objprimspec(@local_types[$index]) == 1 {
                 $op_name := $op_name ~ 'i';
                 $res_type := $MVM_operand_int64;
             }
-            elsif @local_types[$index].isa(num) {
+            elsif nqp::objprimspec(@local_types[$index]) == 2 {
                 $op_name := $op_name ~ 'n';
                 $res_type := $MVM_operand_num64;
             }
-            elsif @local_types[$index].isa(str) {
+            elsif nqp::objprimspec(@local_types[$index]) == 3 {
                 $op_name := $op_name ~ 's';
                 $res_type := $MVM_operand_str;
             }
