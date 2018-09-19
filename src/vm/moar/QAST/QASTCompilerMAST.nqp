@@ -2620,10 +2620,14 @@ class MoarVM::Frame {
                 self.compile_operand($MVM_operand_read_reg, $MVM_operand_str, @args[$arg_pos]);
             }
             elsif $flag +& $Arg::int {
-                nqp::die("int arg NYI");
+                $!bytecode.write_uint16(%MAST::Ops::codes<arg_i>);
+                $!bytecode.write_uint16($arg_out_pos);
+                self.compile_operand($MVM_operand_read_reg, $MVM_operand_int64, @args[$arg_pos]);
             }
             elsif $flag +& $Arg::num {
-                nqp::die("num arg NYI");
+                $!bytecode.write_uint16(%MAST::Ops::codes<arg_n>);
+                $!bytecode.write_uint16($arg_out_pos);
+                self.compile_operand($MVM_operand_read_reg, $MVM_operand_num64, @args[$arg_pos]);
             }
             else {
                 nqp::die("Unhandled arg type $flag");
