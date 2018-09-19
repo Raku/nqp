@@ -2304,6 +2304,32 @@ class MoarVM::Callsites {
     }
 }
 
+class MoarVM::Handler {
+    has $!start_offset;
+    has $!end_offset;
+    has $!category_mask;
+    has $!action;
+    has $!label;
+    has $!label_reg;
+    has $!local;
+    method BUILD(:$start_offset, :$end_offset, :$category_mask, :$action, :$label) {
+        $!start_offset  := $start_offset;
+        $!end_offset    := $end_offset;
+        $!category_mask := $category_mask;
+        $!action        := $action;
+        $!label         := $label;
+    }
+    method start_offset()    { $!start_offset }
+    method end_offset()      { $!end_offset }
+    method category_mask()   { $!category_mask }
+    method action()          { $!action }
+    method label()           { $!label }
+    method label_reg()       { $!label_reg }
+    method set_label_reg($l) { $!label_reg := $l }
+    method local()           { $!local }
+    method set_local($l)     { $!local := $l }
+}
+
 class MoarVM::Frame {
     has str $!cuuid;
     has uint32 $!cuuid-idx;
@@ -2321,6 +2347,8 @@ class MoarVM::Frame {
     has $!annotations;
     has $!annotations-offset;
     has $!num-annotations;
+    has @!handlers;
+
     method BUILD(:$cuuid, :$name, :$string-heap, :$callsites, :$annotations, :$writer, :$mast) {
         $!cuuid              := $cuuid;
         $!name               := $name;
@@ -2333,6 +2361,7 @@ class MoarVM::Frame {
         $!callsites          := $callsites;
         $!annotations        := $annotations;
         $!num-annotations    := 0;
+        @!handlers           := nqp::list;
         %!labels             := nqp::hash;
         %!label-fixups       := nqp::hash;
         @!lexical-names      := nqp::list;
@@ -2368,18 +2397,27 @@ class MoarVM::Frame {
     method flags() {
         nqp::getattr($!mast, MAST::Frame, '$!flags');
     }
-    method num-annotations() {
-        $!num-annotations
-    }
+    method num-annotations() { $!num-annotations }
+    method handlers() { @!handlers }
     method size() {
-        50
+        my uint32 $size := 50
             + 2  * nqp::elems(self.local_types)
             + 6  * nqp::elems(self.lexical_types)
             + 12 * nqp::elems(self.static_lex_values) / 4;
+        for @!handlers {
+            $size := $size + 20;
+            if $_.category_mask +& 4096 {
+                $size := $size + 2;
+            }
+        }
+        $size
     }
 
     method add-string(str $s) {
         $!string-heap.add($s);
+    }
+    method resolve-label($label) {
+        %!labels{nqp::objectid($label)}
     }
 
     proto method write_instruction($i) { * }
@@ -2644,6 +2682,45 @@ class MoarVM::Frame {
         }
         $!num-annotations++;
     }
+    multi method write_instruction(MAST::HandlerScope $i) {
+        my $start := nqp::elems($!bytecode);
+        for nqp::getattr($i, MAST::HandlerScope, '@!instructions') {
+            self.write_instruction($_);
+        }
+        my $category_mask := nqp::getattr($i, MAST::HandlerScope, '$!category_mask');
+        my $action := nqp::getattr($i, MAST::HandlerScope, '$!action');
+        my $handler := MoarVM::Handler.new(
+            :start_offset($start),
+            :end_offset(nqp::elems($!bytecode)),
+            :$category_mask,
+            :$action,
+            :label(nqp::getattr($i, MAST::HandlerScope, '$!goto_label')),
+        );
+        nqp::push(@!handlers, $handler);
+        if $category_mask +& 4096 { # MVM_EX_CATEGORY_LABELED
+            my $l := nqp::getattr($i, MAST::HandlerScope, '$!label_local');
+            nqp::die('MAST::Local required for HandlerScope with loop label')
+                unless $l.isa(MAST::Local);
+            nqp::die('MAST::Local index out of range in HandlerScope')
+                if $l.index >= nqp::elems(self.local_types);
+            nqp::die('MAST::Local for HandlerScope must be an object')
+                if type_to_local_type(self.local_types()[$l.index]) != $MVM_reg_obj;
+            $handler.set_label_reg($l.index);
+        }
+        if $action == 2 { # HANDLER_INVOKE
+            $handler.set_local(nqp::getattr(
+                nqp::getattr($i, MAST::HandlerScope, '$!block_local'),
+                MAST::Local,
+                '$!index'
+            ));
+        }
+        elsif $action == 0 || $action == 1 { # HANDLER_UNWIND_GOTO || HANDLER_UNWIND_GOTO_OBJ 
+            $handler.set_local(0);
+        }
+        else {
+            nqp::die('Invalid action code for handler scope');
+        }
+    }
     multi method write_instruction($i) {
         note("Instruction " ~ $i.HOW.name($i) ~ " NYI");
         note($i.dump);
@@ -2829,6 +2906,7 @@ class MoarVM::BytecodeWriter {
         my @lexical_names := $f.lexical-name-idxs;
         my @static_lex_values := $f.static_lex_values;
         my uint16 $num_static_lex_values := nqp::elems(@static_lex_values) / 4;
+        my @handlers := $f.handlers;
         $!mbc.write_uint32($f.bytecode-offset); # Bytecode segment offset
         $!mbc.write_uint32($f.bytecode-length); # Bytecode length in bytes
         $!mbc.write_uint32(nqp::elems(@local_types)); # Number of locals/registers
@@ -2844,7 +2922,7 @@ class MoarVM::BytecodeWriter {
         }
         $!mbc.write_uint32($f.annotations-offset); # Annotation segment offset
         $!mbc.write_uint32($f.num-annotations); # Number of annotations
-        $!mbc.write_uint32(0); # Number of handlers
+        $!mbc.write_uint32(nqp::elems(@handlers)); # Number of handlers
         $!mbc.write_uint16($f.flags); # Frame flag bits
         $!mbc.write_uint16($num_static_lex_values); # Number of entries in static lexical values table
         $!mbc.write_uint32(0); # Code object SC dependency index + 1
@@ -2856,6 +2934,17 @@ class MoarVM::BytecodeWriter {
         for @lexical_types {
             $!mbc.write_uint16(type_to_local_type($_));
             $!mbc.write_uint32(@lexical_names[$i++]);
+        }
+        for @handlers {
+            $!mbc.write_uint32($_.start_offset);
+            $!mbc.write_uint32($_.end_offset);
+            $!mbc.write_uint32($_.category_mask);
+            $!mbc.write_uint16($_.action);
+            $!mbc.write_uint16($_.local);
+            $!mbc.write_uint32($f.resolve-label($_.label));
+            if $_.category_mask +& 4096 { # MVM_EX_CATEGORY_LABELED
+                $!mbc.write_uint16($_.label_reg);
+            }
         }
         $i := 0;
         while ($i < $num_static_lex_values) {
