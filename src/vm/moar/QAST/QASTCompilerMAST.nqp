@@ -2598,7 +2598,7 @@ class MoarVM::Frame {
             if $flag +& $Arg::named {
                 $!bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
                 $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand(0, $MVM_operand_str, @args[$arg_pos], $i);
+                self.compile_operand(0, $MVM_operand_str, @args[$arg_pos]);
                 $arg_pos++;
                 $arg_out_pos++;
             }
