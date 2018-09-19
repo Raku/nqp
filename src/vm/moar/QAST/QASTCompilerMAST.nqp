@@ -2397,6 +2397,12 @@ class MoarVM::Frame {
     method flags() {
         nqp::getattr($!mast, MAST::Frame, '$!flags');
     }
+    method code_obj_sc_dep_idx() {
+        nqp::getattr($!mast, MAST::Frame, '$!code_obj_sc_dep_idx');
+    }
+    method code_obj_sc_idx() {
+        nqp::getattr($!mast, MAST::Frame, '$!code_obj_sc_idx');
+    }
     method num-annotations() { $!num-annotations }
     method handlers() { @!handlers }
     method size() {
@@ -2925,8 +2931,14 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_uint32(nqp::elems(@handlers)); # Number of handlers
         $!mbc.write_uint16($f.flags); # Frame flag bits
         $!mbc.write_uint16($num_static_lex_values); # Number of entries in static lexical values table
-        $!mbc.write_uint32(0); # Code object SC dependency index + 1
-        $!mbc.write_uint32(0); # SC object index
+        if $f.flags +& 4 { # FRAME_FLAG_HAS_CODE_OBJ
+            $!mbc.write_uint32(nqp::add_i($f.code_obj_sc_dep_idx, 1)); # Code object SC dependency index + 1
+            $!mbc.write_uint32($f.code_obj_sc_idx); # SC object index
+        }
+        else {
+            $!mbc.write_uint32(0); # No code object SC dependency index
+            $!mbc.write_uint32(0); # No SC object index
+        }
         for @local_types {
             $!mbc.write_uint16(type_to_local_type($_));
         }
