@@ -2638,7 +2638,13 @@ class MoarVM::Frame {
 
 	my $res_type;
         if $op == 2 {
-            nqp::die("op 2 NYI");
+            nqp::die('speshresolve must have a result')
+                unless $result.isa(MAST::Local);
+            nqp::die('MAST::Local index out of range')
+                if $result.index >= nqp::elems(self.local_types);
+            nqp::die('speshresolve must have an object result')
+                if type_to_local_type(self.local_types()[$result.index]) != $MVM_reg_obj;
+            $res_type := $MVM_operand_obj;
         }
         elsif $result.isa(MAST::Local) {
             my @local_types := self.local_types;
