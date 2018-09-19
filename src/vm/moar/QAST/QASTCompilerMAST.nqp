@@ -2643,7 +2643,7 @@ class MoarVM::Frame {
         elsif $result.isa(MAST::Local) {
             my @local_types := self.local_types;
             my $index := $result.index;
-            if $result.index > nqp::elems(self.local_types) {
+            if $result.index >= nqp::elems(@local_types) {
                 nqp::die("MAST::Local index out of range");
             }
             my $op_name := $op == 0 ?? 'invoke_' !! 'nativeinvoke_';
