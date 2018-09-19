@@ -2179,7 +2179,7 @@ nqp::setmethcache($buf, nqp::hash(
         self.push(nqp::bitshiftr_i($i +& 0xFF000000000000, 48));
         self.push(nqp::bitshiftr_i($i +& 0xFF00000000000000, 56));
     },
-    'write_uint32_at', method (uint32 $i, uint16 $pos) {
+    'write_uint32_at', method (uint32 $i, uint32 $pos) {
         nqp::bindpos_i(self, $pos, $i +& 0xFF);
         nqp::bindpos_i(self, $pos + 1, nqp::bitshiftr_i($i +& 0xFF00, 8));
         nqp::bindpos_i(self, $pos + 2, nqp::bitshiftr_i($i +& 0xFF0000, 16));
