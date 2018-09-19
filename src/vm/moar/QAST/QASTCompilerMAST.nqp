@@ -3089,7 +3089,7 @@ class MASTBytecodeAssembler {
             $writer.add-frame($frame);
         }
         $writer.assemble;
-        nqp::loadbytecodebuffer($writer.bytecode);
+        nqp::buffertocu($writer.bytecode);
     }
 }
 
