@@ -2491,7 +2491,7 @@ class MoarVM::Frame {
     my $MVM_operand_lex_outer := 88;
     my $MVM_operand_coderef := 96;
     my $MVM_operand_callsite := 104;
-    my $MVM_operand_type_mask := 120;
+    my $MVM_operand_type_mask := 248;
     my $MVM_operand_spesh_slot := 128;
     my $MVM_operand_uint8 := 136;
     my $MVM_operand_uint16 := 144;
