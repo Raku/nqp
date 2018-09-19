@@ -3069,6 +3069,8 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
 QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
 QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
 QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
+QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
+
 sub push_op(@dest, str $op, *@args) {
     nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
 }
