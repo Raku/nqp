@@ -2437,7 +2437,7 @@ class MoarVM::Frame {
                 return;
             }
             elsif -2147483647 < $value && $value < 2147483647 {
-                $!bytecode.write_uint16(%MAST::Ops::codes<const_i64_16>);
+                $!bytecode.write_uint16(%MAST::Ops::codes<const_i64_32>);
                 self.write_operand($i, 0, $i.operands[0]);
                 $!bytecode.write_uint32($value);
                 return;
