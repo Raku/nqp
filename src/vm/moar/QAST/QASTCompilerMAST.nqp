@@ -2331,12 +2331,14 @@ class MoarVM::Handler {
 }
 
 class MoarVM::Frame {
+    has $!writer;
+    has $!mast;
+    has $!compunit;
+
     has str $!cuuid;
     has uint32 $!cuuid-idx;
     has str $!name;
     has uint32 $!name-idx;
-    has $!writer;
-    has $!mast;
     has $!bytecode;
     has uint32 $!bytecode-offset;
     has $!string-heap;
@@ -2349,10 +2351,11 @@ class MoarVM::Frame {
     has $!num-annotations;
     has @!handlers;
 
-    method BUILD(:$cuuid, :$name, :$string-heap, :$callsites, :$annotations, :$writer, :$mast) {
+    method BUILD(:$cuuid, :$name, :$string-heap, :$callsites, :$annotations, :$writer, :$compunit, :$mast) {
         $!cuuid              := $cuuid;
         $!name               := $name;
         $!writer             := $writer;
+        $!compunit           := $compunit;
         $!mast               := $mast;
         $!bytecode           := $buf.new;
         $!string-heap        := $string-heap;
@@ -2737,6 +2740,27 @@ class MoarVM::Frame {
             nqp::die('Invalid action code for handler scope');
         }
     }
+    multi method write_instruction(MAST::ExtOp $i) {
+        my $op := $i.op;
+        my @extop_sigs := nqp::getattr($!compunit, MAST::CompUnit, '@!extop_sigs');
+        nqp::die("Invalid extension op $op specified")
+            if $op < 1024 || $op - 1024 >= nqp::elems(@extop_sigs); # EXTOP_BASE
+        my @operands := @extop_sigs[$op - 1024];
+
+        $!bytecode.write_uint16($op);
+
+        my $num_operands := nqp::elems(@operands);
+        nqp::die("Instruction has invalid number of operads")
+            if nqp::elems($i.operands) != $num_operands;
+        my $idx := 0;
+        while $idx < $num_operands {
+            my $flags := nqp::atpos_i(@operands, $idx);
+            my $rw    := $flags +& $MVM_operand_rw_mask;
+            my $type  := $flags +& $MVM_operand_type_mask;
+            self.compile_operand($rw, $type, $i.operands[$idx]);
+            $idx++;
+        }
+    }
     multi method write_instruction($i) {
         note("Instruction " ~ $i.HOW.name($i) ~ " NYI");
         note($i.dump);
@@ -2818,16 +2842,19 @@ class MoarVM::BytecodeWriter {
     has @!frames;
     has $!bytecode;
     has @!sc_handle_idxs;
+    has @!extop_name_idxs;
     method BUILD(:$string-heap, :$callsites, :$annotations, :$compunit) {
-        $!mbc            := $buf.new;
-        $!bytecode       := $buf.new;
-        $!string-heap    := $string-heap;
-        $!callsites      := $callsites;
-        $!annotations    := $annotations;
-        $!compunit       := $compunit;
-        @!frames         := nqp::list;
-        @!sc_handle_idxs := nqp::list;
+        $!mbc             := $buf.new;
+        $!bytecode        := $buf.new;
+        $!string-heap     := $string-heap;
+        $!callsites       := $callsites;
+        $!annotations     := $annotations;
+        $!compunit        := $compunit;
+        @!frames          := nqp::list;
+        @!sc_handle_idxs  := nqp::list;
+        @!extop_name_idxs := nqp::list;
         self.collect_sc_deps;
+        self.collect_extop_names;
     }
     method add-string(str $s) {
         $!string-heap.add($s);
@@ -2851,7 +2878,8 @@ class MoarVM::BytecodeWriter {
         my uint32 $string_heap_size := +align_section($!string-heap.size);
         my @sc_handles := nqp::getattr($!compunit, MAST::CompUnit, '@!sc_handles');
         my uint32 $sc_deps_size := +align_section(nqp::elems(@sc_handles) * 4);
-        my uint32 $extops_size := 0;
+        my $num_extops := nqp::elems(nqp::getattr($!compunit, MAST::CompUnit, '@!extop_names'));
+        my uint32 $extops_size := +align_section($num_extops * (4 + 8));
         my uint32 $bytecode_size := +align_section(nqp::elems($!bytecode));
         my uint32 $annotations_size := nqp::elems($!annotations);
 
@@ -2864,7 +2892,7 @@ class MoarVM::BytecodeWriter {
         $offset := $offset + $sc_deps_size;
 
         $!mbc.write_uint32($offset); # Offset of extension ops table
-        $!mbc.write_uint32(0); # Number of entries in extension ops table
+        $!mbc.write_uint32($num_extops); # Number of entries in extension ops table
         $offset := $offset + $extops_size;
 
         $!mbc.write_uint32($offset); # Offset of frames segment
@@ -2997,9 +3025,31 @@ class MoarVM::BytecodeWriter {
             nqp::push(@!sc_handle_idxs, self.add-string($_));
         }
     }
+    method collect_extop_names() {
+        my @extop_names := nqp::getattr($!compunit, MAST::CompUnit, '@!extop_names');
+        for @extop_names {
+            nqp::push(@!extop_name_idxs, self.add-string($_));
+        }
+    }
     method write_sc_deps_table() {
         for @!sc_handle_idxs {
             $!mbc.write_uint32($_);
+        }
+    }
+    method write_extops() {
+        my $num_extops := nqp::elems(nqp::getattr($!compunit, MAST::CompUnit, '@!extop_names'));
+        my @extop_sigs := nqp::getattr($!compunit, MAST::CompUnit, '@!extop_sigs');
+        my $i := 0;
+        while $i < $num_extops {
+            $!mbc.write_uint32(@!extop_name_idxs[$i]);
+            my @sig_array := @extop_sigs[$i];
+            my $num_operands := nqp::elems(@sig_array);
+            my $j := 0;
+            while $j < 8 {
+                $!mbc.write_uint8($j < $num_operands ?? nqp::atpos_i(@sig_array, $j) !! 0);
+                $j++;
+            }
+            $i++;
         }
     }
     method write_annotations() {
@@ -3021,6 +3071,8 @@ class MoarVM::BytecodeWriter {
         self.write_header;
         self.align;
         self.write_sc_deps_table;
+        self.align;
+        self.write_extops;
         self.align;
         my int $idx := 0;
         for @!frames {
@@ -3094,6 +3146,7 @@ class MASTBytecodeAssembler {
                 :$string-heap,
                 :$callsites,
                 :$annotations,
+                :compunit($mast),
                 :$writer,
             );
             $writer.add-frame($frame);
