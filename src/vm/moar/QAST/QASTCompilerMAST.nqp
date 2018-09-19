@@ -2831,7 +2831,7 @@ class MoarVM::BytecodeWriter {
     }
     method write_header() {
         # 92 bytes
-        my $hll := self.add-string($!compunit.hll);
+        my $hll := self.add-string($!compunit.hll || '');
 
         my uint32 $header_size := +align_section(8 + 21 * 4);
         my uint32 $frames := nqp::elems(@!frames);
