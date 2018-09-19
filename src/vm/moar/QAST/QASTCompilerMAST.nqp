@@ -3135,10 +3135,7 @@ class MASTBytecodeAssembler {
         my $callsites := MoarVM::Callsites.new(:$string-heap);
         my $annotations := $buf.new;
         my $writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations, :compunit($mast));
-        my $i := 0;
         for @cu_frames {
-            note("Adding frame " ~ $_.name);
-            note($_.dump);
             my $frame := MoarVM::Frame.new(
                 :cuuid($_.cuuid),
                 :name($_.name),
