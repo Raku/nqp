@@ -69,6 +69,6 @@ public final class NQPCodeRef  {
     }
 
     public void setOuterFrame(MaterializedFrame outer) {
-        outer = outer;
+        this.outer = outer;
     }
 }
