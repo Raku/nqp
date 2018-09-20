@@ -1091,7 +1091,7 @@ class QAST::TruffleCompiler does SerializeOnce {
     method NYI($msg) {
         #nqp::die("NYI: $msg");
         note("NYI: $msg");
-        TAST.new($OBJ, ['null']);
+        TAST.new($OBJ, ['nyi', $msg]);
     }
 }
 
