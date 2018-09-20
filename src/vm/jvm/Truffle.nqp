@@ -495,6 +495,8 @@ class QAST::OperationsTruffle {
         TAST.new($OBJ, $ret);
     });
 
+    add_simple_op('decont', $OBJ, [$OBJ]);
+
     %ops<callstatic> := %ops<call>;
 
     add_op('bind', sub ($comp, $node, :$want) {
