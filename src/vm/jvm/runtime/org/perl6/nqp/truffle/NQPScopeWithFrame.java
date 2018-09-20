@@ -5,6 +5,7 @@ import com.oracle.truffle.api.frame.FrameSlot;
 
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.GlobalContext;
@@ -92,6 +93,24 @@ public class NQPScopeWithFrame extends NQPScope {
             return outer.getGlobalContext();
         } else {
             throw new RuntimeException("Can't get HLLs");
+        }
+    }
+
+    @Override
+    public NQPCodeRef getCuid(String cuid) {
+        if (outer != null) {
+            return outer.getCuid(cuid);
+        } else {
+            throw new RuntimeException("Can't get cuid");
+        }
+    }
+
+    @Override
+    public void addCuid(String cuid, NQPCodeRef codeRef) {
+        if (outer != null) {
+            outer.addCuid(cuid, codeRef);
+        } else {
+            throw new RuntimeException("Can't add cuid");
         }
     }
 }

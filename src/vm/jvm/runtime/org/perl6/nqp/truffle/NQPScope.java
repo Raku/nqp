@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle;
 
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.GlobalContext;
@@ -17,5 +18,9 @@ public abstract class NQPScope {
     public abstract FrameSlot findLocal(String name);
 
     public abstract HLL getCurrentHLL();
+
+    public abstract NQPCodeRef getCuid(String cuid);
+    public abstract void addCuid(String cuid, NQPCodeRef codeRef);
+
     public abstract GlobalContext getGlobalContext();
 }

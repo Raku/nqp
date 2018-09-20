@@ -5,6 +5,11 @@ import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
+import com.oracle.truffle.api.nodes.IndirectCallNode;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
+import org.perl6.nqp.truffle.runtime.NQPArguments;
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "callmethod")
@@ -37,8 +42,27 @@ public final class NQPCallmethodNode extends NQPObjNode {
     public Object execute(VirtualFrame frame) {
         Object invocant = invocantNode.execute(frame);
         String method = this.methodNode.executeStr(frame);
-        System.out.println("callmethod NYI: " + method);
-        return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
+
+        /* TODO - specialization and all the cool inline caching */
+        System.out.println("callmethod on: " + invocant.getClass().getName());
+        if (invocant instanceof TypeObject) {
+            System.out.println("callmethod on TypeObject: " + method);
+            TypeObject typeObject = (TypeObject) invocant;
+            Object foundMethod = typeObject.stable.methodCache.get(method);
+            if (foundMethod != null) {
+                Object[] arguments =  NQPArguments.createInitial(1);
+                NQPArguments.setUserArgument(arguments, 0, invocant);
+
+                NQPCodeRef function = (NQPCodeRef) foundMethod;
+                NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
+                IndirectCallNode callNode = IndirectCallNode.create();
+                return callNode.call(function.getCallTarget(), arguments);
+            }
+            return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
+        } else {
+            System.out.println("callmethod NYI: " + method);
+            return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
+        }
     }
 }
 

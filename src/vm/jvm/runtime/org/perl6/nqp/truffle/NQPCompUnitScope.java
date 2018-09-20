@@ -1,7 +1,9 @@
 package org.perl6.nqp.truffle;
 
 import com.oracle.truffle.api.frame.FrameSlot;
+import java.util.HashMap;
 import org.perl6.nqp.truffle.GlobalContext;
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
@@ -10,6 +12,8 @@ public class NQPCompUnitScope extends NQPScope {
     HLL currentHLL;
 
     GlobalContext globalContext;
+
+    HashMap<String, NQPCodeRef> cuids;
 
     public NQPCompUnitScope(NQPScope outer, String hll, GlobalContext globalContext) {
         this.outer = outer;
@@ -23,6 +27,8 @@ public class NQPCompUnitScope extends NQPScope {
         }
 
         this.currentHLL = hlls.get(hll);
+
+        cuids = new HashMap<String, NQPCodeRef>();
     }
 
     @Override
@@ -34,6 +40,21 @@ public class NQPCompUnitScope extends NQPScope {
     @Override
     public HLL getCurrentHLL() {
         return currentHLL;
+    }
+
+    @Override
+    public NQPCodeRef getCuid(String cuid) {
+        NQPCodeRef got = cuids.get(cuid);
+        if (got != null) {
+            return got;
+        } else {
+            throw new RuntimeException("Can't get cuid: " + cuid);
+        }
+    }
+
+    @Override
+    public void addCuid(String cuid, NQPCodeRef codeRef) {
+        cuids.put(cuid, codeRef);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package org.perl6.nqp.truffle.sixmodel;
 
+import java.util.HashMap;
+
 public class STable {
     /** Initializes a new STable.
      */
@@ -21,6 +23,11 @@ public class STable {
      * The type-object.
      */
     public Object what;
+
+    /**
+     * By-name method dispatch cache.
+     */
+    public HashMap<String, Object> methodCache;
 
     /**
      * Array of type objects. If this is set, then it is expected to contain

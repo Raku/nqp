@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPNull;
+import org.perl6.nqp.truffle.runtime.NQPHash;
+
 
 public class SerializationReader {
     /* The current version of the serialization format. */
@@ -46,8 +49,8 @@ public class SerializationReader {
 
     private String[] sh;
 
-//    private CodeRef[] cr;
-//    private int crCount;
+    private NQPCodeRef[] cr;
+
 //    private CallFrame[] contexts;
 
     private ByteBuffer orig;
@@ -78,18 +81,16 @@ public class SerializationReader {
     private HashMap<String, SerializationContext> scs;
 
     SerializationContext[] dependentSCs;
-//
-//    /* The object we're currently deserializing. */
-//    SixModelObject curObject;
-//
 
-//  CodeRef[] cr, int crCount,
+    /* The object we're currently deserializing. */
+    Object currentObject;
 
-    public SerializationReader(SerializationContext sc, String[] sh, ByteBuffer orig, HashMap<String, SerializationContext> scs) {
+
+
+    public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs) {
         this.sc = sc;
         this.sh = sh;
-//        this.cr = cr;
-//        this.crCount = crCount;
+        this.cr = cr;
         this.orig = orig;
         this.scs = scs;
     }
@@ -104,14 +105,14 @@ public class SerializationReader {
         deserializeStringHeap();
 
         resolveDependencies();
-//
-//        // Put code refs in place.
-//        for (int i = 0; i < crCount; i++) {
+
+        // Put code refs in place.
+        for (int i = 0; i < cr.length; i++) {
 //            cr[i].isStaticCodeRef = true;
 //            cr[i].sc = sc;
-//            sc.addCodeRef(cr[i]);
-//        }
-//
+            sc.addCodeRef(cr[i]);
+        }
+
         // Handle any STable repossessions, then stub STables.
         sc.initSTableList(stTableEntries);
 //        if (reposTableEntries > 0)
@@ -128,8 +129,8 @@ public class SerializationReader {
 //        deserializeClosures();
 //
 //        // Second passes over STables and objects.
-//        deserializeSTables();
-//        deserializeObjects();
+        deserializeSTables();
+        deserializeObjects();
 //
 //        // Finish up contexts and closures.
 //        deserializeContexts();
@@ -422,10 +423,11 @@ public class SerializationReader {
             st.what = readObjRef();
             st.who = readRef();
 
-            /* Method cache and v-table. */
+            /* Method cache */
             Object methodCache = readRef();
-//            if (methodCache != null)
-//                st.MethodCache = ((VMHashInstance)methodCache).storage;
+            if (methodCache != NQPNull.SINGLETON) {
+                st.methodCache = ((NQPHash) methodCache).getContents();
+            }
 
             long vtableLength = orig.getLong();
 
@@ -512,13 +514,17 @@ public class SerializationReader {
 //            st.REPR.deserialize_repr_data(tc, st, this);
         }
     }
-//
-//    private void deserializeObjects() {
-//        for (int i = 0; i < objTableEntries; i++) {
-//            // Can skip if it's a type object.
-//            SixModelObject obj = sc.getObject(i);
-//            if (obj instanceof TypeObject)
-//                continue;
+
+    private void deserializeObjects() {
+        for (int i = 0; i < objTableEntries; i++) {
+            // Can skip if it's a type object.
+            Object obj = sc.getObject(i);
+            if (obj instanceof TypeObject) {
+                System.out.println("deserializing a type object");
+                continue;
+            } else {
+                System.out.println("deserializing something else");
+            }
 //
 //            // Seek reader to object data offset.
 //            orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE + 8);
@@ -528,9 +534,9 @@ public class SerializationReader {
 //            this.curObject = obj;
 //            obj.st.REPR.deserialize_finish(tc, obj.st, this, obj);
 //            this.curObject = null;
-//        }
-//    }
-//
+        }
+    }
+
 //    private void deserializeContexts() {
 //        contexts = new CallFrame[contextTableEntries];
 //        for (int i = 0; i < contextTableEntries; i++) {
@@ -662,22 +668,21 @@ public class SerializationReader {
 //            }
 //            return resArray;
 //        }
-//        case REFVAR_VM_HASH_STR_VAR:
-//            SixModelObject BOOTHash = tc.gc.BOOTHash;
-//            SixModelObject resHash = BOOTHash.st.REPR.allocate(tc, BOOTHash.st);
-//            elems = orig.getInt();
-//            for (int i = 0; i < elems; i++) {
-//                String key = lookupString(orig.getInt());
-//                resHash.bind_key_boxed(tc, key, readRef());
-//            }
-//            if (this.curObject != null) {
-//                resHash.sc = sc;
-//                sc.owned_objects.put(resHash, this.curObject);
-//            }
-//            return resHash;
-//        case REFVAR_STATIC_CODEREF:
-//        case REFVAR_CLONED_CODEREF:
-//            return readCodeRef();
+        case REFVAR_VM_HASH_STR_VAR:
+            NQPHash hash = new NQPHash();
+            elems = orig.getInt();
+            for (int i = 0; i < elems; i++) {
+                String key = lookupString(orig.getInt());
+                hash.bindkey(key, readRef());
+            }
+            if (this.currentObject != null) {
+                hash.sc = sc;
+                sc.ownedObjects.put(hash, this.currentObject);
+            }
+            return hash;
+        case REFVAR_STATIC_CODEREF:
+        case REFVAR_CLONED_CODEREF:
+            return readCodeRef();
         default:
             throw new RuntimeException("Unimplemented case of read_ref: " + discrim);
         }
@@ -695,13 +700,18 @@ public class SerializationReader {
 //        return lookupSTable(orig.getInt(), orig.getInt());
 //    }
 //
-//    public CodeRef readCodeRef() {
-//        SerializationContext sc = locateSC(orig.getInt());
-//        int idx = orig.getInt();
-//        if (idx < 0 || idx >= sc.coderefCount())
+
+    public Object readCodeRef() {
+        SerializationContext sc = locateSC(orig.getInt());
+        int idx = orig.getInt();
+        if (idx < 0 || idx >= sc.codeRefCount()) {
+              System.out.println("Invalid SC code index " + idx);
+              return NQPNull.SINGLETON;
 //            throw new RuntimeException("Invalid SC code index " + idx);
-//        return sc.getCodeRef(idx);
-//    }
+        }
+        return sc.getCodeRef(idx);
+    }
+
 //
 //    public long readLong() {
 //        return orig.getLong();

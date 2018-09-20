@@ -3,14 +3,20 @@ package org.perl6.nqp.truffle;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.FrameSlotKind;
+import com.oracle.truffle.api.nodes.RootNode;
+
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
+import org.perl6.nqp.truffle.nodes.control.NQPStaticBlockNode;
+
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
 import org.perl6.nqp.truffle.MalformedAstException;
 
 import org.perl6.nqp.truffle.sixmodel.Bootstrapper;
+
 
 
 import org.perl6.nqp.dsl.Predeserializer;
@@ -19,8 +25,12 @@ import org.perl6.nqp.dsl.Deserializer;
 public class ManageScopes {
     @Predeserializer("block")
     public static NQPScope createNewScope(NQPScope scope) {
-        FrameDescriptor frameDescriptor = new FrameDescriptor();
-        return new NQPScopeWithFrame(frameDescriptor, scope);
+        return new NQPScopeWithFrame(new FrameDescriptor(), scope);
+    }
+
+    @Predeserializer("block-static")
+    public static NQPScope createNewStaticScope(NQPScope scope) {
+        return new NQPScopeWithFrame(new FrameDescriptor(), scope);
     }
 
     @Deserializer("block")
@@ -29,6 +39,16 @@ public class ManageScopes {
         return new NQPBlockNode(
             new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
         );
+    }
+
+    @Deserializer("block-static")
+    public static NQPNode createBlock(NQPScope scope, String cuid, NQPNode[] children) {
+        FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
+        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        System.out.println("adding cuids");
+        scope.addCuid(cuid, code);
+        return new NQPStaticBlockNode(code);
     }
 
     private static FrameSlotKind kindFromType(long type) {

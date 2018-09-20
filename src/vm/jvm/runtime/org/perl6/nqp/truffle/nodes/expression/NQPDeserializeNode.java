@@ -9,6 +9,8 @@ import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPStrNode;
 import org.perl6.nqp.truffle.runtime.NQPListStr;
+import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.Base64;
 import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
@@ -42,7 +44,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
         String blob = blobNode.executeStr(frame);
         SerializationContext sc = (SerializationContext) scNode.execute(frame);
         NQPListStr shList = (NQPListStr) shNode.execute(frame);
-        Object cr = crNode.execute(frame);
+        NQPList crList = (NQPList) crNode.execute(frame);
         Object conflict = conflictNode.execute(frame);
 
         System.out.println("deserializing");
@@ -50,9 +52,19 @@ public final class NQPDeserializeNode extends NQPStrNode {
 
 
         String[] sh = new String[shList.elems()];
+        for (int i = 0; i < shList.elems(); i++) {
+            sh[i] = shList.atposStr(i);
+        }
 
-        SerializationReader sr = new SerializationReader(sc, sh, binaryBlob, scs);
-        //            tc, sc, shArray, crArray, crCount, binaryBlob);
+        System.out.println("got code refs: " + crList.elems());
+
+        NQPCodeRef[] cr = new NQPCodeRef[crList.elems()];
+        for (int i = 0; i < crList.elems(); i++) {
+            cr[i] = (NQPCodeRef) crList.atpos(i);
+        }
+
+
+        SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs);
         sr.deserialize();
 
         return blob; 

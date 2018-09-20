@@ -145,6 +145,14 @@ class QAST::OperationsTruffle {
 
     add_simple_op('deserialize', $STR, [$STR, $OBJ, $OBJ, $OBJ, $OBJ]);
 
+    add_op('list_b', sub ($comp, $node, :$want) {
+        my @cuids;
+        for $node.list -> $block {
+            @cuids.push($block.cuid);
+        }
+        TAST.new($OBJ, ['list_b', @cuids]);
+    });
+
     add_simple_op('die', $VOID, [$STR]);
     %ops<die_s> := %ops<die>;
 
@@ -792,6 +800,9 @@ class QAST::TruffleCompiler does SerializeOnce {
         }
         $sh_ast := QAST::Block.new( :blocktype('immediate'), $sh_ast );
 
+        my @code_ref_blocks := $cu.code_ref_blocks;
+        my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
+
         my $repo_conflict_resolver;
 
         # Handle repossession conflict resolution code, if any.
@@ -828,7 +839,7 @@ class QAST::TruffleCompiler does SerializeOnce {
                 nqp::isnull($serialized) ?? QAST::Op.new( :op('null_s') ) !! QAST::SVal.new( :value($serialized) ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast,
-                QAST::Op.new( :op('null') ),
+                $cr_ast,
                 QAST::Var.new( :name('conflicts'), :scope('local') )
             ),
             QAST::Op.new(
@@ -964,16 +975,32 @@ class QAST::TruffleCompiler does SerializeOnce {
         {
             my $*BLOCK := $block;
             my $*BINDVAL := 0;
-            my @ret := ['block'];
 
-            self.compile_all_the_children($node, $RETVAL, @ret);
+            my @body;
+            my @tree;
+
+            if $node.blocktype eq 'immediate' {
+                @body := ['block'];
+                @tree := ['call', @body, [], []];
+            }
+            elsif $node.blocktype eq 'declaration' || $node.blocktype eq '' {
+                @body := ['block'];
+                @tree := @body;
+            }
+            elsif $node.blocktype eq 'declaration_static' {
+                @body := ['block-static', $node.cuid];
+                @tree := @body;
+            }
+
+            my int $start_of_body := +@body;
+
+            self.compile_all_the_children($node, $RETVAL, @body);
 
             my @compiled_params := self.compile_params($*BLOCK.params);
 
-            nqp::splice(@ret, @compiled_params, 1, 0);
+            nqp::splice(@body, @compiled_params, $start_of_body, 0);
 
-            TAST.new($OBJ,
-                $node.blocktype eq 'immediate' ?? ['call', @ret, [], []] !! @ret);
+            TAST.new($OBJ, @tree);
         }
     }
 

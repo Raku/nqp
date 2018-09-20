@@ -51,7 +51,8 @@ public final class NQPCodeRef  {
 
     /** The current implementation of this function. */
     private final RootCallTarget callTarget;
-    private final MaterializedFrame outer;
+
+    private MaterializedFrame outer;
 
 
     public NQPCodeRef(RootNode root, MaterializedFrame outer) {
@@ -65,5 +66,9 @@ public final class NQPCodeRef  {
 
     public MaterializedFrame getOuterFrame() {
         return outer;
+    }
+
+    public void setOuterFrame(MaterializedFrame outer) {
+        outer = outer;
     }
 }

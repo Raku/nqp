@@ -3,6 +3,8 @@ package org.perl6.nqp.truffle.sixmodel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+
 public final class SerializationContext {
     /* The handle of this SC. */
     public String handle;
@@ -11,15 +13,23 @@ public final class SerializationContext {
     public String description;
 
     /* The root set of objects that live in this SC. */
-    private ArrayList<Object> rootObjects;
+    private ArrayList<Object> rootObjects = new ArrayList<Object>();
 
     /* The root set of STables that live in this SC. */
-    private ArrayList<STable> rootSTables;
+    private ArrayList<STable> rootSTables = new ArrayList<STable>();
+
+    /* The root set of code refs that live in this SC. */
+    private ArrayList<NQPCodeRef> rootCodes = new ArrayList<NQPCodeRef>();
+
+    /* Some things we deserialize are not directly in an SC, root set, but
+     * rather are owned by others. This is mostly thanks to Parrot legacy,
+     * where not everything was a 6model object. This maps such owned
+     * objects to their owner. It is used to determine what object should
+     * be repossessed in the case a write barrier is hit. */
+    public HashMap<Object, Object> ownedObjects = new HashMap<Object, Object>();
 
     public SerializationContext(String handle) {
         this.handle = handle;
-        this.rootObjects = new ArrayList<Object>();
-        this.rootSTables = new ArrayList<STable>();
     }
 
     public void initSTableList(int entries) {
@@ -55,6 +65,35 @@ public final class SerializationContext {
 
     public int stableCount() {
         return rootSTables.size();
+    }
+
+    private HashMap<Object, Integer> codeIndexCache = new HashMap<Object, Integer>();
+    public void addCodeRef(NQPCodeRef coderef) {
+        int newIndex = rootCodes.size();
+        rootCodes.add(coderef);
+        codeIndexCache.put(coderef, new Integer(newIndex));
+    }
+    public void addCodeRef(NQPCodeRef obj, int index) {
+        if (index == rootCodes.size()) {
+            rootCodes.add(obj);
+        } else {
+            rootCodes.set(index, obj);
+        }
+        codeIndexCache.put(obj, new Integer(index));
+    }
+    public int getCodeIndex(Object coderef) {
+        Integer cachedIndex = codeIndexCache.get(coderef);
+        if (cachedIndex != null) {
+            return cachedIndex.intValue();
+        } else {
+            return -1;
+        }
+    }
+    public NQPCodeRef getCodeRef(int index) {
+        return rootCodes.get(index);
+    }
+    public int codeRefCount() {
+        return rootCodes.size();
     }
 
     private HashMap<Object, Integer> objectIndexCache = new HashMap<Object, Integer>();
