@@ -50,7 +50,8 @@ public final class NQPCallmethodNode extends NQPObjNode {
             TypeObject typeObject = (TypeObject) invocant;
             Object foundMethod = typeObject.stable.methodCache.get(method);
             if (foundMethod != null) {
-                Object[] arguments =  NQPArguments.createInitial(1);
+
+                Object[] arguments = NQPArguments.unpack(frame, 1, argumentFlags, argumentNames, argumentNodes);
                 NQPArguments.setUserArgument(arguments, 0, invocant);
 
                 NQPCodeRef function = (NQPCodeRef) foundMethod;

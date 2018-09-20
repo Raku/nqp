@@ -40,7 +40,6 @@
  */
 package org.perl6.nqp.truffle.nodes.call;
 
-import com.oracle.truffle.api.CompilerAsserts;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.instrumentation.StandardTags;
 import com.oracle.truffle.api.instrumentation.Tag;
@@ -55,18 +54,12 @@ import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPHash;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;
 
 
 @NodeInfo(shortName = "call")
 public final class NQPCallNode extends NQPObjNode {
-
-    public static final long NAMED = 1;
-    public static final long FLAT = 2;
 
     @Child private NQPNode functionNode;
 
@@ -94,42 +87,7 @@ public final class NQPCallNode extends NQPObjNode {
     public Object execute(VirtualFrame frame) {
         Object function = functionNode.execute(frame);
 
-        CompilerAsserts.compilationConstant(argumentNodes.length);
-
-        int count = 0;
-        Object[] values = new Object[argumentNodes.length];
-        for (int i = 0; i < argumentNodes.length; i++) {
-            values[i] = argumentNodes[i].execute(frame);
-            if ((argumentFlags[i] & NAMED) != 0) {
-            } else if ((argumentFlags[i] & FLAT) != 0) {
-                count += ((NQPList) values[i]).elems();
-            } else {
-                count++;
-            }
-        }
-
-        Object[] arguments =  NQPArguments.createInitial(count);
-
-        int positional = 0;
-        int nameIndex = 0;
-
-        for (int i = 0; i < argumentNodes.length; i++) {
-            if ((argumentFlags[i] & FLAT) != 0 && (argumentFlags[i] & NAMED) != 0) {
-                NQPHash hash = (NQPHash) values[i];
-                for (Map.Entry<String, Object> entry : hash.entrySet()) {
-                    NQPArguments.setNamedArgument(arguments, entry.getKey(), entry.getValue());
-                }
-            } else if ((argumentFlags[i] & NAMED) != 0) {
-                NQPArguments.setNamedArgument(arguments, argumentNames[nameIndex++], values[i]);
-            } else if ((argumentFlags[i] & FLAT) != 0) {
-                NQPList array = (NQPList) values[i];
-                for (int j = 0; j < array.elems(); j++) {
-                    NQPArguments.setUserArgument(arguments, positional++, array.atpos(j));
-                }
-            } else {
-                NQPArguments.setUserArgument(arguments, positional++, values[i]);
-            }
-        }
+        Object[] arguments = NQPArguments.unpack(frame, 0, argumentFlags, argumentNames, argumentNodes);
 
         return dispatchNode.executeDispatch(function, arguments);
     }
