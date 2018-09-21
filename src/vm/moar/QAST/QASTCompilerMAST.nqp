@@ -3190,10 +3190,10 @@ class MASTBytecodeAssembler {
     }
 
     method assemble_to_file($mast, $file) {
-        nqp::masttofile($mast, self.node_hash(), $file)
+        self.assemble($mast).save($file);
     }
 
-    method assemble_and_load($mast) {
+    method assemble($mast) {
         my @cu_frames := nqp::getattr($mast, MAST::CompUnit, '@!frames');
         my $string-heap := MoarVM::StringHeap.new(:strings($mast.string_heap));
         my $callsites := MoarVM::Callsites.new(:$string-heap);
@@ -3213,7 +3213,11 @@ class MASTBytecodeAssembler {
             $writer.add-frame($frame);
         }
         $writer.assemble;
-        nqp::buffertocu($writer.bytecode);
+        $writer
+    }
+
+    method assemble_and_load($mast) {
+        nqp::buffertocu(self.assemble($mast).bytecode);
     }
 }
 
