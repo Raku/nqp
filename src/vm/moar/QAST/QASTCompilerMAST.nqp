@@ -3150,6 +3150,10 @@ class MoarVM::BytecodeWriter {
     }
     method get_frame_index(MAST::Frame $f) {
         my $idx := 0;
+        if nqp::getattr($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
+            return nqp::getattr($f, MAST::Frame, '$!frame_idx');
+        }
+        note("Need to iterate");
         for nqp::getattr($!compunit, MAST::CompUnit, '@!frames') {
             return $idx if nqp::objectid($_) eq nqp::objectid($f);
             $idx++;
