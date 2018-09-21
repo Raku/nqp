@@ -1,6 +1,105 @@
 # Per-compilation instance of the MAST compiler, holding state and driving the
 # compilation.
 
+my $buf := nqp::newtype(nqp::null(), 'VMArray');
+nqp::composetype($buf, nqp::hash('array', nqp::hash('type', uint8)));
+nqp::setmethcache($buf, nqp::hash(
+    'new', method () {
+        nqp::create($buf)
+    },
+    'push', method (uint8 $value) {
+        nqp::push_i(self, $value)
+    },
+    'write_s', method (str $s) {
+        my @subbuf := nqp::encode($s, 'utf8', nqp::create($buf));
+        self.write_buf(@subbuf);
+    },
+    'write_double', method (num $n) {
+        nqp::writenum(self, nqp::elems(self), $n, 0);
+    },
+    'write_uint32', method (uint32 $i) {
+        self.push($i +& 0xFF);
+        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
+        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
+        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
+    },
+    'write_uint64', method (uint64 $i) {
+        self.push($i +& 0xFF);
+        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
+        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
+        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
+        self.push(nqp::bitshiftr_i($i +& 0xFF00000000, 32));
+        self.push(nqp::bitshiftr_i($i +& 0xFF0000000000, 40));
+        self.push(nqp::bitshiftr_i($i +& 0xFF000000000000, 48));
+        self.push(nqp::bitshiftr_i($i +& 0xFF00000000000000, 56));
+    },
+    'write_uint32_at', method (uint32 $i, uint32 $pos) {
+        nqp::bindpos_i(self, $pos, $i +& 0xFF);
+        nqp::bindpos_i(self, $pos + 1, nqp::bitshiftr_i($i +& 0xFF00, 8));
+        nqp::bindpos_i(self, $pos + 2, nqp::bitshiftr_i($i +& 0xFF0000, 16));
+        nqp::bindpos_i(self, $pos + 3, nqp::bitshiftr_i($i +& 0xFF000000, 24));
+    },
+    'write_uint16', method (uint16 $i) {
+        self.push($i +& 0xFF);
+        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
+    },
+    'write_uint8', method (uint8 $i) {
+        self.push($i);
+    },
+    'write_buf', method (@buf) {
+        for @buf {
+            self.push($_);
+        }
+    },
+    'dump', method () {
+        note(nqp::elems(self) ~ " bytes");
+        for self {
+            note($_);
+        }
+    }
+));
+
+sub POS($c) {
+    return $c - 65      if $c >= 65 && $c < 91;  # A..Z
+    return $c - 97 + 26 if $c >= 97 && $c < 123; # a..z
+    return $c - 48 + 52 if $c >= 48 && $c < 58;  # 0..9
+    return 62 if $c == 43;
+    return 63 if $c == 47;
+    return -1 if $c == 61;
+    nqp::die("Invalid data in base64_decode");
+}
+sub base64_decode(str $s) {
+    my $data := $buf.new;
+    my @n := (-1, -1, -1, -1);
+
+    my int $len := nqp::chars($s);
+    if $len % 4 {
+        nqp::die("Length of input to base64_decode is not a multiple of 4");
+    }
+
+    my int $pos := 0;
+    while $pos < $len {
+        @n[0] := POS(nqp::getcp_s($s, $pos++));
+        @n[1] := POS(nqp::getcp_s($s, $pos++));
+        @n[2] := POS(nqp::getcp_s($s, $pos++));
+        @n[3] := POS(nqp::getcp_s($s, $pos++));
+
+        if @n[0] == -1 || @n[1] == -1 || (@n[2] == -1 && @n[3] != -1) {
+            nqp::die("Invalid data in base64_decode");
+        }
+
+        $data.write_uint8(nqp::bitshiftl_i(@n[0], 2) + nqp::bitshiftr_i(@n[1], 4));
+        if @n[2] != -1 {
+            $data.write_uint8(nqp::bitshiftl_i(@n[1] +& 15, 4) + nqp::bitshiftr_i(@n[2], 2));
+        }
+        if @n[3] != -1 {
+            $data.write_uint8(nqp::add_i(nqp::bitshiftl_i(@n[2] +& 3, 6), @n[3]));
+        }
+    }
+
+    return $data;
+}
+
 my class MASTCompilerInstance {
     # The HLL that we're compiling.
     has $!hll;
@@ -861,13 +960,20 @@ my class MASTCompilerInstance {
     method serialize_sc($sc) {
         my $sh := nqp::list_s();
         my str $serialized := nqp::serialize($sc, $sh);
-        [$serialized, nqp::null()];
+        [$serialized, $sh];
+    }
+
+    method decode_serialized_data($serialized) {
+        base64_decode($serialized)
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         my $sc_tuple := self.serialize_sc($sc);
         my str $serialized := $sc_tuple[0];
         my $sh := $sc_tuple[1];
+
+        $!mast_compunit.serialized(self.decode_serialized_data($serialized));
+        $!mast_compunit.string_heap($sh);
 
         # String heap QAST.
         my $sh_ast;
@@ -920,9 +1026,7 @@ my class MASTCompilerInstance {
             ),
             QAST::Op.new(
                 :op('deserialize'),
-                nqp::isnull_s($serialized)
-                    ?? QAST::Op.new( :op('null_s') )
-                    !! QAST::SVal.new( :value($serialized) ),
+                QAST::Op.new( :op('null_s') ),
                 QAST::Var.new( :name('cur_sc'), :scope('local') ),
                 $sh_ast, # XXX I had to leave this in, otherwise the JS backend doesn't build.
                          #     I would love some help figuring out why!
@@ -2147,64 +2251,6 @@ if nqp::isnull(nqp::getcomp('QAST')) {
     nqp::bindcomp('QAST', QAST::MASTCompiler);
 }
 
-my $buf := nqp::newtype(nqp::null(), 'VMArray');
-nqp::composetype($buf, nqp::hash('array', nqp::hash('type', uint8)));
-nqp::setmethcache($buf, nqp::hash(
-    'new', method () {
-        nqp::create($buf)
-    },
-    'push', method (uint8 $value) {
-        nqp::push_i(self, $value)
-    },
-    'write_s', method (str $s) {
-        my @subbuf := nqp::encode($s, 'utf8', nqp::create($buf));
-        self.write_buf(@subbuf);
-    },
-    'write_double', method (num $n) {
-        nqp::writenum(self, nqp::elems(self), $n, 0);
-    },
-    'write_uint32', method (uint32 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
-    },
-    'write_uint64', method (uint64 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
-        self.push(nqp::bitshiftr_i($i +& 0xFF00000000, 32));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000000000, 40));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000000000, 48));
-        self.push(nqp::bitshiftr_i($i +& 0xFF00000000000000, 56));
-    },
-    'write_uint32_at', method (uint32 $i, uint32 $pos) {
-        nqp::bindpos_i(self, $pos, $i +& 0xFF);
-        nqp::bindpos_i(self, $pos + 1, nqp::bitshiftr_i($i +& 0xFF00, 8));
-        nqp::bindpos_i(self, $pos + 2, nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        nqp::bindpos_i(self, $pos + 3, nqp::bitshiftr_i($i +& 0xFF000000, 24));
-    },
-    'write_uint16', method (uint16 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
-    },
-    'write_uint8', method (uint8 $i) {
-        self.push($i);
-    },
-    'write_buf', method (@buf) {
-        for @buf {
-            self.push($_);
-        }
-    },
-    'dump', method () {
-        note(nqp::elems(self) ~ " bytes");
-        for self {
-            note($_);
-        }
-    }
-));
-
 my %uint_map;
 my %int_map;
 my %num_map;
@@ -2777,8 +2823,14 @@ class MoarVM::StringHeap {
     has @!strings;
     has %!strings;
     has $!done;
-    method BUIILD() {
-        @!strings := list();
+    method BUILD(:@strings) {
+        @!strings := nqp::list();
+        %!strings := nqp::hash();
+        if nqp::islist(@strings) {
+            for @strings {
+                self.add($_ || '');
+            }
+        }
         $!done := 0;
     }
     method add(str $s) {
@@ -2882,6 +2934,8 @@ class MoarVM::BytecodeWriter {
         my uint32 $extops_size := +align_section($num_extops * (4 + 8));
         my uint32 $bytecode_size := +align_section(nqp::elems($!bytecode));
         my uint32 $annotations_size := nqp::elems($!annotations);
+        my $serialized := $!compunit.serialized;
+        my uint32 $serialized_size := +align_section(nqp::defined($serialized) ?? nqp::elems($serialized) !! 0);
 
         my uint32 $offset := $header_size;
         $!mbc.write_s("MOARVM\r\n");
@@ -2907,8 +2961,9 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_uint32($!string-heap.elems); # Number of strings in heap
         $offset := $offset + $string_heap_size;
 
-        $!mbc.write_uint32(0); # Offset of SC data segment
-        $!mbc.write_uint32(0); # Number of entries in SC data segment
+        $!mbc.write_uint32($offset); # Offset of SC data segment
+        $!mbc.write_uint32($serialized_size); # Number of entries in SC data segment
+        $offset := $offset + $serialized_size;
 
         $!mbc.write_uint32($offset); # Offset of bytecode segment
         $!mbc.write_uint32(nqp::elems($!bytecode)); # Length of bytecode segment
@@ -3019,6 +3074,9 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_buf($_);
         }
     }
+    method write_serialized_data() {
+        $!mbc.write_buf($!compunit.serialized) if nqp::defined($!compunit.serialized);
+    }
     method collect_sc_deps() {
         my @sc_handles := nqp::getattr($!compunit, MAST::CompUnit, '@!sc_handles');
         for @sc_handles {
@@ -3083,6 +3141,8 @@ class MoarVM::BytecodeWriter {
         self.align;
         self.write_string_heap;
         self.align;
+        self.write_serialized_data;
+        self.align;
         $!mbc.write_buf($!bytecode);
         self.align;
         self.write_annotations;
@@ -3131,7 +3191,7 @@ class MASTBytecodeAssembler {
 
     method assemble_and_load($mast) {
         my @cu_frames := nqp::getattr($mast, MAST::CompUnit, '@!frames');
-        my $string-heap := MoarVM::StringHeap.new;
+        my $string-heap := MoarVM::StringHeap.new(:strings($mast.string_heap));
         my $callsites := MoarVM::Callsites.new(:$string-heap);
         my $annotations := $buf.new;
         my $writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations, :compunit($mast));
