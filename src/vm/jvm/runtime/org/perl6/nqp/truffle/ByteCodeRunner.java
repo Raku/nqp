@@ -56,7 +56,6 @@ import java.nio.channels.FileChannel;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-
 @AstBuilder(
     nodeClass = NQPNode.class,
     nodesClass = NQPNode[].class,
@@ -82,7 +81,7 @@ abstract class ByteCodeRunner {
         return nodes;
     }
 
-    public void runByteCode(String input) {
+    public void runByteCode(GlobalContext globalContext, String input) {
         try {
             FileInputStream stream = new FileInputStream(input);
             FileChannel channel = stream.getChannel();
@@ -101,7 +100,7 @@ abstract class ByteCodeRunner {
             long version = reader.readVersion();
 
             FrameDescriptor frameDescriptor = new FrameDescriptor();
-            RootNode rootNode = new NQPRootNode(null, frameDescriptor, byteCodeToNode(reader, new NQPScopeWithFrame(frameDescriptor, null)));
+            RootNode rootNode = new NQPRootNode(null, frameDescriptor, byteCodeToNode(reader, new NQPScopeWithFrame(frameDescriptor, new NQPScopeWithGlobalContext(globalContext))));
 
             CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
             callTarget.call();

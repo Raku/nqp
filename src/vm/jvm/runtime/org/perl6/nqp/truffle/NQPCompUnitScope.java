@@ -52,16 +52,13 @@ public class NQPCompUnitScope extends NQPScope {
     NQPScope outer;
     HLL currentHLL;
 
-    GlobalContext globalContext;
 
     HashMap<String, NQPCodeRef> cuids;
 
-    public NQPCompUnitScope(NQPScope outer, String hll, GlobalContext globalContext) {
+    public NQPCompUnitScope(NQPScope outer, String hll) {
         this.outer = outer;
 
-        this.globalContext = globalContext;
-
-        HashMap<String, HLL> hlls = globalContext.hlls;
+        HashMap<String, HLL> hlls = outer.getGlobalContext().hlls;
 
         if (!hlls.containsKey(hll)) {
             hlls.put(hll, new HLL());
@@ -74,7 +71,7 @@ public class NQPCompUnitScope extends NQPScope {
 
     @Override
     public GlobalContext getGlobalContext() {
-        return globalContext;
+        return outer.getGlobalContext();
     }
 
 

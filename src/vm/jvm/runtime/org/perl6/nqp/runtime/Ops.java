@@ -7167,7 +7167,7 @@ public final class Ops {
     }
 
     public static String runtrufflebytecode(String file, ThreadContext tc) {
-        (new ByteCodeRunnerGen()).runByteCode(file);
+        (new ByteCodeRunnerGen()).runByteCode(new org.perl6.nqp.truffle.GlobalContext(), file);
         return file;
     }
 

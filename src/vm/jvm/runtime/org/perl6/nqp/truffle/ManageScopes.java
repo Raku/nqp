@@ -48,8 +48,6 @@ import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 import org.perl6.nqp.truffle.nodes.control.NQPStaticBlockNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-import org.perl6.nqp.truffle.sixmodel.Bootstrapper;
-
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -119,9 +117,7 @@ public class ManageScopes {
 
     @Predeserializer("comp-unit")
     public static NQPScope setupCompUnit(NQPScope scope, String hllName) {
-        GlobalContext globalContext = new GlobalContext();
-        Bootstrapper.bootstrap(globalContext);
-        return new NQPCompUnitScope(scope, hllName, globalContext);
+        return new NQPCompUnitScope(scope, hllName);
     }
 
     @Deserializer("comp-unit")

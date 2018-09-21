@@ -19,8 +19,10 @@ import java.nio.file.Path;
 
 
 import org.perl6.nqp.truffle.ByteCodeWriter;
+import org.perl6.nqp.truffle.GlobalContext;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.NQPScopeWithFrame;
+import org.perl6.nqp.truffle.NQPScopeWithGlobalContext;
 
 import org.perl6.nqp.truffle.runtime.HLL;
 
@@ -49,7 +51,7 @@ import org.perl6.nqp.dsl.AstBuilder;
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
         FrameDescriptor frameDescriptor = new FrameDescriptor();
-        RootNode rootNode = new NQPRootNode(null, frameDescriptor, tastToNode(node, new NQPScopeWithFrame(frameDescriptor, null), tc));
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, tastToNode(node, new NQPScopeWithFrame(frameDescriptor,  new NQPScopeWithGlobalContext(new GlobalContext())), tc));
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);

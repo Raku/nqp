@@ -44,6 +44,7 @@ package org.perl6.nqp.truffle;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.sixmodel.TypeObject;
+import org.perl6.nqp.truffle.sixmodel.Bootstrapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ public class GlobalContext {
         hlls = new HashMap<>();
         scs = new HashMap<>();
         compilingSCs = new ArrayList<>();
+        Bootstrapper.bootstrap(this);
     }
 }
 
