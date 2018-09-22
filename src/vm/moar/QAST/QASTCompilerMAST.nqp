@@ -7,9 +7,6 @@ nqp::setmethcache($buf, nqp::hash(
     'new', method () {
         nqp::create($buf)
     },
-    'push', method (uint8 $value) {
-        nqp::push_i(self, $value)
-    },
     'write_s', method (str $s) {
         my @subbuf := nqp::encode($s, 'utf8', nqp::create($buf));
         self.write_buf(@subbuf);
@@ -18,38 +15,22 @@ nqp::setmethcache($buf, nqp::hash(
         nqp::writenum(self, nqp::elems(self), $n, 0);
     },
     'write_uint32', method (uint32 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
+        nqp::writeuint(self, nqp::elems(self), $i, 4);
     },
     'write_uint64', method (uint64 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000, 24));
-        self.push(nqp::bitshiftr_i($i +& 0xFF00000000, 32));
-        self.push(nqp::bitshiftr_i($i +& 0xFF0000000000, 40));
-        self.push(nqp::bitshiftr_i($i +& 0xFF000000000000, 48));
-        self.push(nqp::bitshiftr_i($i +& 0xFF00000000000000, 56));
+        nqp::writeuint(self, nqp::elems(self), $i, 6);
     },
     'write_uint32_at', method (uint32 $i, uint32 $pos) {
-        nqp::bindpos_i(self, $pos, $i +& 0xFF);
-        nqp::bindpos_i(self, $pos + 1, nqp::bitshiftr_i($i +& 0xFF00, 8));
-        nqp::bindpos_i(self, $pos + 2, nqp::bitshiftr_i($i +& 0xFF0000, 16));
-        nqp::bindpos_i(self, $pos + 3, nqp::bitshiftr_i($i +& 0xFF000000, 24));
+        nqp::writeuint(self, $pos, $i, 4);
     },
     'write_uint16', method (uint16 $i) {
-        self.push($i +& 0xFF);
-        self.push(nqp::bitshiftr_i($i +& 0xFF00, 8));
+        nqp::writeuint(self, nqp::elems(self), $i, 2);
     },
     'write_uint8', method (uint8 $i) {
-        self.push($i);
+        nqp::writeuint(self, nqp::elems(self), $i, 0);
     },
     'write_buf', method (@buf) {
-        for @buf {
-            self.push($_);
-        }
+        nqp::splice(self, @buf, nqp::elems(self), 0);
     },
     'dump', method () {
         note(nqp::elems(self) ~ " bytes");
@@ -2303,16 +2284,16 @@ class MoarVM::Callsites {
         my @named_idxs := nqp::list;
         my int $num_nameds := 0;
         my int $i := 0;
+        my $identifier := $buf.new;
         for @flags {
             if $_ +& $callsite_arg_named {
                 my $name := @args[$i + $num_nameds++];
                 nqp::push(@named_idxs, $!string-heap.add(nqp::getattr($name, MAST::SVal, '$!value')));
             }
+            $identifier.write_uint8($_);
             $i++;
         }
 
-        my $identifier := $buf.new;
-        $identifier.write_buf(@flags);
         for @named_idxs {
             $identifier.write_uint16($_);
         }
@@ -2859,7 +2840,7 @@ class MoarVM::StringHeap {
         $str.write_uint32(nqp::elems($encoded) * 2 + $utf8); # LSB is UTF-8 flag
         my $pad := 4 - nqp::elems($encoded) % 4;
         $pad := 0 if $pad == 4;
-        $encoded.push(0) while $pad--;
+        $encoded.write_uint8(0) while $pad--;
         $str.write_buf($encoded);
         nqp::push(@!strings, $str);
 
