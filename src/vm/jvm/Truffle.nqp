@@ -863,6 +863,8 @@ class QAST::TruffleCompiler does SerializeOnce {
 
         my $*BLOCK := BlockInfo.new(NQPMu, NQPMu);
 
+        my @*DECLARATIONS := ['stmts'];
+
         my $pre_deserialize := ['stmts'];
 
         my $deserialization_code := $node.compilation_mode
@@ -876,7 +878,8 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
         }
 
-        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', $pre_deserialize, $deserialization_code, self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
+
+        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', @*DECLARATIONS, $pre_deserialize, $deserialization_code, self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
     }
 
     multi method as_truffle(QAST::VM $node, :$want) {
@@ -994,6 +997,9 @@ class QAST::TruffleCompiler does SerializeOnce {
                 @tree := @body;
             }
 
+            my @*DECLARATIONS := ['stmts'];
+            @body.push(@*DECLARATIONS);
+
             my int $start_of_body := +@body;
 
             self.compile_all_the_children($node, $RETVAL, @body);
@@ -1040,7 +1046,8 @@ class QAST::TruffleCompiler does SerializeOnce {
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 my int $type := self.type_from_typeobj($node.returns);
                 $*BLOCK.register_var_type($node, $type);
-                return TAST.new($type, ["declare-$scope", $type, $node.name, $action]);
+                @*DECLARATIONS.push(["declare-$scope", $type, $node.name, ["null"]]);
+                return TAST.new($type, $action);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);
