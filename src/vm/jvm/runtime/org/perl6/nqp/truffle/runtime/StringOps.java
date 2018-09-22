@@ -1,6 +1,8 @@
 package org.perl6.nqp.truffle.runtime;
-import java.util.HashMap;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
+import java.util.HashMap;
 
 public class StringOps {
     /* Brute force, but not normally needed for most programs. */
@@ -17,16 +19,16 @@ public class StringOps {
             for (int i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("ALERT",            (int)7);
-            names.put("BEL",              (int)7);
-            names.put("LF",               (int)10);
-            names.put("LINE FEED",        (int)10);
-            names.put("FF",               (int)12);
-            names.put("FORM FEED",        (int)12);
-            names.put("CR",               (int)13);
-            names.put("CARRIAGE RETURN",  (int)13);
-            names.put("NEL",              (int)133);
-            names.put("NEXT LINE",        (int)133);
+            names.put("ALERT",            7);
+            names.put("BEL",              7);
+            names.put("LF",               10);
+            names.put("LINE FEED",        10);
+            names.put("FF",               12);
+            names.put("FORM FEED",        12);
+            names.put("CR",               13);
+            names.put("CARRIAGE RETURN",  13);
+            names.put("NEL",              133);
+            names.put("NEXT LINE",        133);
             names.remove("BELL"); // added below as 0x1F514, cmp. RT #130542
             cpNameMap = names;
             cpNameMapAboveBMP = false;
@@ -38,7 +40,7 @@ public class StringOps {
             for (int i = Character.MAX_VALUE; i <= 0x10FFFF; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("BELL",             (int)0x1F514);
+            names.put("BELL",             0x1F514);
             cpNameMapAboveBMP = true;
             found = names.get(name);
         }

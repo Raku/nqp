@@ -1,6 +1,5 @@
 package org.perl6.nqp.truffle.runtime;
 
-import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 import java.util.HashMap;
@@ -8,12 +7,12 @@ import java.util.Map;
 import java.util.Set;
 
 public final class NQPHash {
-    HashMap<String, Object> contents;
+    private HashMap<String, Object> contents;
 
     public SerializationContext sc;
 
     public NQPHash() {
-        this.contents = new HashMap<String, Object>();
+        this.contents = new HashMap<>();
     }
 
     public NQPHash(HashMap<String, Object> contents) {

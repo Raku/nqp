@@ -1,6 +1,7 @@
 package org.perl6.nqp.truffle.runtime;
 
 import org.perl6.nqp.truffle.runtime.doubleconv.DoubleConversion;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
 
 public class Coercions {

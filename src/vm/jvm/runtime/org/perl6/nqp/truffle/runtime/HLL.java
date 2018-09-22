@@ -1,13 +1,12 @@
 package org.perl6.nqp.truffle.runtime;
 
-import org.perl6.nqp.truffle.runtime.NQPNull;
 import java.util.HashMap;
 
 public final class HLL {
-    HashMap<String, Object> symbols;
+    private HashMap<String, Object> symbols;
 
     public HLL() {
-        symbols = new HashMap<String, Object>();
+        symbols = new HashMap<>();
     }
 
     public Object getSymbol(String key) {

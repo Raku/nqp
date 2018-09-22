@@ -3,10 +3,10 @@ package org.perl6.nqp.truffle.runtime;
 import java.util.ArrayList;
 
 public final class NQPListInt {
-    ArrayList<Long> contents;
+    private ArrayList<Long> contents;
 
     public NQPListInt() {
-        this.contents = new ArrayList<Long>();
+        this.contents = new ArrayList<>();
     }
 
     public long pushInt(long element) {

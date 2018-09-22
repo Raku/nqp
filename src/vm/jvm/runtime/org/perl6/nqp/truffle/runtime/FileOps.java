@@ -1,9 +1,9 @@
 package org.perl6.nqp.truffle.runtime;
+
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
-import java.io.File;
+
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
-import java.nio.file.NotLinkException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -219,7 +219,7 @@ public class FileOps {
         }
 
         try {
-            FileTime ft = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
+            final FileTime ft = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
             return ft.to(TimeUnit.NANOSECONDS) / 1000000000;
         } catch (Exception e) {
             return -1;

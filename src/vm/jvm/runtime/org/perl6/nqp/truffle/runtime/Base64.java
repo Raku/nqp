@@ -1,6 +1,7 @@
 package org.perl6.nqp.truffle.runtime;
 
 import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
 import java.nio.ByteBuffer;
 
 public class Base64 {
@@ -68,7 +69,7 @@ public class Base64 {
     public static ByteBuffer decode(String s)
     {
         if (s.length() % 4 != 0)
-            new RuntimeException("Invalid Base64 input");
+            throw new RuntimeException("Invalid Base64 input");
 
         byte[] data = new byte[s.length() / 4 * 3];
         int n[] = new int[4];
@@ -81,13 +82,13 @@ public class Base64 {
             n[3] = POS(s.charAt(p++));
 
             if (n[0] == -2 || n[1] == -2 || n[2] == -2 || n[3] == -2)
-                new RuntimeException("Invalid Base64 input");
+                throw new RuntimeException("Invalid Base64 input");
 
             if (n[0] == -1 || n[1] == -1)
-                new RuntimeException("Invalid Base64 input");
+                throw new RuntimeException("Invalid Base64 input");
 
             if (n[2] == -1 && n[3] != -1)
-                new RuntimeException("Invalid Base64 input");
+                throw new RuntimeException("Invalid Base64 input");
 
             data[q] = (byte)((n[0] << 2) + (n[1] >> 4));
             if (n[2] != -1)

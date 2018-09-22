@@ -1,11 +1,13 @@
 package org.perl6.nqp.truffle.runtime;
+
+import org.perl6.nqp.truffle.nodes.NQPNode;
+
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerAsserts;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.perl6.nqp.truffle.nodes.NQPNode;
 
 public final class NQPArguments {
     public static final int OUTER_FRAME_INDEX = 0;
@@ -28,7 +30,7 @@ public final class NQPArguments {
         Object maybeNamedArgs = arguments[NAMED_ARGUMENTS_INDEX];
         HashMap<String, Object> namedArgs;
         if (maybeNamedArgs == null) {
-            namedArgs = new HashMap<String, Object>();
+            namedArgs = new HashMap<>();
             arguments[NAMED_ARGUMENTS_INDEX] = namedArgs;
         } else {
             namedArgs = (HashMap<String, Object>) maybeNamedArgs;

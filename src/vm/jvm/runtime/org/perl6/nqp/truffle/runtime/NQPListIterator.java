@@ -1,14 +1,14 @@
 package org.perl6.nqp.truffle.runtime;
 
 public final class NQPListIterator {
-    final NQPList list;
-    final int target;
-    int idx;
+    private final NQPList list;
+    private final int target;
+    private int idx;
 
     public NQPListIterator(NQPList list) {
         this.list = list;
-        idx = 0;
-        target = list.elems();
+        this.idx = 0;
+        this.target = list.elems();
     }
 
     public Object shift() {

@@ -44,8 +44,6 @@ import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.RootCallTarget;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.frame.MaterializedFrame;
-import org.perl6.nqp.truffle.NQPLanguage;
-
 
 public final class NQPCodeRef  {
 

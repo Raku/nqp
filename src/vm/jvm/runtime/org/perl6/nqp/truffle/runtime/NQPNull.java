@@ -38,6 +38,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.perl6.nqp.truffle.runtime;
 
 public final class NQPNull {
