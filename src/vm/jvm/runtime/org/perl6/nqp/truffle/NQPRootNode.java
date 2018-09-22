@@ -38,20 +38,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.perl6.nqp.truffle;
+
+import org.perl6.nqp.truffle.nodes.NQPNode;
 
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.nodes.NodeInfo;
-import org.perl6.nqp.truffle.nodes.NQPNode;
-import org.perl6.nqp.truffle.NQPLanguage;
 
 @NodeInfo(language = "NQP", description = "The root of all NQP execution trees")
 public class NQPRootNode extends RootNode {
+
     /** The function body that is executed, and specialized during execution. */
-    @Child private NQPNode bodyNode;
+    @Child
+    private NQPNode bodyNode;
+
     public NQPRootNode(NQPLanguage language, FrameDescriptor frameDescriptor, NQPNode bodyNode) {
         super(language, frameDescriptor);
         this.bodyNode = bodyNode;

@@ -40,5 +40,6 @@
  */
 
 package org.perl6.nqp.truffle;
+
 public final class NQPContext {
 }

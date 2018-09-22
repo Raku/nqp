@@ -38,9 +38,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.perl6.nqp.truffle;
-import org.perl6.nqp.truffle.NQPContext;
+
 import com.oracle.truffle.api.TruffleLanguage;
+
 @TruffleLanguage.Registration(id = NQPLanguage.ID, name = "NQP", version = "0.1", mimeType = NQPLanguage.MIME_TYPE)
 public final class NQPLanguage extends TruffleLanguage<NQPContext> {
     public static final String ID = "nqp";

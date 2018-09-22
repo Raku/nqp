@@ -38,10 +38,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package org.perl6.nqp.truffle;
+
 import com.oracle.truffle.api.dsl.TypeSystem;
-import org.perl6.nqp.truffle.runtime.NQPNull;
-import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+
 @TypeSystem
 public abstract class NQPTypes {
 }
