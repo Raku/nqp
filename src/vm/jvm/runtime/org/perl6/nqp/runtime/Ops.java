@@ -7166,11 +7166,6 @@ public final class Ops {
         return null;
     }
 
-    public static String runtrufflebytecode(String file, ThreadContext tc) {
-        (new ByteCodeRunnerGen()).runByteCode(new org.perl6.nqp.truffle.GlobalContext(), file);
-        return file;
-    }
-
     public static SixModelObject tasttobytecode(SixModelObject tast, String output, ThreadContext tc) {
           (new TruffleCompilerGen()).writeByteCode(tast, output, tc);
           return tast;

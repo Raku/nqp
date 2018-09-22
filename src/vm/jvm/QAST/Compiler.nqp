@@ -2861,7 +2861,6 @@ QAST::OperationsJAST.map_classlib_core_op('atomicstore', $TYPE_OPS, 'atomicstore
 # Truffle backend hooks
 
 QAST::OperationsJAST.map_classlib_core_op('runtruffle', $TYPE_OPS, 'runtruffle', [$RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('runtrufflebytecode', $TYPE_OPS, 'runtrufflebytecode', [$RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('tasttobytecode', $TYPE_OPS, 'tasttobytecode', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 
 # JVM-specific ops for compilation unit handling
