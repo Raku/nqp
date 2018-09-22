@@ -10,16 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class NQPArguments {
-    public static final int OUTER_FRAME_INDEX = 0;
-    public static final int NAMED_ARGUMENTS_INDEX = 1;
-    public static final int RUNTIME_ARGUMENT_COUNT = 2;
+    private static final int OUTER_FRAME_INDEX = 0;
+    private static final int NAMED_ARGUMENTS_INDEX = 1;
+    private static final int RUNTIME_ARGUMENT_COUNT = 2;
 
     public static Object getUserArgument(Object[] arguments, int index) {
         return arguments[index + RUNTIME_ARGUMENT_COUNT];
     }
 
     public static boolean hasUserArgument(Object[] arguments, int index) {
-        return index + RUNTIME_ARGUMENT_COUNT < arguments.length;
+        return (index + RUNTIME_ARGUMENT_COUNT) < arguments.length;
     }
 
     public static void setUserArgument(Object[] arguments, int index, Object value) {
@@ -27,16 +27,13 @@ public final class NQPArguments {
     }
 
     public static void setNamedArgument(Object[] arguments, String key, Object value) {
-        Object maybeNamedArgs = arguments[NAMED_ARGUMENTS_INDEX];
-        HashMap<String, Object> namedArgs;
-        if (maybeNamedArgs == null) {
-            namedArgs = new HashMap<>();
-            arguments[NAMED_ARGUMENTS_INDEX] = namedArgs;
-        } else {
-            namedArgs = (HashMap<String, Object>) maybeNamedArgs;
+        if (arguments[NAMED_ARGUMENTS_INDEX] == null) {
+            arguments[NAMED_ARGUMENTS_INDEX] = new HashMap<String, Object>();
         }
 
-        namedArgs.put(key, value);
+        if (arguments[NAMED_ARGUMENTS_INDEX] instanceof HashMap) {
+            ((HashMap<String, Object>) arguments[NAMED_ARGUMENTS_INDEX]).put(key, value);
+        }
     }
 
     public static Object getNamedArgument(Object[] arguments, String key) {
@@ -59,33 +56,37 @@ public final class NQPArguments {
     }
 
     public static Object[] createInitial(int userArgumentCount) {
-        Object[] result = new Object[RUNTIME_ARGUMENT_COUNT + userArgumentCount];
-        return result;
+        return new Object[RUNTIME_ARGUMENT_COUNT + userArgumentCount];
     }
 
     public static int getUserArgumentCount(Object[] arguments) {
         return arguments.length - RUNTIME_ARGUMENT_COUNT;
     }
 
-    public static final long NAMED = 1;
-    public static final long FLAT = 2;
+    private static final long NAMED = 1;
+    private static final long FLAT = 2;
 
-    public static Object[] unpack(VirtualFrame frame, int extra, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+    public static Object[] unpack(
+        VirtualFrame frame,
+        int extra,
+        long[] argumentFlags,
+        String[] argumentNames,
+        NQPNode[] argumentNodes
+    ) {
         CompilerAsserts.compilationConstant(argumentNodes.length);
 
+        final Object[] values = new Object[argumentNodes.length];
+
         int count = 0;
-        Object[] values = new Object[argumentNodes.length];
         for (int i = 0; i < argumentNodes.length; i++) {
             values[i] = argumentNodes[i].execute(frame);
-            if ((argumentFlags[i] & NAMED) != 0) {
-            } else if ((argumentFlags[i] & FLAT) != 0) {
-                count += ((NQPList) values[i]).elems();
-            } else {
-                count++;
+
+            if ((argumentFlags[i] & NAMED) == 0) {
+                count += ((argumentFlags[i] & FLAT) != 0) ? ((NQPList) values[i]).elems() : 1;
             }
         }
 
-        Object[] arguments =  NQPArguments.createInitial(extra + count);
+        final Object[] arguments =  NQPArguments.createInitial(extra + count);
 
         int positional = extra;
         int nameIndex = 0;
