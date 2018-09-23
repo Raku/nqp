@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2015, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * The Universal Permissive License (UPL), Version 1.0
@@ -38,66 +38,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.perl6.nqp.truffle.nodes.call;
+package org.perl6.nqp.truffle.nodes.variables;
 
 import com.oracle.truffle.api.frame.FrameSlot;
+import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.VirtualFrame;
-import com.oracle.truffle.api.instrumentation.StandardTags;
-import com.oracle.truffle.api.instrumentation.Tag;
-import com.oracle.truffle.api.nodes.ExplodeLoop;
-import com.oracle.truffle.api.nodes.NodeInfo;
-
+import com.oracle.truffle.api.frame.Frame;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
+import org.perl6.nqp.truffle.runtime.DynamicContext;
+import org.perl6.nqp.dsl.Deserializer;
 
 import org.perl6.nqp.truffle.NQPScope;
 
-import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-import org.perl6.nqp.truffle.runtime.NQPArguments;
-import org.perl6.nqp.truffle.runtime.NQPList;
-import org.perl6.nqp.truffle.runtime.NQPHash;
-
-import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
-import org.perl6.nqp.dsl.Deserializer;
-
-
-@NodeInfo(shortName = "call")
-public final class NQPCallNode extends NQPObjNode {
+public class NQPDynamicGetDirectNode extends NQPObjNode {
     private final FrameSlot contextSlot;
+    private final String name;
 
-    @Child private NQPNode functionNode;
-
-    @Children private final NQPNode[] argumentNodes;
-
-    @CompilationFinal(dimensions = 1)
-    private final long[] argumentFlags;
-
-    @CompilationFinal(dimensions = 1)
-    private final String[] argumentNames;
-
-    @Child private NQPDispatchNode dispatchNode;
-
-    public NQPCallNode(FrameSlot contextSlot, NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+    public NQPDynamicGetDirectNode(FrameSlot contextSlot, String name) {
         this.contextSlot = contextSlot;
-        this.functionNode = functionNode;
-        this.argumentFlags = argumentFlags;
-        this.argumentNames = argumentNames;
-        this.argumentNodes = argumentNodes;
-        this.dispatchNode = NQPDispatchNodeGen.create();
+        this.name = name;
     }
 
-    @Deserializer("call")
-    public static NQPCallNode deserialize(NQPScope scope, NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
-        return new NQPCallNode(scope.getContextSlot(), functionNode, argumentFlags, argumentNames, argumentNodes);
+    @Deserializer("dynamic-get-direct")
+    public static NQPDynamicGetDirectNode getLexical(NQPScope scope, String name) {
+        FrameSlot contextSlot = scope.getContextSlot();
+        return new NQPDynamicGetDirectNode(contextSlot, name);
     }
 
-    @ExplodeLoop
     @Override
     public Object execute(VirtualFrame frame) {
-        Object function = functionNode.execute(frame);
-
-        Object[] arguments = NQPArguments.unpack(frame, contextSlot, 0, argumentFlags, argumentNames, argumentNodes);
-
-        return dispatchNode.executeDispatch(function, arguments);
+        DynamicContext context = (DynamicContext) FrameUtil.getObjectSafe(frame, contextSlot);
+        return context.lookupDirect(name);
     }
 }

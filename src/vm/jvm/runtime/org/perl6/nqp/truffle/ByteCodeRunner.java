@@ -44,11 +44,13 @@ package org.perl6.nqp.truffle;
 import org.perl6.nqp.dsl.AstBuilder;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.runtime.DynamicContext;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.CallTarget;
 import com.oracle.truffle.api.nodes.RootNode;
 import com.oracle.truffle.api.frame.FrameDescriptor;
+import com.oracle.truffle.api.frame.FrameSlot;
 
 import java.io.IOException;
 import java.io.FileInputStream;
@@ -81,7 +83,7 @@ abstract class ByteCodeRunner {
         return nodes;
     }
 
-    public void runByteCode(GlobalContext globalContext, String input) {
+    public void runByteCode(GlobalContext globalContext, DynamicContext context, String input) {
         try {
             FileInputStream stream = new FileInputStream(input);
             FileChannel channel = stream.getChannel();
@@ -103,7 +105,7 @@ abstract class ByteCodeRunner {
             RootNode rootNode = new NQPRootNode(null, frameDescriptor, byteCodeToNode(reader, new NQPScopeWithFrame(frameDescriptor, new NQPScopeWithGlobalContext(globalContext))));
 
             CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
-            callTarget.call();
+            callTarget.call(context);
 
             channel.close();
             stream.close();

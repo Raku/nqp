@@ -25,6 +25,7 @@ import org.perl6.nqp.truffle.NQPScopeWithFrame;
 import org.perl6.nqp.truffle.NQPScopeWithGlobalContext;
 
 import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.runtime.DynamicContext;
 
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -55,7 +56,7 @@ abstract class TruffleCompiler {
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
-        callTarget.call();
+        callTarget.call(new DynamicContext());
     }
 
     protected NQPNode[] tastToNodeArray(SixModelObject node, int from, NQPScope scope, ThreadContext tc) {

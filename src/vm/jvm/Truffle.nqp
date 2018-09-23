@@ -590,6 +590,7 @@ class QAST::TruffleCompiler does SerializeOnce {
         has $!outer; # Outer block's BlockInfo
         has @!params; # the parameters the block takes
         has $!var_types; # Mapping of variables types
+        has $!has_dynamic_context; # Do we create a new dynamic context
 
         method var_type($var) {
             $!var_types{$var.scope}{$var.name};
@@ -617,6 +618,11 @@ class QAST::TruffleCompiler does SerializeOnce {
 
         method params() { @!params }
         method outer() { $!outer }
+
+        method has_dynamic_context($value = NO_VALUE) {
+            $!has_dynamic_context := $value unless $value =:= NO_VALUE;
+            $!has_dynamic_context;
+        }
     }
 
     method compile(QAST::CompUnit $cu) {
@@ -878,8 +884,18 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
         }
 
+        # TODO main/load
+        my $block := self.as_truffle($node[0], :want($OBJ)).tree;
 
-        TAST.new($OBJ, ['comp-unit', $node.hll, ['stmts', @*DECLARATIONS, $pre_deserialize, $deserialization_code, self.as_truffle($node[0][1], :want($VOID)).tree, self.as_truffle($node[0][3], :want($OBJ)).tree]]);
+        TAST.new($OBJ, [
+            'comp-unit', $node.hll, ['stmts',
+                [$*BLOCK.has_dynamic_context ?? 'create-new-context' !! 'get-parent-context'],
+                @*DECLARATIONS,
+                $pre_deserialize,
+                $deserialization_code,
+                ['call', $block, [], []]
+            ]
+        ]);
     }
 
     multi method as_truffle(QAST::VM $node, :$want) {
@@ -997,6 +1013,8 @@ class QAST::TruffleCompiler does SerializeOnce {
                 @tree := @body;
             }
 
+            @body.push(['get-parent-context']);
+
             my @*DECLARATIONS := ['stmts'];
             @body.push(@*DECLARATIONS);
 
@@ -1024,13 +1042,43 @@ class QAST::TruffleCompiler does SerializeOnce {
         TAST.new($NUM, ['nval', $node.value]);
     }
 
+    method is_dynamic_var(QAST::Var $var) {
+        # HACK due to a nqp misdesign we need to check the name for the * twigil
+        # TODO Make nqp mark dynamic variables explicitly
+        my str $name := $var.name;
+        if nqp::chars($name) > 2 {
+            my str $sigil := nqp::substr($name, 0, 1);
+            my str $twigil := nqp::substr($name, 1, 1);
+            if $twigil eq '*' || $twigil eq '?' {
+              return 1;
+            }
+        }
+
+        return 0;
+    }
+
     # TODO native types for variables
     multi method as_truffle(QAST::Var $node, :$want) {
         my $action;
 
         my $type := self.figure_out_type($node);
 
-        if $node.scope eq 'lexical' || $node.scope eq 'local' {
+        if $node.scope eq 'lexical' && self.is_dynamic_var($node) {
+            if $node.decl eq 'var' {
+                nqp::say("declaring a dynamic variable");
+                # TODO avoid double binds
+                @*DECLARATIONS.push(["dynamic-bind-direct", $node.name, ["null"]]);
+            }
+
+            if $*BINDVAL {
+                $*BLOCK.has_dynamic_context(1);
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($type));
+                return TAST.new($OBJ, ["dynamic-bind-direct", $node.name, $value.tree]);
+            } else {
+                return TAST.new($OBJ, ["dynamic-get-direct", $node.name]);
+            }
+        }
+        elsif $node.scope eq 'lexical' || $node.scope eq 'local' {
             my str $scope := $node.scope;
             if $*BINDVAL {
                 my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($type));
@@ -1066,6 +1114,14 @@ class QAST::TruffleCompiler does SerializeOnce {
             return self.as_truffle_clear_bindval($*BINDVAL
                 ?? QAST::Op.new( :op('bindkey'), $node[0], $node[1], $*BINDVAL)
                 !! QAST::Op.new( :op('atkey'), $node[0], $node[1]), :$want);
+        }
+        elsif $node.scope eq 'contextual' {
+            if $*BINDVAL {
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($OBJ));
+                return TAST.new($OBJ, ['dynamic-bind', $node.name, $value.tree]);
+            } else {
+                return TAST.new($OBJ, ['dynamic-get', $node.name]);
+            }
         }
         else {
             self.NYI("var scope {$node.scope}");

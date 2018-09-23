@@ -56,6 +56,8 @@ public abstract class NQPScope {
     public abstract FrameSlot addLocal(String name);
     public abstract FrameSlot findLocal(String name);
 
+    public abstract FrameSlot getContextSlot();
+
     public abstract HLL getCurrentHLL();
 
     public abstract NQPCodeRef getCuid(String cuid);

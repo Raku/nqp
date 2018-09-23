@@ -1,8 +1,10 @@
 package org.perl6.nqp.truffle.nodes.call;
 
+import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -14,9 +16,10 @@ import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "callmethod")
 public final class NQPCallmethodNode extends NQPObjNode {
-
     public static final long NAMED = 1;
     public static final long FLAT = 2;
+
+    private final FrameSlot contextSlot;
 
     @Child private NQPNode invocantNode;
     @Child private NQPNode methodNode;
@@ -29,13 +32,18 @@ public final class NQPCallmethodNode extends NQPObjNode {
 
     @Children private final NQPNode[] argumentNodes;
 
-    @Deserializer("callmethod")
-    public NQPCallmethodNode(NQPNode invocantNode, NQPNode methodNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+    public NQPCallmethodNode(FrameSlot contextSlot, NQPNode invocantNode, NQPNode methodNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+        this.contextSlot = contextSlot;
         this.invocantNode = invocantNode;
         this.methodNode = methodNode;
         this.argumentFlags = argumentFlags;
         this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
+    }
+
+    @Deserializer("callmethod")
+    public static NQPCallmethodNode deserialize(NQPScope scope, NQPNode invocantNode, NQPNode methodNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
+        return new NQPCallmethodNode(scope.getContextSlot(), invocantNode, methodNode, argumentFlags, argumentNames, argumentNodes);
     }
 
     @Override
@@ -51,7 +59,7 @@ public final class NQPCallmethodNode extends NQPObjNode {
             Object foundMethod = typeObject.stable.methodCache.get(method);
             if (foundMethod != null) {
 
-                Object[] arguments = NQPArguments.unpack(frame, 1, argumentFlags, argumentNames, argumentNodes);
+                Object[] arguments = NQPArguments.unpack(frame, contextSlot, 1, argumentFlags, argumentNames, argumentNodes);
                 NQPArguments.setUserArgument(arguments, 0, invocant);
 
                 NQPCodeRef function = (NQPCodeRef) foundMethod;

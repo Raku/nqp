@@ -2,6 +2,8 @@ package org.perl6.nqp.truffle.runtime;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 
+import com.oracle.truffle.api.frame.FrameUtil;
+import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerAsserts;
@@ -10,9 +12,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class NQPArguments {
-    private static final int OUTER_FRAME_INDEX = 0;
-    private static final int NAMED_ARGUMENTS_INDEX = 1;
-    private static final int RUNTIME_ARGUMENT_COUNT = 2;
+    private static final int DYNAMIC_CONTEXT_INDEX = 0;
+    private static final int OUTER_FRAME_INDEX = 1;
+    private static final int NAMED_ARGUMENTS_INDEX = 2;
+    private static final int RUNTIME_ARGUMENT_COUNT = 3;
 
     public static Object getUserArgument(Object[] arguments, int index) {
         return arguments[index + RUNTIME_ARGUMENT_COUNT];
@@ -55,6 +58,14 @@ public final class NQPArguments {
         return (MaterializedFrame) arguments[OUTER_FRAME_INDEX];
     }
 
+    public static void setDynamicContext(Object[] arguments, DynamicContext context) {
+        arguments[DYNAMIC_CONTEXT_INDEX] = context;
+    }
+
+    public static DynamicContext getDynamicContext(Object[] arguments) {
+        return (DynamicContext) arguments[DYNAMIC_CONTEXT_INDEX];
+    }
+
     public static Object[] createInitial(int userArgumentCount) {
         return new Object[RUNTIME_ARGUMENT_COUNT + userArgumentCount];
     }
@@ -68,6 +79,7 @@ public final class NQPArguments {
 
     public static Object[] unpack(
         VirtualFrame frame,
+        FrameSlot contextSlot,
         int extra,
         long[] argumentFlags,
         String[] argumentNames,
@@ -87,6 +99,8 @@ public final class NQPArguments {
         }
 
         final Object[] arguments =  NQPArguments.createInitial(extra + count);
+
+        NQPArguments.setDynamicContext(arguments, (DynamicContext) FrameUtil.getObjectSafe(frame, contextSlot));
 
         int positional = extra;
         int nameIndex = 0;

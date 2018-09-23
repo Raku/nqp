@@ -54,4 +54,9 @@ public class NQPScopeWithGlobalContext extends NQPScope {
     public FrameSlot findLocal(String name) {
         throw new RuntimeException("Can't add find local");
     }
+
+    @Override
+    public FrameSlot getContextSlot() {
+        throw new RuntimeException("Can't get a context slot");
+    }
 }

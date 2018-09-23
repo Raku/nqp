@@ -48,7 +48,12 @@ import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.FrameSlot;
 
+
 public class NQPScopeWithFrame extends NQPScope {
+    static class ContextSlot {
+        public static final ContextSlot SINGLETON = new ContextSlot();
+        private ContextSlot() {}
+    }
 
     static class NQPLocalVariable {
         final String name;
@@ -113,7 +118,12 @@ public class NQPScopeWithFrame extends NQPScope {
     }
 
     public FrameDescriptor getFrameDescriptor() {
-        return this.frameDescriptor;
+        return frameDescriptor;
+    }
+
+    @Override
+    public FrameSlot getContextSlot() {
+        return frameDescriptor.findOrAddFrameSlot(ContextSlot.SINGLETON, FrameSlotKind.Object);
     }
 
     @Override

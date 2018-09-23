@@ -76,6 +76,12 @@ public class NQPCompUnitScope extends NQPScope {
 
 
     @Override
+    public FrameSlot getContextSlot() {
+        return outer.getContextSlot();
+    }
+
+
+    @Override
     public HLL getCurrentHLL() {
         return currentHLL;
     }
