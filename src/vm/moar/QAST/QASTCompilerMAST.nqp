@@ -100,6 +100,8 @@ my class MASTCompilerInstance {
     # The most recent op we tried to compile, for error reporting.
     has $!last_op;
 
+    has $!writer;
+
     # This uses a very simple scheme. Write registers are assumed
     # to be write-once, read-once.  Therefore, if a QAST control
     # structure wants to reuse the intermediate result of an
@@ -433,7 +435,12 @@ my class MASTCompilerInstance {
     method to_mast($qast, %mast_frames = nqp::hash()) {
         # Set up compilation state.
         $!hll := '';
-        $!mast_compunit := MAST::CompUnit.new();
+        my $string-heap := MoarVM::StringHeap.new();
+        my $callsites := MoarVM::Callsites.new(:$string-heap);
+        my $annotations := $buf.new;
+        $!writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations);
+        $!mast_compunit := MAST::CompUnit.new(:$!writer);
+        $!writer.set-compunit($!mast_compunit);
         %!mast_frames := %mast_frames;
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
@@ -954,7 +961,7 @@ my class MASTCompilerInstance {
         my $sh := $sc_tuple[1];
 
         $!mast_compunit.serialized(self.decode_serialized_data($serialized));
-        $!mast_compunit.string_heap($sh);
+        $!mast_compunit.add_strings($sh);
 
         # String heap QAST.
         my $sh_ast;
@@ -1039,7 +1046,9 @@ my class MASTCompilerInstance {
             # Create an empty frame and add it to the compilation unit.
             my $frame := MAST::Frame.new(
                 :name($node.name),
-                :cuuid($cuid));
+                :cuuid($cuid),
+                :writer($!writer),
+                :compunit($!mast_compunit));
 
             $!mast_compunit.add_frame($frame);
             try $outer := $*BLOCK;
@@ -2331,475 +2340,6 @@ class MoarVM::Callsites {
     }
 }
 
-class MoarVM::Handler {
-    has $!start_offset;
-    has $!end_offset;
-    has $!category_mask;
-    has $!action;
-    has $!label;
-    has $!label_reg;
-    has $!local;
-    method BUILD(:$start_offset, :$end_offset, :$category_mask, :$action, :$label) {
-        $!start_offset  := $start_offset;
-        $!end_offset    := $end_offset;
-        $!category_mask := $category_mask;
-        $!action        := $action;
-        $!label         := $label;
-    }
-    method start_offset()    { $!start_offset }
-    method end_offset()      { $!end_offset }
-    method category_mask()   { $!category_mask }
-    method action()          { $!action }
-    method label()           { $!label }
-    method label_reg()       { $!label_reg }
-    method set_label_reg($l) { $!label_reg := $l }
-    method local()           { $!local }
-    method set_local($l)     { $!local := $l }
-}
-
-class MoarVM::Frame {
-    has $!writer;
-    has $!mast;
-    has $!compunit;
-
-    has str $!cuuid;
-    has uint32 $!cuuid-idx;
-    has str $!name;
-    has uint32 $!name-idx;
-    has $!bytecode;
-    has uint32 $!bytecode-offset;
-    has $!string-heap;
-    has %!labels;
-    has %!label-fixups;
-    has $!callsites;
-    has @!lexical-names;
-    has $!annotations;
-    has $!annotations-offset;
-    has $!num-annotations;
-    has @!handlers;
-
-    method BUILD(:$cuuid, :$name, :$string-heap, :$callsites, :$annotations, :$writer, :$compunit, :$mast) {
-        $!cuuid              := $cuuid;
-        $!name               := $name;
-        $!writer             := $writer;
-        $!compunit           := $compunit;
-        $!mast               := $mast;
-        $!bytecode           := $buf.new;
-        $!string-heap        := $string-heap;
-        $!cuuid-idx          := $string-heap.add($!cuuid);
-        $!name-idx           := $string-heap.add($!name);
-        $!callsites          := $callsites;
-        $!annotations        := $annotations;
-        $!num-annotations    := 0;
-        @!handlers           := nqp::list;
-        %!labels             := nqp::hash;
-        %!label-fixups       := nqp::hash;
-        @!lexical-names      := nqp::list;
-        $!annotations-offset := nqp::elems($!annotations);
-
-        for nqp::getattr($!mast, MAST::Frame, '@!lexical_names') {
-            nqp::push(@!lexical-names, self.add-string($_));
-        }
-        for $mast.instructions -> $i {
-            self.write_instruction($i);
-        }
-    }
-    method cuuid() { $!cuuid }
-    method name() { $!name }
-    method mast() { $!mast }
-    method cuuid-idx() { $!cuuid-idx }
-    method name-idx() { $!name-idx }
-    method bytecode() { $!bytecode }
-    method bytecode-length() { nqp::elems($!bytecode) }
-    method bytecode-offset() { $!bytecode-offset }
-    method annotations-offset() { $!annotations-offset }
-    method set-bytecode-offset($offset) { $!bytecode-offset := $offset }
-    method local_types() {
-        nqp::getattr($!mast, MAST::Frame, '@!local_types')
-    }
-    method lexical_types() {
-        nqp::getattr($!mast, MAST::Frame, '@!lexical_types')
-    }
-    method lexical-name-idxs() { @!lexical-names }
-    method static_lex_values() {
-        nqp::getattr($!mast, MAST::Frame, '@!static_lex_values')
-    }
-    method flags() {
-        nqp::getattr($!mast, MAST::Frame, '$!flags');
-    }
-    method code_obj_sc_dep_idx() {
-        nqp::getattr($!mast, MAST::Frame, '$!code_obj_sc_dep_idx');
-    }
-    method code_obj_sc_idx() {
-        nqp::getattr($!mast, MAST::Frame, '$!code_obj_sc_idx');
-    }
-    method num-annotations() { $!num-annotations }
-    method handlers() { @!handlers }
-    method size() {
-        my uint32 $size := 50
-            + 2  * nqp::elems(self.local_types)
-            + 6  * nqp::elems(self.lexical_types)
-            + 12 * nqp::elems(self.static_lex_values) / 4;
-        for @!handlers {
-            $size := $size + 20;
-            if $_.category_mask +& 4096 {
-                $size := $size + 2;
-            }
-        }
-        $size
-    }
-
-    method add-string(str $s) {
-        $!string-heap.add($s);
-    }
-    method resolve-label($label) {
-        %!labels{nqp::objectid($label)}
-    }
-
-    proto method write_instruction($i) { * }
-    multi method write_instruction(MAST::Op $i) {
-        if $i.op == %MAST::Ops::codes<const_i64> {
-            my $value := nqp::getattr($i.operands[1], MAST::IVal, '$!value');
-            if -32767 < $value && $value < 32768 {
-                $!bytecode.write_uint16(%MAST::Ops::codes<const_i64_16>);
-                self.write_operand($i, 0, $i.operands[0]);
-                $!bytecode.write_uint16($value);
-                return;
-            }
-            elsif -2147483647 < $value && $value < 2147483647 {
-                $!bytecode.write_uint16(%MAST::Ops::codes<const_i64_32>);
-                self.write_operand($i, 0, $i.operands[0]);
-                $!bytecode.write_uint32($value);
-                return;
-            }
-        }
-        $!bytecode.write_uint16($i.op);
-        my int $idx := 0;
-        for $i.operands -> $o {
-            self.write_operand($i, $idx++, $o);
-        }
-    }
-    multi method write_instruction(MAST::Label $i) {
-        my $pos := nqp::elems($!bytecode);
-        my $key := nqp::objectid($i);
-        if %!labels{$key} {
-            nqp::die("Duplicate label at $pos");
-        }
-        %!labels{$key} := $pos;
-        if nqp::existskey(%!label-fixups, $key) {
-            for %!label-fixups{$key} {
-                $!bytecode.write_uint32_at($pos, $_);
-            }
-        }
-    }
-
-    my $MVM_reg_int8  := 1;
-    my $MVM_reg_int16 := 2;
-    my $MVM_reg_int32 := 3;
-    my $MVM_reg_int64 := 4;
-    my $MVM_reg_num32 := 5;
-    my $MVM_reg_num64 := 6;
-    my $MVM_reg_str   := 7;
-    my $MVM_reg_obj   := 8;
-
-    my $MVM_operand_literal := 0;
-    my $MVM_operand_read_reg := 1;
-    my $MVM_operand_write_reg := 2;
-    my $MVM_operand_read_lex := 3;
-    my $MVM_operand_write_lex := 4;
-    my $MVM_operand_rw_mask := 7;
-    my $MVM_operand_int8 := 8;
-    my $MVM_operand_int16 := 16;
-    my $MVM_operand_int32 := 24;
-    my $MVM_operand_int64 := 32;
-    my $MVM_operand_num32 := 40;
-    my $MVM_operand_num64 := 48;
-    my $MVM_operand_str := 56;
-    my $MVM_operand_obj := 64;
-    my $MVM_operand_ins := 72;
-    my $MVM_operand_type_var := 80;
-    my $MVM_operand_lex_outer := 88;
-    my $MVM_operand_coderef := 96;
-    my $MVM_operand_callsite := 104;
-    my $MVM_operand_type_mask := 248;
-    my $MVM_operand_spesh_slot := 128;
-    my $MVM_operand_uint8 := 136;
-    my $MVM_operand_uint16 := 144;
-    my $MVM_operand_uint32 := 152;
-    my $MVM_operand_uint64 := 160;
-
-    my @kind_to_args := [0,
-        $Arg::int,  # $MVM_reg_int8            := 1;
-        $Arg::int,  # $MVM_reg_int16           := 2;
-        $Arg::int,  # $MVM_reg_int32           := 3;
-        $Arg::int,  # $MVM_reg_int64           := 4;
-        $Arg::num,  # $MVM_reg_num32           := 5;
-        $Arg::num,  # $MVM_reg_num64           := 6;
-        $Arg::str,  # $MVM_reg_str             := 7;
-        $Arg::obj   # $MVM_reg_obj             := 8;
-    ];
-    method compile_operand($rw, $type, $arg) {
-        if $rw == $MVM_operand_literal {
-            if $type == $MVM_operand_int64 {
-                $!bytecode.write_uint64(nqp::getattr($arg, MAST::IVal, '$!value'));
-            }
-            elsif $type == $MVM_operand_int16 {
-                my $value := nqp::getattr($arg, MAST::IVal, '$!value');
-                if $value < -32768 || 32767 < $value {
-                    nqp::die("Value outside range of 16-bit MAST::IVal");
-                }
-                $!bytecode.write_uint16($value);
-            }
-            elsif $type == $MVM_operand_num64 {
-                $!bytecode.write_double(nqp::getattr($arg, MAST::NVal, '$!value'));
-            }
-            elsif $type == $MVM_operand_str {
-                $!bytecode.write_uint32(self.add-string(nqp::getattr($arg, MAST::SVal, '$!value')));
-            }
-            elsif $type == $MVM_operand_ins {
-                my $key := nqp::objectid($arg);
-                if nqp::existskey(%!labels, $key) {
-                    $!bytecode.write_uint32(%!labels{$key});
-                }
-                else {
-                    my @fixups := nqp::existskey(%!label-fixups, $key)
-                        ?? %!label-fixups{$key}
-                        !! (%!label-fixups{$key} := nqp::list);
-                    nqp::push(@fixups, nqp::elems($!bytecode));
-                    $!bytecode.write_uint32(0);
-                }
-            }
-            elsif $type == $MVM_operand_coderef {
-                nqp::die("Expected MAST::Frame, but didn't get one")
-                    unless $arg.isa(MAST::Frame);
-                $!bytecode.write_uint16($!writer.get_frame_index($arg));
-            }
-            else {
-                nqp::die("literal operand type $type NYI");
-            }
-        }
-        elsif $rw == $MVM_operand_read_reg || $rw == $MVM_operand_write_reg {
-            nqp::die("Expected MAST::Local, but didn't get one")
-                unless $arg.isa(MAST::Local);
-
-            my @local_types := self.local_types;
-            my $index := $arg.index;
-            if $arg.index > nqp::elems(self.local_types) {
-                nqp::die("MAST::Local index out of range");
-            }
-            my $local_type := @local_types[$index];
-            if ($type != nqp::bitshiftl_i(type_to_local_type($local_type), 3) && $type != $MVM_operand_type_var) {
-                nqp::die("MAST::Local of wrong type specified");
-            }
-
-            $!bytecode.write_uint16($index);
-        }
-        elsif $rw == $MVM_operand_read_lex || $rw == $MVM_operand_write_lex {
-            nqp::die("Expected MAST::Lexical, but didn't get one")
-                unless $arg.isa(MAST::Lexical);
-            $!bytecode.write_uint16($arg.index);
-            $!bytecode.write_uint16(nqp::getattr($arg, MAST::Lexical, '$!frames_out'));
-        }
-        else {
-            nqp::die("Unknown operand mode $rw cannot be compiled");
-        }
-    }
-    multi method write_instruction(MAST::Call $i) {
-        my $target := nqp::getattr($i, MAST::Call, '$!target');
-        my @flags  := nqp::getattr($i, MAST::Call, '@!flags');
-        my @args   := nqp::getattr($i, MAST::Call, '@!args');
-        my $result := nqp::getattr($i, MAST::Call, '$!result');
-        my $op     := nqp::getattr($i, MAST::Call, '$!op');
-        my $callsite-id := $!callsites.get_callsite_id(@flags, @args);
-
-        $!bytecode.write_uint16(%MAST::Ops::codes<prepargs>);
-        $!bytecode.write_uint16($callsite-id);
-
-        my $call_op :=
-            $op == 1
-                ?? %MAST::Ops::codes<nativeinvoke_v>
-                !! $op == 2
-                    ?? %MAST::Ops::codes<speshresolve>
-                    !! %MAST::Ops::codes<invoke_v>;
-
-        my uint16 $arg_pos := $op == 1 ?? 1 !! 0;
-        my uint16 $arg_out_pos := 0;
-        for @flags -> $flag {
-            if $flag +& $Arg::named {
-                $!bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
-                $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand(0, $MVM_operand_str, @args[$arg_pos]);
-                $arg_pos++;
-                $arg_out_pos++;
-            }
-            elsif $flag +& $Arg::flat {
-                nqp::die("Illegal flat arg to speshresolve") if $op == 2;
-            }
-
-            if $op == 2 && !($flag +& $Arg::obj) {
-                nqp::die("Illegal non-object arg to speshresolve:\n" ~ $i.dump);
-            }
-            if $flag +& $Arg::obj {
-                $!bytecode.write_uint16(%MAST::Ops::codes<arg_o>);
-                $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand($MVM_operand_read_reg, $MVM_operand_obj, @args[$arg_pos]);
-            }
-            elsif $flag +& $Arg::str {
-                $!bytecode.write_uint16(%MAST::Ops::codes<arg_s>);
-                $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand($MVM_operand_read_reg, $MVM_operand_str, @args[$arg_pos]);
-            }
-            elsif $flag +& $Arg::int {
-                $!bytecode.write_uint16(%MAST::Ops::codes<arg_i>);
-                $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand($MVM_operand_read_reg, $MVM_operand_int64, @args[$arg_pos]);
-            }
-            elsif $flag +& $Arg::num {
-                $!bytecode.write_uint16(%MAST::Ops::codes<arg_n>);
-                $!bytecode.write_uint16($arg_out_pos);
-                self.compile_operand($MVM_operand_read_reg, $MVM_operand_num64, @args[$arg_pos]);
-            }
-            else {
-                nqp::die("Unhandled arg type $flag");
-            }
-            $arg_pos++;
-            $arg_out_pos++;
-        }
-
-	my $res_type;
-        if $op == 2 {
-            nqp::die('speshresolve must have a result')
-                unless $result.isa(MAST::Local);
-            nqp::die('MAST::Local index out of range')
-                if $result.index >= nqp::elems(self.local_types);
-            nqp::die('speshresolve must have an object result')
-                if type_to_local_type(self.local_types()[$result.index]) != $MVM_reg_obj;
-            $res_type := $MVM_operand_obj;
-        }
-        elsif $result.isa(MAST::Local) {
-            my @local_types := self.local_types;
-            my $index := $result.index;
-            if $result.index >= nqp::elems(@local_types) {
-                nqp::die("MAST::Local index out of range");
-            }
-            my $op_name := $op == 0 ?? 'invoke_' !! 'nativeinvoke_';
-            if nqp::objprimspec(@local_types[$index]) == 1 {
-                $op_name := $op_name ~ 'i';
-                $res_type := $MVM_operand_int64;
-            }
-            elsif nqp::objprimspec(@local_types[$index]) == 2 {
-                $op_name := $op_name ~ 'n';
-                $res_type := $MVM_operand_num64;
-            }
-            elsif nqp::objprimspec(@local_types[$index]) == 3 {
-                $op_name := $op_name ~ 's';
-                $res_type := $MVM_operand_str;
-            }
-            elsif nqp::objprimspec(@local_types[$index]) == 0 { # object
-                $op_name := $op_name ~ 'o';
-                $res_type := $MVM_operand_obj;
-            }
-            else {
-                nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
-            }
-            $call_op := %MAST::Ops::codes{$op_name};
-        }
-
-        $!bytecode.write_uint16($call_op);
-        if $call_op != %MAST::Ops::codes<invoke_v> && $call_op != %MAST::Ops::codes<nativeinvoke_v> {
-            self.compile_operand($MVM_operand_read_reg, $res_type, $result);
-        }
-        if $op == 2 {
-            self.compile_operand($MVM_operand_literal, $MVM_operand_str, $target);
-        }
-        else {
-            self.compile_operand($MVM_operand_read_reg, $MVM_operand_obj, $target);
-        }
-        if $op == 1 {
-            self.compile_operand($MVM_operand_read_reg, $MVM_operand_obj, @args[0]);
-        }
-    }
-    multi method write_instruction(MAST::Annotated $i) {
-        $!annotations.write_uint32(nqp::elems($!bytecode));
-        $!annotations.write_uint32(self.add-string(nqp::getattr($i, MAST::Annotated, '$!file')));
-        $!annotations.write_uint32(nqp::getattr($i, MAST::Annotated, '$!line'));
-        for nqp::getattr($i, MAST::Annotated, '@!instructions') {
-            self.write_instruction($_);
-        }
-        $!num-annotations++;
-    }
-    multi method write_instruction(MAST::HandlerScope $i) {
-        my $start := nqp::elems($!bytecode);
-        for nqp::getattr($i, MAST::HandlerScope, '@!instructions') {
-            self.write_instruction($_);
-        }
-        my $category_mask := nqp::getattr($i, MAST::HandlerScope, '$!category_mask');
-        my $action := nqp::getattr($i, MAST::HandlerScope, '$!action');
-        my $handler := MoarVM::Handler.new(
-            :start_offset($start),
-            :end_offset(nqp::elems($!bytecode)),
-            :$category_mask,
-            :$action,
-            :label(nqp::getattr($i, MAST::HandlerScope, '$!goto_label')),
-        );
-        nqp::push(@!handlers, $handler);
-        if $category_mask +& 4096 { # MVM_EX_CATEGORY_LABELED
-            my $l := nqp::getattr($i, MAST::HandlerScope, '$!label_local');
-            nqp::die('MAST::Local required for HandlerScope with loop label')
-                unless $l.isa(MAST::Local);
-            nqp::die('MAST::Local index out of range in HandlerScope')
-                if $l.index >= nqp::elems(self.local_types);
-            nqp::die('MAST::Local for HandlerScope must be an object')
-                if type_to_local_type(self.local_types()[$l.index]) != $MVM_reg_obj;
-            $handler.set_label_reg($l.index);
-        }
-        if $action == 2 { # HANDLER_INVOKE
-            $handler.set_local(nqp::getattr(
-                nqp::getattr($i, MAST::HandlerScope, '$!block_local'),
-                MAST::Local,
-                '$!index'
-            ));
-        }
-        elsif $action == 0 || $action == 1 { # HANDLER_UNWIND_GOTO || HANDLER_UNWIND_GOTO_OBJ 
-            $handler.set_local(0);
-        }
-        else {
-            nqp::die('Invalid action code for handler scope');
-        }
-    }
-    multi method write_instruction(MAST::ExtOp $i) {
-        my $op := $i.op;
-        my @extop_sigs := nqp::getattr($!compunit, MAST::CompUnit, '@!extop_sigs');
-        nqp::die("Invalid extension op $op specified")
-            if $op < 1024 || $op - 1024 >= nqp::elems(@extop_sigs); # EXTOP_BASE
-        my @operands := @extop_sigs[$op - 1024];
-
-        $!bytecode.write_uint16($op);
-
-        my $num_operands := nqp::elems(@operands);
-        nqp::die("Instruction has invalid number of operads")
-            if nqp::elems($i.operands) != $num_operands;
-        my $idx := 0;
-        while $idx < $num_operands {
-            my $flags := nqp::atpos_i(@operands, $idx);
-            my $rw    := $flags +& $MVM_operand_rw_mask;
-            my $type  := $flags +& $MVM_operand_type_mask;
-            self.compile_operand($rw, $type, $i.operands[$idx]);
-            $idx++;
-        }
-    }
-    multi method write_instruction($i) {
-        note("Instruction " ~ $i.HOW.name($i) ~ " NYI");
-        note($i.dump);
-    }
-    method write_operand($i, $idx, $o) {
-        my $flags := nqp::atpos_i(@MAST::Ops::values, nqp::atpos_i(@MAST::Ops::offsets, $i.op) + $idx);
-        my $rw    := $flags +& $MVM_operand_rw_mask;
-        my $type  := $flags +& $MVM_operand_type_mask;
-        self.compile_operand($rw, $type, $o);
-    }
-}
-
 class MoarVM::StringHeap {
     has @!strings;
     has %!strings;
@@ -2876,23 +2416,31 @@ class MoarVM::BytecodeWriter {
     has $!bytecode;
     has @!sc_handle_idxs;
     has @!extop_name_idxs;
-    method BUILD(:$string-heap, :$callsites, :$annotations, :$compunit) {
+    method BUILD(:$string-heap, :$callsites, :$annotations) {
         $!mbc             := $buf.new;
         $!bytecode        := $buf.new;
         $!string-heap     := $string-heap;
         $!callsites       := $callsites;
         $!annotations     := $annotations;
-        $!compunit        := $compunit;
         @!frames          := nqp::list;
         @!sc_handle_idxs  := nqp::list;
         @!extop_name_idxs := nqp::list;
+    }
+    method prepare() {
         self.collect_sc_deps;
         self.collect_extop_names;
+        for @!frames {
+            $_.prepare;
+        }
     }
+    method set-compunit($compunit) { $!compunit := $compunit }
+    method string-heap() { $!string-heap }
+    method callsites()   { $!callsites }
+    method annotations() { $!annotations }
     method add-string(str $s) {
         $!string-heap.add($s);
     }
-    method add-frame(MoarVM::Frame $f) {
+    method add-frame(MAST::Frame $f) {
         nqp::push(@!frames, $f);
     }
     method write_header() {
@@ -2979,7 +2527,7 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32(0); # No deserialize frame
         }
     }
-    method write_frame(MoarVM::Frame $f, int $idx) {
+    method write_frame(MAST::Frame $f, int $idx) {
         # 11 * 4 + 3 * 2 = 50
         my @local_types := $f.local_types;
         my @lexical_types := $f.lexical_types;
@@ -2993,7 +2541,7 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_uint32(nqp::elems(@lexical_types)); # Number of lexicals
         $!mbc.write_uint32($f.cuuid-idx); # Compilation unit unique ID (string heap index)
         $!mbc.write_uint32($f.name-idx); # Name (string heap index)
-        my $outer := nqp::getattr($f.mast, MAST::Frame, '$!outer');
+        my $outer := $f.outer;
         if nqp::defined($outer) {
             $!mbc.write_uint16(self.get_frame_index($outer)); # Outer
         }
@@ -3134,7 +2682,6 @@ class MoarVM::BytecodeWriter {
         if nqp::getattr($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
             return nqp::getattr($f, MAST::Frame, '$!frame_idx');
         }
-        note("Need to iterate");
         for nqp::getattr($!compunit, MAST::CompUnit, '@!frames') {
             return $idx if nqp::objectid($_) eq nqp::objectid($f);
             $idx++;
@@ -3175,24 +2722,15 @@ class MASTBytecodeAssembler {
     }
 
     method assemble($mast) {
+        my $writer := $mast.writer;
         my @cu_frames := nqp::getattr($mast, MAST::CompUnit, '@!frames');
-        my $string-heap := MoarVM::StringHeap.new(:strings($mast.string_heap));
-        my $callsites := MoarVM::Callsites.new(:$string-heap);
-        my $annotations := $buf.new;
-        my $writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations, :compunit($mast));
+        my $string-heap := $writer.string-heap;
+        my $callsites := $writer.callsites;
+        my $annotations := $writer.annotations;
         for @cu_frames {
-            my $frame := MoarVM::Frame.new(
-                :cuuid($_.cuuid),
-                :name($_.name),
-                :mast($_),
-                :$string-heap,
-                :$callsites,
-                :$annotations,
-                :compunit($mast),
-                :$writer,
-            );
-            $writer.add-frame($frame);
+            $writer.add-frame($_);
         }
+        $writer.prepare;
         $writer.assemble;
         $writer
     }
