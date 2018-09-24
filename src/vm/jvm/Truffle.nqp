@@ -1067,8 +1067,6 @@ class QAST::TruffleCompiler does SerializeOnce {
 
     # TODO native types for variables
     multi method as_truffle(QAST::Var $node, :$want) {
-        my $action;
-
         my $type := self.figure_out_type($node);
 
         if $node.scope eq 'lexical' && self.is_dynamic_var($node) {
@@ -1086,30 +1084,32 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
         }
         elsif $node.scope eq 'lexical' || $node.scope eq 'local' {
+
             my str $scope := $node.scope;
-            if $*BINDVAL {
-                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($type));
-                $action := ["bind-{nqp::lc(%type_names{$type})}-$scope", $node.name, $value.tree];
-            } else {
-                $action := ["get-$scope", $node.name];
-            }
 
             if $node.decl eq '' {
-                return TAST.new($type, $action);
+                # It's not a declaration
             }
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 my int $type := self.type_from_typeobj($node.returns);
                 $*BLOCK.register_var_type($node, $type);
-                @*DECLARATIONS.push(["declare-$scope", $type, $node.name, ["null"]]);
-                return TAST.new($type, $action);
+                @*DECLARATIONS.push(["declare-{$node.scope}", $type, $node.name, ["null"]]);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);
-                return TAST.new($OBJ, $action);
             }
             else {
                 self.NYI("var declaration type {$node.decl}");
             }
+
+            return TAST.new($OBJ, $*BINDVAL
+                ?? [
+                    "bind-{nqp::lc(%type_names{$type})}-{$node.scope}",
+                    $node.name,
+                    self.as_truffle_clear_bindval($*BINDVAL, :want($type)).tree
+                ]
+                !! ["get-$scope", $node.name]
+            );
         }
         elsif $node.scope eq 'positional' {
             return self.as_truffle_clear_bindval($*BINDVAL
