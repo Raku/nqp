@@ -111,3 +111,9 @@ add_simple_op('istrue', $INT, [$OBJ]);
 add_simple_op('atpos', $OBJ, [$OBJ, $INT]);
 add_simple_op('bindpos', $OBJ, [$OBJ, $INT, $OBJ]);
 
+add_simple_op('who', $OBJ, [$OBJ]);
+
+add_simple_op('can', $INT, [$OBJ, $STR]);
+add_simple_op('defined', $INT, [$OBJ]);
+
+add_simple_op('ctx', $OBJ, []);

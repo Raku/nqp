@@ -42,7 +42,7 @@ public class NQPScopeWithGlobalContext extends NQPScope {
 
     @Override
     public FoundLexical findLexical(String name, int depth) {
-        throw new RuntimeException("Can't find lexical");
+        return null;
     }
 
     @Override

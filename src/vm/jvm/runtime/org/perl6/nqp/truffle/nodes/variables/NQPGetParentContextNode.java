@@ -21,7 +21,6 @@ public class NQPGetParentContextNode extends NQPObjNode {
 
     @Deserializer("get-parent-context")
     public static NQPGetParentContextNode getLexical(NQPScope scope) {
-        System.out.println("get-parent-context");
         FrameSlot contextSlot = scope.getContextSlot();
         return new NQPGetParentContextNode(contextSlot);
     }
@@ -29,7 +28,6 @@ public class NQPGetParentContextNode extends NQPObjNode {
     @Override
     public Object execute(VirtualFrame frame) {
         Object[] arguments = frame.getArguments();
-        System.out.println("found dynamic context:" + NQPArguments.getDynamicContext(arguments));
         frame.setObject(contextSlot, NQPArguments.getDynamicContext(arguments));
         return NQPNull.SINGLETON;
     }

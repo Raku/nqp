@@ -33,8 +33,9 @@ knowhow ModuleLoader {
         @search_paths
     }
     
-    method ctxsave() {
-        $*MAIN_CTX := nqp::ctxcaller(nqp::ctx());
+    method ctxsave($ctx) {
+        nqp::say('in ctxsave');
+        $*MAIN_CTX := $ctx;
         $*CTXSAVE := 0;
     }
     
@@ -212,5 +213,3 @@ knowhow ModuleLoader {
 }
 
 nqp::bindcurhllsym('ModuleLoader', ModuleLoader);
-
-ModuleLoader.load_setting('NQPCORE');

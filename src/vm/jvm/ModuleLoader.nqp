@@ -32,8 +32,8 @@ knowhow ModuleLoader {
         @search_paths
     }
     
-    method ctxsave() {
-        $*MAIN_CTX := nqp::ctxcaller(nqp::ctx());
+    method ctxsave($ctx?) {
+        $*MAIN_CTX := nqp::defined($ctx) ?? $ctx !! nqp::ctxcaller(nqp::ctx());
         $*CTXSAVE := 0;
     }
     

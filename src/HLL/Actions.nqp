@@ -42,8 +42,9 @@ class HLL::Actions {
                     ),
                     QAST::Op.new(
                         :op('callmethod'), :name('ctxsave'),
-                        QAST::Var.new( :name('ctxsave'), :scope('local')
-                    )))))
+                        QAST::Var.new( :name('ctxsave'), :scope('local') ),
+                        QAST::Op.new( :op('ctx') )
+                    ))))
     }
    
     method SET_BLOCK_OUTER_CTX($block) {

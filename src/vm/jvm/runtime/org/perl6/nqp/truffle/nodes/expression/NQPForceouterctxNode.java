@@ -1,6 +1,8 @@
 package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
+import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.dsl.Deserializer;
@@ -18,9 +20,9 @@ public final class NQPForceouterctxNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        Object code = codeNode.execute(frame);
-        Object ctx = ctxNode.execute(frame);
-        System.out.println("forceouterctx NYI");
+        NQPCodeRef code = (NQPCodeRef) codeNode.execute(frame);
+        MaterializedFrame ctx = (MaterializedFrame) ctxNode.execute(frame);
+        code.setOuterFrame(ctx);
         return code;
     }
 }

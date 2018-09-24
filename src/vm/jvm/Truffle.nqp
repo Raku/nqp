@@ -497,6 +497,12 @@ class QAST::OperationsTruffle {
 
     add_simple_op('decont', $OBJ, [$OBJ]);
 
+    add_simple_op('can', $INT, [$OBJ, $STR], :decont(0));
+    add_simple_op('defined', $INT, [$OBJ], :decont(0));
+    add_simple_op('who', $OBJ, [$OBJ], :decont(0));
+
+    add_simple_op('ctx', $OBJ, []);
+
     %ops<callstatic> := %ops<call>;
 
     add_op('bind', sub ($comp, $node, :$want) {
@@ -885,7 +891,9 @@ class QAST::TruffleCompiler does SerializeOnce {
         }
 
         # TODO main/load
+
         my $block := self.as_truffle($node[0], :want($OBJ)).tree;
+        nqp::splice($block, ['block-forced-outer', $node[0].cuid], 0, 1);
 
         TAST.new($OBJ, [
             'comp-unit', $node.hll, ['stmts',
@@ -1090,7 +1098,6 @@ class QAST::TruffleCompiler does SerializeOnce {
             if $node.decl eq '' {
                 return TAST.new($type, $action);
             }
-            # TODO static should do deserialization
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 my int $type := self.type_from_typeobj($node.returns);
                 $*BLOCK.register_var_type($node, $type);
@@ -1160,49 +1167,9 @@ class QAST::TruffleCompiler does SerializeOnce {
     }
 }
 
-
-my $mini_setting := '
-sub print(*@args) {
-    nqp::print(nqp::join("", @args));
-    1;
-}
-sub say(*@args) {
-    nqp::say(nqp::join("", @args));
-    1;
-}
-
-sub plan($quantity) {
-    nqp::say("1..$quantity");
-}
-
-sub ok($condition, $desc?) {
-    nqp::say(($condition ?? "ok" !! "not ok") ~ ($desc ?? " - $desc" !! ""));
-}
-
-sub is($got, $expected, $desc?) {
-    ok($got eq $expected, $desc);
-    if $got ne $expected {
-        my $out := "";
-        for nqp::split("\n", "     got: \'$got\'\nexpected: \'$expected\'") -> $line {
-            $out := $out ~ "# $line\n";
-        }
-        print($out);
-    }
-}
-
-
-sub skip($desc, $count=1) {
-    my $i := 0;
-    while $i < $count {
-        say("ok# SKIP $desc");
-        $i := $i + 1;
-    }
-};
-';
-
 class TruffleBackend {
     method start($source, *%adverbs) {
-        $mini_setting ~ $source;
+        $source;
     }
 
     method stages() {

@@ -47,6 +47,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 import org.perl6.nqp.truffle.nodes.control.NQPStaticBlockNode;
+import org.perl6.nqp.truffle.nodes.control.NQPForcedOuterBlockNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import com.oracle.truffle.api.frame.FrameDescriptor;
 import com.oracle.truffle.api.frame.FrameSlotKind;
@@ -61,6 +62,11 @@ public class ManageScopes {
 
     @Predeserializer("block-static")
     public static NQPScope createNewStaticScope(NQPScope scope) {
+        return new NQPScopeWithFrame(new FrameDescriptor(), scope);
+    }
+
+    @Predeserializer("block-forced-outer")
+    public static NQPScope createNewForcedOuterScope(NQPScope scope) {
         return new NQPScopeWithFrame(new FrameDescriptor(), scope);
     }
 
@@ -80,6 +86,15 @@ public class ManageScopes {
         System.out.println("adding cuids");
         scope.addCuid(cuid, code);
         return new NQPStaticBlockNode(code);
+    }
+
+    @Deserializer("block-forced-outer")
+    public static NQPNode createForcedOuterBlock(NQPScope scope, String cuid, NQPNode[] children) {
+        FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
+        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        scope.addCuid(cuid, code);
+        return new NQPForcedOuterBlockNode(code);
     }
 
     private static FrameSlotKind kindFromType(long type) {

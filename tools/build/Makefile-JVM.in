@@ -130,7 +130,7 @@ ALL_OUTPUT = \
   $(P6QREGEX_JAR) \
   $(NQP_JAR) \
 
-j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR) $(TRUFFLE_JAR)
+j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR) $(TRUFFLE_JAR) $(T_STAGE1_DIR)/$(NQP_MO_JAR) $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR) $(T_STAGE1_DIR)/$(CORE_SETTING_JAR)
 
 j-install: j-all
 	$(MKPATH) $(DESTDIR)$(BIN_DIR)
@@ -371,19 +371,19 @@ j-qregex-test-loud: $(J_RUNNER)
 	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) t/qregex
 
 
-$(T_STAGE1_DIR)/$(NQP_MO_JAR): $(NQP_MO_SOURCES) $(ALL_OUTPUT) $(J_RUNNER)
+$(T_STAGE1_DIR)/$(NQP_MO_JAR): $(NQP_MO_SOURCES) $(ALL_OUTPUT) $(J_RUNNER) $(TRUFFLE_JAR)
 	$(MKPATH) $(T_STAGE1_DIR)
 	$(PERL) tools/build/gen-cat.pl jvm $(NQP_MO_SOURCES) > $(T_STAGE1_DIR)/$(NQP_MO_COMBINED)
 
 	.@slash@$(J_RUNNER) src/vm/jvm/bin/cross-compile.nqp --setting=NULL --target=jar --truffle-output $(T_STAGE1_DIR)/nqpmo.truffle6 --output $(T_STAGE1_DIR)/$(NQP_MO_JAR) --no-regex-lib $(T_STAGE1_DIR)/$(NQP_MO_COMBINED)
 
-t-setting: $(T_STAGE1_DIR)/$(NQP_MO_JAR)  $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR) $(T_STAGE1_DIR)/$(CORE_SETTING_JAR)
 
 
-$(T_STAGE1_DIR)/$(MODULE_LOADER_JAR): $(ALL_OUTPUT) $(J_RUNNER) src/vm/truffle/ModuleLoader.nqp
-	.@slash@$(J_RUNNER) src/vm/jvm/bin/cross-compile.nqp --setting=NULL --target=jar --truffle-output $(T_STAGE1_DIR)/ModuleLoader.truffle6 --output $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR) --no-regex-lib src/vm/jvm/ModuleLoader.nqp
+$(T_STAGE1_DIR)/$(MODULE_LOADER_JAR): $(ALL_OUTPUT) $(J_RUNNER) src/vm/truffle/ModuleLoader.nqp $(TRUFFLE_JAR)
+	.@slash@$(J_RUNNER) src/vm/jvm/bin/cross-compile.nqp --setting=NULL --target=jar --truffle-output $(T_STAGE1_DIR)/ModuleLoader.truffle6 --output $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR) --no-regex-lib src/vm/truffle/ModuleLoader.nqp
 
-$(T_STAGE1_DIR)/$(CORE_SETTING_JAR): $(ALL_OUTPUT) $(CORE_SETTING_SOURCES) $(T_STAGE1_DIR)/$(NQP_MO_JAR) $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR)
+$(T_STAGE1_DIR)/$(CORE_SETTING_JAR): $(ALL_OUTPUT) $(CORE_SETTING_SOURCES) $(T_STAGE1_DIR)/$(NQP_MO_JAR) $(T_STAGE1_DIR)/$(MODULE_LOADER_JAR) $(TRUFFLE_JAR)
 	$(MKPATH) $(T_STAGE1_DIR)
-	$(PERL) tools/build/gen-cat.pl truffle $(CORE_SETTING_SOURCES) > $(T_STAGE1_DIR)/$(CORE_SETTING_COMBINED)
-	.@slash@$(J_RUNNER) src/vm/jvm/bin/cross-compile.nqp --module-path=$(T_STAGE1_DIR) --setting=NULL --target=jar --truffle-output $(T_STAGE1_DIR)/NQPCORE.setting.truffle6 --output $(T_STAGE1_DIR)/$(CORE_SETTING_JAR) --no-regex-lib  $(T_STAGE1_DIR)/$(CORE_SETTING_COMBINED)
+#	$(PERL) tools/build/gen-cat.pl truffle $(CORE_SETTING_SOURCES) > $(T_STAGE1_DIR)/$(CORE_SETTING_COMBINED)
+	.@slash@$(J_RUNNER) src/vm/jvm/bin/cross-compile.nqp --module-path=$(T_STAGE1_DIR) --setting=NULL --target=jar --truffle-output $(T_STAGE1_DIR)/NQPCORE.setting.truffle6 --output $(T_STAGE1_DIR)/$(CORE_SETTING_JAR) --no-regex-lib src/vm/truffle/NQPCORE.setting
+# $(T_STAGE1_DIR)/$(CORE_SETTING_COMBINED)
