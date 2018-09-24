@@ -1073,7 +1073,6 @@ class QAST::TruffleCompiler does SerializeOnce {
 
         if $node.scope eq 'lexical' && self.is_dynamic_var($node) {
             if $node.decl eq 'var' {
-                nqp::say("declaring a dynamic variable");
                 # TODO avoid double binds
                 @*DECLARATIONS.push(["dynamic-bind-direct", $node.name, ["null"]]);
             }

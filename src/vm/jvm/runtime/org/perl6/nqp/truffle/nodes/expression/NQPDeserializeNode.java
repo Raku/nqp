@@ -47,22 +47,17 @@ public final class NQPDeserializeNode extends NQPStrNode {
         NQPList crList = (NQPList) crNode.execute(frame);
         Object conflict = conflictNode.execute(frame);
 
-        System.out.println("deserializing");
         ByteBuffer binaryBlob = Base64.decode(blob);
-
 
         String[] sh = new String[shList.elems()];
         for (int i = 0; i < shList.elems(); i++) {
             sh[i] = shList.atposStr(i);
         }
 
-        System.out.println("got code refs: " + crList.elems());
-
         NQPCodeRef[] cr = new NQPCodeRef[crList.elems()];
         for (int i = 0; i < crList.elems(); i++) {
             cr[i] = (NQPCodeRef) crList.atpos(i);
         }
-
 
         SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs);
         sr.deserialize();

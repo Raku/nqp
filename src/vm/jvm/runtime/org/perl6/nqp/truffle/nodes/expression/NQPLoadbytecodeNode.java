@@ -33,12 +33,9 @@ public final class NQPLoadbytecodeNode extends NQPStrNode {
     public String executeStr(VirtualFrame frame) {
         String fileName = argNode.executeStr(frame);
 
-        System.out.println("loadbytecode " + fileName);
-
         File file = new File(fileName);
         if (!file.exists() && fileName.equals("ModuleLoader.truffle6")) {
             /* We special case the initial ModuleLoader loading. */
-            System.out.println("We have the initial ModuleLoader");
             fileName = "gen/truffle/stage1/" + fileName;
         }
 

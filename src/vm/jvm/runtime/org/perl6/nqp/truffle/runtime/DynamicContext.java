@@ -15,7 +15,6 @@ public class DynamicContext {
     }
 
     public Object lookup(String name) {
-        System.out.println("looking up dynamic variable " + name);
         if (contents.containsKey(name)) {
             return contents.get(name);
         } else {
@@ -34,10 +33,9 @@ public class DynamicContext {
             if (outer != null) {
                 this.outer.bind(name, value);
             } else {
-                System.out.println("Can't bind " + name);
+                throw new RuntimeException("Can't bind " + name);
             }
         }
-        System.out.println("binding dynamic variable " + name + " = " + value);
     }
 
     public void bindDirect(String name, Object value) {
@@ -45,7 +43,6 @@ public class DynamicContext {
     }
 
     public Object lookupDirect(String name) {
-        System.out.println("looking up dynamic variable direct: " + name);
         return contents.get(name);
     }
 }

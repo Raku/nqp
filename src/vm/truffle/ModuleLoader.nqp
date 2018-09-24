@@ -34,7 +34,6 @@ knowhow ModuleLoader {
     }
     
     method ctxsave($ctx) {
-        nqp::say('in ctxsave');
         $*MAIN_CTX := $ctx;
         $*CTXSAVE := 0;
     }
@@ -60,8 +59,6 @@ knowhow ModuleLoader {
                 last;
             }
         }
-
-        nqp::say("we have path: $path");
 
         if nqp::existskey(%modules_loaded, $path) {
             $module_ctx := %modules_loaded{$path};
@@ -165,18 +162,13 @@ knowhow ModuleLoader {
     }
     
     method load_setting($setting_name) {
-        nqp::say('here we loading setting');
         my $setting;
         
         if $setting_name ne 'NULL' {
             # Add path prefix and .setting suffix.
             my $path := "$setting_name.setting";
-            nqp::say('#1');
             my @prefixes := self.search_path('setting-path');
-            nqp::say('#2');
             for @prefixes -> $prefix {
-                nqp::say("checking $prefix");
-                nqp::say("trying out :" ~ "$prefix/$path.truffle6");
                 if nqp::stat("$prefix/$path.truffle6", 0) {
                     $path := "$prefix/$path.truffle6";
                     #last;
@@ -190,7 +182,6 @@ knowhow ModuleLoader {
                     #last;
                 }
             }
-            nqp::say('#3');
 
             # Unless we already did so, load the setting.
             unless nqp::existskey(%settings_loaded, $path) {

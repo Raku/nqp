@@ -83,7 +83,6 @@ public class ManageScopes {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
         RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
         NQPCodeRef code = new NQPCodeRef(rootNode, null);
-        System.out.println("adding cuids");
         scope.addCuid(cuid, code);
         return new NQPStaticBlockNode(code);
     }
