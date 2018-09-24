@@ -40,6 +40,7 @@ public class Processor extends AbstractProcessor {
         TypeMirror strsClass;
         TypeMirror scopeClass;
         TypeMirror hllClass;
+        TypeMirror contextSlotClass;
 
         AstTypes(AstBuilder annotation) {
             try {
@@ -94,6 +95,12 @@ public class Processor extends AbstractProcessor {
                 annotation.hllClass();
             } catch (MirroredTypeException e) {
                 hllClass = e.getTypeMirror();
+            }
+
+            try {
+                annotation.contextSlotClass();
+            } catch (MirroredTypeException e) {
+                contextSlotClass = e.getTypeMirror();
             }
         }
     }
@@ -150,6 +157,9 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.hllClass)) {
                 writer.append("scope.getCurrentHLL()");
+                i--;
+            } else if (paramType.equals(astTypes.contextSlotClass)) {
+                writer.append("scope.getContextSlot()");
                 i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
@@ -265,6 +275,8 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.hllClass)) {
                 i--;
+            } else if (paramType.equals(astTypes.contextSlotClass)) {
+                i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }
@@ -303,6 +315,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("scope");
             } else if (paramType.equals(astTypes.hllClass)) {
                 writer.append("scope.getCurrentHLL()");
+            } else if (paramType.equals(astTypes.contextSlotClass)) {
+                writer.append("scope.getContextSlot()");
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }

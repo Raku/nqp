@@ -49,21 +49,14 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.runtime.DynamicContext;
 import org.perl6.nqp.dsl.Deserializer;
 
-import org.perl6.nqp.truffle.NQPScope;
-
 public class NQPDynamicGetNode extends NQPObjNode {
     private final FrameSlot contextSlot;
     private final String name;
 
+    @Deserializer("dynamic-get")
     public NQPDynamicGetNode(FrameSlot contextSlot, String name) {
         this.contextSlot = contextSlot;
         this.name = name;
-    }
-
-    @Deserializer("dynamic-get")
-    public static NQPDynamicGetNode getLexical(NQPScope scope, String name) {
-        FrameSlot contextSlot = scope.getContextSlot();
-        return new NQPDynamicGetNode(contextSlot, name);
     }
 
     @Override

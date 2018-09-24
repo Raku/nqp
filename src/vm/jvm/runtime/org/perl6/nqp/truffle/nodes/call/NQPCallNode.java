@@ -50,8 +50,6 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
-import org.perl6.nqp.truffle.NQPScope;
-
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.runtime.NQPList;
@@ -77,6 +75,7 @@ public final class NQPCallNode extends NQPObjNode {
 
     @Child private NQPDispatchNode dispatchNode;
 
+    @Deserializer("call")
     public NQPCallNode(FrameSlot contextSlot, NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
         this.contextSlot = contextSlot;
         this.functionNode = functionNode;
@@ -84,11 +83,6 @@ public final class NQPCallNode extends NQPObjNode {
         this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
         this.dispatchNode = NQPDispatchNodeGen.create();
-    }
-
-    @Deserializer("call")
-    public static NQPCallNode deserialize(NQPScope scope, NQPNode functionNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
-        return new NQPCallNode(scope.getContextSlot(), functionNode, argumentFlags, argumentNames, argumentNodes);
     }
 
     @ExplodeLoop

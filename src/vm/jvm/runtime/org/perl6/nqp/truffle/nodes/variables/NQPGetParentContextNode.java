@@ -10,19 +10,12 @@ import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.dsl.Deserializer;
 
-import org.perl6.nqp.truffle.NQPScope;
-
 public class NQPGetParentContextNode extends NQPObjNode {
     private final FrameSlot contextSlot;
 
+    @Deserializer("get-parent-context")
     public NQPGetParentContextNode(FrameSlot contextSlot) {
         this.contextSlot = contextSlot;
-    }
-
-    @Deserializer("get-parent-context")
-    public static NQPGetParentContextNode getLexical(NQPScope scope) {
-        FrameSlot contextSlot = scope.getContextSlot();
-        return new NQPGetParentContextNode(contextSlot);
     }
 
     @Override

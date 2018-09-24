@@ -45,6 +45,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     strsClass = String[].class,
     scopeClass = NQPScope.class,
     hllClass = HLL.class,
+    contextSlotClass = FrameSlot.class,
     tastToByteCode = true,
     tastToNode = true,
     byteCodeToNode = false

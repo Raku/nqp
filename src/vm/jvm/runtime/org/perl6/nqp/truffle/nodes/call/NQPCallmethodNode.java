@@ -4,7 +4,6 @@ import com.oracle.truffle.api.frame.FrameSlot;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.NodeInfo;
-import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
@@ -32,6 +31,7 @@ public final class NQPCallmethodNode extends NQPObjNode {
 
     @Children private final NQPNode[] argumentNodes;
 
+    @Deserializer
     public NQPCallmethodNode(FrameSlot contextSlot, NQPNode invocantNode, NQPNode methodNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
         this.contextSlot = contextSlot;
         this.invocantNode = invocantNode;
@@ -39,11 +39,6 @@ public final class NQPCallmethodNode extends NQPObjNode {
         this.argumentFlags = argumentFlags;
         this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
-    }
-
-    @Deserializer("callmethod")
-    public static NQPCallmethodNode deserialize(NQPScope scope, NQPNode invocantNode, NQPNode methodNode, long[] argumentFlags, String[] argumentNames, NQPNode[] argumentNodes) {
-        return new NQPCallmethodNode(scope.getContextSlot(), invocantNode, methodNode, argumentFlags, argumentNames, argumentNodes);
     }
 
     @Override

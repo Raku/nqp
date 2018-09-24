@@ -9,23 +9,16 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.runtime.DynamicContext;
 import org.perl6.nqp.dsl.Deserializer;
 
-import org.perl6.nqp.truffle.NQPScope;
-
 public class NQPDynamicBindNode extends NQPObjNode {
     private final FrameSlot contextSlot;
     private final String name;
     private final NQPNode valueNode;
 
+    @Deserializer("dynamic-bind")
     public NQPDynamicBindNode(FrameSlot contextSlot, String name, NQPNode valueNode) {
         this.contextSlot = contextSlot;
         this.name = name;
         this.valueNode = valueNode;
-    }
-
-    @Deserializer("dynamic-bind")
-    public static NQPDynamicBindNode deserializer(NQPScope scope, String name, NQPNode valueNode) {
-        FrameSlot contextSlot = scope.getContextSlot();
-        return new NQPDynamicBindNode(contextSlot, name, valueNode);
     }
 
     @Override
