@@ -31,6 +31,8 @@ public final class NQPElemsNode extends NQPIntNode {
             return ((NQPListNum)arg).elems();
         } else if (arg instanceof NQPListStr) {
             return ((NQPListStr)arg).elems();
+        } else if (arg instanceof NQPHash) {
+            return ((NQPHash)arg).elems();
         } else {
             throw Debug.wrongThing("does not implement elems", arg);
         }
