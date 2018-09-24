@@ -92,11 +92,7 @@ public class NQPScopeWithFrame extends NQPScope {
         FrameSlot found = frameDescriptor.findFrameSlot(name);
 
         if (found == null) {
-            if (outer != null) {
-                return outer.findLexical(name, depth + 1);
-            } else {
-                throw new RuntimeException("Can't find lexical: " + name);
-            }
+            return outer.findLexical(name, depth + 1);
         }
         return new FoundLexical(found, depth);
     }
@@ -128,38 +124,22 @@ public class NQPScopeWithFrame extends NQPScope {
 
     @Override
     public HLL getCurrentHLL() {
-        if (outer != null) {
-            return outer.getCurrentHLL();
-        } else {
-            throw new RuntimeException("Can't get current HLL");
-        }
+        return outer.getCurrentHLL();
     }
 
     @Override
     public GlobalContext getGlobalContext() {
-        if (outer != null) {
-            return outer.getGlobalContext();
-        } else {
-            throw new RuntimeException("Can't get HLLs");
-        }
+        return outer.getGlobalContext();
     }
 
     @Override
     public NQPCodeRef getCuid(String cuid) {
-        if (outer != null) {
-            return outer.getCuid(cuid);
-        } else {
-            throw new RuntimeException("Can't get cuid");
-        }
+        return outer.getCuid(cuid);
     }
 
     @Override
     public void addCuid(String cuid, NQPCodeRef codeRef) {
-        if (outer != null) {
-            outer.addCuid(cuid, codeRef);
-        } else {
-            throw new RuntimeException("Can't add cuid");
-        }
+        outer.addCuid(cuid, codeRef);
     }
 }
 
