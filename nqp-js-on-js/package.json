@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.15.0",
   "name": "nqp-js-on-js",
   "bin": {
     "nqp-js-on-js": "nqp-bootstrapped.js"
@@ -14,6 +14,6 @@
     }
   ],
   "dependencies": {
-    "nqp-runtime": "0.2.0"
+    "nqp-runtime": "0.15.0"
   }
 }
