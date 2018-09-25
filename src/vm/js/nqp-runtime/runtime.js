@@ -479,7 +479,7 @@ exports.dumpObj = function(obj) {
 const containerSpecs = require('./container-specs.js');
 exports.extraRuntime = function(lang, path) {
   if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
-  const runtime = require(path);
+  const runtime = typeof path === 'string' ? require(path) : path.require(lang + '-runtime');
   if (!runtime.loaded) {
     runtime.loaded = true;
     runtime.load(exports, CodeRef, Capture, containerSpecs);
