@@ -130,6 +130,8 @@ public class Processor extends AbstractProcessor {
         int i = 0;
 
         for (VariableElement param : executableElement.getParameters()) {
+
+            Global global = ((Global)param.getAnnotation(Global.class));
             TypeMirror paramType = param.asType();
 
             if (first) {
@@ -160,6 +162,9 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 writer.append("scope.getContextSlot()");
+                i--;
+            } else if (global != null) {
+                writer.append("scope.getGlobalContext()." + param.getSimpleName());
                 i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
@@ -255,6 +260,8 @@ public class Processor extends AbstractProcessor {
         String indent = "               ";
 
         for (VariableElement param : executableElement.getParameters()) {
+
+            Global global = ((Global)param.getAnnotation(Global.class));
             TypeMirror paramType = param.asType();
 
             if (paramType.equals(astTypes.nodeClass)) {
@@ -277,6 +284,8 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 i--;
+            } else if (global != null) {
+                i--;
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }
@@ -289,6 +298,8 @@ public class Processor extends AbstractProcessor {
         boolean first = true;;
 
         for (VariableElement param : executableElement.getParameters()) {
+
+            Global global = ((Global)param.getAnnotation(Global.class));
             TypeMirror paramType = param.asType();
 
             if (first) {
@@ -317,6 +328,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("scope.getCurrentHLL()");
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 writer.append("scope.getContextSlot()");
+            } else if (global != null) {
+                writer.append("scope.getGlobalContext()." + param.getSimpleName());
             } else {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Wrong param type: " + paramType.toString());
             }

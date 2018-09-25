@@ -7,6 +7,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+import org.perl6.nqp.dsl.Global;
 
 @NodeInfo(shortName = "wval")
 public final class NQPWValNode extends NQPObjNode {
@@ -15,15 +16,11 @@ public final class NQPWValNode extends NQPObjNode {
 
     public HashMap<String, SerializationContext> scs;
 
-    public NQPWValNode(HashMap<String, SerializationContext> scs, String handle, int index) {
+    @Deserializer
+    public NQPWValNode(@Global HashMap<String, SerializationContext> scs, String handle, long index) {
         this.scs = scs;
         this.handle = handle;
-        this.index = index;
-    }
-
-    @Deserializer("wval")
-    public static NQPWValNode deserialize(NQPScope scope, String handle, long index) {
-        return new NQPWValNode(scope.getGlobalContext().scs, handle, (int) index);
+        this.index = (int) index;
     }
 
     /* TODO - do the lookup only once*/

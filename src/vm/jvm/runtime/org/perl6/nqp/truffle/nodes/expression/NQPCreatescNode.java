@@ -9,20 +9,17 @@ import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.dsl.Global;
 
 @NodeInfo(shortName = "createsc")
 public final class NQPCreatescNode extends NQPObjNode {
     private final HashMap<String, SerializationContext> scs;
     @Child private NQPNode handleNode;
 
-    public NQPCreatescNode(HashMap<String, SerializationContext> scs, NQPNode handleNode) {
+    @Deserializer
+    public NQPCreatescNode(@Global HashMap<String, SerializationContext> scs, NQPNode handleNode) {
         this.scs = scs;
         this.handleNode = handleNode;
-    }
-
-    @Deserializer("createsc")
-    public static NQPCreatescNode deserialize(NQPScope scope, NQPNode handleNode) {
-        return new NQPCreatescNode(scope.getGlobalContext().scs, handleNode);
     }
 
     @Override

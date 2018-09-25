@@ -6,6 +6,8 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.NQPScope;
 import java.util.ArrayList;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+
+import org.perl6.nqp.dsl.Global;
 import org.perl6.nqp.dsl.Deserializer;
 
 
@@ -14,14 +16,10 @@ public final class NQPPushcompscNode extends NQPObjNode {
     private final ArrayList<SerializationContext> compilingSCs;
     @Child private NQPNode scNode;
 
-    public NQPPushcompscNode(ArrayList<SerializationContext> compilingSCs, NQPNode scNode) {
+    @Deserializer
+    public NQPPushcompscNode(@Global ArrayList<SerializationContext> compilingSCs, NQPNode scNode) {
         this.compilingSCs = compilingSCs;
         this.scNode = scNode;
-    }
-
-    @Deserializer
-    public static NQPPushcompscNode deserialize(NQPScope scope, NQPNode scNode) {
-        return new NQPPushcompscNode(scope.getGlobalContext().compilingSCs, scNode);
     }
 
     @Override

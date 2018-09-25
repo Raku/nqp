@@ -7,18 +7,15 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.dsl.Global;
 
 @NodeInfo(shortName = "popcompsc")
 public final class NQPPopcompscNode extends NQPObjNode {
     private final ArrayList<SerializationContext> compilingSCs;
 
-    public NQPPopcompscNode(ArrayList<SerializationContext> compilingSCs) {
-        this.compilingSCs = compilingSCs;    
-    }
-
     @Deserializer
-    public static NQPPopcompscNode deserialize(NQPScope scope) {
-        return new NQPPopcompscNode(scope.getGlobalContext().compilingSCs);
+    public NQPPopcompscNode(@Global ArrayList<SerializationContext> compilingSCs) {
+        this.compilingSCs = compilingSCs;    
     }
 
     @Override

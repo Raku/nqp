@@ -8,6 +8,7 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.dsl.Global;
 
 @NodeInfo(shortName = "gethllsym")
 public final class NQPGethllsymNode extends NQPObjNode {
@@ -15,7 +16,8 @@ public final class NQPGethllsymNode extends NQPObjNode {
     @Child private NQPNode hllNameNode;
     @Child private NQPNode symbolNode;
 
-    public NQPGethllsymNode(HashMap<String, HLL> hlls, NQPNode hllNameNode, NQPNode symbolNode) {
+    @Deserializer
+    public NQPGethllsymNode(@Global HashMap<String, HLL> hlls, NQPNode hllNameNode, NQPNode symbolNode) {
         this.hlls = hlls;
         this.hllNameNode = hllNameNode;
         this.symbolNode = symbolNode;
@@ -31,10 +33,5 @@ public final class NQPGethllsymNode extends NQPObjNode {
         }
 
         return hlls.get(hllName).getSymbol(symbolName);
-    }
-
-    @Deserializer("gethllsym")
-    public static NQPGethllsymNode deserialize(NQPScope scope, NQPNode hllNameNode, NQPNode symbolNode) {
-        return new NQPGethllsymNode(scope.getGlobalContext().hlls, hllNameNode, symbolNode);
     }
 }

@@ -5,6 +5,7 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import org.perl6.nqp.dsl.Deserializer;
+import org.perl6.nqp.dsl.Global;
 import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPStrNode;
@@ -25,18 +26,14 @@ public final class NQPDeserializeNode extends NQPStrNode {
 
     private final HashMap<String, SerializationContext> scs;
 
-    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, HashMap<String, SerializationContext> scs) {
+    @Deserializer
+    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, @Global HashMap<String, SerializationContext> scs) {
         this.blobNode = blobNode;
         this.scNode = scNode;
         this.shNode = shNode;
         this.crNode = crNode;
         this.conflictNode = conflictNode;
         this.scs = scs;
-    }
-
-    @Deserializer("deserialize")
-    public static NQPDeserializeNode deserialize(NQPScope scope, NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode) {
-        return new NQPDeserializeNode(blobNode, scNode, shNode, crNode, conflictNode, scope.getGlobalContext().scs);
     }
 
     @Override
