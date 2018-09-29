@@ -9,7 +9,7 @@ import org.perl6.nqp.truffle.sixmodel.STable;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
 @Layout
-interface P6opaqueObjectLayout {
+public interface P6opaqueObjectLayout {
     DynamicObjectFactory createP6opaqueObjectShape(STable stable);
 
     DynamicObject createP6opaqueObject(DynamicObjectFactory factory, @Nullable SerializationContext sc);
@@ -19,4 +19,6 @@ interface P6opaqueObjectLayout {
 
     void setStable(DynamicObject object, STable value);
     STable getStable(DynamicObject object);
+
+    boolean isP6opaqueObject(Object object);
 }

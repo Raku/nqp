@@ -14,6 +14,7 @@ public class P6opaque extends REPR {
     public P6opaque(STable stable) {
         stable = stable;
         stubShape = P6opaqueObjectLayoutImpl.INSTANCE.createP6opaqueObjectShape(stable);
+        shape = P6opaqueObjectLayoutImpl.INSTANCE.createP6opaqueObjectShape(stable);
     }
 
     @Override

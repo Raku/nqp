@@ -8,6 +8,11 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import org.perl6.nqp.truffle.sixmodel.TypeObject;
+import com.oracle.truffle.api.object.DynamicObject;
+
+import org.perl6.nqp.truffle.sixmodel.STable;
+import org.perl6.nqp.truffle.sixmodel.reprs.P6opaqueObjectLayoutImpl;
+
 import org.perl6.nqp.truffle.runtime.NQPArguments;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
@@ -41,30 +46,39 @@ public final class NQPCallmethodNode extends NQPObjNode {
         this.argumentNodes = argumentNodes;
     }
 
+    STable getStable(Object invocant) {
+        if (P6opaqueObjectLayoutImpl.INSTANCE.isP6opaqueObject(invocant)) {
+            return P6opaqueObjectLayoutImpl.INSTANCE.getStable((DynamicObject) invocant);
+        } else if (invocant instanceof TypeObject) {
+            return ((TypeObject) invocant).stable;
+        } else {
+            throw new RuntimeException("callmethod on: , can't get Stable" + invocant.getClass().getName());
+        }
+    }
+
     @Override
     public Object execute(VirtualFrame frame) {
         Object invocant = invocantNode.execute(frame);
         String method = this.methodNode.executeStr(frame);
 
+        System.out.println("calling method: " + method);
+
         /* TODO - specialization and all the cool inline caching */
-        System.out.println("callmethod on: " + invocant.getClass().getName());
-        if (invocant instanceof TypeObject) {
-            System.out.println("callmethod on TypeObject: " + method);
-            TypeObject typeObject = (TypeObject) invocant;
-            Object foundMethod = typeObject.stable.methodCache.get(method);
-            if (foundMethod != null) {
 
-                Object[] arguments = NQPArguments.unpack(frame, contextSlot, 1, argumentFlags, argumentNames, argumentNodes);
-                NQPArguments.setUserArgument(arguments, 0, invocant);
+        STable stable = getStable(invocant);
 
-                NQPCodeRef function = (NQPCodeRef) foundMethod;
-                NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
-                IndirectCallNode callNode = IndirectCallNode.create();
-                return callNode.call(function.getCallTarget(), arguments);
-            }
-            return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
+        Object foundMethod = stable.methodCache.get(method);
+
+        if (foundMethod != null) {
+            Object[] arguments = NQPArguments.unpack(frame, contextSlot, 1, argumentFlags, argumentNames, argumentNodes);
+            NQPArguments.setUserArgument(arguments, 0, invocant);
+
+            NQPCodeRef function = (NQPCodeRef) foundMethod;
+            NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
+            IndirectCallNode callNode = IndirectCallNode.create();
+            return callNode.call(function.getCallTarget(), arguments);
         } else {
-            System.out.println("callmethod NYI: " + method);
+            System.out.println("Can't find method" + method);
             return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
         }
     }

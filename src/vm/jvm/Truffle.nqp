@@ -500,6 +500,7 @@ class QAST::OperationsTruffle {
     add_simple_op('can', $INT, [$OBJ, $STR], :decont(0));
     add_simple_op('defined', $INT, [$OBJ], :decont(0));
     add_simple_op('who', $OBJ, [$OBJ], :decont(0));
+    add_simple_op('create', $OBJ, [$OBJ]);
 
     add_simple_op('ctx', $OBJ, []);
 
