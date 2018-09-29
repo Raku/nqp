@@ -71,15 +71,20 @@ public class ManageScopes {
     }
 
     @Deserializer("block")
-    public static NQPNode createBlock(NQPScope scope, NQPNode[] children) {
+    public static NQPNode createBlock(NQPScope scope, String cuid, NQPNode[] children) {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
+
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
+        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        scope.addCuid(cuid, code);
+
         return new NQPBlockNode(
             new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
         );
     }
 
     @Deserializer("block-static")
-    public static NQPNode createBlock(NQPScope scope, String cuid, NQPNode[] children) {
+    public static NQPNode createStaticBlock(NQPScope scope, String cuid, NQPNode[] children) {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
         RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
         NQPCodeRef code = new NQPCodeRef(rootNode, null);

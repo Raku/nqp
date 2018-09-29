@@ -893,7 +893,7 @@ class QAST::TruffleCompiler does SerializeOnce {
         # TODO main/load
 
         my $block := self.as_truffle($node[0], :want($OBJ)).tree;
-        nqp::splice($block, ['block-forced-outer', $node[0].cuid], 0, 1);
+        nqp::splice($block, ['block-forced-outer'], 0, 1);
 
         TAST.new($OBJ, [
             'comp-unit', $node.hll, ['stmts',
@@ -1017,10 +1017,11 @@ class QAST::TruffleCompiler does SerializeOnce {
                 @tree := @body;
             }
             elsif $node.blocktype eq 'declaration_static' {
-                @body := ['block-static', $node.cuid];
+                @body := ['block-static'];
                 @tree := @body;
             }
 
+            @body.push($node.cuid);
             @body.push(['get-parent-context']);
 
             my @*DECLARATIONS := ['stmts'];
