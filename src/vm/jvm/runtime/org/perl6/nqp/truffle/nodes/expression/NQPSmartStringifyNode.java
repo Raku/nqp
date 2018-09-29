@@ -56,8 +56,6 @@ import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.Coercions;
 
-import org.perl6.nqp.truffle.MalformedAstException;
-
 import org.perl6.nqp.truffle.Debug;
 
 @NodeInfo(shortName = "smart stringify")
@@ -87,16 +85,6 @@ public class NQPSmartStringifyNode extends NQPStrNode {
 
     protected final boolean isNull(Object value) {
         return value == NQPNull.SINGLETON;
-    }
-
-    @Override
-    public final long executeInt(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a in");
-    }
-
-    @Override
-    public final double executeNum(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a num");
     }
 
     @Deserializer("smart-stringify")

@@ -60,8 +60,6 @@ import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.Debug;
 
-import org.perl6.nqp.truffle.MalformedAstException;
-
 @NodeInfo(shortName = "smart numify")
 @NodeChildren({@NodeChild(value="valueNode", type=NQPNode.class)})
 public class NQPSmartNumifyNode extends NQPNumNode {
@@ -97,18 +95,6 @@ public class NQPSmartNumifyNode extends NQPNumNode {
 
     protected final boolean isNull(Object value) {
         return value == NQPNull.SINGLETON;
-    }
-
-    public final Object execute(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an obj");
-    }
-
-    public final String executeStr(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a str");
-    }
-
-    public final long executeInt(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an int");
     }
 
     @Deserializer("smart-numify")

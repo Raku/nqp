@@ -47,8 +47,6 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
 
-import org.perl6.nqp.truffle.MalformedAstException;
-
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 
 import com.oracle.truffle.api.dsl.Specialization;
@@ -64,18 +62,6 @@ public class NQPSmartIntifyNode extends NQPIntNode {
     @Specialization
     protected long doLong(Long value) {
         return (long) value;
-    }
-
-    public final Object execute(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an obj");
-    }
-
-    public final String executeStr(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces a str");
-    }
-
-    public final double executeNum(VirtualFrame frame) {
-        throw new MalformedAstException("Expected an AST node that produces an int");
     }
 
     @Deserializer("smart-intify")
