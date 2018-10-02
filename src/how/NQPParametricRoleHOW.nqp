@@ -61,7 +61,7 @@ knowhow NQPParametricRoleHOW {
             nqp::setwho(nqp::newtype($metarole, 'Uninstantiable'), {}),
             $name);
     }
-    
+
     method set_body_block($obj, $body_block) {
         $!body_block := $body_block;
     }
@@ -117,7 +117,7 @@ knowhow NQPParametricRoleHOW {
     method parametric($obj) {
         1
     }
-    
+
     # Curries this parametric role with arguments.
     method curry($obj, *@args) {
         NQPCurriedRoleHOW.new_type($obj, |@args)

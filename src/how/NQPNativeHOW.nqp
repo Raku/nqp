@@ -8,7 +8,7 @@ knowhow NQPNativeHOW {
     method archetypes() {
         $archetypes
     }
-    
+
     method new(:$name) {
         my $obj := nqp::create(self);
         $obj.BUILD(:name($name));
@@ -68,11 +68,11 @@ knowhow NQPNativeHOW {
     method nativesize($obj) {
         $!nativesize
     }
-    
+
     method set_unsigned($obj, $unsigned) {
         $!unsigned := $unsigned ?? 1 !! 0
     }
-    
+
     method unsigned($obj) {
         $!unsigned
     }

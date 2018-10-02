@@ -12,7 +12,7 @@ my class NQPCapture {
         @!array := nqp::list();
         %!hash := nqp::hash();
     }
-    
+
     method list() { @!array }
 
     method hash() { %!hash }

@@ -1,7 +1,7 @@
 knowhow NQPModuleHOW {
     has $!name;
     has $!composed;
-    
+
     my $archetypes := Archetypes.new( );
     method archetypes() {
         $archetypes
@@ -44,7 +44,7 @@ knowhow NQPModuleHOW {
         nqp::setmethcacheauth($obj, 1);
         $!composed := 1;
     }
-    
+
     method find_method($obj, $name, *%opts) {
         nqp::null()
     }

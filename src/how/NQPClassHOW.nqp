@@ -27,7 +27,7 @@ knowhow NQPClassHOW {
 
     # Full list of roles that we do.
     has @!done;
-    
+
     # Cached values, which are thrown away if the class changes. We don't ever
     # mutate the %!caches hash, but instead clone/mutate/replace; additions
     # are rare compared to lookups, and this beats locking.
@@ -38,11 +38,11 @@ knowhow NQPClassHOW {
     has $!trace;
     has $!trace_depth;
     has @!trace_exclude;
-    
+
     # Build plan.
     has @!BUILDALLPLAN;
     has @!BUILDPLAN;
-    
+
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes() {
         $archetypes
@@ -136,11 +136,11 @@ knowhow NQPClassHOW {
         }
         nqp::push(@!parents, $parent);
     }
-    
+
     method set_default_parent($obj, $parent) {
         $!default_parent := $parent;
     }
-    
+
     # Changes the object's parent. Conditions: it has exactly one parent, and that
     # parent has no attributes, and nor does the new one.
     method reparent($obj, $new_parent) {
@@ -212,23 +212,23 @@ knowhow NQPClassHOW {
 
         # Create BUILDPLAN.
         self.create_BUILDPLAN($obj);
-        
+
         # Compose the representation.
         unless $!composed {
             self.compose_repr($obj);
         }
-        
+
         # Mark as composed.
         $!composed := 1;
 
         $obj
     }
-    
+
     method compose_repr($obj) {
         # Use any attribute information to produce attribute protocol
         # data. The protocol consists of an array...
         my @repr_info;
-        
+
         # ...which contains an array per MRO entry...
         for @!mro -> $type_obj {
             my @type_info;
@@ -236,7 +236,7 @@ knowhow NQPClassHOW {
 
             # ...which in turn contains the current type in the MRO...
             nqp::push(@type_info, $type_obj);
-        
+
             # ...then an array of hashes per attribute...
             my @attrs;
             nqp::push(@type_info, @attrs);
@@ -259,11 +259,11 @@ knowhow NQPClassHOW {
                 }
                 nqp::push(@attrs, %attr_info);
             }
-        
+
             # ...followed by a list of immediate parents.
             nqp::push(@type_info, $type_obj.HOW.parents($type_obj, :local));
         }
-        
+
         # Compose the representation using it.
         my $info := nqp::hash();
         $info<attribute> := @repr_info;
@@ -429,7 +429,7 @@ knowhow NQPClassHOW {
 
         nqp::settypecache($obj, @tc)
     }
-    
+
     sub reverse(@in) {
         my @out;
         for @in { nqp::unshift(@out, $_) }
@@ -478,7 +478,7 @@ knowhow NQPClassHOW {
         # First, we'll create the build plan for just this class.
         my @plan;
         my @attrs := $obj.HOW.attributes($obj, :local(1));
-        
+
         # Does it have its own BUILD?
         my $build := $obj.HOW.method_table($obj)<BUILD>;
         if nqp::defined($build) {
@@ -497,7 +497,7 @@ knowhow NQPClassHOW {
                 nqp::push(@plan, [$sigop, $obj, $attr_name, $name]);
             }
         }
-        
+
         # Check if there's any default values to put in place.
         for @attrs {
             if nqp::can($_, 'build') {
@@ -507,10 +507,10 @@ knowhow NQPClassHOW {
                 }
             }
         }
-        
+
         # Install plan for this class.
         @!BUILDPLAN := @plan;
-        
+
         # Now create the full plan by getting the MRO, and working from
         # least derived to most derived, copying the plans.
         my @all_plan;
@@ -525,11 +525,11 @@ knowhow NQPClassHOW {
         }
         @!BUILDALLPLAN := @all_plan;
     }
-    
+
     method BUILDPLAN($obj) {
         @!BUILDPLAN
     }
-    
+
     method BUILDALLPLAN($obj) {
         @!BUILDALLPLAN
     }
@@ -541,7 +541,7 @@ knowhow NQPClassHOW {
     method parents($obj, :$local = 0) {
         $local ?? @!parents !! @!mro
     }
-    
+
     method mro($obj) {
         @!mro
     }
@@ -672,7 +672,7 @@ knowhow NQPClassHOW {
             ?? %!caches{$key}
             !! self.cache_add($obj, $key, $value_generator())
     }
-    
+
     method flush_cache($obj) {
         nqp::scwbdisable();
         %!caches := {} unless nqp::isnull(%!caches);
@@ -696,7 +696,7 @@ knowhow NQPClassHOW {
 
     ##
     ## Mix-ins
-    ## 
+    ##
     has @!mixin_cache;
     method set_is_mixin($obj) { $!is_mixin := 1 }
     method is_mixin($obj) { $!is_mixin }
@@ -714,14 +714,14 @@ knowhow NQPClassHOW {
                 }
             }
         }
-        
+
         # Create and cache mixin-type if needed.
         unless $found {
             # Flush its cache as promised, otherwise outdated NFAs will stick around.
             self.flush_cache($obj) if !nqp::isnull($obj) || self.is_mixin($obj);
             # Work out a type name for the post-mixed-in role.
             my $new_name := self.name($obj) ~ '+{' ~ $role.HOW.name($role) ~ '}';
-            
+
             # Create new type, derive it from ourself and then add
             # all the roles we're mixing it.
             $new_type := self.new_type(:name($new_name), :repr($obj.REPR));
@@ -729,7 +729,7 @@ knowhow NQPClassHOW {
             $new_type.HOW.add_parent($new_type, $obj.WHAT);
             $new_type.HOW.add_role($new_type, $role);
             $new_type.HOW.compose($new_type);
-            
+
             # Store the type.
             nqp::scwbdisable();
             @!mixin_cache := [] if nqp::isnull(@!mixin_cache);
@@ -738,14 +738,14 @@ knowhow NQPClassHOW {
             nqp::scwbenable();
             1;
         }
-        
+
         # If the original object was concrete, change its type by calling a
         # low level op. Otherwise, we just return the new type object
         nqp::isconcrete($obj) ??
             nqp::rebless($obj, $new_type) !!
             $new_type
     }
-    
+
     ##
     ## Tracing
     ##

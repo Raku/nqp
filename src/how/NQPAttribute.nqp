@@ -32,11 +32,11 @@ knowhow NQPAttribute {
     method type() {
         $!has_type ?? $!type !! nqp::null()
     }
-    
+
     method has_accessor() {
         0
     }
-    
+
     method build_closure() {
         0
     }
@@ -44,23 +44,23 @@ knowhow NQPAttribute {
     method box_target() {
         !nqp::isnull($!box_target) && $!box_target ?? 1 !! 0
     }
-    
+
     method auto_viv_container() {
         $!has_default ?? $!default !! nqp::null()
     }
-    
+
     method set_positional_delegate($value) {
         $!positional_delegate := $value;
     }
-    
+
     method set_associative_delegate($value) {
         $!associative_delegate := $value;
     }
-    
+
     method positional_delegate() {
         !nqp::isnull($!positional_delegate) && $!positional_delegate ?? 1 !! 0
     }
-    
+
     method associative_delegate() {
         !nqp::isnull($!associative_delegate) && $!associative_delegate ?? 1 !! 0
     }

@@ -1,6 +1,6 @@
 class QAST::VM is QAST::Node does QAST::Children {
     has %!alternatives;
-    
+
     method new(*@children, *%alternatives) {
         my $obj := nqp::create(self);
         nqp::bindattr_i($obj, QAST::Node, '$!flags', 0);
@@ -8,18 +8,18 @@ class QAST::VM is QAST::Node does QAST::Children {
         nqp::bindattr($obj, QAST::VM, '%!alternatives', %alternatives);
         $obj
     }
-    
-    method supports($option) {  
+
+    method supports($option) {
         nqp::existskey(%!alternatives, $option)
     }
-    
+
     method alternative($option) {
         nqp::atkey(%!alternatives, $option)
     }
 
     method dump_children(int $indent, @onto) {
         for sorted_keys(%!alternatives) -> $k {
-            my $v := %!alternatives{$k}; 
+            my $v := %!alternatives{$k};
             nqp::push(@onto, nqp::x(' ', $indent));
             nqp::push(@onto, '[');
             nqp::push(@onto, $k);

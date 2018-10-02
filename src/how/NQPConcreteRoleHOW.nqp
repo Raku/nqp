@@ -157,7 +157,7 @@ knowhow NQPConcreteRoleHOW {
     method roles($obj) {
         @!roles
     }
-    
+
     method role_typecheck_list($obj) {
         @!role_typecheck_list
     }

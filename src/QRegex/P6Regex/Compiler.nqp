@@ -1,5 +1,4 @@
-class QRegex::P6Regex::Compiler is HLL::Compiler {
-}
+class QRegex::P6Regex::Compiler is HLL::Compiler { }
 
 my $p6regex := QRegex::P6Regex::Compiler.new();
 $p6regex.language('QRegex::P6Regex');

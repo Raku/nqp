@@ -296,7 +296,7 @@ class HLL::Backend::MoarVM {
                 }
                 nqp::push_s($pieces, ')');
             }
-            elsif nqp::isstr($obj) { 
+            elsif nqp::isstr($obj) {
                 if nqp::index($obj, '\\') {
                     $obj := literal_subst($obj, '\\', '\\\\');
                 }
