@@ -698,7 +698,7 @@ my $chain_gen := sub ($qastcomp, $op) {
         }
     }
 
-    nqp::push(@ops, $endlabel);
+    $*MAST_FRAME.add-label($endlabel);
     MAST::InstructionList.new(@ops, $res_reg, $MVM_reg_obj)
 }
 QAST::MASTOperations.add_core_op: 'chain',       $chain_gen;
@@ -717,10 +717,7 @@ for <if unless with without> -> $op_name {
         nqp::die("The '$op_name' op needs 2 or 3 operands, got $operands")
             if $operands < 2 || $operands > 3;
 
-        # Create labels.
-        my $if_id    := $qastcomp.unique($op_name);
-        my $else_lbl := MAST::Label.new();
-        my $end_lbl  := MAST::Label.new();
+        my $regalloc := $*REGALLOC;
 
         # Compile each of the children, handling any that want the conditional
         # value to be passed.
@@ -728,6 +725,12 @@ for <if unless with without> -> $op_name {
         my $wanted  := $is_void ?? $MVM_reg_void !! NQPMu;
         my @comp_ops;
         my $is_withy := $op_name eq 'with' || $op_name eq 'without';
+
+        # Create labels.
+        my $if_id    := $qastcomp.unique($op_name);
+        my $end_lbl  := MAST::Label.new();
+        my $else_lbl := ($operands == 3 || !$is_void) ?? MAST::Label.new() !! $end_lbl;
+        my $then_lbl := MAST::Label.new();
         my $cond_temp_lbl := $is_withy || needs_cond_passed($op[1]) || needs_cond_passed($op[2])
             ?? $qastcomp.unique('__im_cond_')
             !! '';
@@ -759,63 +762,16 @@ for <if unless with without> -> $op_name {
         else {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
-        if needs_cond_passed($op[1]) {
-            my $orig_type := $op[1].blocktype;
-            $op[1].blocktype('declaration');
-            @comp_ops[1] := $qastcomp.as_mast(QAST::Op.new(
-                :op('call'),
-                $op[1],
-                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
-                :want($wanted));
-            $op[1].blocktype($orig_type);
-        }
-        else {
-            @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted), :want-decont($*WANT-DECONT));
-        }
-        if needs_cond_passed($op[2]) {
-            my $orig_type := $op[2].blocktype;
-            $op[2].blocktype('declaration');
-            @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
-                :op('call'),
-                $op[2],
-                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
-                :want($wanted));
-            $op[2].blocktype($orig_type);
-        }
-        elsif $op[2] {
-            @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
-        }
-
-        if (@comp_ops[0].result_kind == $MVM_reg_void) {
-            nqp::die("The '$op_name' op condition cannot be void, cannot use the results of '" ~ $op[0].op ~ "'");
-        }
-
-        my $res_kind;
-        my $res_reg;
-        my $regalloc := $*REGALLOC;
-        if $is_void {
-            $res_reg := MAST::VOID;
-        }
-        else {
-            $res_kind := $operands == 3
-                ?? (@comp_ops[1].result_kind == @comp_ops[2].result_kind
-                && @comp_ops[1].result_kind != $MVM_reg_void
-                    ?? @comp_ops[1].result_kind
-                    !! $MVM_reg_obj)
-                !! (@comp_ops[0].result_kind == @comp_ops[1].result_kind
-                    ?? @comp_ops[0].result_kind
-                    !! $MVM_reg_obj);
-            $res_reg := $regalloc.fresh_register($res_kind);
-        }
 
         my @ins;
 
         # Evaluate the condition first; store result if needed.
         push_ilist(@ins, @comp_ops[0]);
+
+        my $cond_res_reg;
         if $operands == 2 && !$is_void {
-            my $il := MAST::InstructionList.new(@ins, @comp_ops[0].result_reg, @comp_ops[0].result_kind);
-            $qastcomp.coerce($il, $res_kind);
-            push_op(@ins, 'set', $res_reg, $il.result_reg);
+            $cond_res_reg := $regalloc.fresh_register(@comp_ops[0].result_kind);
+            push_op(@ins, 'set', $cond_res_reg, @comp_ops[0].result_reg);
         }
 
         # Emit the jump.
@@ -835,7 +791,7 @@ for <if unless with without> -> $op_name {
                 $op_name eq 'if' || $op_name eq 'with'
                   ?? 'unless_o' !! 'if_o',
                 $decont_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
             $regalloc.release_register($decont_reg, $MVM_reg_obj);
         }
@@ -846,7 +802,7 @@ for <if unless with without> -> $op_name {
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
                   !! @Condition-op-kinds[        @comp_ops[0].result_kind],
                 $coerce-reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
             $regalloc.release_register: $coerce-reg, $coerce-kind;
         }
@@ -856,29 +812,92 @@ for <if unless with without> -> $op_name {
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
                   !! @Condition-op-kinds[        @comp_ops[0].result_kind],
                 @comp_ops[0].result_reg,
-                ($operands == 3 ?? $else_lbl !! $end_lbl)
+                $else_lbl
             );
+        }
+
+        if needs_cond_passed($op[1]) {
+            my $orig_type := $op[1].blocktype;
+            $op[1].blocktype('declaration');
+            @comp_ops[1] := $qastcomp.as_mast(QAST::Op.new(
+                :op('call'),
+                $op[1],
+                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
+                :want($wanted));
+            $op[1].blocktype($orig_type);
+        }
+        else {
+            @comp_ops[1] := $qastcomp.as_mast($op[1], :want($wanted), :want-decont($*WANT-DECONT));
+        }
+
+        if (@comp_ops[0].result_kind == $MVM_reg_void) {
+            nqp::die("The '$op_name' op condition cannot be void, cannot use the results of '" ~ $op[0].op ~ "'");
+        }
+
+        my $res_kind;
+        my $res_reg;
+        my $then_res_reg;
+        if $is_void {
+            $res_reg := MAST::VOID;
+            $then_res_reg := $res_reg;
+        }
+        else {
+            if $operands == 3 {
+                $then_res_reg := $regalloc.fresh_register(@comp_ops[1].result_kind);
+            }
+            else {
+                $res_kind := # $operands == 3
+#                ?? (
+#                    @comp_ops[1].result_kind == @comp_ops[2].result_kind
+#                        && @comp_ops[1].result_kind != $MVM_reg_void
+#                    ?? @comp_ops[1].result_kind
+#                    !! $MVM_reg_obj
+#                )
+##                !!
+                    (@comp_ops[0].result_kind == @comp_ops[1].result_kind
+                        ?? @comp_ops[0].result_kind
+                        !! $MVM_reg_obj);
+                $res_reg := $regalloc.fresh_register($res_kind);
+            }
         }
 
         # Emit the then, stash the result
         push_ilist(@ins, @comp_ops[1]);
-        if (!$is_void && @comp_ops[1].result_kind != $res_kind) {
-            my $coercion := $qastcomp.coercion(@comp_ops[1], $res_kind);
-            push_ilist(@ins, $coercion);
-            push_op(@ins, 'set', $res_reg, $coercion.result_reg);
-        }
-        elsif !$is_void {
-            push_op(@ins, 'set', $res_reg, @comp_ops[1].result_reg);
-        }
-        $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
 
         # Handle else branch (coercion of condition result if 2-arg).
         if $operands == 3 {
+            if !$is_void {
+                push_op(@ins, 'set', $then_res_reg, @comp_ops[1].result_reg);
+                $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
+            }
+
             # Terminate the then branch first.
-            push_op(@ins, 'goto', $end_lbl);
-            nqp::push(@ins, $else_lbl);
+            push_op(@ins, 'goto', $is_void ?? $end_lbl !! $then_lbl);
+            $*MAST_FRAME.add-label($else_lbl);
+
+            if needs_cond_passed($op[2]) {
+                my $orig_type := $op[2].blocktype;
+                $op[2].blocktype('declaration');
+                @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
+                    :op('call'),
+                    $op[2],
+                    QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
+                    :want($wanted));
+                $op[2].blocktype($orig_type);
+            }
+            elsif $op[2] {
+                @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
+            }
 
             push_ilist(@ins, @comp_ops[2]);
+
+            $res_kind := 
+                @comp_ops[1].result_kind == @comp_ops[2].result_kind
+                    && @comp_ops[1].result_kind != $MVM_reg_void
+                ?? @comp_ops[1].result_kind
+                !! $MVM_reg_obj;
+            $res_reg := $regalloc.fresh_register($res_kind);
+
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
                     my $coercion := $qastcomp.coercion(@comp_ops[2], $res_kind);
@@ -890,9 +909,41 @@ for <if unless with without> -> $op_name {
                 }
             }
             $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
+
+            if !$is_void {
+                push_op(@ins, 'goto', $end_lbl);
+                $*MAST_FRAME.add-label($then_lbl);
+
+                if (@comp_ops[1].result_kind != $res_kind) {
+                    my $il := MAST::InstructionList.new(@ins, $then_res_reg, @comp_ops[1].result_kind);
+                    my $coercion := $qastcomp.coercion($il, $res_kind);
+                    push_ilist(@ins, $coercion);
+                    push_op(@ins, 'set', $res_reg, $coercion.result_reg);
+                }
+                else {
+                    push_op(@ins, 'set', $res_reg, $then_res_reg);
+                }
+                $regalloc.release_register($then_res_reg, @comp_ops[1].result_kind);
+            }
         }
+
+        if $operands == 2 && !$is_void {
+            my $il := MAST::InstructionList.new(@ins, @comp_ops[1].result_reg, @comp_ops[1].result_kind);
+            $qastcomp.coerce($il, $res_kind);
+            push_op(@ins, 'set', $res_reg, $il.result_reg);
+            $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
+            push_op(@ins, 'goto', $end_lbl);
+
+            $*MAST_FRAME.add-label($else_lbl);
+            my $cond_il := MAST::InstructionList.new(@ins, $cond_res_reg, @comp_ops[0].result_kind);
+            $qastcomp.coerce($cond_il, $res_kind);
+            push_op(@ins, 'set', $res_reg, $cond_il.result_reg);
+            $regalloc.release_register($cond_il.result_reg, $cond_il.result_kind);
+        }
+
+        $*MAST_FRAME.add-label($end_lbl);
+
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
-        nqp::push(@ins, $end_lbl);
 
         MAST::InstructionList.new(@ins, $res_reg, $res_kind)
     });
@@ -921,7 +972,7 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     $expr.append($then);
     push_op($expr.instructions, 'set', $res_reg, $then.result_reg);
-    nqp::push($expr.instructions, $lbl);
+    $*MAST_FRAME.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
     my $newer := MAST::InstructionList.new(nqp::list(), $res_reg, $MVM_reg_obj);
     $expr.append($newer);
@@ -969,7 +1020,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
         push_op(@ops, 'unless_i', $t, $jumplabel);
         push_op(@ops, 'unless_i', $u, $jumplabel);
         push_op(@ops, 'goto', $falselabel);
-        nqp::push(@ops, $jumplabel);
+        $*MAST_FRAME.add-label($jumplabel);
 
         if @comp_ops {
             my $truelabel := MAST::Label.new();
@@ -977,7 +1028,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
             push_op(@ops, 'set', $res_reg, $bpost.result_reg);
             $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
             push_op(@ops, 'set', $t, $u);
-            nqp::push(@ops, $truelabel);
+            $*MAST_FRAME.add-label($truelabel);
         }
         else {
             $have_middle_child := 0;
@@ -990,7 +1041,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     push_op(@ops, 'set', $res_reg, $bpost.result_reg);
     $*REGALLOC.release_register($bpost.result_reg, $MVM_reg_obj);
     push_op(@ops, 'goto', $endlabel);
-    nqp::push(@ops, $falselabel);
+    $*MAST_FRAME.add-label($falselabel);
 
     if $f_ast {
         push_ilist(@ops, $f_ast);
@@ -1001,7 +1052,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
         push_op(@ops, 'null', $res_reg);
     }
 
-    nqp::push(@ops, $endlabel);
+    $*MAST_FRAME.add-label($endlabel);
 
     $*REGALLOC.release_register($d, $MVM_reg_obj);
 
@@ -1028,13 +1079,106 @@ QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     $expr.append($then);
     push_op($expr.instructions, 'set', $res_reg, $then.result_reg);
-    nqp::push($expr.instructions, $lbl);
+    $*MAST_FRAME.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
     my $newer := MAST::InstructionList.new(nqp::list(), $res_reg, $MVM_reg_obj);
     $expr.append($newer);
 
     $expr
 });
+
+sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind) {
+    my @loop_il;
+    # Generate a lousy return value for our while loop.
+    unless $res_reg =:= MAST::VOID {
+        push_op(@loop_il, 'null', $res_reg);
+    }
+
+    if $repness {
+        # It's a repeat_ variant, need to go straight into the
+        # loop body unconditionally.
+        if $cond_temp {
+            push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
+        }
+        push_op(@loop_il, 'goto', $redo_lbl);
+    }
+    $*MAST_FRAME.add-label($test_lbl);
+
+    # Compile each of the children.
+    my @comp_ops;
+    my @comp_types;
+
+    my $comp := $qastcomp.as_mast(@children[0]);
+    @comp_ops.push($comp);
+    @comp_types.push($comp.result_kind);
+
+    # Check operand count.
+    my $operands := +@children;
+    nqp::die("The '$repness$op_name' op needs 2 or 3 operands, got $operands")
+        if $operands != 2 && $operands != 3;
+
+    push_ilist(@loop_il, @comp_ops[0]);
+    if @comp_ops[0].result_kind == $MVM_reg_obj {
+        my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
+        push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
+        push_op(@loop_il,
+            # the conditional routines are reversed on purpose
+            $op_name eq 'while' ?? 'unless_o' !! 'if_o',
+            $decont_reg,
+            $done_lbl
+        );
+        $regalloc.release_register($decont_reg, $MVM_reg_obj);
+    }
+    elsif @Full-width-coerce-to[@comp_ops[0].result_kind]
+    -> $coerce-kind {
+        my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
+        push_op(@loop_il,
+            $op_name eq 'while'
+              ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+              !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+            $coerce-reg,
+            $done_lbl
+        );
+        $regalloc.release_register: $coerce-reg, $coerce-kind;
+    }
+    else {
+        push_op(@loop_il,
+            $op_name eq 'while'
+              ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+              !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+            @comp_ops[0].result_reg,
+            $done_lbl
+        );
+    }
+
+    $*MAST_FRAME.add-label($redo_lbl);
+    push_op(@loop_il, 'osrpoint');
+
+    # Emit the loop body; stash the result.
+
+    $comp := $qastcomp.as_mast(@children[1], :want($MVM_reg_void));
+    @comp_ops.push($comp);
+    @comp_types.push($comp.result_kind);
+
+    if $orig_type {
+        @children[1][0].blocktype($orig_type);
+    }
+    my $body := $qastcomp.coerce(@comp_ops[1], $res_kind);
+    push_ilist(@loop_il, $body);
+
+    # If there's a third child, evaluate it as part of the
+    # "next".
+    if $operands == 3 {
+        $*MAST_FRAME.add-label($next_lbl);
+        $comp := $qastcomp.as_mast(@children[2], :want($MVM_reg_void));
+        @comp_ops.push($comp);
+        @comp_types.push($comp.result_kind);
+        push_ilist(@loop_il, @comp_ops[2]);
+    }
+
+    # Emit the iteration jump.
+    push_op(@loop_il, 'goto', $test_lbl);
+}
 
 # Loops.
 for ('', 'repeat_') -> $repness {
@@ -1084,93 +1228,9 @@ for ('', 'repeat_') -> $repness {
                 $res_reg := $regalloc.fresh_register($res_kind);
             }
 
-            # Compile each of the children.
-            my @comp_ops;
-            my @comp_types;
-            for @children {
-                my $comp := nqp::elems(@comp_ops) == 0
-                    ?? $qastcomp.as_mast($_)
-                    !! $qastcomp.as_mast($_, :want($MVM_reg_void));
-                @comp_ops.push($comp);
-                @comp_types.push($comp.result_kind);
-            }
-
-            if $orig_type {
-                @children[1][0].blocktype($orig_type);
-            }
-
-            # Check operand count.
-            my $operands := +@comp_ops;
-            nqp::die("The '$repness$op_name' op needs 2 or 3 operands, got $operands")
-                if $operands != 2 && $operands != 3;
-
             # Test the condition and jump to the loop end if it's
             # not met.
-            my @loop_il;
-
-            # Generate a lousy return value for our while loop.
-            unless $res_reg =:= MAST::VOID {
-                push_op(@loop_il, 'null', $res_reg);
-            }
-
-            if $repness {
-                # It's a repeat_ variant, need to go straight into the
-                # loop body unconditionally.
-                if $cond_temp {
-                    push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
-                }
-                push_op(@loop_il, 'goto', $redo_lbl);
-            }
-            nqp::push(@loop_il, $test_lbl);
-            push_ilist(@loop_il, @comp_ops[0]);
-            if @comp_ops[0].result_kind == $MVM_reg_obj {
-                my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-                push_op(@loop_il, 'decont', $decont_reg, @comp_ops[0].result_reg);
-                push_op(@loop_il,
-                    # the conditional routines are reversed on purpose
-                    $op_name eq 'while' ?? 'unless_o' !! 'if_o',
-                    $decont_reg,
-                    $done_lbl
-                );
-                $regalloc.release_register($decont_reg, $MVM_reg_obj);
-            }
-            elsif @Full-width-coerce-to[@comp_ops[0].result_kind]
-            -> $coerce-kind {
-                my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
-                push_op(@loop_il,
-                    $op_name eq 'while'
-                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
-                    $coerce-reg,
-                    $done_lbl
-                );
-                $regalloc.release_register: $coerce-reg, $coerce-kind;
-            }
-            else {
-                push_op(@loop_il,
-                    $op_name eq 'while'
-                      ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                      !! @Condition-op-kinds[        @comp_ops[0].result_kind],
-                    @comp_ops[0].result_reg,
-                    $done_lbl
-                );
-            }
-
-            # Emit the loop body; stash the result.
-            my $body := $qastcomp.coerce(@comp_ops[1], $res_kind);
-            nqp::push(@loop_il, $redo_lbl);
-            push_op(@loop_il, 'osrpoint');
-            push_ilist(@loop_il, $body);
-
-            # If there's a third child, evaluate it as part of the
-            # "next".
-            if $operands == 3 {
-                nqp::push(@loop_il, $next_lbl);
-                push_ilist(@loop_il, @comp_ops[2]);
-            }
-
-            # Emit the iteration jump.
-            push_op(@loop_il, 'goto', $test_lbl);
+            my $loop_start := nqp::elems($*MAST_FRAME.bytecode);
 
             # Emit postlude, with exception handlers if needed. Note that we
             # don't actually need to emit a bunch of handlers; since a handler
@@ -1194,36 +1254,79 @@ for ('', 'repeat_') -> $repness {
                     push_op($il, 'set', $lablocal, $labreg);
                     $regalloc.release_register($labreg, $MVM_reg_obj);
                 }
+                my $loop_il := loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind);
                 my @redo_il := [MAST::HandlerScope.new(
-                    :instructions(@loop_il),
+                    :start($loop_start),
                     :category_mask($redo_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($redo_lbl),
                     :label($lablocal)
                 )];
+                my $operands := +@children;
                 my @next_il := [MAST::HandlerScope.new(
-                    :instructions(@redo_il),
+                    :start($loop_start),
                     :category_mask($next_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($operands == 3 ?? $next_lbl !! $test_lbl),
                     :label($lablocal)
                 )];
                 nqp::push($il, MAST::HandlerScope.new(
-                    :instructions(@next_il),
+                    :start($loop_start),
                     :category_mask($last_mask),
                     :action($HandlerAction::unwind_and_goto),
                     :goto($done_lbl),
                     :label($lablocal)
                 ));
-                nqp::push($il, $done_lbl);
+                $*MAST_FRAME.add-label($done_lbl);
                 MAST::InstructionList.new($il, $res_reg, $res_kind)
             }
             else {
-                nqp::push(@loop_il, $done_lbl);
+                my @loop_il := loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind);
+                $*MAST_FRAME.add-label($done_lbl);
                 MAST::InstructionList.new(@loop_il, $res_reg, $res_kind)
             }
         });
     }
+}
+
+sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo, $block_res, @val_temps) {
+    # Emit loop test.
+    my $loop_il := ();
+    $*MAST_FRAME.add-label($lbl_next);
+    push_op($loop_il, 'unless_o', $iter_tmp, $lbl_done);
+    $loop_il := MAST::InstructionList.new($loop_il, MAST::VOID, $MVM_reg_void);
+
+    # Fetch values into temporaries (on the stack ain't enough in case
+    # of redo).
+    my $val_il := ();
+    my @arg_flags;
+    my $arity := @operands[1].arity || 1;
+    while $arity > 0 {
+        my $tmp := $regalloc.fresh_o();
+        push_op($val_il, 'shift_o', $tmp, $iter_tmp);
+        nqp::push(@val_temps, $tmp);
+        nqp::push(@arg_flags, $Arg::obj);
+        $arity := $arity - 1;
+    }
+
+    $*MAST_FRAME.add-label($lbl_redo);
+    push_op($val_il, 'osrpoint');
+    $val_il := MAST::InstructionList.new($val_il, MAST::VOID, $MVM_reg_void);
+
+    # Now do block invocation.
+    my $inv_il := MAST::Call.new(
+        :target($block_res.result_reg),
+        :flags(@arg_flags),
+        |@val_temps
+    );
+    $inv_il := MAST::InstructionList.new([$inv_il], MAST::VOID, $MVM_reg_void);
+    push_ilist($val_il.instructions, $inv_il);
+
+    # Emit next.
+    push_ilist($loop_il.instructions, $val_il);
+    push_op($loop_il.instructions, 'goto', $lbl_next );
+    $regalloc.release_register($inv_il.result_reg, $inv_il.result_kind);
+    $loop_il
 }
 
 QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
@@ -1242,7 +1345,6 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     unless nqp::istype(@operands[1], QAST::Block) {
         nqp::die("The 'for' op expects a block as its second operand, got " ~ @operands[1].HOW.name(@operands[1]));
     }
-
 
     my $orig_blocktype := @operands[1].blocktype;
 
@@ -1272,41 +1374,7 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     my $lbl_redo := MAST::Label.new();
     my $lbl_done := MAST::Label.new();
 
-    # Emit loop test.
-    my $loop_il := ();
-    nqp::push($loop_il, $lbl_next);
-    push_op($loop_il, 'unless_o', $iter_tmp, $lbl_done);
-    $loop_il := MAST::InstructionList.new($loop_il, MAST::VOID, $MVM_reg_void);
-
-    # Fetch values into temporaries (on the stack ain't enough in case
-    # of redo).
-    my $val_il := ();
     my @val_temps;
-    my @arg_flags;
-    my $arity := @operands[1].arity || 1;
-    while $arity > 0 {
-        my $tmp := $regalloc.fresh_o();
-        push_op($val_il, 'shift_o', $tmp, $iter_tmp);
-        nqp::push(@val_temps, $tmp);
-        nqp::push(@arg_flags, $Arg::obj);
-        $arity := $arity - 1;
-    }
-    nqp::push($val_il, $lbl_redo);
-    push_op($val_il, 'osrpoint');
-    $val_il := MAST::InstructionList.new($val_il, MAST::VOID, $MVM_reg_void);
-
-    # Now do block invocation.
-    my $inv_il := MAST::Call.new(
-        :target($block_res.result_reg),
-        :flags(@arg_flags),
-        |@val_temps
-    );
-    $inv_il := MAST::InstructionList.new([$inv_il], MAST::VOID, $MVM_reg_void);
-    push_ilist($val_il.instructions, $inv_il);
-
-    # Emit next.
-    push_ilist($loop_il.instructions, $val_il);
-    push_op($loop_il.instructions, 'goto', $lbl_next );
 
     # Emit postlude, wrapping in handlers if needed.
     if $handler {
@@ -1325,23 +1393,24 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
             push_op($il, 'set', $lablocal, $labreg);
             $regalloc.release_register($labreg, $MVM_reg_obj);
         }
-        my @ins_wrap := $loop_il.instructions;
+        my $loop_start := nqp::elems($*MAST_FRAME.bytecode);
+        my @ins_wrap := for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo, $block_res, @val_temps);
         @ins_wrap := [MAST::HandlerScope.new(
-            :instructions(@ins_wrap),
+            :start($loop_start),
             :category_mask($redo_mask),
             :action($HandlerAction::unwind_and_goto),
             :goto($lbl_redo),
             :label($lablocal)
         )];
         @ins_wrap := [MAST::HandlerScope.new(
-            :instructions(@ins_wrap),
+            :start($loop_start),
             :category_mask($next_mask),
             :action($HandlerAction::unwind_and_goto),
             :goto($lbl_next),
             :label($lablocal)
         )];
         nqp::push($il, MAST::HandlerScope.new(
-            :instructions(@ins_wrap),
+            :start($loop_start),
             :category_mask($last_mask),
             :action($HandlerAction::unwind_and_goto),
             :goto($lbl_done),
@@ -1349,9 +1418,9 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         ));
     }
     else {
-        push_ilist($il, $loop_il);
+        push_ilist($il, for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo, $block_res, @val_temps));
     }
-    nqp::push($il, $lbl_done);
+    $*MAST_FRAME.add-label($lbl_done);
 
     @operands[1].blocktype($orig_blocktype);
 
@@ -1359,7 +1428,6 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     # give a value.
     $regalloc.release_register($block_res.result_reg, $block_res.result_kind);
     for @val_temps { $regalloc.release_register($_, $MVM_reg_obj) }
-    $regalloc.release_register($inv_il.result_reg, $inv_il.result_kind);
     if $*WANT == $MVM_reg_void {
         $regalloc.release_register($list_il.result_reg, $list_il.result_kind);
         MAST::InstructionList.new($il, MAST::VOID, $MVM_reg_void)
@@ -1759,18 +1827,19 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # Wrap instructions to try up in a handler and evaluate to the result
     # of the protected code of the exception handler.
     my $protected_result  := $regalloc.fresh_o();
+    my $prot_start := nqp::elems($*MAST_FRAME.bytecode);
     my $protil := $qastcomp.as_mast($protected, :want($MVM_reg_obj));
     my $uwlbl  := MAST::Label.new();
     my $endlbl := MAST::Label.new();
     push_op($protil.instructions, 'set', $protected_result, $protil.result_reg);
     push_op($protil.instructions, 'goto', $endlbl);
     nqp::push($il, MAST::HandlerScope.new(
-        :instructions($protil.instructions), :goto($uwlbl), :block($hblocal),
+        :start($prot_start), :goto($uwlbl), :block($hblocal),
         :category_mask($mask), :action($HandlerAction::invoke_and_we'll_see),
         :label($lablocal)));
-    nqp::push($il, $uwlbl);
+    $*MAST_FRAME.add-label($uwlbl);
     push_op($il, 'takehandlerresult', $protected_result);
-    nqp::push($il, $endlbl);
+    $*MAST_FRAME.add-label($endlbl);
 
     $regalloc.release_register($protil.result_reg, $MVM_reg_obj);
 
@@ -1790,18 +1859,19 @@ QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $
     my int $mask := %handler_names{$type};
 
     my $il        := nqp::list();
+    my $prot_start := nqp::elems($*MAST_FRAME.bytecode);
     my $protected := $qastcomp.as_mast(@children[0], :want($MVM_reg_obj));
-    my $handler   := $qastcomp.as_mast(@children[2], :want($MVM_reg_obj));
     my $endlbl     := MAST::Label.new();
     my $handlelbl  := MAST::Label.new();
     push_op($protected.instructions, 'goto', $endlbl);
     nqp::push($il, MAST::HandlerScope.new(
-        :instructions($protected.instructions), :goto($handlelbl),
+        :start($prot_start), :goto($handlelbl),
         :category_mask($mask), :action($HandlerAction::unwind_and_goto_with_payload)));
-    nqp::push($il, $handlelbl);
+    $*MAST_FRAME.add-label($handlelbl);
+    my $handler   := $qastcomp.as_mast(@children[2], :want($MVM_reg_obj));
     push_ilist($il, $handler);
     push_op($il, 'set', $protected.result_reg, $handler.result_reg);
-    nqp::push($il, $endlbl);
+    $*MAST_FRAME.add-label($endlbl);
     $*REGALLOC.release_register($handler.result_reg, $MVM_reg_obj);
 
     MAST::InstructionList.new($il, $protected.result_reg, $MVM_reg_obj)
@@ -2885,7 +2955,7 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     if $*BLOCK.lexical($op[0].value) -> $lex {
         push_op(@ops, 'bindlex', $lex, $disp_reg);
     }
-    nqp::push(@ops, $done_lbl);
+    $*MAST_FRAME.add-label($done_lbl);
     $regalloc.release_register($disp_reg, $MVM_reg_obj);
     $regalloc.release_register($isnull_reg, $MVM_reg_int64);
     MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
