@@ -1,5 +1,3 @@
-#! nqp
-
 # method ops (just method calls for now)
 
 plan(5);

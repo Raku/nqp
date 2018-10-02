@@ -1,5 +1,3 @@
-#! nqp
-
 plan(1);
 
 my $content := slurp("t/nqp/063-slurp.t");

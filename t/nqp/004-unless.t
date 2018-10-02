@@ -1,5 +1,3 @@
-#! nqp
-
 # check control structure 'unless'
 
 say('1..6');
@@ -22,4 +20,3 @@ say("ok 5 # postfix statement modifier form (false)") unless 0;
 print("not ") unless 1;
 
 say("ok 6 # postfix statement modifier form (true)");
-

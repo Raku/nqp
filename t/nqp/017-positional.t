@@ -1,5 +1,3 @@
-#! nqp
-
 # check positional subscripting
 
 plan(7);
@@ -20,4 +18,3 @@ say(@l[0]);
 
 @l[10] := 'ok 7 # automatic expansion';
 say(@l[10]);
-

@@ -1,4 +1,3 @@
-#!/usr/bin/env nqp
 plan(119 * 2 + 4 * 3);
 ok(nqp::indexic('hi', '', 2) == 2, 'nqp::indexic finds empty string after last index');
 ok(nqp::indexic('hi', '', 0) == 0, 'nqp::indexic finds empty string at start');

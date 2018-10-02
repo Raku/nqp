@@ -1,5 +1,3 @@
-#! nqp
-
 plan(31);
 
 use NQPHLL;

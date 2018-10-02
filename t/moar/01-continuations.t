@@ -1,5 +1,3 @@
-#! nqp
-
 # continuations.
 
 plan(24);

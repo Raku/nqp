@@ -1,5 +1,3 @@
-#! nqp
-
 # check blocks and statement enders
 
 say('1..7');
@@ -30,4 +28,3 @@ say('1..7');
 }; {
     say("7 # blocks following an end brace must be separated by a semicolon")
 }
-

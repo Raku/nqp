@@ -1,5 +1,3 @@
-#! nqp
-
 # implicit and explicit returns from subs
 
 plan(5);
@@ -18,7 +16,7 @@ sub baz() {
 }
 
 sub nested() {
-    if (1) { 
+    if (1) {
         my $try_to_stop_the_nested_block_from_being_optimized_out := 4;
         return $try_to_stop_the_nested_block_from_being_optimized_out;
     }

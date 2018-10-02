@@ -1,5 +1,3 @@
-#! nqp
-
 plan(2);
 
 my @a := nqp::decodelocaltime(nqp::time_i());

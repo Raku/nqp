@@ -1,5 +1,5 @@
 plan(5);
-my sub foo() { 
+my sub foo() {
 };
 my $orig := nqp::getstaticcode(&foo);
 ok(nqp::eqaddr(nqp::getstaticcode(nqp::clone(&foo)), $orig), "clone shares static code");

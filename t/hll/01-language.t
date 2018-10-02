@@ -1,5 +1,3 @@
-#!/usr/bin/env nqp
-
 use NQPHLL;
 plan(2);
 

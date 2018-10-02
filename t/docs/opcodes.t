@@ -1,5 +1,3 @@
-#! nqp
-
 my @*vms := nqp::list('jvm', 'moar', 'js');
 
 my %documented_ops := find_documented_opcodes();

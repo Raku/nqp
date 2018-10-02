@@ -2,7 +2,6 @@ use nqpmo;
 
 plan(27);
 
-
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
     nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
@@ -10,17 +9,14 @@ my sub create_buf($type) {
     $buf;
 }
 
-
 my $buf8 := create_buf(uint8);
 my $buf16 := create_buf(uint16);
-
 
 my $buf := nqp::encode('', 'utf8', $buf8.new);
 
 ok(nqp::elems($buf) == 0, 'encoding empty string as UTF-8');
 my $str := nqp::decode($buf, 'utf8');
 is($str, '', 'decoding empty UTF-8 string into string');
-
 
 # Test for a regression in the Parrot backend.
 $buf := nqp::encode('a', 'utf16', $buf16.new);

@@ -1,5 +1,3 @@
-#! nqp
-
 # class inheritance
 
 plan(9);

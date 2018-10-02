@@ -1,10 +1,7 @@
 plan(21);
 
-class IsThisType {
-}
-class IsntThisType {
-}
-
+class IsThisType { }
+class IsntThisType { }
 
 class TypeCheckTestHOW {
     has int $!type_check_called;
@@ -58,7 +55,7 @@ class AcceptingType {
     has int $!accepts_type_called;
 
     has $!accepts;
-    
+
     method accepts_type_called() {
         $!accepts_type_called;
     }
@@ -111,4 +108,3 @@ nqp::settypecache($type_check_false_with_cache, nqp::list($accepts_not_called));
 ok(nqp::istype($type_check_false_with_cache, $accepts_true), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS: istype when the type is not in cache but accepts return true');
 ok(nqp::istype($type_check_false_with_cache, $accepts_not_called), 'nqp::const::TYPE_CHECK_NEEDS_ACCEPTS: istype when the type is in cache');
 is($accepts_not_called.HOW.accepts_type_called, 0, '...accept_type is not called');
-

@@ -1,5 +1,3 @@
-#! nqp
-
 plan(7);
 
 ok(NQPCursor.parse('a', :rule(/<alpha>/), :p(0)),

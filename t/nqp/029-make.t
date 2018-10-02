@@ -1,5 +1,3 @@
-#! nqp
-
 # Tests for 'make' builtin.
 
 plan(2);
@@ -15,5 +13,3 @@ our sub foo() {
 
 foo();
 say($/.ast);
-
-

@@ -1,5 +1,3 @@
-#! nqp
-
 plan(7);
 
 my $count := 1;

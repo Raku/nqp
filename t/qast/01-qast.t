@@ -651,7 +651,7 @@ test_qast_result(
     -> $r {
         ok(nqp::getattr_i($r, E, '$!x') == 99, 'attribute binding works');
     });
-    
+
 my $test_obj := nqp::create(E);
 nqp::bindattr_i($test_obj, E, '$!x', 199);
 is_qast_args(
@@ -1397,9 +1397,9 @@ test_qast_result(
                 ),
                 sval('D')
            ),
-           QAST::Op.new( :op<chain>, :name<op1>, 
+           QAST::Op.new( :op<chain>, :name<op1>,
                QAST::Op.new( :op<chain>, :name<op2>,
-                   QAST::Op.new( :op<chain>, :name<op3>, 
+                   QAST::Op.new( :op<chain>, :name<op3>,
                        QAST::Op.new( :op<chain>, :name<op2>, sval('A'), sval('B')),
                        sval('E')
                    ),
@@ -2280,7 +2280,7 @@ is_qast(
                         with_arity(1, QAST::Block.new(
                             :blocktype<immediate>,
                             QAST::Op.new(
-                                :op<if>, 
+                                :op<if>,
                                 QAST::Op.new(
                                     :op<iseq_i>,
                                     QAST::Var.new( :name('$j'), :scope<lexical>, :decl<param> ),

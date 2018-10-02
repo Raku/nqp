@@ -1,5 +1,3 @@
-#! nqp
-
 my $die_message := 'unset';
 
 sub dies_ok(&callable, $description) {

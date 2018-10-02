@@ -1,5 +1,3 @@
-#! nqp
-
 # test protoregexes in grammars
 
 plan(7);
@@ -31,6 +29,3 @@ ok( !$/ ,           'successfully failed protoregex match' );
 
 $/ := ABC.parse('xxx', :rule<symbols>);
 ok( !$/ ,           'successfully failed protoregex match' );
-
-
-

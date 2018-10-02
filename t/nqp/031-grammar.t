@@ -1,5 +1,3 @@
-#! nqp
-
 # Test grammars and regexes
 
 plan(18);

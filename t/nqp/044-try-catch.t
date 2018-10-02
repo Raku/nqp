@@ -1,5 +1,3 @@
-#! nqp
-
 # Tests for try and catch
 
 plan(60);
@@ -108,8 +106,8 @@ is($ok, "oops_s!", "nqp::die_s");
     nqp::setpayload($exception, "cute payload");
     nqp::throw($exception);
     CATCH {
-       is(nqp::getmessage($_), "a cute exception", "nqp::setmessage/nqp::getmessage"); 
-       is(nqp::getpayload($_), "cute payload", "nqp::setpayload/nqp::getpayload"); 
+       is(nqp::getmessage($_), "a cute exception", "nqp::setmessage/nqp::getmessage");
+       is(nqp::getpayload($_), "cute payload", "nqp::setpayload/nqp::getpayload");
     }
 }
 
@@ -135,8 +133,8 @@ is($ok, "oops_s!", "nqp::die_s");
     nqp::throw($exception);
     CATCH {
        is($_.custom_stuff, "cool stuff", "calling method on custom exception");
-       is(nqp::getmessage($_), "a custom exception", "nqp::setmessage/nqp::getmessage on custom exception"); 
-       is(nqp::getpayload($_), "custom payload", "nqp::setpayload/nqp::getpayload on custom exception"); 
+       is(nqp::getmessage($_), "a custom exception", "nqp::setmessage/nqp::getmessage on custom exception");
+       is(nqp::getpayload($_), "custom payload", "nqp::setpayload/nqp::getpayload on custom exception");
     }
 }
 

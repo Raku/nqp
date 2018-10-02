@@ -90,4 +90,3 @@ is($obj2.find_this, "found", 'calling a method from find_method directly');
 is($obj2.find_with_args('100', '200'), 300, "...got correct return value");
 
 is($obj2.HOW.find_method_called, 6, 'find_method is called the correct amount of times');
-

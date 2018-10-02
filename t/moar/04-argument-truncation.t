@@ -1,5 +1,3 @@
-# t/moar/argument-truncation.t
-
 plan(8);
 
 sub pos8(int8  $i) {
@@ -35,4 +33,3 @@ named8(:i(42));
 named16(:i(42));
 named32(:i(42));
 named64(:i(42));
-

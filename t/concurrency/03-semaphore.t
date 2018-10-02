@@ -1,6 +1,3 @@
-#! nqp
-
-
 plan(12);
 
 my class Semaphore is repr('Semaphore') { }

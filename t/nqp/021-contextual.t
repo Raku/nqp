@@ -1,5 +1,3 @@
-#! nqp
-
 # Tests for contextual variables
 
 plan(31);

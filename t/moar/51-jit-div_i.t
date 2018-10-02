@@ -1,5 +1,3 @@
-#!/usr/bin/env nqp-m
-
 nqp::say("1..12");
 sub foo(int $i, int $j) {
     my int $x := nqp::div_i($i, $j);

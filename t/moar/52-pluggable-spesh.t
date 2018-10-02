@@ -1,7 +1,5 @@
-#!/usr/bin/env nqp
-
 # Tests for extending the MoarVM specializer to guard on new kinds of things
-# from NQP. 
+# from NQP.
 
 plan(66);
 

@@ -7,7 +7,7 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     my $value := 42;
     sub fetch($cont) { $value }
     sub store($cont, $new) { $value := $new }
-    
+
     class SomeCont {
         method foo() {
             "container";
@@ -17,21 +17,21 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
         'fetch', &fetch,
         'store', &store
     ));
-    
+
     ok(!nqp::isrwcont(42), 'isrwcont on something that is not a rwcontainer');
 
     my $cont := nqp::create(SomeCont);
     ok(nqp::iscont($cont), 'correct result from iscont');
 
     ok(nqp::isrwcont($cont), 'correct result from isrwcont');
-    
+
     ok(nqp::decont($cont) == 42, 'initial decontainerization OK');
-    
+
     ok(nqp::eqaddr(nqp::assign($cont, 101), $cont), "assign return container");
     ok(nqp::decont($cont) == 101, 'assigned value stuck');
-    
+
     ok($value == 101, 'updated captured value also');
-    
+
     ok(nqp::eqaddr(nqp::assignunchecked($cont, 69), $cont), "assignunchecked returns container");
 
     ok(nqp::decont($cont) == 69, 'assignunchecked value stuck');
@@ -64,7 +64,7 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     is($cont.foo, "foo", "calling a method on a container deconts");
     is(SomeCont.foo, "container", "a method call on a type object dosen't decont");
     is($cont.HOW.name($cont), "Foo", "HOW deconts");
-    ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts"); 
+    ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts");
 
     class FooMore is Foo {
         method foo() {
@@ -97,7 +97,7 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
             $b := $new
         }
     }
-    
+
     class FlaggyCont {
     }
 

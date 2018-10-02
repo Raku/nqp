@@ -1,5 +1,3 @@
-#! nqp
-
 plan(1519);
 
 {
@@ -56,14 +54,14 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 0,   'serialized empty SC to non-empty string');
     ok(nqp::chars($serialized) >= 36, 'output is at least as long as the header');
 
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 0, 'deserialized SC is also empty');
 }
 
@@ -71,37 +69,37 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T1 is repr('P6int') { }
     my $v1 := nqp::box_i(42, T1);
     add_to_sc($sc, 0, $v1);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6int output longer than a header');
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 1,  'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T1),    'deserialized object has correct type');
     ok(nqp::unbox_i(nqp::scgetobj($dsc, 0)) == 42, 'deserialized object has correct value');
 }
-    
+
 # Serializing an SC with a single object with P6num REPR.
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T2 is repr('P6num') { }
     my $v := nqp::box_n(6.9, T2);
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6num output longer than a header');
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 1,   'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T2),     'deserialized object has correct type');
     ok(nqp::unbox_n(nqp::scgetobj($dsc, 0)) == 6.9, 'deserialized object has correct value');
@@ -111,17 +109,17 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T3 is repr('P6str') { }
     my $v := nqp::box_s('dugong', T3);
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6str output longer than a header');
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 1,        'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T3),          'deserialized object has correct type');
     ok(nqp::unbox_s(nqp::scgetobj($dsc, 0)) eq 'dugong', 'deserialized object has correct value');
@@ -131,7 +129,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T4 {
         has int $!a;
         has num $!b;
@@ -155,7 +153,7 @@ sub fresh_out_sc() {
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
@@ -170,7 +168,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T5 {
         has $!x;
         method set_x($x) {
@@ -187,10 +185,10 @@ sub fresh_out_sc() {
 
     my $serialized := nqp::serialize($sc, $sh);
     ok(nqp::chars($serialized) > 36, 'serialized SC with P6opaque output longer than a header');
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 2,  'deserialized SC has 2 objects');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T5),    'first deserialized object has correct type');
     ok(nqp::istype(nqp::scgetobj($dsc, 1), T5),    'second deserialized object has correct type');
@@ -202,7 +200,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T6 {
         has $!x;
         has int $!v;
@@ -222,14 +220,14 @@ sub fresh_out_sc() {
     $v1.set_xv($v2, 5);
     $v2.set_xv($v3, 8);
     $v3.set_v(40);
-    
+
     # Here, we only add *one* of the three explicitly to the SC.
     add_to_sc($sc, 0, $v1);
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) == 3,  'deserialized SC has 3 objects - the one we added and two discovered');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T6),    'first deserialized object has correct type');
     ok(nqp::istype(nqp::scgetobj($dsc, 1), T6),    'second deserialized object has correct type');
@@ -245,7 +243,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T7 {
         has $!a;
         has $!b;
@@ -268,7 +266,7 @@ sub fresh_out_sc() {
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
@@ -283,7 +281,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T8 {
         has $!a;
         has $!b;
@@ -303,7 +301,7 @@ sub fresh_out_sc() {
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
@@ -324,7 +322,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T9 {
         has $!a;
         method new() {
@@ -344,7 +342,7 @@ sub fresh_out_sc() {
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
@@ -358,7 +356,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T10 {
         has $!a;
         method new() {
@@ -380,7 +378,7 @@ sub fresh_out_sc() {
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
@@ -400,7 +398,7 @@ sub fresh_out_sc() {
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
-    
+
     class T11 {
         has $!a;
         method new() {
@@ -421,7 +419,7 @@ sub fresh_out_sc() {
     add_to_sc($sc, 0, $v);
 
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc(fresh_out_sc());
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 

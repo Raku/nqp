@@ -1,5 +1,3 @@
-#! nqp
-
 plan(4);
 
 class Foo {

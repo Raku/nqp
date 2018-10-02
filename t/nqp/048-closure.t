@@ -1,5 +1,3 @@
-#! nqp
-
 plan(2);
 
 sub A($a) {
@@ -11,4 +9,3 @@ my $y := A(5);
 
 ok( $y() == 10, "second closure correct" );
 ok( $x() == 6, "first closure correct" );
-

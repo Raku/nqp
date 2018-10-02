@@ -91,7 +91,7 @@ $str_boxer.HOW.add_attribute($str_boxer, NQPAttribute.new(
 ));
 $str_boxer.HOW.add_parent($str_boxer, NQPMu);
 $str_boxer.HOW.add_method($str_boxer, 'twice', method () {
-    nqp::getattr_s(self, $str_boxer, '$!value') * 2; 
+    nqp::getattr_s(self, $str_boxer, '$!value') * 2;
 });
 $str_boxer.HOW.compose($str_boxer);
 

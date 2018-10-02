@@ -1,5 +1,3 @@
-#! nqp
-
 # Test INIT blocks
 
 INIT plan(4);
@@ -19,5 +17,3 @@ $foo := 3;
 INIT ok($foo++, 'after first INIT but before mainline');
 
 ok($foo == 3, 'After everything else');
-
-

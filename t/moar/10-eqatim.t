@@ -1,4 +1,3 @@
-#!/usr/bin/env nqp
 ## TODO XXX need MORE tests to check failures, not just succeses
 plan(110);
 ok(!nqp::eqatim('b', 'bb', 0), "MVM index/equatic bug");

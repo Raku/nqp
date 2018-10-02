@@ -1,5 +1,3 @@
-#! nqp
-
 # Test nqp::op pseudo-functions.
 
 plan(371);

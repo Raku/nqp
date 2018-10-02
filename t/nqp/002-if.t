@@ -1,5 +1,3 @@
-#! nqp
-
 # check control structure 'if'
 
 say('1..6');

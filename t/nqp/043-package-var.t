@@ -1,5 +1,3 @@
-#! nqp.pbc
-
 # Accessing package variables directly
 
 plan(4);

@@ -1,5 +1,3 @@
-#! nqp
-
 plan(13);
 
 grammar ABC {

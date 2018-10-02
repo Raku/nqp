@@ -1,5 +1,3 @@
-#! nqp
-
 use nqpmo;
 
 plan(57);
@@ -19,12 +17,12 @@ sub add_to_sc($sc, $idx, $obj) {
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
     add_to_sc($sc, 1, nqp::box_i(42, $type));
-    
+
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc('TEST_SC_1_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
     ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
@@ -38,21 +36,21 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_2_IN');
     my $sh := nqp::list_s();
-    
+
     my $type := nqp::knowhow().new_type(:name('Dugong'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, nqp::knowhowattr().new(name => '$!home'));
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
-    
+
     my $instance := nqp::create($type);
     nqp::bindattr($instance, $type, '$!home', 'Sea');
     add_to_sc($sc, 1, $instance);
-    
+
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc('TEST_SC_2_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
     ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
@@ -66,7 +64,7 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_3_IN');
     my $sh := nqp::list_s();
-    
+
     my $type := NQPClassHOW.new_type(:name('Badger'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!eats', type => str));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!age', type => int));
@@ -74,7 +72,7 @@ sub add_to_sc($sc, $idx, $obj) {
     $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
-    
+
     my $instance := nqp::create($type);
     nqp::bindattr_s($instance, $type, '$!eats', 'mushrooms');
     nqp::bindattr_i($instance, $type, '$!age', 5);
@@ -84,12 +82,12 @@ sub add_to_sc($sc, $idx, $obj) {
     my $defaults := nqp::create($type);
 
     add_to_sc($sc, 2, $defaults);
-    
+
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc('TEST_SC_3_OUT');
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
     ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
@@ -111,7 +109,7 @@ sub add_to_sc($sc, $idx, $obj) {
 
     my $other_instance := nqp::create(nqp::scgetobj($dsc, 0));
     ok(nqp::isconcrete($other_instance), 'can make new instance of deserialized type');
-    
+
     nqp::bindattr_s($other_instance, nqp::scgetobj($dsc, 0), '$!eats', 'snakes');
     nqp::bindattr_i($other_instance, nqp::scgetobj($dsc, 0), '$!age', 10);
     nqp::bindattr_n($other_instance, nqp::scgetobj($dsc, 0), '$!weight', 3.4);
@@ -127,14 +125,14 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_4_IN');
     my $sh := nqp::list_s();
-    
+
     my $m1 := method () { "awful" };
     my $m2 := method () { "Hi, I'm " ~ nqp::getattr(self, self.WHAT, '$!name') };
     nqp::scsetcode($sc, 0, $m1);
     nqp::scsetcode($sc, 1, $m2);
     nqp::markcodestatic($m1);
     nqp::markcodestatic($m2);
-    
+
     my $type := NQPClassHOW.new_type(:name('Llama'), :repr('P6opaque'));
     $type.HOW.add_attribute($type, NQPAttribute.new(name => '$!name'));
     $type.HOW.add_method($type, 'smell', $m1);
@@ -142,17 +140,17 @@ sub add_to_sc($sc, $idx, $obj) {
     $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
     add_to_sc($sc, 0, $type);
-    
+
     my $instance := nqp::create($type);
     nqp::bindattr($instance, $type, '$!name', 'Bob');
     add_to_sc($sc, 1, $instance);
-    
+
     my $serialized := nqp::serialize($sc, $sh);
-    
+
     my $dsc := nqp::createsc('TEST_SC_4_OUT');
     my $cr := nqp::list($m1, $m2);
     nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
-    
+
     ok(nqp::scobjcount($dsc) >= 2,                 'deserialized SC has at least the knowhow type and its instance');
     ok(!nqp::isconcrete(nqp::scgetobj($dsc, 0)),   'type object deserialized and is not concrete');
     ok(nqp::isconcrete(nqp::scgetobj($dsc, 1)),    'instance deserialized and is concrete');
@@ -166,7 +164,7 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_5_IN');
     my $sh := nqp::list_s();
-    
+
 
     my $half-true := method () {
         nqp::bindattr(self, self.WHAT, '$!bool', !nqp::getattr(self, self.WHAT, '$!bool'));
@@ -208,7 +206,7 @@ sub add_to_sc($sc, $idx, $obj) {
 {
     my $sc := nqp::createsc('TEST_SC_6_IN');
     my $sh := nqp::list_s();
-    
+
 
     my $invoke := sub ($invoke) {
         700
@@ -503,7 +501,7 @@ sub add_to_sc($sc, $idx, $obj) {
         has int $!accepts_type_called;
 
         has $!accepts;
-        
+
         method accepts_type_called() {
             $!accepts_type_called;
         }

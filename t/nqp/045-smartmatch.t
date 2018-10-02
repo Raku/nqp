@@ -1,5 +1,3 @@
-#! nqp
-
 plan(12);
 
 my $match := 'cde' ~~ regex abc { c(.)e };

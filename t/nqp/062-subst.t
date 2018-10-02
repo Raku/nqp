@@ -1,5 +1,3 @@
-#! nqp
-
 plan(7);
 
 my $str := 'hello';
@@ -17,4 +15,3 @@ is(subst($str, /FOO/, 'BAR'), 'hello', "Non-existing string doesn't clobber stri
 is(subst($str, /FOO/, 'BAR', :global), 'hello', "Non-existing string doesn't clobber string globally");
 
 # vim: ft=perl6
-

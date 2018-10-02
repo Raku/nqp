@@ -1,5 +1,3 @@
-#! nqp
-
 # test named parameters and arguments
 
 plan(11);

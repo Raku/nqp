@@ -1,5 +1,3 @@
-#! nqp
-
 # check module
 
 plan(3);
@@ -16,4 +14,3 @@ module XYZ {
 
 XYZ::foo('ok 3');
 XYZ::sayfoo();
-

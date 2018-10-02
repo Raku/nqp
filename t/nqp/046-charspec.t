@@ -1,5 +1,3 @@
-#! nqp
-
 # check literals
 
 plan(3);

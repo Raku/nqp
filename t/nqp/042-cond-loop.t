@@ -44,4 +44,3 @@ while $a == 10 { ok($a == 10, 'while still works'); $a++; }
 $a := 1;
 $a := $a * $_ for <1 2 3>;
 ok( $a == 6 , 'for');
-

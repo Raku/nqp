@@ -1,5 +1,3 @@
-#! nqp
-
 plan(37);
 
 my $b := "b+";
@@ -63,4 +61,3 @@ ok("ad" ~~ /a <?{ 1 }> d/, 'Zero-width assertions still work 1');
 ok(!("ad" ~~ /a <!{ 1 }> d/), 'Zero-width assertions still work 2');
 
 ok("test.h" ~~ /.h$/, 'Do not parse $/ as variable interpolation');
-

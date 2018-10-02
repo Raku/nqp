@@ -1,5 +1,3 @@
-#! nqp
-
 # interpolating quotes
 
 plan(17);

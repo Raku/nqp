@@ -1,5 +1,3 @@
-#!/usr/bin/env nqp
-
 # Test case for even-moar-jit register allocator.
 # This only demonstrates something when run under MVM_JIT_EXPR_ENABLE=1
 
@@ -56,4 +54,3 @@ while $i < 301 {
     }
     $i := $i + 1;
 }
-    

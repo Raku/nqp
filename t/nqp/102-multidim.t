@@ -1,5 +1,3 @@
-#! nqp
-
 plan(213);
 
 sub is-dims(@arr, @expected-dims, $description) {
@@ -455,7 +453,7 @@ sub add_to_sc($sc, $idx, $obj) {
     # Create serialization context.
     my $sc := nqp::createsc('TEST_SC_IN');
     my $sh := nqp::list_s();
-    
+
     # Add 2D array type.
     add_to_sc($sc, 0, $array_type_2d);
 

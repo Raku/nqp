@@ -1,5 +1,3 @@
-#! nqp
-
 plan(15);
 
 my class Lock    is repr('ReentrantMutex')    { }

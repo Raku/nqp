@@ -40,5 +40,3 @@ sub foo() {
 }
 my $pad := foo();
 is(nqp::atkey($pad,'$bar'), "hi","accessing a variable using nqp::curlexpad outside of that sub");
-
-

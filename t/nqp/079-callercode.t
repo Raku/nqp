@@ -36,8 +36,8 @@ class Foo {
       $!attr := 100;
       self.b(1);
     } elsif $arg == 2 {
-      ok(1,'nqp::callercode work for methods'); 
-      ok($!attr == 110,'the attribute has the correct value'); 
+      ok(1,'nqp::callercode work for methods');
+      ok($!attr == 110,'the attribute has the correct value');
     }
   }
   method b($arg) {
@@ -84,7 +84,7 @@ toplevel(0);
 {
     my sub reach_end() {
       my $count := 0;
-      my $ctx := nqp::ctx(); 
+      my $ctx := nqp::ctx();
       while !nqp::isnull($ctx) {
         $ctx := nqp::ctxcaller($ctx);
         $count := $count + 1;
@@ -92,6 +92,6 @@ toplevel(0);
 
       ok($count > 0 && nqp::isnull($ctx), 'nqp::ctxcaller get nqp::null when we have no caller');
     }
-    
+
     reach_end();
 }

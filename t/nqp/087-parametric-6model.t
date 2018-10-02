@@ -1,5 +1,3 @@
-#! nqp
-
 plan(15);
 
 # Counter to make sure parameterization interning works right.

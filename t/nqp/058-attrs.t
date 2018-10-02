@@ -1,5 +1,3 @@
-#! nqp
-
 plan(33);
 
 class Foo {

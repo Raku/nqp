@@ -1,5 +1,3 @@
-#! nqp
-
 # nqp::buildnativecall($target, $libname, $symbol, $convention, $arguments, $returns)
 #
 # Build a call descriptor into $target (which must be NativeCall REPRd or have
@@ -30,7 +28,7 @@
 # $returns is a hash of the same kind used in $arguments
 #
 # nqp::nativecall($returns, $call, $arguments)
-# 
+#
 # Actually calls the foreign function. $returns is the type object for the
 # return type (or null, for void functions), $call is the descriptor build
 # with nqp::buildnativecall, and $arguments the arguments passed.

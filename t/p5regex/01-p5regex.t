@@ -1,5 +1,3 @@
-#! nqp
-
 use NQPP5QRegex;
 
 my @files := [

@@ -1,5 +1,3 @@
-#! nqp
-
 plan(11);
 
 my $runs := 0;

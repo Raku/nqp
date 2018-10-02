@@ -1,4 +1,3 @@
-#!nqp
 use nqpmo;
 
 plan(12);

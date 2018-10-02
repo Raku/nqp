@@ -1,6 +1,3 @@
-#! nqp
-
-
 plan(24);
 
 # 2 tests

@@ -1,4 +1,3 @@
-
 plan(8);
 
 my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';

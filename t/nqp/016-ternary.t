@@ -18,4 +18,3 @@ is( $a, 'yes' );
 my $d := 0 ?? ( $a := 'no' ) !! 'yes';
 is( $d, 'yes' );
 is( $a, 'yes' );
-

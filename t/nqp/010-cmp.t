@@ -1,5 +1,3 @@
-#! nqp
-
 # check comparisons
 
 say('1..19');

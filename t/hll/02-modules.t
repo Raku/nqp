@@ -1,5 +1,3 @@
-#! nqp
-
 say("1..0 # Skipped: design changes, need re-work");
 
 # plan(4);

@@ -1,5 +1,3 @@
-#! nqp
-
 # check comments
 
 say('1..16');

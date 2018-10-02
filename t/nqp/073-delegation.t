@@ -9,7 +9,7 @@ class Foo {
     has %!assoc_bar is associative_delegate;
     has %!assoc_baz;
     method get_pos_1() {
-       @!pos_bar[1]; 
+       @!pos_bar[1];
     }
 
     method all_pos() {
@@ -17,7 +17,7 @@ class Foo {
     }
 
     method get_assoc_1() {
-       %!assoc_bar<1>; 
+       %!assoc_bar<1>;
     }
 }
 

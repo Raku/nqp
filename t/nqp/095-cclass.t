@@ -1,11 +1,11 @@
 plan(42);
-sub test_cclass($c, $str) { 
+sub test_cclass($c, $str) {
   my $s := '';
   my $i := 0;
-  my $len := nqp::chars($str); 
+  my $len := nqp::chars($str);
   while $i < $len {
-    $s := nqp::concat($s, nqp::iscclass($c, $str, $i) > 0 ?? '1' !! '0'); 
-    $i++; 
+    $s := nqp::concat($s, nqp::iscclass($c, $str, $i) > 0 ?? '1' !! '0');
+    $i++;
   }
   return $s;
 }
@@ -32,20 +32,20 @@ my %matches := nqp::hash(
 );
 
 my %const := nqp::hash(
-    nqp::const::CCLASS_ANY, 'ANY', 
-    nqp::const::CCLASS_NUMERIC, 'NUMERIC', 
-    nqp::const::CCLASS_WHITESPACE, 'WHITESPACE', 
-    nqp::const::CCLASS_WORD, 'WORD', 
-    nqp::const::CCLASS_NEWLINE, 'NEWLINE', 
-    nqp::const::CCLASS_ALPHABETIC, 'ALPHABETIC', 
-    nqp::const::CCLASS_UPPERCASE, 'UPPERCASE', 
-    nqp::const::CCLASS_LOWERCASE, 'LOWERCASE', 
-    nqp::const::CCLASS_HEXADECIMAL, 'HEXADECIMAL', 
-    nqp::const::CCLASS_BLANK, 'BLANK', 
-    nqp::const::CCLASS_CONTROL, 'CONTROL', 
-    nqp::const::CCLASS_PUNCTUATION, 'PUNCTUATION', 
-    nqp::const::CCLASS_ALPHANUMERIC, 'ALPHANUMERIC', 
-    nqp::const::CCLASS_PRINTING, 'PRINTING', 
+    nqp::const::CCLASS_ANY, 'ANY',
+    nqp::const::CCLASS_NUMERIC, 'NUMERIC',
+    nqp::const::CCLASS_WHITESPACE, 'WHITESPACE',
+    nqp::const::CCLASS_WORD, 'WORD',
+    nqp::const::CCLASS_NEWLINE, 'NEWLINE',
+    nqp::const::CCLASS_ALPHABETIC, 'ALPHABETIC',
+    nqp::const::CCLASS_UPPERCASE, 'UPPERCASE',
+    nqp::const::CCLASS_LOWERCASE, 'LOWERCASE',
+    nqp::const::CCLASS_HEXADECIMAL, 'HEXADECIMAL',
+    nqp::const::CCLASS_BLANK, 'BLANK',
+    nqp::const::CCLASS_CONTROL, 'CONTROL',
+    nqp::const::CCLASS_PUNCTUATION, 'PUNCTUATION',
+    nqp::const::CCLASS_ALPHANUMERIC, 'ALPHANUMERIC',
+    nqp::const::CCLASS_PRINTING, 'PRINTING',
 );
 
 for %const -> $cclass {
@@ -69,7 +69,7 @@ sub mock_find_cclass($c, $str, $offset, $count) {
 
 sub test_findcclass($c, $str, $len) {
   my $s := '';
-  my $i := 0; 
+  my $i := 0;
   while $i < $len {
     $s := nqp::concat($s, nqp::findcclass($c, $str, $i, $len));
     $s := nqp::concat($s, ';');
@@ -80,7 +80,7 @@ sub test_findcclass($c, $str, $len) {
 
 sub test_mock_findcclass($c, $str, $len) {
   my $s := '';
-  my $i := 0; 
+  my $i := 0;
   while $i < $len {
     $s := nqp::concat($s, mock_find_cclass($c, $str, $i, $len));
     $s := nqp::concat($s, ';');
@@ -117,7 +117,7 @@ sub mock_find_notcclass($c, $str, $offset, $count) {
 
 sub test_mock_findnotcclass($c, $str, $len) {
   my $s := '';
-  my $i := 0; 
+  my $i := 0;
   while $i < $len {
     $s := nqp::concat($s, mock_find_notcclass($c, $str, $i, $len));
     $s := nqp::concat($s, ';');
@@ -128,7 +128,7 @@ sub test_mock_findnotcclass($c, $str, $len) {
 
 sub test_findnotcclass($c, $str, $len) {
   my $s := '';
-  my $i := 0; 
+  my $i := 0;
   while $i < $len {
     $s := nqp::concat($s, nqp::findnotcclass($c, $str, $i, $len));
     $s := nqp::concat($s, ';');

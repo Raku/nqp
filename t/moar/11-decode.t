@@ -1,4 +1,4 @@
-# This can be moved when *conf ops are added to jvm and others
+# XXX This can be moved when *conf ops are added to jvm and others
 use nqpmo;
 plan(9);
 

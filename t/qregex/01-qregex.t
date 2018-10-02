@@ -1,5 +1,3 @@
-#! nqp
-
 # for string_to_int
 use QRegex;
 

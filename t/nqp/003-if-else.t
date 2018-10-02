@@ -1,5 +1,3 @@
-#! nqp
-
 # check control structure 'if ... else'
 
 say('1..14');

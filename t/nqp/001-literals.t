@@ -1,5 +1,3 @@
-#! nqp
-
 # check literals
 
 say('1..9');

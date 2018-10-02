@@ -1,5 +1,3 @@
-#!/usr/bin/env nqp
-
 # test optional arguments and parameters
 
 plan(7);

@@ -1,4 +1,3 @@
-
 plan(1);
 
 # exec nqp commands to test known bad pod
