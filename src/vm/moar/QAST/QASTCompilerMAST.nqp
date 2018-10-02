@@ -20,6 +20,12 @@ nqp::setmethcache($buf, nqp::hash(
     'write_uint64', method (uint64 $i) {
         nqp::writeuint(self, nqp::elems(self), $i, 6);
     },
+    'read_uint32_at', method (uint32 $pos) {
+          nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 3), 24)
+        + nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 2), 16)
+        + nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 1), 8)
+        + nqp::atpos_i(self, $pos)
+    },
     'write_uint32_at', method (uint32 $i, uint32 $pos) {
         nqp::writeuint(self, $pos, $i, 4);
     },
@@ -432,8 +438,7 @@ my class MASTCompilerInstance {
     method mast_frames() { %!mast_frames }
     method sc() { $!sc }
 
-    method to_mast($qast, %mast_frames = nqp::hash()) {
-        # Set up compilation state.
+    method do_to_mast($qast, %mast_frames) {
         $!hll := '';
         my $string-heap := MoarVM::StringHeap.new();
         my $callsites := MoarVM::Callsites.new(:$string-heap);
@@ -447,6 +452,13 @@ my class MASTCompilerInstance {
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
+    }
+    method to_mast($qast, %mast_frames = nqp::hash()) {
+        # Set up compilation state.
+        my $profile := nqp::existskey(nqp::getenvhash(), 'PROFILEMBC') && nqp::istype($qast, QAST::CompUnit) && $qast.compilation_mode && !$qast.is_nested;
+        nqp::mvmstartprofile(nqp::hash('kind', 'instrumented')) if $profile;
+        self.do_to_mast($qast, %mast_frames);
+        HLL::Backend::MoarVM.dump_instrumented_profile_data(nqp::mvmendprofile, nqp::null) if $profile;
         #CATCH {
         #    my $err    := $!;
         #    my $source := self.source_for_node($!last_op);
@@ -1036,9 +1048,11 @@ my class MASTCompilerInstance {
         my $cuid := $node.cuid();
         my $block;
         my $outer;
+        #my $*MAST_FRAME;
         if %*BLOCKS_DONE{$cuid} -> @already {
             $block := @already[0];
             $outer := @already[1];
+            #$*MAST_FRAME := %!mast_frames{$cuid};
         }
         else {
             my $outer_frame := try $*MAST_FRAME;
@@ -1138,6 +1152,8 @@ my class MASTCompilerInstance {
 
                 # fixup the end of this frame's instruction list with the return
                 push_op($frame.instructions, $ret_op, |@ret_args);
+
+                $frame.start_prologue;
 
                 # Build up the frame prologue. Start with lexical captures and clones.
                 my @pre := nqp::list();
@@ -1317,14 +1333,14 @@ my class MASTCompilerInstance {
                             # generate end label to skip initialization code
                             my $endlbl := MAST::Label.new();
 
-                            # generate default initialization code. Could also be
-                            # wrapped in another QAST::Block.
-                            my $default_mast := self.as_mast($var.default, :want($valreg_kind));
-
                             # emit param grabbing op
                             $val2
                                 ?? push_op(@pre, $opname, $valreg, $val, $val2, $endlbl)
                                 !! push_op(@pre, $opname, $valreg, $val, $endlbl);
+
+                            # generate default initialization code. Could also be
+                            # wrapped in another QAST::Block.
+                            my $default_mast := self.as_mast($var.default, :want($valreg_kind));
 
                             # emit default initialization code
                             push_ilist(@pre, $default_mast);
@@ -1334,7 +1350,7 @@ my class MASTCompilerInstance {
                             $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
 
                             # end label to skip initialization code
-                            nqp::push(@pre, $endlbl);
+                            $*MAST_FRAME.add-label($endlbl);
                         }
                         elsif $var.slurpy {
                             if $var.named {
@@ -1380,7 +1396,7 @@ my class MASTCompilerInstance {
                     # unexpected ones.
                     push_op(@pre, 'paramnamesused') unless $named_slurpy;
                 }
-
+                $frame.end_prologue;
                 nqp::splice($frame.instructions, @pre, 0, 0);
             }
         }
@@ -1484,6 +1500,15 @@ my class MASTCompilerInstance {
         my $WANT := $*WANT;
         my $all_void := nqp::defined($WANT) && $WANT == $MVM_reg_void;
         for @stmts {
+            my $node := $_.node;
+            # Annotate with line number if we have one.
+            if nqp::isconcrete($node) && nqp::can($node,'orig') {
+                my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
+                my $line := @line_file[0];
+                my $file := @line_file[1] || $!file;
+                MAST::Annotated.new(:$file, :$line);
+            }
+
             my int $use_result := 0;
             # Compile this child to MAST, and add its instructions to the end
             # of our instruction list. Also track the last statement.
@@ -1506,18 +1531,7 @@ my class MASTCompilerInstance {
                 $last_stmt := self.as_mast($_, :want($MVM_reg_void));
             }
 
-            # Annotate with line number if we have one.
-            my $node := $_.node;
-            if nqp::isconcrete($node) && nqp::can($node,'orig') {
-                my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
-                my $line := @line_file[0];
-                my $file := @line_file[1] || $!file;
-                nqp::push(@all_ins, MAST::Annotated.new(
-                    :$file, :$line, :instructions($last_stmt.instructions) ));
-            }
-            else {
-                nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
-            }
+            nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
 
             if $use_result {
                 $result_stmt := $last_stmt;
@@ -1626,9 +1640,9 @@ my class MASTCompilerInstance {
             push_ilist($il, $fallback_res);
             push_op($il, 'set', $res_reg, $fallback_res.result_reg);
             push_op($il, 'goto', $fallback_end);
-            nqp::push($il, $fallback_if_nonnull);
+            $*MAST_FRAME.add-label($fallback_if_nonnull);
             push_op($il, 'set', $res_reg, $var_res.result_reg);
-            nqp::push($il, $fallback_end);
+            $*MAST_FRAME.add-label($fallback_end);
             $*REGALLOC.release_register($var_res.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($fallback_res.result_reg, $MVM_reg_obj);
 
@@ -2176,10 +2190,9 @@ my class MASTCompilerInstance {
     }
 
     method annotated($ilist, $file, $line) {
-        MAST::InstructionList.new([
-            MAST::Annotated.new(:file($file), :line($line),
-                :instructions($ilist.instructions))],
-            $ilist.result_reg, $ilist.result_kind)
+        nqp::die("annotated got called!");
+        MAST::Annotated.new(:file($file), :line($line));
+        MAST::InstructionList.new([], $ilist.result_reg, $ilist.result_kind)
     }
 
     method type_to_register_kind($type) {
@@ -2297,7 +2310,7 @@ class MoarVM::Callsites {
         for @flags {
             if $_ +& $callsite_arg_named {
                 my $name := @args[$i + $num_nameds++];
-                nqp::push(@named_idxs, $!string-heap.add(nqp::getattr($name, MAST::SVal, '$!value')));
+                nqp::push(@named_idxs, $name);
             }
             $identifier.write_uint8($_);
             $i++;
@@ -2431,6 +2444,8 @@ class MoarVM::BytecodeWriter {
         self.collect_extop_names;
         for @!frames {
             $_.prepare;
+            $_.set-annotations-offset(nqp::elems($!annotations));
+            $!annotations.write_buf($_.annotations);
         }
     }
     method set-compunit($compunit) { $!compunit := $compunit }
