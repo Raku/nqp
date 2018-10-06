@@ -39,12 +39,7 @@ op.print = function(arg) {
 };
 
 op.say = function(arg) {
-  if (process.stdout) {
-    process.stdout.write(arg);
-    process.stdout.write('\n');
-  } else {
-    console.log(arg);
-  }
+  process.stdout.write(arg + '\n');
   return arg;
 };
 
