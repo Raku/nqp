@@ -303,7 +303,7 @@ exports.toNum = /*async*/ function(arg_, ctx) {
   } else if (arg.$$numify) {
     return arg.$$numify();
   } else {
-    throw 'Can\'t convert to num';
+    throw new NQPException(`Can't convert to num`);
   }
 };
 
