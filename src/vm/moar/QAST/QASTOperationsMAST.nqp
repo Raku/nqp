@@ -1097,9 +1097,9 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     if $repness {
         # It's a repeat_ variant, need to go straight into the
         # loop body unconditionally.
-        if $cond_temp {
-            push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
-        }
+        #if $cond_temp {
+        #    push_op(@loop_il, 'null', $*BLOCK.local($cond_temp));
+        #}
         push_op(@loop_il, 'goto', $redo_lbl);
     }
     $*MAST_FRAME.add-label($test_lbl);
