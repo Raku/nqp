@@ -843,7 +843,9 @@ for <if unless with without> -> $op_name {
         }
         else {
             if $operands == 3 {
-                $then_res_reg := $regalloc.fresh_register(@comp_ops[1].result_kind);
+                if @comp_ops[1].result_kind != 0 {
+                    $then_res_reg := $regalloc.fresh_register(@comp_ops[1].result_kind);
+                }
             }
             else {
                 $res_kind := # $operands == 3
@@ -866,7 +868,7 @@ for <if unless with without> -> $op_name {
 
         # Handle else branch (coercion of condition result if 2-arg).
         if $operands == 3 {
-            if !$is_void {
+            if !$is_void && $then_res_reg {
                 push_op(@ins, 'set', $then_res_reg, @comp_ops[1].result_reg);
                 $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
             }
@@ -914,16 +916,18 @@ for <if unless with without> -> $op_name {
                 push_op(@ins, 'goto', $end_lbl);
                 $*MAST_FRAME.add-label($then_lbl);
 
-                if (@comp_ops[1].result_kind != $res_kind) {
-                    my $il := MAST::InstructionList.new(@ins, $then_res_reg, @comp_ops[1].result_kind);
-                    my $coercion := $qastcomp.coercion($il, $res_kind);
-                    push_ilist(@ins, $coercion);
-                    push_op(@ins, 'set', $res_reg, $coercion.result_reg);
+                if $then_res_reg {
+                    if (@comp_ops[1].result_kind != $res_kind) {
+                        my $il := MAST::InstructionList.new(@ins, $then_res_reg, @comp_ops[1].result_kind);
+                        my $coercion := $qastcomp.coercion($il, $res_kind);
+                        push_ilist(@ins, $coercion);
+                        push_op(@ins, 'set', $res_reg, $coercion.result_reg);
+                    }
+                    else {
+                        push_op(@ins, 'set', $res_reg, $then_res_reg);
+                    }
+                    $regalloc.release_register($then_res_reg, @comp_ops[1].result_kind);
                 }
-                else {
-                    push_op(@ins, 'set', $res_reg, $then_res_reg);
-                }
-                $regalloc.release_register($then_res_reg, @comp_ops[1].result_kind);
             }
         }
 
