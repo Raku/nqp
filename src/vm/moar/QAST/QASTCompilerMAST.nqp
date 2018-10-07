@@ -500,7 +500,6 @@ my class MASTCompilerInstance {
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_num64,
                     $grow.result_reg);
                 $il := $grow.instructions;
-                push_ilist($il, $box);
                 $reg := $box.result_reg;
             }
             elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 {
@@ -508,7 +507,6 @@ my class MASTCompilerInstance {
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_int64,
                     $grow.result_reg);
                 $il := $grow.instructions;
-                push_ilist($il, $box);
                 $reg := $box.result_reg;
             }
             elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
@@ -516,7 +514,6 @@ my class MASTCompilerInstance {
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_uint64,
                     $grow.result_reg);
                 $il := $grow.instructions;
-                push_ilist($il, $box);
                 $reg := $box.result_reg;
             }
             else {
@@ -533,21 +530,18 @@ my class MASTCompilerInstance {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_num64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
                 $il := $unbox.instructions;
-                push_ilist($il, $shrink);
                 $reg := $shrink.result_reg;
             }
             elsif $desired == $MVM_reg_int32 || $desired == $MVM_reg_int16 || $desired == $MVM_reg_int8 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_int64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
                 $il := $unbox.instructions;
-                push_ilist($il, $shrink);
                 $reg := $shrink.result_reg;
             }
             elsif $desired == $MVM_reg_uint32 || $desired == $MVM_reg_uint16 || $desired == $MVM_reg_uint8 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_uint64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
                 $il := $unbox.instructions;
-                push_ilist($il, $shrink);
                 $reg := $shrink.result_reg;
             }
             else {
@@ -1176,7 +1170,6 @@ my class MASTCompilerInstance {
                     my $value_mast := self.as_mast(
                         QAST::WVal.new( :value($_.value) ),
                         :want($MVM_reg_obj));
-                    push_ilist(@pre, $value_mast);
                     push_op(@pre, 'clone', $block.local($_.name), $value_mast.result_reg);
                 }
 
@@ -1342,9 +1335,6 @@ my class MASTCompilerInstance {
                             # wrapped in another QAST::Block.
                             my $default_mast := self.as_mast($var.default, :want($valreg_kind));
 
-                            # emit default initialization code
-                            push_ilist(@pre, $default_mast);
-
                             # put the initialization result in the variable register
                             push_op(@pre, 'set', $valreg, $default_mast.result_reg);
                             $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
@@ -1380,12 +1370,11 @@ my class MASTCompilerInstance {
                         for $var.list {
                             if nqp::istype($_, QAST::ParamTypeCheck) {
                                 my $tc_mast := self.as_mast($_[0], :want($MVM_reg_int64));
-                                push_ilist(@pre, $tc_mast);
                                 push_op(@pre, 'assertparamcheck', $tc_mast.result_reg);
                                 $*REGALLOC.release_register($tc_mast.result_reg, $MVM_reg_int64);
                             }
                             else {
-                                push_ilist(@pre, self.as_mast($_, :want($MVM_reg_void)));
+                                self.as_mast($_, :want($MVM_reg_void));
                             }
                         }
 
@@ -1629,7 +1618,6 @@ my class MASTCompilerInstance {
         }
         else {
             my $il := nqp::list();
-            push_ilist($il, $var_res);
 
             my $fallback_if_nonnull := MAST::Label.new();
             my $fallback_end := MAST::Label.new();
@@ -1637,7 +1625,6 @@ my class MASTCompilerInstance {
             push_op($il, 'ifnonnull', $var_res.result_reg, $fallback_if_nonnull);
 
             my $fallback_res := self.as_mast($node.fallback, :want($MVM_reg_obj));
-            push_ilist($il, $fallback_res);
             push_op($il, 'set', $res_reg, $fallback_res.result_reg);
             push_op($il, 'goto', $fallback_end);
             $*MAST_FRAME.add-label($fallback_if_nonnull);
@@ -1749,7 +1736,6 @@ my class MASTCompilerInstance {
                 $res_kind := $*BLOCK.local_kind($name);
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
-                    push_ilist(@ins, $valmast);
                     push_op(@ins, 'set', $local, $valmast.result_reg);
                     $*REGALLOC.release_register($valmast.result_reg, $res_kind);
                 }
@@ -1783,7 +1769,6 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_ilist(@ins, $valmast);
                     push_op(@ins, 'bindlex', $lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
@@ -1820,7 +1805,6 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_ilist(@ins, $valmast);
                     push_op(@ins, "bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], MAST::SVal.new( :value($name) ), $res_reg);
                     $res_kind := $valmast.result_kind;
                 }
@@ -1871,7 +1855,6 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
                     $res_reg := $valmast.result_reg;
-                    push_ilist(@ins, $valmast);
                     push_op(@ins, 'bindlex', $lexref, $res_reg);
                 }
                 else {
@@ -1907,7 +1890,6 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_ilist(@ins, $valmast);
                     push_op(@ins, 'bindlex', $lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
@@ -1925,12 +1907,9 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
                     $res_reg := $valmast.result_reg;
-                    push_ilist(@ins, $valmast);
-                    push_ilist(@ins, $name_const);
                     push_op(@ins, 'binddynlex', $name_const.result_reg, $res_reg);
                 }
                 else {
-                    push_ilist(@ins, $name_const);
                     $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                     push_op(@ins, 'getdynlex', $res_reg, $name_const.result_reg);
                 }
@@ -1948,8 +1927,6 @@ my class MASTCompilerInstance {
             # Compile object and handle.
             my $obj := self.as_mast_clear_bindval(@args[0], :want($MVM_reg_obj));
             my $han := self.as_mast_clear_bindval(@args[1], :want($MVM_reg_obj));
-            push_ilist(@ins, $obj);
-            push_ilist(@ins, $han);
 
             my int $hint := -1;
 
@@ -1974,7 +1951,6 @@ my class MASTCompilerInstance {
             }
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
-                push_ilist(@ins, $valmast);
                 push_op(@ins, 'bind' ~ @attr_opnames[$kind], $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ), $valmast.result_reg,
                         MAST::IVal.new( :value($hint) ) );
@@ -2010,8 +1986,6 @@ my class MASTCompilerInstance {
             # Compile object and handle, and get hint.
             my $obj := self.as_mast_clear_bindval(@args[0], :want($MVM_reg_obj));
             my $han := self.as_mast_clear_bindval(@args[1], :want($MVM_reg_obj));
-            push_ilist(@ins, $obj);
-            push_ilist(@ins, $han);
             my int $hint := -1;
             if nqp::istype(@args[1], QAST::WVal) {
                 $hint := nqp::hintfor(@args[1].value, $name);
