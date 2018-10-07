@@ -479,7 +479,6 @@ my class MASTCompilerInstance {
     # Expects that the value in need of coercing has already been
     # obtained. Produces instructions to coerce it.
     method coercion($res, $desired) {
-        my $il := nqp::list();
         my $got := $res.result_kind;
         my $reg := $res.result_reg;
         if $got == $desired {
@@ -499,21 +498,18 @@ my class MASTCompilerInstance {
                 my $grow := self.coercion($res, $MVM_reg_num64);
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_num64,
                     $grow.result_reg);
-                $il := $grow.instructions;
                 $reg := $box.result_reg;
             }
             elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 {
                 my $grow := self.coercion($res, $MVM_reg_int64);
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_int64,
                     $grow.result_reg);
-                $il := $grow.instructions;
                 $reg := $box.result_reg;
             }
             elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                 my $grow := self.coercion($res, $MVM_reg_uint64);
                 my $box := QAST::MASTOperations.box(self, $!hll, $MVM_reg_uint64,
                     $grow.result_reg);
-                $il := $grow.instructions;
                 $reg := $box.result_reg;
             }
             else {
@@ -529,19 +525,16 @@ my class MASTCompilerInstance {
             elsif $desired == $MVM_reg_num32 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_num64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
-                $il := $unbox.instructions;
                 $reg := $shrink.result_reg;
             }
             elsif $desired == $MVM_reg_int32 || $desired == $MVM_reg_int16 || $desired == $MVM_reg_int8 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_int64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
-                $il := $unbox.instructions;
                 $reg := $shrink.result_reg;
             }
             elsif $desired == $MVM_reg_uint32 || $desired == $MVM_reg_uint16 || $desired == $MVM_reg_uint8 {
                 my $unbox := QAST::MASTOperations.unbox(self, $!hll, $MVM_reg_uint64, $reg);
                 my $shrink := self.coercion($unbox, $desired);
-                $il := $unbox.instructions;
                 $reg := $shrink.result_reg;
             }
             else {
@@ -575,7 +568,6 @@ my class MASTCompilerInstance {
                 }
                 elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
-                    $il := $uint64.instructions;
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                     push_op('coerce_ui', $res_reg, $reg);
@@ -684,7 +676,6 @@ my class MASTCompilerInstance {
                 else {
                     unless $got == $MVM_reg_int64 {
                         my $int64 := self.coercion($res, $MVM_reg_int64);
-                        $il := $int64.instructions;
                         $reg := $int64.result_reg;
                         $release_type := $int64.result_kind;
                     }
@@ -694,7 +685,6 @@ my class MASTCompilerInstance {
             elsif $desired == $MVM_reg_uint32 {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
-                    $il := $uint64.instructions;
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
@@ -703,7 +693,6 @@ my class MASTCompilerInstance {
             elsif $desired == $MVM_reg_uint16 {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
-                    $il := $uint64.instructions;
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
@@ -712,7 +701,6 @@ my class MASTCompilerInstance {
             elsif $desired == $MVM_reg_uint8 {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
-                    $il := $uint64.instructions;
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
@@ -1132,9 +1120,6 @@ my class MASTCompilerInstance {
                     $ins := self.coerce($ins, $MVM_reg_int64);
                 }
 
-                # Add to instructions list for this block.
-                nqp::splice($frame.instructions, $ins.instructions, +$frame.instructions, 0);
-
                 $block.return_kind($ins.result_kind);
                 # generate a return statement
                 # get the return op name
@@ -1386,7 +1371,6 @@ my class MASTCompilerInstance {
                     push_op('paramnamesused') unless $named_slurpy;
                 }
                 $frame.end_prologue;
-                nqp::splice($frame.instructions, @pre, 0, 0);
             }
         }
 
@@ -1519,8 +1503,6 @@ my class MASTCompilerInstance {
             else {
                 $last_stmt := self.as_mast($_, :want($MVM_reg_void));
             }
-
-            nqp::splice(@all_ins, $last_stmt.instructions, +@all_ins, 0);
 
             if $use_result {
                 $result_stmt := $last_stmt;
