@@ -724,7 +724,7 @@ my class MASTCompilerInstance {
             $*REGALLOC.release_register($reg, $release_type);
             $reg := $res_reg;
         }
-        MAST::InstructionList.new($il, $reg, $desired)
+        MAST::InstructionList.new($reg, $desired)
     }
 
     method as_mast($qast, :$want, :$want-decont) {
@@ -1391,14 +1391,14 @@ my class MASTCompilerInstance {
         }
 
         if $node.blocktype eq 'raw' || !nqp::istype($outer, BlockInfo) {
-            MAST::InstructionList.new(nqp::list(), MAST::VOID, $MVM_reg_void);
+            MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
         }
         elsif $node.blocktype eq 'immediate' {
             my $clone_reg := $*BLOCK.clone_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
                 my @ins;
                 nqp::push(@ins, MAST::Call.new( :target($clone_reg), :flags([]) ));
-                MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
+                MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
             else {
                 my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
@@ -1406,7 +1406,7 @@ my class MASTCompilerInstance {
                 nqp::push(@ins, MAST::Call.new(
                     :target($clone_reg), :flags([]), :result($res_reg)
                 ));
-                MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+                MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
         elsif $node.blocktype eq 'immediate_static' {
@@ -1416,18 +1416,18 @@ my class MASTCompilerInstance {
             push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
                 nqp::push(@ins, MAST::Call.new( :target($code_reg), :flags([]) ));
-                MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
+                MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             } else {
                 my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
                 nqp::push(@ins, MAST::Call.new(
                     :target($code_reg), :flags([]), :result($res_reg)
                 ));
-                MAST::InstructionList.new(@ins, $res_reg, $block.return_kind)
+                MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
         elsif $node.blocktype eq '' || $node.blocktype eq 'declaration' {
             my $clone_reg := $*BLOCK.clone_inner($node);
-            MAST::InstructionList.new(nqp::list(), $clone_reg, $MVM_reg_obj)
+            MAST::InstructionList.new($clone_reg, $MVM_reg_obj)
         }
         elsif $node.blocktype eq 'declaration_static' {
             $*BLOCK.capture_inner($node);
@@ -1435,11 +1435,11 @@ my class MASTCompilerInstance {
                 my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 my @ins;
                 push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
-                MAST::InstructionList.new(@ins, $code_reg, $MVM_reg_obj)
+                MAST::InstructionList.new($code_reg, $MVM_reg_obj)
             }
             else {
                 my $clone_reg := $*BLOCK.clone_inner($node);
-                MAST::InstructionList.new(nqp::list(), $clone_reg, $MVM_reg_obj)
+                MAST::InstructionList.new($clone_reg, $MVM_reg_obj)
             }
         }
         else {
@@ -1532,10 +1532,10 @@ my class MASTCompilerInstance {
             $result_count++;
         }
         if $result_stmt && $result_stmt.result_kind != $MVM_reg_void {
-            MAST::InstructionList.new(@all_ins, $result_stmt.result_reg, $result_stmt.result_kind);
+            MAST::InstructionList.new($result_stmt.result_reg, $result_stmt.result_kind);
         }
         else {
-            MAST::InstructionList.new(@all_ins, MAST::VOID, $MVM_reg_void);
+            MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
         }
     }
 
@@ -1633,7 +1633,7 @@ my class MASTCompilerInstance {
             $*REGALLOC.release_register($var_res.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($fallback_res.result_reg, $MVM_reg_obj);
 
-            MAST::InstructionList.new($il, $res_reg, $MVM_reg_obj)
+            MAST::InstructionList.new($res_reg, $MVM_reg_obj)
         }
     }
 
@@ -1708,7 +1708,7 @@ my class MASTCompilerInstance {
         if nqp::isconcrete($want) {
             # Declaration in void context need generate no code.
             if $want == $MVM_reg_void {
-                return MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+                return MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
 
             # Both lexicalref and attributeref in the context we want a
@@ -2014,7 +2014,7 @@ my class MASTCompilerInstance {
             nqp::die("QAST::Var with scope '$scope' NYI");
         }
 
-        MAST::InstructionList.new(@ins, $res_reg, $res_kind)
+        MAST::InstructionList.new($res_reg, $res_kind)
     }
 
     multi method compile_node(MAST::InstructionList $ilist, :$want) {
@@ -2022,7 +2022,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(MAST::Node $node, :$want) {
-        MAST::InstructionList.new([$node], MAST::VOID, $MVM_reg_void)
+        MAST::InstructionList.new(MAST::VOID, $MVM_reg_void)
     }
 
     method as_mast_clear_bindval($node, :$want) {
@@ -2070,36 +2070,36 @@ my class MASTCompilerInstance {
 
     multi method compile_node(QAST::IVal $iv, :$want) {
         my $reg := $*REGALLOC.fresh_i();
+        MAST::Op.new(
+            :op('const_i64'),
+            $reg,
+            MAST::IVal.new( :value($iv.value) )
+        );
         MAST::InstructionList.new(
-            [MAST::Op.new(
-                :op('const_i64'),
-                $reg,
-                MAST::IVal.new( :value($iv.value) )
-            )],
             $reg,
             $MVM_reg_int64)
     }
 
     multi method compile_node(QAST::NVal $nv, :$want) {
         my $reg := $*REGALLOC.fresh_n();
+        MAST::Op.new(
+            :op('const_n64'),
+            $reg,
+            MAST::NVal.new( :value($nv.value) )
+        );
         MAST::InstructionList.new(
-            [MAST::Op.new(
-                :op('const_n64'),
-                $reg,
-                MAST::NVal.new( :value($nv.value) )
-            )],
             $reg,
             $MVM_reg_num64)
     }
 
     sub const_s($val) {
         my $reg := $*REGALLOC.fresh_s();
+        MAST::Op.new(
+            :op('const_s'),
+            $reg,
+            MAST::SVal.new( :value($val) )
+        );
         MAST::InstructionList.new(
-            [MAST::Op.new(
-                :op('const_s'),
-                $reg,
-                MAST::SVal.new( :value($val) )
-            )],
             $reg,
             $MVM_reg_str)
     }
@@ -2116,19 +2116,19 @@ my class MASTCompilerInstance {
             unless $frame && $frame ~~ MAST::Frame;
 
         my $reg := $*REGALLOC.fresh_o();
+        MAST::Op.new(
+            :op('getcode'),
+            $reg,
+            $frame
+        );
         MAST::InstructionList.new(
-            [MAST::Op.new(
-                :op('getcode'),
-                $reg,
-                $frame
-            )],
             $reg,
             $MVM_reg_obj)
     }
 
     multi method compile_node(QAST::WVal $node, :$want) {
         if nqp::isconcrete($want) && $want == $MVM_reg_void {
-            MAST::InstructionList.new([], MAST::VOID, $MVM_reg_void);
+            MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
         }
         else {
             my $val    := $node.value;
@@ -2140,13 +2140,13 @@ my class MASTCompilerInstance {
             my $sc_idx := $!mast_compunit.sc_idx($sc);
             my $reg    := $*REGALLOC.fresh_o();
             my $op     := $idx < 32768 ?? 'wval' !! 'wval_wide';
+            MAST::Op.new(
+                :op($op),
+                $reg,
+                MAST::IVal.new( :value($sc_idx) ),
+                MAST::IVal.new( :value($idx) )
+            );
             MAST::InstructionList.new(
-                [MAST::Op.new(
-                    :op($op),
-                    $reg,
-                    MAST::IVal.new( :value($sc_idx) ),
-                    MAST::IVal.new( :value($idx) )
-                )],
                 $reg,
                 $MVM_reg_obj)
         }
@@ -2166,7 +2166,7 @@ my class MASTCompilerInstance {
     method annotated($ilist, $file, $line) {
         nqp::die("annotated got called!");
         MAST::Annotated.new(:file($file), :line($line));
-        MAST::InstructionList.new([], $ilist.result_reg, $ilist.result_kind)
+        MAST::InstructionList.new($ilist.result_reg, $ilist.result_kind)
     }
 
     method type_to_register_kind($type) {

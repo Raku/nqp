@@ -105,9 +105,8 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     my $regalloc := $*REGALLOC;
     if $val.result_kind == $MVM_reg_int64 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        my @ins := $val.instructions;
-        push_op(@ins, 'not_i', $not_reg, $val.result_reg);
-        MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
+        MAST::Op.new(:op<not_i>, $not_reg, $val.result_reg);
+        MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_int32 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
@@ -120,31 +119,24 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     elsif $val.result_kind == $MVM_reg_obj {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         my $dc := $regalloc.fresh_register($MVM_reg_obj);
-        my @ins := $val.instructions;
-        push_op(@ins, 'decont', $dc, $val.result_reg);
-        push_op(@ins, 'isfalse', $not_reg, $dc);
+        MAST::Op.new(:op<decont>, $dc, $val.result_reg);
+        MAST::Op.new(:op<isfalse>, $not_reg, $dc);
         $regalloc.release_register($dc, $MVM_reg_obj);
-        MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
+        MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_str {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        my @ins := $val.instructions;
-        push_op(@ins, 'isfalse_s', $not_reg, $val.result_reg);
-        MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
+        MAST::Op.new(:op<isfalse_s>, $not_reg, $val.result_reg);
+        MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_num64 {
         my $tmp_reg := $regalloc.fresh_register($MVM_reg_num64);
         my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
-        my @ins := $val.instructions;
-        push_op(@ins, 'const_n64', $tmp_reg, MAST::NVal.new( :value(0.0) ));
-        push_op(@ins, 'eq_n', $res_reg, $val.result_reg, $tmp_reg);
-        MAST::InstructionList.new(@ins, $res_reg, $MVM_reg_int64)
+        MAST::Op.new(:op<const_n64>, $tmp_reg, MAST::NVal.new( :value(0.0) ));
+        MAST::Op.new(:op<eq_n>, $res_reg, $val.result_reg, $tmp_reg);
+        MAST::InstructionList.new($res_reg, $MVM_reg_int64)
     }
     else {
         nqp::die("This case of nqp falsey op NYI");
     }
 });
-
-sub push_op(@dest, str $op, *@args) {
-    nqp::push(@dest, MAST::Op.new_with_operand_array( :$op, @args ));
-}
