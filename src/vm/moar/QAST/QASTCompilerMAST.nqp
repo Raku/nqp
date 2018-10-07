@@ -553,32 +553,32 @@ my class MASTCompilerInstance {
             my $release_type := $got;
             if $desired == $MVM_reg_int64 {
                 if $got == $MVM_reg_num64 {
-                    push_op($il, 'coerce_ni', $res_reg, $reg);
+                    push_op('coerce_ni', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_str {
-                    push_op($il, 'coerce_si', $res_reg, $reg);
+                    push_op('coerce_si', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op($il, 'const_i64', $res_reg, MAST::IVal.new( :value(0) ));
+                    push_op('const_i64', $res_reg, MAST::IVal.new( :value(0) ));
                 }
                 elsif $got == $MVM_reg_int32 {
-                    push_op($il, 'extend_i32', $res_reg, $reg);
+                    push_op('extend_i32', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_int16 {
-                    push_op($il, 'extend_i16', $res_reg, $reg);
+                    push_op('extend_i16', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_int8 {
-                    push_op($il, 'extend_i8', $res_reg, $reg);
+                    push_op('extend_i8', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_uint64 {
-                    push_op($il, 'coerce_ui', $res_reg, $reg);
+                    push_op('coerce_ui', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
                     $il := $uint64.instructions;
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
-                    push_op($il, 'coerce_ui', $res_reg, $reg);
+                    push_op('coerce_ui', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for int; got: "~$got);
@@ -586,16 +586,16 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_num64 {
                 if $got == $MVM_reg_int64 {
-                    push_op($il, 'coerce_in', $res_reg, $reg);
+                    push_op('coerce_in', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_str {
-                    push_op($il, 'coerce_sn', $res_reg, $reg);
+                    push_op('coerce_sn', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_num32 {
-                    push_op($il, 'extend_n32', $res_reg, $reg);
+                    push_op('extend_n32', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op($il, 'const_n64', $res_reg, MAST::NVal.new( :value(0) ));
+                    push_op('const_n64', $res_reg, MAST::NVal.new( :value(0) ));
                 }
                 elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
@@ -610,7 +610,7 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_str {
                 if $got == $MVM_reg_int64 {
-                    push_op($il, 'coerce_is', $res_reg, $reg);
+                    push_op('coerce_is', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_int32 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
@@ -620,13 +620,13 @@ my class MASTCompilerInstance {
                     push_op($il, 'coerce_is', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_num64 {
-                    push_op($il, 'coerce_ns', $res_reg, $reg);
+                    push_op('coerce_ns', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op($il, 'const_s', $res_reg, MAST::SVal.new( :value('') ));
+                    push_op('const_s', $res_reg, MAST::SVal.new( :value('') ));
                 }
                 elsif $got == $MVM_reg_uint64 {
-                    push_op($il, 'coerce_us', $res_reg, $reg);
+                    push_op('coerce_us', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for str; got: "~$got);
@@ -634,7 +634,7 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_num32 {
                 if $got == $MVM_reg_num64 {
-                    push_op($il, 'trunc_n32', $res_reg, $reg);
+                    push_op('trunc_n32', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for num32; got: "~$got);
@@ -642,7 +642,7 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_int32 {
                 if $got == $MVM_reg_int64 {
-                    push_op($il, 'trunc_i32', $res_reg, $reg);
+                    push_op('trunc_i32', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_num64 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
@@ -657,7 +657,7 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_int16 {
                 if $got == $MVM_reg_int64 {
-                    push_op($il, 'trunc_i16', $res_reg, $reg);
+                    push_op('trunc_i16', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for int16; got: " ~ $got);
@@ -665,7 +665,7 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_int8 {
                 if $got == $MVM_reg_int64 {
-                    push_op($il, 'trunc_i8', $res_reg, $reg);
+                    push_op('trunc_i8', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for int8; got: " ~ $got);
@@ -673,13 +673,13 @@ my class MASTCompilerInstance {
             }
             elsif $desired == $MVM_reg_uint64 {
                 if $got == $MVM_reg_uint32 {
-                    push_op($il, 'extend_u32', $res_reg, $reg);
+                    push_op('extend_u32', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_uint16 {
-                    push_op($il, 'extend_u16', $res_reg, $reg);
+                    push_op('extend_u16', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_uint8 {
-                    push_op($il, 'extend_u8', $res_reg, $reg);
+                    push_op('extend_u8', $res_reg, $reg);
                 }
                 else {
                     unless $got == $MVM_reg_int64 {
@@ -688,7 +688,7 @@ my class MASTCompilerInstance {
                         $reg := $int64.result_reg;
                         $release_type := $int64.result_kind;
                     }
-                    push_op($il, 'coerce_iu', $res_reg, $reg);
+                    push_op('coerce_iu', $res_reg, $reg);
                 }
             }
             elsif $desired == $MVM_reg_uint32 {
@@ -698,7 +698,7 @@ my class MASTCompilerInstance {
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
-                push_op($il, 'trunc_u32', $res_reg, $reg);
+                push_op('trunc_u32', $res_reg, $reg);
             }
             elsif $desired == $MVM_reg_uint16 {
                 unless $got == $MVM_reg_uint64 {
@@ -707,7 +707,7 @@ my class MASTCompilerInstance {
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
-                push_op($il, 'trunc_u16', $res_reg, $reg);
+                push_op('trunc_u16', $res_reg, $reg);
             }
             elsif $desired == $MVM_reg_uint8 {
                 unless $got == $MVM_reg_uint64 {
@@ -716,7 +716,7 @@ my class MASTCompilerInstance {
                     $reg := $uint64.result_reg;
                     $release_type := $uint64.result_kind;
                 }
-                push_op($il, 'trunc_u8', $res_reg, $reg);
+                push_op('trunc_u8', $res_reg, $reg);
             }
             else {
                 nqp::die("Coercion from type '$got' to '$desired' NYI");
@@ -1145,7 +1145,7 @@ my class MASTCompilerInstance {
                 nqp::push(@ret_args, $ins.result_reg) unless $ret_op eq 'return';
 
                 # fixup the end of this frame's instruction list with the return
-                push_op($frame.instructions, $ret_op, |@ret_args);
+                push_op($ret_op, |@ret_args);
 
                 $frame.start_prologue;
 
@@ -1153,16 +1153,16 @@ my class MASTCompilerInstance {
                 my @pre := nqp::list();
                 my $capture_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 for $block.captured_inners() {
-                    push_op(@pre, 'getcode', $capture_reg, %!mast_frames{$_});
-                    push_op(@pre, 'capturelex', $capture_reg);
+                    push_op('getcode', $capture_reg, %!mast_frames{$_});
+                    push_op('capturelex', $capture_reg);
                 }
                 $*REGALLOC.release_register($capture_reg, $MVM_reg_obj);
                 my %cloned_inners := $block.cloned_inners();
                 for sorted_keys(%cloned_inners) {
                     my $frame := %!mast_frames{$_};
                     my $reg   := %cloned_inners{$_};
-                    push_op(@pre, 'getcode', $reg, $frame);
-                    push_op(@pre, 'takeclosure', $reg, $reg);
+                    push_op('getcode', $reg, $frame);
+                    push_op('takeclosure', $reg, $reg);
                 }
 
                 # Set up for any contvar locals.
@@ -1170,13 +1170,13 @@ my class MASTCompilerInstance {
                     my $value_mast := self.as_mast(
                         QAST::WVal.new( :value($_.value) ),
                         :want($MVM_reg_obj));
-                    push_op(@pre, 'clone', $block.local($_.name), $value_mast.result_reg);
+                    push_op('clone', $block.local($_.name), $value_mast.result_reg);
                 }
 
                 if $node.custom_args {
                     # The block does the arg processing by itself, so we accept any number
                     # of args here.
-                    push_op(@pre, 'checkarity',
+                    push_op('checkarity',
                         MAST::IVal.new( :size(16), :value(0)),
                         MAST::IVal.new( :size(16), :value(-1)));
                 }
@@ -1221,7 +1221,7 @@ my class MASTCompilerInstance {
                     }
 
                     # check the arity
-                    push_op(@pre, 'checkarity',
+                    push_op('checkarity',
                         MAST::IVal.new( :size(16), :value($pos_required)),
                         MAST::IVal.new( :size(16), :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional)));
 
@@ -1328,15 +1328,15 @@ my class MASTCompilerInstance {
 
                             # emit param grabbing op
                             $val2
-                                ?? push_op(@pre, $opname, $valreg, $val, $val2, $endlbl)
-                                !! push_op(@pre, $opname, $valreg, $val, $endlbl);
+                                ?? push_op($opname, $valreg, $val, $val2, $endlbl)
+                                !! push_op($opname, $valreg, $val, $endlbl);
 
                             # generate default initialization code. Could also be
                             # wrapped in another QAST::Block.
                             my $default_mast := self.as_mast($var.default, :want($valreg_kind));
 
                             # put the initialization result in the variable register
-                            push_op(@pre, 'set', $valreg, $default_mast.result_reg);
+                            push_op('set', $valreg, $default_mast.result_reg);
                             $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
 
                             # end label to skip initialization code
@@ -1344,33 +1344,33 @@ my class MASTCompilerInstance {
                         }
                         elsif $var.slurpy {
                             if $var.named {
-                                push_op(@pre, $opname, $valreg);
+                                push_op($opname, $valreg);
                             }
                             else {
-                                push_op(@pre, $opname, $valreg, MAST::IVal.new( :value($pos_required + $pos_optional) ));
+                                push_op($opname, $valreg, MAST::IVal.new( :value($pos_required + $pos_optional) ));
                             }
                         }
                         else {
                             # emit param grabbing op
                             $val2
-                                ?? push_op(@pre, $opname, $valreg, $val, $val2)
-                                !! push_op(@pre, $opname, $valreg, $val);
+                                ?? push_op($opname, $valreg, $val, $val2)
+                                !! push_op($opname, $valreg, $val);
                         }
 
                         if $truncop {
-                            push_op(@pre, $truncop, $targetreg, $valreg);
+                            push_op($truncop, $targetreg, $valreg);
                         }
 
                         if $scope eq 'lexical' {
                             # emit the op to bind the lexical to the result register
-                            push_op(@pre, 'bindlex', $block.lexical($var.name), $targetreg);
+                            push_op('bindlex', $block.lexical($var.name), $targetreg);
                         }
 
                         # Emit any additional tasks and typechecks.
                         for $var.list {
                             if nqp::istype($_, QAST::ParamTypeCheck) {
                                 my $tc_mast := self.as_mast($_[0], :want($MVM_reg_int64));
-                                push_op(@pre, 'assertparamcheck', $tc_mast.result_reg);
+                                push_op('assertparamcheck', $tc_mast.result_reg);
                                 $*REGALLOC.release_register($tc_mast.result_reg, $MVM_reg_int64);
                             }
                             else {
@@ -1383,7 +1383,7 @@ my class MASTCompilerInstance {
 
                     # If we didn't slurp all the names, check there are no
                     # unexpected ones.
-                    push_op(@pre, 'paramnamesused') unless $named_slurpy;
+                    push_op('paramnamesused') unless $named_slurpy;
                 }
                 $frame.end_prologue;
                 nqp::splice($frame.instructions, @pre, 0, 0);
@@ -1413,7 +1413,7 @@ my class MASTCompilerInstance {
             $*BLOCK.capture_inner($node);
             my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             my @ins;
-            push_op(@ins, 'getcode', $code_reg, %!mast_frames{$node.cuid});
+            push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
                 nqp::push(@ins, MAST::Call.new( :target($code_reg), :flags([]) ));
                 MAST::InstructionList.new(@ins, MAST::VOID, $MVM_reg_void);
@@ -1434,7 +1434,7 @@ my class MASTCompilerInstance {
             if nqp::defined($want) && $want == $MVM_reg_void {
                 my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 my @ins;
-                push_op(@ins, 'getcode', $code_reg, %!mast_frames{$node.cuid});
+                push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
                 MAST::InstructionList.new(@ins, $code_reg, $MVM_reg_obj)
             }
             else {
@@ -1622,13 +1622,13 @@ my class MASTCompilerInstance {
             my $fallback_if_nonnull := MAST::Label.new();
             my $fallback_end := MAST::Label.new();
             my $res_reg := $*REGALLOC.fresh_o();
-            push_op($il, 'ifnonnull', $var_res.result_reg, $fallback_if_nonnull);
+            push_op('ifnonnull', $var_res.result_reg, $fallback_if_nonnull);
 
             my $fallback_res := self.as_mast($node.fallback, :want($MVM_reg_obj));
-            push_op($il, 'set', $res_reg, $fallback_res.result_reg);
-            push_op($il, 'goto', $fallback_end);
+            push_op('set', $res_reg, $fallback_res.result_reg);
+            push_op('goto', $fallback_end);
             $*MAST_FRAME.add-label($fallback_if_nonnull);
-            push_op($il, 'set', $res_reg, $var_res.result_reg);
+            push_op('set', $res_reg, $var_res.result_reg);
             $*MAST_FRAME.add-label($fallback_end);
             $*REGALLOC.release_register($var_res.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($fallback_res.result_reg, $MVM_reg_obj);
@@ -1736,7 +1736,7 @@ my class MASTCompilerInstance {
                 $res_kind := $*BLOCK.local_kind($name);
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
-                    push_op(@ins, 'set', $local, $valmast.result_reg);
+                    push_op('set', $local, $valmast.result_reg);
                     $*REGALLOC.release_register($valmast.result_reg, $res_kind);
                 }
                 $res_reg := $local;
@@ -1769,11 +1769,11 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_op(@ins, 'bindlex', $lex, $res_reg);
+                    push_op('bindlex', $lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    push_op(@ins, 'getlex', $res_reg, $lex);
+                    push_op('getlex', $res_reg, $lex);
                 }
                 else {
                     # for lexical param declarations, we don't actually have a result value,
@@ -1783,7 +1783,7 @@ my class MASTCompilerInstance {
                     $*REGALLOC.release_register($res_reg, $res_kind);
                     # get another one in case someone is using it...
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    push_op(@ins, 'getlex', $res_reg, $lex);
+                    push_op('getlex', $res_reg, $lex);
                 }
             }
             elsif $lexref {
@@ -1796,8 +1796,8 @@ my class MASTCompilerInstance {
                 }
                 my $tmp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
                 $res_reg := $*REGALLOC.fresh_register($res_kind);
-                push_op(@ins, 'getlex', $tmp_reg, $lexref);
-                push_op(@ins, @decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $tmp_reg);
+                push_op('getlex', $tmp_reg, $lexref);
+                push_op(@decont_opnames[@kind_to_op_slot[$res_kind]], $res_reg, $tmp_reg);
                 $*REGALLOC.release_register($tmp_reg, $MVM_reg_obj);
             }
             else {
@@ -1805,12 +1805,12 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_op(@ins, "bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], MAST::SVal.new( :value($name) ), $res_reg);
+                    push_op("bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], MAST::SVal.new( :value($name) ), $res_reg);
                     $res_kind := $valmast.result_kind;
                 }
                 else {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    push_op(@ins, "get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]],
+                    push_op("get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]],
                         $res_reg, MAST::SVal.new( :value($name) ));
                 }
             }
@@ -1844,7 +1844,7 @@ my class MASTCompilerInstance {
                 if $lex_kind == $MVM_reg_obj {
                     nqp::die('Cannot take a reference to a non-native lexical');
                 }
-                push_op(@ins, @lexref_opnames[$lex_kind], $res_reg, $lex);
+                push_op(@lexref_opnames[$lex_kind], $res_reg, $lex);
             }
             elsif $lexref {
                 # We want a reference, the register contains a reference, so
@@ -1855,10 +1855,10 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
                     $res_reg := $valmast.result_reg;
-                    push_op(@ins, 'bindlex', $lexref, $res_reg);
+                    push_op('bindlex', $lexref, $res_reg);
                 }
                 else {
-                    push_op(@ins, 'getlex', $res_reg, $lexref);
+                    push_op('getlex', $res_reg, $lexref);
                 }
             }
             else {
@@ -1866,7 +1866,7 @@ my class MASTCompilerInstance {
                     nqp::die('Cannot bind to late-bound QAST::Var with scope lexicalref');
                 }
                 my $lex_kind := self.type_to_register_kind($node.returns);
-                push_op(@ins, @lexref_n_opnames[@kind_to_op_slot[$lex_kind]],
+                push_op(@lexref_n_opnames[@kind_to_op_slot[$lex_kind]],
                     $res_reg, MAST::SVal.new( :value($name) ));
             }
         }
@@ -1877,8 +1877,8 @@ my class MASTCompilerInstance {
             my $name_reg := $*REGALLOC.fresh_s();
             $res_reg     := $*REGALLOC.fresh_o();
             $res_kind    := $MVM_reg_obj;
-            push_op(@ins, 'const_s', $name_reg, MAST::SVal.new( :value($name) ));
-            push_op(@ins, 'getlexperinvtype_o', $res_reg, $name_reg);
+            push_op('const_s', $name_reg, MAST::SVal.new( :value($name) ));
+            push_op('getlexperinvtype_o', $res_reg, $name_reg);
             $*REGALLOC.release_register($name_reg, $MVM_reg_str);
         }
         elsif $scope eq 'contextual' {
@@ -1890,16 +1890,16 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_op(@ins, 'bindlex', $lex, $res_reg);
+                    push_op('bindlex', $lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    push_op(@ins, 'getlex', $res_reg, $lex);
+                    push_op('getlex', $res_reg, $lex);
                 }
                 else {
                     $*REGALLOC.release_register($res_reg, $res_kind);
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    push_op(@ins, 'getlex', $res_reg, $lex);
+                    push_op('getlex', $res_reg, $lex);
                 }
             }
             else {
@@ -1907,11 +1907,11 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($MVM_reg_obj));
                     $res_reg := $valmast.result_reg;
-                    push_op(@ins, 'binddynlex', $name_const.result_reg, $res_reg);
+                    push_op('binddynlex', $name_const.result_reg, $res_reg);
                 }
                 else {
                     $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                    push_op(@ins, 'getdynlex', $res_reg, $name_const.result_reg);
+                    push_op('getdynlex', $res_reg, $name_const.result_reg);
                 }
             }
             $*REGALLOC.release_register($name_const.result_reg, $MVM_reg_str);
@@ -1951,7 +1951,7 @@ my class MASTCompilerInstance {
             }
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
-                push_op(@ins, 'bind' ~ @attr_opnames[$kind], $obj.result_reg,
+                push_op('bind' ~ @attr_opnames[$kind], $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ), $valmast.result_reg,
                         MAST::IVal.new( :value($hint) ) );
                 $res_reg := $valmast.result_reg;
@@ -1960,7 +1960,7 @@ my class MASTCompilerInstance {
             else {
                 $res_reg := $*REGALLOC.fresh_register($kind);
                 $res_kind := $kind;
-                push_op(@ins, 'get' ~ @attr_opnames[$kind], $res_reg, $obj.result_reg,
+                push_op('get' ~ @attr_opnames[$kind], $res_reg, $obj.result_reg,
                     $han.result_reg, MAST::SVal.new( :value($name) ),
                         MAST::IVal.new( :value($hint) ) );
             }
@@ -1994,7 +1994,7 @@ my class MASTCompilerInstance {
             # Emit lookup.
             $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             $res_kind := $MVM_reg_obj;
-            push_op(@ins, @attrref_opnames[$kind], $res_reg, $obj.result_reg,
+            push_op(@attrref_opnames[$kind], $res_reg, $obj.result_reg,
                 $han.result_reg, MAST::SVal.new( :value($name) ),
                     MAST::IVal.new( :value($hint) ) );
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
