@@ -278,7 +278,7 @@ class QAST::MASTRegexCompiler {
             call($method, [ $Arg::obj ], $cur), # don't pass a :result so it's void
         ]);
 
-        MAST::InstructionList.new(@ins, $cur, $MVM_reg_obj)
+        MAST::InstructionList.new($cur, $MVM_reg_obj)
     }
 
     method alt($node) {

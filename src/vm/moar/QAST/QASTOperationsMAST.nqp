@@ -28,19 +28,17 @@ my int $MVM_operand_uint64      := ($MVM_reg_uint64 * 8);
 # It groups together a set of instructions along with a result register and a
 # result kind.  It also tracks the source filename and line number.
 class MAST::InstructionList {
-    has @!instructions;
     has $!result_reg;
     has int $!result_kind;
 
-    method new(@instructions, $result_reg, $result_kind) {
+    method new($result_reg, $result_kind) {
         my $obj := nqp::create(self);
-        nqp::bindattr($obj, MAST::InstructionList, '@!instructions', @instructions);
         nqp::bindattr($obj, MAST::InstructionList, '$!result_reg', $result_reg);
         nqp::bindattr_i($obj, MAST::InstructionList, '$!result_kind', $result_kind);
         $obj
     }
 
-    method instructions() { @!instructions }
+    method instructions() { [] }
     method result_reg()   { $!result_reg }
     method result_kind()  { $!result_kind }
 
@@ -499,7 +497,7 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
             push_op('push_o', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_obj);
         }
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
         $arr.append($ensure_return_register);
     }
     $arr
@@ -522,7 +520,7 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
             push_op('push_i', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_int64);
         }
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
         $arr.append($ensure_return_register);
     }
     $arr
@@ -545,7 +543,7 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
             push_op('push_n', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_num64);
         }
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
         $arr.append($ensure_return_register);
     }
     $arr
@@ -568,7 +566,7 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
             push_op('push_s', $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_str);
         }
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
         $arr.append($ensure_return_register);
     }
     $arr
@@ -594,7 +592,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
             push_op('push_o', $arr_reg, $item_reg);
         }
         $regalloc.release_register($item_reg, $MVM_reg_obj);
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $arr_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
         $arr.append($ensure_return_register);
     }
     $arr
@@ -625,7 +623,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
             $regalloc.release_register($key_reg, $MVM_reg_str);
             $regalloc.release_register($val_reg, $MVM_reg_obj);
         }
-        my $ensure_return_register := MAST::InstructionList.new(nqp::list(), $hash_reg, $MVM_reg_obj);
+        my $ensure_return_register := MAST::InstructionList.new($hash_reg, $MVM_reg_obj);
         $hash.append($ensure_return_register);
     }
     $hash
@@ -695,7 +693,7 @@ my $chain_gen := sub ($qastcomp, $op) {
     }
 
     $*MAST_FRAME.add-label($endlabel);
-    MAST::InstructionList.new(@ops, $res_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 }
 QAST::MASTOperations.add_core_op: 'chain',       $chain_gen;
 QAST::MASTOperations.add_core_op: 'chainstatic', $chain_gen;
@@ -909,7 +907,7 @@ for <if unless with without> -> $op_name {
 
                 if $then_res_reg {
                     if (@comp_ops[1].result_kind != $res_kind) {
-                        my $il := MAST::InstructionList.new(@ins, $then_res_reg, @comp_ops[1].result_kind);
+                        my $il := MAST::InstructionList.new($then_res_reg, @comp_ops[1].result_kind);
                         my $coercion := $qastcomp.coercion($il, $res_kind);
                         push_op('set', $res_reg, $coercion.result_reg);
                     }
@@ -922,14 +920,14 @@ for <if unless with without> -> $op_name {
         }
 
         if $operands == 2 && !$is_void {
-            my $il := MAST::InstructionList.new(@ins, @comp_ops[1].result_reg, @comp_ops[1].result_kind);
+            my $il := MAST::InstructionList.new(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
             $qastcomp.coerce($il, $res_kind);
             push_op('set', $res_reg, $il.result_reg);
             $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
             push_op('goto', $end_lbl);
 
             $*MAST_FRAME.add-label($else_lbl);
-            my $cond_il := MAST::InstructionList.new(@ins, $cond_res_reg, @comp_ops[0].result_kind);
+            my $cond_il := MAST::InstructionList.new($cond_res_reg, @comp_ops[0].result_kind);
             $qastcomp.coerce($cond_il, $res_kind);
             push_op('set', $res_reg, $cond_il.result_reg);
             $regalloc.release_register($cond_il.result_reg, $cond_il.result_kind);
@@ -939,7 +937,7 @@ for <if unless with without> -> $op_name {
 
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
 
-        MAST::InstructionList.new(@ins, $res_reg, $res_kind)
+        MAST::InstructionList.new($res_reg, $res_kind)
     });
 }
 
@@ -968,7 +966,7 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
     push_op('set', $res_reg, $then.result_reg);
     $*MAST_FRAME.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
-    my $newer := MAST::InstructionList.new(nqp::list(), $res_reg, $MVM_reg_obj);
+    my $newer := MAST::InstructionList.new($res_reg, $MVM_reg_obj);
     $expr.append($newer);
 
     $expr
@@ -1047,7 +1045,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
 
     $*REGALLOC.release_register($d, $MVM_reg_obj);
 
-    MAST::InstructionList.new(@ops, $res_reg, $res_kind)
+    MAST::InstructionList.new($res_reg, $res_kind)
 });
 
 QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
@@ -1072,7 +1070,7 @@ QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
     push_op('set', $res_reg, $then.result_reg);
     $*MAST_FRAME.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
-    my $newer := MAST::InstructionList.new(nqp::list(), $res_reg, $MVM_reg_obj);
+    my $newer := MAST::InstructionList.new($res_reg, $MVM_reg_obj);
     $expr.append($newer);
 
     $expr
@@ -1265,12 +1263,12 @@ for ('', 'repeat_') -> $repness {
                     :label($lablocal)
                 ));
                 $*MAST_FRAME.add-label($done_lbl);
-                MAST::InstructionList.new($il, $res_reg, $res_kind)
+                MAST::InstructionList.new($res_reg, $res_kind)
             }
             else {
                 my @loop_il := loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind);
                 $*MAST_FRAME.add-label($done_lbl);
-                MAST::InstructionList.new(@loop_il, $res_reg, $res_kind)
+                MAST::InstructionList.new($res_reg, $res_kind)
             }
         });
     }
@@ -1281,7 +1279,7 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
     my $loop_il := ();
     $*MAST_FRAME.add-label($lbl_next);
     push_op('unless_o', $iter_tmp, $lbl_done);
-    $loop_il := MAST::InstructionList.new($loop_il, MAST::VOID, $MVM_reg_void);
+    $loop_il := MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
 
     # Fetch values into temporaries (on the stack ain't enough in case
     # of redo).
@@ -1298,7 +1296,7 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
 
     $*MAST_FRAME.add-label($lbl_redo);
     push_op('osrpoint');
-    $val_il := MAST::InstructionList.new($val_il, MAST::VOID, $MVM_reg_void);
+    $val_il := MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
 
     # Now do block invocation.
     my $inv_il := MAST::Call.new(
@@ -1306,7 +1304,7 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
         :flags(@arg_flags),
         |@val_temps
     );
-    $inv_il := MAST::InstructionList.new([$inv_il], MAST::VOID, $MVM_reg_void);
+    $inv_il := MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
 
     # Emit next.
     push_op('goto', $lbl_next );
@@ -1412,10 +1410,10 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     for @val_temps { $regalloc.release_register($_, $MVM_reg_obj) }
     if $*WANT == $MVM_reg_void {
         $regalloc.release_register($list_il.result_reg, $list_il.result_kind);
-        MAST::InstructionList.new($il, MAST::VOID, $MVM_reg_void)
+        MAST::InstructionList.new(MAST::VOID, $MVM_reg_void)
     }
     else {
-        MAST::InstructionList.new($il, $list_il.result_reg, $list_il.result_kind)
+        MAST::InstructionList.new($list_il.result_reg, $list_il.result_kind)
     }
 });
 
@@ -1570,7 +1568,7 @@ my $call_gen := sub ($qastcomp, $op) {
         :op($op.op eq 'nativeinvoke' ?? 1 !! 0),
     ));
 
-    MAST::InstructionList.new(@ins, $res_reg, $res_kind)
+    MAST::InstructionList.new($res_reg, $res_kind)
 };
 QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
@@ -1668,7 +1666,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         |@arg_regs
     ));
 
-    MAST::InstructionList.new(@ins, $res_reg, $res_kind)
+    MAST::InstructionList.new($res_reg, $res_kind)
 });
 
 # Binding
@@ -1812,7 +1810,7 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 
     $regalloc.release_register($protil.result_reg, $MVM_reg_obj);
 
-    MAST::InstructionList.new($il, $protected_result, $MVM_reg_obj)
+    MAST::InstructionList.new($protected_result, $MVM_reg_obj)
 });
 
 # Simple payload handler.
@@ -1842,7 +1840,7 @@ QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $
     $*MAST_FRAME.add-label($endlbl);
     $*REGALLOC.release_register($handler.result_reg, $MVM_reg_obj);
 
-    MAST::InstructionList.new($il, $protected.result_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($protected.result_reg, $MVM_reg_obj)
 });
 
 # Control exception throwing.
@@ -1866,7 +1864,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             my $ex  := $regalloc.fresh_register($MVM_reg_obj);
             my $lbl := $qastcomp.as_mast($label, :want($MVM_reg_obj));
             my $cat := $regalloc.fresh_register($MVM_reg_int64);
-            my $il  := MAST::InstructionList.new(nqp::list(), $res, $MVM_reg_obj);
+            my $il  := MAST::InstructionList.new($res, $MVM_reg_obj);
             $il.append($lbl);
             push_op('newexception',   $ex);
             push_op('bindexpayload',  $ex,  $lbl.result_reg );
@@ -1881,7 +1879,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             my $res := $regalloc.fresh_register($MVM_reg_obj);
             push_op('throwcatdyn', $res,
                 MAST::IVal.new( :value(%control_map{$name}) ));
-            MAST::InstructionList.new($il, $res, $MVM_reg_obj)
+            MAST::InstructionList.new($res, $MVM_reg_obj)
         }
     }
     else {
@@ -1902,7 +1900,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     push_op('coerce_ni', $b, $a);
     $regalloc.release_register($a, $MVM_reg_num64);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($il, $b, $MVM_reg_int64)
+    MAST::InstructionList.new($b, $MVM_reg_int64)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
@@ -1913,7 +1911,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     push_op('decont', $dc, $reg);
     push_op('smrt_numify', $res_reg, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($il, $res_reg, $MVM_reg_num64)
+    MAST::InstructionList.new($res_reg, $MVM_reg_num64)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
@@ -1924,7 +1922,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     push_op('decont', $dc, $reg);
     push_op('smrt_strify', $res_reg, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($il, $res_reg, $MVM_reg_str)
+    MAST::InstructionList.new($res_reg, $MVM_reg_str)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
@@ -1938,7 +1936,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     push_op('coerce_nu', $b, $a);
     $regalloc.release_register($a, $MVM_reg_num64);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($il, $b, $MVM_reg_int64)
+    MAST::InstructionList.new($b, $MVM_reg_int64)
 });
 sub boxer($kind, $type_op, $op) {
     -> $qastcomp, $reg {
@@ -1948,7 +1946,7 @@ sub boxer($kind, $type_op, $op) {
         push_op($type_op, $res_reg);
         push_op($op, $res_reg, $reg, $res_reg);
         $regalloc.release_register($reg, $kind);
-        MAST::InstructionList.new($il, $res_reg, $MVM_reg_obj)
+        MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
 }
 QAST::MASTOperations.add_hll_box('', $MVM_reg_int64, boxer($MVM_reg_int64, 'hllboxtype_i', 'box_i'));
@@ -1959,7 +1957,7 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
     my $il := nqp::list();
     my $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
     push_op('null', $res_reg);
-    MAST::InstructionList.new($il, $res_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 
 # Context introspection
@@ -2614,13 +2612,13 @@ QAST::MASTOperations.add_core_moarop_mapping('iterval', 'iterval');
 QAST::MASTOperations.add_core_op('null', -> $qastcomp, $op {
     my $want := $*WANT;
     if nqp::isconcrete($want) && $want == $MVM_reg_void {
-        MAST::InstructionList.new(nqp::list(), MAST::VOID, $MVM_reg_void);
+        MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
     }
     else {
         my $il := nqp::list();
         my $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
         push_op('null', $res_reg);
-        MAST::InstructionList.new($il, $res_reg, $MVM_reg_obj)
+        MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
 });
 QAST::MASTOperations.add_core_moarop_mapping('null_s', 'null_s');
@@ -2662,7 +2660,7 @@ QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
     my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj), :want-decont);
     push_op('decont', $res_reg, $expr.result_reg);
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
-    MAST::InstructionList.new($expr.instructions, $res_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
 QAST::MASTOperations.add_core_op('wantdecont', -> $qastcomp, $op {
@@ -2707,7 +2705,7 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
         }
         $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
         $regalloc.release_register($type_mast.result_reg, $MVM_reg_obj);
-        MAST::InstructionList.new(@ins, $val_mast.result_reg, $want)
+        MAST::InstructionList.new($val_mast.result_reg, $want)
     })
 }
 
@@ -2743,7 +2741,7 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
         }
         $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
         $regalloc.release_register($type_mast.result_reg, $MVM_reg_obj);
-        MAST::InstructionList.new(@ins, $res_reg, $want)
+        MAST::InstructionList.new($res_reg, $want)
     })
 }
 
@@ -2833,7 +2831,7 @@ sub add_native_assign_op($op_name, $kind) {
             my @ins;
             push_op($op_name, $target_mast.result_reg, $value_mast.result_reg);
             $regalloc.release_register($value_mast.result_reg, $kind);
-            MAST::InstructionList.new(@ins, $target_mast.result_reg, $MVM_reg_obj)
+            MAST::InstructionList.new($target_mast.result_reg, $MVM_reg_obj)
         }
     })
 }
@@ -2917,7 +2915,7 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     $*MAST_FRAME.add-label($done_lbl);
     $regalloc.release_register($disp_reg, $MVM_reg_obj);
     $regalloc.release_register($isnull_reg, $MVM_reg_int64);
-    MAST::InstructionList.new(@ops, $MVM_reg_void, MAST::VOID)
+    MAST::InstructionList.new($MVM_reg_void, MAST::VOID)
 });
 QAST::MASTOperations.add_core_moarop_mapping('cleardispatcher', 'takedispatcher');
 QAST::MASTOperations.add_core_moarop_mapping('freshcoderef', 'freshcoderef');
@@ -3125,7 +3123,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
         :result($res_reg),
         :op(2)
     ));
-    MAST::InstructionList.new(@ins, $res_reg, $MVM_reg_obj)
+    MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 
 QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
