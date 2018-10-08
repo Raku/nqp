@@ -151,16 +151,14 @@ class QAST::MASTRegexCompiler {
         my $itmp := $!regalloc.fresh_i();
         my $i0 := $!regalloc.fresh_i();
 
-        my @ins := [
-            op('const_i64', $negone, ival(-1)),
-            op('const_i64', $zero, ival(0)),
-            op('const_i64', $one, ival(1)),
-            op('const_i64', $two, ival(2)),
-            op('const_i64', $three, ival(3)),
-            op('const_i64', $four, ival(4)),
-            op('findmeth', $method, $self, sval('!cursor_start')),
-            call($method, [ $Arg::obj ], :result($cur), $self )
-        ];
+        op('const_i64', $negone, ival(-1));
+        op('const_i64', $zero, ival(0));
+        op('const_i64', $one, ival(1));
+        op('const_i64', $two, ival(2));
+        op('const_i64', $three, ival(3));
+        op('const_i64', $four, ival(4));
+        op('findmeth', $method, $self, sval('!cursor_start'));
+        call($method, [ $Arg::obj ], :result($cur), $self );
 
         my $sharedclass;
         my int $has_cursor_type := $node.has_cursor_type();
@@ -209,8 +207,8 @@ class QAST::MASTRegexCompiler {
         my $i18 := $!regalloc.fresh_i();
         $*MAST_FRAME.add-label($restartlabel);
         if $!cstack_used {
-            nqp::push(@ins, op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
-                ival(nqp::hintfor($!cursor_type, '$!cstack'))));
+            op('getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
+                ival(nqp::hintfor($!cursor_type, '$!cstack')));
         }
         $*MAST_FRAME.add-label($faillabel);
         op('isnull', $i0, $bstack);
@@ -251,11 +249,11 @@ class QAST::MASTRegexCompiler {
             op('dec_i', $i18);
             op('atpos_i', $i18, $bstack, $i18);
             $*MAST_FRAME.add-label($cutlabel);
-            nqp::push(@ins, op('setelemspos', $cstack, $i18));
+            op('setelemspos', $cstack, $i18);
         }
         $*MAST_FRAME.add-label($jumplabel);
-        nqp::push(@ins, op('jumplist', ival(+@!rxjumps), $itmp));
-        nqp::push(@ins, op('goto', $_)) for @!rxjumps;
+        op('jumplist', ival(+@!rxjumps), $itmp);
+        op('goto', $_) for @!rxjumps;
         $*MAST_FRAME.add-label($donelabel);
         op('findmeth', $method, $cur, sval('!cursor_fail'));
         call($method, [ $Arg::obj ], $cur); # don't pass a :result so it's void
@@ -270,7 +268,6 @@ class QAST::MASTRegexCompiler {
 
         # See if we can stash the labels array in an SC or if we'll have
         # to actually emit code for it.
-        my @ins         := nqp::list();
         my @label_arr   := nqp::list_i();
         my int $have_sc := 0;
         if $!qastcomp.sc -> $sc {
@@ -281,17 +278,17 @@ class QAST::MASTRegexCompiler {
 
             # Emit wval instruction to look it up.
             my $sc_idx := $!qastcomp.mast_compunit.sc_idx($sc);
-            nqp::push(@ins, op(
+            op(
                 $obj_idx < 32768 ?? 'wval' !! 'wval_wide',
                 %!reg<back_cur>,
                 MAST::IVal.new( :value($sc_idx) ),
                 MAST::IVal.new( :value($obj_idx) )
-            ));
+            );
             $have_sc := 1;
         }
         else {
-            nqp::push(@ins, op('bootintarray', %!reg<back_cur>));
-            nqp::push(@ins, op('create', %!reg<back_cur>, %!reg<back_cur>));
+            op('bootintarray', %!reg<back_cur>);
+            op('create', %!reg<back_cur>, %!reg<back_cur>);
         }
 
         # Calculate all the branches to try, which populates the bstack
@@ -309,19 +306,19 @@ class QAST::MASTRegexCompiler {
             nqp::push_i(@label_arr, $altlabel_index);
 
             if !$have_sc {
-                nqp::push(@ins, op('const_i64', $itmp, ival($altlabel_index)));
-                nqp::push(@ins, op('push_i', %!reg<back_cur>, $itmp));
+                op('const_i64', $itmp, ival($altlabel_index));
+                op('push_i', %!reg<back_cur>, $itmp);
             }
         }
 
-        self.regex_mark(@ins, $endlabel_index, %!reg<negone>, %!reg<zero>);
-        nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>, sval('!alt')));
+        self.regex_mark($endlabel_index, %!reg<negone>, %!reg<zero>);
+        op('findmeth', %!reg<method>, %!reg<cur>, sval('!alt'));
         my $name := $!regalloc.fresh_s();
-        nqp::push(@ins, op('const_s', $name, sval($node.name)));
-        nqp::push(@ins, call(%!reg<method>, [ $Arg::obj, $Arg::int, $Arg::str, $Arg::obj ],
-            %!reg<cur>, %!reg<pos>, $name, %!reg<back_cur>));
+        op('const_s', $name, sval($node.name));
+        call(%!reg<method>, [ $Arg::obj, $Arg::int, $Arg::str, $Arg::obj ],
+            %!reg<cur>, %!reg<pos>, $name, %!reg<back_cur>);
         $!regalloc.release_register($name, $MVM_reg_str);
-        nqp::push(@ins, op('goto', %!reg<fail>));
+        op('goto', %!reg<fail>);
 
         my $altcount := 0;
         $iter := nqp::iterator($node.list);
@@ -330,23 +327,21 @@ class QAST::MASTRegexCompiler {
             my $altlabel := @!rxjumps[$altlabel_index];
             $*MAST_FRAME.add-label($altlabel);
             self.regex_mast(nqp::shift($iter));
-            nqp::push(@ins, op('goto', $endlabel));
+            op('goto', $endlabel);
 
             $altcount++;
         }
 
         $!regalloc.release_register($itmp, $MVM_reg_int64);
         $*MAST_FRAME.add-label($endlabel);
-        self.regex_commit(@ins, $endlabel_index) if $node.backtrack eq 'r';
-        @ins # so the label array creation or lookup happens first
+        self.regex_commit($endlabel_index) if $node.backtrack eq 'r';
     }
 
     method altseq($node) {
-        my @ins := nqp::list();
         my $iter := nqp::iterator($node.list);
         my $endlabel_index := self.rxjump();
         my $endlabel := @!rxjumps[$endlabel_index];
-        self.regex_mark(@ins, $endlabel_index, %!reg<negone>, %!reg<zero>);
+        self.regex_mark($endlabel_index, %!reg<negone>, %!reg<zero>);
         my $altlabel_index := self.rxjump();
         my $altlabel := @!rxjumps[$altlabel_index];
         while $iter {
@@ -355,32 +350,30 @@ class QAST::MASTRegexCompiler {
             if $iter {
                 $altlabel_index := self.rxjump();
                 $altlabel := @!rxjumps[$altlabel_index];
-                self.regex_mark(@ins, $altlabel_index, %!reg<pos>, %!reg<zero>);
+                self.regex_mark($altlabel_index, %!reg<pos>, %!reg<zero>);
             }
             self.regex_mast($matcher);
             if $iter {
-                self.regex_commit(@ins, $endlabel_index) if $node.backtrack eq 'r';
-                nqp::push(@ins, op('goto', $endlabel));
+                self.regex_commit($endlabel_index) if $node.backtrack eq 'r';
+                op('goto', $endlabel);
             }
         }
         $*MAST_FRAME.add-label($endlabel);
-        @ins
     }
 
     method anchor($node) {
-        my @ins := nqp::list();
         my $subtype := $node.subtype;
         my $donelabel := label();
         my $itmp := $!regalloc.fresh_i();
         my $pos := %!reg<pos>;
         my $fail := %!reg<fail>;
         if $subtype eq 'bos' {
-            nqp::push(@ins, op('ne_i', $itmp, $pos, %!reg<zero>));
-            nqp::push(@ins, op('if_i', $itmp, $fail));
+            op('ne_i', $itmp, $pos, %!reg<zero>);
+            op('if_i', $itmp, $fail);
         }
         elsif $subtype eq 'eos' {
-            nqp::push(@ins, op('lt_i', $itmp, $pos, %!reg<eos>));
-            nqp::push(@ins, op('if_i', $itmp, $fail));
+            op('lt_i', $itmp, $pos, %!reg<eos>);
+            op('if_i', $itmp, $fail);
         }
         elsif $subtype eq 'lwb' {
             my $cclass_word := $!regalloc.fresh_i();
@@ -435,7 +428,7 @@ class QAST::MASTRegexCompiler {
             $!regalloc.release_register($cclass_newline, $MVM_reg_int64);
         }
         elsif $subtype eq 'fail' {
-            nqp::push(@ins, op('goto', $fail));
+            op('goto', $fail);
         }
         elsif $subtype eq 'pass' || $subtype eq '' {
             # Nothing to do.
@@ -446,7 +439,6 @@ class QAST::MASTRegexCompiler {
             nqp::die("Unknown anchor subtype $subtype");
         }
         $!regalloc.release_register($itmp, $MVM_reg_int64);
-        @ins
     }
 
     my %cclass_code;
@@ -464,21 +456,19 @@ class QAST::MASTRegexCompiler {
         self.panic("Unrecognized subtype '$subtype' in QAST::Regex cclass")
             unless $cclass;
 
-        my @ins := nqp::list();
         my $itmp := $!regalloc.fresh_i();
-        nqp::push(@ins, op('ge_i', $itmp, %!reg<pos>, %!reg<eos>));
-        nqp::push(@ins, op('if_i', $itmp, %!reg<fail>));
+        op('ge_i', $itmp, %!reg<pos>, %!reg<eos>);
+        op('if_i', $itmp, %!reg<fail>);
 
         if $cclass != nqp::const::CCLASS_ANY {
             my $testop := $node.negate ?? 'if_i' !! 'unless_i';
-            nqp::push(@ins, op('const_i64', $itmp, ival($cclass)));
-            nqp::push(@ins, op('iscclass', $itmp, $itmp, %!reg<tgt>, %!reg<pos>));
-            nqp::push(@ins, op($testop, $itmp, %!reg<fail>));
+            op('const_i64', $itmp, ival($cclass));
+            op('iscclass', $itmp, $itmp, %!reg<tgt>, %!reg<pos>);
+            op($testop, $itmp, %!reg<fail>);
         }
 
-        nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
+        op('inc_i', %!reg<pos>) unless $node.subtype eq 'zerowidth';
         $!regalloc.release_register($itmp, $MVM_reg_int64);
-        @ins
     }
 
     method concat($node) {
@@ -501,37 +491,33 @@ class QAST::MASTRegexCompiler {
         my $conjlabel := @!rxjumps[$conjlabel_index];
         my $firstlabel := label();
         my $iter := nqp::iterator($node.list);
-        my @ins := [
-            op('goto', $firstlabel),
-        ];
+        op('goto', $firstlabel);
         $*MAST_FRAME.add-label($conjlabel);
-        nqp::push(@ins, op('goto', %!reg<fail>));
+        op('goto', %!reg<fail>);
         # call the first child
         $*MAST_FRAME.add-label($firstlabel);
         # make a mark that holds our starting position in the pos slot
-        self.regex_mark(@ins, $conjlabel_index, %!reg<pos>, %!reg<zero>);
+        self.regex_mark($conjlabel_index, %!reg<pos>, %!reg<zero>);
         self.regex_mast(nqp::shift($iter));
         # use previous mark to make one with pos=start, rep=end
         my $itmp := $!regalloc.fresh_i();
         my $i12 := $!regalloc.fresh_i();
-        self.regex_peek(@ins, $conjlabel_index, $itmp);
-        self.regex_mark(@ins, $conjlabel_index, $itmp, %!reg<pos>);
+        self.regex_peek($conjlabel_index, $itmp);
+        self.regex_mark($conjlabel_index, $itmp, %!reg<pos>);
 
         while $iter {
-            nqp::push(@ins, op('set', %!reg<pos>, $itmp));
+            op('set', %!reg<pos>, $itmp);
             self.regex_mast(nqp::shift($iter));
-            self.regex_peek(@ins, $conjlabel_index, $itmp, $i12);
-            nqp::push(@ins, op('ne_i', $i12, %!reg<pos>, $i12));
-            nqp::push(@ins, op('if_i', $i12, %!reg<fail>));
+            self.regex_peek($conjlabel_index, $itmp, $i12);
+            op('ne_i', $i12, %!reg<pos>, $i12);
+            op('if_i', $i12, %!reg<fail>);
         }
-        nqp::push(@ins, op('set', %!reg<pos>, $itmp)) if $node.subtype eq 'zerowidth';
+        op('set', %!reg<pos>, $itmp) if $node.subtype eq 'zerowidth';
         $!regalloc.release_register($itmp, $MVM_reg_int64);
         $!regalloc.release_register($i12, $MVM_reg_int64);
-        @ins
     }
 
     method enumcharlist($node) {
-        my @ins;
         my $op := $node.negate ?? 'indexnat' !! 'indexat';
         my $i0 := $!regalloc.fresh_i();
         my $donelabel := label();
@@ -554,16 +540,14 @@ class QAST::MASTRegexCompiler {
             $!regalloc.release_register($i1, $MVM_reg_int64);
         }
         else {
-            nqp::push(@ins, op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>));
+            op($op, %!reg<tgt>, %!reg<pos>, sval($node[0]), %!reg<fail>);
         }
-        nqp::push(@ins, op('inc_i', %!reg<pos>))
+        op('inc_i', %!reg<pos>)
 	        unless $node.subtype eq 'zerowidth';
         $*MAST_FRAME.add-label($donelabel) if $donelabel;
-        @ins
     }
 
     method charrange($node) {
-        my @ins;
         my $i0    := $!regalloc.fresh_i();
         my $i1    := $!regalloc.fresh_i();
         my $lower := $!regalloc.fresh_i();
@@ -595,7 +579,7 @@ class QAST::MASTRegexCompiler {
             $!regalloc.release_register($s1, $MVM_reg_str);
             $!regalloc.release_register($i2, $MVM_reg_int64);
             unless $node.negate {
-                nqp::push(@ins, op('goto', %!reg<fail>));
+                op('goto', %!reg<fail>);
                 $*MAST_FRAME.add-label($succeed);
             }
         }
@@ -622,7 +606,7 @@ class QAST::MASTRegexCompiler {
             $!regalloc.release_register($s1, $MVM_reg_str);
             $!regalloc.release_register($i2, $MVM_reg_int64);
             unless $node.negate {
-                nqp::push(@ins, op('goto', %!reg<fail>));
+                op('goto', %!reg<fail>);
                 $*MAST_FRAME.add-label($succeed);
             }
         }
@@ -635,7 +619,7 @@ class QAST::MASTRegexCompiler {
             op('lt_i', $i1, $i0, $lower);
             op('if_i', $i1, $goal);
             if $node.negate {
-                nqp::push(@ins, op('goto', %!reg<fail>));
+                op('goto', %!reg<fail>);
                 $*MAST_FRAME.add-label($succeed);
             }
         }
@@ -648,30 +632,28 @@ class QAST::MASTRegexCompiler {
             op('lt_i', $i1, $i0, $lower);
             op('if_i', $i1, $goal);
             if $node.negate {
-                nqp::push(@ins, op('goto', %!reg<fail>));
+                op('goto', %!reg<fail>);
                 $*MAST_FRAME.add-label($succeed);
             }
         }
-        nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
+        op('inc_i', %!reg<pos>) unless $node.subtype eq 'zerowidth';
         $!regalloc.release_register($i0,    $MVM_reg_int64);
         $!regalloc.release_register($i1,    $MVM_reg_int64);
         $!regalloc.release_register($lower, $MVM_reg_int64);
         $!regalloc.release_register($upper, $MVM_reg_int64);
-        @ins
     }
 
     method literal($node) {
         my $litconst := $node[0];
         my $s0 := $!regalloc.fresh_s();
         my $i0 := $!regalloc.fresh_i();
-        my @ins;
         if $node.negate {
             # Need explicit check we're not going beyond the string end in the
             # negated case, to avoid false positive.
-            nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
-            nqp::push(@ins, op('add_i', $i0, %!reg<pos>, $i0));
-            nqp::push(@ins, op('gt_i', $i0, $i0, %!reg<eos>));
-            nqp::push(@ins, op('if_i', $i0, %!reg<fail>));
+            op('const_i64', $i0, ival(nqp::chars($litconst)));
+            op('add_i', $i0, %!reg<pos>, $i0);
+            op('gt_i', $i0, $i0, %!reg<eos>);
+            op('if_i', $i0, %!reg<fail>);
         }
         # XXX create some regex prologue system so these const assignments
         # can happen only once at the beginning of a regex. hash of string constants
@@ -684,28 +666,26 @@ class QAST::MASTRegexCompiler {
                      $node.subtype eq 'ignorecase+ignoremark' ?? 'eqaticim_s' !! 'eqat_s';
 
         my $cmpop := $node.negate ?? 'if_i' !! 'unless_i';
-        nqp::push(@ins, op('const_s', $s0, sval($litconst)));
-        nqp::push(@ins, op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>));
-        nqp::push(@ins, op($cmpop, $i0, %!reg<fail>));
+        op('const_s', $s0, sval($litconst));
+        op($eq_op, $i0, %!reg<tgt>, $s0, %!reg<pos>);
+        op($cmpop, $i0, %!reg<fail>);
         unless $node.subtype eq 'zerowidth' {
-            nqp::push(@ins, op('const_i64', $i0, ival(nqp::chars($litconst))));
-            nqp::push(@ins, op('add_i', %!reg<pos>, %!reg<pos>, $i0));
+            op('const_i64', $i0, ival(nqp::chars($litconst)));
+            op('add_i', %!reg<pos>, %!reg<pos>, $i0);
         }
         $!regalloc.release_register($s0, $MVM_reg_str);
         $!regalloc.release_register($i0, $MVM_reg_int64);
-        @ins
     }
 
     method pass($node) {
-        my @ins := nqp::list();
         my @args := [%!reg<cur>, %!reg<pos>];
         my @flags := [$Arg::obj, $Arg::int];
         my $op;
         my $meth := $!regalloc.fresh_o();
-        nqp::push(@ins, op('findmeth', $meth, %!reg<cur>, sval('!cursor_pass')));
+        op('findmeth', $meth, %!reg<cur>, sval('!cursor_pass'));
         if $node.name {
             my $sname := $!regalloc.fresh_s();
-            nqp::push(@ins, op('const_s', $sname, sval($node.name)));
+            op('const_s', $sname, sval($node.name));
             nqp::push(@args, $sname);
             nqp::push(@flags, $Arg::str);
         }
@@ -719,33 +699,27 @@ class QAST::MASTRegexCompiler {
             nqp::push(@args, %!reg<one>);
             nqp::push(@flags, $Arg::named +| $Arg::int);
         }
-        nqp::push(@ins, call($meth, @flags, :result($meth), |@args));
+        call($meth, @flags, :result($meth), |@args);
         $!regalloc.release_register($meth, $MVM_reg_obj);
-        nqp::push(@ins, op('return_o', %!reg<cur>));
-        @ins
+        op('return_o', %!reg<cur>);
     }
 
     method qastnode($node) {
-        my @ins := [
-            op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'), %!reg<pos>, ival(-1)),
-            op('bindlex', $*BLOCK.resolve_lexical('$¢'), %!reg<cur>)
-        ];
+        op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'), %!reg<pos>, ival(-1));
+        op('bindlex', $*BLOCK.resolve_lexical('$¢'), %!reg<cur>);
         my $cmast := $!qastcomp.as_mast($node[0]);
         $!regalloc.release_register($cmast.result_reg, $cmast.result_kind);
         my $cndop := $node.negate # the negation meaning is reversed for the op
           ?? @Condition-op-kinds[        $cmast.result_kind]
           !! @Negated-condition-op-kinds[$cmast.result_kind];
         if $node.subtype eq 'zerowidth' && ! nqp::isnull($cndop) {
-            nqp::push(@ins, op('decont', $cmast.result_reg, $cmast.result_reg))
+            op('decont', $cmast.result_reg, $cmast.result_reg)
                 if $cmast.result_kind == $MVM_reg_obj;
-            nqp::push(@ins, op($cndop, $cmast.result_reg, %!reg<fail>));
+            op($cndop, $cmast.result_reg, %!reg<fail>);
         }
-        @ins
     }
 
     method dynquant($node) {
-        my @ins := nqp::list();
-
         my $backtrack  := $node.backtrack || 'g';
         my $sep        := $node[2];
         my $looplabel_index := self.rxjump();
@@ -789,25 +763,25 @@ class QAST::MASTRegexCompiler {
 
         # $needmark := $needrep || $backtrack eq 'r';
         if $backtrack eq 'r' {
-            nqp::push(@ins, op('set', $needmark, %!reg<one>));
+            op('set', $needmark, %!reg<one>);
         }
         else {
-            nqp::push(@ins, op('set', $needmark, $needrep));
+            op('set', $needmark, $needrep);
         }
 
         if $backtrack eq 'f' {
             my $seplabel := label();
-            nqp::push(@ins, op('set', $rep, %!reg<zero>));
+            op('set', $rep, %!reg<zero>);
 
-            nqp::push(@ins, op('ge_i', $ireg, $min_reg, %!reg<one>)); # if $min < 1 {
-            nqp::push(@ins, op('if_i', $ireg, $skip1label));
-            self.regex_mark(@ins, $looplabel_index, $pos, $rep);
-            nqp::push(@ins, op('goto', $donelabel));
+            op('ge_i', $ireg, $min_reg, %!reg<one>); # if $min < 1 {
+            op('if_i', $ireg, $skip1label);
+            self.regex_mark($looplabel_index, $pos, $rep);
+            op('goto', $donelabel);
             $*MAST_FRAME.add-label($skip1label);                      # }
 
-            nqp::push(@ins, op('goto', $seplabel)) if $sep;
+            op('goto', $seplabel) if $sep;
             $*MAST_FRAME.add-label($looplabel);
-            nqp::push(@ins, op('set', $ireg, $rep));
+            op('set', $ireg, $rep);
             if $sep {
                 self.regex_mast($sep);
                 $*MAST_FRAME.add-label($seplabel);
@@ -830,27 +804,27 @@ class QAST::MASTRegexCompiler {
 
             op('eq_i', $ireg, $max_reg, %!reg<one>); # unless $max == 1 {
             op('if_i', $ireg, $skip4label);
-            self.regex_mark(@ins, $looplabel_index, $pos, $rep);
+            self.regex_mark($looplabel_index, $pos, $rep);
             $*MAST_FRAME.add-label($skip4label);         # }
 
             $*MAST_FRAME.add-label($donelabel);
         }
         else {
-            nqp::push(@ins, op('if_i', $min_reg, $skip1label));     # if $min == 0 {
-            self.regex_mark(@ins, $donelabel_index, $pos, %!reg<zero>);
+            op('if_i', $min_reg, $skip1label);     # if $min == 0 {
+            self.regex_mark($donelabel_index, $pos, %!reg<zero>);
             $*MAST_FRAME.add-label($skip1label);
 
-            nqp::push(@ins, op('unless_i', $min_reg, $skip2label)); # elsif $needmark {
-            nqp::push(@ins, op('unless_i', $needmark, $skip2label));
-            self.regex_mark(@ins, $donelabel_index, %!reg<negone>, %!reg<zero>);
+            op('unless_i', $min_reg, $skip2label); # elsif $needmark {
+            op('unless_i', $needmark, $skip2label);
+            self.regex_mark($donelabel_index, %!reg<negone>, %!reg<zero>);
             $*MAST_FRAME.add-label($skip2label);                    # }
 
             $*MAST_FRAME.add-label($looplabel);
             self.regex_mast($node[0]);
 
-            nqp::push(@ins, op('unless_i', $needmark, $skip3label)); # if $needmark {
-            self.regex_peek(@ins, $donelabel_index, MAST::Local.new(:index(-1)), $rep);
-            self.regex_commit(@ins, $donelabel_index) if $backtrack eq 'r';
+            op('unless_i', $needmark, $skip3label); # if $needmark {
+            self.regex_peek($donelabel_index, MAST::Local.new(:index(-1)), $rep);
+            self.regex_commit($donelabel_index) if $backtrack eq 'r';
             op('inc_i', $rep);
 
             op('le_i', $ireg, $max_reg, %!reg<one>); # if $max > 1 {
@@ -862,9 +836,9 @@ class QAST::MASTRegexCompiler {
 
             op('eq_i', $ireg, $max_reg, %!reg<one>); # unless $max == 1 {
             op('if_i', $ireg, $skip5label);
-            self.regex_mark(@ins, $donelabel_index, $pos, $rep);
+            self.regex_mark($donelabel_index, $pos, $rep);
             self.regex_mast($sep) if $sep;
-            nqp::push(@ins, op('goto', $looplabel));
+            op('goto', $looplabel);
             $*MAST_FRAME.add-label($skip5label);         # }
             $*MAST_FRAME.add-label($donelabel);
 
@@ -875,17 +849,15 @@ class QAST::MASTRegexCompiler {
             $*MAST_FRAME.add-label($skip6label);         # }
         }
         $*MAST_FRAME.add-label($skip7label);
-        @ins
     }
 
     method quant($node) {
-        my @ins := nqp::list();
         my $min := $node.min;
         my $max := $node.max;
 
         if $min == 0 && $max == 0 {
             # Nothing to do, and nothing to backtrack into.
-            return @ins;
+            return;
         }
 
         my $backtrack := $node.backtrack || 'g';
@@ -902,70 +874,69 @@ class QAST::MASTRegexCompiler {
 
         if $backtrack eq 'f' {
             my $seplabel := label();
-            nqp::push(@ins, op('set', $rep, %!reg<zero>));
+            op('set', $rep, %!reg<zero>);
             if $min < 1 {
-                self.regex_mark(@ins, $looplabel_index, $pos, $rep);
-                nqp::push(@ins, op('goto', $donelabel));
+                self.regex_mark($looplabel_index, $pos, $rep);
+                op('goto', $donelabel);
             }
-            nqp::push(@ins, op('goto', $seplabel)) if $sep;
+            op('goto', $seplabel) if $sep;
             $*MAST_FRAME.add-label($looplabel);
-            nqp::push(@ins, op('set', $ireg, $rep));
+            op('set', $ireg, $rep);
             if $sep {
                 self.regex_mast($sep);
                 $*MAST_FRAME.add-label($seplabel);
             }
             self.regex_mast($node[0]);
-            nqp::push(@ins, op('set', $rep, $ireg));
-            nqp::push(@ins, op('inc_i', $rep));
+            op('set', $rep, $ireg);
+            op('inc_i', $rep);
             if $min > 1 {
                 my $minreg := $!regalloc.fresh_i();
-                nqp::push(@ins, op('const_i64', $minreg, ival($min)));
-                nqp::push(@ins, op('lt_i', $ireg, $rep, $minreg));
-                nqp::push(@ins, op('if_i', $ireg, $looplabel));
+                op('const_i64', $minreg, ival($min));
+                op('lt_i', $ireg, $rep, $minreg);
+                op('if_i', $ireg, $looplabel);
                 $!regalloc.release_register($minreg, $MVM_reg_int64);
             }
             if $max > 1 {
                 my $maxreg := $!regalloc.fresh_i();
-                nqp::push(@ins, op('const_i64', $maxreg, ival($max)));
-                nqp::push(@ins, op('ge_i', $ireg, $rep, $maxreg));
-                nqp::push(@ins, op('if_i', $ireg, $donelabel));
+                op('const_i64', $maxreg, ival($max));
+                op('ge_i', $ireg, $rep, $maxreg);
+                op('if_i', $ireg, $donelabel);
                 $!regalloc.release_register($maxreg, $MVM_reg_int64);
             }
-            self.regex_mark(@ins, $looplabel_index, $pos, $rep) if $max != 1;
+            self.regex_mark($looplabel_index, $pos, $rep) if $max != 1;
             $*MAST_FRAME.add-label($donelabel);
         }
         else {
-            if $min == 0 { self.regex_mark(@ins, $donelabel_index, $pos, %!reg<zero>); }
-            elsif $needmark { self.regex_mark(@ins, $donelabel_index, %!reg<negone>, %!reg<zero>); }
+            if $min == 0 { self.regex_mark($donelabel_index, $pos, %!reg<zero>); }
+            elsif $needmark { self.regex_mark($donelabel_index, %!reg<negone>, %!reg<zero>); }
             $*MAST_FRAME.add-label($looplabel);
             self.regex_mast($node[0]);
             if $needmark {
-                self.regex_peek(@ins, $donelabel_index, MAST::Local.new(:index(-1)), $rep);
-                self.regex_commit(@ins, $donelabel_index) if $backtrack eq 'r';
-                nqp::push(@ins, op('inc_i', $rep));
+                self.regex_peek($donelabel_index, MAST::Local.new(:index(-1)), $rep);
+                self.regex_commit($donelabel_index) if $backtrack eq 'r';
+                op('inc_i', $rep);
                 if $max > 1 {
                     my $maxreg := $!regalloc.fresh_i();
-                    nqp::push(@ins, op('const_i64', $maxreg, ival($max)));
-                    nqp::push(@ins, op('ge_i', $ireg, $rep, $maxreg));
-                    nqp::push(@ins, op('if_i', $ireg, $donelabel));
+                    op('const_i64', $maxreg, ival($max));
+                    op('ge_i', $ireg, $rep, $maxreg);
+                    op('if_i', $ireg, $donelabel);
                     $!regalloc.release_register($maxreg, $MVM_reg_int64);
                 }
             }
             unless $max == 1 {
-                self.regex_mark(@ins, $donelabel_index, $pos, $rep);
+                self.regex_mark($donelabel_index, $pos, $rep);
                 self.regex_mast($sep) if $sep;
-                nqp::push(@ins, op('goto', $looplabel));
+                op('goto', $looplabel);
             }
             $*MAST_FRAME.add-label($donelabel);
             if $min > 1 {
                 my $minreg := $!regalloc.fresh_i();
-                nqp::push(@ins, op('const_i64', $minreg, ival($min)));
-                nqp::push(@ins, op('lt_i', $ireg, $rep, $minreg));
-                nqp::push(@ins, op('if_i', $ireg, %!reg<fail>));
+                op('const_i64', $minreg, ival($min));
+                op('lt_i', $ireg, $rep, $minreg);
+                op('if_i', $ireg, %!reg<fail>);
                 $!regalloc.release_register($minreg, $MVM_reg_int64);
             }
         }
-        @ins
     }
 
     method scan($node) {
@@ -974,53 +945,49 @@ class QAST::MASTRegexCompiler {
         my $scanlabel := label();
         my $donelabel := label();
         my $ireg0 := $!regalloc.fresh_i();
-        my @ins := [
-            op('getattr_i', $ireg0, %!reg<self>, %!reg<curclass>, sval('$!from'),
-                ival(nqp::hintfor($!cursor_type, '$!from'))),
-            op('ne_i', $ireg0, $ireg0, %!reg<negone>),
-            op('if_i', $ireg0, $donelabel),
-            op('goto', $scanlabel),
-        ];
+        op('getattr_i', $ireg0, %!reg<self>, %!reg<curclass>, sval('$!from'),
+            ival(nqp::hintfor($!cursor_type, '$!from')));
+        op('ne_i', $ireg0, $ireg0, %!reg<negone>);
+        op('if_i', $ireg0, $donelabel);
+        op('goto', $scanlabel);
         $*MAST_FRAME.add-label($looplabel);
-        nqp::push(@ins, op('inc_i', %!reg<pos>));
+        op('inc_i', %!reg<pos>);
         if $node.list && $node.subtype ne 'ignorecase' && $node.subtype ne 'ignoremark' && $node.subtype ne 'ignorecase+ignoremark' {
             my $lit := $!regalloc.fresh_s();
-            nqp::push(@ins, op('const_s', $lit, sval($node[0])));
-            nqp::push(@ins, op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
-            nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
+            op('const_s', $lit, sval($node[0]));
+            op('index_s', %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>);
+            op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>);
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
         elsif $node.list && ($node.subtype eq 'ignorecase' || $node.subtype eq 'ignorecase+ignoremark' || $node.subtype eq 'ignoremark') {
             my $lit := $!regalloc.fresh_s();
             my $op  := $node.subtype eq 'ignorecase' ?? 'indexic_s' !!
                        $node.subtype eq 'ignoremark' ?? 'indexim_s' !! 'indexicim_s';
-            nqp::push(@ins, op('const_s', $lit, sval($node[0])));
-            nqp::push(@ins, op($op, %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>));
-            nqp::push(@ins, op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>));
+            op('const_s', $lit, sval($node[0]));
+            op($op, %!reg<pos>, %!reg<tgt>, $lit, %!reg<pos>);
+            op('eq_i', $ireg0, %!reg<pos>, %!reg<negone>);
             $!regalloc.release_register($lit, $MVM_reg_str);
         }
         else {
-            nqp::push(@ins, op('gt_i', $ireg0, %!reg<pos>, %!reg<eos>));
+            op('gt_i', $ireg0, %!reg<pos>, %!reg<eos>);
         }
-        nqp::push(@ins, op('if_i', $ireg0, %!reg<fail>));
-        nqp::push(@ins, op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!from'), %!reg<pos>, ival(-1)));
+        op('if_i', $ireg0, %!reg<fail>);
+        op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!from'), %!reg<pos>, ival(-1));
         $*MAST_FRAME.add-label($scanlabel);
-        self.regex_mark(@ins, $looplabel_index, %!reg<pos>, %!reg<zero>);
+        self.regex_mark($looplabel_index, %!reg<pos>, %!reg<zero>);
         $*MAST_FRAME.add-label($donelabel);
-        @ins
     }
 
     method subcapture($node) {
-        my @ins := nqp::list();
         my $donelabel := label();
         my $faillabel_index := self.rxjump();
         my $faillabel := @!rxjumps[$faillabel_index];
         my $itmp := $!regalloc.fresh_i();
         my $p11 := $!regalloc.fresh_o();
         my $s11 := $!regalloc.fresh_s();
-        self.regex_mark(@ins, $faillabel_index, %!reg<pos>, %!reg<zero>);
+        self.regex_mark($faillabel_index, %!reg<pos>, %!reg<zero>);
         self.regex_mast($node[0]);
-        self.regex_peek(@ins, $faillabel_index, $itmp);
+        self.regex_peek($faillabel_index, $itmp);
         op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
             %!reg<pos>, ival(-1));
         op('findmeth', %!reg<method>, %!reg<cur>, sval('!cursor_start_subcapture'));
@@ -1033,12 +1000,11 @@ class QAST::MASTRegexCompiler {
             %!reg<cur>, $p11, $s11, :result(self.'!get_cstack'()));
         op('goto', $donelabel);
         $*MAST_FRAME.add-label($faillabel);
-        nqp::push(@ins, op('goto', %!reg<fail>));
+        op('goto', %!reg<fail>);
         $*MAST_FRAME.add-label($donelabel);
         $!regalloc.release_register($itmp, $MVM_reg_int64);
         $!regalloc.release_register($p11, $MVM_reg_obj);
         $!regalloc.release_register($s11, $MVM_reg_str);
-        @ins
     }
 
     my @kind_to_args := [0,
@@ -1077,7 +1043,6 @@ class QAST::MASTRegexCompiler {
     }
 
     method subrule($node) {
-        my @ins      := nqp::list();
         my $subtype  := $node.subtype;
         my $testop   := $node.negate ?? 'ge_i' !! 'lt_i';
         my $captured := 0;
@@ -1124,7 +1089,7 @@ class QAST::MASTRegexCompiler {
             my $passlabel := @!rxjumps[$passlabel_index];
             if $node.backtrack eq 'r' {
                 unless $subtype eq 'method' {
-                    self.regex_mark(@ins, $passlabel_index, %!reg<negone>, %!reg<zero>);
+                    self.regex_mark($passlabel_index, %!reg<negone>, %!reg<zero>);
                 }
                 $*MAST_FRAME.add-label($passlabel);
             }
@@ -1144,11 +1109,11 @@ class QAST::MASTRegexCompiler {
 
                 if $subtype eq 'capture' {
                     my $sname := $!regalloc.fresh_s();
-                    nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>,
-                        sval('!cursor_capture')));
-                    nqp::push(@ins, op('const_s', $sname, sval($node.name)));
-                    nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                        %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'())));
+                    op('findmeth', %!reg<method>, %!reg<cur>,
+                        sval('!cursor_capture'));
+                    op('const_s', $sname, sval($node.name));
+                    call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
+                        %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'()));
                     $!regalloc.release_register($sname, $MVM_reg_str);
                     $captured := 1;
 
@@ -1166,10 +1131,10 @@ class QAST::MASTRegexCompiler {
                     op('push_i', $bstack, $itmp);
                 }
                 else {
-                    nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>,
-                        sval('!cursor_push_cstack')));
-                    nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj],
-                        %!reg<cur>, $p11, :result(self.'!get_cstack'())));
+                    op('findmeth', %!reg<method>, %!reg<cur>,
+                        sval('!cursor_push_cstack'));
+                    call(%!reg<method>, [$Arg::obj, $Arg::obj],
+                        %!reg<cur>, $p11, :result(self.'!get_cstack'()));
                 }
 
                 my $bstack := %!reg<bstack>;
@@ -1184,24 +1149,22 @@ class QAST::MASTRegexCompiler {
 
         if !$captured && $subtype eq 'capture' {
             my $sname := $!regalloc.fresh_s();
-            nqp::push(@ins, op('findmeth', %!reg<method>, %!reg<cur>,
-                sval('!cursor_capture')));
-            nqp::push(@ins, op('const_s', $sname, sval($node.name)));
-            nqp::push(@ins, call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'())));
+            op('findmeth', %!reg<method>, %!reg<cur>,
+                sval('!cursor_capture'));
+            op('const_s', $sname, sval($node.name));
+            call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
+                %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'()));
             $!regalloc.release_register($sname, $MVM_reg_str);
         }
 
-        nqp::push(@ins, op('getattr_i', %!reg<pos>, $p11, %!reg<curclass>,
-            sval('$!pos'), ival(nqp::hintfor($!cursor_type, '$!pos'))))
+        op('getattr_i', %!reg<pos>, $p11, %!reg<curclass>,
+            sval('$!pos'), ival(nqp::hintfor($!cursor_type, '$!pos')))
                 unless $subtype eq 'zerowidth';
 
         $!regalloc.release_register($itmp, $MVM_reg_int64);
-
-        @ins
     }
 
-    method regex_mark(@ins, $label_index, $pos, $rep) {
+    method regex_mark($label_index, $pos, $rep) {
         my $bstack := %!reg<bstack>;
         my $mark := $!regalloc.fresh_i();
         my $elems := $!regalloc.fresh_i();
@@ -1227,7 +1190,7 @@ class QAST::MASTRegexCompiler {
         $!regalloc.release_register($caps, $MVM_reg_int64);
     }
 
-    method regex_peek(@ins, $label_index, *@regs) {
+    method regex_peek($label_index, *@regs) {
         my $bstack := %!reg<bstack>;
         my $mark := $!regalloc.fresh_i();
         my $ptr := $!regalloc.fresh_i();
@@ -1246,15 +1209,15 @@ class QAST::MASTRegexCompiler {
         op('goto', $haselemsendlabel);
         $*MAST_FRAME.add-label($backupendlabel);
         for @regs {
-            nqp::push(@ins, op('inc_i', $ptr));
-            nqp::push(@ins, op('atpos_i', $_, $bstack, $ptr)) if $_.index != -1;
+            op('inc_i', $ptr);
+            op('atpos_i', $_, $bstack, $ptr) if $_.index != -1;
         }
         $!regalloc.release_register($mark, $MVM_reg_int64);
         $!regalloc.release_register($ptr, $MVM_reg_int64);
         $!regalloc.release_register($i0, $MVM_reg_int64);
     }
 
-    method regex_commit(@ins, $label_index) {
+    method regex_commit($label_index) {
         my $bstack := %!reg<bstack>;
         my $mark := $!regalloc.fresh_i();
         my $ptr := $!regalloc.fresh_i();
@@ -1328,10 +1291,8 @@ class QAST::MASTRegexCompiler {
         my $testop  := $node.negate ?? 'if_i' !! 'unless_i';
         my $succeed := label();
         my $prop    := ~$node[0];
-        my @ins     := [
-            op('ge_i', $i0, %!reg<pos>, %!reg<eos>),
-            op('if_i', $i0, %!reg<fail>),
-        ];
+        op('ge_i', $i0, %!reg<pos>, %!reg<eos>);
+        op('if_i', $i0, %!reg<fail>);
         if nqp::elems(@($node)) == 1 {
             my $hasvalcode := label();
             my $endblock   := label();
@@ -1403,8 +1364,7 @@ class QAST::MASTRegexCompiler {
             $*MAST_FRAME.add-label($succeed);
             op($testop, $i0, %!reg<fail>);
         }
-        nqp::push(@ins, op('inc_i', %!reg<pos>)) unless $node.subtype eq 'zerowidth';
-        @ins
+        op('inc_i', %!reg<pos>) unless $node.subtype eq 'zerowidth';
     }
 
     method ws($node) { self.subrule($node) }
