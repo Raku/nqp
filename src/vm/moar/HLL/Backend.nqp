@@ -372,7 +372,7 @@ class HLL::Backend::MoarVM {
             for $obj -> $thread {
                 my $thisprof := nqp::list;
                 $thisprof[3] := "NULL";
-                $thisprof[4] := $thread<start_time>;
+                $thisprof[4] := ~$thread<start_time>;
                 for $thread -> $k {
                     my $v := $thread{$k};
                     if $k eq 'total_time' {
