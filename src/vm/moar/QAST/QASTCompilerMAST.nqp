@@ -591,10 +591,9 @@ my class MASTCompilerInstance {
                 }
                 elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
-                    $il := $int64.instructions;
                     $reg := $int64.result_reg;
                     $release_type := $int64.result_kind;
-                    push_op($il, 'coerce_in', $res_reg, $reg);
+                    push_op('coerce_in', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for num; got: "~$got);
@@ -606,10 +605,9 @@ my class MASTCompilerInstance {
                 }
                 elsif $got == $MVM_reg_int32 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
-                    $il := $int64.instructions;
                     $reg := $int64.result_reg;
                     $release_type := $int64.result_kind;
-                    push_op($il, 'coerce_is', $res_reg, $reg);
+                    push_op('coerce_is', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_num64 {
                     push_op('coerce_ns', $res_reg, $reg);
@@ -638,10 +636,9 @@ my class MASTCompilerInstance {
                 }
                 elsif $got == $MVM_reg_num64 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
-                    $il := $int64.instructions;
                     $reg := $int64.result_reg;
                     $release_type := $int64.result_kind;
-                    push_op($il, 'trunc_i32', $res_reg, $reg);
+                    push_op('trunc_i32', $res_reg, $reg);
                 }
                 else {
                     nqp::die("Unknown coercion case for int32; got: " ~ $got);
@@ -1380,32 +1377,29 @@ my class MASTCompilerInstance {
         elsif $node.blocktype eq 'immediate' {
             my $clone_reg := $*BLOCK.clone_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
-                my @ins;
-                nqp::push(@ins, MAST::Call.new( :target($clone_reg), :flags([]) ));
+                MAST::Call.new( :target($clone_reg), :flags([]) );
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
             else {
                 my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
-                my @ins;
-                nqp::push(@ins, MAST::Call.new(
+                MAST::Call.new(
                     :target($clone_reg), :flags([]), :result($res_reg)
-                ));
+                );
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
         elsif $node.blocktype eq 'immediate_static' {
             $*BLOCK.capture_inner($node);
             my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-            my @ins;
             push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
-                nqp::push(@ins, MAST::Call.new( :target($code_reg), :flags([]) ));
+                MAST::Call.new( :target($code_reg), :flags([]) );
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             } else {
                 my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
-                nqp::push(@ins, MAST::Call.new(
+                MAST::Call.new(
                     :target($code_reg), :flags([]), :result($res_reg)
-                ));
+                );
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
@@ -1417,7 +1411,6 @@ my class MASTCompilerInstance {
             $*BLOCK.capture_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
                 my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                my @ins;
                 push_op('getcode', $code_reg, %!mast_frames{$node.cuid});
                 MAST::InstructionList.new($code_reg, $MVM_reg_obj)
             }
@@ -1463,7 +1456,6 @@ my class MASTCompilerInstance {
     # This takes any node that is a statement list of some kind and compiles
     # all of the statements within it.
     method compile_all_the_stmts(@stmts, $resultchild?) {
-        my @all_ins;
         # the most recent statement mast
         my $last_stmt;
         my $result_stmt;
@@ -1599,8 +1591,6 @@ my class MASTCompilerInstance {
             $var_res
         }
         else {
-            my $il := nqp::list();
-
             my $fallback_if_nonnull := MAST::Label.new();
             my $fallback_end := MAST::Label.new();
             my $res_reg := $*REGALLOC.fresh_o();
@@ -1711,7 +1701,6 @@ my class MASTCompilerInstance {
 
         # Now go by scope.
         my $name := $node.name;
-        my @ins;
         if $scope eq 'local' {
             my $local := $*BLOCK.local($name);
             if $local {
