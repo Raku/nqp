@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.CompletionHandler;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
@@ -13,8 +14,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import java.nio.charset.CharacterCodingException;
 
 import org.perl6.nqp.runtime.CallSiteDescriptor;
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -29,22 +28,25 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
 
     public AsyncFileHandle(ThreadContext tc, String filename, String mode) {
         try {
-            Path p = new File(filename).toPath();
-            if (mode.equals("r")) {
-                chan = AsynchronousFileChannel.open(p, StandardOpenOption.READ);
+            final Path p = new File(filename).toPath();
+
+            switch (mode) {
+                case "r":
+                    chan = AsynchronousFileChannel.open(p, StandardOpenOption.READ);
+                    break;
+                case "w":
+                    chan = AsynchronousFileChannel.open(p,
+                        StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+                    break;
+                case "wa":
+                    chan = AsynchronousFileChannel.open(p,
+                        StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    break;
+                default:
+                    ExceptionHandling.dieInternal(tc, "Unhandled file open mode '" + mode + "'");
+                    break;
             }
-            else if (mode.equals("w")) {
-                chan = AsynchronousFileChannel.open(p, StandardOpenOption.WRITE,
-                                                       StandardOpenOption.CREATE);
-            }
-            else if (mode.equals("wa")) {
-                chan = AsynchronousFileChannel.open(p, StandardOpenOption.WRITE,
-                                                       StandardOpenOption.CREATE,
-                                                       StandardOpenOption.APPEND);
-            }
-            else {
-                ExceptionHandling.dieInternal(tc, "Unhandled file open mode '" + mode + "'");
-            }
+
             setEncoding(tc, Charset.forName("UTF-8"));
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
@@ -179,7 +181,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                       final boolean chomp, final LinkedBlockingQueue<SixModelObject> queue,
                       final SixModelObject done, final SixModelObject error) {
         final LinesState ls = new LinesState();
-        ls.lineChunks = new ArrayList<ByteBuffer>();
+        ls.lineChunks = new ArrayList<>();
         ls.readBuffer = ByteBuffer.allocate(32768);
         ls.total = 0;
         ls.position = 0;
@@ -262,9 +264,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
                     ls.position += bytes;
                     ls.readBuffer = ByteBuffer.allocate(32768);
                     chan.read(ls.readBuffer, ls.position, ls, this);
-                } catch (IOException e) {
-                    failed(e, ls);
-                } catch (InterruptedException e) {
+                } catch (IOException | InterruptedException e) {
                     failed(e, ls);
                 }
             }
