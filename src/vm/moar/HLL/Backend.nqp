@@ -120,8 +120,10 @@ class HLL::Backend::MoarVM {
         my %type-info   := nqp::hash();
 
         sub post_process_call_graph_node($node) {
+            my int $highest-child-id;
             try {
                 if nqp::existskey($id_remap, $node<id>) {
+                    note("bloop?");
                     $node<id> := $id_remap{$node<id>};
                 } else {
                     my str $newkey := ~($new-id-counter++);
@@ -182,14 +184,18 @@ class HLL::Backend::MoarVM {
                 nqp::deletekey($node, "name");
                 if nqp::existskey($node, "callees") {
                     for $node<callees> {
-                        post_process_call_graph_node($_);
+                        $highest-child-id := post_process_call_graph_node($_);
                     }
+                }
+                else {
+                    $highest-child-id := $node<id>;
                 }
                 CATCH {
                     note("profiler caught an error during post_process_call_graph_node:");
                     note(nqp::getmessage($!));
                 }
             }
+            $highest-child-id;
         }
 
         sub to_json($obj) {
