@@ -1,4 +1,4 @@
-plan(27);
+plan(29);
 
 my sub isnan($n) {
     nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
