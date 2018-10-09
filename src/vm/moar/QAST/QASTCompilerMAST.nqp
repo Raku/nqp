@@ -504,6 +504,13 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_void {
                     push_op($il, 'const_n64', $res_reg, MAST::NVal.new( :value(0) ));
                 }
+                elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
+                    my $int64 := self.coercion($res, $MVM_reg_int64);
+                    $il := $int64.instructions;
+                    $reg := $int64.result_reg;
+                    $release_type := $int64.result_kind;
+                    push_op($il, 'coerce_in', $res_reg, $reg);
+                }
                 else {
                     nqp::die("Unknown coercion case for num; got: "~$got);
                 }
