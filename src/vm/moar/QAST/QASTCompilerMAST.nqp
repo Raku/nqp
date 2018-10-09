@@ -519,6 +519,13 @@ my class MASTCompilerInstance {
                 if $got == $MVM_reg_int64 {
                     push_op($il, 'coerce_is', $res_reg, $reg);
                 }
+                elsif $got == $MVM_reg_int32 {
+                    my $int64 := self.coercion($res, $MVM_reg_int64);
+                    $il := $int64.instructions;
+                    $reg := $int64.result_reg;
+                    $release_type := $int64.result_kind;
+                    push_op($il, 'coerce_is', $res_reg, $reg);
+                }
                 elsif $got == $MVM_reg_num64 {
                     push_op($il, 'coerce_ns', $res_reg, $reg);
                 }
