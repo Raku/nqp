@@ -10,6 +10,7 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 
 public class ExceptionHandling {
+
     // ----------------------------------------
     // Exception handler categories
     // ----------------------------------------
@@ -94,6 +95,7 @@ public class ExceptionHandling {
 
                 if (handler != null) {
                     invokeHandler(tc, handler, category, frame, retStr, exObj, null);
+                    return;
                 }
             }
         }
@@ -179,9 +181,9 @@ public class ExceptionHandling {
     static {
         try {
             INVOKE_HANDLER_REENTER = MethodHandles.insertArguments(
-                    MethodHandles.lookup().findStatic(ExceptionHandling.class, "invokeHandler",
-                        MethodType.methodType(Void.TYPE, ThreadContext.class, long[].class, long.class, CallFrame.class, boolean.class, VMExceptionInstance.class, ResumeStatus.Frame.class)),
-                    0, null, null, 0L, null, false, null);
+                MethodHandles.lookup().findStatic(ExceptionHandling.class, "invokeHandler",
+                    MethodType.methodType(Void.TYPE, ThreadContext.class, long[].class, long.class, CallFrame.class, boolean.class, VMExceptionInstance.class, ResumeStatus.Frame.class)),
+                0, null, null, 0L, null, false, null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
