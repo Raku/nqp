@@ -56,3 +56,14 @@ is($uint16_as_num, 100, 'uint16 to num conversion');
 my uint8 $uint8 := 100;
 my num $uint8_as_num := $uint32;
 is($uint8_as_num, 100, 'uint8 to num conversion');
+
+my num $num_30 := 30;
+my int32 $int32_30 := $num_30;
+
+is($int32_30, 30, 'num to int32 conversion');
+
+{
+  my int $int32 := 30;
+  my str $str := $int32;
+  is($str, '30', 'int32 to str conversion');
+}
