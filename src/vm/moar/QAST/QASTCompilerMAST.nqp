@@ -551,6 +551,13 @@ my class MASTCompilerInstance {
                 if $got == $MVM_reg_int64 {
                     push_op($il, 'trunc_i32', $res_reg, $reg);
                 }
+                elsif $got == $MVM_reg_num64 {
+                    my $int64 := self.coercion($res, $MVM_reg_int64);
+                    $il := $int64.instructions;
+                    $reg := $int64.result_reg;
+                    $release_type := $int64.result_kind;
+                    push_op($il, 'trunc_i32', $res_reg, $reg);
+                }
                 else {
                     nqp::die("Unknown coercion case for int32; got: " ~ $got);
                 }
