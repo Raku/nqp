@@ -1,4 +1,5 @@
 package org.perl6.nqp.sixmodel;
+
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.runtime.ExceptionHandling;
 

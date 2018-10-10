@@ -1,4 +1,3 @@
 package org.perl6.nqp.sixmodel;
 
-public abstract class AbstractParametricity {
-}
+public abstract class AbstractParametricity { }
