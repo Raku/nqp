@@ -12,28 +12,29 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class ConcBlockingQueue extends REPR {
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-        STable st = new STable(this, HOW);
-        SixModelObject obj = new TypeObject();
+        final STable st = new STable(this, HOW);
+        final SixModelObject obj = new TypeObject();
+
         obj.st = st;
         st.WHAT = obj;
+
         return st.WHAT;
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        ConcBlockingQueueInstance obj = new ConcBlockingQueueInstance();
+        final ConcBlockingQueueInstance obj = new ConcBlockingQueueInstance();
+
         obj.st = st;
-        obj.queue = new LinkedBlockingQueue<SixModelObject>();
+        obj.queue = new LinkedBlockingQueue<>();
+
         return obj;
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        throw ExceptionHandling.dieInternal(tc,
-            "Cannot deserialize a concurrent blocking queue");
+        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a concurrent blocking queue");
     }
 
-    public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
-        throw ExceptionHandling.dieInternal(tc,
-            "Cannot deserialize a concurrent blocking queue");
+    public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
+        throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a concurrent blocking queue");
     }
 }
