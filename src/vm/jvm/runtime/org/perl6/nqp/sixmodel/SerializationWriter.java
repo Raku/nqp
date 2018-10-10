@@ -622,18 +622,14 @@ public class SerializationWriter {
         }
 
         writeInt(st.VTable == null ? 0 : st.VTable.length);
-        if (st.VTable != null) {
-            for (SixModelObject vTable : st.VTable) {
-                writeRef(vTable);
-            }
+        for (SixModelObject vTable : st.VTable) {
+            writeRef(vTable);
         }
 
         // write type check cache
         writeInt(st.TypeCheckCache == null ? 0 : st.TypeCheckCache.length);
-        if (st.TypeCheckCache != null) {
-            for (SixModelObject typeCheckCache : st.TypeCheckCache) {
-                writeRef(typeCheckCache);
-            }
+        for (SixModelObject typeCheckCache : st.TypeCheckCache) {
+            writeRef(typeCheckCache);
         }
 
         // write mode flags
