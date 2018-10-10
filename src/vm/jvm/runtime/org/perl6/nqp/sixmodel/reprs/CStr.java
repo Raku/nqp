@@ -8,25 +8,27 @@ import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-
 public class CStr extends REPR {
+
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-        STable st = new STable(this, HOW);
+        final STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data needed. */
-        SixModelObject obj = new TypeObject();
+
+        final SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
+
         return st.WHAT;
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        SixModelObject obj = new CStrInstance();
+        final SixModelObject obj = new CStrInstance();
         obj.st = st;
+
         return obj;
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        /* This REPR can't be serialized. */
         ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CStr object.");
 
         return null;
