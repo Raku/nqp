@@ -61,7 +61,6 @@ import org.perl6.nqp.io.IIOCancelable;
 import org.perl6.nqp.io.IIOClosable;
 import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOExitable;
-import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOLineSeparable;
 import org.perl6.nqp.io.IIOLockable;
 import org.perl6.nqp.io.IIOSeekable;
@@ -94,7 +93,6 @@ import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
-import org.perl6.nqp.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.sixmodel.reprs.ConditionVariableInstance;
 import org.perl6.nqp.sixmodel.reprs.ContextRef;
 import org.perl6.nqp.sixmodel.reprs.ContextRefInstance;
@@ -105,8 +103,6 @@ import org.perl6.nqp.sixmodel.reprs.MultiCacheInstance;
 import org.perl6.nqp.sixmodel.reprs.NFA;
 import org.perl6.nqp.sixmodel.reprs.NFAInstance;
 import org.perl6.nqp.sixmodel.reprs.NFAStateInfo;
-import org.perl6.nqp.sixmodel.reprs.NativeCallBody;
-import org.perl6.nqp.sixmodel.reprs.NativeCallInstance;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceAttribute;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceIntLex;
 import org.perl6.nqp.sixmodel.reprs.NativeRefInstanceNumLex;
@@ -143,7 +139,11 @@ import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
  * JVM makes available.
  */
 public final class Ops {
-    /* I/O opcodes */
+
+    // --------------------
+    // IO opcodes
+    // --------------------
+
     public static String print(String v, ThreadContext tc) {
         tc.gc.out.print(v);
         return v;
@@ -374,30 +374,35 @@ public final class Ops {
         }
 
         try {
-            FileTime ft = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
-            return ft.to(TimeUnit.NANOSECONDS) / 1000000000;
+            final FileTime fileTime = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
+            return (double) (fileTime.to(TimeUnit.NANOSECONDS) / 1_000_000_000);
         } catch (Exception e) {
             return -1;
         }
     }
 
     public static SixModelObject open(String path, String mode, ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance) IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new FileHandle(tc, path, mode);
+
         return h;
     }
 
     public static SixModelObject openasync(String path, String mode, ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance) IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new AsyncFileHandle(tc, path, mode);
+
         return h;
     }
 
     public static SixModelObject socket(long listener, ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
         if (listener == 0) {
             h.handle = new SocketHandle(tc);
         } else if (listener > 0) {
@@ -406,50 +411,64 @@ public final class Ops {
             ExceptionHandling.dieInternal(tc,
                 "Socket handle does not support a negative listener value");
         }
+
         return h;
     }
 
     public static SixModelObject connect(SixModelObject obj, String host, long port, ThreadContext tc) {
-        IOHandleInstance h = (IOHandleInstance)obj;
+        final IOHandleInstance h = (IOHandleInstance)obj;
         if (h.handle instanceof SocketHandle) {
             ((SocketHandle)h.handle).connect(tc, host, (int) port);
         } else {
             ExceptionHandling.dieInternal(tc,
                 "This handle does not support connect");
         }
+
         return obj;
     }
 
-    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long backlog, ThreadContext tc) {
-        IOHandleInstance h = (IOHandleInstance)obj;
+    public static SixModelObject bindsock(
+        SixModelObject obj,
+        String host,
+        long port,
+        long backlog,
+        ThreadContext tc
+    ) {
+        final IOHandleInstance h = (IOHandleInstance)obj;
         if (h.handle instanceof IIOBindable) {
             ((IIOBindable)h.handle).bind(tc, host, (int) port, (int)backlog);
         } else {
             ExceptionHandling.dieInternal(tc,
                 "This handle does not support bind");
         }
+
         return obj;
     }
 
     public static SixModelObject accept(SixModelObject obj, ThreadContext tc) {
-        IOHandleInstance listener = (IOHandleInstance)obj;
+        final IOHandleInstance listener = (IOHandleInstance)obj;
+
         if (listener.handle instanceof ServerSocketHandle) {
             SocketHandle handle = ((ServerSocketHandle)listener.handle).accept(tc);
             if (handle != null) {
-                SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-                IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+                final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+                final IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
                 h.handle = handle;
+
                 return h;
             }
         } else {
             ExceptionHandling.dieInternal(tc,
                 "This handle does not support accept");
         }
+
         return null;
     }
 
     public static long getport(SixModelObject obj, ThreadContext tc) {
-        IOHandleInstance h = (IOHandleInstance)obj;
+        final IOHandleInstance h = (IOHandleInstance)obj;
+
         if (h.handle instanceof ServerSocketHandle) {
             return ((ServerSocketHandle)h.handle).listenPort;
         } else {
@@ -460,160 +479,168 @@ public final class Ops {
     }
 
     public static long filereadable(String path, ThreadContext tc) {
-        Path path_o;
-        long res;
         try {
-            path_o = Paths.get(path);
-            res = Files.isReadable(path_o) ? 1 : 0;
+            final Path filePath = Paths.get(path);
+            return Files.isReadable(filePath) ? 1 : 0;
         }
         catch (Exception e) {
             die_s(e.getMessage(), tc);
-            res = -1; /* unreachable */
+            return -1; // should not reach here
         }
-        return res;
     }
 
     public static long filewritable(String path, ThreadContext tc) {
-        Path path_o;
-        long res;
         try {
-            path_o = Paths.get(path);
-            res = Files.isWritable(path_o) ? 1 : 0;
+            final Path filePath = Paths.get(path);
+            return Files.isWritable(filePath) ? 1 : 0;
         }
         catch (Exception e) {
             die_s(e.getMessage(), tc);
-            res = -1; /* unreachable */
+            return -1; // should not reach here
         }
-        return res;
     }
 
     public static long fileexecutable(String path, ThreadContext tc) {
-        Path path_o;
-        long res;
         try {
-            path_o = Paths.get(path);
-            res = Files.isExecutable(path_o) ? 1 : 0;
+            final Path filePath = Paths.get(path);
+            return Files.isExecutable(filePath) ? 1 : 0;
         }
         catch (Exception e) {
             die_s(e.getMessage(), tc);
-            res = -1; /* unreachable */
+            return -1; // should not reach here
         }
-        return res;
     }
 
     public static long fileislink(String path, ThreadContext tc) {
-        Path path_o;
-        long res;
         try {
-            path_o = Paths.get(path);
-            res = Files.isSymbolicLink(path_o) ? 1 : 0;
+            final Path filePath = Paths.get(path);
+            return Files.isSymbolicLink(filePath) ? 1 : 0;
         }
         catch (Exception e) {
             die_s(e.getMessage(), tc);
-            res = -1; /* unreachable */
+            return -1; // should not reach here
         }
-        return res;
     }
 
     public static SixModelObject getstdin(ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new StandardReadHandle(tc, tc.gc.in);
+
         return h;
     }
 
     public static SixModelObject getstdout(ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new StandardWriteHandle(tc, tc.gc.out);
+
         return h;
     }
 
     public static SixModelObject getstderr(ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
+        final SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
+
+        final IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
         h.handle = new StandardWriteHandle(tc, tc.gc.err);
+
         return h;
     }
 
     public static SixModelObject setencoding(SixModelObject obj, String encoding, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance) obj;
 
-            Charset cs;
-            if (encoding.equals("ascii"))
-                cs = Charset.forName("US-ASCII");
-            else if (encoding.equals("iso-8859-1"))
-                cs = Charset.forName("ISO-8859-1");
-            else if (encoding.equals("utf8"))
-                cs = Charset.forName("UTF-8");
-            else if (encoding.equals("utf16"))
-                cs = Charset.forName("UTF-16");
-            else if (encoding.equals("windows-1252"))
-                cs = Charset.forName("windows-1252");
-            else if (encoding.equals("windows-1251"))
-                cs = Charset.forName("windows-1251");
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "Unsupported encoding " + encoding);
-
-            if (h.handle instanceof IIOEncodable)
-                ((IIOEncodable)h.handle).setEncoding(tc, cs);
-            else
+            final IIOEncodable handle;
+            if (h.handle instanceof IIOEncodable) {
+                handle = (IIOEncodable) h.handle;
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support textual I/O");
-        }
-        else {
+            }
+
+            final Charset cs;
+            switch (encoding) {
+                case "ascii":
+                    cs = Charset.forName("US-ASCII");
+                    break;
+                case "iso-8859-1":
+                    cs = Charset.forName("ISO-8859-1");
+                    break;
+                case "utf8":
+                    cs = Charset.forName("UTF-8");
+                    break;
+                case "utf16":
+                    cs = Charset.forName("UTF-16");
+                    break;
+                case "windows-1252":
+                    cs = Charset.forName("windows-1252");
+                    break;
+                case "windows-1251":
+                    cs = Charset.forName("windows-1251");
+                    break;
+                default:
+                    throw ExceptionHandling.dieInternal(tc,
+                        "Unsupported encoding " + encoding);
+            }
+
+            handle.setEncoding(tc, cs);
+
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "setencoding requires an object with the IOHandle REPR");
         }
+
         return obj;
     }
 
     public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
 
-            if (h.handle instanceof IIOLineSeparable)
-                ((IIOLineSeparable)h.handle).setInputLineSeparator(tc, sep);
-            else
+            if (h.handle instanceof IIOLineSeparable) {
+                ((IIOLineSeparable) h.handle).setInputLineSeparator(tc, sep);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support setting input line separator");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "setinputlinesep requires an object with the IOHandle REPR");
         }
+
         return obj;
     }
 
     public static SixModelObject seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOSeekable) {
                 ((IIOSeekable)h.handle).seek(tc, offset, whence);
-            }
-            else
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support seek");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "seekfh requires an object with the IOHandle REPR");
         }
+
         return null;
     }
 
     public static long tellfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSeekable)
-                return ((IIOSeekable)h.handle).tell(tc);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSeekable) {
+                return ((IIOSeekable) h.handle).tell(tc);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support tell");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "tellfh requires an object with the IOHandle REPR");
         }
@@ -621,16 +648,15 @@ public final class Ops {
 
     public static SixModelObject lockfh(SixModelObject obj, long flag, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOLockable) {
                 ((IIOLockable)h.handle).lock(tc, flag);
                 return obj;
-            }
-            else
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support locking");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "lockfh requires an object with the IOHandle REPR");
         }
@@ -638,38 +664,42 @@ public final class Ops {
 
     public static SixModelObject unlockfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOLockable) {
                 ((IIOLockable)h.handle).unlock(tc);
                 return obj;
-            }
-            else
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support locking");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "unlockfh requires an object with the IOHandle REPR");
         }
     }
 
-    public static SixModelObject readfh(SixModelObject io, SixModelObject res, long bytes, ThreadContext tc) {
+    public static SixModelObject readfh(
+        SixModelObject io,
+        SixModelObject res,
+        long bytes,
+        ThreadContext tc
+    ) {
         if (io instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)io;
+            final IOHandleInstance h = (IOHandleInstance)io;
             if (h.handle instanceof IIOSyncReadable) {
                 if (res instanceof VMArrayInstance_i8) {
-                    VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
+                    final VMArrayInstance_i8 arr = (VMArrayInstance_i8)res;
 
-                    byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);
+                    final byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);
                     arr.elems = array.length;
                     arr.start = 0;
                     arr.slots = array;
 
                     return res;
                 } else if (res instanceof VMArrayInstance_u8) {
-                    VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
+                    final VMArrayInstance_u8 arr = (VMArrayInstance_u8)res;
 
-                    byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);
+                    final byte[] array = ((IIOSyncReadable)h.handle).read(tc, (int)bytes);
                     arr.elems = array.length;
                     arr.start = 0;
                     arr.slots = array;
@@ -690,71 +720,68 @@ public final class Ops {
     }
 
     public static long writefh(SixModelObject obj, SixModelObject buf, ThreadContext tc) {
-        ByteBuffer bb = Buffers.unstashBytes(buf, tc);
-        long written;
+        final ByteBuffer byteBuffer = Buffers.unstashBytes(buf, tc);
+
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            byte[] bytesToWrite = new byte[bb.limit()];
-            bb.get(bytesToWrite);
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).write(tc, bytesToWrite);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+
+            final byte[] bytesToWrite = new byte[byteBuffer.limit()];
+            byteBuffer.get(bytesToWrite);
+            if (h.handle instanceof IIOSyncWritable) {
+                return ((IIOSyncWritable) h.handle).write(tc, bytesToWrite);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support write");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "writefh requires an object with the IOHandle REPR");
         }
-        return written;
     }
 
     public static long printfh(SixModelObject obj, String data, ThreadContext tc) {
-        long written;
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).print(tc, data);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable) {
+                return ((IIOSyncWritable) h.handle).print(tc, data);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support print");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "printfh requires an object with the IOHandle REPR");
         }
-        return written;
     }
 
     public static long sayfh(SixModelObject obj, String data, ThreadContext tc) {
-        long written;
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).say(tc, data);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable) {
+                return ((IIOSyncWritable) h.handle).say(tc, data);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support say");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "sayfh requires an object with the IOHandle REPR");
         }
-        return written;
     }
 
     public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                ((IIOSyncWritable)h.handle).flush(tc);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncWritable) {
+                ((IIOSyncWritable) h.handle).flush(tc);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support flush");
-        }
-        else {
+            }
+        } else {
             die_s("flushfh requires an object with the IOHandle REPR", tc);
         }
+
         return obj;
     }
 
@@ -770,14 +797,15 @@ public final class Ops {
 
     public static String readcharsfh(SixModelObject obj, long chars, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).readchars(tc, (int)chars);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+
+            if (h.handle instanceof IIOSyncReadable) {
+                return ((IIOSyncReadable) h.handle).readchars(tc, (int) chars);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support readchars");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "readcharsfh requires an object with the IOHandle REPR");
         }
@@ -785,39 +813,41 @@ public final class Ops {
 
     public static String readlinefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).readline(tc);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncReadable) {
+                return ((IIOSyncReadable) h.handle).readline(tc);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support readline");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "readlinefh requires an object with the IOHandle REPR");
         }
     }
 
     public static String readlinechompfh(SixModelObject obj, ThreadContext tc) {
-        String line = readlinefh(obj, tc);
-        if (line.endsWith("\r\n"))
+        final String line = readlinefh(obj, tc);
+
+        if (line.endsWith("\r\n")) {
             return line.substring(0, line.length() - 2);
-        else if (line.endsWith("\n"))
+        } else if (line.endsWith("\n")) {
             return line.substring(0, line.length() - 1);
-        else
+        } else {
             return line;
+        }
     }
 
     public static String readallfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).slurp(tc);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncReadable) {
+                return ((IIOSyncReadable) h.handle).slurp(tc);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support slurp");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "readallfh requires an object with the IOHandle REPR");
         }
@@ -825,139 +855,165 @@ public final class Ops {
 
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).eof(tc) ? 1 : 0;
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOSyncReadable) {
+                return ((IIOSyncReadable) h.handle).eof(tc) ? 1 : 0;
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support eof");
-        }
-        else {
+            }
+        } else {
             throw ExceptionHandling.dieInternal(tc,
                 "eoffh requires an object with the IOHandle REPR");
         }
     }
 
-    public static SixModelObject slurpasync(SixModelObject obj, SixModelObject resultType,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
+    public static SixModelObject slurpasync(
+        SixModelObject obj,
+        SixModelObject resultType,
+        SixModelObject done,
+        SixModelObject error,
+        ThreadContext tc
+    ) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).slurp(tc, resultType, done, error);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncReadable) {
+                ((IIOAsyncReadable) h.handle).slurp(tc, resultType, done, error);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support async slurp");
-        }
-        else {
+            }
+        } else {
             die_s("slurpasync requires an object with the IOHandle REPR", tc);
         }
         return obj;
     }
 
-    public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
+    public static SixModelObject spurtasync(
+        SixModelObject obj,
+        SixModelObject resultType,
+        SixModelObject data,
+        SixModelObject done,
+        SixModelObject error,
+        ThreadContext tc
+    ) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncWritable)
-                ((IIOAsyncWritable)h.handle).spurt(tc, resultType, data, done, error);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncWritable) {
+                ((IIOAsyncWritable) h.handle).spurt(tc, resultType, data, done, error);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support async spurt");
-        }
-        else {
+            }
+        } else {
             die_s("spurtasync requires an object with the IOHandle REPR", tc);
         }
         return obj;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
-            long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
-            ThreadContext tc) {
+    public static SixModelObject linesasync(
+        SixModelObject obj,
+        SixModelObject resultType,
+        long chomp,
+        SixModelObject queue,
+        SixModelObject done,
+        SixModelObject error,
+        ThreadContext tc
+    ) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).lines(tc, resultType, chomp != 0,
-                    (LinkedBlockingQueue)((JavaObjectWrapper)queue).theObject,
-                    done, error);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOAsyncReadable) {
+                ((IIOAsyncReadable) h.handle).lines(
+                    tc,
+                    resultType,
+                    chomp != 0,
+                    (LinkedBlockingQueue) ((JavaObjectWrapper) queue).theObject,
+                    done,
+                    error);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support async lines");
-        }
-        else {
+            }
+        } else {
             die_s("linesasync requires an object with the IOHandle REPR", tc);
         }
+
         return obj;
     }
 
     public static SixModelObject closefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOClosable)
-                ((IIOClosable)h.handle).close(tc);
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOClosable) {
+                ((IIOClosable) h.handle).close(tc);
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support close");
-        }
-        else {
+            }
+        } else {
             die_s("closefh requires an object with the IOHandle REPR", tc);
         }
+
         return obj;
     }
 
     public static long closefhi(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
             if (h.handle instanceof IIOClosable
-             && h.handle instanceof IIOExitable) {
+                && h.handle instanceof IIOExitable) {
                 ((IIOClosable)h.handle).close(tc);
                 return (long)((IIOExitable)h.handle).exitValue(tc) << 8;
-            }
-            else
+            } else {
                 throw ExceptionHandling.dieInternal(tc,
                     "This handle does not support close or exitValue");
-        }
-        else {
+            }
+        } else {
             die_s("closefhi requires an object with the IOHandle REPR", tc);
         }
+
         return -1;
     }
 
     public static SixModelObject setbuffersizefh(SixModelObject obj, long size, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
+            final IOHandleInstance h = (IOHandleInstance)obj;
 
             // TODO: what to do with instances of other classes like BOOTIO?
-            if (h.handle instanceof IIOSyncWritable)
-                ((IIOSyncWritable)h.handle).setBufferSize(tc, size);
-        }
-        else {
+            if (h.handle instanceof IIOSyncWritable) {
+                ((IIOSyncWritable) h.handle).setBufferSize(tc, size);
+            }
+        } else {
             die_s("setbuffersizefh requires an object with the IOHandle REPR", tc);
         }
+
         return obj;
     }
 
     public static long isttyfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOPossiblyTTY)
-                return ((IIOPossiblyTTY)h.handle).isTTY(tc) ? 1 : 0;
-            else
+            final IOHandleInstance h = (IOHandleInstance)obj;
+            if (h.handle instanceof IIOPossiblyTTY) {
+                return ((IIOPossiblyTTY) h.handle).isTTY(tc) ? 1 : 0;
+            } else {
                 return 0;
-        }
-        else {
+            }
+        } else {
             die_s("isttyfh requires an object with the IOHandle REPR", tc);
         }
+
         return -1;
     }
 
     public static long filenofh(SixModelObject obj, ThreadContext tc) {
-        /* XXX Implement this */
+        // TODO NYI
         return -1;
     }
 
     public static Set<PosixFilePermission> modeToPosixFilePermission(long mode) {
-        Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+        final Set<PosixFilePermission> perms = EnumSet.noneOf(PosixFilePermission.class);
+
         if ((mode & 0001) != 0) perms.add(PosixFilePermission.OTHERS_EXECUTE);
         if ((mode & 0002) != 0) perms.add(PosixFilePermission.OTHERS_WRITE);
         if ((mode & 0004) != 0) perms.add(PosixFilePermission.OTHERS_READ);
@@ -967,6 +1023,7 @@ public final class Ops {
         if ((mode & 0100) != 0) perms.add(PosixFilePermission.OWNER_EXECUTE);
         if ((mode & 0200) != 0) perms.add(PosixFilePermission.OWNER_WRITE);
         if ((mode & 0400) != 0) perms.add(PosixFilePermission.OWNER_READ);
+
         return perms;
     }
 
