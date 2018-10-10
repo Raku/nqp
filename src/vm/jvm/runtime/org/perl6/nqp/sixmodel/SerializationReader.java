@@ -808,7 +808,7 @@ public class SerializationReader {
         final SerializationContext sc = locateSC(orig.getInt());
         final int idx = orig.getInt();
 
-        if (idx < 0 || idx >= sc.coderefCount()) {
+        if (idx < 0 || idx >= sc.codeRefCount()) {
             throw new RuntimeException("Invalid SC code index " + idx);
         }
 
