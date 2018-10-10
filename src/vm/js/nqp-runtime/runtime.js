@@ -275,9 +275,6 @@ exports.toStr = /*async*/ function(arg_, ctx) {
 
 
 exports.toNum = /*async*/ function(arg_, ctx) {
-  if (!arg_.$$decont) {
-    console.log('there');
-  }
   const arg = /*await*/ arg_.$$decont(ctx);
   if (arg === Null) {
     return 0;
