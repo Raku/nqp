@@ -106,6 +106,20 @@ helpers.lexRef_i = function(currentHLL, get, set) {
   return ref;
 };
 
+helpers.lexRef_i64 = function(currentHLL, get, set) {
+  const refType = currentHLL.get('int64_lex_ref');
+  if (refType === undefined) {
+    throw 'No int64 lexical reference type registered for current HLL';
+  }
+  const STable = refType._STable;
+  const ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+};
+
+helpers.lexRef_u64 = helpers.lexRef_i64;
+
 helpers.lexRef_s = function(currentHLL, get, set) {
   const refType = currentHLL.get('str_lex_ref');
   if (refType === undefined) {

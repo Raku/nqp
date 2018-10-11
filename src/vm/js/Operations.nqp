@@ -147,6 +147,8 @@ class QAST::OperationsJS {
 
     method OBJ() { $T_OBJ }
     method INT() { $T_INT }
+    method INT64() { $T_INT64 }
+    method UINT64() { $T_UINT64 }
     method STR() { $T_STR }
     method NUM() { $T_NUM }
     method BOOL() { $T_BOOL }
@@ -182,6 +184,8 @@ class QAST::OperationsJS {
     add_assign_op('assign_n', $T_NUM);
     add_assign_op('assign_s', $T_STR);
 
+    add_assign_op('assign_i64', $T_INT64);
+    add_assign_op('assign_u64', $T_UINT64);
 
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx, :await);
 
@@ -255,6 +259,11 @@ class QAST::OperationsJS {
     add_simple_op('pow_i', $T_INT, [$T_INT, $T_INT], sub ($a, $b) {"(Math.pow($a,$b)|0)"});
     add_simple_op('gcd_i', $T_INT, [$T_INT, $T_INT]);
     add_simple_op('lcm_i', $T_INT, [$T_INT, $T_INT]);
+
+
+    # 64 bit integer arithmetic
+    add_simple_op('add_i64', $T_INT64, [$T_INT64, $T_INT64], sub ($a, $b) {"BigInt.asIntN(64, $a + $b)"});
+    add_simple_op('sub_i64', $T_INT64, [$T_INT64, $T_INT64], sub ($a, $b) {"BigInt.asIntN(64, $a - $b)"});
 
     add_op('chain', sub ($comp, $node, :$want) {
         my str $ret := $*BLOCK.add_tmp;

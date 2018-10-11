@@ -677,7 +677,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
 
             if $desired == $T_STR {
-                if $got_int || $got == $T_UINT32 {
+                if $got_int || $got == $T_UINT32 || $got == $T_INT64 || $got == $T_UINT64 {
                     return Chunk.new($T_STR, $chunk.expr ~ '.toString()', $chunk);
                 }
                 elsif $got == $T_NUM {
@@ -714,9 +714,11 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     %convert{$T_INT} := 'intToObj';
                     %convert{$T_INT8} := 'intToObj';
                     %convert{$T_INT16} := 'intToObj';
+                    %convert{$T_INT64} := 'int64ToObj';
                     %convert{$T_UINT8} := 'intToObj';
                     %convert{$T_UINT16} := 'intToObj';
                     %convert{$T_UINT32} := 'intToObj';
+                    %convert{$T_UINT64} := 'int64ToObj';
                     %convert{$T_NUM} := 'numToObj';
                     %convert{$T_STR} := 'strToObj';
                     %convert{$T_RETVAL} := 'retval';
@@ -732,6 +734,18 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     return Chunk.new($T_BOOL, "({$chunk.expr} !== 0)", $chunk);
                 } elsif $got == $T_STR {
                     return Chunk.new($T_BOOL, "({$chunk.expr} && {$chunk.expr} !== nqp.null_s)", $chunk);
+                }
+            }
+
+            if $desired == $T_UINT64 {
+                if $got == $T_INT64 {
+                    return Chunk.new($T_UINT64, "BigInt.asUintN(64, {$chunk.expr})", $chunk);
+                }
+            }
+
+            if $desired == $T_INT64 {
+                if $got == $T_UINT64 {
+                    return Chunk.new($T_INT64, "BigInt.asIntN(64, {$chunk.expr})", $chunk);
                 }
             }
 
@@ -1399,7 +1413,12 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
 
     multi method as_js(QAST::IVal $node, :$want) {
-        Chunk.new($T_INT,'('~$node.value()~')', :$node);
+        if $want == $T_INT64 || $want == $T_UINT64 {
+            Chunk.new($want,'('~$node.value()~'n)', :$node);
+        } else {
+            # TODO think about 64bit values
+            Chunk.new($T_INT,'('~$node.value()~')', :$node);
+        }
     }
 
     multi method as_js(QAST::NVal $node, :$want) {
@@ -1614,7 +1633,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
 
-    my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
+    my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR, $T_INT64, $T_UINT64];
     method type_from_typeobj($typeobj) {
         my int $type := nqp::objprimspec($typeobj);
         if $type == 1 {
@@ -1632,12 +1651,15 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             else {
                 $T_INT;
             }
-        } else {
+        }
+        else {
           @types[$type];
         }
     }
 
     my @suffix := ['', '_i', '_n', '_s'];
+    @suffix[$T_INT64] := '_i64';
+    @suffix[$T_UINT64] := '_u64';
 
     method suffix_from_type($type) {
         self.is_fancy_int($type) ?? '_i' !! @suffix[$type];
@@ -1747,7 +1769,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void($check, "if (!{$check.expr}) return nqp.paramcheckfailed(HLL, $*CTX, Array.prototype.slice.call(arguments));\n");
     }
 
-    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s', $T_INT16, '0', $T_INT8, '0', $T_UINT8, '0', $T_UINT16, '0', $T_UINT32, '0');
+    my %default_value := nqp::hash($T_OBJ, 'nqp.Null', $T_INT, '0', $T_NUM, '0', $T_STR, 'nqp.null_s', $T_INT16, '0', $T_INT8, '0', $T_UINT8, '0', $T_UINT16, '0', $T_UINT32, '0', $T_UINT64, '0n',  $T_INT64, '0n');
 
     method declare_var(QAST::Var $node) {
         my int $type := self.type_from_typeobj($node.returns);

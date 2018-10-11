@@ -248,6 +248,54 @@ class NativeRef {
           this.set(value.$$getStr());
         }
       });
+    } else if (primitiveType == 4) { // int64
+      this.STable.addInternalMethods(class {
+        $$iscont_s() {
+          return 1;
+        }
+
+        $$iscont() {
+          return 1;
+        }
+
+        $$isrwcont() {
+          return 1;
+        }
+
+        $$assign_i64(ctx, value) {
+          this.set(value);
+        }
+
+        $$assign_u64(ctx, value) {
+          this.set(value);
+        }
+
+        $$getStr() {
+          return this.get().toString();
+        }
+
+        $$getInt64() {
+          return this.get();
+        }
+
+        $$getUint64() {
+          return BigInt.asUintN(64, this.get());
+        }
+
+        $$decont(ctx) {
+          let hll = STable.hllOwner;
+          if (hll === undefined) {
+            hll = ctx.codeRef().staticCode.hll;
+          }
+
+          const type = hll.get('int_box');
+
+          const repr = type._STable.REPR;
+          const obj = repr.allocate(type._STable);
+          obj.$$setInt64(this.get());
+          return obj;
+        }
+      });
     } else {
       throw 'incorrect type of NativeRef: ' + primitiveType;
     }

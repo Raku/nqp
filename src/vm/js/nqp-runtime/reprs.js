@@ -131,6 +131,9 @@ function slotToAttr(slot) {
 }
 
 class REPR {
+  boxedPrimitive() {
+    return 0;
+  }
 };
 REPR.prototype.allocate = basicAllocate;
 REPR.prototype.typeObjectFor = basicTypeObjectFor;
@@ -833,10 +836,13 @@ class P6int extends REPR {
     this.bits = cursor.varint();
     this.isUnsigned = cursor.varint();
   }
+
+  boxedPrimitive() {
+    return this.bits == 64 ? (this.isUnsigned ? 5 : 4) : 1;
+  }
 };
 
 P6int.prototype.flattenedDefault = '0';
-P6int.prototype.boxedPrimitive = 1;
 P6int.prototype.flattenSTable = true;
 
 
@@ -902,9 +908,12 @@ class P6num extends REPR {
       return obj;
     });
   }
+
+  boxedPrimitive() {
+    return 2;
+  }
 };
 
-P6num.prototype.boxedPrimitive = 2;
 P6num.prototype.flattenSTable = true;
 P6num.prototype.flattenedDefault = '0';
 
@@ -968,9 +977,12 @@ class P6str extends REPR {
       return obj;
     });
   }
+
+  boxedPrimitive() {
+    return 3;
+  }
 };
 
-P6str.prototype.boxedPrimitive = 3;
 P6str.prototype.flattenSTable = true;
 P6str.prototype.flattenedDefault = 'nullStr';
 
@@ -1091,7 +1103,7 @@ class NFA extends REPR {
 reprs.NFA = NFA;
 
 function primType(type) {
-  return type !== Null ? (type._STable.REPR.boxedPrimitive || 0): 0;
+  return type !== Null ? (type._STable.REPR.boxedPrimitive()): 0;
 }
 
 // TODO rework VMArray to be more correct
@@ -1601,10 +1613,27 @@ function getBI(obj) {
 
 function getIntFromBI(n) {
   if (n < -(2n**63n) || 2n**63n <= n) {
-    // TODO - put exact number of bits into exception
     throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into native integer`);
   } else {
     return Number(n) | 0;
+  }
+}
+
+function getInt64FromBI(n) {
+  if (n < -(2n**63n) || 2n**63n <= n) {
+    throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into native 64bit integer`);
+  } else {
+    return n;
+  }
+}
+
+function getUint64FromBI(n) {
+  if (n < 0n) {
+    throw new NQPException(`Cannot unbox negative bigint into unsigned native 64bit integer`);
+  } else if (2n**64n <= n) {
+    throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into unsigned native 64bit integer`);
+  } else {
+    return n;
   }
 }
 
@@ -1615,8 +1644,20 @@ class P6bigint extends REPR {
         this.value = BigInt(value);
       }
 
+      $$setInt64(value) {
+        this.value = value;
+      }
+
       $$getInt() {
         return getIntFromBI(this.value);
+      }
+
+      $$getInt64() {
+        return getInt64FromBI(this.value);
+      }
+
+      $$getUint64() {
+        return getUint64FromBI(this.value);
       }
 
       $$setBignum(value) {
@@ -1691,12 +1732,24 @@ class P6bigint extends REPR {
         this[name] = BigInt(value);
       }
 
+      $$setInt64(value) {
+        this[name] = value;
+      }
+
       $$getInt() {
         return getIntFromBI(this[name]);
       }
 
       $$decont_i(ctx) {
         return getIntFromBI(this[name]);
+      }
+
+      $$getInt64() {
+        return getInt64FromBI(this[name]);
+      }
+
+      $$getUint64() {
+        return getUint64FromBI(this[name]);
       }
 
       $$getBignum() {
@@ -2281,7 +2334,7 @@ class NativeRef extends REPR {
   compose(STable, reprInfoHash) {
     const nativeref = reprInfoHash.content.get('nativeref').content;
     const type = nativeref.get('type');
-    this.primitiveType = type._STable.REPR.boxedPrimitive;
+    this.primitiveType = type._STable.REPR.boxedPrimitive();
     this.refkind = nativeref.get('refkind');
   }
 

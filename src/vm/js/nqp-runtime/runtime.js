@@ -60,6 +60,7 @@ exports.arg = core.arg;
 exports.intToObj = core.intToObj;
 exports.numToObj = core.numToObj;
 exports.strToObj = core.strToObj;
+exports.int64ToObj = core.int64ToObj;
 
 exports.EvalResult = core.EvalResult;
 
@@ -595,6 +596,8 @@ const chunkNamesToTypes = {
   T_UINT16: 9,
   T_UINT8: 10,
   T_UINT32: 11,
+  T_INT64: 12,
+  T_UINT64: 13,
 
   T_VOID: -1,
   T_NONVAL: -2,

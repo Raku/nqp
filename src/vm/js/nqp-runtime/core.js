@@ -206,6 +206,18 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
   }
 };
 
+exports.int64ToObj = function(currentHLL, i) {
+  const type = currentHLL.get('int_box');
+  if (!type) {
+    return new NQPInt(i);
+  } else {
+    const repr = type._STable.REPR;
+    const obj = repr.allocate(type._STable);
+    obj.$$setInt64(i);
+    return obj;
+  }
+};
+
 const numToObj = exports.numToObj = function(currentHLL, n) {
   const type = currentHLL.get('num_box');
   if (!type) {
@@ -1159,7 +1171,7 @@ op.objprimspec = function(obj) {
     } else if (obj instanceof NQPStr) {
       return 3;
     } else {
-      return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive : 0);
+      return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive() : 0);
     }
   } else {
     throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);

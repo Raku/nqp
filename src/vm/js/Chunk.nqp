@@ -15,6 +15,9 @@ my $T_UINT16 := 9; # We use a javascript number but always treat it as a 16bit i
 my $T_UINT8 := 10; # We use a javascript number but always treat it as a 8bit integer
 my $T_UINT32 := 11; # We use a javascript number but always treat it as a unsigned 32bit integer
 
+my $T_INT64 := 12; # We use a BigInt but treat it as a signed 64bit integer
+my $T_UINT64 := 13; # We use a BigInt but treat it as a unsigned 64bit integer
+
 my $T_VOID := -1; # Value of this type shouldn't exist, we use a "" as the expr
 my $T_NONVAL := -2; # something that is not a nqp value
 
