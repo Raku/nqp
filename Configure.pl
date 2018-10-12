@@ -212,7 +212,7 @@ MAIN: {
         }
 
         my $node_version = `node --version`;
-my ($major, $minor, $path) = $node_version =~ /v(\d+)\.(\d+)\.(\d+)/;
+        my ($major, $minor, $path) = $node_version =~ /v(\d+)\.(\d+)\.(\d+)/;
         unless ($major > 10 || $major == 10 && $minor >= 10) {
             chomp($node_version);
             sorry($options{'ignore-errors'}, "Need at least node.js v10.10.0 (got $node_version)");
