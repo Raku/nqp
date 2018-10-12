@@ -270,6 +270,10 @@ class NativeRef {
           this.set(value);
         }
 
+        $$assign(ctx, value) {
+          this.set(value.$$getInt64());
+        }
+
         $$getStr() {
           return this.get().toString();
         }
