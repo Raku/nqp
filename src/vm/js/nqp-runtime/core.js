@@ -661,7 +661,7 @@ function toJS(obj) {
 
 const nqp = require('./runtime.js');
 
-const Script = process.browser ? null : require('vm').Script;
+const vm = process.browser ? null : require('vm');
 
 const sourceMaps = {};
 const evaledP6Sources = {};
@@ -789,6 +789,11 @@ exports.buildSourceMap = new BuildSourceMap();
 
 
 class JavaScriptCompiler extends NQPObject {
+  $$fixupRun(code) {
+    const fixedUp = code.replace(/\/\*\s*return\s\*\/\s*nqp\.run/, 'return nqp.run');
+    return fixedUp;
+  }
+
   eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       return fromJS(eval(nqp.arg_s(ctx, code)));
@@ -824,7 +829,7 @@ class JavaScriptCompiler extends NQPObject {
       evaledP6Filenames[fakeFilename] = nqp.toStr(_NAMED.file, ctx);
     }
 
-    const script = new Script(preamble + codeStr, {filename: fakeFilename});
+    const compiled = vm.compileFunction(preamble + this.$$fixupRun(codeStr), [], {filename: fakeFilename});
 
     global.nqpModule = module;
 
@@ -835,19 +840,18 @@ class JavaScriptCompiler extends NQPObject {
       return require(path);
     };
 
-
-    const ret = fromJS(script.runInThisContext());
+    const ret = fromJS(compiled());
     global.nqpRequire = oldNqpRequire;
 
     return ret;
   }
 
   compile(ctx, _NAMED, self, code) {
-    const script = new Script(code);
+    const compiled = vm.compileFunction(this.$$fixupRun(code));
 
     const codeRef = new CodeRef();
     codeRef.$$call = function(ctx, _NAMED) {
-      return fromJS(script.runInThisContext());
+      return fromJS(compiled());
     };
     return codeRef;
   }
@@ -1613,7 +1617,7 @@ op.ctxouterskipthunks = function(ctx) {
   let outer = ctx.$$skipHandlers().$$outer;
 
   // FIXME - ctxs that don't have a codeRef
-  while (outer && outer.codeRef().staticCode.isThunk) {
+  while (outer && (outer.codeRef() && outer.codeRef().staticCode.isThunk)) {
     outer = outer.$$outer;
     if (outer) outer = outer.$$skipHandlers();
   }
