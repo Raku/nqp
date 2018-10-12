@@ -177,6 +177,7 @@ class FileHandle extends IOHandle {
   constructor(fd) {
     super();
     this.fd = fd;
+    this.eof = false;
   }
 
   $$closefh() {
@@ -198,11 +199,7 @@ class FileHandle extends IOHandle {
   }
 
   $$eoffh() {
-    // I haven't found a way to implement this directly in node.js
-    const current = fs.seekSync(this.fd, 0, 1);
-    const end = fs.seekSync(this.fd, 0, 2);
-    fs.seekSync(this.fd, current, 0);
-    return current == end ? 1 : 0;
+    return this.eof ? 1 : 0;
   }
 
   $$tellfh() {
@@ -233,6 +230,9 @@ class FileHandle extends IOHandle {
     const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
     const buffer = Buffer.allocUnsafe(bytes);
     const read = fs.readSync(this.fd, buffer, 0, bytes, null);
+    if (read === 0) {
+      this.eof = true;
+    }
     buf.array.length = read;
     for (let i = 0; i < read; i++) {
       if (isUnsigned) {
@@ -406,6 +406,11 @@ op.getstderr = function() {
 };
 
 class Stdout extends StdHandle {
+  constructor() {
+    super();
+    this.tellCount = 0;
+  }
+
   $$isttyfh() {
     return (process.stdout.isTTY ? 1 : 0);
   }
@@ -419,7 +424,13 @@ class Stdout extends StdHandle {
 
   $$writefh(buf) {
     const buffer = core.toRawBuffer(buf);
+    this.tellCount += buffer.length;
     process.stdout.write(buffer);
+  }
+
+  /* HACK - needed for the REPL to run */
+  $$tellfh() {
+    return this.tellCount;
   }
 };
 
