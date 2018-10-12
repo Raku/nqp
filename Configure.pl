@@ -211,6 +211,13 @@ MAIN: {
             sorry($options{'ignore-errors'}, "You don't have node.js. Please install node.js.");
         }
 
+        my $node_version = `node --version`;
+my ($major, $minor, $path) = $node_version =~ /v(\d+)\.(\d+)\.(\d+)/;
+        unless ($major > 10 || $major == 10 && $minor >= 10) {
+            chomp($node_version);
+            sorry($options{'ignore-errors'}, "Need at least node.js v10.10.0 (got $node_version)");
+        }
+
         fill_template_file(
             'gen/js/Makefile-JS.in',
             $MAKEFILE,
