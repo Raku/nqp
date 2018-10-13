@@ -1852,8 +1852,9 @@ class QAST::OperationsJS {
     add_simple_op('condsignalall', $T_OBJ, [$T_OBJ], :side_effects);
     add_simple_op('condsignalone', $T_OBJ, [$T_OBJ], :side_effects);
 
-    add_simple_op('asyncconnect', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_OBJ], :side_effects);
-    add_simple_op('asynclisten', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('asyncsocket', $T_OBJ, [$T_OBJ, $T_OBJ, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('asyncconnect', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_OBJ], :side_effects);
+    add_simple_op('asynclisten', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_STR, $T_INT, $T_INT, $T_OBJ], :side_effects);
     add_simple_op('asyncwritebytes', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('asyncreadbyte', $T_OBJ, [$T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('spawnprocasync', $T_OBJ, [$T_OBJ, $T_OBJ, $T_STR, $T_OBJ, $T_OBJ], :ctx, :side_effects, :await);
