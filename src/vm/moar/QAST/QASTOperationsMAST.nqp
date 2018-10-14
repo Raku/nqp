@@ -3069,6 +3069,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
 QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
+QAST::MASTOperations.add_core_moarop_mapping('serializetobuf', 'serializetobuf');
 QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
 QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
 
