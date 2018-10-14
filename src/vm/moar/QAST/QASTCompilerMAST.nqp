@@ -932,20 +932,16 @@ my class MASTCompilerInstance {
     # This method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
         my $sh := nqp::list_s();
-        my str $serialized := nqp::serialize($sc, $sh);
+        my $serialized := nqp::serializetobuf($sc, $sh, $buf);
         [$serialized, $sh];
-    }
-
-    method decode_serialized_data($serialized) {
-        base64_decode($serialized)
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
         my $sc_tuple := self.serialize_sc($sc);
-        my str $serialized := $sc_tuple[0];
+        my $serialized := $sc_tuple[0];
         my $sh := $sc_tuple[1];
 
-        $!mast_compunit.serialized(self.decode_serialized_data($serialized));
+        $!mast_compunit.serialized($serialized);
         $!mast_compunit.add_strings($sh);
 
         # String heap QAST.
