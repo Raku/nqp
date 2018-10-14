@@ -438,7 +438,8 @@ my class MASTCompilerInstance {
     method mast_frames() { %!mast_frames }
     method sc() { $!sc }
 
-    method do_to_mast($qast, %mast_frames) {
+    method to_mast($qast, %mast_frames = nqp::hash()) {
+        # Set up compilation state.
         $!hll := '';
         my $string-heap := MoarVM::StringHeap.new();
         my $callsites := MoarVM::Callsites.new(:$string-heap);
@@ -452,13 +453,6 @@ my class MASTCompilerInstance {
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
-    }
-    method to_mast($qast, %mast_frames = nqp::hash()) {
-        # Set up compilation state.
-        my $profile := nqp::existskey(nqp::getenvhash(), 'PROFILEMBC') && nqp::istype($qast, QAST::CompUnit) && $qast.compilation_mode && !$qast.is_nested;
-        nqp::mvmstartprofile(nqp::hash('kind', 'instrumented')) if $profile;
-        self.do_to_mast($qast, %mast_frames);
-        HLL::Backend::MoarVM.dump_instrumented_profile_data(nqp::mvmendprofile, nqp::null) if $profile;
         #CATCH {
         #    my $err    := $!;
         #    my $source := self.source_for_node($!last_op);
