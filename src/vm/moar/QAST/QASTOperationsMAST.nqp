@@ -1471,6 +1471,11 @@ sub arrange_args(@in) {
     @posit
 }
 
+my @kind_to_opcode := nqp::list;
+@kind_to_opcode[$MVM_reg_obj]   := %MAST::Ops::codes<arg_o>,
+@kind_to_opcode[$MVM_reg_str]   := %MAST::Ops::codes<arg_s>,
+@kind_to_opcode[$MVM_reg_int64] := %MAST::Ops::codes<arg_i>,
+@kind_to_opcode[$MVM_reg_num64] := %MAST::Ops::codes<arg_n>,
 my $call_gen := sub ($qastcomp, $op) {
     # Work out what callee is.
     my $callee;
@@ -1503,17 +1508,58 @@ my $call_gen := sub ($qastcomp, $op) {
     nqp::die("Callee code did not result in a MAST::Local")
         unless $callee.result_reg && $callee.result_reg ~~ MAST::Local;
 
-    # main instruction list
-    # the result MAST::Locals of the arg expressions
-    my @arg_regs := nqp::list();
-    # the result kind codes of the arg expressions
-    my @arg_kinds := nqp::list();
-    # the args' flags in the protocol the MAST compiler expects
-    my @arg_flags := nqp::list();
+    my $frame := $*MAST_FRAME;
+    my $bytecode := $frame.bytecode;
+
+    # The arg's results
+    my @arg_mast := nqp::list();
 
     # Process arguments.
-    for @args {
-        handle_arg($_, $qastcomp, @arg_regs, @arg_flags, @arg_kinds);
+    for @args -> $arg {
+        my $arg_mast := $qastcomp.as_mast($arg);
+        my int $arg_mast_kind := $arg_mast.result_kind;
+        if $arg_mast_kind == $MVM_reg_num32 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
+        }
+        elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
+                $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
+                $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+                $arg_mast_kind == $MVM_reg_uint8 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+        }
+        nqp::push(@arg_mast, $arg_mast);
+    }
+
+    my $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+
+    $bytecode.write_uint16(%MAST::Ops::codes<prepargs>);
+    $bytecode.write_uint16($callsite-id);
+
+    my $i := 0;
+    my $arg_out_pos := 0;
+    for @args -> $arg {
+        if nqp::can($arg, 'named') && !$arg.flat && $arg.named -> $name {
+            $bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
+            $bytecode.write_uint16($arg_out_pos);
+            $bytecode.write_uint32($frame.add-string($name));
+            $arg_out_pos++;
+        }
+
+        my $arg_mast := @arg_mast[$i++];
+        if $op.op eq 'speshresolve' {
+            if nqp::can($arg, 'flat') && $arg.flat {
+                nqp::die("Illegal flat arg to speshresolve");
+            }
+            if $arg_mast.result_kind != $MVM_reg_obj {
+                nqp::die("Illegal non-object arg to speshresolve");
+            }
+        }
+        my $kind := $arg_mast.result_kind;
+        my $arg_opcode := @kind_to_opcode[$kind];
+        nqp::die("Unhandled arg type $kind") unless $arg_opcode;
+        $bytecode.write_uint16($arg_opcode);
+        $bytecode.write_uint16($arg_out_pos++);
+        $bytecode.write_uint16($arg_mast.result_reg.index);
     }
 
     # Release the callee's result register.
@@ -1521,11 +1567,9 @@ my $call_gen := sub ($qastcomp, $op) {
     $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
 
     # Release each arg's result register
-    my $arg_num := 0;
-    for @arg_regs -> $reg {
-        if $reg ~~ MAST::Local {
-            $regalloc.release_register($reg, @arg_kinds[$arg_num]);
-            $arg_num++;
+    for @arg_mast -> $arg {
+        if $arg.result_reg ~~ MAST::Local {
+            $regalloc.release_register($arg.result_reg, $arg.result_kind);
         }
     }
 
@@ -1541,18 +1585,60 @@ my $call_gen := sub ($qastcomp, $op) {
     else {
         $res_kind := $qastcomp.type_to_register_kind($op.returns);
         $res_reg := $regalloc.fresh_register($res_kind);
-        nqp::unshift(@arg_regs, $return_type.result_reg) if $is_nativecall;
         %result<result> := $res_reg;
     }
 
     # Generate call.
-    MAST::Call.new(
-        :target($callee.result_reg),
-        :flags(@arg_flags),
-        |@arg_regs,
-        |%result,
-        :op($op.op eq 'nativeinvoke' ?? 1 !! 0),
-    );
+    my $res_type;
+    if $op.op eq 'speshresolve' {
+        nqp::die('speshresolve must have a result')
+            unless $res_reg.isa(MAST::Local);
+        nqp::die('MAST::Local index out of range')
+            if $res_reg.index >= nqp::elems($frame.local_types);
+        nqp::die('speshresolve must have an object result')
+            if type_to_local_type($frame.local_types()[$res_reg.index]) != $MVM_reg_obj;
+        $res_type := $MVM_operand_obj;
+        $bytecode.write_uint16(%MAST::Ops::codes<speshresolve>);
+        $bytecode.write_uint16($callee.result_reg.index);
+    }
+    elsif $res_reg.isa(MAST::Local) { # We got a return value
+        my @local_types := $frame.local_types;
+        my $index := $res_reg.index;
+        if $res_reg.index >= nqp::elems(@local_types) {
+            nqp::die("MAST::Local index out of range");
+        }
+        my $op_name := $is_nativecall ?? 'nativeinvoke_' !! 'invoke_';
+        if nqp::objprimspec(@local_types[$index]) == 1 {
+            $op_name := $op_name ~ 'i';
+            $res_type := $MVM_operand_int64;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 2 {
+            $op_name := $op_name ~ 'n';
+            $res_type := $MVM_operand_num64;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 3 {
+            $op_name := $op_name ~ 's';
+            $res_type := $MVM_operand_str;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 0 { # object
+            $op_name := $op_name ~ 'o';
+            $res_type := $MVM_operand_obj;
+        }
+        else {
+            nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
+        }
+        $bytecode.write_uint16(%MAST::Ops::codes{$op_name});
+        $bytecode.write_uint16($res_reg.index);
+        $bytecode.write_uint16($callee.result_reg.index);
+    }
+    else {
+        $bytecode.write_uint16(%MAST::Ops::codes<invoke_v>);
+        $bytecode.write_uint16($callee.result_reg.index);
+    }
+
+    if $is_nativecall {
+        $bytecode.write_uint16($return_type.result_reg.index);
+    }
 
     MAST::InstructionList.new($res_reg, $res_kind)
 };
