@@ -2242,17 +2242,76 @@ class MoarVM::Callsites {
         my int $num_nameds := 0;
         my int $i := 0;
         my $identifier := $buf.new;
+        my $frame := $*MAST_FRAME;
         for @flags {
             if $_ +& $callsite_arg_named {
                 my $name := @args[$i + $num_nameds++];
-                nqp::push(@named_idxs, $name);
+                nqp::push(@named_idxs, $frame.add-string($name));
             }
             $identifier.write_uint8($_);
             $i++;
         }
 
         for @named_idxs {
-            $identifier.write_uint16($_);
+            $identifier.write_uint32($_);
+        }
+        my $identifier_s := nqp::decode($identifier, 'iso-8859-1'); # just turn the buf into a str without real interpretation
+        if nqp::existskey(%!callsites, $identifier_s) {
+            return %!callsites{$identifier_s};
+        }
+
+        my $callsite-idx := nqp::elems(%!callsites);
+        %!callsites{$identifier_s} := $callsite-idx;
+        $!callsites.write_uint16($elems);
+        for @flags {
+            $!callsites.write_uint8($_);
+        }
+        if $align > 0 {
+            $!callsites.write_uint8(0);
+        }
+        for @named_idxs {
+            $!callsites.write_uint32($_);
+        }
+        $callsite-idx
+    }
+my @kind_to_args := [0,
+    $Arg::int,  # $MVM_reg_int8            := 1;
+    $Arg::int,  # $MVM_reg_int16           := 2;
+    $Arg::int,  # $MVM_reg_int32           := 3;
+    $Arg::int,  # $MVM_reg_int64           := 4;
+    $Arg::num,  # $MVM_reg_num32           := 5;
+    $Arg::num,  # $MVM_reg_num64           := 6;
+    $Arg::str,  # $MVM_reg_str             := 7;
+    $Arg::obj   # $MVM_reg_obj             := 8;
+];
+    method get_callsite_id_from_args(@args, @arg_mast) {
+        nqp::die('get_callsite_id after serialization!') if $!done;
+        my uint16 $elems := nqp::elems(@args);
+        my uint16 $align := $elems % 2;
+        my @named_idxs := nqp::list;
+        my int $i := 0;
+        my $identifier := $buf.new;
+        my $frame := $*MAST_FRAME;
+        my @flags := nqp::list;
+        for @args -> $arg {
+            my $result_typeflag := @kind_to_args[@arg_mast[$i].result_kind];
+            if nqp::can($arg, 'flat') {
+                if $arg.flat {
+                    $result_typeflag := $result_typeflag +| ($arg.named ?? $Arg::flatnamed !! $Arg::flat);
+                }
+                elsif $arg.named -> $name {
+                    nqp::push(@named_idxs, $frame.add-string($name));
+                    $result_typeflag := $result_typeflag +| $Arg::named;
+                }
+            }
+            nqp::push(@flags, $result_typeflag);
+
+            $identifier.write_uint8($result_typeflag);
+            $i++;
+        }
+
+        for @named_idxs {
+            $identifier.write_uint32($_);
         }
         my $identifier_s := nqp::decode($identifier, 'iso-8859-1'); # just turn the buf into a str without real interpretation
         if nqp::existskey(%!callsites, $identifier_s) {
