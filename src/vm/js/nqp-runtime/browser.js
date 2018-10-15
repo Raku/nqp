@@ -3,6 +3,8 @@ const Null = require('./null.js');
 const Hash = require('./hash.js');
 const core = require('./core.js');
 
+const AnsiToHtml = require('ansi-to-html');
+
 const NQPObject = require('./nqp-object.js');
 
 exports.op = op;
@@ -47,7 +49,31 @@ class BrowserStdin extends NQPObject {
   }
 }
 
-const STDOUT = new BufferedConsole(output => console.log(output));
+const converter = new AnsiToHtml({escapeXML: true, stream: true});
+
+class HijackedConsole extends NQPObject {
+  constructor(hijack) {
+    super();
+    this.hijack = hijack;
+  }
+
+  $$writefh(buf) {
+    const buffer = core.toRawBuffer(buf);
+    this.$$write(buffer.toString());
+  }
+
+  $$write(str) {
+    this.hijack(converter.toHtml(str));
+  }
+
+  $$isttyfh() {
+    return 1;
+  }
+}
+
+const STDOUT =
+  window.NQP_STDOUT ? new HijackedConsole(window.NQP_STDOUT)
+  : new BufferedConsole(output => console.log(output));
 const STDERR = new BufferedConsole(output => console.error(output));
 const STDIN = new BrowserStdin();
 
