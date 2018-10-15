@@ -847,7 +847,10 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   compile(ctx, _NAMED, self, code) {
-    const compiled = vm.compileFunction(this.$$fixupRun(code));
+    const codeStr = this.$$fixupRun(nqp.arg_s(ctx, code));
+    const compiled = process.browser
+      ? eval('(function() {' + codeStr + '})')
+      : vm.compileFunction(codeStr);
 
     const codeRef = new CodeRef();
     codeRef.$$call = function(ctx, _NAMED) {
