@@ -618,9 +618,6 @@ class P6opaque extends REPRWithAttributes {
 
 };
 
-P6opaque.prototype.createObjConstructor = basicConstructor;
-P6opaque.prototype.typeObjectFor = basicTypeObjectFor;
-
 reprs.P6opaque = P6opaque;
 
 class KnowHOWREPR {
