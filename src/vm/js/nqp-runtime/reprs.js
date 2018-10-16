@@ -48,22 +48,6 @@ const reprById = [];
 
 const bignum = require('./bignum.js');
 
-function basicTypeObjectFor(HOW) {
-  const st = new sixmodel.STable(this, HOW);
-  this._STable = st;
-
-  const obj = st.createTypeObject();
-  this._STable.WHAT = obj;
-
-  return obj;
-}
-
-function basicAllocate(STable) {
-  return new STable.ObjConstructor();
-}
-
-function noopCompose(obj, reprInfo) {
-}
 
 function methodNotFoundError(ctx, obj, name) {
   const handler = ctx ? ctx.$$getHLL().get('method_not_found_error') : undefined;
@@ -74,71 +58,85 @@ function methodNotFoundError(ctx, obj, name) {
   }
 }
 
-function basicConstructor(STable) {
-  const ObjConstructor = function() {};
-  const handler = {};
-  handler.get = function(target, name) {
-    if (STable.lazyMethodCache) {
-      STable.setMethodCache(STable.methodCache);
-      const method = STable.methodCache.get(name);
-      if (method !== undefined) {
-        return STable.ObjConstructor.prototype[name];
-      }
-    }
 
-    /* are we trying to access an internal property? */
-    /* HACK with then, we likely need to prefix p6 methods to avoid this problem */
-    if (name.substr(0, 2) === '$$' || name == 'then') {
-      return undefined;
-    }
-
-    if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
-      return function(ctx, _NAMED, obj) {
-        return methodNotFoundError(ctx, obj, name);
-      };
-    }
-
-
-    return /*async*/ function() {
-      const how = this._STable.HOW;
-
-      const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
-
-      if (method === Null) {
-        return methodNotFoundError(arguments[0], arguments[2], name);
-      }
-
-      const args = [];
-      for (let i = 0; i < arguments.length; i++) {
-        args.push(arguments[i]);
-      }
-      return method.$$apply(args);
-    };
-  };
-
-
-  ObjConstructor.prototype = Object.create(new Proxy({}, handler));
-  ObjConstructor.prototype._STable = STable;
-
-  ObjConstructor.prototype._SC = undefined;
-  ObjConstructor.prototype._WHERE = undefined;
-
-  return ObjConstructor;
-}
 
 function slotToAttr(slot) {
   return 'attr$' + slot;
 }
 
 class REPR {
+  typeObjectFor(HOW) {
+    const st = new sixmodel.STable(this, HOW);
+    this._STable = st;
+
+    const obj = st.createTypeObject();
+    this._STable.WHAT = obj;
+
+    return obj;
+  }
+
+  allocate(STable) {
+    return new STable.ObjConstructor();
+  }
+
+  compose(obj, reprInfo) {
+  }
+
+  createObjConstructor(STable) {
+    const ObjConstructor = function() {};
+    const handler = {};
+    handler.get = function(target, name) {
+      if (STable.lazyMethodCache) {
+        STable.setMethodCache(STable.methodCache);
+        const method = STable.methodCache.get(name);
+        if (method !== undefined) {
+          return STable.ObjConstructor.prototype[name];
+        }
+      }
+
+      /* are we trying to access an internal property? */
+      /* HACK with then, we likely need to prefix p6 methods to avoid this problem */
+      if (name.substr(0, 2) === '$$' || name == 'then') {
+        return undefined;
+      }
+
+      if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+        return function(ctx, _NAMED, obj) {
+          return methodNotFoundError(ctx, obj, name);
+        };
+      }
+
+
+      return /*async*/ function() {
+        const how = this._STable.HOW;
+
+        const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
+
+        if (method === Null) {
+          return methodNotFoundError(arguments[0], arguments[2], name);
+        }
+
+        const args = [];
+        for (let i = 0; i < arguments.length; i++) {
+          args.push(arguments[i]);
+        }
+        return method.$$apply(args);
+      };
+    };
+
+    ObjConstructor.prototype = Object.create(new Proxy({}, handler));
+    ObjConstructor.prototype._STable = STable;
+
+    ObjConstructor.prototype._SC = undefined;
+    ObjConstructor.prototype._WHERE = undefined;
+
+    return ObjConstructor;
+  }
+
   boxedPrimitive() {
     return 0;
   }
 };
-REPR.prototype.allocate = basicAllocate;
-REPR.prototype.typeObjectFor = basicTypeObjectFor;
-REPR.prototype.compose = noopCompose;
-REPR.prototype.createObjConstructor = basicConstructor;
 
 class REPRWithAttributes extends REPR {
   deserializeNameToIndexMapping(cursor) {
@@ -620,7 +618,7 @@ class P6opaque extends REPRWithAttributes {
 
 reprs.P6opaque = P6opaque;
 
-class KnowHOWREPR {
+class KnowHOWREPR extends REPR {
   deserializeFinish(obj, data) {
     obj.__name = data.str();
     obj.__attributes = data.variant().array;
@@ -642,13 +640,9 @@ class KnowHOWREPR {
   }
 };
 
-KnowHOWREPR.prototype.typeObjectFor = basicTypeObjectFor;
-KnowHOWREPR.prototype.createObjConstructor = basicConstructor;
-
-
 reprs.KnowHOWREPR = KnowHOWREPR;
 
-class KnowHOWAttribute {
+class KnowHOWAttribute extends REPR {
   deserializeFinish(obj, data) {
     obj.__name = data.str();
   }
@@ -657,10 +651,6 @@ class KnowHOWAttribute {
     data.str(obj.__name);
   }
 };
-
-KnowHOWAttribute.prototype.createObjConstructor = basicConstructor;
-KnowHOWAttribute.prototype.typeObjectFor = basicTypeObjectFor;
-KnowHOWAttribute.prototype.allocate = basicAllocate;
 
 reprs.KnowHOWAttribute = KnowHOWAttribute;
 
@@ -1585,15 +1575,13 @@ class VMHash extends REPR {
 
 reprs.VMHash = VMHash;
 
-class VMIter {
+class VMIter extends REPR {
   deserializeFinish(obj, data) {
     // STUB
     console.log('deserializing VMIter');
   }
 };
 
-VMIter.prototype.createObjConstructor = basicConstructor;
-VMIter.prototype.typeObjectFor = basicTypeObjectFor;
 reprs.VMIter = VMIter;
 
 
