@@ -20,7 +20,7 @@ my @nqp_tests = grep {$_ !~ /regex-interpolation/ && $_ !~ /optional-args/ && $_
 
 my @moar_tests = (); # qw(t/moar/03-line-seps.t);
 
-my @runtime_unit_tests = qw(t/js/varint.js);
+my @runtime_unit_tests; # = qw(t/js/varint.js);
 my @continuation_tests = qw(t/js/continuations.t);
 
 my @native_call_tests = qw(t/nativecall/01-basic.t);
