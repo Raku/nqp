@@ -1602,7 +1602,7 @@ function backtrace(exception) {
                   column = original.column;
                 }
               } else {
-                if (file) {
+                if (file && resolveSourceMap) {
                   const resolved = resolveSourceMap(file);
                   if (resolved !== null) {
                     const original = resolved.originalPositionFor({line: line, column: column});
