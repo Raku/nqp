@@ -1900,6 +1900,8 @@ class QAST::OperationsJS {
     add_simple_op('iseq_snfg', $T_INT, [$T_STR, $T_STR]);
     add_simple_op('isne_snfg', $T_INT, [$T_STR, $T_STR]);
 
+    add_simple_op('getjsattr', $T_OBJ, [$T_OBJ, $T_STR], :decont(0), :ctx);
+    add_simple_op('setjsattr', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :decont(0, 2), :ctx, :side_effects);
 
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {

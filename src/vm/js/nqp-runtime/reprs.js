@@ -2469,6 +2469,40 @@ reprs.CUnion = CUnion;
 reprs.CStruct = CUnion;
 
 
+class WrappedJSObject extends REPR {
+  createObjConstructor(STable) {
+    const ObjConstructor = function() {};
+    const handler = {};
+    handler.get = function(target, name) {
+      if (name.substr(0, 2) === '$$') {
+        return undefined;
+      }
+
+      return /*async*/ function() {
+        const converted = [];
+        for (let i = 3; i < arguments.length; i++) {
+          converted.push(/*await*/ core.toJSWithCtx(arguments[0], arguments[i].$$decont(arguments[0])));
+        }
+
+        if (this.$$jsObject[name]) {
+          return core.fromJSToReturnValue(arguments[0], this.$$jsObject[name].apply(this.$$jsObject, converted));
+        } else {
+          methodNotFoundError(arguments[0], this, name);
+        }
+      };
+    };
+
+    ObjConstructor.prototype = Object.create(new Proxy({}, handler));
+    ObjConstructor.prototype._STable = STable;
+
+    ObjConstructor.prototype._SC = undefined;
+    ObjConstructor.prototype._WHERE = undefined;
+
+    return ObjConstructor;
+  }
+}
+reprs.WrappedJSObject = WrappedJSObject;
+
 let ID = 0;
 for (const name in reprs) {
   module.exports[name] = reprs[name];

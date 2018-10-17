@@ -194,6 +194,8 @@ const NativeUIntArg = nativeArgs.NativeUIntArg;
 const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
+const NativeNumRet = nativeArgs.NativeNumRet;
+
 const intToObj = exports.intToObj = function(currentHLL, i) {
   const type = currentHLL.get('int_box');
   if (!type) {
@@ -615,7 +617,7 @@ class WrappedFunction extends NQPObject {
     for (let i = 2; i < args.length; i++) {
       converted.push(/*await*/ toJS(args[i]));
     }
-    return fromJS(this.func.apply(null, converted));
+    return fromJSToReturnValue(args[0], this.func.apply(null, converted));
   }
 
   $$call(args) {
@@ -623,19 +625,78 @@ class WrappedFunction extends NQPObject {
   }
 };
 
-function fromJS(obj) {
+function fromJSToReturnValue(ctx, obj) {
+  return fromJS(ctx.$$getHLL(), obj, true, false);
+}
+
+exports.fromJSToReturnValue = fromJSToReturnValue;
+
+function fromJSToArgument(obj) {
+  return fromJS(hll.getHLL('perl6'), obj, false, true);
+}
+
+function fromJSToObject(ctx, obj) {
+  return fromJS(hll.getHLL('perl6'), obj, false, false);
+}
+
+function fromJS(HLL, obj, isReturnValue, isArgument) {
   if (typeof obj === 'function') {
     return new WrappedFunction(obj);
   } else if (obj === undefined || obj === null) {
-    return Null;
+    return HLL.get('null_value');
+  } else if (obj === true) {
+    return HLL.get('true_value');
+  } else if (obj === false) {
+    return HLL.get('false_value');
   } else if (typeof obj === 'number') {
-    return new NQPNum(obj);
+    if (isReturnValue) {
+      return new NativeNumRet(obj);
+    } else if (isArgument) {
+      return new NativeNumArg(obj);
+    } else {
+      const type = HLL.get('int_box');
+      const boxed = type._STable.REPR.allocate(type._STable);
+      boxed.$$setInt(obj);
+      return boxed;
+    }
   } else if (typeof obj === 'string') {
-    return new NQPStr(obj);
-  } else {
+    if (isReturnValue) {
+      return obj;
+    } else if (isArgument) {
+      return new NativeStrArg(obj);
+    } else {
+      const type = HLL.get('str_box');
+      const boxed = type._STable.REPR.allocate(type._STable);
+      boxed.$$setStr(obj);
+      return boxed;
+    }
+  } else if (obj.$$decont) {
     return obj;
+  } else if (obj instanceof EvalResult) {
+    return obj;
+  } else {
+    const type = HLL.get('js_box');
+    const wrapped = type._STable.REPR.allocate(type._STable);
+    wrapped.$$jsObject = obj;
+    return wrapped;
   }
 }
+
+function toJSWithCtx(ctx, obj) {
+  const HLL = ctx.$$getHLL();
+  if (obj.$$istype(ctx, HLL.get('str_box'))) {
+    return obj.$$getStr();
+  } else if (obj.$$istype(ctx, HLL.get('num_box'))) {
+    return obj.$$getNum();
+  } else if (obj.$$istype(ctx, HLL.get('js_box'))) {
+    return obj.$$jsObject;
+  } else {
+    require('nqp-runtime').dumpObj(obj);
+    console.trace(`Can't unbox`);
+  }
+}
+
+exports.toJSWithCtx = toJSWithCtx;
 
 function toJS(obj) {
   if (obj instanceof NativeIntArg || obj instanceof NativeUIntArg) {
@@ -650,7 +711,7 @@ function toJS(obj) {
     return function() {
       const converted = [null, {}];
       for (let i = 0; i < arguments.length; i++) {
-        converted.push(fromJS(arguments[i]));
+        converted.push(fromJSToArgument(arguments[i]));
       }
       return toJS(obj.$$apply(converted));
     };
@@ -796,7 +857,8 @@ class JavaScriptCompiler extends NQPObject {
 
   eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
-      return fromJS(eval(nqp.arg_s(ctx, code)));
+      let codeStr = nqp.arg_s(ctx, code);
+      return fromJSToReturnValue(ctx, eval(codeStr));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();
@@ -840,7 +902,7 @@ class JavaScriptCompiler extends NQPObject {
       return require(path);
     };
 
-    const ret = fromJS(compiled());
+    const ret = fromJSToReturnValue(ctx, compiled());
     global.nqpRequire = oldNqpRequire;
 
     return ret;
@@ -854,7 +916,7 @@ class JavaScriptCompiler extends NQPObject {
 
     const codeRef = new CodeRef();
     codeRef.$$call = function(ctx, _NAMED) {
-      return fromJS(compiled());
+      return fromJSToReturnValue(ctx, compiled());
     };
     return codeRef;
   }
@@ -1993,4 +2055,12 @@ op.iseq_snfg = function(a, b) {
 
 op.isne_snfg = function(a, b) {
   return (a.normalize('NFC') === b.normalize('NFC')) ? 0 : 1;
+};
+
+op.setjsattr = function(ctx, obj, attr, value) {
+  return obj.$$jsObject[attr] = toJSWithCtx(ctx, value);
+};
+
+op.getjsattr = function(ctx, obj, attr) {
+  return fromJSToObject(ctx, obj.$$jsObject[attr]);
 };
