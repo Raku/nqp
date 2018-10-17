@@ -110,3 +110,7 @@ op.getpid = function() {
 op.getppid = function() {
   return -1;
 };
+
+op.cwd = function() {
+  return '?';
+};
