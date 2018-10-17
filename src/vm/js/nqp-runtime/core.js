@@ -195,6 +195,7 @@ const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
 const NativeNumRet = nativeArgs.NativeNumRet;
+const NativeIntRet = nativeArgs.NativeIntRet;
 
 const intToObj = exports.intToObj = function(currentHLL, i) {
   const type = currentHLL.get('int_box');
@@ -615,7 +616,7 @@ class WrappedFunction extends NQPObject {
   /*async*/ $$apply(args) {
     const converted = [];
     for (let i = 2; i < args.length; i++) {
-      converted.push(/*await*/ toJS(args[i]));
+      converted.push(/*await*/ argToJSWithCtx(args[0], args[i]));
     }
     return fromJSToReturnValue(args[0], this.func.apply(null, converted));
   }
@@ -682,43 +683,52 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
   }
 }
 
-function toJSWithCtx(ctx, obj) {
-  const HLL = ctx.$$getHLL();
-  if (obj.$$istype(ctx, HLL.get('str_box'))) {
-    return obj.$$getStr();
-  } else if (obj.$$istype(ctx, HLL.get('num_box'))) {
-    return obj.$$getNum();
-  } else if (obj.$$istype(ctx, HLL.get('js_box'))) {
-    return obj.$$jsObject;
-  } else {
-    require('nqp-runtime').dumpObj(obj);
-    console.trace(`Can't unbox`);
-  }
-}
-
-exports.toJSWithCtx = toJSWithCtx;
-
-function toJS(obj) {
+function argToJSWithCtx(ctx, obj) {
   if (obj instanceof NativeIntArg || obj instanceof NativeUIntArg) {
     return obj.value;
   } else if (obj instanceof NativeNumArg) {
     return obj.value;
   } else if (obj instanceof NativeStrArg) {
     return obj.value;
-  } else if (obj instanceof NQPInt) {
+  } else {
+    return toJSWithCtx(ctx, obj);
+  }
+}
+
+function returnValueToJSWithCtx(ctx, obj) {
+  if (obj instanceof NativeNumRet) {
     return obj.value;
-  } else if (obj instanceof CodeRef) {
+  } else if (obj instanceof NativeNumArg) {
+    return obj.value;
+  } else if (typeof obj === 'string') {
+    return obj;
+  } else {
+    return toJSWithCtx(ctx, obj);
+  }
+}
+
+function toJSWithCtx(ctx, obj) {
+  const HLL = ctx.$$getHLL();
+  if (HLL.get('str_box') && obj.$$istype(ctx, HLL.get('str_box'))) {
+    return obj.$$getStr();
+  } else if (HLL.get('num_box') && obj.$$istype(ctx, HLL.get('num_box'))) {
+    return obj.$$getNum();
+  } else if (HLL.get('js_box') && obj.$$istype(ctx, HLL.get('js_box'))) {
+    return obj.$$jsObject;
+  } else if (op.isinvokable(obj)) {
     return function() {
       const converted = [null, {}];
       for (let i = 0; i < arguments.length; i++) {
         converted.push(fromJSToArgument(arguments[i]));
       }
-      return toJS(obj.$$apply(converted));
+      return returnValueToJSWithCtx(ctx, obj.$$apply(converted));
     };
   } else {
-    return obj;
+    throw new NQPException(`Can't pass object to js`);
   }
 }
+
+exports.toJSWithCtx = toJSWithCtx;
 
 const nqp = require('./runtime.js');
 
@@ -851,14 +861,18 @@ exports.buildSourceMap = new BuildSourceMap();
 
 class JavaScriptCompiler extends NQPObject {
   $$fixupRun(code) {
-    const fixedUp = code.replace(/\/\*\s*return\s\*\/\s*nqp\.run/, 'return nqp.run');
+    let fixedUp = code.replace(/\/\*\s*return\s\*\/\s*nqp\.run/, 'return nqp.run');
+    if (process.browser) {
+        // HACK this is potential trouble
+        fixedUp = fixedUp.replace(/require\("nqp-runtime"\)/g, `require('./runtime.nqp-raw-runtime')`);
+    }
     return fixedUp;
   }
 
   eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       let codeStr = nqp.arg_s(ctx, code);
-      return fromJSToReturnValue(ctx, eval(codeStr));
+      return fromJSToReturnValue(ctx, eval('(function() {' + this.$$fixupRun(codeStr) + '})()'));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();
