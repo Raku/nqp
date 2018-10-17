@@ -1653,7 +1653,8 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         nqp::die('Method call node requires at least one child');
     }
     # evaluate the invocant expression
-    my $invocant := $qastcomp.as_mast(@args.shift(), :want($MVM_reg_obj));
+    my $invocant_qast := @args.shift();
+    my $invocant := $qastcomp.as_mast($invocant_qast, :want($MVM_reg_obj));
     my $methodname_expr;
     if $op.name {
         # great!
@@ -1672,18 +1673,28 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     nqp::die("Invocant code did not result in a MAST::Local")
         unless $invocant.result_reg && $invocant.result_reg ~~ MAST::Local;
 
-    # main instruction list
-    # the result MAST::Locals of the arg expressions
-    my @arg_regs := [$invocant.result_reg];
-    # the result kind codes of the arg expressions
-    my @arg_kinds := [$MVM_reg_obj];
-    # the args' flags in the protocol the MAST compiler expects
-    my @arg_flags := [$Arg::obj];
+    my $frame := $*MAST_FRAME;
+    my $bytecode := $frame.bytecode;
+
+    # The arg's results
+    my @arg_mast := [$invocant];
 
     # Process arguments.
-    for @args {
-        handle_arg($_, $qastcomp, @arg_regs, @arg_flags, @arg_kinds);
+    for @args -> $arg {
+        my $arg_mast := $qastcomp.as_mast($arg);
+        my int $arg_mast_kind := $arg_mast.result_kind;
+        if $arg_mast_kind == $MVM_reg_num32 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
+        }
+        elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
+                $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
+                $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+                $arg_mast_kind == $MVM_reg_uint8 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+        }
+        nqp::push(@arg_mast, $arg_mast);
     }
+    nqp::unshift(@args, $invocant_qast);
 
     # generate and emit findmethod code
     my $regalloc   := $*REGALLOC;
@@ -1711,15 +1722,37 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     # release the method name register if we used one
     $regalloc.release_register($method_name, $MVM_reg_str) unless $op.name;
 
+    my $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+
+    $bytecode.write_uint16(%MAST::Ops::codes<prepargs>);
+    $bytecode.write_uint16($callsite-id);
+
+    my $i := 0;
+    my $arg_out_pos := 0;
+    for @args -> $arg {
+        if nqp::can($arg, 'named') && !$arg.flat && $arg.named -> $name {
+            $bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
+            $bytecode.write_uint16($arg_out_pos);
+            $bytecode.write_uint32($frame.add-string($name));
+            $arg_out_pos++;
+        }
+
+        my $arg_mast := @arg_mast[$i++];
+        my $kind := $arg_mast.result_kind;
+        my $arg_opcode := @kind_to_opcode[$kind];
+        nqp::die("Unhandled arg type $kind") unless $arg_opcode;
+        $bytecode.write_uint16($arg_opcode);
+        $bytecode.write_uint16($arg_out_pos++);
+        $bytecode.write_uint16($arg_mast.result_reg.index);
+    }
+
     # release the callee register
     $regalloc.release_register($callee_reg, $MVM_reg_obj);
 
     # Release the invocant's and each arg's result registers
-    my $arg_num := 0;
-    for @arg_regs -> $reg {
-        if $reg ~~ MAST::Local {
-            $regalloc.release_register($reg, @arg_kinds[$arg_num]);
-            $arg_num++;
+    for @arg_mast -> $arg {
+        if $arg.result_reg ~~ MAST::Local {
+            $regalloc.release_register($arg.result_reg, $arg.result_kind);
         }
     }
 
@@ -1730,12 +1763,41 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my $res_reg := $regalloc.fresh_register($res_kind);
 
     # Generate call.
-    MAST::Call.new(
-        :target($callee_reg),
-        :result($res_reg),
-        :flags(@arg_flags),
-        |@arg_regs
-    );
+    my $res_type;
+    if $res_reg.isa(MAST::Local) { # We got a return value
+        my @local_types := $frame.local_types;
+        my $index := $res_reg.index;
+        if $res_reg.index >= nqp::elems(@local_types) {
+            nqp::die("MAST::Local index out of range");
+        }
+        my $op_name := 'invoke_';
+        if nqp::objprimspec(@local_types[$index]) == 1 {
+            $op_name := $op_name ~ 'i';
+            $res_type := $MVM_operand_int64;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 2 {
+            $op_name := $op_name ~ 'n';
+            $res_type := $MVM_operand_num64;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 3 {
+            $op_name := $op_name ~ 's';
+            $res_type := $MVM_operand_str;
+        }
+        elsif nqp::objprimspec(@local_types[$index]) == 0 { # object
+            $op_name := $op_name ~ 'o';
+            $res_type := $MVM_operand_obj;
+        }
+        else {
+            nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
+        }
+        $bytecode.write_uint16(%MAST::Ops::codes{$op_name});
+        $bytecode.write_uint16($res_reg.index);
+        $bytecode.write_uint16($callee_reg.index);
+    }
+    else { #FIXME either remove this condition, or implement VOID context for method calls above
+        $bytecode.write_uint16(%MAST::Ops::codes<invoke_v>);
+        $bytecode.write_uint16($callee_reg.index);
+    }
 
     MAST::InstructionList.new($res_reg, $res_kind)
 });
