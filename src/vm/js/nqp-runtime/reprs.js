@@ -2500,7 +2500,16 @@ class WrappedJSObject extends REPR {
 
     return ObjConstructor;
   }
+
+  setupSTable(STable) {
+    STable.addInternalMethods(class {
+      $$can(ctx, name) {
+        return typeof this.$$jsObject[name] === 'function';
+      }
+    });
+  }
 }
+
 reprs.WrappedJSObject = WrappedJSObject;
 
 let ID = 0;
