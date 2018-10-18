@@ -1,4 +1,4 @@
-plan(35);
+plan(41);
 
 ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
 
@@ -186,4 +186,31 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     is($clone_of_cont.attr, 456, 'clone_nd container can be assigned to');
 
     is($cont.attr, 678, 'original container is independent of clone but had shared value');
+
+    class ValueWithDefined {
+        has $!defined;
+        method defined() {
+            $!defined;
+        }
+    }
+
+
+    my $cont_for_with_defined := nqp::create(SimpleCont);
+    nqp::assign($cont_for_with_defined, ValueWithDefined.new(defined => 1));
+
+    my $cont_for_with_not_defined := nqp::create(SimpleCont);
+    nqp::assign($cont_for_with_not_defined, ValueWithDefined.new(defined => 0));
+
+    my $cont_with_false_value := nqp::create(SimpleCont);
+    nqp::assign($cont_with_false_value, 0);
+    my $cont_for_with_container_defined := nqp::create(SimpleCont);
+    nqp::assign($cont_for_with_container_defined, ValueWithDefined.new(defined => $cont_with_false_value));
+
+    is(nqp::with($cont_for_with_defined, "good", "bad"), "good", 'with - defined case');
+    is(nqp::with($cont_for_with_not_defined, "good", "bad"), "bad", 'with - undefined case');
+    is(nqp::with($cont_for_with_container_defined, "good", "bad"), "good", 'with - defined returns container');
+
+    is(nqp::without($cont_for_with_defined, "good", "bad"), "bad", 'without - defined case');
+    is(nqp::without($cont_for_with_not_defined, "good", "bad"), "good", 'without - undefined case');
+    is(nqp::without($cont_for_with_container_defined, "good", "bad"), "bad", 'without - defined returns container');
 }
