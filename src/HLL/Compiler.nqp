@@ -264,8 +264,12 @@ class HLL::Compiler does HLL::Backend::Default {
 
         my $*LIBPATH;
         if %adverbs<libpath> {
-            $*LIBPATH := nqp::split('|||', %adverbs<libpath>);
-            nqp::getcomp('JavaScript').eval('(function(paths) {nqp.libpath(paths.array)})')($*LIBPATH);
+            my $split := nqp::split('|||', %adverbs<libpath>);
+            $*LIBPATH := nqp::list_s();
+            for $split -> $str {
+                nqp::push_s($*LIBPATH, $str);
+            }
+            nqp::getcomp('JavaScript').eval('return (function(paths) {nqp.libpath(paths)})')($*LIBPATH);
         }
 
         my $*EXECNAME;

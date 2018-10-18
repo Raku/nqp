@@ -277,7 +277,7 @@ class JavaScriptBackend {
                 nqp::unlink($tmp_file);
             }
         } else {
-            my $sourcemap := nqp::getcomp('JavaScript').eval('nqp.buildSourceMap')(
+            my $sourcemap := nqp::getcomp('JavaScript').eval('return nqp.buildSourceMap')(
                 $sourcemap_and_js.js,
                 $sourcemap_and_js.p6-source,
                 $sourcemap_and_js.mapping,
