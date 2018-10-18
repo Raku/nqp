@@ -723,6 +723,8 @@ function toJSWithCtx(ctx, obj) {
       }
       return returnValueToJSWithCtx(ctx, obj.$$apply(converted));
     };
+  } else if (obj._STable === BOOT.StrArray._STable) {
+    return obj.array;
   } else {
     throw new NQPException(`Can't pass object to js`);
   }
