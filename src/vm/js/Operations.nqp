@@ -1137,10 +1137,10 @@ class QAST::OperationsJS {
 
             my $check_cond;
             if $is_withy {
-                my $defined := $comp.await("{$cond.expr}.defined($*CTX, null, {$cond.expr})");
+                my $deconted := $comp.await("{$cond.expr}.\$\$decont($*CTX)");
+                my $defined := $comp.await("$deconted.defined($*CTX, null, {$cond.expr})");
                 my $retvaled := "nqp.retval(HLL, $defined)";
-                my $deconted := $comp.await("$retvaled.\$\$decont($*CTX)");
-                $check_cond := Chunk.new($T_INT, $comp.await("$deconted.\$\$toBool($*CTX)"), $cond);
+                $check_cond := Chunk.new($T_INT, $comp.await("$retvaled.\$\$toBool($*CTX)"), $cond);
             } else {
                 $check_cond := $comp.coerce($cond, $T_BOOL);
             }
