@@ -30,6 +30,11 @@ my &op_goto   := %core_op_generators<goto>;
 my &op_null   := %core_op_generators<null>;
 my &op_set    := %core_op_generators<set>;
 
+my uint $op_code_prepargs     := %MAST::Ops::codes<prepargs>;
+my uint $op_code_argconst_s   := %MAST::Ops::codes<argconst_s>;
+my uint $op_code_invoke_v     := %MAST::Ops::codes<invoke_v>;
+my uint $op_code_speshresolve := %MAST::Ops::codes<speshresolve>;
+
 # This is used as a return value from all of the various compilation routines.
 # It groups together a set of instructions along with a result register and a
 # result kind.  It also tracks the source filename and line number.
@@ -1537,19 +1542,22 @@ my $call_gen := sub ($qastcomp, $op) {
         nqp::push(@arg_mast, $arg_mast);
     }
 
-    my $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+    my uint $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+    my uint64 $bytecode_pos := nqp::elems($bytecode);
 
-    $bytecode.write_uint16(%MAST::Ops::codes<prepargs>);
-    $bytecode.write_uint16($callsite-id);
+    nqp::writeuint($bytecode, $bytecode_pos, $op_code_prepargs, 2);
+    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callsite-id, 2);
+    $bytecode_pos := $bytecode_pos + 4;
 
     my $i := 0;
-    my $arg_out_pos := 0;
+    my uint64 $arg_out_pos := 0;
     for @args -> $arg {
         if nqp::can($arg, 'named') && !$arg.flat && $arg.named -> $name {
-            $bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
-            $bytecode.write_uint16($arg_out_pos);
-            $bytecode.write_uint32($frame.add-string($name));
-            $arg_out_pos++;
+            nqp::writeuint($bytecode, $bytecode_pos, $op_code_argconst_s, 2);
+            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
+            my uint $name_idx := $frame.add-string($name);
+            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $name_idx, 4);
+            $bytecode_pos := $bytecode_pos + 8;
         }
 
         my $arg_mast := @arg_mast[$i++];
@@ -1562,11 +1570,13 @@ my $call_gen := sub ($qastcomp, $op) {
             }
         }
         my $kind := $arg_mast.result_kind;
-        my $arg_opcode := @kind_to_opcode[$kind];
+        my uint64 $arg_opcode := @kind_to_opcode[$kind];
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
-        $bytecode.write_uint16($arg_opcode);
-        $bytecode.write_uint16($arg_out_pos++);
-        $bytecode.write_uint16($arg_mast.result_reg.index);
+        nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
+        my uint64 $res_index := $arg_mast.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
+        $bytecode_pos := $bytecode_pos + 6;
     }
 
     # Release the callee's result register.
@@ -1605,8 +1615,9 @@ my $call_gen := sub ($qastcomp, $op) {
         nqp::die('speshresolve must have an object result')
             if type_to_local_type($frame.local_types()[$res_reg.index]) != $MVM_reg_obj;
         $res_type := $MVM_operand_obj;
-        $bytecode.write_uint16(%MAST::Ops::codes<speshresolve>);
-        $bytecode.write_uint16($callee.result_reg.index);
+        nqp::writeuint($bytecode, $bytecode_pos, $op_code_speshresolve, 2);
+        my uint $callee_res_index := $callee.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_res_index, 2);
     }
     elsif $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
@@ -1634,13 +1645,17 @@ my $call_gen := sub ($qastcomp, $op) {
         else {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
         }
-        $bytecode.write_uint16(%MAST::Ops::codes{$op_name});
-        $bytecode.write_uint16($res_reg.index);
-        $bytecode.write_uint16($callee.result_reg.index);
+        my uint $op_code := %MAST::Ops::codes{$op_name};
+        nqp::writeuint($bytecode, $bytecode_pos, $op_code, 2);
+        my uint $res_index := $res_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
+        my uint $callee_res_index := $callee.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $callee_res_index, 2);
     }
     else {
-        $bytecode.write_uint16(%MAST::Ops::codes<invoke_v>);
-        $bytecode.write_uint16($callee.result_reg.index);
+        nqp::writeuint($bytecode, $bytecode_pos, $op_code_invoke_v, 2);
+        my uint $callee_res_index := $callee.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_res_index, 2);
     }
 
     if $is_nativecall {
@@ -1729,28 +1744,33 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     # release the method name register if we used one
     $regalloc.release_register($method_name, $MVM_reg_str) unless $op.name;
 
-    my $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+    my uint $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+    my uint64 $bytecode_pos := nqp::elems($bytecode);
 
-    $bytecode.write_uint16(%MAST::Ops::codes<prepargs>);
-    $bytecode.write_uint16($callsite-id);
+    nqp::writeuint($bytecode, $bytecode_pos, $op_code_prepargs, 2);
+    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callsite-id, 2);
+    $bytecode_pos := $bytecode_pos + 4;
 
     my $i := 0;
-    my $arg_out_pos := 0;
+    my uint64 $arg_out_pos := 0;
     for @args -> $arg {
         if nqp::can($arg, 'named') && !$arg.flat && $arg.named -> $name {
-            $bytecode.write_uint16(%MAST::Ops::codes<argconst_s>);
-            $bytecode.write_uint16($arg_out_pos);
-            $bytecode.write_uint32($frame.add-string($name));
-            $arg_out_pos++;
+            nqp::writeuint($bytecode, $bytecode_pos, $op_code_argconst_s, 2);
+            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
+            my uint $name_idx := $frame.add-string($name);
+            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $name_idx, 4);
+            $bytecode_pos := $bytecode_pos + 8;
         }
 
         my $arg_mast := @arg_mast[$i++];
         my $kind := $arg_mast.result_kind;
-        my $arg_opcode := @kind_to_opcode[$kind];
+        my uint64 $arg_opcode := @kind_to_opcode[$kind];
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
-        $bytecode.write_uint16($arg_opcode);
-        $bytecode.write_uint16($arg_out_pos++);
-        $bytecode.write_uint16($arg_mast.result_reg.index);
+        nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
+        my uint64 $res_index := $arg_mast.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
+        $bytecode_pos := $bytecode_pos + 6;
     }
 
     # release the callee register
@@ -1804,13 +1824,17 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         else {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
         }
-        $bytecode.write_uint16(%MAST::Ops::codes{$op_name});
-        $bytecode.write_uint16($res_reg.index);
-        $bytecode.write_uint16($callee_reg.index);
+        my uint $op_code := %MAST::Ops::codes{$op_name};
+        nqp::writeuint($bytecode, $bytecode_pos, $op_code, 2);
+        my uint $res_index := $res_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
+        my uint $callee_reg_index := $callee_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $callee_reg_index, 2);
     }
     else {
-        $bytecode.write_uint16(%MAST::Ops::codes<invoke_v>);
-        $bytecode.write_uint16($callee_reg.index);
+        nqp::writeuint($bytecode, $bytecode_pos, $op_code_invoke_v, 2);
+        my uint $callee_reg_index := $callee_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_reg_index, 2);
     }
 
     MAST::InstructionList.new($res_reg, $res_kind)
