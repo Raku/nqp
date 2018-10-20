@@ -1,51 +1,6 @@
 # Per-compilation instance of the MAST compiler, holding state and driving the
 # compilation.
 
-my $buf := nqp::newtype(nqp::null(), 'VMArray');
-nqp::composetype($buf, nqp::hash('array', nqp::hash('type', uint8)));
-nqp::setmethcache($buf, nqp::hash(
-    'new', method () {
-        nqp::create($buf)
-    },
-    'write_s', method (str $s) {
-        my @subbuf := nqp::encode($s, 'utf8', nqp::create($buf));
-        self.write_buf(@subbuf);
-    },
-    'write_double', method (num $n) {
-        nqp::writenum(self, nqp::elems(self), $n, 0);
-    },
-    'write_uint32', method (uint32 $i) {
-        nqp::writeuint(self, nqp::elems(self), $i, 4);
-    },
-    'write_uint64', method (uint64 $i) {
-        nqp::writeuint(self, nqp::elems(self), $i, 6);
-    },
-    'read_uint32_at', method (uint32 $pos) {
-          nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 3), 24)
-        + nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 2), 16)
-        + nqp::bitshiftl_i(nqp::atpos_i(self, $pos + 1), 8)
-        + nqp::atpos_i(self, $pos)
-    },
-    'write_uint32_at', method (uint32 $i, uint32 $pos) {
-        nqp::writeuint(self, $pos, $i, 4);
-    },
-    'write_uint16', method (uint16 $i) {
-        nqp::writeuint(self, nqp::elems(self), $i, 2);
-    },
-    'write_uint8', method (uint8 $i) {
-        nqp::writeuint(self, nqp::elems(self), $i, 0);
-    },
-    'write_buf', method (@buf) {
-        nqp::splice(self, @buf, nqp::elems(self), 0);
-    },
-    'dump', method () {
-        note(nqp::elems(self) ~ " bytes");
-        for self {
-            note($_);
-        }
-    }
-));
-
 sub POS($c) {
     return $c - 65      if $c >= 65 && $c < 91;  # A..Z
     return $c - 97 + 26 if $c >= 97 && $c < 123; # a..z
@@ -56,7 +11,7 @@ sub POS($c) {
     nqp::die("Invalid data in base64_decode");
 }
 sub base64_decode(str $s) {
-    my $data := $buf.new;
+    my $data := MAST::Bytecode.new;
     my @n := (-1, -1, -1, -1);
 
     my int $len := nqp::chars($s);
@@ -443,7 +398,7 @@ my class MASTCompilerInstance {
         $!hll := '';
         my $string-heap := MoarVM::StringHeap.new();
         my $callsites := MoarVM::Callsites.new(:$string-heap);
-        my $annotations := $buf.new;
+        my $annotations := MAST::Bytecode.new;
         $!writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations);
         $!mast_compunit := MAST::CompUnit.new(:$!writer);
         $!writer.set-compunit($!mast_compunit);
@@ -932,7 +887,7 @@ my class MASTCompilerInstance {
     # This method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
         my $sh := nqp::list_s();
-        my $serialized := nqp::serializetobuf($sc, $sh, $buf);
+        my $serialized := nqp::serializetobuf($sc, $sh, MAST::Bytecode);
         [$serialized, $sh];
     }
 
@@ -2220,7 +2175,7 @@ class MoarVM::Callsites {
     has $!done;
     method BUILD(:$string-heap) {
         $!string-heap := $string-heap;
-        $!callsites   := $buf.new;
+        $!callsites   := MAST::Bytecode.new;
         %!callsites   := nqp::hash;
         $!done        := 0;
     }
@@ -2233,7 +2188,7 @@ class MoarVM::Callsites {
         my @named_idxs := nqp::list;
         my int $num_nameds := 0;
         my int $i := 0;
-        my $identifier := $buf.new;
+        my $identifier := MAST::Bytecode.new;
         my $frame := $*MAST_FRAME;
         for @flags {
             if $_ +& $callsite_arg_named {
@@ -2282,7 +2237,7 @@ my @kind_to_args := [0,
         my uint16 $align := $elems % 2;
         my @named_idxs := nqp::list;
         my int $i := 0;
-        my $identifier := $buf.new;
+        my $identifier := MAST::Bytecode.new;
         my $frame := $*MAST_FRAME;
         my @flags := nqp::list;
         for @args -> $arg {
@@ -2373,9 +2328,9 @@ class MoarVM::StringHeap {
             $i++;
         }
 
-        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create($buf));
+        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
 
-        my $str := $buf.new;
+        my $str := MAST::Bytecode.new;
         $str.write_uint32(nqp::elems($encoded) * 2 + $utf8); # LSB is UTF-8 flag
         my $pad := 4 - nqp::elems($encoded) % 4;
         $pad := 0 if $pad == 4;
@@ -2416,8 +2371,8 @@ class MoarVM::BytecodeWriter {
     has @!sc_handle_idxs;
     has @!extop_name_idxs;
     method BUILD(:$string-heap, :$callsites, :$annotations) {
-        $!mbc             := $buf.new;
-        $!bytecode        := $buf.new;
+        $!mbc             := MAST::Bytecode.new;
+        $!bytecode        := MAST::Bytecode.new;
         $!string-heap     := $string-heap;
         $!callsites       := $callsites;
         $!annotations     := $annotations;
