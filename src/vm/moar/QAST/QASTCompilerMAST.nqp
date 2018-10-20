@@ -2700,24 +2700,6 @@ class MoarVM::BytecodeWriter {
 }
 
 class MASTBytecodeAssembler {
-    method node_hash() {
-        nqp::hash(
-            'CompUnit',         MAST::CompUnit,
-            'Frame',            MAST::Frame,
-            'Op',               MAST::Op,
-            'ExtOp',            MAST::ExtOp,
-            'SVal',             MAST::SVal,
-            'IVal',             MAST::IVal,
-            'NVal',             MAST::NVal,
-            'Label',            MAST::Label,
-            'Local',            MAST::Local,
-            'Lexical',          MAST::Lexical,
-            'Call',             MAST::Call,
-            'Annotated',        MAST::Annotated,
-            'HandlerScope',     MAST::HandlerScope
-        )
-    }
-
     method assemble_to_file($mast, $file) {
         self.assemble($mast).save($file);
     }
