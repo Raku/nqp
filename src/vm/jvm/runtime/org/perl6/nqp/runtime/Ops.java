@@ -1638,7 +1638,7 @@ public final class Ops {
             }
             curFrame = curFrame.caller;
         }
-        throw ExceptionHandling.dieInternal(tc, "Dyanmic variable '" + name + "' not found");
+        throw ExceptionHandling.dieInternal(tc, "Dynamic variable '" + name + "' not found");
     }
     public static SixModelObject getlexdyn(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
