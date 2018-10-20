@@ -196,9 +196,32 @@ public final class IOOps {
         throw new UnsupportedOperationException("watchfile is not yet implemented.");
     }
 
+    public static SixModelObject asyncsocket(
+        SixModelObject queue,
+        SixModelObject schedulee,
+        int listening,
+        SixModelObject asyncType,
+        ThreadContext tc
+    ) {
+        final AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
+        task.queue = queue;
+        task.schedulee = schedulee;
+
+        if (listening == 1) {
+            final AsyncServerSocketHandle handle = new AsyncServerSocketHandle(tc);
+            task.handle = handle;
+        } else {
+            final AsyncSocketHandle handle = new AsyncSocketHandle(tc);
+            task.handle = handle;
+        }
+
+        return task;
+    }
+
     public static SixModelObject asyncconnect(
         SixModelObject queue,
         SixModelObject schedulee,
+        SixModelObject handle,
         String host,
         long port,
         SixModelObject asyncType,
@@ -207,17 +230,15 @@ public final class IOOps {
         final AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
         task.queue = queue;
         task.schedulee = schedulee;
-
-        final AsyncSocketHandle handle = new AsyncSocketHandle(tc);
-        task.handle = handle;
-        handle.connect(tc, host, (int) port, task);
-
+        task.handle = ((IOHandleInstance)handle).handle;
+        ((AsyncSocketHandle)task.handle).connect(tc, host, (int) port, task);
         return task;
     }
 
     public static SixModelObject asynclisten(
         SixModelObject queue,
         SixModelObject schedulee,
+        SixModelObject handle,
         String host,
         long port,
         long backlog,
@@ -227,12 +248,9 @@ public final class IOOps {
         final AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
         task.queue = queue;
         task.schedulee = schedulee;
-
-        final AsyncServerSocketHandle handle = new AsyncServerSocketHandle(tc);
-        task.handle = handle;
-        handle.bind(tc, host, (int) port, (int) backlog);
-        handle.accept(tc, task);
-
+        task.handle = ((IOHandleInstance)handle).handle;
+        ((AsyncServerSocketHandle)task.handle).bind(tc, host, (int) port, (int) backlog);
+        ((AsyncServerSocketHandle)task.handle).accept(tc, task);
         return task;
     }
 
