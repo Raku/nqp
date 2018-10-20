@@ -546,7 +546,7 @@ my class MASTCompilerInstance {
                     push_op('coerce_si', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op('const_i64', $res_reg, MAST::IVal.new( :value(0) ));
+                    push_op('const_i64', $res_reg, 0);
                 }
                 elsif $got == $MVM_reg_int32 {
                     push_op('extend_i32', $res_reg, $reg);
@@ -581,7 +581,7 @@ my class MASTCompilerInstance {
                     push_op('extend_n32', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op('const_n64', $res_reg, MAST::NVal.new( :value(0) ));
+                    push_op('const_n64', $res_reg, 0);
                 }
                 elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
@@ -607,7 +607,7 @@ my class MASTCompilerInstance {
                     push_op('coerce_ns', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_void {
-                    push_op('const_s', $res_reg, MAST::SVal.new( :value('') ));
+                    push_op('const_s', $res_reg, '');
                 }
                 elsif $got == $MVM_reg_uint64 {
                     push_op('coerce_us', $res_reg, $reg);
@@ -1148,9 +1148,7 @@ my class MASTCompilerInstance {
                 if $node.custom_args {
                     # The block does the arg processing by itself, so we accept any number
                     # of args here.
-                    push_op('checkarity',
-                        MAST::IVal.new( :size(16), :value(0)),
-                        MAST::IVal.new( :size(16), :value(-1)));
+                    push_op('checkarity', 0, -1);
                 }
                 else {
                     # Analyze parameters to get count of required/optional and make sure
@@ -1194,8 +1192,8 @@ my class MASTCompilerInstance {
 
                     # check the arity
                     push_op('checkarity',
-                        MAST::IVal.new( :size(16), :value($pos_required)),
-                        MAST::IVal.new( :size(16), :value($pos_slurpy ?? -1 !! $pos_required + $pos_optional)));
+                        $pos_required,
+                        $pos_slurpy ?? -1 !! $pos_required + $pos_optional);
 
                     # build up instructions to bind the params
                     for $block.params -> $var {
@@ -1230,15 +1228,15 @@ my class MASTCompilerInstance {
                                 unless nqp::elems($name) == 2 {
                                     nqp::die("Can only support 1 fallback name for a named parameter, '" ~ $name[0] ~ "' has " ~ nqp::elems($name) - 1);
                                 }
-                                $val := MAST::SVal.new( :value($name[0]) );
-                                $val2 := MAST::SVal.new( :value($name[1]) );
+                                $val := $name[0];
+                                $val2 := $name[1];
                             }
                             else {
-                                $val := MAST::SVal.new( :value($name) );
+                                $val := $name;
                             }
                         }
                         else { # positional
-                            $val := MAST::IVal.new( :size(16), :value($param_index));
+                            $val := $param_index;
                         }
 
                         # Parameter passing is always at full width. In the best
@@ -1319,7 +1317,7 @@ my class MASTCompilerInstance {
                                 push_op($opname, $valreg);
                             }
                             else {
-                                push_op($opname, $valreg, MAST::IVal.new( :value($pos_required + $pos_optional) ));
+                                push_op($opname, $valreg, $pos_required + $pos_optional);
                             }
                         }
                         else {
@@ -1766,13 +1764,13 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    push_op("bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], MAST::SVal.new( :value($name) ), $res_reg);
+                    push_op("bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]], $name, $res_reg);
                     $res_kind := $valmast.result_kind;
                 }
                 else {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
                     push_op("get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]],
-                        $res_reg, MAST::SVal.new( :value($name) ));
+                        $res_reg, $name);
                 }
             }
         }
@@ -1828,7 +1826,7 @@ my class MASTCompilerInstance {
                 }
                 my $lex_kind := self.type_to_register_kind($node.returns);
                 push_op(@lexref_n_opnames[@kind_to_op_slot[$lex_kind]],
-                    $res_reg, MAST::SVal.new( :value($name) ));
+                    $res_reg, $name);
             }
         }
         elsif $scope eq 'typevar' {
@@ -1838,7 +1836,7 @@ my class MASTCompilerInstance {
             my $name_reg := $*REGALLOC.fresh_s();
             $res_reg     := $*REGALLOC.fresh_o();
             $res_kind    := $MVM_reg_obj;
-            push_op('const_s', $name_reg, MAST::SVal.new( :value($name) ));
+            push_op('const_s', $name_reg, $name);
             push_op('getlexperinvtype_o', $res_reg, $name_reg);
             $*REGALLOC.release_register($name_reg, $MVM_reg_str);
         }
@@ -1913,8 +1911,8 @@ my class MASTCompilerInstance {
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
                 push_op('bind' ~ @attr_opnames[$kind], $obj.result_reg,
-                    $han.result_reg, MAST::SVal.new( :value($name) ), $valmast.result_reg,
-                        MAST::IVal.new( :value($hint) ) );
+                    $han.result_reg, $name, $valmast.result_reg,
+                        $hint);
                 $res_reg := $valmast.result_reg;
                 $res_kind := $valmast.result_kind;
             }
@@ -1922,8 +1920,7 @@ my class MASTCompilerInstance {
                 $res_reg := $*REGALLOC.fresh_register($kind);
                 $res_kind := $kind;
                 push_op('get' ~ @attr_opnames[$kind], $res_reg, $obj.result_reg,
-                    $han.result_reg, MAST::SVal.new( :value($name) ),
-                        MAST::IVal.new( :value($hint) ) );
+                    $han.result_reg, $name, $hint);
             }
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
@@ -1956,8 +1953,7 @@ my class MASTCompilerInstance {
             $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             $res_kind := $MVM_reg_obj;
             push_op(@attrref_opnames[$kind], $res_reg, $obj.result_reg,
-                $han.result_reg, MAST::SVal.new( :value($name) ),
-                    MAST::IVal.new( :value($hint) ) );
+                $han.result_reg, $name, $hint );
             $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
             $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
         }
@@ -1994,13 +1990,13 @@ my class MASTCompilerInstance {
     proto method as_mast_constant($qast) { * }
 
     multi method as_mast_constant(QAST::IVal $iv) {
-        MAST::IVal.new( :value($iv.value) )
+        $iv.value
     }
     multi method as_mast_constant(QAST::SVal $sv) {
-        MAST::SVal.new( :value($sv.value) )
+        $sv.value
     }
     multi method as_mast_constant(QAST::NVal $nv) {
-        MAST::NVal.new( :value($nv.value) )
+        $nv.value
     }
     multi method as_mast_constant(QAST::Want $want) {
         my int $finger := 1;
@@ -2016,7 +2012,7 @@ my class MASTCompilerInstance {
     }
     multi method as_mast_constant(QAST::Op $op) {
         if $op.op eq 'const' && nqp::existskey(%const_map, $op.name) {
-            return MAST::IVal.new( :value(%const_map{$op.name}) );
+            return %const_map{$op.name};
         }
         nqp::die("Expected QAST constant, got op '" ~ $op.op ~ "'");
     }
@@ -2034,7 +2030,7 @@ my class MASTCompilerInstance {
         MAST::Op.new(
             :op('const_i64'),
             $reg,
-            MAST::IVal.new( :value($iv.value) )
+            $iv.value
         );
         MAST::InstructionList.new(
             $reg,
@@ -2046,7 +2042,7 @@ my class MASTCompilerInstance {
         MAST::Op.new(
             :op('const_n64'),
             $reg,
-            MAST::NVal.new( :value($nv.value) )
+            $nv.value
         );
         MAST::InstructionList.new(
             $reg,
@@ -2055,11 +2051,7 @@ my class MASTCompilerInstance {
 
     sub const_s($val) {
         my $reg := $*REGALLOC.fresh_s();
-        MAST::Op.new(
-            :op('const_s'),
-            $reg,
-            MAST::SVal.new( :value($val) )
-        );
+        MAST::Op.new(:op('const_s'), $reg, $val);
         MAST::InstructionList.new(
             $reg,
             $MVM_reg_str)
@@ -2104,8 +2096,8 @@ my class MASTCompilerInstance {
             MAST::Op.new(
                 :op($op),
                 $reg,
-                MAST::IVal.new( :value($sc_idx) ),
-                MAST::IVal.new( :value($idx) )
+                $sc_idx,
+                $idx
             );
             MAST::InstructionList.new(
                 $reg,

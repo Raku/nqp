@@ -281,8 +281,8 @@ class QAST::MASTRegexCompiler {
             op(
                 $obj_idx < 32768 ?? 'wval' !! 'wval_wide',
                 %!reg<back_cur>,
-                MAST::IVal.new( :value($sc_idx) ),
-                MAST::IVal.new( :value($obj_idx) )
+                $sc_idx,
+                $obj_idx
             );
             $have_sc := 1;
         }
@@ -1031,7 +1031,7 @@ class QAST::MASTRegexCompiler {
                 $flag := $flag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
             }
             elsif $_.named {
-                nqp::push(@results, MAST::SVal.new( value => $_.named ));
+                nqp::push(@results, $_.named);
                 nqp::push(@result_kinds, NQPMu);
                 $flag := $flag +| $Arg::named;
             }
@@ -1399,7 +1399,7 @@ class QAST::MASTRegexCompiler {
     }
 
     sub label()    { MAST::Label.new() }
-    sub ival($val) { MAST::IVal.new( :value($val) ) }
-    sub nval($val) { MAST::NVal.new( :value($val) ) }
-    sub sval($val) { MAST::SVal.new( :value($val) ) }
+    sub ival($val) { my int $i := $val; $i }
+    sub nval($val) { $val }
+    sub sval($val) { ~$val }
 }

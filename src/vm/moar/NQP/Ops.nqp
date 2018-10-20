@@ -132,7 +132,7 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     elsif $val.result_kind == $MVM_reg_num64 {
         my $tmp_reg := $regalloc.fresh_register($MVM_reg_num64);
         my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
-        MAST::Op.new(:op<const_n64>, $tmp_reg, MAST::NVal.new( :value(0.0) ));
+        MAST::Op.new(:op<const_n64>, $tmp_reg, 0.0);
         MAST::Op.new(:op<eq_n>, $res_reg, $val.result_reg, $tmp_reg);
         MAST::InstructionList.new($res_reg, $MVM_reg_int64)
     }
