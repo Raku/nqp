@@ -2235,30 +2235,32 @@ my @kind_to_args := [0,
         nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@args);
         my uint16 $align := $elems % 2;
-        my @named_idxs := nqp::list;
+        my @named_idxs := nqp::list_i;
         my int $i := 0;
         my $identifier := MAST::Bytecode.new;
+        my uint64 $id_offset := 0;
         my $frame := $*MAST_FRAME;
-        my @flags := nqp::list;
+        my @flags := nqp::list_i;
         for @args -> $arg {
-            my $result_typeflag := @kind_to_args[@arg_mast[$i].result_kind];
+            my uint $result_typeflag := @kind_to_args[@arg_mast[$i].result_kind];
             if nqp::can($arg, 'flat') {
                 if $arg.flat {
                     $result_typeflag := $result_typeflag +| ($arg.named ?? $Arg::flatnamed !! $Arg::flat);
                 }
                 elsif $arg.named -> $name {
-                    nqp::push(@named_idxs, $frame.add-string($name));
+                    nqp::push_i(@named_idxs, $frame.add-string($name));
                     $result_typeflag := $result_typeflag +| $Arg::named;
                 }
             }
-            nqp::push(@flags, $result_typeflag);
+            nqp::push_i(@flags, $result_typeflag);
 
-            $identifier.write_uint8($result_typeflag);
+            nqp::writeuint($identifier, $id_offset++, $result_typeflag, 0);
             $i++;
         }
 
-        for @named_idxs {
-            $identifier.write_uint32($_);
+        for @named_idxs -> uint $idx {
+            nqp::writeuint($identifier, $id_offset, $idx, 4);
+            $id_offset := $id_offset + 4;
         }
         my $identifier_s := nqp::decode($identifier, 'iso-8859-1'); # just turn the buf into a str without real interpretation
         if nqp::existskey(%!callsites, $identifier_s) {
@@ -2267,15 +2269,18 @@ my @kind_to_args := [0,
 
         my $callsite-idx := nqp::elems(%!callsites);
         %!callsites{$identifier_s} := $callsite-idx;
-        $!callsites.write_uint16($elems);
-        for @flags {
-            $!callsites.write_uint8($_);
+        my uint $callsites_offset := nqp::elems($!callsites);
+        nqp::writeuint($!callsites, $callsites_offset, $elems, 2);
+        $callsites_offset := $callsites_offset + 2;
+        for @flags -> uint $flag {
+            nqp::writeuint($!callsites, $callsites_offset++, $flag, 0);
         }
         if $align > 0 {
-            $!callsites.write_uint8(0);
+            nqp::writeuint($!callsites, $callsites_offset++, 0, 0);
         }
-        for @named_idxs {
-            $!callsites.write_uint32($_);
+        for @named_idxs -> uint $idx {
+            nqp::writeuint($!callsites, $callsites_offset, $idx, 4);
+            $callsites_offset := $callsites_offset + 4;
         }
         $callsite-idx
     }
