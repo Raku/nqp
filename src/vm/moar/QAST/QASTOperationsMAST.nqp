@@ -466,12 +466,13 @@ QAST::MASTOperations.add_core_op('stmts', -> $qastcomp, $op {
 my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
     if $size != 1 {
         my $int_reg := $*REGALLOC.fresh_i();
-        push_op('const_i64', $int_reg, MAST::IVal.new( :value($size) ));
+        my int $size_i := +$size;
+        push_op('const_i64', $int_reg, $size_i);
         push_op('setelemspos', $array_reg, $int_reg);
         # reset the number of elements to 0 so that we don't push to the end
         # since our lists don't shrink by themselves (or by setting elems), we'll
         # end up with enough storage to hold all elements exactly
-        push_op('const_i64', $int_reg, MAST::IVal.new( :value(0) ));
+        push_op('const_i64', $int_reg, 0);
         push_op('setelemspos', $array_reg, $int_reg);
         $*REGALLOC.release_register($int_reg, $MVM_reg_int64);
     }
@@ -769,7 +770,7 @@ for <if unless with without> -> $op_name {
             push_op('decont', $decont_reg, @comp_ops[0].result_reg);
             if $is_withy {
                 my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
-                push_op('findmeth', $method_reg, $decont_reg, MAST::SVal.new( :value('defined')));
+                push_op('findmeth', $method_reg, $decont_reg, 'defined');
                 MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg);
                 $regalloc.release_register($method_reg, $MVM_reg_obj);
             }
@@ -1451,7 +1452,7 @@ sub handle_arg($arg, $qastcomp, @arg_regs, @arg_flags, @arg_kinds) {
     }
     elsif nqp::can($arg, 'named') && $arg.named -> $name {
         # add in the extra arg for the name
-        nqp::push(@arg_regs, MAST::SVal.new( value => $name ));
+        nqp::push(@arg_regs, $name);
 
         $result_typeflag := $result_typeflag +| $Arg::named;
     }
@@ -1704,7 +1705,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     # either a MAST::SVal or an $MVM_reg_str
     my $method_name;
     if $op.name {
-        $method_name := MAST::SVal.new( :value($op.name) );
+        $method_name := $op.name;
     }
     else {
         my $method_name_ilist := $qastcomp.as_mast($methodname_expr, :want($MVM_reg_str));
@@ -1999,16 +2000,14 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             $il.append($lbl);
             push_op('newexception',   $ex);
             push_op('bindexpayload',  $ex,  $lbl.result_reg );
-            push_op('const_i64',      $cat,
-                MAST::IVal.new( :value(%control_map{$name} + $HandlerCategory::labeled) ) );
+            push_op('const_i64',      $cat, %control_map{$name} + $HandlerCategory::labeled);
             push_op('bindexcategory', $ex,  $cat );
             push_op('throwdyn',       $res, $ex);
             $il
         }
         else {
             my $res := $regalloc.fresh_register($MVM_reg_obj);
-            push_op('throwcatdyn', $res,
-                MAST::IVal.new( :value(%control_map{$name}) ));
+            push_op('throwcatdyn', $res, %control_map{$name});
             MAST::InstructionList.new($res, $MVM_reg_obj)
         }
     }
@@ -2817,8 +2816,7 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
             push_op($hintedop, $obj_mast.result_reg, $type_mast.result_reg,
-                MAST::SVal.new( :value($name.value) ),
-                $val_mast.result_reg, MAST::IVal.new( :value($hint) ));
+                $name.value, $val_mast.result_reg, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
             push_op($namedop, $obj_mast.result_reg, $type_mast.result_reg,
@@ -2853,7 +2851,7 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
             push_op($hintedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
-                MAST::SVal.new( :value($name.value) ), MAST::IVal.new( :value($hint) ));
+                $name.value, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
             push_op($namedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
@@ -3208,7 +3206,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     unless nqp::istype($target_node, QAST::SVal) {
         nqp::die("speshresolve node must have a first child that is a QAST::SVal");
     }
-    my $target := MAST::SVal.new( :value($target_node.value) );
+    my $target := $target_node.value;
 
     # Compile the arguments
     my $regalloc := $*REGALLOC;
