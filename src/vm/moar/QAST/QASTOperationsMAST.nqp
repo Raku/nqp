@@ -1764,10 +1764,17 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     }
 
     # Figure out expected result register type
-    my $res_kind := $qastcomp.type_to_register_kind($op.returns);
-
+    my $res_kind;
     # and allocate a register for it. Probably reuse an arg's or the invocant's.
-    my $res_reg := $regalloc.fresh_register($res_kind);
+    my $res_reg;
+    if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+        $res_reg := MAST::VOID;
+        $res_kind := $MVM_reg_void;
+    }
+    else {
+        $res_kind := $qastcomp.type_to_register_kind($op.returns);
+        $res_reg := $regalloc.fresh_register($res_kind);
+    }
 
     # Generate call.
     my $res_type;
@@ -1801,7 +1808,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         $bytecode.write_uint16($res_reg.index);
         $bytecode.write_uint16($callee_reg.index);
     }
-    else { #FIXME either remove this condition, or implement VOID context for method calls above
+    else {
         $bytecode.write_uint16(%MAST::Ops::codes<invoke_v>);
         $bytecode.write_uint16($callee_reg.index);
     }
