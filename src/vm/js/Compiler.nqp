@@ -272,6 +272,24 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             }
         }
+
+        method try_get_bind_scope($var) {
+            if nqp::istype($var, QAST::Var) && $var.scope eq 'lexicalref' {
+                # Make sure we've got the lexical itself in scope to bind to.
+                my $info := self;
+                while $info {
+                    return NQPMu if $info.qast && $info.qast.ann('DYN_COMP_WRAPPER');
+                    if nqp::defined($info.lexicalref_type($var)) {
+                        return NQPMu;
+                    }
+                    if $info.has_own_variable($var.name) {
+                        return 'lexical';
+                    }
+                    $info := $info.outer;
+                }
+            }
+            return NQPMu;
+        }
     }
 
     method is_dynamic_var(BlockInfo $info, QAST::Var $var) {

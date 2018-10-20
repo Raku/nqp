@@ -160,32 +160,54 @@ class QAST::OperationsJS {
 
     add_simple_op('setcontspec', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :side_effects, :decont(0));
 
+    sub do_assign($comp, $node, $op_name, $value_kind) {
+        my $cont := $comp.as_js($node[0], :want($T_OBJ));
+        my $value := $comp.as_js($node[1], :want($value_kind));
+
+        my $deconted := $value_kind == $T_OBJ ?? $comp.await("{$value.expr}.\$\$decont($*CTX)") !! $value.expr;
+        Chunk.new($T_OBJ, $cont.expr, [
+            $cont,
+            $value,
+            $comp.await ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
+        ]);
+    }
+
     sub add_assign_op($op_name, $value_kind) {
         # TODO If possible lower it to a bind instead just like on the moarvm backend
         # POTENTIAL OPTIMALIZATION
 
         add_op($op_name, sub ($comp, $node, :$want) {
-            my $cont := $comp.as_js($node[0], :want($T_OBJ));
-            my $value := $comp.as_js($node[1], :want($value_kind));
+            do_assign($comp, $node, $op_name, $value_kind);
+        });
+    }
 
-            my $deconted := $value_kind == $T_OBJ ?? $comp.await("{$value.expr}.\$\$decont($*CTX)") !! $value.expr;
-            Chunk.new($T_OBJ, $cont.expr, [
-                $cont,
-                $value,
-                $comp.await ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
-            ]);
+    sub add_native_assign_op($op_name, $value_kind) {
+        add_op($op_name, sub ($comp, $node, :$want) {
+            unless +$node.list == 2 {
+                nqp::die("The '$op_name' op needs 2 arguments, got " ~ +$node.list);
+            }
+            if $*BLOCK.try_get_bind_scope($node[0]) -> $bind_scope {
+                # Can lower it to a bind instead.
+                my $target := nqp::clone($node[0]);
+                $target.scope($bind_scope);
+                $comp.as_js(QAST::Op.new(:op('bind'), $target, $node[1]), :$want);
+            }
+            else {
+                do_assign($comp, $node, $op_name, $value_kind);
+            }
         });
     }
 
     add_assign_op('assignunchecked', $T_OBJ);
     add_assign_op('assign', $T_OBJ);
 
-    add_assign_op('assign_i', $T_INT);
-    add_assign_op('assign_n', $T_NUM);
-    add_assign_op('assign_s', $T_STR);
+    add_native_assign_op('assign_i', $T_INT);
+    add_native_assign_op('assign_n', $T_NUM);
+    add_native_assign_op('assign_s', $T_STR);
 
-    add_assign_op('assign_i64', $T_INT64);
-    add_assign_op('assign_u64', $T_UINT64);
+    add_native_assign_op('assign_i64', $T_INT64);
+    add_native_assign_op('assign_u64', $T_UINT64);
+
 
     add_simple_op('decont', $T_OBJ, [$T_OBJ], :method_call, :ctx, :await);
 
