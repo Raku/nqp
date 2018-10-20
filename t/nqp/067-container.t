@@ -206,11 +206,16 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     my $cont_for_with_container_defined := nqp::create(SimpleCont);
     nqp::assign($cont_for_with_container_defined, ValueWithDefined.new(defined => $cont_with_false_value));
 
-    is(nqp::with($cont_for_with_defined, "good", "bad"), "good", 'with - defined case');
-    is(nqp::with($cont_for_with_not_defined, "good", "bad"), "bad", 'with - undefined case');
-    is(nqp::with($cont_for_with_container_defined, "good", "bad"), "good", 'with - defined returns container');
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('on the jvm nqp::with incorrectly checks for type object instead of calling defined', 6);
+    }
+    else {
+        is(nqp::with($cont_for_with_defined, "good", "bad"), "good", 'with - defined case');
+        is(nqp::with($cont_for_with_not_defined, "good", "bad"), "bad", 'with - undefined case');
+        is(nqp::with($cont_for_with_container_defined, "good", "bad"), "good", 'with - defined returns container');
 
-    is(nqp::without($cont_for_with_defined, "good", "bad"), "bad", 'without - defined case');
-    is(nqp::without($cont_for_with_not_defined, "good", "bad"), "good", 'without - undefined case');
-    is(nqp::without($cont_for_with_container_defined, "good", "bad"), "bad", 'without - defined returns container');
+        is(nqp::without($cont_for_with_defined, "good", "bad"), "bad", 'without - defined case');
+        is(nqp::without($cont_for_with_not_defined, "good", "bad"), "good", 'without - undefined case');
+        is(nqp::without($cont_for_with_container_defined, "good", "bad"), "bad", 'without - defined returns container');
+    }
 }
