@@ -651,6 +651,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_UINT32 {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeUIntArg({$chunk.expr})", $chunk);
                 }
+                if $got == $T_INT64 || $got == $T_UINT64 {
+                    return Chunk.new($T_CALL_ARG, "nqp.int64ToObj(HLL, {$chunk.expr})", $chunk);
+                }
                 if $got == $T_NUM {
                     return Chunk.new($T_CALL_ARG, "new nqp.NativeNumArg({$chunk.expr})", $chunk);
                 }
