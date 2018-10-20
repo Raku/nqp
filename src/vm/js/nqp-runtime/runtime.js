@@ -540,6 +540,48 @@ exports.arg_i = function(ctx, contedArg) {
   }
 };
 
+exports.arg_i64 = function(ctx, contedArg) {
+  if (contedArg instanceof NativeIntArg) {
+    return BigInt(contedArg.value);
+  } else if (contedArg instanceof NativeUIntArg) {
+    return BigInt(contedArg.value);
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native int64 argument, but got num');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native int64 argument, but got str');
+  }
+
+  const arg = contedArg.$$decont(ctx);
+  if (arg instanceof NQPInt) {
+    return BigInt(arg.value);
+  } else if (arg.$$getInt64) {
+    return BigInt(arg.$$getInt64());
+  } else {
+    throw new NQPException('Expected native int64 argument, but got something else');
+  }
+};
+
+exports.arg_u64 = function(ctx, contedArg) {
+  if (contedArg instanceof NativeIntArg) {
+    return BigInt.asUintN(64, contedArg.value);
+  } else if (contedArg instanceof NativeUIntArg) {
+    return BigInt(contedArg.value);
+  } else if (contedArg instanceof NativeNumArg) {
+    throw new NQPException('Expected native uint64 argument, but got num');
+  } else if (contedArg instanceof NativeStrArg) {
+    throw new NQPException('Expected native uint64 argument, but got str');
+  }
+
+  const arg = contedArg.$$decont(ctx);
+  if (arg instanceof NQPInt) {
+    return BigInt.asUintN(64, BigInt(arg.value));
+  } else if (arg.$$getUint64) {
+    return BigInt(arg.$$getUint64());
+  } else {
+    throw new NQPException('Expected native uint64 argument, but got something else');
+  }
+};
+
 exports.arg_n = function(ctx, contedArg) {
   if (contedArg instanceof NativeNumArg) {
     return contedArg.value;
