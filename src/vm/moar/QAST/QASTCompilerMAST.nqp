@@ -2302,7 +2302,6 @@ my @kind_to_args := [0,
 class MoarVM::StringHeap {
     has @!strings;
     has %!strings;
-    has $!done;
     method BUILD(:@strings) {
         @!strings := nqp::list();
         %!strings := nqp::hash();
@@ -2311,42 +2310,39 @@ class MoarVM::StringHeap {
                 self.add($_ || '');
             }
         }
-        $!done := 0;
     }
     method add(str $s) {
-        if $!done {
-            nqp::die("add after size!");
-        }
         if nqp::existskey(%!strings, $s) {
-            return %!strings{$s};
+            %!strings{$s};
         }
-
-        my int $utf8 := 0;
-        my int $i := 0;
-        my $chars := nqp::chars($s);
-        while $i < $chars {
-            my $g := nqp::getcp_s($s, $i);
-            if $g < 0 || $g >= 0xff || $g == 0x0d {
-                $utf8 := 1;
-                last;
+        else {
+            my int $utf8 := 0;
+            my int $i := 0;
+            my int $chars := nqp::chars($s);
+            while $i < $chars && !$utf8 {
+                my $g := nqp::getcp_s($s, $i++);
+                $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
             }
-            $i++;
+
+            my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
+            my int $encoded_size := nqp::elems($encoded);
+            my int $pad := 4 - $encoded_size % 4;
+            $pad := 0 if $pad == 4;
+
+            my $str := MAST::Bytecode.new;
+            nqp::setelems($str, $encoded_size + 4 + $pad);
+            nqp::setelems($str, 0);
+
+            $str.write_uint32(nqp::elems($encoded) * 2 + $utf8); # LSB is UTF-8 flag
+            $str.write_buf($encoded);
+            $str.write_uint8(0) while $pad--;
+
+            nqp::push(@!strings, $str);
+
+            %!strings{$s} := nqp::elems(@!strings) - 1
         }
-
-        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
-
-        my $str := MAST::Bytecode.new;
-        $str.write_uint32(nqp::elems($encoded) * 2 + $utf8); # LSB is UTF-8 flag
-        my $pad := 4 - nqp::elems($encoded) % 4;
-        $pad := 0 if $pad == 4;
-        $encoded.write_uint8(0) while $pad--;
-        $str.write_buf($encoded);
-        nqp::push(@!strings, $str);
-
-        %!strings{$s} := nqp::elems(@!strings) - 1
     }
     method size() {
-        $!done := 1;
         my uint32 $size := 0;
         for @!strings {
             $size := $size + nqp::elems($_);
