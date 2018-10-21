@@ -1513,8 +1513,7 @@ my $call_gen := sub ($qastcomp, $op) {
     elsif +@args {
         @args := nqp::clone(@args);
         my $callee_qast := @args.shift;
-        my $no_decont := nqp::istype($callee_qast, QAST::Op) && $callee_qast.op eq 'speshresolve'
-            || nqp::istype($callee_qast, QAST::WVal) && !nqp::iscont($callee_qast.value);
+        my $no_decont := nqp::istype($callee_qast, QAST::WVal) && !nqp::iscont($callee_qast.value);
         $callee := $qastcomp.as_mast(
             $no_decont ?? $callee_qast !! QAST::Op.new( :op('decont'), $callee_qast ),
             :want($MVM_reg_obj));
@@ -1571,14 +1570,6 @@ my $call_gen := sub ($qastcomp, $op) {
         }
 
         my $arg_mast := @arg_mast[$i++];
-        if $op.op eq 'speshresolve' {
-            if nqp::can($arg, 'flat') && $arg.flat {
-                nqp::die("Illegal flat arg to speshresolve");
-            }
-            if $arg_mast.result_kind != $MVM_reg_obj {
-                nqp::die("Illegal non-object arg to speshresolve");
-            }
-        }
         my $kind := $arg_mast.result_kind;
         my uint64 $arg_opcode := nqp::atpos_i(@kind_to_opcode, $kind);
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
@@ -1617,19 +1608,7 @@ my $call_gen := sub ($qastcomp, $op) {
 
     # Generate call.
     my $res_type;
-    if $op.op eq 'speshresolve' {
-        nqp::die('speshresolve must have a result')
-            unless $res_reg.isa(MAST::Local);
-        nqp::die('MAST::Local index out of range')
-            if $res_reg.index >= nqp::elems($frame.local_types);
-        nqp::die('speshresolve must have an object result')
-            if type_to_local_type($frame.local_types()[$res_reg.index]) != $MVM_reg_obj;
-        $res_type := $MVM_operand_obj;
-        nqp::writeuint($bytecode, $bytecode_pos, $op_code_speshresolve, 2);
-        my uint $callee_res_index := $callee.result_reg.index;
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_res_index, 2);
-    }
-    elsif $res_reg.isa(MAST::Local) { # We got a return value
+    if $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
         my $index := $res_reg.index;
         if $res_reg.index >= nqp::elems(@local_types) {
@@ -3257,10 +3236,12 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     }
     my $target := $target_node.value;
 
+    my $frame := $*MAST_FRAME;
+    my $bytecode := $frame.bytecode;
+
     # Compile the arguments
-    my $regalloc := $*REGALLOC;
-    my @arg_regs := nqp::list();
-    my @arg_flags := nqp::list();
+    my @arg_mast := nqp::list();
+
     for @args -> $arg {
         if nqp::can($arg, 'flat') && $arg.flat {
             nqp::die('The speshresolve op must not have flattening arguments');
@@ -3271,24 +3252,44 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
         my $arg_mast := $qastcomp.as_mast($arg, :want($MVM_reg_obj));
         nqp::die("Arg code did not result in a MAST::Local")
             unless $arg_mast.result_reg && $arg_mast.result_reg ~~ MAST::Local;
-        nqp::push(@arg_regs, $arg_mast.result_reg);
-        nqp::push(@arg_flags, @kind_to_args[$arg_mast.result_kind]);
+        nqp::push(@arg_mast, $arg_mast);
     }
-    for @arg_regs -> $reg {
-        if $reg ~~ MAST::Local {
-            $regalloc.release_register($reg, $MVM_reg_obj);
+
+    my uint $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
+    my uint64 $bytecode_pos := nqp::elems($bytecode);
+
+    nqp::writeuint($bytecode, $bytecode_pos, $op_code_prepargs, 2);
+    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callsite-id, 2);
+    $bytecode_pos := $bytecode_pos + 4;
+
+    my uint64 $i := 0;
+    for @args -> $arg {
+        my $arg_mast := @arg_mast[$i];
+        my $kind := $arg_mast.result_kind;
+        my uint64 $arg_opcode := nqp::atpos_i(@kind_to_opcode, $kind);
+        nqp::die("Unhandled arg type $kind") unless $arg_opcode;
+        nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $i++, 2);
+        my uint64 $res_index := $arg_mast.result_reg.index;
+        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
+        $bytecode_pos := $bytecode_pos + 6;
+    }
+
+    my $regalloc := $*REGALLOC;
+    for @arg_mast -> $arg {
+        if $arg.result_reg ~~ MAST::Local {
+            $regalloc.release_register($arg.result_reg, $arg.result_kind);
         }
     }
 
     # Assemble the resolve call.
     my $res_reg := $regalloc.fresh_register($MVM_reg_obj);
-    MAST::Call.new(
-        :target($target),
-        :flags(@arg_flags),
-        |@arg_regs,
-        :result($res_reg),
-        :op(2)
-    );
+    nqp::writeuint($bytecode, $bytecode_pos, $op_code_speshresolve, 2);
+    my uint $res_index := $res_reg.index;
+    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
+    my uint $target_idx := $frame.add-string($target);
+    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $target_idx, 4);
+
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 
