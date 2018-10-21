@@ -33,6 +33,10 @@ my &op_set    := %core_op_generators<set>;
 my uint $op_code_prepargs     := %MAST::Ops::codes<prepargs>;
 my uint $op_code_argconst_s   := %MAST::Ops::codes<argconst_s>;
 my uint $op_code_invoke_v     := %MAST::Ops::codes<invoke_v>;
+my uint $op_code_invoke_i     := %MAST::Ops::codes<invoke_i>;
+my uint $op_code_invoke_n     := %MAST::Ops::codes<invoke_n>;
+my uint $op_code_invoke_s     := %MAST::Ops::codes<invoke_s>;
+my uint $op_code_invoke_o     := %MAST::Ops::codes<invoke_o>;
 my uint $op_code_speshresolve := %MAST::Ops::codes<speshresolve>;
 
 # This is used as a return value from all of the various compilation routines.
@@ -786,10 +790,11 @@ for <if unless with without> -> $op_name {
                 $regalloc.release_register($method_reg, $MVM_reg_obj);
             }
 
-            push_op(
+            %core_op_generators{
                 # the conditional routines are reversed on purpose
                 $op_name eq 'if' || $op_name eq 'with'
-                  ?? 'unless_o' !! 'if_o',
+                  ?? 'unless_o' !! 'if_o'
+            }(
                 $decont_reg,
                 $else_lbl
             );
@@ -797,20 +802,22 @@ for <if unless with without> -> $op_name {
         }
         elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
             my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
-            push_op(
+            %core_op_generators{
                 $op_name eq 'if'
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                  !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+            }(
                 $coerce-reg,
                 $else_lbl
             );
             $regalloc.release_register: $coerce-reg, $coerce-kind;
         }
         else {
-            push_op(
+            %core_op_generators{
                 $op_name eq 'if'
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                  !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+            }(
                 @comp_ops[0].result_reg,
                 $else_lbl
             );
@@ -1115,9 +1122,10 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     if @comp_ops[0].result_kind == $MVM_reg_obj {
         my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
         op_decont($decont_reg, @comp_ops[0].result_reg);
-        push_op(
+        %core_op_generators{
             # the conditional routines are reversed on purpose
-            $op_name eq 'while' ?? 'unless_o' !! 'if_o',
+            $op_name eq 'while' ?? 'unless_o' !! 'if_o'
+        }(
             $decont_reg,
             $done_lbl
         );
@@ -1126,27 +1134,29 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     elsif @Full-width-coerce-to[@comp_ops[0].result_kind]
     -> $coerce-kind {
         my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
-        push_op(
+        %core_op_generators{
             $op_name eq 'while'
               ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-              !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+              !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+        }(
             $coerce-reg,
             $done_lbl
         );
         $regalloc.release_register: $coerce-reg, $coerce-kind;
     }
     else {
-        push_op(
+        %core_op_generators{
             $op_name eq 'while'
               ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-              !! @Condition-op-kinds[        @comp_ops[0].result_kind],
+              !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+        }(
             @comp_ops[0].result_reg,
             $done_lbl
         );
     }
 
     $*MAST_FRAME.add-label($redo_lbl);
-    push_op('osrpoint');
+    %core_op_generators{'osrpoint'}();
 
     # Emit the loop body; stash the result.
 
@@ -1297,7 +1307,7 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
     }
 
     $*MAST_FRAME.add-label($lbl_redo);
-    push_op('osrpoint');
+    %core_op_generators{'osrpoint'}();
 
     # Now do block invocation.
     my $inv_il := MAST::Call.new(
@@ -1737,8 +1747,9 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     # or the provided name-producing expression.
     my $decont_inv_reg := $regalloc.fresh_o();
     op_decont($decont_inv_reg, $invocant.result_reg);
-    push_op(($op.name ?? 'findmeth' !! 'findmeth_s'),
-        $callee_reg, $decont_inv_reg, $method_name);
+    $op.name
+        ?? %core_op_generators{'findmeth'}($callee_reg, $decont_inv_reg, $method_name)
+        !! %core_op_generators{'findmeth_s'}($callee_reg, $decont_inv_reg, $method_name);
     $regalloc.release_register($decont_inv_reg, $MVM_reg_obj);
 
     # release the method name register if we used one
@@ -2037,14 +2048,14 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             $il.append($lbl);
             %core_op_generators{'newexception'}($ex);
             %core_op_generators{'bindexpayload'}($ex,  $lbl.result_reg );
-            push_op('const_i64', $cat, %control_map{$name} + $HandlerCategory::labeled);
+            %core_op_generators{'const_i64'}($cat, %control_map{$name} + $HandlerCategory::labeled);
             %core_op_generators{'bindexcategory'}($ex,  $cat );
             %core_op_generators{'throwdyn'}($res, $ex);
             $il
         }
         else {
             my $res := $regalloc.fresh_register($MVM_reg_obj);
-            push_op('throwcatdyn', $res, %control_map{$name});
+            %core_op_generators{'throwcatdyn'}($res, %control_map{$name});
             MAST::InstructionList.new($res, $MVM_reg_obj)
         }
     }
@@ -2852,11 +2863,11 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            push_op($hintedop, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$hintedop}($obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $val_mast.result_reg, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            push_op($namedop, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$namedop}($obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg, $val_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
@@ -2887,11 +2898,11 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            push_op($hintedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$hintedop}($res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            push_op($namedop, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$namedop}($res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
