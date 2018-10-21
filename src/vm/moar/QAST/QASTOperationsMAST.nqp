@@ -1493,11 +1493,11 @@ sub arrange_args(@in) {
     @posit
 }
 
-my @kind_to_opcode := nqp::list;
-@kind_to_opcode[$MVM_reg_obj]   := %MAST::Ops::codes<arg_o>,
-@kind_to_opcode[$MVM_reg_str]   := %MAST::Ops::codes<arg_s>,
-@kind_to_opcode[$MVM_reg_int64] := %MAST::Ops::codes<arg_i>,
-@kind_to_opcode[$MVM_reg_num64] := %MAST::Ops::codes<arg_n>,
+my @kind_to_opcode := nqp::list_i;
+nqp::bindpos_i(@kind_to_opcode, $MVM_reg_obj, %MAST::Ops::codes<arg_o>);
+nqp::bindpos_i(@kind_to_opcode, $MVM_reg_str, %MAST::Ops::codes<arg_s>);
+nqp::bindpos_i(@kind_to_opcode, $MVM_reg_int64, %MAST::Ops::codes<arg_i>);
+nqp::bindpos_i(@kind_to_opcode, $MVM_reg_num64, %MAST::Ops::codes<arg_n>);
 my $call_gen := sub ($qastcomp, $op) {
     # Work out what callee is.
     my $callee;
@@ -1580,7 +1580,7 @@ my $call_gen := sub ($qastcomp, $op) {
             }
         }
         my $kind := $arg_mast.result_kind;
-        my uint64 $arg_opcode := @kind_to_opcode[$kind];
+        my uint64 $arg_opcode := nqp::atpos_i(@kind_to_opcode, $kind);
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
         nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
@@ -1636,19 +1636,20 @@ my $call_gen := sub ($qastcomp, $op) {
             nqp::die("MAST::Local index out of range");
         }
         my $op_name := $is_nativecall ?? 'nativeinvoke_' !! 'invoke_';
-        if nqp::objprimspec(@local_types[$index]) == 1 {
+        my $primspec := nqp::objprimspec(@local_types[$index]);
+        if $primspec == 1 {
             $op_name := $op_name ~ 'i';
             $res_type := $MVM_operand_int64;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 2 {
+        elsif $primspec == 2 {
             $op_name := $op_name ~ 'n';
             $res_type := $MVM_operand_num64;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 3 {
+        elsif $primspec == 3 {
             $op_name := $op_name ~ 's';
             $res_type := $MVM_operand_str;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 0 { # object
+        elsif $primspec == 0 { # object
             $op_name := $op_name ~ 'o';
             $res_type := $MVM_operand_obj;
         }
@@ -1775,7 +1776,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 
         my $arg_mast := @arg_mast[$i++];
         my $kind := $arg_mast.result_kind;
-        my uint64 $arg_opcode := @kind_to_opcode[$kind];
+        my uint64 $arg_opcode := nqp::atpos_i(@kind_to_opcode, $kind);
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
         nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
@@ -1815,27 +1816,27 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         if $res_reg.index >= nqp::elems(@local_types) {
             nqp::die("MAST::Local index out of range");
         }
-        my $op_name := 'invoke_';
-        if nqp::objprimspec(@local_types[$index]) == 1 {
-            $op_name := $op_name ~ 'i';
+        my $primspec := nqp::objprimspec(@local_types[$index]);
+        my uint $op_code;
+        if $primspec == 1 {
+            $op_code := $op_code_invoke_i;
             $res_type := $MVM_operand_int64;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 2 {
-            $op_name := $op_name ~ 'n';
+        elsif $primspec == 2 {
+            $op_code := $op_code_invoke_n;
             $res_type := $MVM_operand_num64;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 3 {
-            $op_name := $op_name ~ 's';
+        elsif $primspec == 3 {
+            $op_code := $op_code_invoke_s;
             $res_type := $MVM_operand_str;
         }
-        elsif nqp::objprimspec(@local_types[$index]) == 0 { # object
-            $op_name := $op_name ~ 'o';
+        elsif $primspec == 0 { # object
+            $op_code := $op_code_invoke_o;
             $res_type := $MVM_operand_obj;
         }
         else {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
         }
-        my uint $op_code := %MAST::Ops::codes{$op_name};
         nqp::writeuint($bytecode, $bytecode_pos, $op_code, 2);
         my uint $res_index := $res_reg.index;
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
