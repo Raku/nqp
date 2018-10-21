@@ -2231,6 +2231,7 @@ my @kind_to_args := [0,
     $Arg::str,  # $MVM_reg_str             := 7;
     $Arg::obj   # $MVM_reg_obj             := 8;
 ];
+    my $latin1decoder := NQPDecoder.new('iso-8859-1');
     method get_callsite_id_from_args(@args, @arg_mast) {
         nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@args);
@@ -2241,16 +2242,14 @@ my @kind_to_args := [0,
         my uint64 $id_offset := 0;
         my $frame := $*MAST_FRAME;
         my @flags := nqp::list_i;
-        for @args -> $arg {
+        for @args {
             my uint $result_typeflag := @kind_to_args[@arg_mast[$i].result_kind];
-            if nqp::can($arg, 'flat') {
-                if $arg.flat {
-                    $result_typeflag := $result_typeflag +| ($arg.named ?? $Arg::flatnamed !! $Arg::flat);
-                }
-                elsif $arg.named -> $name {
-                    nqp::push_i(@named_idxs, $frame.add-string($name));
-                    $result_typeflag := $result_typeflag +| $Arg::named;
-                }
+            if $_.flat {
+                $result_typeflag := $result_typeflag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
+            }
+            elsif $_.named -> $name {
+                nqp::push_i(@named_idxs, $frame.add-string($name));
+                $result_typeflag := $result_typeflag +| $Arg::named;
             }
             nqp::push_i(@flags, $result_typeflag);
 
@@ -2262,7 +2261,8 @@ my @kind_to_args := [0,
             nqp::writeuint($identifier, $id_offset, $idx, 4);
             $id_offset := $id_offset + 4;
         }
-        my $identifier_s := nqp::decode($identifier, 'iso-8859-1'); # just turn the buf into a str without real interpretation
+        $latin1decoder.add-bytes($identifier); # just turn the buf into a str without real interpretation
+        my str $identifier_s := $latin1decoder.consume-all-chars;
         if nqp::existskey(%!callsites, $identifier_s) {
             return %!callsites{$identifier_s};
         }
