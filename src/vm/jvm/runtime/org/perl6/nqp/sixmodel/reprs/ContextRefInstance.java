@@ -15,71 +15,58 @@ public class ContextRefInstance extends SixModelObject {
     }
 
     public void at_key_native(ThreadContext tc, String key) {
-        Integer idx;
-
-        idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
+        Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
             tc.native_i = context.iLex[idx];
             tc.native_type = ThreadContext.NATIVE_INT;
             return;
         }
-
         idx = context.codeRef.staticInfo.nTryGetLexicalIdx(key);
         if (idx != null) {
             tc.native_n = context.nLex[idx];
             tc.native_type = ThreadContext.NATIVE_NUM;
             return;
         }
-
         idx = context.codeRef.staticInfo.sTryGetLexicalIdx(key);
         if (idx != null) {
             tc.native_s = context.sLex[idx];
             tc.native_type = ThreadContext.NATIVE_STR;
             return;
         }
-
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
 
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
-        final Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
-
-        if (idx == null) {
+        Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
+        if (idx == null)
             throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
-        }
-
         context.oLex[idx] = value;
     }
 
     public void bind_key_native(ThreadContext tc, String key) {
-        Integer idx;
-
-        idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
+        Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
             context.iLex[idx] = tc.native_i;
             tc.native_type = ThreadContext.NATIVE_INT;
             return;
         }
-
         idx = context.codeRef.staticInfo.nTryGetLexicalIdx(key);
         if (idx != null) {
             context.nLex[idx] = tc.native_n;
             tc.native_type = ThreadContext.NATIVE_NUM;
             return;
         }
-
         idx = context.codeRef.staticInfo.sTryGetLexicalIdx(key);
         if (idx != null) {
             context.sLex[idx] = tc.native_s;
             tc.native_type = ThreadContext.NATIVE_STR;
             return;
         }
-
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
 
     public long elems(ThreadContext tc) {
-        final StaticCodeInfo info = context.codeRef.staticInfo;
+        StaticCodeInfo info = context.codeRef.staticInfo;
         return (info.oLexicalNames != null ? info.oLexicalNames.length : 0) +
                (info.iLexicalNames != null ? info.iLexicalNames.length : 0) +
                (info.nLexicalNames != null ? info.nLexicalNames.length : 0) +
@@ -87,12 +74,11 @@ public class ContextRefInstance extends SixModelObject {
     }
 
     public long exists_key(ThreadContext tc, String key) {
-        final StaticCodeInfo info = context.codeRef.staticInfo;
-
-        return (info.oTryGetLexicalIdx(key) != null
-            || info.iTryGetLexicalIdx(key) != null
-            || info.nTryGetLexicalIdx(key) != null
-            || info.sTryGetLexicalIdx(key) != null)
-            ? 1 : 0;
+        StaticCodeInfo sci = context.codeRef.staticInfo;
+        return sci.oTryGetLexicalIdx(key) != null ||
+               sci.iTryGetLexicalIdx(key) != null ||
+               sci.nTryGetLexicalIdx(key) != null ||
+               sci.sTryGetLexicalIdx(key) != null
+               ? 1 : 0;
     }
 }

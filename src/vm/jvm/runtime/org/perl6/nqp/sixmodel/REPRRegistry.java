@@ -42,27 +42,21 @@ import org.perl6.nqp.sixmodel.reprs.MultiDimArray;
 import org.perl6.nqp.sixmodel.reprs.Decoder;
 
 public class REPRRegistry {
-
-    private static HashMap<String, Integer> reprIdMap = new HashMap<>();
-
-    private static ArrayList<REPR> reprs = new ArrayList<>();
+    private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
+    private static ArrayList<REPR> reprs = new ArrayList<REPR>();
 
     public static REPR getByName(String name) {
-        final Integer idx = reprIdMap.get(name);
-
-        if (idx == null) {
+        Integer idx = reprIdMap.get(name);
+        if (idx == null)
             throw new RuntimeException("No REPR " + name);
-        }
-
         return getById(idx);
     }
 
     public static REPR getById(int id) {
-        if (id < reprs.size()) {
+        if (id < reprs.size())
             return reprs.get(id);
-        } else {
-            throw new RuntimeException("No REPR " + Integer.toString(id));
-        }
+        else
+            throw new RuntimeException("No REPR " + new Integer(id).toString());
     }
 
     private static void addREPR(String name, REPR REPR) {

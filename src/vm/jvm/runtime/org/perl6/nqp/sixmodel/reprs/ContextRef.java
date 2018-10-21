@@ -10,20 +10,16 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class ContextRef extends REPR {
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-        final STable st = new STable(this, HOW);
-        final SixModelObject obj = new TypeObject();
-
+        STable st = new STable(this, HOW);
+        SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
-
         return st.WHAT;
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        final ContextRefInstance obj = new ContextRefInstance();
-
+        ContextRefInstance obj = new ContextRefInstance();
         obj.st = st;
-
         return obj;
     }
 
@@ -31,7 +27,8 @@ public class ContextRef extends REPR {
         throw ExceptionHandling.dieInternal(tc, "ContextRef does not participate in serialization");
     }
 
-    public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "ContextRef does not participate in serialization");
     }
 

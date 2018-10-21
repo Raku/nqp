@@ -6,7 +6,6 @@ import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 public class CPointerInstance extends SixModelObject {
-
     public Pointer pointer;
 
     public void set_int(ThreadContext tc, long value) {
@@ -16,7 +15,7 @@ public class CPointerInstance extends SixModelObject {
     }
 
     public long get_int(ThreadContext tc) {
-        return (this.pointer == null)
+        return this.pointer == null
             ? 0
             : Pointer.nativeValue(this.pointer);
     }

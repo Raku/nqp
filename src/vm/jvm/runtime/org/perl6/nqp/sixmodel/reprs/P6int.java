@@ -5,7 +5,6 @@ import com.sun.jna.Native;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -17,44 +16,40 @@ import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6int extends REPR {
 
-    // ------------------------------
-    // Possible C types we can handle
-    // ------------------------------
-
-    private final static byte P6INT_C_TYPE_CHAR     =  -1;
-    private final static byte P6INT_C_TYPE_SHORT    =  -2;
-    private final static byte P6INT_C_TYPE_INT      =  -3;
-    private final static byte P6INT_C_TYPE_LONG     =  -4;
-    private final static byte P6INT_C_TYPE_LONGLONG =  -5;
-    private final static byte P6INT_C_TYPE_SIZE_T   =  -6;
-    private final static byte P6INT_C_TYPE_BOOL     =  -7;
+    /**
+     * Possible C types we can handle.
+     */
+    public final static byte P6INT_C_TYPE_CHAR     =  -1;
+    public final static byte P6INT_C_TYPE_SHORT    =  -2;
+    public final static byte P6INT_C_TYPE_INT      =  -3;
+    public final static byte P6INT_C_TYPE_LONG     =  -4;
+    public final static byte P6INT_C_TYPE_LONGLONG =  -5;
+    public final static byte P6INT_C_TYPE_SIZE_T   =  -6;
+    public final static byte P6INT_C_TYPE_BOOL     =  -7;
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
-        final STable st = new STable(this, HOW);
-        final SixModelObject obj = new TypeObject();
-
+        STable st = new STable(this, HOW);
+        SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
 
-        final StorageSpec storageSpec = new StorageSpec();
-        storageSpec.inlineable = StorageSpec.INLINED;
-        storageSpec.boxed_primitive = StorageSpec.BP_INT;
-        storageSpec.bits = 64;
-        storageSpec.can_box = StorageSpec.CAN_BOX_INT;
-        st.REPRData = storageSpec;
+        StorageSpec ss = new StorageSpec();
+        ss.inlineable = StorageSpec.INLINED;
+        ss.boxed_primitive = StorageSpec.BP_INT;
+        ss.bits = 64;
+        ss.can_box = StorageSpec.CAN_BOX_INT;
+        st.REPRData = ss;
 
         return st.WHAT;
     }
 
-    public void compose(ThreadContext tc, STable st, SixModelObject reprInfo) {
-        final SixModelObject integerInfo = reprInfo.at_key_boxed(tc, "integer");
-
+    public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
         if (integerInfo != null) {
-            final SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
+            SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
             if (bits != null) {
-                final short bitWidth = (short) bits.get_int(tc);
-
-                switch (bitWidth) {
+                short bitwidth = (short)bits.get_int(tc);
+                switch (bitwidth) {
                     case P6INT_C_TYPE_CHAR:
                         ((StorageSpec)st.REPRData).bits = Byte.SIZE;
                         break;
@@ -65,38 +60,35 @@ public class P6int extends REPR {
                         ((StorageSpec)st.REPRData).bits = Integer.SIZE;
                         break;
                     case P6INT_C_TYPE_LONG:
-                        // NativeLong.SIZE is in bytes, not bits.
+                        /* NativeLong.SIZE is in bytes, not bits. */
                         ((StorageSpec)st.REPRData).bits = (short)(8 * NativeLong.SIZE);
                         break;
                     case P6INT_C_TYPE_LONGLONG:
-                        // there is no LongLong in Java
+                        /* There is no LongLong in Java */
                         ((StorageSpec)st.REPRData).bits = Long.SIZE;
                         break;
                     case P6INT_C_TYPE_SIZE_T:
                         ((StorageSpec)st.REPRData).bits = (short)(8 * Native.SIZE_T_SIZE);
                         break;
                     case P6INT_C_TYPE_BOOL:
-                        // let's just hope that a bool is 1 byte in size, always.
+                        /* Let's just hope that a bool is 1 byte in size, always. */
                         ((StorageSpec)st.REPRData).bits = Byte.SIZE;
                         break;
                     default:
-                        ((StorageSpec)st.REPRData).bits = bitWidth;
+                        ((StorageSpec)st.REPRData).bits = bitwidth;
                         break;
                 }
             }
 
-            final SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
-            if (unsigned != null) {
-                ((StorageSpec) st.REPRData).is_unsigned = (short) unsigned.get_int(tc);
-            }
+            SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
+            if (unsigned != null)
+                ((StorageSpec)st.REPRData).is_unsigned = (short)unsigned.get_int(tc);
         }
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        final P6intInstance obj = new P6intInstance();
-
+        P6intInstance obj = new P6intInstance();
         obj.st = st;
-
         return obj;
     }
 
@@ -138,15 +130,15 @@ public class P6int extends REPR {
     }
 
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
-        final String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;)J";
-        final MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
+        String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;)J";
+        MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "J");
         getMeth.visitInsn(Opcodes.LRETURN);
         getMeth.visitMaxs(0, 0);
 
-        final String setDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;J)V";
-        final MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_int", setDesc, null, null);
+        String setDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;J)V";
+        MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_int", setDesc, null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.LLOAD, 2);
         setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "J");
@@ -155,31 +147,21 @@ public class P6int extends REPR {
     }
 
     // We don't depend on any details of the STable, so no description is needed
-
-    @Override
-    public boolean inline_description(ThreadContext tc, STable st, StringBuilder out) {
+    @Override public boolean inline_description(ThreadContext tc, STable st, StringBuilder out) {
         return true;
     }
-
-    @Override
-    public boolean box_description(ThreadContext tc, STable st, StringBuilder out) {
+    @Override public boolean box_description(ThreadContext tc, STable st, StringBuilder out) {
         return true;
     }
 
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
-        final P6intInstance obj = new P6intInstance();
-
+        P6intInstance obj = new P6intInstance();
         obj.st = st;
-
         return obj;
     }
 
-    public void deserialize_finish(
-        ThreadContext tc,
-        STable st,
-        SerializationReader reader,
-        SixModelObject obj
-    ) {
+    public void deserialize_finish(ThreadContext tc, STable st,
+            SerializationReader reader, SixModelObject obj) {
         ((P6intInstance)obj).value = reader.readLong();
     }
 
@@ -187,13 +169,8 @@ public class P6int extends REPR {
         writer.writeInt(((P6intInstance)obj).value);
     }
 
-    public void serialize_inlined(
-        ThreadContext tc,
-        STable st,
-        SerializationWriter writer,
-        String prefix,
-        SixModelObject obj
-    ) {
+    public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
+            String prefix, SixModelObject obj) {
         try {
             writer.writeInt((long)obj.getClass().getField(prefix).get(obj));
         } catch (Exception e) {
@@ -205,7 +182,8 @@ public class P6int extends REPR {
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
      */
-    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
+    {
         writer.writeInt(((StorageSpec)st.REPRData).bits);
         writer.writeInt(((StorageSpec)st.REPRData).is_unsigned);
     }
@@ -214,15 +192,20 @@ public class P6int extends REPR {
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
      */
-    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader) {
-        final StorageSpec storageSpec = new StorageSpec();
-
-        storageSpec.inlineable = StorageSpec.INLINED;
-        storageSpec.boxed_primitive = StorageSpec.BP_INT;
-        storageSpec.bits = (reader.version >= 7) ? (short) reader.readLong() : 64;
-        storageSpec.is_unsigned = (reader.version >= 8) ? (short)reader.readLong() : 0;
-        storageSpec.can_box = StorageSpec.CAN_BOX_INT;
-
-        st.REPRData = storageSpec;
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
+    {
+        StorageSpec ss = new StorageSpec();
+        ss.inlineable = StorageSpec.INLINED;
+        ss.boxed_primitive = StorageSpec.BP_INT;
+        if (reader.version >= 7)
+            ss.bits = (short)reader.readLong();
+        else
+            ss.bits = 64;
+        if (reader.version >= 8)
+            ss.is_unsigned = (short)reader.readLong();
+        else
+            ss.is_unsigned = 0;
+        ss.can_box = StorageSpec.CAN_BOX_INT;
+        st.REPRData = ss;
     }
 }

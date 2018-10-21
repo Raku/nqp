@@ -88,63 +88,55 @@ public abstract class REPR {
      * The second step has the STable fully formed (though objects it
      * references may not be) and should do the rest of the work. */
     public abstract SixModelObject deserialize_stub(ThreadContext tc, STable st);
-
     public abstract void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj);
 
     /**
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
      */
-    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
-        // it's fine for this to be unimplemented
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
+    {
+        // It's fine for this to be unimplemented.
     }
 
     /**
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
      */
-    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader) {
-        // it's fine for this to be unimplemented
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
+    {
+        // It's fine for this to be unimplemented.
     }
 
-    // ------------------------------
-    // Flattening related functions
-    // ------------------------------
-
+    /**
+     * Flattening related functions.
+     */
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
-
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
-
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
-
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot inline itself into another");
     }
-
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         throw ExceptionHandling.dieInternal(tc, "This representation does not support being a box target");
     }
-
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
             String prefix, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "This representation cannot serialize an inlined representation of itself");
     }
-
     // These two functions are called when determining if a new class is needed; they should append a complete description
     // of the code they would use for inline* or generateBoxingMethods, in a format which is arbitrary except that it may
     // not contain imbalanced parens, and return true.  Returning false means no description is possible and the class must
     // always be created fresh.
-
     public boolean inline_description(ThreadContext tc, STable st, StringBuilder out) {
         return false;
     }
-
     public boolean box_description(ThreadContext tc, STable st, StringBuilder out) {
         return false;
     }

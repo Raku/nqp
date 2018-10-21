@@ -1,5 +1,6 @@
 package org.perl6.nqp.sixmodel;
 
+import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
 /**
@@ -7,17 +8,13 @@ import org.perl6.nqp.runtime.ThreadContext;
  * the references decontainerizable and assignable.
  */
 public class NativeRefContainerConfigurer extends ContainerConfigurer {
-    /**
-     * Sets this container spec in place for the specified STable.
-     */
+    /* Sets this container spec in place for the specified STable. */
     public void setContainerSpec(ThreadContext tc, STable st) {
         st.ContainerSpec = new NativeRefContainerSpec();
     }
 
-    /**
-     * Configures the container spec with the specified info.
-     */
+    /* Configures the container spec with the specified info. */
     public void configureContainerSpec(ThreadContext tc, STable st, SixModelObject config) {
-        // nothing to configure here
+        /* Nothing to configure here. */
     }
 }

@@ -7,7 +7,6 @@ import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.runtime.ExceptionHandling;
 
 public class P6bigintInstance extends SixModelObject {
-
     public BigInteger value;
 
     private static final BigInteger SMALLEST_UNBOXABLE = new BigInteger(String.valueOf(Long.MIN_VALUE));

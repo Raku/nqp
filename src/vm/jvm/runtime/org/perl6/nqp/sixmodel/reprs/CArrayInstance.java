@@ -12,124 +12,131 @@ import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.NativeCallOps;
 import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
+
 import org.perl6.nqp.sixmodel.SixModelObject;
+
 import org.perl6.nqp.sixmodel.reprs.CArrayREPRData.ElemKind;
 import org.perl6.nqp.sixmodel.reprs.NativeCall.ArgType;
 
 public class CArrayInstance extends SixModelObject implements Refreshable {
-
     public Pointer storage;
+    public SixModelObject[] child_objs;
     public boolean managed;
+    public long allocated;
     public long elems;
 
-    private SixModelObject[] childObjects;
-    private long allocated;
-
-
     public void at_pos_native(ThreadContext tc, long index) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
         if (managed && index >= elems) {
-            if (REPRData.elem_kind == ElemKind.INTEGER) {
+            if (repr_data.elem_kind == ElemKind.INTEGER) {
                 tc.native_type = ThreadContext.NATIVE_INT;
                 tc.native_i = 0;
-            } else if (REPRData.elem_kind == ElemKind.NUMERIC) {
+            }
+            else if (repr_data.elem_kind == ElemKind.NUMERIC) {
                 tc.native_type = ThreadContext.NATIVE_NUM;
                 tc.native_n = 0;
-            } else {
+            }
+            else {
                 ExceptionHandling.dieInternal(tc, "CArray can only at_pos_native with ints and nums.");
             }
             return;
         }
 
-        if (REPRData.elem_kind == ElemKind.INTEGER) {
+        if (repr_data.elem_kind == ElemKind.INTEGER) {
             tc.native_type = ThreadContext.NATIVE_INT;
-
-            if (REPRData.elem_size == 8) {
-                tc.native_i = storage.getByte(index*REPRData.jna_size);
-            } else if (REPRData.elem_size == 16) {
-                tc.native_i = storage.getShort(index*REPRData.jna_size);
-            } else if (REPRData.elem_size == 32) {
-                tc.native_i = storage.getInt(index*REPRData.jna_size);
-            } else if (REPRData.elem_size == 64) {
-                tc.native_i = storage.getLong(index*REPRData.jna_size);
+            if (repr_data.elem_size == 8) {
+                tc.native_i = storage.getByte(index*repr_data.jna_size);
             }
-        } else if (REPRData.elem_kind == ElemKind.NUMERIC) {
+            else if (repr_data.elem_size == 16) {
+                tc.native_i = storage.getShort(index*repr_data.jna_size);
+            }
+            else if (repr_data.elem_size == 32) {
+                tc.native_i = storage.getInt(index*repr_data.jna_size);
+            }
+            else if (repr_data.elem_size == 64) {
+                tc.native_i = storage.getLong(index*repr_data.jna_size);
+            }
+        }
+        else if (repr_data.elem_kind == ElemKind.NUMERIC) {
             tc.native_type = ThreadContext.NATIVE_NUM;
-
-            if (REPRData.elem_size == 32) {
-                tc.native_n = storage.getFloat(index*REPRData.jna_size);
-            } else if (REPRData.elem_size == 64) {
-                tc.native_n = storage.getDouble(index*REPRData.jna_size);
+            if (repr_data.elem_size == 32) {
+                tc.native_n = storage.getFloat(index*repr_data.jna_size);
             }
-        } else {
+            else if (repr_data.elem_size == 64) {
+                tc.native_n = storage.getDouble(index*repr_data.jna_size);
+            }
+        }
+        else {
             ExceptionHandling.dieInternal(tc, "CArray can only at_pos_native with ints and nums.");
         }
     }
 
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
+        int intidx = (int) index;
 
-        // TODO: die if this is a NUMERIC/INTEGER CArray
+        /* TODO: Die if this is a NUMERIC/INTEGER CArray. */
 
-        if (managed && index >= elems) {
-            return REPRData.elem_type;
+        if (managed && index >= elems)
+            return repr_data.elem_type;
+        else if (index >= allocated)
+            expand(tc, index+1);
+
+        if (child_objs[intidx] != null) {
+            return child_objs[intidx];
         }
-
-        if (index >= allocated) {
-            expand(tc, index + 1);
+        else {
+            SixModelObject obj = makeObject(tc, storage.getPointer(index*repr_data.jna_size));
+            child_objs[intidx] = obj;
+            return obj;
         }
-
-        if (childObjects[(int)index] != null) {
-            return childObjects[(int)index];
-        }
-
-        final SixModelObject obj = makeObject(tc, storage.getPointer(index*REPRData.jna_size));
-        childObjects[(int)index] = obj;
-        return obj;
     }
 
     public void bind_pos_native(ThreadContext tc, long index) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
         if (index >= allocated) {
             expand(tc, index+1);
         }
 
-        if (REPRData.elem_kind == ElemKind.INTEGER) {
+        if (repr_data.elem_kind == ElemKind.INTEGER) {
             tc.native_type = ThreadContext.NATIVE_INT;
-
-            if (REPRData.elem_size == 8) {
-                storage.setByte(index*REPRData.jna_size, (byte) tc.native_i);
-            } else if (REPRData.elem_size == 16) {
-                storage.setShort(index*REPRData.jna_size, (short) tc.native_i);
-            } else if (REPRData.elem_size == 32) {
-                storage.setInt(index*REPRData.jna_size, (int) tc.native_i);
-            } else if (REPRData.elem_size == 64) {
-                storage.setLong(index*REPRData.jna_size, tc.native_i);
+            if (repr_data.elem_size == 8) {
+                storage.setByte(index*repr_data.jna_size, (byte) tc.native_i);
             }
-        } else if (REPRData.elem_kind == ElemKind.NUMERIC) {
+            else if (repr_data.elem_size == 16) {
+                storage.setShort(index*repr_data.jna_size, (short) tc.native_i);
+            }
+            else if (repr_data.elem_size == 32) {
+                storage.setInt(index*repr_data.jna_size, (int) tc.native_i);
+            }
+            else if (repr_data.elem_size == 64) {
+                storage.setLong(index*repr_data.jna_size, tc.native_i);
+            }
+        }
+        else if (repr_data.elem_kind == ElemKind.NUMERIC) {
             tc.native_type = ThreadContext.NATIVE_NUM;
-
-            if (REPRData.elem_size == 32) {
-                storage.setFloat(index*REPRData.jna_size, (float) tc.native_n);
-            } else if (REPRData.elem_size == 64) {
-                storage.setDouble(index*REPRData.jna_size, tc.native_n);
+            if (repr_data.elem_size == 32) {
+                storage.setFloat(index*repr_data.jna_size, (float) tc.native_n);
             }
-        } else {
+            else if (repr_data.elem_size == 64) {
+                storage.setDouble(index*repr_data.jna_size, tc.native_n);
+            }
+        }
+        else {
             ExceptionHandling.dieInternal(tc, "CArray can only bind_pos_native with ints and nums.");
         }
     }
 
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
-        final CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
+        int intidx = (int) index;
         value = Ops.decont(value, tc);
 
-        // TODO: die if this is a NUMERIC/INTEGER CArray.
-
-        if (index >= allocated) {
-            expand(tc, index + 1);
-        }
+        /* TODO: Die if this is a NUMERIC/INTEGER CArray. */
+        if (index >= allocated)
+            expand(tc, index+1);
 
         Pointer ptr = null;
         if (Ops.isconcrete(value, tc) != 0) {
@@ -159,35 +166,34 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
             }
         }
 
-        childObjects[(int) index] = value;
+        child_objs[intidx] = value;
         storage.setPointer(index*repr_data.jna_size, ptr);
     }
 
     private void expand(ThreadContext tc, long new_size) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
         if (managed) {
-            final Memory newStorage = new Memory(new_size*REPRData.jna_size);
-            newStorage.clear();
+            Memory new_storage = new Memory(new_size*repr_data.jna_size);
+            new_storage.clear();
             if (storage != null) {
-                final Memory oldStorage = (Memory) storage;
-                newStorage.write(0, oldStorage.getByteArray(0, (int) oldStorage.size()), 0, (int) oldStorage.size());
+                Memory old_storage = (Memory) storage;
+                new_storage.write(0, old_storage.getByteArray(0, (int) old_storage.size()), 0, (int) old_storage.size());
             }
-            storage = newStorage;
+            storage = new_storage;
         }
 
-        final boolean complex =
-            REPRData.elem_kind == ElemKind.CARRAY
-            || REPRData.elem_kind == ElemKind.CPOINTER
-            || REPRData.elem_kind == ElemKind.CSTRUCT
-            || REPRData.elem_kind == ElemKind.CPPSTRUCT
-            || REPRData.elem_kind == ElemKind.CUNION
-            || REPRData.elem_kind == ElemKind.STRING;
+        boolean complex = repr_data.elem_kind == ElemKind.CARRAY
+            || repr_data.elem_kind == ElemKind.CPOINTER
+            || repr_data.elem_kind == ElemKind.CSTRUCT
+            || repr_data.elem_kind == ElemKind.CPPSTRUCT
+            || repr_data.elem_kind == ElemKind.CUNION
+            || repr_data.elem_kind == ElemKind.STRING;
 
         if (complex) {
-            childObjects = (childObjects == null)
-                ? new SixModelObject[(int) new_size]
-                : Arrays.copyOf(childObjects, (int) new_size);
+            child_objs = child_objs == null?
+                new SixModelObject[(int) new_size]:
+                Arrays.copyOf(child_objs, (int) new_size);
         }
 
         elems = new_size;
@@ -199,52 +205,51 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
     }
 
     private SixModelObject makeObject(ThreadContext tc, Pointer ptr) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
-        if (ptr == null) {
-            return REPRData.elem_type;
-        }
+        if (ptr == null)
+            return repr_data.elem_type;
 
-        switch (REPRData.elem_kind) {
+        switch (repr_data.elem_kind) {
         case STRING:
-            return NativeCallOps.toNQPType(tc, ArgType.UTF8STR, REPRData.elem_type, ptr.getString(0));
+            return NativeCallOps.toNQPType(tc, ArgType.UTF8STR, repr_data.elem_type, ptr.getString(0));
         case CARRAY:
-            return NativeCallOps.toNQPType(tc, ArgType.CARRAY, REPRData.elem_type, ptr);
+            return NativeCallOps.toNQPType(tc, ArgType.CARRAY, repr_data.elem_type, ptr);
         case CPOINTER:
-            return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, REPRData.elem_type, ptr);
+            return NativeCallOps.toNQPType(tc, ArgType.CPOINTER, repr_data.elem_type, ptr);
         case CSTRUCT: {
-            Class<?> structClass = ((CStructREPRData) REPRData.elem_type.st.REPRData).structureClass;
-            return NativeCallOps.toNQPType(tc, ArgType.CSTRUCT, REPRData.elem_type, Structure.newInstance(structClass, ptr));
+            Class<?> structClass = ((CStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
         }
         case CPPSTRUCT: {
-            Class<?> structClass = ((CPPStructREPRData) REPRData.elem_type.st.REPRData).structureClass;
-            return NativeCallOps.toNQPType(tc, ArgType.CPPSTRUCT, REPRData.elem_type, Structure.newInstance(structClass, ptr));
+            Class<?> structClass = ((CPPStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CPPSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
         }
         case CUNION: {
-            Class<?> structClass = ((CUnionREPRData) REPRData.elem_type.st.REPRData).structureClass;
-            return NativeCallOps.toNQPType(tc, ArgType.CUNION, REPRData.elem_type, Union.newInstance(structClass, ptr));
+            Class<?> structClass = ((CUnionREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            return NativeCallOps.toNQPType(tc, ArgType.CUNION, repr_data.elem_type, Union.newInstance(structClass, ptr));
         }
         default:
             ExceptionHandling.dieInternal(tc, "CArray can only makeObject strings, arrays, structs and pointers");
         }
 
-        // and a dummy return statement to placate Java's flow analysis.
+        /* And a dummy return statement to placate Java's flow analysis. */
         return null;
     }
 
     public void refresh(ThreadContext tc) {
-        final CArrayREPRData REPRData = (CArrayREPRData) st.REPRData;
+        CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
         // No need to refresh if we don't have any cached children.
-        if (childObjects == null) return;
+        if (child_objs == null) return;
 
-        if (REPRData.elem_kind == ElemKind.CARRAY
-         || REPRData.elem_kind == ElemKind.CSTRUCT
-         || REPRData.elem_kind == ElemKind.CPPSTRUCT
-         || REPRData.elem_kind == ElemKind.CUNION
-        ) {
+        if (repr_data.elem_kind == ElemKind.CARRAY
+         || repr_data.elem_kind == ElemKind.CSTRUCT
+         || repr_data.elem_kind == ElemKind.CPPSTRUCT
+         || repr_data.elem_kind == ElemKind.CUNION) {
             refreshComplex(tc);
-        } else {
+        }
+        else {
             refreshSimple(tc);
         }
     }
@@ -253,16 +258,17 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
      * Refresh logic for CArray of complex (CArray or CStruct) types.
      */
     private void refreshComplex(ThreadContext tc) {
-        for (int i = 0; i < childObjects.length; i++) {
-            final SixModelObject child = childObjects[i];
+        for (int i = 0; i < child_objs.length; i++) {
+            SixModelObject child = child_objs[i];
 
             // No cache for this element? Go to next.
             if (child == null) continue;
 
-            // invalidate cache and recursively refresh child too.
-            // future versions here should only invalidate the cache
-            // if C memory has a different pointer than the cached object
-            childObjects[i] = null;
+            /* Invalidate cache and recursively refresh child too. Future
+             * versions here should only invalidate the cache if C memory has
+             * a different pointer than the cached object.
+             */
+            child_objs[i] = null;
             NativeCallOps.refresh(child, tc);
         }
     }
@@ -271,16 +277,17 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
      * Refresh logic for CArray of simple (CPointer) types.
      */
     private void refreshSimple(ThreadContext tc) {
-        for (int i = 0; i < childObjects.length; i++) {
-            final SixModelObject child = childObjects[i];
+        for (int i = 0; i < child_objs.length; i++) {
+            SixModelObject child = child_objs[i];
 
             // No cache for this element? Go to next.
             if (child == null) continue;
 
-            // invalidate cache.
-            // future versions here should only invalidate the cache
-            // if C memory has a different pointer than the cached object
-            childObjects[i] = null;
+            /* Invalidate cache. Future versions here should only invalidate
+             * the cache if C memory has a different pointer than the cached
+             * object.
+             */
+            child_objs[i] = null;
         }
     }
 }

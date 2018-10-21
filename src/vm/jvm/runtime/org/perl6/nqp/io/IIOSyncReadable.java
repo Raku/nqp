@@ -3,13 +3,9 @@ package org.perl6.nqp.io;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public interface IIOSyncReadable {
-    String slurp(ThreadContext tc);
-
-    String readline(ThreadContext tc);
-
-    String readchars(ThreadContext tc, int chars);
-
-    byte[] read(ThreadContext tc, int bytes);
-
-    boolean eof(ThreadContext tc);
+    public String slurp(ThreadContext tc);
+    public String readline(ThreadContext tc);
+    public String readchars(ThreadContext tc, int chars);
+    public byte[] read(ThreadContext tc, int bytes);
+    public boolean eof(ThreadContext tc);
 }

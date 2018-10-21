@@ -10,9 +10,8 @@ public class CStrInstance extends SixModelObject {
     public Memory cstr;
 
     public void set_str(ThreadContext tc, String value) {
-        // TODO Handle encodings
-
-        final byte[] bytes = Native.toByteArray(value);
+        /* TODO: Handle encodings. */
+        byte[] bytes = Native.toByteArray(value);
         cstr = new Memory(bytes.length);
         cstr.write(0, bytes, 0, bytes.length);
     }
