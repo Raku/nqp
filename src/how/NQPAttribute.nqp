@@ -49,6 +49,10 @@ knowhow NQPAttribute {
         $!has_default ?? $!default !! nqp::null()
     }
 
+    method set_box_target($box_target) {
+        $!box_target := $box_target;
+    }
+
     method set_positional_delegate($value) {
         $!positional_delegate := $value;
     }

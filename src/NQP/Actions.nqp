@@ -1268,6 +1268,9 @@ class NQP::Actions is HLL::Actions {
                     $*W.create_code($ast.ann('block_ast'), $name, 0);
             };
         }
+        elsif $<longname> eq 'box_target' {
+            make -> $m { $*DECLARAND_ATTR.set_box_target(1) };
+        }
         else {
             $/.panic("Trait '$<longname>' not implemented");
         }
