@@ -563,7 +563,7 @@ exports.arg_i64 = function(ctx, contedArg) {
 
 exports.arg_u64 = function(ctx, contedArg) {
   if (contedArg instanceof NativeIntArg) {
-    return BigInt.asUintN(64, contedArg.value);
+    return BigInt.asUintN(64, BigInt(contedArg.value));
   } else if (contedArg instanceof NativeUIntArg) {
     return BigInt(contedArg.value);
   } else if (contedArg instanceof NativeNumArg) {
