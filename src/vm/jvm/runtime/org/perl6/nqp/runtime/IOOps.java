@@ -14,6 +14,7 @@ import org.perl6.nqp.io.AsyncServerSocketHandle;
 import org.perl6.nqp.io.AsyncSocketHandle;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
+import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 import org.perl6.nqp.runtime.Ops;
 
@@ -173,33 +174,66 @@ public final class IOOps {
         throw new UnsupportedOperationException("watchfile is not yet implemented.");
     }
 
-    public static SixModelObject asyncconnect(SixModelObject queue, SixModelObject schedulee,
-            String host, long port, SixModelObject asyncType, ThreadContext tc) {
+    public static SixModelObject asyncsocket(SixModelObject queue, SixModelObject schedulee,
+            long listening, SixModelObject asyncType, ThreadContext tc) {
 
         AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
         task.queue = queue;
         task.schedulee = schedulee;
 
-        AsyncSocketHandle handle = new AsyncSocketHandle(tc);
-        task.handle = handle;
-        handle.connect(tc, host, (int) port, task);
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        SixModelObject IOType = hllConfig.ioType;
+        SixModelObject Array = hllConfig.listType;
+        SixModelObject Str = hllConfig.strBoxType;
+
+        ThreadContext curTC = tc.gc.getCurrentThreadContext();
+        IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC, IOType.st);
+
+        try {
+            if (listening == 1L) {
+                ioHandle.handle = new AsyncServerSocketHandle(tc);
+            } else {
+                ioHandle.handle = new AsyncSocketHandle(tc);
+            }
+            task.handle = ioHandle;
+
+            SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
+            result.push_boxed(curTC, task.schedulee);
+            result.push_boxed(curTC, ioHandle);
+            result.push_boxed(curTC, Str);
+            ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
+        } catch (Throwable t) {
+            SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
+            result.push_boxed(curTC, task.schedulee);
+            result.push_boxed(curTC, IOType);
+            result.push_boxed(curTC, Ops.box_s(t.toString(), Str, curTC));
+            ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
+        }
 
         return task;
     }
 
-    public static SixModelObject asynclisten(SixModelObject queue, SixModelObject schedulee,
-            String host, long port, long backlog, SixModelObject asyncType, ThreadContext tc) {
+    public static SixModelObject asyncconnect(SixModelObject queue, SixModelObject schedulee,
+            SixModelObject handle, String host, long port, SixModelObject asyncType, ThreadContext tc) {
 
         AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
         task.queue = queue;
         task.schedulee = schedulee;
+        task.handle = ((IOHandleInstance) handle).handle;
+        ((AsyncSocketHandle) task.handle).connect(tc, host, (int) port, task);
+        return task;
+    }
 
-        AsyncServerSocketHandle handle = new AsyncServerSocketHandle(tc);
-        task.handle = handle;
+    public static SixModelObject asynclisten(SixModelObject queue, SixModelObject schedulee,
+            SixModelObject handle, String host, long port, long backlog, SixModelObject asyncType,
+            ThreadContext tc) {
 
-        handle.bind(tc, host, (int) port, (int) backlog);
-        handle.accept(tc, task);
-
+        AsyncTaskInstance task = (AsyncTaskInstance) asyncType.st.REPR.allocate(tc, asyncType.st);
+        task.queue = queue;
+        task.schedulee = schedulee;
+        task.handle = ((IOHandleInstance) handle).handle;
+        ((AsyncServerSocketHandle) task.handle).bind(tc, host, (int) port, (int) backlog);
+        ((AsyncServerSocketHandle) task.handle).accept(tc, task);
         return task;
     }
 
