@@ -522,7 +522,7 @@ class P6opaque extends REPRWithAttributes {
       return 'return this.$$bindattr$' + slot + '(value)';
     }, ', value', false, 'bind a value');
 
-    const suffixes = ['_s', '_i', '_n'];
+    const suffixes = ['_s', '_i', '_n', '_i64', '_u64'];
     for (const suffix of suffixes) {
       /* TODO only check attributes of proper type */
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
@@ -790,11 +790,23 @@ class P6int extends REPR {
 
   generateFlattenedAccessors(ownerSTable, attrContentSTable, slot) {
     const attr = slotToAttr(slot);
-    ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      const obj = attrContentSTable.REPR.allocate(attrContentSTable);
-      obj.$$setInt(this[attr]);
-      return obj;
-    });
+    if (this.bits == 64) {
+      /* HACK - int64 and uint64 attributes are for now set in this werid way */
+      ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+        const objectWithAttr = this;
+        return new (class {
+          $$assign(ctx, value) {
+            objectWithAttr[attr] = value.$$getInt64();
+          }
+        });
+      });
+    } else {
+      ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
+        const obj = attrContentSTable.REPR.allocate(attrContentSTable);
+        obj.$$setInt(this[attr]);
+        return obj;
+      });
+    }
   }
 
   generateRefAccessors(ownerSTable, attrContentSTable, slot) {
@@ -1240,7 +1252,7 @@ class VMArray extends REPR {
           return value;
         }
       });
-    } else if (this.primType === 1) {
+    } else if (this.primType === 1 || this.primType === 4 || this.primType == 5) {
       let mangle;
       if (this.type !== Null) {
         const repr = this.type._STable.REPR;

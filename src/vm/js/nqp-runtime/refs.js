@@ -39,6 +39,18 @@ function attrRef_s(currentHLL, get, set) {
   return ref;
 }
 
+function attrRef_i64(currentHLL, get, set) {
+  const refType = currentHLL.get('int64_attr_ref');
+  if (refType === undefined) {
+    throw 'No int64 attribute reference type registered for current HLL';
+  }
+  const STable = refType._STable;
+  const ref = STable.REPR.allocate(STable);
+  ref.get = get;
+  ref.set = set;
+  return ref;
+}
+
 op.getattrref_i = function(currentHLL, obj, classHandle, attrName) {
   return attrRef_i(currentHLL,
       () => obj.$$getattr_i(classHandle, attrName),
@@ -184,3 +196,6 @@ op.atposref_s = function(currentHLL, obj, index) {
 helpers.attrRef_i = attrRef_i;
 helpers.attrRef_n = attrRef_n;
 helpers.attrRef_s = attrRef_s;
+
+helpers.attrRef_i64 = attrRef_i64;
+helpers.attrRef_u64 = attrRef_i64; // TODO - think if that's good

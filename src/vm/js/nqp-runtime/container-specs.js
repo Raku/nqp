@@ -250,7 +250,7 @@ class NativeRef {
       });
     } else if (primitiveType == 4) { // int64
       this.STable.addInternalMethods(class {
-        $$iscont_s() {
+        $$iscont_i() {
           return 1;
         }
 
