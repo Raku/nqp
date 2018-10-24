@@ -887,8 +887,11 @@ my class MASTCompilerInstance {
     # This method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
         my $sh := nqp::list_s();
+        for $!mast_compunit.writer.string-heap.orig-strings {
+            nqp::push_s($sh, $_);
+        }
         my $serialized := nqp::serializetobuf($sc, $sh, MAST::Bytecode);
-        [$serialized, $sh];
+        [$serialized, $sh, 0]; # change to 1 when you need string heap deserialization
     }
 
     method deserialization_code($sc, @code_ref_blocks, $repo_conf_res) {
@@ -902,7 +905,7 @@ my class MASTCompilerInstance {
         # String heap QAST.
         my $sh_ast;
 
-        if nqp::islist($sh) {
+        if $sc_tuple[2] {
             $sh_ast := QAST::Op.new( :op('list_s') );
             my $sh_elems := nqp::elems($sh);
             my $i := 0;
@@ -2301,9 +2304,11 @@ my @kind_to_args := [0,
 
 class MoarVM::StringHeap {
     has @!strings;
+    has @!orig-strings;
     has %!strings;
     method BUILD(:@strings) {
         @!strings := nqp::list();
+        @!orig-strings := nqp::list_s();
         %!strings := nqp::hash();
         if nqp::islist(@strings) {
             for @strings {
@@ -2338,6 +2343,7 @@ class MoarVM::StringHeap {
             $str.write_uint8(0) while $pad--;
 
             nqp::push(@!strings, $str);
+            nqp::push_s(@!orig-strings, $s);
 
             %!strings{$s} := nqp::elems(@!strings) - 1
         }
@@ -2354,6 +2360,9 @@ class MoarVM::StringHeap {
     }
     method strings() {
         @!strings
+    }
+    method orig-strings() {
+        @!orig-strings
     }
 }
 
