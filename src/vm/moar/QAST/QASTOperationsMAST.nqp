@@ -2876,6 +2876,7 @@ QAST::MASTOperations.add_core_moarop_mapping('bindcurhllsym', 'bindcurhllsym');
 QAST::MASTOperations.add_core_moarop_mapping('sethllconfig', 'sethllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecode', 'loadbytecode');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecodebuffer', 'loadbytecodebuffer');
+QAST::MASTOperations.add_core_moarop_mapping('buffertocu', 'buffertocu');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecodefh', 'loadbytecodefh');
 QAST::MASTOperations.add_core_moarop_mapping('settypehll', 'settypehll', 0);
 QAST::MASTOperations.add_core_moarop_mapping('settypehllrole', 'settypehllrole', 0);
