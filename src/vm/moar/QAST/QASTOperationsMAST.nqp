@@ -1575,7 +1575,7 @@ my $call_gen := sub ($qastcomp, $op) {
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
         nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
-        my uint64 $res_index := $arg_mast.result_reg.index;
+        my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
     }
@@ -1610,12 +1610,12 @@ my $call_gen := sub ($qastcomp, $op) {
     my $res_type;
     if $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
-        my $index := $res_reg.index;
-        if $res_reg.index >= nqp::elems(@local_types) {
+        my uint $index := nqp::unbox_u($res_reg);
+        if $index >= nqp::elems(@local_types) {
             nqp::die("MAST::Local index out of range");
         }
         my $op_name := $is_nativecall ?? 'nativeinvoke_' !! 'invoke_';
-        my $primspec := nqp::objprimspec(@local_types[$index]);
+        my int $primspec := nqp::objprimspec(@local_types[$index]);
         if $primspec == 1 {
             $op_name := $op_name ~ 'i';
             $res_type := $MVM_operand_int64;
@@ -1637,19 +1637,19 @@ my $call_gen := sub ($qastcomp, $op) {
         }
         my uint $op_code := %MAST::Ops::codes{$op_name};
         nqp::writeuint($bytecode, $bytecode_pos, $op_code, 2);
-        my uint $res_index := $res_reg.index;
+        my uint $res_index := nqp::unbox_u($res_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
-        my uint $callee_res_index := $callee.result_reg.index;
+        my uint $callee_res_index := nqp::unbox_u($callee.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $callee_res_index, 2);
     }
     else {
         nqp::writeuint($bytecode, $bytecode_pos, $op_code_invoke_v, 2);
-        my uint $callee_res_index := $callee.result_reg.index;
+        my uint $callee_res_index := nqp::unbox_u($callee.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_res_index, 2);
     }
 
     if $is_nativecall {
-        $bytecode.write_uint16($return_type.result_reg.index);
+        $bytecode.write_uint16($return_type.result_reg);
     }
 
     MAST::InstructionList.new($res_reg, $res_kind)
@@ -1759,7 +1759,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
         nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 2);
-        my uint64 $res_index := $arg_mast.result_reg.index;
+        my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
     }
@@ -1791,11 +1791,11 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     my $res_type;
     if $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
-        my $index := $res_reg.index;
-        if $res_reg.index >= nqp::elems(@local_types) {
+        my uint $index := nqp::unbox_u($res_reg);
+        if $index >= nqp::elems(@local_types) {
             nqp::die("MAST::Local index out of range");
         }
-        my $primspec := nqp::objprimspec(@local_types[$index]);
+        my int $primspec := nqp::objprimspec(@local_types[$index]);
         my uint $op_code;
         if $primspec == 1 {
             $op_code := $op_code_invoke_i;
@@ -1817,14 +1817,14 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
         }
         nqp::writeuint($bytecode, $bytecode_pos, $op_code, 2);
-        my uint $res_index := $res_reg.index;
+        my uint $res_index := nqp::unbox_u($res_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
-        my uint $callee_reg_index := $callee_reg.index;
+        my uint $callee_reg_index := nqp::unbox_u($callee_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $callee_reg_index, 2);
     }
     else {
         nqp::writeuint($bytecode, $bytecode_pos, $op_code_invoke_v, 2);
-        my uint $callee_reg_index := $callee_reg.index;
+        my uint $callee_reg_index := nqp::unbox_u($callee_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_reg_index, 2);
     }
 
@@ -3270,7 +3270,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
         nqp::die("Unhandled arg type $kind") unless $arg_opcode;
         nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 2);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $i++, 2);
-        my uint64 $res_index := $arg_mast.result_reg.index;
+        my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
     }
@@ -3285,7 +3285,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     # Assemble the resolve call.
     my $res_reg := $regalloc.fresh_register($MVM_reg_obj);
     nqp::writeuint($bytecode, $bytecode_pos, $op_code_speshresolve, 2);
-    my uint $res_index := $res_reg.index;
+    my uint $res_index := nqp::unbox_u($res_reg);
     nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 2);
     my uint $target_idx := $frame.add-string($target);
     nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $target_idx, 4);
