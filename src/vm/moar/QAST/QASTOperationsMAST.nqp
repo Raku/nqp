@@ -1513,7 +1513,8 @@ my $call_gen := sub ($qastcomp, $op) {
     elsif +@args {
         @args := nqp::clone(@args);
         my $callee_qast := @args.shift;
-        my $no_decont := nqp::istype($callee_qast, QAST::WVal) && !nqp::iscont($callee_qast.value);
+        my $no_decont := nqp::istype($callee_qast, QAST::Op) && $callee_qast.op eq 'speshresolve'
+            || nqp::istype($callee_qast, QAST::WVal) && !nqp::iscont($callee_qast.value);
         $callee := $qastcomp.as_mast(
             $no_decont ?? $callee_qast !! QAST::Op.new( :op('decont'), $callee_qast ),
             :want($MVM_reg_obj));
