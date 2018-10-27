@@ -312,7 +312,6 @@
   * [timer](#timer)
   * [signal](#signal)
   * [watchfile](#watchfile)
-  * [asyncsocket](#asyncsocket)
   * [asyncconnect](#asyncconnect)
   * [asynclisten](#asynclisten)
   * [asyncwritestr](#asyncwritestr)
@@ -2655,31 +2654,23 @@ when a change is detected, consisting of the schedulee, the filename that
 changed if provided by the underlying watcher mechanism, a 0 if the file
 changed, and a 1 if it was renamed. Cancel to stop watching.
 
-## asyncsocket
-*  asyncsocket($queue, $schedulee, int $listening, $handle_type)
-If `$listening` is 1, creates an asynchronous server socket, otherwise creates
-an asynchronous client socket. Afterwards, the queue will be passed an array
-consisting of the raw socket if it was successfully created (a type object if
-not) and an error string (some type object if no error). Returns an AsyncTask
-representing the socket creation attempt.
-
 ## asyncconnect
-* `asyncconnect($queue, $schedulee, $socket, str $host, int $port, $handle_type)`
+* `asyncconnect($queue, $schedulee, str $host, int $port, $handle_type)`
 
-Commences a connection operation for the given socket. Upon connection, the
-queue will be passed an array consisting of the schedulee, a handle if the
-connection was successful (a type object if not) and an error string (some
-type object if no error). Returns an AsyncTask representing the connection
-attempt.
+Creates an asynchronous client socket and commences a connection operation.
+Upon connection, the queue will be passed an array consisting of the
+schedulee, a handle if the connection was successful (a type object if not)
+and an error string (some type object if no error). Returns an AsyncTask
+representing the connection attempt.
 
 ## asynclisten
-* `asynclisten($queue, $schedulee, $socket, str $host, int $port, $handle_type)`
+* `asynclisten($queue, $schedulee, str $host, int $port, $handle_type)`
 
-Starts listening with the given socket  on the specified host and port. Each
-time a connection arrives, the queue will be passed an array consisting of the
-schedulee and the newly created asynchronous socket, for communicating with the
-connecting client. Returns an AsyncTask that can be cancelled to stop listening,
-or throws an exception if there is an error starting to listen.
+Creates an asynchronous server socket listening on the specified host and port.
+Each time a connection arrives, the queue will be passed an array consisting of
+the schedulee and the newly created asynchronous socket, for communicating with
+the connecting client. Returns an AsyncTask that can be cancelled to stop
+listening, or throws an exception if there is an error starting to listen.
 
 ## asyncwritestr
 * `asyncwritestr($handle, $queue, $schedulee, str $to_write, $handle_type)`

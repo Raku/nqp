@@ -2966,7 +2966,6 @@ QAST::MASTOperations.add_core_moarop_mapping('cancel', 'cancel', 0);
 QAST::MASTOperations.add_core_moarop_mapping('cancelnotify', 'cancelnotify', 0);
 QAST::MASTOperations.add_core_moarop_mapping('signal', 'signal');
 QAST::MASTOperations.add_core_moarop_mapping('watchfile', 'watchfile');
-QAST::MASTOperations.add_core_moarop_mapping('asyncsocket', 'asyncsocket');
 QAST::MASTOperations.add_core_moarop_mapping('asyncconnect', 'asyncconnect');
 QAST::MASTOperations.add_core_moarop_mapping('asynclisten', 'asynclisten');
 QAST::MASTOperations.add_core_moarop_mapping('asyncudp', 'asyncudp');
