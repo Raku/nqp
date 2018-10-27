@@ -1077,7 +1077,7 @@ my class MASTCompilerInstance {
                 # fixup the end of this frame's instruction list with the return
                 %core_op_generators{$ret_op}(|@ret_args);
 
-                $frame.start_prologue;
+                $frame.start_subbuffer;
 
                 # Build up the frame prologue. Start with lexical captures and clones.
                 my @pre := nqp::list();
@@ -1313,7 +1313,8 @@ my class MASTCompilerInstance {
                     # unexpected ones.
                     push_op('paramnamesused') unless $named_slurpy;
                 }
-                $frame.end_prologue;
+                my $subbuffer := $frame.end_subbuffer;
+                $frame.insert_bytecode($subbuffer, 0);
             }
         }
 
