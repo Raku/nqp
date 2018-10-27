@@ -737,11 +737,12 @@ for <if unless with without> -> $op_name {
         # Create labels.
         my $if_id    := $qastcomp.unique($op_name);
         my $end_lbl  := MAST::Label.new();
-        my $else_lbl := ($operands == 3 || !$is_void) ?? MAST::Label.new() !! $end_lbl;
-        my $then_lbl := MAST::Label.new();
+        my $else_lbl := MAST::Label.new();
         my $cond_temp_lbl := $is_withy || needs_cond_passed($op[1]) || needs_cond_passed($op[2])
             ?? $qastcomp.unique('__im_cond_')
             !! '';
+
+        # Evaluate the condition first; store result if needed.
         if $cond_temp_lbl {
             if $is_withy {
                 @comp_ops[0] := $qastcomp.as_mast(QAST::Op.new(
@@ -771,57 +772,7 @@ for <if unless with without> -> $op_name {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
 
-        # Evaluate the condition first; store result if needed.
-
-        my $cond_res_reg;
-        if $operands == 2 && !$is_void {
-            $cond_res_reg := $regalloc.fresh_register(@comp_ops[0].result_kind);
-            op_set($cond_res_reg, @comp_ops[0].result_reg);
-        }
-
-        # Emit the jump.
-        if @comp_ops[0].result_kind == $MVM_reg_obj {
-            my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-            op_decont($decont_reg, @comp_ops[0].result_reg);
-            if $is_withy {
-                my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
-                %core_op_generators{'findmeth'}($method_reg, $decont_reg, 'defined');
-                MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg);
-                $regalloc.release_register($method_reg, $MVM_reg_obj);
-            }
-
-            %core_op_generators{
-                # the conditional routines are reversed on purpose
-                $op_name eq 'if' || $op_name eq 'with'
-                  ?? 'unless_o' !! 'if_o'
-            }(
-                $decont_reg,
-                $else_lbl
-            );
-            $regalloc.release_register($decont_reg, $MVM_reg_obj);
-        }
-        elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
-            my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
-            %core_op_generators{
-                $op_name eq 'if'
-                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
-            }(
-                $coerce-reg,
-                $else_lbl
-            );
-            $regalloc.release_register: $coerce-reg, $coerce-kind;
-        }
-        else {
-            %core_op_generators{
-                $op_name eq 'if'
-                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
-                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
-            }(
-                @comp_ops[0].result_reg,
-                $else_lbl
-            );
-        }
+        $*MAST_FRAME.start_subbuffer;
 
         if needs_cond_passed($op[1]) {
             my $orig_type := $op[1].blocktype;
@@ -841,68 +792,117 @@ for <if unless with without> -> $op_name {
             nqp::die("The '$op_name' op condition cannot be void, cannot use the results of '" ~ $op[0].op ~ "'");
         }
 
+        my $then-subbuffer := $*MAST_FRAME.end_subbuffer;
+        my $else-subbuffer;
+
+        if needs_cond_passed($op[2]) {
+            my $orig_type := $op[2].blocktype;
+            $op[2].blocktype('declaration');
+            $*MAST_FRAME.start_subbuffer;
+            @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
+                :op('call'),
+                $op[2],
+                QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
+                :want($wanted));
+            $else-subbuffer := $*MAST_FRAME.end_subbuffer;
+            $op[2].blocktype($orig_type);
+        }
+        elsif $op[2] {
+            $*MAST_FRAME.start_subbuffer;
+            @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
+            $else-subbuffer := $*MAST_FRAME.end_subbuffer;
+        }
+
+
         my $res_kind;
         my $res_reg;
-        my $then_res_reg;
         if $is_void {
             $res_reg := MAST::VOID;
-            $then_res_reg := $res_reg;
         }
         else {
-            if $operands == 3 {
-                if @comp_ops[1].result_kind != 0 {
-                    $then_res_reg := $regalloc.fresh_register(@comp_ops[1].result_kind);
-                }
-            }
-            else {
-                $res_kind := # $operands == 3
-#                ?? (
-#                    @comp_ops[1].result_kind == @comp_ops[2].result_kind
-#                        && @comp_ops[1].result_kind != $MVM_reg_void
-#                    ?? @comp_ops[1].result_kind
-#                    !! $MVM_reg_obj
-#                )
-##                !!
-                    (@comp_ops[0].result_kind == @comp_ops[1].result_kind
-                        ?? @comp_ops[0].result_kind
-                        !! $MVM_reg_obj);
-                $res_reg := $regalloc.fresh_register($res_kind);
-            }
-        }
-
-        # Emit the then, stash the result
-
-        # Handle else branch (coercion of condition result if 2-arg).
-        if $operands == 3 {
-            if !$is_void && $then_res_reg {
-                op_set($then_res_reg, @comp_ops[1].result_reg);
-                $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
-            }
-
-            # Terminate the then branch first.
-            op_goto($is_void ?? $end_lbl !! $then_lbl);
-            $*MAST_FRAME.add-label($else_lbl);
-
-            if needs_cond_passed($op[2]) {
-                my $orig_type := $op[2].blocktype;
-                $op[2].blocktype('declaration');
-                @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
-                    :op('call'),
-                    $op[2],
-                    QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
-                    :want($wanted));
-                $op[2].blocktype($orig_type);
-            }
-            elsif $op[2] {
-                @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
-            }
-
-            $res_kind := 
+            $res_kind := $operands == 3
+            ?? (
                 @comp_ops[1].result_kind == @comp_ops[2].result_kind
                     && @comp_ops[1].result_kind != $MVM_reg_void
                 ?? @comp_ops[1].result_kind
-                !! $MVM_reg_obj;
+                !! $MVM_reg_obj
+            )
+            !!
+                (@comp_ops[0].result_kind == @comp_ops[1].result_kind
+                    ?? @comp_ops[0].result_kind
+                    !! $MVM_reg_obj);
             $res_reg := $regalloc.fresh_register($res_kind);
+        }
+
+        if $operands == 2 && !$is_void {
+            my $il := MAST::InstructionList.new(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
+            $qastcomp.coerce($il, $res_kind);
+            op_set($res_reg, $il.result_reg);
+        }
+
+        # Emit the jump.
+        if @comp_ops[0].result_kind == $MVM_reg_obj {
+            my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
+            op_decont($decont_reg, @comp_ops[0].result_reg);
+            if $is_withy {
+                my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
+                %core_op_generators{'findmeth'}($method_reg, $decont_reg, 'defined');
+                MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg);
+                $regalloc.release_register($method_reg, $MVM_reg_obj);
+            }
+
+            %core_op_generators{
+                # the conditional routines are reversed on purpose
+                $op_name eq 'if' || $op_name eq 'with'
+                  ?? 'unless_o' !! 'if_o'
+            }(
+                $decont_reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+            $regalloc.release_register($decont_reg, $MVM_reg_obj);
+        }
+        elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
+            my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
+            %core_op_generators{
+                $op_name eq 'if'
+                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+            }(
+                $coerce-reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+            $regalloc.release_register: $coerce-reg, $coerce-kind;
+        }
+        else {
+            %core_op_generators{
+                $op_name eq 'if'
+                  ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
+                  !! @Condition-op-kinds[        @comp_ops[0].result_kind]
+            }(
+                @comp_ops[0].result_reg,
+                ($operands == 3 ?? $else_lbl !! $end_lbl)
+            );
+        }
+
+        # Emit the then, stash the result
+        $*MAST_FRAME.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+
+        if (!$is_void && @comp_ops[1].result_kind != $res_kind) {
+            my $coercion := $qastcomp.coercion(@comp_ops[1], $res_kind);
+            op_set($res_reg, $coercion.result_reg);
+        }
+        elsif !$is_void {
+            op_set($res_reg, @comp_ops[1].result_reg);
+        }
+        $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
+
+        # Handle else branch (coercion of condition result if 2-arg).
+        if $operands == 3 {
+            # Terminate the then branch first.
+            op_goto($end_lbl);
+            $*MAST_FRAME.add-label($else_lbl);
+
+            $*MAST_FRAME.insert_bytecode($else-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
 
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
@@ -914,42 +914,11 @@ for <if unless with without> -> $op_name {
                 }
             }
             $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
-
-            if !$is_void {
-                op_goto($end_lbl);
-                $*MAST_FRAME.add-label($then_lbl);
-
-                if $then_res_reg {
-                    if (@comp_ops[1].result_kind != $res_kind) {
-                        my $il := MAST::InstructionList.new($then_res_reg, @comp_ops[1].result_kind);
-                        my $coercion := $qastcomp.coercion($il, $res_kind);
-                        op_set($res_reg, $coercion.result_reg);
-                    }
-                    else {
-                        op_set($res_reg, $then_res_reg);
-                    }
-                    $regalloc.release_register($then_res_reg, @comp_ops[1].result_kind);
-                }
-            }
         }
-
-        if $operands == 2 && !$is_void {
-            my $il := MAST::InstructionList.new(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
-            $qastcomp.coerce($il, $res_kind);
-            op_set($res_reg, $il.result_reg);
-            $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
-            op_goto($end_lbl);
-
-            $*MAST_FRAME.add-label($else_lbl);
-            my $cond_il := MAST::InstructionList.new($cond_res_reg, @comp_ops[0].result_kind);
-            $qastcomp.coerce($cond_il, $res_kind);
-            op_set($res_reg, $cond_il.result_reg);
-            $regalloc.release_register($cond_il.result_reg, $cond_il.result_kind);
-        }
-
-        $*MAST_FRAME.add-label($end_lbl);
 
         $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
+
+        $*MAST_FRAME.add-label($end_lbl);
 
         MAST::InstructionList.new($res_reg, $res_kind)
     });
