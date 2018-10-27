@@ -123,7 +123,6 @@ class HLL::Backend::MoarVM {
             my int $highest-child-id;
             try {
                 if nqp::existskey($id_remap, $node<id>) {
-                    note("bloop?");
                     $node<id> := $id_remap{$node<id>};
                 } else {
                     my str $newkey := ~($new-id-counter++);
