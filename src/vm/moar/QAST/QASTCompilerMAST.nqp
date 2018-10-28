@@ -216,7 +216,7 @@ my class MASTCompilerInstance {
                 self.register_local($var);
             }
             else {
-                my $res_kind := self.add_lexical($var);
+                my int $res_kind := self.add_lexical($var);
                 my $res_reg := $*REGALLOC.fresh_register($res_kind);
                 %!lexical_params{$var.name} := $res_reg;
                 [$res_kind, $res_reg]
@@ -417,8 +417,8 @@ my class MASTCompilerInstance {
         $!mast_compunit
     }
 
-    method coerce($res, $desired) {
-        my $got := $res.result_kind;
+    method coerce($res, int $desired) {
+        my int $got := $res.result_kind;
         if $got != $desired {
             $res.append(self.coercion($res, $desired));
         }
@@ -427,8 +427,8 @@ my class MASTCompilerInstance {
 
     # Expects that the value in need of coercing has already been
     # obtained. Produces instructions to coerce it.
-    method coercion($res, $desired) {
-        my $got := $res.result_kind;
+    method coercion($res, int $desired) {
+        my int $got := $res.result_kind;
         my $reg := $res.result_reg;
         if $got == $desired {
             # Nothing to do.
@@ -1561,7 +1561,7 @@ my class MASTCompilerInstance {
         my $decl  := $node.decl;
 
         my $res_reg;
-        my $res_kind;
+        my int $res_kind;
 
         # Handle any declarations; after this, we call through to the
         # lookup code.
