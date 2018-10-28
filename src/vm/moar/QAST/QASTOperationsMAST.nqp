@@ -46,7 +46,7 @@ class MAST::InstructionList {
     has $!result_reg;
     has int $!result_kind;
 
-    method new($result_reg, $result_kind) {
+    method new($result_reg, int $result_kind) {
         my $obj := nqp::create(self);
         nqp::bindattr($obj, MAST::InstructionList, '$!result_reg', $result_reg);
         nqp::bindattr_i($obj, MAST::InstructionList, '$!result_kind', $result_kind);
@@ -171,7 +171,7 @@ class QAST::MASTOperations {
             my $want-decont := @deconts[$arg_num];
             my $arg := $operand_kind == $MVM_operand_type_var
                 ?? $qastcomp.as_mast($_, :$want-decont)
-                !! $qastcomp.as_mast($_, :want($operand_kind/8), :$want-decont);
+                !! $qastcomp.as_mast($_, :want(nqp::bitshiftr_i($operand_kind, 3)), :$want-decont);
             my int $arg_kind := $arg.result_kind;
 
             if $arg_num == 0 && nqp::eqat($op, 'return_', 0) {
@@ -197,11 +197,11 @@ class QAST::MASTOperations {
                     $type_var_kind := $arg_kind;
                 }
             } # allow nums and ints to be bigger than their destination width
-            elsif (@kind_types[$arg_kind] != @kind_types[$operand_kind/8]) {
-                $qastcomp.coerce($arg, $operand_kind/8);
-                $arg_kind := $operand_kind/8;
+            elsif (@kind_types[$arg_kind] != @kind_types[nqp::bitshiftr_i($operand_kind, 3)]) {
+                $qastcomp.coerce($arg, nqp::bitshiftr_i($operand_kind, 3));
+                $arg_kind := nqp::bitshiftr_i($operand_kind, 3);
                 # the arg typecode left shifted 3 must match the operand typecode
-            #    nqp::die("arg type {@kind_names[$arg_kind]} does not match operand type {@kind_names[$operand_kind/8]} to op '$op'");
+            #    nqp::die("arg type {@kind_names[$arg_kind]} does not match operand type {@kind_names[nqp::bitshiftr_i($operand_kind, 3)]} to op '$op'");
             }
 
             # if this is the write register, get the result reg and type from it
@@ -814,10 +814,11 @@ for <if unless with without> -> $op_name {
         }
 
 
-        my $res_kind;
+        my int $res_kind;
         my $res_reg;
         if $is_void {
             $res_reg := MAST::VOID;
+            $res_kind := $MVM_reg_void;
         }
         else {
             $res_kind := $operands == 3
@@ -957,7 +958,7 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my @ops;
-    my $res_kind   := $MVM_reg_obj;
+    my int $res_kind   := $MVM_reg_obj;
     my $res_reg    := $*REGALLOC.fresh_o();
     my $t          := $*REGALLOC.fresh_i();
     my $u          := $*REGALLOC.fresh_i();
@@ -1190,7 +1191,7 @@ for ('', 'repeat_') -> $repness {
 
             # Allocate result register if needed.
             my $regalloc := $*REGALLOC;
-            my $res_kind := $MVM_reg_obj;
+            my int $res_kind := $MVM_reg_obj;
             my $res_reg;
             if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
                 $res_kind := $MVM_reg_void;
@@ -1564,7 +1565,7 @@ my $call_gen := sub ($qastcomp, $op) {
     # Figure out result register type
     my %result;
     my $res_reg;
-    my $res_kind;
+    my int $res_kind;
     my int $is_nativecall := $op.op eq 'nativeinvoke';
     if !$is_nativecall && nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
         $res_reg := MAST::VOID;
@@ -1745,7 +1746,7 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     }
 
     # Figure out expected result register type
-    my $res_kind;
+    my int $res_kind;
     # and allocate a register for it. Probably reuse an arg's or the invocant's.
     my $res_reg;
     if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
@@ -3031,7 +3032,7 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     $*MAST_FRAME.add-label($done_lbl);
     $regalloc.release_register($disp_reg, $MVM_reg_obj);
     $regalloc.release_register($isnull_reg, $MVM_reg_int64);
-    MAST::InstructionList.new($MVM_reg_void, MAST::VOID)
+    MAST::InstructionList.new(MAST::VOID, $MVM_reg_void)
 });
 QAST::MASTOperations.add_core_moarop_mapping('cleardispatcher', 'takedispatcher');
 QAST::MASTOperations.add_core_moarop_mapping('freshcoderef', 'freshcoderef');
