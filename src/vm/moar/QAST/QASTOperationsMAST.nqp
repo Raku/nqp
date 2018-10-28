@@ -2069,6 +2069,32 @@ my %const_map := nqp::hash(
     'RUSAGE_NSIGNALS',           15,
     'RUSAGE_NVCSW',              16,
     'RUSAGE_NIVCSW',             17,
+
+    'MVM_OPERAND_LITERAL',        0,
+    'MVM_OPERAND_READ_REG',       1,
+    'MVM_OPERAND_WRITE_REG',      2,
+    'MVM_OPERAND_READ_LEX',       3,
+    'MVM_OPERAND_WRITE_LEX',      4,
+    'MVM_OPERAND_RW_MASK',        7,
+
+    'MVM_OPERAND_INT8',           8,
+    'MVM_OPERAND_INT16',         16,
+    'MVM_OPERAND_INT32',         24,
+    'MVM_OPERAND_INT64',         32,
+    'MVM_OPERAND_NUM32',         40,
+    'MVM_OPERAND_NUM64',         48,
+    'MVM_OPERAND_STR',           56,
+    'MVM_OPERAND_OBJ',           64,
+    'MVM_OPERAND_INS',           72,
+    'MVM_OPERAND_TYPE_VAR',      80,
+    'MVM_OPERAND_LEX_OUTER',     88,
+    'MVM_OPERAND_CODEREF',       96,
+    'MVM_OPERAND_CALLSITE',     104,
+    'MVM_OPERAND_TYPE_MASK',    248,
+    'MVM_OPERAND_UINT8',        136,
+    'MVM_OPERAND_UINT16',       144,
+    'MVM_OPERAND_UINT32',       152,
+    'MVM_OPERAND_UINT64',       160,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
