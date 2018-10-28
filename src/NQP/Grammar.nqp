@@ -412,6 +412,7 @@ grammar NQP::Grammar is HLL::Grammar {
         <.newpad>
         [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
+        [ 'is' 'array_type(' <array_type=.typename> ')' ]?
 
         {
             # Construct meta-object for this package, adding it to the
@@ -420,6 +421,10 @@ grammar NQP::Grammar is HLL::Grammar {
             %args<name> := ~$<name>;
             if $<repr> {
                 %args<repr> := ~$<repr><quote_delimited><quote_atom>[0];
+            }
+            %args<array_type> := NQPMu;
+            if $<array_type> {
+                %args<array_type> := $*W.find_sym([~$<array_type><name>]);
             }
             my $how := self.how($*PKGDECL);
             my $INNER := $*W.cur_lexpad();

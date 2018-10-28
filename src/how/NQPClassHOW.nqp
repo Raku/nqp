@@ -19,6 +19,10 @@ knowhow NQPClassHOW {
     has @!roles;
     has $!default_parent;
 
+    # Array type support.
+    has $!is_array_type;
+    has $!array_type;
+
     # Have we been composed?
     has $!composed;
 
@@ -79,7 +83,7 @@ knowhow NQPClassHOW {
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$repr = 'P6opaque') {
+    method new_type(:$name = '<anon>', :$repr = 'P6opaque', :$array_type) {
         my $metaclass := self.new(:name($name));
         nqp::setdebugtypename(
             nqp::setwho(nqp::newtype($metaclass, $repr), {}),
@@ -120,6 +124,19 @@ knowhow NQPClassHOW {
             }
         }
         nqp::push(@!attributes, $meta_attr);
+    }
+
+    method is_array_type($obj) {
+        $!is_array_type
+    }
+
+    method array_type($obj) {
+        $!array_type
+    }
+
+    method set_array_type($obj, $type) {
+        $!is_array_type := 1;
+        $!array_type := $type;
     }
 
     method add_parent($obj, $parent) {
@@ -225,49 +242,59 @@ knowhow NQPClassHOW {
     }
 
     method compose_repr($obj) {
-        # Use any attribute information to produce attribute protocol
-        # data. The protocol consists of an array...
-        my @repr_info;
-
-        # ...which contains an array per MRO entry...
-        for @!mro -> $type_obj {
-            my @type_info;
-            nqp::push(@repr_info, @type_info);
-
-            # ...which in turn contains the current type in the MRO...
-            nqp::push(@type_info, $type_obj);
-
-            # ...then an array of hashes per attribute...
-            my @attrs;
-            nqp::push(@type_info, @attrs);
-            for $type_obj.HOW.attributes($type_obj, :local) -> $attr {
-                my %attr_info;
-                %attr_info<name> := $attr.name;
-                %attr_info<type> := $attr.type;
-                if $attr.box_target {
-                    # Merely having the key serves as a "yes".
-                    %attr_info<box_target> := 1;
-                }
-                if nqp::can($attr, 'auto_viv_container') {
-                    %attr_info<auto_viv_container> := $attr.auto_viv_container;
-                }
-                if $attr.positional_delegate {
-                    %attr_info<positional_delegate> := 1;
-                }
-                if $attr.associative_delegate {
-                    %attr_info<associative_delegate> := 1;
-                }
-                nqp::push(@attrs, %attr_info);
+        if self.is_array_type($obj) {
+            if self.attributes($obj) {
+                nqp::die("Cannot have attributes on an array representation");
             }
-
-            # ...followed by a list of immediate parents.
-            nqp::push(@type_info, $type_obj.HOW.parents($type_obj, :local));
+            nqp::composetype(nqp::decont($obj), nqp::hash('array',
+                nqp::hash('type', nqp::decont(self.array_type($obj)))));
         }
 
-        # Compose the representation using it.
-        my $info := nqp::hash();
-        $info<attribute> := @repr_info;
-        nqp::composetype($obj, $info)
+        else {
+            # Use any attribute information to produce attribute protocol
+            # data. The protocol consists of an array...
+            my @repr_info;
+
+            # ...which contains an array per MRO entry...
+            for @!mro -> $type_obj {
+                my @type_info;
+                nqp::push(@repr_info, @type_info);
+
+                # ...which in turn contains the current type in the MRO...
+                nqp::push(@type_info, $type_obj);
+
+                # ...then an array of hashes per attribute...
+                my @attrs;
+                nqp::push(@type_info, @attrs);
+                for $type_obj.HOW.attributes($type_obj, :local) -> $attr {
+                    my %attr_info;
+                    %attr_info<name> := $attr.name;
+                    %attr_info<type> := $attr.type;
+                    if $attr.box_target {
+                        # Merely having the key serves as a "yes".
+                        %attr_info<box_target> := 1;
+                    }
+                    if nqp::can($attr, 'auto_viv_container') {
+                        %attr_info<auto_viv_container> := $attr.auto_viv_container;
+                    }
+                    if $attr.positional_delegate {
+                        %attr_info<positional_delegate> := 1;
+                    }
+                    if $attr.associative_delegate {
+                        %attr_info<associative_delegate> := 1;
+                    }
+                    nqp::push(@attrs, %attr_info);
+                }
+
+                # ...followed by a list of immediate parents.
+                nqp::push(@type_info, $type_obj.HOW.parents($type_obj, :local));
+            }
+
+            # Compose the representation using it.
+            my $info := nqp::hash();
+            $info<attribute> := @repr_info;
+            nqp::composetype($obj, $info)
+        }
     }
 
     method incorporate_multi_candidates($obj) {

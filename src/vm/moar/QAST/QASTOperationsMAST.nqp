@@ -2069,6 +2069,32 @@ my %const_map := nqp::hash(
     'RUSAGE_NSIGNALS',           15,
     'RUSAGE_NVCSW',              16,
     'RUSAGE_NIVCSW',             17,
+
+    'MVM_OPERAND_LITERAL',        0,
+    'MVM_OPERAND_READ_REG',       1,
+    'MVM_OPERAND_WRITE_REG',      2,
+    'MVM_OPERAND_READ_LEX',       3,
+    'MVM_OPERAND_WRITE_LEX',      4,
+    'MVM_OPERAND_RW_MASK',        7,
+
+    'MVM_OPERAND_INT8',           8,
+    'MVM_OPERAND_INT16',         16,
+    'MVM_OPERAND_INT32',         24,
+    'MVM_OPERAND_INT64',         32,
+    'MVM_OPERAND_NUM32',         40,
+    'MVM_OPERAND_NUM64',         48,
+    'MVM_OPERAND_STR',           56,
+    'MVM_OPERAND_OBJ',           64,
+    'MVM_OPERAND_INS',           72,
+    'MVM_OPERAND_TYPE_VAR',      80,
+    'MVM_OPERAND_LEX_OUTER',     88,
+    'MVM_OPERAND_CODEREF',       96,
+    'MVM_OPERAND_CALLSITE',     104,
+    'MVM_OPERAND_TYPE_MASK',    248,
+    'MVM_OPERAND_UINT8',        136,
+    'MVM_OPERAND_UINT16',       144,
+    'MVM_OPERAND_UINT32',       152,
+    'MVM_OPERAND_UINT64',       160,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -2291,6 +2317,7 @@ QAST::MASTOperations.add_core_moarop_mapping('indexicim', 'indexicim_s');
 QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
 QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
 QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
+QAST::MASTOperations.add_core_moarop_mapping('getcp_s', 'getcp_s');
 QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
 QAST::MASTOperations.add_core_moarop_mapping('encodeconf', 'encodeconf');
 QAST::MASTOperations.add_core_moarop_mapping('encoderep', 'encoderep');
@@ -2500,6 +2527,12 @@ QAST::MASTOperations.add_core_moarop_mapping('bindposnd', 'bindposnd_o', 2);
 QAST::MASTOperations.add_core_moarop_mapping('bindposnd_i', 'bindposnd_i', 2);
 QAST::MASTOperations.add_core_moarop_mapping('bindposnd_n', 'bindposnd_n', 2);
 QAST::MASTOperations.add_core_moarop_mapping('bindposnd_s', 'bindposnd_s', 2);
+QAST::MASTOperations.add_core_moarop_mapping('writeint', 'writeint');
+QAST::MASTOperations.add_core_moarop_mapping('writeuint', 'writeuint');
+QAST::MASTOperations.add_core_moarop_mapping('writenum', 'writenum');
+QAST::MASTOperations.add_core_moarop_mapping('readint', 'readint');
+QAST::MASTOperations.add_core_moarop_mapping('readuint', 'readuint');
+QAST::MASTOperations.add_core_moarop_mapping('readnum', 'readnum');
 QAST::MASTOperations.add_core_moarop_mapping('bindkey', 'bindkey_o', 2);
 QAST::MASTOperations.add_core_moarop_mapping('bindkey_i', 'bindkey_i', 2);
 QAST::MASTOperations.add_core_moarop_mapping('bindkey_n', 'bindkey_n', 2);
@@ -2876,6 +2909,7 @@ QAST::MASTOperations.add_core_moarop_mapping('bindcurhllsym', 'bindcurhllsym');
 QAST::MASTOperations.add_core_moarop_mapping('sethllconfig', 'sethllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecode', 'loadbytecode');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecodebuffer', 'loadbytecodebuffer');
+QAST::MASTOperations.add_core_moarop_mapping('buffertocu', 'buffertocu');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecodefh', 'loadbytecodefh');
 QAST::MASTOperations.add_core_moarop_mapping('settypehll', 'settypehll', 0);
 QAST::MASTOperations.add_core_moarop_mapping('settypehllrole', 'settypehllrole', 0);
@@ -3068,6 +3102,7 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
 QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
+QAST::MASTOperations.add_core_moarop_mapping('serializetobuf', 'serializetobuf');
 QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
 QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
 
