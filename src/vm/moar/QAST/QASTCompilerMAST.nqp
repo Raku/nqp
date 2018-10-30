@@ -2330,7 +2330,7 @@ class MoarVM::StringHeap {
             my int $i := 0;
             my int $chars := nqp::chars($s);
             while $i < $chars && !$utf8 {
-                my $g := nqp::getcp_s($s, $i++);
+                my int $g := nqp::getcp_s($s, $i++);
                 $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
             }
 
