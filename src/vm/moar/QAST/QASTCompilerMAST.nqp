@@ -2225,16 +2225,20 @@ class MoarVM::Callsites {
         }
         $callsite-idx
     }
-my @kind_to_args := [0,
-    $Arg::int,  # $MVM_reg_int8            := 1;
-    $Arg::int,  # $MVM_reg_int16           := 2;
-    $Arg::int,  # $MVM_reg_int32           := 3;
-    $Arg::int,  # $MVM_reg_int64           := 4;
-    $Arg::num,  # $MVM_reg_num32           := 5;
-    $Arg::num,  # $MVM_reg_num64           := 6;
-    $Arg::str,  # $MVM_reg_str             := 7;
-    $Arg::obj   # $MVM_reg_obj             := 8;
-];
+
+    my @kind_to_args := nqp::list_i;
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, $Arg::int);
+    nqp::push_i(@kind_to_args, $Arg::int);
+    nqp::push_i(@kind_to_args, $Arg::int);
+    nqp::push_i(@kind_to_args, $Arg::int);
+    nqp::push_i(@kind_to_args, $Arg::num);
+    nqp::push_i(@kind_to_args, $Arg::num);
+    nqp::push_i(@kind_to_args, $Arg::str);
+    nqp::push_i(@kind_to_args, $Arg::obj);
+    my $flatnamed := $Arg::flatnamed;
+    my $flat      := $Arg::flat;
+    my $named     := $Arg::named;
     my $latin1decoder := NQPDecoder.new('iso-8859-1');
     method get_callsite_id_from_args(@args, @arg_mast) {
         nqp::die('get_callsite_id after serialization!') if $!done;
@@ -2247,13 +2251,13 @@ my @kind_to_args := [0,
         my $frame := $*MAST_FRAME;
         my @flags := nqp::list_i;
         for @args {
-            my uint $result_typeflag := @kind_to_args[@arg_mast[$i].result_kind];
+            my uint $result_typeflag := nqp::atpos_i(@kind_to_args, @arg_mast[$i].result_kind);
             if $_.flat {
-                $result_typeflag := $result_typeflag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
+                $result_typeflag := $result_typeflag +| ($_.named ?? $flatnamed !! $flat);
             }
             elsif $_.named -> $name {
                 nqp::push_i(@named_idxs, $frame.add-string($name));
-                $result_typeflag := $result_typeflag +| $Arg::named;
+                $result_typeflag := $result_typeflag +| $named;
             }
             nqp::push_i(@flags, $result_typeflag);
 
