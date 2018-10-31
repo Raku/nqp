@@ -16,6 +16,8 @@ const repossession = require('./repossession.js');
 
 const BOOT = require('./BOOT.js');
 
+const Ctx = require('./ctx.js');
+
 const constants = require('./constants.js');
 
 const op = {};
@@ -275,6 +277,9 @@ class BinaryWriteCursor {
         this.writer.serializeClosure(ref);
         discrim = REFVAR_CLONED_CODEREF;
       }
+    /* HACK - a ctx should even get here */
+    } else if (ref instanceof Ctx) {
+      discrim = REFVAR_VM_NULL;
     } else {
       /* Just a normal object, with no special serialization needs. */
       discrim = REFVAR_OBJECT;
