@@ -144,7 +144,8 @@ if (process.browser) {
 
       const oldLoaderCtx = exports.loaderCtx;
       exports.loaderCtx = ctx;
-      file = file.replace(/\.setting(\.js)?$/, '_setting');
+      file = file.replace(/\./g, '_');
+      file = file.replace(/\_js$/, '');
       file = file.replace(/::/g, '-');
       require('./' + file + '.nqp-raw-runtime');
       exports.loaderCtx = oldLoaderCtx;
