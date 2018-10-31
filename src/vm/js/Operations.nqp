@@ -186,7 +186,7 @@ class QAST::OperationsJS {
             unless +$node.list == 2 {
                 nqp::die("The '$op_name' op needs 2 arguments, got " ~ +$node.list);
             }
-            if $*BLOCK.try_get_bind_scope($node[0]) -> $bind_scope {
+            if $want != $T_CALL_ARG && $*BLOCK.try_get_bind_scope($node[0]) -> $bind_scope {
                 # Can lower it to a bind instead.
                 my $target := nqp::clone($node[0]);
                 $target.scope($bind_scope);
