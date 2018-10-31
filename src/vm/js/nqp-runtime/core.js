@@ -212,7 +212,7 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
 exports.int64ToObj = function(currentHLL, i) {
   const type = currentHLL.get('int_box');
   if (!type) {
-    return new NQPInt(i);
+    throw new NQPException(`Can't box 64 bit integer: HLL doesn't have int_box`);
   } else {
     const repr = type._STable.REPR;
     const obj = repr.allocate(type._STable);
