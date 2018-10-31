@@ -41,6 +41,10 @@ class BufferedConsole extends NQPObject {
   $$isttyfh() {
     return 1;
   }
+
+  $$setbuffersizefh(size) {
+    return this;
+  }
 }
 
 class BrowserStdin extends NQPObject {
