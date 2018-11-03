@@ -2490,7 +2490,7 @@ class MoarVM::BytecodeWriter {
         my int $i := 0;
         for @lexical_types {
             $!mbc.write_uint16(type_to_local_type($_));
-            $!mbc.write_uint32(@lexical_names[$i++]);
+            $!mbc.write_uint32(nqp::atpos_i(@lexical_names, $i++));
         }
         for @handlers {
             $!mbc.write_uint32($_.start_offset);
