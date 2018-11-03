@@ -244,7 +244,7 @@ my class MASTCompilerInstance {
             # pass a 1 meaning get a Totally New MAST::Local
             my $local := $*REGALLOC.fresh_register($kind, !$temporary);
             %!locals{$name} := $local;
-            %!local_names_by_index{$local.index} := $name;
+            %!local_names_by_index{nqp::unbox_u($local.index)} := $name;
             if $temporary {
                 %*STMTTEMPS{$name} := $local;
             }
@@ -373,7 +373,7 @@ my class MASTCompilerInstance {
     }
 
     method coerce($res, int $desired) {
-        my int $got := $res.result_kind;
+        my int $got := nqp::unbox_i($res.result_kind);
         if $got != $desired {
             $res.append(self.coercion($res, $desired));
         }
@@ -383,7 +383,7 @@ my class MASTCompilerInstance {
     # Expects that the value in need of coercing has already been
     # obtained. Produces instructions to coerce it.
     method coercion($res, int $desired) {
-        my int $got := $res.result_kind;
+        my int $got := nqp::unbox_i($res.result_kind);
         my $reg := $res.result_reg;
         if $got == $desired {
             # Nothing to do.
@@ -447,7 +447,7 @@ my class MASTCompilerInstance {
         }
         else {
             my $res_reg := $*REGALLOC.fresh_register($desired);
-            my $release_type := $got;
+            my int $release_type := $got;
             if $desired == $MVM_reg_int64 {
                 if $got == $MVM_reg_num64 {
                     %core_op_generators{'coerce_ni'}($res_reg, $reg);
@@ -473,7 +473,7 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
                     $reg := $uint64.result_reg;
-                    $release_type := $uint64.result_kind;
+                    $release_type := nqp::unbox_i($uint64.result_kind);
                     %core_op_generators{'coerce_ui'}($res_reg, $reg);
                 }
                 else {
@@ -496,7 +496,7 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
                     $reg := $int64.result_reg;
-                    $release_type := $int64.result_kind;
+                    $release_type := nqp::unbox_i($int64.result_kind);
                     push_op('coerce_in', $res_reg, $reg);
                 }
                 else {
@@ -510,7 +510,7 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_int32 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
                     $reg := $int64.result_reg;
-                    $release_type := $int64.result_kind;
+                    $release_type := nqp::unbox_i($int64.result_kind);
                     push_op('coerce_is', $res_reg, $reg);
                 }
                 elsif $got == $MVM_reg_num64 {
@@ -541,7 +541,7 @@ my class MASTCompilerInstance {
                 elsif $got == $MVM_reg_num64 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
                     $reg := $int64.result_reg;
-                    $release_type := $int64.result_kind;
+                    $release_type := nqp::unbox_i($int64.result_kind);
                     push_op('trunc_i32', $res_reg, $reg);
                 }
                 else {
@@ -578,7 +578,7 @@ my class MASTCompilerInstance {
                     unless $got == $MVM_reg_int64 {
                         my $int64 := self.coercion($res, $MVM_reg_int64);
                         $reg := $int64.result_reg;
-                        $release_type := $int64.result_kind;
+                        $release_type := nqp::unbox_i($int64.result_kind);
                     }
                     %core_op_generators{'coerce_iu'}($res_reg, $reg);
                 }
@@ -587,7 +587,7 @@ my class MASTCompilerInstance {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
                     $reg := $uint64.result_reg;
-                    $release_type := $uint64.result_kind;
+                    $release_type := nqp::unbox_i($uint64.result_kind);
                 }
                 %core_op_generators{'trunc_u32'}($res_reg, $reg);
             }
@@ -595,7 +595,7 @@ my class MASTCompilerInstance {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
                     $reg := $uint64.result_reg;
-                    $release_type := $uint64.result_kind;
+                    $release_type := nqp::unbox_i($uint64.result_kind);
                 }
                 %core_op_generators{'trunc_u16'}($res_reg, $reg);
             }
@@ -603,7 +603,7 @@ my class MASTCompilerInstance {
                 unless $got == $MVM_reg_uint64 {
                     my $uint64 := self.coercion($res, $MVM_reg_uint64);
                     $reg := $uint64.result_reg;
-                    $release_type := $uint64.result_kind;
+                    $release_type := nqp::unbox_i($uint64.result_kind);
                 }
                 %core_op_generators{'trunc_u8'}($res_reg, $reg);
             }
@@ -1220,7 +1220,7 @@ my class MASTCompilerInstance {
 
                             # put the initialization result in the variable register
                             op_set($valreg, $default_mast.result_reg);
-                            $*REGALLOC.release_register($default_mast.result_reg, $default_mast.result_kind);
+                            $*REGALLOC.release_register($default_mast.result_reg, nqp::unbox_i($default_mast.result_kind));
 
                             # end label to skip initialization code
                             $*MAST_FRAME.add-label($endlbl);
@@ -1389,7 +1389,7 @@ my class MASTCompilerInstance {
                 $last_stmt := nqp::defined($WANT)
                     ?? self.as_mast($_, :want($WANT), :$want-decont)
                     !! self.as_mast($_, :$want-decont);
-                if $last_stmt.result_kind == $MVM_reg_void {
+                if nqp::unbox_i($last_stmt.result_kind) == $MVM_reg_void {
                     $last_stmt := self.coerce($last_stmt, $MVM_reg_obj);
                 }
                 $use_result := 1;
@@ -1403,12 +1403,12 @@ my class MASTCompilerInstance {
             }
             else {
                 # release top-level results (since they can't be used by anything anyway)
-                $*REGALLOC.release_register($last_stmt.result_reg, $last_stmt.result_kind);
+                $*REGALLOC.release_register($last_stmt.result_reg, nqp::unbox_i($last_stmt.result_kind));
             }
             $result_count++;
         }
-        if $result_stmt && $result_stmt.result_kind != $MVM_reg_void {
-            MAST::InstructionList.new($result_stmt.result_reg, $result_stmt.result_kind);
+        if $result_stmt && nqp::unbox_i($result_stmt.result_kind) != $MVM_reg_void {
+            MAST::InstructionList.new($result_stmt.result_reg, nqp::unbox_i($result_stmt.result_kind));
         }
         else {
             MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
@@ -2206,7 +2206,7 @@ class MoarVM::Callsites {
         my $frame := $*MAST_FRAME;
         my @flags := nqp::list_i;
         for @args {
-            my uint $result_typeflag := nqp::atpos_i(@kind_to_args, @arg_mast[$i].result_kind);
+            my uint $result_typeflag := nqp::atpos_i(@kind_to_args, nqp::unbox_i(@arg_mast[$i].result_kind));
             if $_.flat {
                 $result_typeflag := $result_typeflag +| ($_.named ?? $flatnamed !! $flat);
             }
