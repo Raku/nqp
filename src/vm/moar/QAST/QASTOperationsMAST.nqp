@@ -1505,7 +1505,8 @@ my $call_gen := sub ($qastcomp, $op) {
     nqp::die("Callee code did not result in a MAST::Local")
         unless $callee.result_reg && $callee.result_reg ~~ MAST::Local;
 
-    my $frame := $*MAST_FRAME;
+    my $regalloc := $*REGALLOC;
+    my $frame    := $*MAST_FRAME;
     my $bytecode := $frame.bytecode;
 
     # The arg's results
@@ -1554,18 +1555,12 @@ my $call_gen := sub ($qastcomp, $op) {
         my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
+
+        $regalloc.release_register($arg_mast.result_reg, $kind);
     }
 
     # Release the callee's result register.
-    my $regalloc := $*REGALLOC;
     $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
-
-    # Release each arg's result register
-    for @arg_mast -> $arg {
-        if $arg.result_reg ~~ MAST::Local {
-            $regalloc.release_register($arg.result_reg, $arg.result_kind);
-        }
-    }
 
     # Figure out result register type
     my %result;
@@ -1738,17 +1733,12 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
+
+        $regalloc.release_register($arg_mast.result_reg, $kind);
     }
 
     # release the callee register
     $regalloc.release_register($callee_reg, $MVM_reg_obj);
-
-    # Release the invocant's and each arg's result registers
-    for @arg_mast -> $arg {
-        if $arg.result_reg ~~ MAST::Local {
-            $regalloc.release_register($arg.result_reg, $arg.result_kind);
-        }
-    }
 
     # Figure out expected result register type
     my int $res_kind;
@@ -3212,7 +3202,8 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     }
     my $target := $target_node.value;
 
-    my $frame := $*MAST_FRAME;
+    my $regalloc := $*REGALLOC;
+    my $frame    := $*MAST_FRAME;
     my $bytecode := $frame.bytecode;
 
     # Compile the arguments
@@ -3249,13 +3240,8 @@ QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
         my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
         nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 2);
         $bytecode_pos := $bytecode_pos + 6;
-    }
 
-    my $regalloc := $*REGALLOC;
-    for @arg_mast -> $arg {
-        if $arg.result_reg ~~ MAST::Local {
-            $regalloc.release_register($arg.result_reg, $arg.result_kind);
-        }
+        $regalloc.release_register($arg_mast.result_reg, $kind);
     }
 
     # Assemble the resolve call.
