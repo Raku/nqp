@@ -2149,14 +2149,12 @@ class MoarVM::Callsites {
             if $_ +& $callsite_arg_named {
                 my $name := @args[$i + $num_nameds++];
                 nqp::push(@named_idxs, $frame.add-string($name));
+                $identifier.write_uint32($_);
             }
             $identifier.write_uint8($_);
             $i++;
         }
 
-        for @named_idxs {
-            $identifier.write_uint32($_);
-        }
         my $identifier_s := nqp::decode($identifier, 'iso-8859-1'); # just turn the buf into a str without real interpretation
         if nqp::existskey(%!callsites, $identifier_s) {
             return %!callsites{$identifier_s};
@@ -2187,14 +2185,13 @@ class MoarVM::Callsites {
     nqp::push_i(@kind_to_args, $Arg::num);
     nqp::push_i(@kind_to_args, $Arg::str);
     nqp::push_i(@kind_to_args, $Arg::obj);
-    my $flatnamed := $Arg::flatnamed;
-    my $flat      := $Arg::flat;
-    my $named     := $Arg::named;
+    my int $flatnamed := $Arg::flatnamed;
+    my int $flat      := $Arg::flat;
+    my int $named     := $Arg::named;
     my $latin1decoder := NQPDecoder.new('iso-8859-1');
     method get_callsite_id_from_args(@args, @arg_mast) {
         nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@args);
-        my uint16 $align := $elems % 2;
         my @named_idxs := nqp::list_i;
         my int $i := 0;
         my $identifier := MAST::Bytecode.new;
@@ -2206,9 +2203,15 @@ class MoarVM::Callsites {
             if $_.flat {
                 $result_typeflag := $result_typeflag +| ($_.named ?? $flatnamed !! $flat);
             }
-            elsif $_.named -> $name {
-                nqp::push_i(@named_idxs, $frame.add-string($name));
-                $result_typeflag := $result_typeflag +| $named;
+            else {
+                my str $name := $_.named;
+                if $name {
+                    my int $idx := nqp::unbox_i($frame.add-string($name));
+                    nqp::push_i(@named_idxs, $idx);
+                    nqp::writeuint($identifier, $id_offset, $idx, 4);
+                    $id_offset := $id_offset + 4;
+                    $result_typeflag := $result_typeflag +| $named;
+                }
             }
             nqp::push_i(@flags, $result_typeflag);
 
@@ -2216,10 +2219,6 @@ class MoarVM::Callsites {
             $i++;
         }
 
-        for @named_idxs -> uint $idx {
-            nqp::writeuint($identifier, $id_offset, $idx, 4);
-            $id_offset := $id_offset + 4;
-        }
         $latin1decoder.add-bytes($identifier); # just turn the buf into a str without real interpretation
         my str $identifier_s := $latin1decoder.consume-all-chars;
         if nqp::existskey(%!callsites, $identifier_s) {
@@ -2231,14 +2230,16 @@ class MoarVM::Callsites {
         my uint $callsites_offset := nqp::elems($!callsites);
         nqp::writeuint($!callsites, $callsites_offset, $elems, 2);
         $callsites_offset := $callsites_offset + 2;
-        for @flags -> uint $flag {
-            nqp::writeuint($!callsites, $callsites_offset++, $flag, 0);
+        my $iter := nqp::iterator(@flags);
+        while $iter {
+            nqp::writeuint($!callsites, $callsites_offset++, nqp::shift_i($iter), 0);
         }
-        if $align > 0 {
+        if $elems +& 1 {
             nqp::writeuint($!callsites, $callsites_offset++, 0, 0);
         }
-        for @named_idxs -> uint $idx {
-            nqp::writeuint($!callsites, $callsites_offset, $idx, 4);
+        $iter := nqp::iterator(@named_idxs);
+        while $iter {
+            nqp::writeuint($!callsites, $callsites_offset, nqp::shift_i($iter), 4);
             $callsites_offset := $callsites_offset + 4;
         }
         $callsite-idx
