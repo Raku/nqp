@@ -972,17 +972,17 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $endlabel   := MAST::Label.new();
 
     my @comp_ops;
-    my $f_ast;
+    my $f;
     for $op.list {
         if $_.named eq 'false' {
-            $f_ast := $qastcomp.as_mast($_, :want($MVM_reg_obj));
+            $f := $_;
         }
         else {
-            nqp::push(@comp_ops, $qastcomp.as_mast($_, :want($MVM_reg_obj)));
+            nqp::push(@comp_ops, $_);
         }
     }
 
-    my $apost := nqp::shift(@comp_ops);
+    my $apost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
     op_set($res_reg, $apost.result_reg);
     op_decont($d, $apost.result_reg);
     %core_op_generators{'istrue'}($t, $d);
@@ -991,7 +991,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $have_middle_child := 1;
     my $bpost;
     while $have_middle_child {
-        $bpost := nqp::shift(@comp_ops);
+        $bpost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
         op_decont($d, $bpost.result_reg);
         %core_op_generators{'istrue'}($u, $d);
 
@@ -1022,7 +1022,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     op_goto($endlabel);
     $*MAST_FRAME.add-label($falselabel);
 
-    if $f_ast {
+    if $f {
+        my $f_ast := $qastcomp.as_mast($f, :want($MVM_reg_obj));
         op_set($res_reg, $f_ast.result_reg);
         $*REGALLOC.release_register($f_ast.result_reg, $MVM_reg_obj);
     }
