@@ -70,36 +70,16 @@ my class MASTCompilerInstance {
     # using the result as an arg to another op.
     my class RegAlloc {
         has $!frame;
-        has @!objs;
-        has @!int64s;
-        has @!int32s;
-        has @!int16s;
-        has @!int8s;
-        has @!num64s;
-        has @!num32s;
-        has @!strs;
-        has @!uint64s;
-        has @!uint32s;
-        has @!uint16s;
-        has @!uint8s;
-        has %!released_indexes;
+        has @!released;
+        has @!released_indexes;
 
+        my @types := [nqp::null,int8,int16,int32,int,num32,num,str,NQPMu,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,uint8,uint16,uint32,uint64];
         method new($frame) {
             my $obj := nqp::create(self);
+            my @released := [nqp::null,[],[],[],[],[],[],[],[],nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,nqp::null,[],[],[],[]];
+            nqp::bindattr($obj, RegAlloc, '@!released', @released);
             nqp::bindattr($obj, RegAlloc, '$!frame', $frame);
-            nqp::bindattr($obj, RegAlloc, '@!objs', []);
-            nqp::bindattr($obj, RegAlloc, '@!int64s', []);
-            nqp::bindattr($obj, RegAlloc, '@!int32s', []);
-            nqp::bindattr($obj, RegAlloc, '@!int16s', []);
-            nqp::bindattr($obj, RegAlloc, '@!int8s', []);
-            nqp::bindattr($obj, RegAlloc, '@!num64s', []);
-            nqp::bindattr($obj, RegAlloc, '@!num32s', []);
-            nqp::bindattr($obj, RegAlloc, '@!strs', []);
-            nqp::bindattr($obj, RegAlloc, '@!uint64s', []);
-            nqp::bindattr($obj, RegAlloc, '@!uint32s', []);
-            nqp::bindattr($obj, RegAlloc, '@!uint16s', []);
-            nqp::bindattr($obj, RegAlloc, '@!uint8s', []);
-            nqp::bindattr($obj, RegAlloc, '%!released_indexes', {});
+            nqp::bindattr($obj, RegAlloc, '@!released_indexes', nqp::list_i);
             $obj
         }
 
@@ -112,33 +92,19 @@ my class MASTCompilerInstance {
         # so a Local can't be a non-Var for the first half of a block and
         # then a Var the second half, but then control returns to the first half
         method fresh_register($kind, $new = 0) {
-            my @arr; my $type;
             # set $new to 1 here if you suspect a problem with the allocator,
             # or if you suspect a register is being double-released somewhere.
             # $new := 1;
-               if $kind == $MVM_reg_int64  { @arr := @!int64s; $type := int }
-            elsif $kind == $MVM_reg_num64  { @arr := @!num64s; $type := num }
-            elsif $kind == $MVM_reg_str    { @arr := @!strs; $type := str }
-            elsif $kind == $MVM_reg_obj    { @arr := @!objs; $type := NQPMu }
-            elsif $kind == $MVM_reg_int32  { @arr := @!int32s; $type := int32 }
-            elsif $kind == $MVM_reg_int16  { @arr := @!int16s; $type := int16 }
-            elsif $kind == $MVM_reg_int8   { @arr := @!int8s; $type := int8 }
-            elsif $kind == $MVM_reg_num32  { @arr := @!num32s; $type := num32 }
-            elsif $kind == $MVM_reg_uint64 { @arr := @!uint64s; $type := uint64 }
-            elsif $kind == $MVM_reg_uint32 { @arr := @!uint32s; $type := uint32 }
-            elsif $kind == $MVM_reg_uint16 { @arr := @!uint16s; $type := uint16 }
-            elsif $kind == $MVM_reg_uint8  { @arr := @!uint8s; $type := uint8 }
-            else { nqp::die("Unhandled reg kind $kind") }
+            my @arr := @!released[$kind];
 
-            my $reg;
             if nqp::elems(@arr) && !$new {
-                $reg := nqp::pop(@arr);
-                nqp::deletekey(%!released_indexes, $reg.index);
+                my $reg := nqp::pop(@arr);
+                nqp::bindpos_i(@!released_indexes, nqp::unbox_u($reg), 0);
+                $reg
             }
             else {
-                $reg := MAST::Local.new(:index($!frame.add_local($type)));
+                MAST::Local.new(:index($!frame.add_local(@types[$kind])));
             }
-            $reg
         }
 
         method release_i($reg) { self.release_register($reg, $MVM_reg_int64) }
@@ -147,22 +113,11 @@ my class MASTCompilerInstance {
         method release_o($reg) { self.release_register($reg, $MVM_reg_obj) }
 
         method release_register($reg, int $kind, int $force = 0) {
-            return 1 if $kind == $MVM_reg_void || !$force && $*BLOCK.is_var($reg)
-                || nqp::existskey(%!released_indexes, $reg.index);
-            %!released_indexes{$reg.index} := 1;
-            return nqp::push(@!int64s, $reg) if $kind == $MVM_reg_int64;
-            return nqp::push(@!num64s, $reg) if $kind == $MVM_reg_num64;
-            return nqp::push(@!strs, $reg) if $kind == $MVM_reg_str;
-            return nqp::push(@!objs, $reg) if $kind == $MVM_reg_obj;
-            return nqp::push(@!int32s, $reg) if $kind == $MVM_reg_int32;
-            return nqp::push(@!int16s, $reg) if $kind == $MVM_reg_int16;
-            return nqp::push(@!int8s, $reg) if $kind == $MVM_reg_int8;
-            return nqp::push(@!num32s, $reg) if $kind == $MVM_reg_num32;
-            return nqp::push(@!uint64s, $reg) if $kind == $MVM_reg_uint64;
-            return nqp::push(@!uint32s, $reg) if $kind == $MVM_reg_uint32;
-            return nqp::push(@!uint16s, $reg) if $kind == $MVM_reg_uint16;
-            return nqp::push(@!uint8s, $reg) if $kind == $MVM_reg_uint8;
-            nqp::die("Unhandled reg kind $kind");
+            unless $kind == $MVM_reg_void || !$force && $*BLOCK.is_var($reg) {
+                nqp::bindpos_i(@!released_indexes, nqp::unbox_u($reg), 1);
+                nqp::push(@!released[$kind], $reg);
+            }
+            NQPMu
         }
     }
 
