@@ -1279,14 +1279,12 @@ my class MASTCompilerInstance {
         elsif $node.blocktype eq 'immediate' {
             my $clone_reg := $*BLOCK.clone_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
-                MAST::Call.new( :target($clone_reg), :flags([]) );
+                $*MAST_FRAME.compile-simple-call($clone_reg, nqp::null);
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
             else {
                 my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
-                MAST::Call.new(
-                    :target($clone_reg), :flags([]), :result($res_reg)
-                );
+                $*MAST_FRAME.compile-simple-call($clone_reg, $res_reg);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
@@ -1295,13 +1293,11 @@ my class MASTCompilerInstance {
             my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             %core_op_generators{'getcode'}($code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
-                MAST::Call.new( :target($code_reg), :flags([]) );
+                $*MAST_FRAME.compile-simple-call($code_reg, nqp::null);
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             } else {
                 my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
-                MAST::Call.new(
-                    :target($code_reg), :flags([]), :result($res_reg)
-                );
+                $*MAST_FRAME.compile-simple-call($code_reg, $res_reg);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
