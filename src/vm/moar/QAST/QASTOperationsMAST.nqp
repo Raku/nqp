@@ -1985,7 +1985,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             $il.append($lbl);
             %core_op_generators{'newexception'}($ex);
             %core_op_generators{'bindexpayload'}($ex,  $lbl.result_reg );
-            %core_op_generators{'const_i64'}($cat, %control_map{$name} + $HandlerCategory::labeled);
+            %core_op_generators{'const_i64'}($cat, nqp::add_i(%control_map{$name}, $HandlerCategory::labeled));
             %core_op_generators{'bindexcategory'}($ex,  $cat );
             %core_op_generators{'throwdyn'}($res, $ex);
             $il
