@@ -889,13 +889,14 @@ for <if unless with without> -> $op_name {
         $*MAST_FRAME.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
 
         if (!$is_void && @comp_ops[1].result_kind != $res_kind) {
+            # coercion will automatically release @comp_ops[1].result_reg
             my $coercion := $qastcomp.coercion(@comp_ops[1], $res_kind);
             op_set($res_reg, $coercion.result_reg);
         }
         elsif !$is_void {
             op_set($res_reg, @comp_ops[1].result_reg);
+            $regalloc.release_register(@comp_ops[1].result_reg, nqp::unbox_i(@comp_ops[1].result_kind));
         }
-        $regalloc.release_register(@comp_ops[1].result_reg, @comp_ops[1].result_kind);
 
         # Handle else branch (coercion of condition result if 2-arg).
         if $operands == 3 {
@@ -907,17 +908,21 @@ for <if unless with without> -> $op_name {
 
             if !$is_void {
                 if @comp_ops[2].result_kind != $res_kind {
+                    # coercion will automatically release @comp_ops[2].result_reg
                     my $coercion := $qastcomp.coercion(@comp_ops[2], $res_kind);
                     op_set($res_reg, $coercion.result_reg);
                 }
                 else {
                     op_set($res_reg, @comp_ops[2].result_reg);
+                    $regalloc.release_register(@comp_ops[2].result_reg, nqp::unbox_i(@comp_ops[2].result_kind));
                 }
             }
-            $regalloc.release_register(@comp_ops[2].result_reg, @comp_ops[2].result_kind);
         }
 
-        $regalloc.release_register(@comp_ops[0].result_reg, @comp_ops[0].result_kind);
+        unless $operands == 2 && !$is_void {
+            # coercion will automatically release @comp_ops[0].result_reg
+            $regalloc.release_register(@comp_ops[0].result_reg, nqp::unbox_i(@comp_ops[0].result_kind));
+        }
 
         $*MAST_FRAME.add-label($end_lbl);
 
