@@ -107,7 +107,7 @@ class QAST::MASTOperations {
     my @core_operands_counts  := MAST::Ops.WHO<@counts>;
     my @core_operands_values  := MAST::Ops.WHO<@values>;
     my %core_op_codes         := MAST::Ops.WHO<%codes>;
-    method compile_mastop($qastcomp, $op, @args, @deconts, :$returnarg = -1, :$want) {
+    method compile_mastop($qastcomp, str $op, @args, @deconts, :$returnarg = -1, :$want) {
         # Resolve as either core op or ext op.
         my int $num_operands;
         my int $operands_offset;
