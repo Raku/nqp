@@ -1578,7 +1578,6 @@ my $call_gen := sub ($qastcomp, $op) {
     }
 
     # Generate call.
-    my $res_type;
     if $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
         my uint $index := nqp::unbox_u($res_reg);
@@ -1589,19 +1588,15 @@ my $call_gen := sub ($qastcomp, $op) {
         my int $primspec := nqp::objprimspec(@local_types[$index]);
         if $primspec == 1 {
             $op_name := $op_name ~ 'i';
-            $res_type := $MVM_operand_int64;
         }
         elsif $primspec == 2 {
             $op_name := $op_name ~ 'n';
-            $res_type := $MVM_operand_num64;
         }
         elsif $primspec == 3 {
             $op_name := $op_name ~ 's';
-            $res_type := $MVM_operand_str;
         }
         elsif $primspec == 0 { # object
             $op_name := $op_name ~ 'o';
-            $res_type := $MVM_operand_obj;
         }
         else {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
@@ -1754,7 +1749,6 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     }
 
     # Generate call.
-    my $res_type;
     if $res_reg.isa(MAST::Local) { # We got a return value
         my @local_types := $frame.local_types;
         my uint $index := nqp::unbox_u($res_reg);
@@ -1765,19 +1759,15 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         my uint $op_code;
         if $primspec == 1 {
             $op_code := $op_code_invoke_i;
-            $res_type := $MVM_operand_int64;
         }
         elsif $primspec == 2 {
             $op_code := $op_code_invoke_n;
-            $res_type := $MVM_operand_num64;
         }
         elsif $primspec == 3 {
             $op_code := $op_code_invoke_s;
-            $res_type := $MVM_operand_str;
         }
         elsif $primspec == 0 { # object
             $op_code := $op_code_invoke_o;
-            $res_type := $MVM_operand_obj;
         }
         else {
             nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
