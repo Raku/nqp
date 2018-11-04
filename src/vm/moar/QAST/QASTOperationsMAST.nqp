@@ -863,16 +863,20 @@ for <if unless with without> -> $op_name {
             $regalloc.release_register($decont_reg, $MVM_reg_obj);
         }
         elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
-            my $coerce-reg := $regalloc.fresh_register: $coerce-kind;
+            # workaround for coercion unconditionally releasing the source register while we still need it later on
+            my $coerce-reg := $regalloc.fresh_register: @comp_ops[0].result_kind;
+            op_set($coerce-reg, @comp_ops[0].result_reg);
+            my $il := MAST::InstructionList.new($coerce-reg, nqp::unbox_i(@comp_ops[0].result_kind));
+            $qastcomp.coerce($il, $coerce-kind);
             %core_op_generators{
                 $op_name eq 'if'
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
                   !! @Condition-op-kinds[        @comp_ops[0].result_kind]
             }(
-                $coerce-reg,
+                $il.result_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
-            $regalloc.release_register: $coerce-reg, $coerce-kind;
+            $regalloc.release_register: $il.result_reg, $coerce-kind;
         }
         else {
             %core_op_generators{
