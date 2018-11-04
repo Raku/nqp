@@ -82,17 +82,22 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
 
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
-                AsyncSocketHandle handle = new AsyncSocketHandle(curTC, channel);
-                IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
+                AsyncSocketHandle clientHandle = new AsyncSocketHandle(curTC, channel);
+                IOHandleInstance clientIoHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
                         IOType.st);
-                ioHandle.handle = handle;
+                clientIoHandle.handle = clientHandle;
+
+                IOHandleInstance serverIoHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
+                        IOType.st);
+                serverIoHandle.handle = this;
 
                 SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
                 result.push_boxed(curTC, task.schedulee);
-                result.push_boxed(curTC, ioHandle);
+                result.push_boxed(curTC, clientIoHandle);
                 result.push_boxed(curTC, Null);
                 result.push_boxed(curTC, Ops.box_s(peerHost, Str, curTC));
                 result.push_boxed(curTC, Ops.box_i(peerPort, Int, curTC));
+                result.push_boxed(curTC, serverIoHandle);
                 result.push_boxed(curTC, Ops.box_s(socketHost, Str, curTC));
                 result.push_boxed(curTC, Ops.box_i(socketPort, Int, curTC));
 
@@ -108,6 +113,7 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 result.push_boxed(curTC, Ops.box_s(exc.toString(), Str, curTC));
                 result.push_boxed(curTC, Str);
                 result.push_boxed(curTC, Int);
+                result.push_boxed(curTC, IOType);
                 result.push_boxed(curTC, Str);
                 result.push_boxed(curTC, Int);
             }
@@ -134,17 +140,24 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 socketHost = "::1";
             int socketPort = localAddress.getPort();
 
-            SixModelObject result = Array.st.REPR.allocate(tc, Array.st);
+            ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
-            result.push_boxed(tc, task.schedulee);
-            result.push_boxed(tc, IOType);
-            result.push_boxed(tc, Null);
-            result.push_boxed(tc, Str);
-            result.push_boxed(tc, Int);
-            result.push_boxed(tc, Ops.box_s(socketHost, Str, tc));
-            result.push_boxed(tc, Ops.box_i(socketPort, Int, tc));
+            IOHandleInstance ioHandle = (IOHandleInstance) IOType.st.REPR.allocate(curTC,
+                    IOType.st);
+            ioHandle.handle = this;
 
-            ((ConcBlockingQueueInstance) task.queue).push_boxed(tc, result);
+            SixModelObject result = Array.st.REPR.allocate(curTC, Array.st);
+
+            result.push_boxed(curTC, task.schedulee);
+            result.push_boxed(curTC, IOType);
+            result.push_boxed(curTC, Null);
+            result.push_boxed(curTC, Str);
+            result.push_boxed(curTC, Int);
+            result.push_boxed(curTC, ioHandle);
+            result.push_boxed(curTC, Ops.box_s(socketHost, Str, curTC));
+            result.push_boxed(curTC, Ops.box_i(socketPort, Int, curTC));
+
+            ((ConcBlockingQueueInstance) task.queue).push_boxed(curTC, result);
         }
         catch (Exception e) {
             throw ExceptionHandling.dieInternal(tc, e);
