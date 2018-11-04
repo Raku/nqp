@@ -78,7 +78,7 @@ public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
                 String peerHost = remoteAddress.getAddress().getHostAddress();
                 if (peerHost.equals("0:0:0:0:0:0:0:1"))
                     peerHost = "::1";
-                int peerPort = localAddress.getPort();
+                int peerPort = remoteAddress.getPort();
 
                 ThreadContext curTC = tc.gc.getCurrentThreadContext();
 
