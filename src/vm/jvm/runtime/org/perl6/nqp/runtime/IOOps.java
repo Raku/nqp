@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.SocketOptions;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -166,6 +167,75 @@ public final class IOOps {
         Runnable sigrun = new SigRunnable(tc, schedulee, signalNum);
         Runtime.getRuntime().addShutdownHook(new Thread(sigrun));
         return task;
+    }
+
+    private static class Sockopts {
+        public static final List<String> sockoptsKeys = Arrays.asList(
+            "SO_BINDADDR", "SO_BROADCAST", "SO_KEEPALIVE", "SO_LINGER",
+            "SO_OOBINLINE", "SO_RCVBUF", "SO_REUSEADDR", "SO_SNDBUF",
+            "SO_TIMEOUT"
+        );
+
+        public static Map<String, Integer> process() {
+            Map<String, Integer> sockoptsWanted = new HashMap<String, Integer>();
+            for ( String k : sockoptsKeys ) { sockoptsWanted.put(k, 0); }
+
+            for (String sockopt : sockoptsWanted.keySet()) {
+                switch (sockopt) {
+                    case "SO_BINDADDR":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_BINDADDR));
+                        break;
+                    case "SO_BROADCAST":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_BROADCAST));
+                        break;
+                    case "SO_KEEPALIVE":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_KEEPALIVE));
+                        break;
+                    case "SO_LINGER":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_LINGER));
+                        break;
+                    case "SO_OOBINLINE":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_OOBINLINE));
+                        break;
+                    case "SO_RCVBUF":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_RCVBUF));
+                        break;
+                    case "SO_REUSEADDR":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_REUSEADDR));
+                        break;
+                    case "SO_SNDBUF":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_SNDBUF));
+                        break;
+                    case "SO_TIMEOUT":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_TIMEOUT));
+                        break;
+                }
+            }
+
+            return sockoptsWanted;
+        }
+    }
+
+    private static SixModelObject sockoptsCache = null;
+
+    public static SixModelObject getsockopts(ThreadContext tc) {
+        if (sockoptsCache != null) return sockoptsCache;
+
+        final SixModelObject listType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
+        final SixModelObject strType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;
+        final SixModelObject intType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType;
+        final SixModelObject res      = listType.st.REPR.allocate(tc, listType.st);
+
+        Map<String, Integer> sockoptsWanted = Sockopts.process();
+
+        for (String sockopt : Sockopts.sockoptsKeys) {
+            long sockoptnum = (long) sockoptsWanted.get(sockopt);
+            res.push_boxed(tc, Ops.box_s(sockopt, strType, tc));
+            res.push_boxed(tc, Ops.box_i(sockoptnum, intType, tc));
+        }
+
+        sockoptsCache = res;
+        return res;
     }
 
     public static SixModelObject watchfile(SixModelObject queue, SixModelObject schedulee,
