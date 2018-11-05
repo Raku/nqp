@@ -208,6 +208,7 @@
   * [lstat_time](#lstat_time)
   * [symlink](#symlink)
   * [unlink](#unlink)
+  * [getsockopts](#getsockopts)
 - [Type/Conversion Opcodes](#-typeconversion-opcodes)
   * [bool](#bool)
   * [bootarray `jvm` `moar`](#bootarray-jvm-moar)
@@ -1889,6 +1890,12 @@ Create a symbolic link from `$after` to `$before`
 
 Delete the given file $path. Returns 0 on success, -2 if the file
 didn't exist. May throw an exception.
+
+## getsockopts
+* `getsockopts(--> Mu)`
+
+Returns a list of the option types supported by nqp::getsockopt and
+nqp::setsockopt.
 
 # <a id="type"></a> Type/Conversion Opcodes
 
