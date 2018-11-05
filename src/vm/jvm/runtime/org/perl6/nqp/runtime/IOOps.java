@@ -238,6 +238,14 @@ public final class IOOps {
         return res;
     }
 
+    public static long getsockopt(SixModelObject handle, long option, ThreadContext tc) {
+        throw new UnsupportedOperationException("getsockopt is not yet implemented.");
+    }
+
+    public static long setsockopt(SixModelObject handle, long option, long value, ThreadContext tc) {
+        throw new UnsupportedOperationException("setsockopt is not yet implemented.");
+    }
+
     public static SixModelObject watchfile(SixModelObject queue, SixModelObject schedulee,
             String filename, SixModelObject asyncType, ThreadContext tc) {
         throw new UnsupportedOperationException("watchfile is not yet implemented.");
