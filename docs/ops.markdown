@@ -209,6 +209,8 @@
   * [symlink](#symlink)
   * [unlink](#unlink)
   * [getsockopts](#getsockopts)
+  * [getsockopt](#getsockopt)
+  * [setsockopt](#setsockopt)
 - [Type/Conversion Opcodes](#-typeconversion-opcodes)
   * [bool](#bool)
   * [bootarray `jvm` `moar`](#bootarray-jvm-moar)
@@ -1896,6 +1898,16 @@ didn't exist. May throw an exception.
 
 Returns a list of the option types supported by nqp::getsockopt and
 nqp::setsockopt.
+
+## getsockopt
+* `getsockopt(Mu $socket, Int $option --> Int)`
+
+Returns the set value for the given option on the socket.
+
+## setsockopt
+* `setsockopt(Mu $socket, Int $option, Int $value --> Int)`
+
+Sets the value for the given option on the socket.
 
 # <a id="type"></a> Type/Conversion Opcodes
 
