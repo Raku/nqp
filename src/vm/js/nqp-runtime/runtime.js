@@ -64,11 +64,14 @@ exports.int64ToObj = core.int64ToObj;
 
 exports.EvalResult = core.EvalResult;
 
+let browser;
+
 if (!process.browser) {
   const io = require('./io.js');
   loadOps(io);
 } else {
-  loadOps(require('./browser.js'));
+  browser = require('./browser.js');
+  loadOps(browser);
 }
 
 const bignum = require('./bignum.js');
@@ -507,8 +510,26 @@ exports.NativeRef = require('./reprs.js').NativeRef;
 
 exports.getHLL = hll.getHLL;
 
+let once = true;
 exports.run = function(code) {
-  return code();
+  if (once && browser && window.__rakudo__ && window.__rakudo__.waitForStart) {
+    once = false;
+
+    window.__rakudo__.waitForStart.push(() => {
+      browser.op.getstdout().start();
+      try {
+        code();
+      } catch (e) {
+        if (e instanceof browser.Exit) {
+        } else {
+          throw e;
+        }
+      }
+      browser.op.getstdout().end();
+    });
+  } else {
+    return code();
+  }
 };
 
 exports.tooFewPos = function(got, expected) {

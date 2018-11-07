@@ -75,9 +75,44 @@ class HijackedConsole extends NQPObject {
   }
 }
 
-const STDOUT =
-  window.NQP_STDOUT ? new HijackedConsole(window.NQP_STDOUT)
-  : new BufferedConsole(output => console.log(output));
+let STDOUT;
+if (window.NQP_STDOUT) {
+  STDOUT = new HijackedConsole(window.NQP_STDOUT)
+} else if (window.__karma__) {
+  const TapConsole = require('./tap-console.js');
+  STDOUT = new TapConsole();
+} else {
+  STDOUT = new BufferedConsole(output => console.error(output));
+}
+
+if (window.__karma__) {
+  if (!window.__rakudo__) {
+    window.__rakudo__ = {};
+  }
+
+  window.__rakudo__.startTime = new Date().getTime();
+  window.__rakudo__.waitForStart = [];
+  window.__rakudo__.results = [];
+  window.__rakudo__.resultCount = 0;
+
+  window.__karma__.start = function(results) {
+    STDOUT.karmaResults = results;
+
+    for (const code of window.__rakudo__.waitForStart) {
+      code();
+    }
+
+    window.__karma__.info({total: window.__rakudo__.resultCount});
+    for (const result of window.__rakudo__.results) {
+      window.__karma__.result(result);
+    }
+    window.__karma__.complete({
+      coverage: window.__coverage__
+    });
+
+  };
+}
+
 const STDERR = new BufferedConsole(output => console.error(output));
 const STDIN = new BrowserStdin();
 
@@ -117,4 +152,10 @@ op.getppid = function() {
 
 op.cwd = function() {
   return '?';
+};
+
+exports.Exit = class Exit {};
+
+op.exit = function() {
+  throw new exports.Exit();
 };
