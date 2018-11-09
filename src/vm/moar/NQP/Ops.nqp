@@ -110,11 +110,9 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     }
     elsif $val.result_kind == $MVM_reg_int32 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        my @ins := $val.instructions;
-
-        push_op(@ins, 'extend_i32', $not_reg, $val.result_reg);
-        push_op(@ins, 'not_i', $not_reg, $not_reg);
-        MAST::InstructionList.new(@ins, $not_reg, $MVM_reg_int64)
+        MAST::Op.new(:op<extend_i32>, $not_reg, $val.result_reg);
+        MAST::Op.new(:op<not_i>, $not_reg, $not_reg);
+        MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_obj {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
