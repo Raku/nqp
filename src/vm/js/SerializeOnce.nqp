@@ -1,3 +1,6 @@
+class SerializedBytes is repr('VMArray') is array_type(uint8) {
+}
+
 # It only makes sense to serialize a serialization context once, so when cross compiling we cache the result
 role SerializeOnce {
     method serialize_sc_without_caching($sc) {
@@ -12,12 +15,12 @@ role SerializeOnce {
         nqp::pushcompsc($fake_stack_top_sc);
 
         my $sh := nqp::list_s();
-        my $serialized := nqp::serialize($sc, $sh);
+        my $serialized := nqp::serializetobuf($sc, $sh, SerializedBytes);
 
         # HACK - now we pop our fake sc
         nqp::popcompsc();
 
-        [$serialized,$sh];
+        [$serialized,$sh,1];
     }
 
     method serialize_sc($sc) {

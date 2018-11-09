@@ -1526,6 +1526,48 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         "var code_refs = nqp.createArray([{nqp::join(',',@blocks)}]);\n" # TODO
     }
 
+    my sub encode_as_base64($buf) {
+        my @base64 := nqp::split('', "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+        my @str;
+
+        my int $i := 0;
+
+        my int $size := nqp::elems($buf);
+
+        while $i < $size {
+            my int $c := nqp::atpos_i($buf, $i++);
+            $c := $c * 256;
+            if $i < $size {
+                $c := $c + nqp::atpos_i($buf, $i);
+            }
+
+            $i++;
+
+            $c := $c * 256;
+            if $i < $size {
+                $c := $c + nqp::atpos_i($buf, $i);
+            }
+            $i++;
+
+            nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x00fc0000, 18)]);
+            nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x0003f000, 12)]);
+
+            if $i > $size + 1 {
+                nqp::push(@str, '=');
+            } else {
+                nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x00000fc0, 6)]);
+            }
+
+            if $i > $size {
+                nqp::push(@str, '=');
+            } else {
+                nqp::push(@str, @base64[$c +& 0x0000003f]);
+            }
+        }
+
+        nqp::join('', @str);
+    }
 
     method create_sc($ast) {
         my @sh;
@@ -1538,7 +1580,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         my $sc_tuple := self.serialize_sc($sc);
-        my str $sc_data := $sc_tuple[0];
+        my str $sc_data := nqp::isstr($sc_tuple[0]) ?? $sc_tuple[0] !! encode_as_base64($sc_tuple[0]);
         my $sc_sh := $sc_tuple[1];
 
 
