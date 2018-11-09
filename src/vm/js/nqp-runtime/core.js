@@ -1108,6 +1108,8 @@ function writeBuffer(highLevel, lowLevel) {
   }
 }
 
+exports.writeBuffer = writeBuffer;
+
 op.encodeconf = function(str, encoding_, output, permissive) {
   if (output.array.length) {
     throw new NQPException('encode requires an empty array');
