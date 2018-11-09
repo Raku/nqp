@@ -113,19 +113,21 @@ class HLL::Backend::MoarVM {
             $escaped_squote    := q{\\'};
         }
 
-        my int $new-id-counter := 0;
+        my int $new-id-counter := -1;
         my $id_remap    := nqp::hash();
         my $id_to_thing := nqp::hash();
 
         my %type-info   := nqp::hash();
 
+        my int $node-id-counter := -1;
+
         sub post_process_call_graph_node($node) {
-            my int $highest-child-id;
+            my $this-node-id := ++$node-id-counter;
             try {
                 if nqp::existskey($id_remap, $node<id>) {
                     $node<id> := $id_remap{$node<id>};
                 } else {
-                    my str $newkey := ~($new-id-counter++);
+                    my str $newkey := ~(++$new-id-counter);
                     $id_remap{$node<id>} := $newkey;
                     $node<id> := $newkey;
                 }
@@ -135,7 +137,7 @@ class HLL::Backend::MoarVM {
                         if nqp::existskey($id_remap, %alloc_info<id>) {
                             %alloc_info<id> := $id_remap{%alloc_info<id>};
                         } else {
-                            my str $newkey := ~($new-id-counter++);
+                            my str $newkey := ~(++$new-id-counter);
                             $id_remap{%alloc_info<id>} := $newkey;
                             %alloc_info<id> := $newkey;
                         }
@@ -183,19 +185,15 @@ class HLL::Backend::MoarVM {
                 nqp::deletekey($node, "name");
                 if nqp::existskey($node, "callees") {
                     for $node<callees> {
-                        $highest-child-id := post_process_call_graph_node($_);
+                        post_process_call_graph_node($_);
                     }
-                }
-                else {
-                    $highest-child-id := $node<id>;
                 }
                 CATCH {
                     note("profiler caught an error during post_process_call_graph_node:");
                     note(nqp::getmessage($!));
                 }
             }
-            $node<highest_child_id> := $highest-child-id;
-            $highest-child-id;
+            $node<highest_child_id> := $node-id-counter - 1;
         }
 
         sub to_json($obj) {
