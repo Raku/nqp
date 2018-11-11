@@ -1,4 +1,4 @@
-plan(1519);
+plan(1523);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -782,4 +782,78 @@ sub round_trip_int_array($desc, @a) {
     }
 
     round_trip_int_array('integers with one zero bit', @a);
+}
+
+sub create_buf($type) {
+    my $buf := nqp::newtype(nqp::null(), 'VMArray');
+    nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+    $buf;
+}
+
+sub encode_as_base64($buf) {
+    my @base64 := nqp::split('', "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
+
+    my @str;
+
+    my int $i := 0;
+
+    my int $size := nqp::elems($buf);
+
+    while $i < $size {
+        my int $c := nqp::atpos_i($buf, $i++);
+        $c := $c * 256;
+        if $i < $size {
+            $c := $c + nqp::atpos_i($buf, $i);
+        }
+
+        $i++;
+
+        $c := $c * 256;
+        if $i < $size {
+            $c := $c + nqp::atpos_i($buf, $i);
+        }
+        $i++;
+
+        nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x00fc0000, 18)]);
+        nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x0003f000, 12)]);
+
+        if $i > $size + 1 {
+            nqp::push(@str, '=');
+        }
+        else {
+            nqp::push(@str, @base64[nqp::bitshiftr_i($c +& 0x00000fc0, 6)]);
+        }
+
+        if $i > $size {
+            nqp::push(@str, '=');
+        }
+        else {
+            nqp::push(@str, @base64[$c +& 0x0000003f]);
+        }
+    }
+
+    nqp::join('', @str);
+}
+
+# Serializing an SC using nqp::serializetobuf
+{
+    my $sc := nqp::createsc(fresh_in_sc());
+    my $sh := nqp::list_s();
+
+    class T1 is repr('P6int') { }
+    my $v1 := nqp::box_i(42, T1);
+    add_to_sc($sc, 0, $v1);
+
+    my $buf8 := create_buf(uint8);
+
+    my $serialized := encode_as_base64(nqp::serializetobuf($sc, $sh, $buf8));
+    ok(nqp::chars($serialized) > 36, 'nqp::serializetobuf - SC with P6int output longer than a header');
+
+    my $dsc := nqp::createsc(fresh_out_sc());
+    nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
+
+    ok(nqp::scobjcount($dsc) == 1,  'nqp::serializetobuf - deserialized SC has a single object');
+    ok(nqp::istype(nqp::scgetobj($dsc, 0), T1),    'nqp::serializetobuf - deserialized object has correct type');
+    ok(nqp::unbox_i(nqp::scgetobj($dsc, 0)) == 42, 'nqp::serializetobuf - deserialized object has correct value');
 }
