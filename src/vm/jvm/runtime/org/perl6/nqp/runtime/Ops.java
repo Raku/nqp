@@ -5189,7 +5189,7 @@ public final class Ops {
                     ((SCRefInstance)scRef).referencedSC,
                     stringHeap);
 
-            String serialized = sw.serialize();
+            String serialized = Base64.encode(sw.serialize());
 
             int index = 0;
             for (String s : stringHeap) {
@@ -5198,6 +5198,31 @@ public final class Ops {
             }
 
             return serialized;
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "serialize was not passed a valid SCRef");
+        }
+    }
+    public static SixModelObject serializetobuf(SixModelObject scRef, SixModelObject sh, SixModelObject type, ThreadContext tc) {
+        if (scRef instanceof SCRefInstance) {
+            ArrayList<String> stringHeap = new ArrayList<String>();
+            SerializationWriter sw = new SerializationWriter(tc,
+                    ((SCRefInstance)scRef).referencedSC,
+                    stringHeap);
+
+            SixModelObject buf = type.st.REPR.allocate(tc, type.st);
+
+            byte[] serialized = sw.serialize().array();
+
+            Buffers.stashBytes(tc, buf, serialized);
+
+            int index = 0;
+            for (String s : stringHeap) {
+                tc.native_s = s;
+                sh.bind_pos_native(tc, index++);
+            }
+
+            return buf;
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "serialize was not passed a valid SCRef");

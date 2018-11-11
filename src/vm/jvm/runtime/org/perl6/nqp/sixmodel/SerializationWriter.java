@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.perl6.nqp.runtime.Base64;
 import org.perl6.nqp.runtime.CallFrame;
 import org.perl6.nqp.runtime.CodeRef;
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -104,7 +103,7 @@ public class SerializationWriter {
         this.contextsListPos = 0;
     }
 
-    public String serialize() {
+    public ByteBuffer serialize() {
         /* Initialize string heap so first entry is the NULL string. */
         sh.add(null);
 
@@ -402,7 +401,7 @@ public class SerializationWriter {
     }
 
     /* Concatenates the various output segments into a single binary string. */
-    private String concatenateOutputs() {
+    private ByteBuffer concatenateOutputs() {
         int output_size = 0;
         int offset      = 0;
 
@@ -518,8 +517,7 @@ public class SerializationWriter {
         if (offset != output_size)
             throw new RuntimeException("Serialization sanity check failed: offset != output_size");
 
-        /* Base 64 encode and return. */
-        return Base64.encode(output);
+        return output;
     }
 
     /* This handles the serialization of an object, which largely involves a
