@@ -1006,6 +1006,7 @@ op.serializetobuf = function(sc, sh, type) {
   const writer = new SerializationWriter(sc, sh.array);
   const buffer = type._STable.REPR.allocate(type._STable);
   core.writeBuffer(buffer, writer.serialize());
+  return buffer;
 }
 
 op.scsetobj = function(sc, idx, obj) {
