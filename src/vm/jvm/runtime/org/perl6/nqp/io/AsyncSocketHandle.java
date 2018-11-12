@@ -2,6 +2,8 @@ package org.perl6.nqp.io;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketOptions;
+import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.AsynchronousCloseException;
@@ -19,7 +21,7 @@ import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 
-public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
+public class AsyncSocketHandle implements IIOClosable, IIOCancelable, IIOOptions {
     private AsynchronousSocketChannel channel;
 
     public AsyncSocketHandle(ThreadContext tc) {
@@ -223,5 +225,49 @@ public class AsyncSocketHandle implements IIOClosable, IIOCancelable {
     @Override
     public void cancel(ThreadContext tc) {
         close(tc);
+    }
+
+    public long getOption(ThreadContext tc, int option) throws IOException {
+        switch (option) {
+            case SocketOptions.SO_SNDBUF:
+                return channel.getOption(StandardSocketOptions.SO_SNDBUF);
+            case SocketOptions.SO_RCVBUF:
+                return channel.getOption(StandardSocketOptions.SO_RCVBUF);
+            case SocketOptions.SO_KEEPALIVE:
+                return channel.getOption(StandardSocketOptions.SO_KEEPALIVE) ? 1 : 0;
+            case SocketOptions.SO_REUSEADDR:
+                return channel.getOption(StandardSocketOptions.SO_REUSEADDR) ? 1 : 0;
+            case SocketOptions.TCP_NODELAY:
+                return channel.getOption(StandardSocketOptions.TCP_NODELAY) ? 1 : 0;
+            default:
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket");
+        }
+    }
+
+    public long setOption(ThreadContext tc, int option, int value) throws IOException {
+        switch (option) {
+            case SocketOptions.SO_SNDBUF:
+                channel.setOption(StandardSocketOptions.SO_SNDBUF, value);
+                break;
+            case SocketOptions.SO_RCVBUF:
+                channel.setOption(StandardSocketOptions.SO_RCVBUF, value);
+                break;
+            case SocketOptions.SO_KEEPALIVE:
+                channel.setOption(StandardSocketOptions.SO_KEEPALIVE,
+                        (value == 0) ? false : true);
+                break;
+            case SocketOptions.SO_REUSEADDR:
+                channel.setOption(StandardSocketOptions.SO_REUSEADDR,
+                        (value == 0) ? false : true);
+                break;
+            case SocketOptions.TCP_NODELAY:
+                channel.setOption(StandardSocketOptions.TCP_NODELAY,
+                        (value == 0) ? false : true);
+                break;
+            default:
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket");
+        }
+
+        return 0;
     }
 }

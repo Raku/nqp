@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
+import java.net.SocketOption;
 import java.net.SocketOptions;
+import java.net.StandardSocketOptions;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ import java.util.Map;
 import org.perl6.nqp.io.AsyncProcessHandle;
 import org.perl6.nqp.io.AsyncServerSocketHandle;
 import org.perl6.nqp.io.AsyncSocketHandle;
+import org.perl6.nqp.io.ServerSocketHandle;
+import org.perl6.nqp.io.SocketHandle;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
@@ -171,9 +175,8 @@ public final class IOOps {
 
     private static class Sockopts {
         public static final List<String> sockoptsKeys = Arrays.asList(
-            "SO_BINDADDR", "SO_BROADCAST", "SO_KEEPALIVE", "SO_LINGER",
-            "SO_OOBINLINE", "SO_RCVBUF", "SO_REUSEADDR", "SO_SNDBUF",
-            "SO_TIMEOUT"
+            "SO_BROADCAST", "SO_KEEPALIVE", "SO_LINGER",
+            "SO_RCVBUF", "SO_REUSEADDR", "SO_SNDBUF", "TCP_NODELAY"
         );
 
         public static Map<String, Integer> process() {
@@ -182,9 +185,6 @@ public final class IOOps {
 
             for (String sockopt : sockoptsWanted.keySet()) {
                 switch (sockopt) {
-                    case "SO_BINDADDR":
-                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_BINDADDR));
-                        break;
                     case "SO_BROADCAST":
                         sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_BROADCAST));
                         break;
@@ -193,9 +193,6 @@ public final class IOOps {
                         break;
                     case "SO_LINGER":
                         sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_LINGER));
-                        break;
-                    case "SO_OOBINLINE":
-                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_OOBINLINE));
                         break;
                     case "SO_RCVBUF":
                         sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_RCVBUF));
@@ -206,8 +203,8 @@ public final class IOOps {
                     case "SO_SNDBUF":
                         sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_SNDBUF));
                         break;
-                    case "SO_TIMEOUT":
-                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.SO_TIMEOUT));
+                    case "TCP_NODELAY":
+                        sockoptsWanted.put(sockopt, new Integer(SocketOptions.TCP_NODELAY));
                         break;
                 }
             }
@@ -238,12 +235,44 @@ public final class IOOps {
         return res;
     }
 
-    public static long getsockopt(SixModelObject handle, long option, ThreadContext tc) {
-        throw new UnsupportedOperationException("getsockopt is not yet implemented.");
+    public static long getsockopt(SixModelObject h, long option, ThreadContext tc) {
+        Object handle = ((IOHandleInstance) h).handle;
+
+        try {
+            if (handle instanceof AsyncSocketHandle) {
+                return ((AsyncSocketHandle) handle).getOption(tc, (int) option);
+            } else if (handle instanceof AsyncServerSocketHandle) {
+                return ((AsyncServerSocketHandle) handle).getOption(tc, (int) option);
+            } else if (handle instanceof SocketHandle) {
+                return ((SocketHandle) handle).getOption(tc, (int) option);
+            } else if (handle instanceof ServerSocketHandle) {
+                return ((ServerSocketHandle) handle).getOption(tc, (int) option);
+            } else {
+                throw ExceptionHandling.dieInternal(tc, "Getting socket options is not supported for this type of socket");
+            }
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 
-    public static long setsockopt(SixModelObject handle, long option, long value, ThreadContext tc) {
-        throw new UnsupportedOperationException("setsockopt is not yet implemented.");
+    public static void setsockopt(SixModelObject h, long option, long value, ThreadContext tc) {
+        Object handle = ((IOHandleInstance) h).handle;
+
+        try {
+            if (handle instanceof AsyncSocketHandle) {
+                ((AsyncSocketHandle) handle).setOption(tc, (int) option, (int) value);
+            } else if (handle instanceof AsyncServerSocketHandle) {
+                ((AsyncServerSocketHandle) handle).setOption(tc, (int) option, (int) value);
+            } else if (handle instanceof SocketHandle) {
+                ((SocketHandle) handle).setOption(tc, (int) option, (int) value);
+            } else if (handle instanceof ServerSocketHandle) {
+                ((ServerSocketHandle) handle).setOption(tc, (int) option, (int) value);
+            } else {
+                throw ExceptionHandling.dieInternal(tc, "Setting socket options is not supported for this type of socket");
+            }
+        } catch (IOException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 
     public static SixModelObject watchfile(SixModelObject queue, SixModelObject schedulee,
