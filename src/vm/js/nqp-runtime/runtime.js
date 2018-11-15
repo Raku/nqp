@@ -21,6 +21,10 @@ const BOOT = require('./BOOT.js');
 
 const nativeArgs = require('./native-args.js');
 
+const JSBI = require('jsbi');
+
+const asIntN = require('./as-int-n.js');
+
 const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
 const NativeUIntArg = exports.NativeUIntArg = nativeArgs.NativeUIntArg;
 const NativeNumArg = exports.NativeNumArg = nativeArgs.NativeNumArg;
@@ -564,9 +568,9 @@ exports.arg_i = function(ctx, contedArg) {
 
 exports.arg_i64 = function(ctx, contedArg) {
   if (contedArg instanceof NativeIntArg) {
-    return BigInt(contedArg.value);
+    return JSBI.BigInt(contedArg.value);
   } else if (contedArg instanceof NativeUIntArg) {
-    return BigInt(contedArg.value);
+    return JSBI.BigInt(contedArg.value);
   } else if (contedArg instanceof NativeNumArg) {
     throw new NQPException('Expected native int64 argument, but got num');
   } else if (contedArg instanceof NativeStrArg) {
@@ -575,9 +579,9 @@ exports.arg_i64 = function(ctx, contedArg) {
 
   const arg = contedArg.$$decont(ctx);
   if (arg instanceof NQPInt) {
-    return BigInt(arg.value);
+    return JSBI.BigInt(arg.value);
   } else if (arg.$$getInt64) {
-    return BigInt(arg.$$getInt64());
+    return JSBI.BigInt(arg.$$getInt64());
   } else {
     throw new NQPException('Expected native int64 argument, but got something else');
   }
@@ -585,9 +589,9 @@ exports.arg_i64 = function(ctx, contedArg) {
 
 exports.arg_u64 = function(ctx, contedArg) {
   if (contedArg instanceof NativeIntArg) {
-    return BigInt.asUintN(64, BigInt(contedArg.value));
+    return asIntN.asUintN(64, JSBI.BigInt(contedArg.value));
   } else if (contedArg instanceof NativeUIntArg) {
-    return BigInt(contedArg.value);
+    return JSBI.BigInt(contedArg.value);
   } else if (contedArg instanceof NativeNumArg) {
     throw new NQPException('Expected native uint64 argument, but got num');
   } else if (contedArg instanceof NativeStrArg) {
@@ -596,9 +600,9 @@ exports.arg_u64 = function(ctx, contedArg) {
 
   const arg = contedArg.$$decont(ctx);
   if (arg instanceof NQPInt) {
-    return BigInt.asUintN(64, BigInt(arg.value));
+    return asIntN.asUintN(64, JSBI.BigInt(arg.value));
   } else if (arg.$$getUint64) {
-    return BigInt(arg.$$getUint64());
+    return asIntN(arg.$$getUint64());
   } else {
     throw new NQPException('Expected native uint64 argument, but got something else');
   }
@@ -796,3 +800,9 @@ for (const prop in props) {
 
 exports.buildSourceMap = core.buildSourceMap;
 exports.createSourceMap = core.createSourceMap;
+
+exports.ZERO = JSBI.BigInt(0);
+
+
+exports.asIntN = asIntN.asIntN;
+exports.asUintN = asIntN.asUintN;

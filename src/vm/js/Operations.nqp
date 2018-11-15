@@ -284,8 +284,8 @@ class QAST::OperationsJS {
 
 
     # 64 bit integer arithmetic
-    add_simple_op('add_i64', $T_INT64, [$T_INT64, $T_INT64], sub ($a, $b) {"BigInt.asIntN(64, $a + $b)"});
-    add_simple_op('sub_i64', $T_INT64, [$T_INT64, $T_INT64], sub ($a, $b) {"BigInt.asIntN(64, $a - $b)"});
+    add_simple_op('add_i64', $T_INT64, [$T_INT64, $T_INT64]);
+    add_simple_op('sub_i64', $T_INT64, [$T_INT64, $T_INT64]);
 
     add_op('chain', sub ($comp, $node, :$want) {
         my str $ret := $*BLOCK.add_tmp;

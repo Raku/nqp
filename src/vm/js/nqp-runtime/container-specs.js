@@ -4,6 +4,8 @@ const coercions = require('./coercions.js');
 
 const NQPInt = require('./nqp-int.js');
 
+const asIntN = require('./as-int-n.js');
+
 class CodePair {
   constructor(STable) {
     this.STable = STable;
@@ -283,7 +285,7 @@ class NativeRef {
         }
 
         $$getUint64() {
-          return BigInt.asUintN(64, this.get());
+          return asIntN.asUintN(64, this.get());
         }
 
         $$decont(ctx) {

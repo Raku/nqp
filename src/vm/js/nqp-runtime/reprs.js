@@ -11,6 +11,11 @@ const BOOT = require('./BOOT.js');
 const core = require('./core.js');
 const nqp = require('./runtime.js');
 
+const JSBI = require('jsbi');
+
+const ZERO = JSBI.BigInt(0);
+
+
 const constants = require('./constants.js');
 
 const ref = process.browser ? null : require('ref');
@@ -1607,9 +1612,10 @@ function getBI(obj) {
   return obj.$$getBignum();
 }
 
+const SIGNED_LIMIT = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(63));
 
 function getIntFromBI(n) {
-  if (n < -(2n**63n) || 2n**63n <= n) {
+  if (JSBI.lessThan(n, JSBI.unaryMinus(SIGNED_LIMIT)) || JSBI.greaterThanOrEqual(n, SIGNED_LIMIT)) {
     throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into native integer`);
   } else {
     return Number(n) | 0;
@@ -1617,17 +1623,18 @@ function getIntFromBI(n) {
 }
 
 function getInt64FromBI(n) {
-  if (n < -(2n**63n) || 2n**63n <= n) {
+  if (JSBI.lessThan(n, JSBI.unaryMinus(SIGNED_LIMIT)) || JSBI.greaterThanOrEqual(n, SIGNED_LIMIT)) {
     throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into native 64bit integer`);
   } else {
     return n;
   }
 }
 
+const UNSIGNED_MAX = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(64));
 function getUint64FromBI(n) {
-  if (n < 0n) {
+  if (JSBI.lessThan(n, ZERO)) {
     throw new NQPException(`Cannot unbox negative bigint into unsigned native 64bit integer`);
-  } else if (2n**64n <= n) {
+  } else if (JSBI.greaterThanOrEqual(n, UNSIGNED_MAX)) {
     throw new NQPException(`Cannot unbox ${bignum.bitSize(n)} bit wide bigint into unsigned native 64bit integer`);
   } else {
     return n;
@@ -1638,7 +1645,7 @@ class P6bigint extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this.value = BigInt(value);
+        this.value = JSBI.BigInt(value);
       }
 
       $$setInt64(value) {
@@ -1675,7 +1682,7 @@ class P6bigint extends REPR {
     const attr = slotToAttr(slot);
 
     ownerSTable.addInternalMethod('$$getattr$' + slot, function() {
-      const value = this[attr] || 0n;
+      const value = this[attr] || ZERO;
       return makeBI(attrContentSTable, value);
     });
 
@@ -1687,17 +1694,17 @@ class P6bigint extends REPR {
 
   deserializeFinish(obj, data) {
     if (data.varint() == 1) { /* Is it small int? */
-      obj.value = BigInt(data.varint());
+      obj.value = JSBI.BigInt(data.varint());
     } else {
-      obj.value = BigInt(data.str());
+      obj.value = JSBI.BigInt(data.str());
     }
   }
 
   deserializeInline(data) {
     if (data.varint() == 1) { /* Is it small int? */
-      return BigInt(data.varint());
+      return JSBI.BigInt(data.varint());
     } else {
-      return BigInt(data.str());
+      return JSBI.BigInt(data.str());
     }
   }
 
@@ -1726,7 +1733,7 @@ class P6bigint extends REPR {
   generateBoxingMethods(STable, name) {
     STable.addInternalMethods(class {
       $$setInt(value) {
-        this[name] = BigInt(value);
+        this[name] = JSBI.BigInt(value);
       }
 
       $$setInt64(value) {
@@ -1761,7 +1768,7 @@ class P6bigint extends REPR {
 };
 
 P6bigint.prototype.flattenSTable = true;
-P6bigint.prototype.flattenedDefault = '0n';
+P6bigint.prototype.flattenedDefault = 'ZERO';
 
 
 reprs.P6bigint = P6bigint;

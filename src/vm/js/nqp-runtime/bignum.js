@@ -1,4 +1,12 @@
 'use strict';
+
+const JSBI = require('jsbi');
+const asIntN = require('./as-int-n.js');
+
+const ZERO = JSBI.BigInt(0);
+const ONE = JSBI.BigInt(1);
+const TWO = JSBI.BigInt(2);
+
 const core = require('./core.js');
 
 const hll = require('./hll.js');
@@ -30,7 +38,7 @@ function getBI(obj) {
 }
 
 op.fromstr_I = function(str, type) {
-  return makeBI(type, BigInt(str));
+  return makeBI(type, JSBI.BigInt(str));
 };
 
 op.tostr_I = function(n) {
@@ -42,45 +50,45 @@ op.base_I = function(n, base) {
 };
 
 op.iseq_I = function(a, b) {
-  return intishBool(getBI(a) === getBI(b));
+  return intishBool(JSBI.equal(getBI(a), getBI(b)));
 };
 
 op.isne_I = function(a, b) {
-  return intishBool(getBI(a) !== getBI(b));
+  return intishBool(!JSBI.equal(getBI(a), getBI(b)));
 };
 
 op.mul_I = function(a, b, type) {
-  return makeBI(type, getBI(a) * getBI(b));
+  return makeBI(type, JSBI.multiply(getBI(a), getBI(b)));
 };
 
 op.add_I = function(a, b, type) {
-  return makeBI(type, getBI(a) + getBI(b));
+  return makeBI(type, JSBI.add(getBI(a), getBI(b)));
 };
 
 op.sub_I = function(a, b, type) {
-  return makeBI(type, getBI(a) - getBI(b));
+  return makeBI(type, JSBI.subtract(getBI(a), getBI(b)));
 };
 
 op.div_I = function(a, b, type) {
   const divident = getBI(a);
   const divisor = getBI(b);
   // workaround for .div rounding to zero not down
-  if (((divident < 0n) !== (divisor < 0n)) && divident % divisor !== 0n) {
-    return makeBI(type, (divident / divisor) - 1n);
+  if ((JSBI.lessThan(divident, ZERO) !== JSBI.lessThan(divisor, ZERO)) && !JSBI.equal(JSBI.remainder(divident, divisor), ZERO)) {
+    return makeBI(type, JSBI.subtract(JSBI.divide(divident, divisor), ONE));
   }
-  return makeBI(type, divident / divisor);
+  return makeBI(type, JSBI.divide(divident, divisor));
 };
 
 op.pow_I = function(a, b, numType, biType) {
   const base = getBI(a);
   const exponent = getBI(b);
-  if (exponent < 0n) {
+  if (JSBI.lessThan(exponent, ZERO)) {
     return makeNum(numType, Math.pow(Number(base), Number(exponent)));
   } else {
-    if (exponent > 4294967296 && base !== 1n && base !== -1n && base !== 0n) {
-        return makeNum(numType, (base < 0n && exponent % 2n === 1n) ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY);
+    if (JSBI.greaterThan(exponent, JSBI.BigInt(4294967296)) && !JSBI.equal(base, ONE) && !JSBI.equal(base, JSBI.unaryMinus(ONE)) && !JSBI.equal(base, ZERO)) {
+        return makeNum(numType, (JSBI.lessThan(base, ZERO) && JSBI.equal(JSBI.remainder(exponent, TWO), ONE)) ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY);
     }
-    return makeBI(biType, base ** exponent);
+    return makeBI(biType, JSBI.exponentiate(base, exponent));
   }
 };
 
@@ -90,16 +98,16 @@ op.mod_I = function(n, m, type) {
      bignum returns the module with the sign equal to the dividend not the divisor. */
   const a = getBI(n);
   const b = getBI(m);
-  if ((a < 0n && b > 0n) || (a > 0n && b < 0n)) {
-    const x = (a / b) - 1n;
-    const ret = a - (b * x);
-    return makeBI(type, (ret === b) ? 0n : ret);
+  if ((JSBI.lessThan(a, ZERO) && JSBI.greaterThan(b, ZERO)) || (JSBI.greaterThan(a, ZERO) && JSBI.lessThan(b, ZERO))) {
+    const x = JSBI.subtract(JSBI.divide(a, b), ONE);
+    const ret = JSBI.subtract(a, JSBI.multiply(b, x));
+    return makeBI(type, JSBI.equal(ret, b) ? ZERO : ret);
   }
-  return makeBI(type, a % b);
+  return makeBI(type, JSBI.remainder(a, b));
 };
 
 op.neg_I = function(a, type) {
-  return makeBI(type, -getBI(a));
+  return makeBI(type, JSBI.unaryMinus(getBI(a)));
 };
 
 op.isbig_I = function(n) {
@@ -107,7 +115,7 @@ op.isbig_I = function(n) {
    * bitLength excludes sign considerations, thus 31 rather than
    * 32. */
   const x = getBI(n);
-  return (x < -2147483648n || 2147483647n < x) ? 1 : 0;
+  return (JSBI.lessThan(x, JSBI.BigInt('-2147483648')) || JSBI.greaterThan(x, JSBI.BigInt('2147483647'))) ? 1 : 0;
 };
 
 op.expmod_I = function(a, b, c, type) {
@@ -115,23 +123,23 @@ op.expmod_I = function(a, b, c, type) {
   let exponent = getBI(b);
   const modulus = getBI(c);
 
-  if (modulus === 1n) return makeBI(type, 0n);
+  if (JSBI.equal(modulus, ONE)) return makeBI(type, ZERO);
 
-  let result = 1n;
+  let result = ONE;
 
 
-  if (exponent < 0n && base != 1n) {
-      return makeBI(type, 0n);
+  if (JSBI.lessThan(exponent, ZERO) && !JSBI.equal(base, ONE)) {
+      return makeBI(type, ZERO);
   }
 
-  base = base % modulus;
+  base = JSBI.remainder(base, modulus);
 
-  while (exponent > 0n) {
-    if (exponent % 2n === 1n) {
-      result = (result * base) % modulus;
+  while (JSBI.greaterThan(exponent, ZERO)) {
+    if (JSBI.equal(JSBI.remainder(exponent, TWO), ONE)) {
+      result = JSBI.remainder(JSBI.multiply(result, base), modulus);
     }
-    exponent = exponent >> 1n;
-    base = (base * base) % modulus;
+    exponent = JSBI.signedRightShift(exponent, ONE);
+    base = JSBI.remainder(JSBI.multiply(base, base), modulus);
   }
 
   return makeBI(type, result);
@@ -140,16 +148,16 @@ op.expmod_I = function(a, b, c, type) {
 
 /* TODO - optimize by using a smaller bignum when so much isn't needed */
 const digits = 325;
-const digitsBignum = 10n ** BigInt(digits);
+const digitsBignum = JSBI.exponentiate(JSBI.BigInt(10), JSBI.BigInt(digits));
 
 op.div_In = function(a, b) {
   const divisor = getBI(b);
-  if (divisor === 0n) {
+  if (JSBI.equal(divisor, ZERO)) {
     return Number(getBI(a)) / 0;
   }
 
   let sign = 1;
-  let big = ((getBI(a) * digitsBignum) / divisor).toString();
+  let big = JSBI.divide(JSBI.multiply(getBI(a), digitsBignum), divisor).toString();
   if (big.substr(0, 1) == '-') {
     big = big.substr(1);
     sign = -1;
@@ -164,59 +172,59 @@ op.div_In = function(a, b) {
 
 
 op.isle_I = function(a, b) {
-  return intishBool(getBI(a) <= getBI(b));
+  return intishBool(JSBI.lessThanOrEqual(getBI(a), getBI(b)));
 };
 
 op.islt_I = function(a, b) {
-  return intishBool(getBI(a) < getBI(b));
+  return intishBool(JSBI.lessThan(getBI(a), getBI(b)));
 };
 
 op.isge_I = function(a, b) {
-  return intishBool(getBI(a) >= getBI(b));
+  return intishBool(JSBI.greaterThanOrEqual(getBI(a), getBI(b)));
 };
 
 op.isgt_I = function(a, b) {
-  return intishBool(getBI(a) > getBI(b));
+  return intishBool(JSBI.greaterThan(getBI(a), getBI(b)));
 };
 
 op.cmp_I = function(left, right) {
   const a = getBI(left);
   const b = getBI(right);
-  return (a === b ? 0 : (a < b ? -1 : 1));
+  return (JSBI.equal(a, b) ? 0 : (JSBI.lessThan(a, b) ? -1 : 1));
 };
 
 op.isprime_I = function(n, attempts) {
   const unboxed = getBI(n);
-  return isPrime(unboxed) ? 1 : 0;
+  return isPrime(BigInt(unboxed.toString())) ? 1 : 0;
 };
 
 op.bitshiftl_I = function(a, b, type) {
-  return makeBI(type, getBI(a) << BigInt(b));
+  return makeBI(type, JSBI.leftShift(getBI(a), JSBI.BigInt(b)));
 };
 
 op.bitshiftr_I = function(a, b, type) {
-  return makeBI(type, getBI(a) >> BigInt(b));
+  return makeBI(type, JSBI.signedRightShift(getBI(a), JSBI.BigInt(b)));
 };
 
 op.bitand_I = function(a, b, type) {
-  return makeBI(type, getBI(a) & getBI(b));
+  return makeBI(type, JSBI.bitwiseAnd(getBI(a), getBI(b)));
 };
 
 op.bitor_I = function(a, b, type) {
-  return makeBI(type, getBI(a) | getBI(b));
+  return makeBI(type, JSBI.bitwiseOr(getBI(a), getBI(b)));
 };
 
 op.bitxor_I = function(a, b, type) {
-  return makeBI(type, getBI(a) ^ getBI(b));
+  return makeBI(type, JSBI.bitwiseXor(getBI(a), getBI(b)));
 };
 
 op.bitneg_I = function(a, type) {
-  return makeBI(type, ~getBI(a));
+  return makeBI(type, JSBI.bitwiseNot(getBI(a)));
 };
 
 function gcd(a, b) {
-  while (b !== 0n) {
-    let r = a % b;
+  while (!JSBI.equal(b, ZERO)) {
+    let r = JSBI.remainder(a, b);
     a = b;
     b = r;
   }
@@ -226,9 +234,9 @@ function gcd(a, b) {
 op.lcm_I = function(n, m, type) {
   const a = getBI(n);
   const b = getBI(m);
-  const absA = a < 0n ? -a : a;
-  const absB = b < 0n ? -b : b;
-  return makeBI(type, (absA / gcd(a, b)) * absB);
+  const absA = a < ZERO ? JSBI.unaryMinus(a) : a;
+  const absB = b < ZERO ? JSBI.unaryMinus(b) : b;
+  return makeBI(type, JSBI.multiply(JSBI.divide(absA, gcd(a, b)), absB));
 };
 
 /* TODO - benchmark the binary version */
@@ -238,7 +246,7 @@ op.gcd_I = function(a, b, type) {
 
 op.abs_I = function(n, type) {
   let x = getBI(n);
-  return makeBI(type, x < 0n ? -x : x);
+  return makeBI(type, x < ZERO ? JSBI.unaryMinus(x) : x);
 };
 
 op.tonum_I = function(n) {
@@ -263,26 +271,28 @@ op.fromnum_I = function(num, type) {
     return '0'.repeat(parseInt(exponent));
   })
 
-  return makeBI(type, BigInt(expanded));
+  return makeBI(type, JSBI.BigInt(expanded));
 };
 
 op.bool_I = function(n) {
-  return intishBool(getBI(n) !== 0n);
+  return intishBool(!JSBI.equal(getBI(n), ZERO));
 };
+
+const TEN = JSBI.BigInt(10);
 
 op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
   const extracted = core.radixHelper(radix, str, zpos, flags);
   if (extracted == null) {
-    return hll.slurpyArray(currentHLL, [makeBI(type, 0n), makeBI(type, 1n), new NQPInt(-1)]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, ZERO), makeBI(type, ONE), new NQPInt(-1)]);
   }
 
   if (radix == 10) {
-    const pow = 10n ** BigInt(extracted.power);
-    return hll.slurpyArray(currentHLL, [makeBI(type, BigInt(extracted.number)), makeBI(type, pow), new NQPInt(extracted.offset)]);
+    const pow = JSBI.exponentiate(TEN, JSBI.BigInt(extracted.power));
+    return hll.slurpyArray(currentHLL, [makeBI(type, JSBI.BigInt(extracted.number)), makeBI(type, pow), new NQPInt(extracted.offset)]);
   } else {
     const n = extracted.number;
-    let base = 1n;
-    let result = 0n;
+    let base = ONE;
+    let result = ZERO;
 
     for (let i = n.length - 1; i >= 0; i--) {
       let digit = n.charCodeAt(i);
@@ -291,8 +301,8 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
       else if (digit >= 65 && digit <= 90) digit = digit - 65 + 10; // A-Z
       else break;
 
-      result += base * BigInt(digit);
-      base = base * BigInt(radix);
+      result = JSBI.add(result, JSBI.multiply(base, JSBI.BigInt(digit)));
+      base = JSBI.multiply(base, JSBI.BigInt(radix));
     }
 
     if (n[0] == '-') result = -result;
@@ -304,10 +314,10 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
 function bitSize(n) {
   let bits = 0;
 
-  if (n < 0) n = -n;
+  if (JSBI.lessThan(n, ZERO)) n = JSBI.unaryMinus(n);
 
-  while (n) {
-    n = n >> 1n;
+  while (!JSBI.equal(n, ZERO)) {
+    n = JSBI.signedRightShift(n, ONE);
     bits++;
   }
   return bits;
@@ -315,12 +325,16 @@ function bitSize(n) {
 
 exports.bitSize = bitSize;
 
+const THIRTY_TWO = JSBI.BigInt(32);
+const SIXTY_FOUR = JSBI.BigInt(64);
+
 function randomWithSameBitSize(n) {
-  let got = 0n;
+  let got = ZERO;
   let needed = bitSize(n);
+
   while (needed >= 64) {
     let randomBits = core.generator.randomint()
-    got = got << 64n | BigInt(randomBits[0]) << 32n | BigInt(randomBits[1]);
+    got = JSBI.bitwiseOr(JSBI.bitwiseOr(JSBI.leftShift(got, SIXTY_FOUR), JSBI.leftShift(JSBI.BigInt(randomBits[0]), THIRTY_TWO)), JSBI.BigInt(randomBits[1]));
     needed -= 64;
   }
 
@@ -334,12 +348,12 @@ function randomWithSameBitSize(n) {
   if (needed > 32) {
     needed -= 32;
     unused = 1;
-    got = got << 32n | BigInt(randomBits[0])
+    got = JSBI.bitwiseOr(JSBI.leftShift(got, THIRTY_TWO), JSBI.BigInt(randomBits[0]));
   }
 
 
   const prefixMask = (2 ** needed) - 1;
-  got = got << BigInt(needed) | BigInt((randomBits[unused] & prefixMask) >>> 0);
+  got = JSBI.bitwiseOr(JSBI.leftShift(got, JSBI.BigInt(needed)), JSBI.BigInt((randomBits[unused] & prefixMask) >>> 0));
 
   return got;
 }
@@ -355,7 +369,15 @@ op.rand_I = function(n, type) {
   let candidate;
   do {
     candidate = randomWithSameBitSize(max);
-  } while (candidate >= max);
+  } while (JSBI.greaterThanOrEqual(candidate, max));
 
   return makeBI(type, candidate);
 };
+
+op.add_i64 = function(a, b) {
+  return asIntN.asIntN(64, JSBI.add(a, b));
+}
+
+op.sub_i64 = function(a, b) {
+  return asIntN.asIntN(64, JSBI.sub(a, b));
+}
