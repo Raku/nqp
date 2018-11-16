@@ -12,6 +12,7 @@
     "eslint-config-google": "^0.8.0"
   },
   "dependencies": {
+    "jsbi": "^2.0.2",
     "nqp-runtime": "file:src/vm/js/nqp-runtime"
   }
 }
