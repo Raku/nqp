@@ -1,4 +1,4 @@
-package org.perl6.nqp.truffle.nodes.expression;
+package org.perl6.nqp.truffle.nodes.sixmodel;
 
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
