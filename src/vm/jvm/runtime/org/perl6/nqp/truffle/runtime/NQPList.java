@@ -1,9 +1,12 @@
 package org.perl6.nqp.truffle.runtime;
 
+import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import java.util.ArrayList;
 
 public final class NQPList {
     private ArrayList<Object> contents;
+
+    public SerializationContext sc;
 
     public NQPList() {
         this.contents = new ArrayList<>();

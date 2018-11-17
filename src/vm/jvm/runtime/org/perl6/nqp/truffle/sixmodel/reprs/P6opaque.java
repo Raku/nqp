@@ -5,6 +5,7 @@ import com.oracle.truffle.api.object.DynamicObject;
 import org.perl6.nqp.truffle.sixmodel.REPR;
 import org.perl6.nqp.truffle.sixmodel.STable;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 
 public class P6opaque extends REPR {
     private STable stable;
@@ -36,5 +37,10 @@ public class P6opaque extends REPR {
     @Override
     public void setSc(Object obj, SerializationContext sc) {
         P6opaqueObjectLayoutImpl.INSTANCE.setSc((DynamicObject) obj, sc);
+    }
+
+    @Override
+    public void deserializeFinish(SerializationReader reader, Object obj) {
+        System.out.println("TODO: deserializing P6opaque");
     }
 }

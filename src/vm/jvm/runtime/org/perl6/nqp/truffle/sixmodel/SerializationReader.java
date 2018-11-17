@@ -11,6 +11,8 @@ import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.runtime.NQPHash;
 
+import org.perl6.nqp.truffle.runtime.NQPList;
+
 
 public class SerializationReader {
     /* The current version of the serialization format. */
@@ -85,7 +87,7 @@ public class SerializationReader {
     /* The object we're currently deserializing. */
     Object currentObject;
 
-
+    REPR[] reprs;
 
     public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs) {
         this.sc = sc;
@@ -273,8 +275,8 @@ public class SerializationReader {
         dependentSCs = new SerializationContext[depTableEntries];
         orig.position(depTableOffset);
         for (int i = 0; i < depTableEntries; i++) {
-            String handle = lookupString(orig.getInt());
-            String desc = lookupString(orig.getInt());
+            String handle = readString();
+            String desc = readString();
             SerializationContext sc = scs.get(handle);
             if (sc == null) {
                 if (desc == null)
@@ -351,7 +353,7 @@ public class SerializationReader {
 
             // Create STable stub and add it to the root STable set.
             STable stable = new STable(null);
-            REPR repr = REPRRegistry.createFromName(lookupString(orig.getInt()), stable);
+            REPR repr = REPRRegistry.createFromName(readString(), stable);
             stable.repr = repr;
             stable.sc = sc;
             sc.setSTable(i, stable);
@@ -359,6 +361,8 @@ public class SerializationReader {
     }
 
     private void stubObjects() {
+        reprs = new REPR[objTableOffset];
+
         for (int i = 0; i < objTableEntries; i++) {
             // May already have it, due to repossession.
             if (sc.getObject(i) != null)
@@ -382,6 +386,8 @@ public class SerializationReader {
                 // Concrete object; defer to the REPR.
                 stubObj = st.repr.deserializeStub();
                 st.repr.setSc(stubObj, sc);
+
+                reprs[i] = st.repr;
             }
 
             // Place object in SC root set.
@@ -519,21 +525,18 @@ public class SerializationReader {
         for (int i = 0; i < objTableEntries; i++) {
             // Can skip if it's a type object.
             Object obj = sc.getObject(i);
-            if (obj instanceof TypeObject) {
-                System.out.println("deserializing a type object");
-                continue;
-            } else {
-                System.out.println("deserializing something else");
+            if (!(obj instanceof TypeObject)) {
+                // Seek reader to object data offset.
+                orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE + 8);
+                orig.position(objDataOffset + orig.getInt());
+
+                // Complete the object's deserialization.
+                this.currentObject = obj;
+
+                reprs[i].deserializeFinish(this, obj);
+                this.currentObject = null;
+
             }
-//
-//            // Seek reader to object data offset.
-//            orig.position(objTableOffset + i * OBJECTS_TABLE_ENTRY_SIZE + 8);
-//            orig.position(objDataOffset + orig.getInt());
-//
-//            // Complete the object's deserialization.
-//            this.curObject = obj;
-//            obj.st.REPR.deserialize_finish(tc, obj.st, this, obj);
-//            this.curObject = null;
         }
     }
 
@@ -614,7 +617,6 @@ public class SerializationReader {
 //
     public Object readRef() {
         short discrim = orig.getShort();
-        int elems;
         switch (discrim) {
         case REFVAR_NULL:
         case REFVAR_VM_NULL:
@@ -636,18 +638,19 @@ public class SerializationReader {
 //            SixModelObject sResult = BOOTStr.st.REPR.allocate(tc, BOOTStr.st);
 //            sResult.set_str(tc, lookupString(orig.getInt()));
 //            return sResult;
-//        case REFVAR_VM_ARR_VAR: {
-//            SixModelObject BOOTArray = tc.gc.BOOTArray;
-//            SixModelObject resArray = BOOTArray.st.REPR.allocate(tc, BOOTArray.st);
-//            elems = orig.getInt();
-//            for (int i = 0; i < elems; i++)
-//                resArray.bind_pos_boxed(tc, i, readRef());
-//            if (this.curObject != null) {
-//                resArray.sc = sc;
-//                sc.owned_objects.put(resArray, this.curObject);
-//            }
-//            return resArray;
-//        }
+        case REFVAR_VM_ARR_VAR: {
+            NQPList array = new NQPList();
+              int elems = orig.getInt();
+            for (int i = 0; i < elems; i++) {
+                array.push(readRef());
+            }
+            if (this.currentObject != null) {
+                array.sc = sc;
+                sc.ownedObjects.put(array, this.currentObject);
+            }
+
+            return array;
+        }
 //        case REFVAR_VM_ARR_STR: {
 //            SixModelObject BOOTStrArray = tc.gc.BOOTStrArray;
 //            SixModelObject resArray = BOOTStrArray.st.REPR.allocate(tc, BOOTStrArray.st);
@@ -668,9 +671,9 @@ public class SerializationReader {
 //            }
 //            return resArray;
 //        }
-        case REFVAR_VM_HASH_STR_VAR:
+        case REFVAR_VM_HASH_STR_VAR: {
             NQPHash hash = new NQPHash();
-            elems = orig.getInt();
+            int elems = orig.getInt();
             for (int i = 0; i < elems; i++) {
                 String key = lookupString(orig.getInt());
                 hash.bindkey(key, readRef());
@@ -680,6 +683,7 @@ public class SerializationReader {
                 sc.ownedObjects.put(hash, this.currentObject);
             }
             return hash;
+        }
         case REFVAR_STATIC_CODEREF:
         case REFVAR_CLONED_CODEREF:
             return readCodeRef();
@@ -725,10 +729,10 @@ public class SerializationReader {
 //        return orig.getDouble();
 //    }
 //
-//    public String readStr() {
-//        return lookupString(orig.getInt());
-//    }
-//
+    public String readString() {
+        return lookupString(orig.getInt());
+    }
+
     private STable lookupSTable(int scIdx, int idx) {
         SerializationContext sc = locateSC(scIdx);
         if (idx < 0 || idx >= sc.stableCount())
