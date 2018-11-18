@@ -495,6 +495,34 @@ class QAST::OperationsTruffle {
         TAST.new($OBJ, $ret);
     });
 
+    add_op('handle', :!inlinable, sub ($comp, $node, :$want) {
+        my @children := nqp::clone($node.list());
+        if @children == 0 {
+            nqp::die("The 'handle' op requires at least one child");
+        }
+
+        # If there's exactly one child, then there's nothing protecting
+        # it; just compile it and we're done.
+        my $protected := @children.shift();
+
+        unless @children {
+            return $comp.as_truffle($protected, :$want);
+        }
+
+
+        my @types;
+        my @tree := ['handle', $comp.as_truffle($protected, :want($OBJ)).tree];
+
+        for @children -> $type, $handler {
+            nqp::push(@types, $type);
+            nqp::push(@tree, $comp.as_truffle($handler, :want($OBJ)).tree);
+        }
+
+        nqp::splice(@tree, [@types], 2, 0);
+
+        TAST.new($OBJ, @tree);
+    });
+
     add_simple_op('decont', $OBJ, [$OBJ]);
 
     add_simple_op('can', $INT, [$OBJ, $STR], :decont(0));
