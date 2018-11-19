@@ -1103,6 +1103,8 @@ class QAST::TruffleCompiler does SerializeOnce {
             if $node.decl eq 'var' {
                 # TODO avoid double binds
                 @*DECLARATIONS.push(["dynamic-bind-direct", $node.name, ["null"]]);
+            } elsif $node.decl eq 'static' {
+                @*DECLARATIONS.push(["dynamic-bind-direct", $node.name, self.value_as_wval($node.value)]);
             }
 
             if $*BINDVAL {
@@ -1124,6 +1126,13 @@ class QAST::TruffleCompiler does SerializeOnce {
                 my int $type := self.type_from_typeobj($node.returns);
                 $*BLOCK.register_var_type($node, $type);
                 @*DECLARATIONS.push(["declare-{$node.scope}", $type, $node.name]);
+                if $node.decl eq 'static' {
+                    my $bind := QAST::Op.new(:op<bind>,
+                        QAST::Var.new(:scope($node.scope), :name($node.name)),
+                        QAST::WVal.new(:value($node.value))
+                    );
+                    @*DECLARATIONS.push(self.as_truffle_clear_bindval($bind, :want($VOID)).tree);
+                }
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);
@@ -1181,12 +1190,15 @@ class QAST::TruffleCompiler does SerializeOnce {
         TAST.new($OBJ, ['bval', $node.value.cuid]);
     }
 
-    multi method as_truffle(QAST::WVal $node, :$want) {
-        my $value := $node.value;
+    method value_as_wval($value) {
         my $sc     := nqp::getobjsc($value);
         my str $handle := nqp::scgethandle($sc);
         my int $idx    := nqp::scgetobjidx($sc, $value);
-        TAST.new($OBJ, ['wval', $handle, $idx]);
+        ['wval', $handle, $idx];
+    }
+
+    multi method as_truffle(QAST::WVal $node, :$want) {
+        TAST.new($OBJ, self.value_as_wval($node.value));
     }
 
     method NYI($msg) {
