@@ -1168,6 +1168,18 @@ class QAST::TruffleCompiler does SerializeOnce {
                 return TAST.new($OBJ, ['dynamic-get', $node.name]);
             }
         }
+        elsif $node.scope eq 'attribute' {
+            my int $type := self.type_from_typeobj($node.returns);
+            my $obj := self.as_truffle_clear_bindval($node[0], :want($OBJ)).tree;
+            my $class_handle := self.as_truffle_clear_bindval($node[1], :want($OBJ)).tree;
+
+            if $*BINDVAL {
+                my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($OBJ)).tree;
+                return TAST.new($OBJ, ['attribute-bind', $obj, $class_handle, $node.name, $value]);
+            } else {
+                return TAST.new($OBJ, ['attribute-get', $obj, $class_handle, $node.name]);
+            }
+        }
         else {
             self.NYI("var scope {$node.scope}");
         }
