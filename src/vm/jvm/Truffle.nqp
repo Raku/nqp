@@ -1123,7 +1123,7 @@ class QAST::TruffleCompiler does SerializeOnce {
             elsif $node.decl eq 'var' || $node.decl eq 'static' {
                 my int $type := self.type_from_typeobj($node.returns);
                 $*BLOCK.register_var_type($node, $type);
-                @*DECLARATIONS.push(["declare-{$node.scope}", $type, $node.name, ["null"]]);
+                @*DECLARATIONS.push(["declare-{$node.scope}", $type, $node.name]);
             }
             elsif $node.decl eq 'param' {
                 $*BLOCK.add_param($node);

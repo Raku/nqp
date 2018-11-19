@@ -45,6 +45,7 @@ import org.perl6.nqp.dsl.Predeserializer;
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPBlockBodyNode;
+import org.perl6.nqp.truffle.nodes.expression.NQPNullNode;
 import org.perl6.nqp.truffle.nodes.control.NQPBlockNode;
 import org.perl6.nqp.truffle.nodes.control.NQPStaticBlockNode;
 import org.perl6.nqp.truffle.nodes.control.NQPForcedOuterBlockNode;
@@ -119,8 +120,8 @@ public class ManageScopes {
     }
 
     @Deserializer("declare-lexical")
-    public static NQPNode createDeclareLexical(NQPScope scope, long type, String name, NQPNode inner) {
-        return inner;
+    public static NQPNode createDeclareLexical(NQPScope scope, long type, String name) {
+        return new NQPNullNode();
     }
 
     @Predeserializer("declare-local")
@@ -130,8 +131,8 @@ public class ManageScopes {
     }
 
     @Deserializer("declare-local")
-    public static NQPNode createDeclareLocal(NQPScope scope, long type, String name, NQPNode inner) {
-        return inner;
+    public static NQPNode createDeclareLocal(NQPScope scope, long type, String name) {
+        return new NQPNullNode();
     }
 
     @Predeserializer("comp-unit")
