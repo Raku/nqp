@@ -195,7 +195,7 @@ knowhow NQPParametricRoleHOW {
         @attrs
     }
 
-    method roles($obj) {
+    method roles($obj, :$transitive) {
         @!roles
     }
 }
