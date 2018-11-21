@@ -160,7 +160,6 @@ class Ctx extends NQPObject {
   /*async*/ propagateException(exception) {
     if (exception.$$category) {
       return this.propagateControlException(exception);
-      return;
     }
 
     let ctx = this;
