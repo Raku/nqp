@@ -13,7 +13,7 @@ const hll = require('./hll.js');
 
 const NQPInt = require('./nqp-int.js');
 
-const isPrime = require('bigint-is-prime');
+const isPrime = require('jsbi-is-prime');
 
 const op = {};
 exports.op = op;
@@ -194,8 +194,7 @@ op.cmp_I = function(left, right) {
 };
 
 op.isprime_I = function(n, attempts) {
-  const unboxed = getBI(n);
-  return isPrime(BigInt(unboxed.toString())) ? 1 : 0;
+  return isPrime(getBI(n)) ? 1 : 0;
 };
 
 op.bitshiftl_I = function(a, b, type) {
