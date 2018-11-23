@@ -516,7 +516,7 @@ exports.getHLL = hll.getHLL;
 
 let once = true;
 exports.run = function(code) {
-  if (once && browser && window.__rakudo__ && window.__rakudo__.waitForStart) {
+  if (once && browser && typeof window !== 'undefined' && window.__rakudo__ && window.__rakudo__.waitForStart) {
     once = false;
 
     window.__rakudo__.waitForStart.push(() => {

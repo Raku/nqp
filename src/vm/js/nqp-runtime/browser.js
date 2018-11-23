@@ -9,6 +9,9 @@ const NQPObject = require('./nqp-object.js');
 
 exports.op = op;
 
+// allows running code bundles as for browser use outside of the browser
+const maybeWindow = typeof window === 'undefined' ? {} : window;
+
 class BufferedConsole extends NQPObject {
   constructor(output) {
     super();
@@ -76,38 +79,38 @@ class HijackedConsole extends NQPObject {
 }
 
 let STDOUT;
-if (window.NQP_STDOUT) {
-  STDOUT = new HijackedConsole(window.NQP_STDOUT)
-} else if (window.__karma__) {
+if (maybeWindow.NQP_STDOUT) {
+  STDOUT = new HijackedConsole(maybeWindow.NQP_STDOUT)
+} else if (maybeWindow.__karma__) {
   const TapConsole = require('./tap-console.js');
   STDOUT = new TapConsole();
 } else {
   STDOUT = new BufferedConsole(output => console.error(output));
 }
 
-if (window.__karma__) {
-  if (!window.__rakudo__) {
-    window.__rakudo__ = {};
+if (maybeWindow.__karma__) {
+  if (!maybeWindow.__rakudo__) {
+    maybeWindow.__rakudo__ = {};
   }
 
-  window.__rakudo__.startTime = new Date().getTime();
-  window.__rakudo__.waitForStart = [];
-  window.__rakudo__.results = [];
-  window.__rakudo__.resultCount = 0;
+  maybeWindow.__rakudo__.startTime = new Date().getTime();
+  maybeWindow.__rakudo__.waitForStart = [];
+  maybeWindow.__rakudo__.results = [];
+  maybeWindow.__rakudo__.resultCount = 0;
 
-  window.__karma__.start = function(results) {
+  maybeWindow.__karma__.start = function(results) {
     STDOUT.karmaResults = results;
 
-    for (const code of window.__rakudo__.waitForStart) {
+    for (const code of maybeWindow.__rakudo__.waitForStart) {
       code();
     }
 
-    window.__karma__.info({total: window.__rakudo__.resultCount});
-    for (const result of window.__rakudo__.results) {
-      window.__karma__.result(result);
+    maybeWindow.__karma__.info({total: maybeWindow.__rakudo__.resultCount});
+    for (const result of maybeWindow.__rakudo__.results) {
+      maybeWindow.__karma__.result(result);
     }
-    window.__karma__.complete({
-      coverage: window.__coverage__
+    maybeWindow.__karma__.complete({
+      coverage: maybeWindow.__coverage__
     });
 
   };
