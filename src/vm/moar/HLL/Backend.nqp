@@ -193,7 +193,7 @@ class HLL::Backend::MoarVM {
                     note(nqp::getmessage($!));
                 }
             }
-            $node<highest_child_id> := $node-id-counter - 1;
+            $node<highest_child_id> := $node-id-counter;
         }
 
         sub to_json($obj) {
