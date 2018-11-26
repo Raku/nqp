@@ -233,7 +233,12 @@ class Ctx extends NQPObject {
   }
 
   throw(exception) {
-    exception.$$stack = stackTrace.get();
+    // Partial workaround for browser that don't use the V8 stack trace API (like Firefox)
+    try {
+      exception.$$stack = stackTrace.get();
+    } catch (e) {
+      exception.$$stack = [];
+    }
     exception.$$ctx = this;
     return this.propagateException(exception);
   }
