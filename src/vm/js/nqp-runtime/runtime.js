@@ -157,6 +157,10 @@ if (process.browser) {
       require('./' + file + '.nqp-raw-runtime');
       exports.loaderCtx = oldLoaderCtx;
   };
+
+  exports.requireExtraStuff = function(path) {
+    return require(path);
+  };
 } else {
   op.loadbytecode = /*async*/ function(ctx, file) {
     // HACK - temporary hack for rakudo-js
