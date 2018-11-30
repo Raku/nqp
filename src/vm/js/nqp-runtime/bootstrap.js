@@ -215,10 +215,6 @@ function bootType(typeName, reprName) {
   return typeObj;
 }
 
-module.exports.bootType = bootType;
-
-module.exports.core = core;
-
 function bootArray(type) {
   const array = bootType('BOOTArray', 'VMArray');
   array._STable.REPR.type = Null;
