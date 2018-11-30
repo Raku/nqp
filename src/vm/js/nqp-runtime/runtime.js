@@ -810,3 +810,8 @@ exports.ZERO = JSBI.BigInt(0);
 
 exports.asIntN = asIntN.asIntN;
 exports.asUintN = asIntN.asUintN;
+
+const globalContext = require('./global-context.js');
+
+module.exports.freshGlobalContext = globalContext.freshGlobalContext;
+module.exports.setGlobalContext = globalContext.setGlobalContext;
