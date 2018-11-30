@@ -25,6 +25,8 @@ const NQPStr = require('./nqp-str.js');
 
 const NQPException = require('./nqp-exception.js');
 
+const globalContext = require('./global-context.js');
+
 /* Possible reference types we can serialize. */
 const REFVAR_NULL = 1;
 const REFVAR_OBJECT = 2;
@@ -41,10 +43,9 @@ const REFVAR_CLONED_CODEREF = 12;
 
 
 /** All the loaded serialization contexts using their unique IDs as keys */
-const serializationContexts = SerializationContext.contexts;
 
 module.exports.wval = function(handle, idx) {
-  return serializationContexts[handle].rootObjects[idx];
+  return globalContext.context.scs[handle].rootObjects[idx];
 };
 
 op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, setupWVals) {
@@ -64,7 +65,7 @@ op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, 
 };
 
 op.createsc = function(handle) {
-  return (serializationContexts[handle] = new SerializationContext(handle));
+  return (globalContext.context.scs[handle] = new SerializationContext(handle));
 };
 
 op.scsetdesc = function(sc, desc) {
@@ -549,7 +550,7 @@ class BinaryCursor {
     this.sc.deps = deps;
 
     for (const i in dependencies) {
-      const dep = serializationContexts[dependencies[i][0]];
+      const dep = globalContext.context.scs[dependencies[i][0]];
       if (!dep) {
         console.log(
             'Missing dependencie, can\'t find serialization context handle:',
@@ -627,7 +628,7 @@ class BinaryCursor {
         if (codeRef.staticVars) {
           for (const name in codeRef.staticVars) {
             if (codeRef.staticVars[name] instanceof Array) {
-              codeRef.staticVars[name] = serializationContexts[codeRef.staticVars[name][0]].rootObjects[codeRef.staticVars[name][1]];
+              codeRef.staticVars[name] = globalContext.context.scs[codeRef.staticVars[name][0]].rootObjects[codeRef.staticVars[name][1]];
             } else if (typeof codeRef.staticVars[name] === 'number') {
               codeRef.staticVars[name] = sc.rootObjects[codeRef.staticVars[name]];
             }
@@ -637,7 +638,7 @@ class BinaryCursor {
         if (codeRef.contVars) {
           for (const name in codeRef.contVars) {
             if (codeRef.contVars[name] instanceof Array) {
-              codeRef.contVars[name] = serializationContexts[codeRef.contVars[name][0]].rootObjects[codeRef.contVars[name][1]];
+              codeRef.contVars[name] = globalContext.context.scs[codeRef.contVars[name][0]].rootObjects[codeRef.contVars[name][1]];
             } else if (typeof codeRef.contVars[name] === 'number') {
               codeRef.contVars[name] = sc.rootObjects[codeRef.contVars[name]];
             }

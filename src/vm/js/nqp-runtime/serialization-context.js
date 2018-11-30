@@ -1,5 +1,9 @@
 'use strict';
 
+const globalContext = require('./global-context.js');
+
+globalContext.initialize(context => context.scs = {});
+
 const NQPObject = require('./nqp-object.js');
 
 /**
@@ -25,7 +29,6 @@ class SerializationContext extends NQPObject {
     super();
     this.description = '???';
     this.handle = handle;
-    SerializationContext.contexts[handle] = this;
     this.rootObjects = [];
     this.rootSTables = [];
     this.rootCodes = [];
@@ -77,5 +80,4 @@ class SerializationContext extends NQPObject {
   }
 };
 
-SerializationContext.contexts = {};
 module.exports = SerializationContext;

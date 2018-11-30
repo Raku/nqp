@@ -17,9 +17,12 @@ const Null = require('./null.js');
 
 const NQPStr = require('./nqp-str.js');
 
+const globalContext = require('./global-context.js');
 
 const core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
+
+globalContext.initialize(context => context.scs['__6MODEL_CORE__'] = core);
 
 function addToScWithSt(obj) {
   core.rootObjects.push(obj);
