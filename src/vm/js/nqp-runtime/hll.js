@@ -89,7 +89,6 @@ op.hllizefor = function(ctx, obj, language) {
 };
 
 const hllConfigs = {};
-exports.hllConfigs = hllConfigs;
 
 function getHLL(language) {
   if (!hllConfigs[language]) {
