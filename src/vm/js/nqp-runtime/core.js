@@ -61,6 +61,8 @@ const resolveSourceMap = process.browser ? null : require('./resolve-sourcemap.j
 
 const path = process.browser ? null : require('path');
 
+const globalContext = require('./global-context.js');
+
 const nullStr = require('./null_s.js');
 
 exports.CodeRef = CodeRef;
@@ -600,10 +602,11 @@ op.scwbdisable = function() {
   return ++repossession.scwbDisableDepth;
 };
 
-const compilerRegistry = new Map();
+
+globalContext.initialize(context => context.compilerRegistry = new Map());
 
 op.bindcomp = function(language, compiler) {
-  compilerRegistry.set(language, compiler);
+  globalContext.context.compilerRegistry.set(language, compiler);
   return compiler;
 };
 
@@ -938,7 +941,7 @@ class JavaScriptCompiler extends NQPObject {
   }
 };
 
-compilerRegistry.set('JavaScript', new JavaScriptCompiler());
+globalContext.initialize(context => context.compilerRegistry.set('JavaScript', new JavaScriptCompiler()));
 
 class JSBackendStub extends NQPObject {
   name(ctx, named) {
@@ -956,7 +959,7 @@ class NQPStub extends NQPObject {
   }
 };
 
-compilerRegistry.set('nqp', new NQPStub());
+globalContext.initialize(context => context.compilerRegistry.set('nqp', new NQPStub()));
 
 // Needed for standalone compiled Perl 6 script to work
 
@@ -986,6 +989,8 @@ FakePerl6.prototype._STable.HOW = new FakePerl6HOW;
 const fakePerl6 = new FakePerl6();
 
 op.getcomp = function(language) {
+  const compilerRegistry = globalContext.context.compilerRegistry;
+
   if (language === 'perl6' && !compilerRegistry.has(language)) {
     return fakePerl6;
   }
