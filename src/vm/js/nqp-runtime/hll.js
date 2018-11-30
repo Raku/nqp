@@ -88,9 +88,11 @@ op.hllizefor = function(ctx, obj, language) {
   }
 };
 
-const hllConfigs = {};
+globalContext.initialize(context => context.hllConfigs = {});
 
 function getHLL(language) {
+  const hllConfigs = globalContext.context.hllConfigs;
+
   if (!hllConfigs[language]) {
     hllConfigs[language] = new Map;
     hllConfigs[language].set('slurpy_array', BOOT.Array);
