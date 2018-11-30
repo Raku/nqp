@@ -12,8 +12,6 @@ const NQPException = require('./nqp-exception.js');
 
 const StaticCtx = require('./static-ctx.js');
 
-const repossession = require('./repossession.js');
-
 const BOOT = require('./BOOT.js');
 
 const Ctx = require('./ctx.js');
@@ -21,6 +19,8 @@ const Ctx = require('./ctx.js');
 const constants = require('./constants.js');
 
 const core = require('./core.js');
+
+const globalContext = require('./global-context.js');
 
 const op = {};
 exports.op = op;
@@ -1042,7 +1042,7 @@ op.scsetcode = function(sc, idx, obj) {
 };
 
 op.neverrepossess = function(obj) {
-  repossession.neverRepossess.set(obj, true);
+  globalContext.context.neverRepossess.set(obj, true);
   return obj;
 };
 

@@ -5,9 +5,7 @@ const Null = require('./null.js');
 
 const HashIter = require('./hash-iter.js');
 
-const repossession = require('./repossession.js');
-const compilingSCs = repossession.compilingSCs;
-
+const sixmodel = require('./sixmodel.js');
 
 class Hash extends NQPObject {
   constructor() {
@@ -68,18 +66,6 @@ class Hash extends NQPObject {
     return new HashIter(this);
   }
 
-  // TODO: avoid copy and paste
-  $$scwb() {
-    if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
-      return;
-    }
-
-    if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-      const owned = this._SC.ownedObjects.get(this);
-      compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
-    }
-  }
-
   $$istype(ctx, type) {
     return 0;
   }
@@ -88,5 +74,7 @@ class Hash extends NQPObject {
     return 0;
   }
 };
+
+Hash.prototype.$$scwb = sixmodel.scwb;
 
 module.exports = Hash;

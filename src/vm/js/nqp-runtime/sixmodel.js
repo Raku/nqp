@@ -8,8 +8,13 @@ const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
 
 const Null = require('./null.js');
 
-const repossession = require('./repossession.js');
-const compilingSCs = repossession.compilingSCs;
+const globalContext = require('./global-context.js');
+
+globalContext.initialize(context => {
+  context.compilingSCs = [];
+  context.scwbDisableDepth = 0;
+  context.neverRepossess = new Map();
+});
 
 const constants = require('./constants.js');
 
@@ -38,6 +43,20 @@ const NativeStrArg = nativeArgs.NativeStrArg;
     return Null;
   }
 }
+function scwb() {
+  const compilingSCs = globalContext.context.compilingSCs;
+
+  if (compilingSCs.length == 0 || globalContext.context.scwbDisableDepth || globalContext.context.neverRepossess.get(this)) {
+    return;
+  }
+
+  if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
+    const owned = this._SC.ownedObjects.get(this);
+    compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
+  }
+}
+
+module.exports.scwb = scwb;
 
 class STable {
   constructor(REPR, HOW) {
@@ -80,17 +99,7 @@ class STable {
 
     this.ObjConstructor.prototype.$$call = undefined;
 
-    this.ObjConstructor.prototype.$$scwb = function() {
-      if (compilingSCs.length == 0 || repossession.scwbDisableDepth || repossession.neverRepossess.get(this)) {
-        return;
-      }
-
-      if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-        const owned = this._SC.ownedObjects.get(this);
-        compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
-      }
-    };
-
+    this.ObjConstructor.prototype.$$scwb = scwb;
     this.ObjConstructor.prototype.$$istype = /*async*/ function(ctx, type) {
       const cache = this._STable.typeCheckCache;
       if (cache) {
@@ -355,7 +364,9 @@ class STable {
   }
 
   scwb() {
-    if (compilingSCs.length == 0 || repossession.scwbDisableDepth) return;
+    const compilingSCs = globalContext.context.compilingSCs;
+
+    if (compilingSCs.length == 0 || globalContext.context.scwbDisableDepth) return;
     if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
       compilingSCs[compilingSCs.length - 1].repossessSTable(this);
     }

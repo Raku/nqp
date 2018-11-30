@@ -33,8 +33,6 @@ const BOOT = require('./BOOT.js');
 
 const exceptionsStack = require('./exceptions-stack.js');
 
-const repossession = require('./repossession.js');
-
 const sixmodel = require('./sixmodel.js');
 
 const Capture = require('./capture.js');
@@ -586,20 +584,20 @@ op.freshcoderef = function(code) {
 };
 
 op.pushcompsc = function(sc) {
-  repossession.compilingSCs.push(sc);
+  globalContext.context.compilingSCs.push(sc);
   return sc;
 };
 
 op.popcompsc = function(sc) {
-  return repossession.compilingSCs.pop();
+  return globalContext.context.compilingSCs.pop();
 };
 
 op.scwbenable = function() {
-  return --repossession.scwbDisableDepth;
+  return --globalContext.context.scwbDisableDepth;
 };
 
 op.scwbdisable = function() {
-  return ++repossession.scwbDisableDepth;
+  return ++globalContext.context.scwbDisableDepth;
 };
 
 
