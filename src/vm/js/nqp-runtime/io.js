@@ -401,8 +401,9 @@ class Stderr extends StdHandle {
   }
 };
 
+const STDERR = new Stderr();
 op.getstderr = function() {
-  return new Stderr();
+  return STDERR;
 };
 
 class Stdout extends StdHandle {
@@ -434,8 +435,9 @@ class Stdout extends StdHandle {
   }
 };
 
+const STDOUT = new Stdout();
 op.getstdout = function() {
-  return new Stdout();
+  return STDOUT;
 };
 
 
