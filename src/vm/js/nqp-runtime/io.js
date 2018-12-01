@@ -505,7 +505,7 @@ function wrapBuffer(buffer, type) {
 /*async*/ function stringifyEnv(ctx, hash) {
   const stringifed = {};
 
-  for (let key of hash.content.keys()) {
+  for (const key of hash.content.keys()) {
     stringifed[key] = /*await*/ nqp.toStr(hash.content.get(key), ctx);
   }
 
@@ -573,19 +573,19 @@ op.getsignals = function(currentHLL) {
 
   const osSigs = os.platform() === 'win32'
     ? {
-        SIGHUP:    1,
-        SIGKILL:   9,
+        SIGHUP: 1,
+        SIGKILL: 9,
         SIGWINCH: 28,
       }
     : os.constants.signals;
 
   const sigWanted = [
-    'SIGHUP',  'SIGINT',    'SIGQUIT',   'SIGILL',   'SIGTRAP', 'SIGABRT',
-    'SIGEMT',  'SIGFPE',    'SIGKILL',   'SIGBUS',   'SIGSEGV', 'SIGSYS',
-    'SIGPIPE', 'SIGALRM',   'SIGTERM',   'SIGURG',   'SIGSTOP', 'SIGTSTP',
-    'SIGCONT', 'SIGCHLD',   'SIGTTIN',   'SIGTTOU',  'SIGIO',   'SIGXCPU',
-    'SIGXFSZ', 'SIGVTALRM', 'SIGPROF',   'SIGWINCH', 'SIGINFO', 'SIGUSR1',
-    'SIGUSR2', 'SIGTHR',    'SIGSTKFLT', 'SIGPWR',   'SIGBREAK',
+    'SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
+    'SIGEMT', 'SIGFPE', 'SIGKILL', 'SIGBUS', 'SIGSEGV', 'SIGSYS',
+    'SIGPIPE', 'SIGALRM', 'SIGTERM', 'SIGURG', 'SIGSTOP', 'SIGTSTP',
+    'SIGCONT', 'SIGCHLD', 'SIGTTIN', 'SIGTTOU', 'SIGIO', 'SIGXCPU',
+    'SIGXFSZ', 'SIGVTALRM', 'SIGPROF', 'SIGWINCH', 'SIGINFO', 'SIGUSR1',
+    'SIGUSR2', 'SIGTHR', 'SIGSTKFLT', 'SIGPWR', 'SIGBREAK',
   ];
 
   const arr = [];

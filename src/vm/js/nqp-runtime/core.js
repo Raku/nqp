@@ -753,7 +753,7 @@ function applyLineDirectives(file, line, directives) {
       if (line > directives[i].originalLine) {
         return {
           line: line - directives[i].originalLine + directives[i].line - 1,
-          file: directives[i].file
+          file: directives[i].file,
         };
       }
     }
@@ -766,7 +766,7 @@ function processCompLineDirectives(ctx, compLineDirectives) {
   return compLineDirectives.array.map(directive => ({
     originalLine: nqp.toInt(directive.array[0], ctx),
     file: nqp.toStr(directive.array[2], ctx),
-    line: nqp.toInt(directive.array[1], ctx)
+    line: nqp.toInt(directive.array[1], ctx),
   }));
 }
 
@@ -777,12 +777,12 @@ function createSourceMap(js, p6, mapping, jsFile, p6File, lineDirectives) {
   const p6Props = charProps(p6);
 
 
-  let stack = [];
+  const stack = [];
   let lastGenerated = -1;
 
   for (let i = 0; i < mapping.length; i += 2) {
-    let originalOffset = mapping[i];
-    let generatedOffset = mapping[i+1];
+    const originalOffset = mapping[i];
+    const generatedOffset = mapping[i+1];
 
     function addRange() {
         const {file: originalFile, line: originalLine} = applyLineDirectives(p6File, p6Props.lineAt(stack[stack.length - 1])+1, lineDirectives);
@@ -847,7 +847,7 @@ class BuildSourceMap extends NQPObject {
     p6 = nqp.arg_s(ctx, p6);
     jsFile = nqp.arg_s(ctx, jsFile);
     mapping = mapping.array;
-    p6File = nqp.arg_s(ctx, p6File)
+    p6File = nqp.arg_s(ctx, p6File);
     compLineDirectives = processCompLineDirectives(ctx, compLineDirectives);
     sourcemapFile = nqp.arg_s(ctx, sourcemapFile);
 
@@ -874,7 +874,7 @@ class JavaScriptCompiler extends NQPObject {
 
   eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
-      let codeStr = nqp.arg_s(ctx, code);
+      const codeStr = nqp.arg_s(ctx, code);
       return fromJSToReturnValue(ctx, eval('(function() {' + this.$$fixupRun(codeStr) + '})()'));
     }
 
@@ -1139,7 +1139,6 @@ op.encode = function(str, encoding, output) {
 };
 
 op.encoderepconf = function(str, encoding_, replacement, output, permissive) {
-
   if (replacement === nullStr) {
     return op.encodeconf(str, encoding_, output, permissive);
   }
@@ -1407,8 +1406,8 @@ op.getlexrel = function(pad, name) {
 
 
 op.bitand_s = function(a, b) {
-  const codePointsA = []
-  const codePointsB = []
+  const codePointsA = [];
+  const codePointsB = [];
 
   for (const c of a.normalize('NFC')) {
     codePointsA.push(c.codePointAt(0));
@@ -1427,8 +1426,8 @@ op.bitand_s = function(a, b) {
 };
 
 op.bitor_s = function(a, b) {
-  const codePointsA = []
-  const codePointsB = []
+  const codePointsA = [];
+  const codePointsB = [];
 
   for (const c of a.normalize('NFC')) {
     codePointsA.push(c.codePointAt(0));
@@ -1447,8 +1446,8 @@ op.bitor_s = function(a, b) {
 };
 
 op.bitxor_s = function(a, b) {
-  const codePointsA = []
-  const codePointsB = []
+  const codePointsA = [];
+  const codePointsB = [];
 
   for (const c of a.normalize('NFC')) {
     codePointsA.push(c.codePointAt(0));
@@ -1462,7 +1461,6 @@ op.bitxor_s = function(a, b) {
   for (let i = 0; i < codePointsA.length || i < codePointsB.length; i++) {
     ret.push((codePointsA[i] || 0) ^ (codePointsB[i] || 0));
   }
-
 
 
   return String.fromCodePoint.apply(undefined, ret).normalize('NFC');
@@ -1483,7 +1481,7 @@ op.getcodelocation = function(code) {
     sourcePath = evaledP6Filenames[code.staticCode.filename];
     source = evaledP6Sources[code.staticCode.filename];
   } else {
-    const result = sourceMapResolve.resolveSourceMapSync(fs.readFileSync(code.staticCode.filename).toString('utf8'), code.staticCode.filename,  fs.readFileSync);
+    const result = sourceMapResolve.resolveSourceMapSync(fs.readFileSync(code.staticCode.filename).toString('utf8'), code.staticCode.filename, fs.readFileSync);
     sourcePath = path.resolve(path.dirname(result.sourcesRelativeTo), result.map.sources[0]);
 
     source = fs.readFileSync(sourcePath, 'utf8');
@@ -1813,10 +1811,10 @@ op.getuniname = function(codePoint) {
   } else if (0xE000 <= codePoint && codePoint <= 0xF8FF
             || 0xF0000 <= codePoint && codePoint <= 0xFFFFD
             || 0x100000 <= codePoint && codePoint <= 0x10FFFD) {
-    return '<private-use-' + formatCodePoint(codePoint) + '>'
+    return '<private-use-' + formatCodePoint(codePoint) + '>';
   } else if (0xD800 <= codePoint && codePoint <= 0xDBFF
             || 0xDC00 <= codePoint && codePoint <= 0xDFFF) {
-    return '<surrogate-' + formatCodePoint(codePoint) + '>'
+    return '<surrogate-' + formatCodePoint(codePoint) + '>';
   } else {
     return ucd.codePointToName(codePoint) || 'missing';
   }

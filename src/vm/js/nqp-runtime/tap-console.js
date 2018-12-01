@@ -31,8 +31,8 @@ class TapConsole extends NQPObject {
           pending: assert.todo,
           log: [JSON.stringify(assert.diag || assert, null, 2)],
           suite: [window.__rakudo__.suit || '?suit?'],
-          time: new Date().getTime() - window.__rakudo__.startTime
-        }
+          time: new Date().getTime() - window.__rakudo__.startTime,
+        };
 
         window.__rakudo__.results.push(result);
 

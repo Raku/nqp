@@ -80,7 +80,7 @@ class HijackedConsole extends NQPObject {
 
 let STDOUT;
 if (maybeWindow.NQP_STDOUT) {
-  STDOUT = new HijackedConsole(maybeWindow.NQP_STDOUT)
+  STDOUT = new HijackedConsole(maybeWindow.NQP_STDOUT);
 } else if (maybeWindow.__karma__) {
   const TapConsole = require('./tap-console.js');
   STDOUT = new TapConsole();
@@ -110,9 +110,8 @@ if (maybeWindow.__karma__) {
       maybeWindow.__karma__.result(result);
     }
     maybeWindow.__karma__.complete({
-      coverage: maybeWindow.__coverage__
+      coverage: maybeWindow.__coverage__,
     });
-
   };
 }
 

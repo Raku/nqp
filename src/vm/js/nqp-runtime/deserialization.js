@@ -841,7 +841,7 @@ class BinaryCursor {
       /* Read indexes where type object and STable will get placed if a
        * matching intern is found. */
       const typeIdx = data.int32();
-      const stIdx   = data.int32();
+      const stIdx = data.int32();
 
       /* Read parameters and push into array. */
       const numParams = data.int32();

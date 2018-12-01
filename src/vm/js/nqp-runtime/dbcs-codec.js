@@ -446,7 +446,7 @@ class DBCSEncoder {
 
     if (this.leadSurrogate !== -1) {
       // Incomplete surrogate pair - only lead surrogate found.
-      throw new NQPException("Incomplete surrogate pair");
+      throw new NQPException('Incomplete surrogate pair');
       this.leadSurrogate = -1;
     }
 
@@ -588,8 +588,6 @@ function findIdx(table, val) {
 }
 
 
-
-
 class Encoding {
   constructor(options) {
     const codec = new DBCSCodec(options);
@@ -602,7 +600,6 @@ class Encoding {
     const trail = this.decoder.end(false);
 
     return trail ? (res + trail) : res;
-
   }
 
   decodeWithReplacement(buffer, replacement, permisive) {

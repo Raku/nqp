@@ -64,7 +64,6 @@ function methodNotFoundError(ctx, obj, name) {
 }
 
 
-
 function slotToAttr(slot) {
   return 'attr$' + slot;
 }
@@ -1174,10 +1173,9 @@ class VMArray extends REPR {
 
       $$slice(start, end) {
         start = start < 0 ? this.array.length + start : start;
-        end   = end   < 0 ? this.array.length + end   : end;
+        end = end < 0 ? this.array.length + end : end;
         if ( end < start || start < 0 || end < 0
-             || this.array.length <= start || this.array.length <= end )
-        {
+             || this.array.length <= start || this.array.length <= end ) {
             throw new NQPException('VMArray: Slice index out of bounds');
         }
 
@@ -2373,7 +2371,7 @@ class CREPR extends REPRWithAttributes {
   allocate(STable) {
     const obj = new STable.ObjConstructor();
     if (!this.UnionConstructor) {
-      throw new NQPException("CUnion: must compose before allocating");
+      throw new NQPException('CUnion: must compose before allocating');
     }
     obj.$$data = this.UnionConstructor();
     return obj;
@@ -2420,7 +2418,7 @@ class CREPR extends REPRWithAttributes {
       }
 
       if (parents.length > 1) {
-        throw new NQPException("CUnion representation does not support multiple inheritance");
+        throw new NQPException('CUnion representation does not support multiple inheritance');
       }
     }
 
@@ -2437,7 +2435,7 @@ class CREPR extends REPRWithAttributes {
     this.UnionConstructor = this.createLowlevelConstructor(refTypes);
 
 
-    const suffixes = ['','_s', '_i', '_n'];
+    const suffixes = ['', '_s', '_i', '_n'];
     for (const suffix of suffixes) {
       this.generateUniversalAccessor(STable, '$$getattr' + suffix, function(slot) {
         return 'return this.$$getattr$' + slot + suffix + '()';
@@ -2480,7 +2478,6 @@ class CUnion extends CREPR {
 
 class CStruct extends CREPR {
 };
-
 
 
 reprs.CUnion = CUnion;

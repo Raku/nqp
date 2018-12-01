@@ -18,7 +18,7 @@ module.exports.freshGlobalContext = function(setup) {
   for (const setup of initialization) {
     setup(module.exports.context);
   }
-  
+
   return old;
 };
 

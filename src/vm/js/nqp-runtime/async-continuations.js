@@ -14,12 +14,12 @@ class CtxJustReset extends Ctx {
 
 function findReset(tag, ctx) {
   /* TODO - tag */
-  let search = ctx; 
+  let search = ctx;
   while (search) {
     if (search instanceof CtxJustReset && (tag === Null || search.$$tag == tag)) {
       return search;
     }
-    search = search.$$caller; 
+    search = search.$$caller;
   }
   console.trace(`Can't find reset`);
 }
@@ -30,7 +30,7 @@ op.continuationreset = function(ctx, currentHLL, tag, block) {
       block.resetCtx.$$outside = resolve;
       block.inside(Null);
     } else {
-      let newCtx = new CtxJustReset(ctx, ctx, null);
+      const newCtx = new CtxJustReset(ctx, ctx, null);
       newCtx.$$outside = resolve;
       newCtx.$$tag = tag;
       block.$$call(newCtx, null).then(value => newCtx.$$outside(nqp.retval(currentHLL, value)), reject);

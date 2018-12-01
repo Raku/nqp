@@ -555,7 +555,6 @@ class SerializationWriter {
         /* If what we write was an object reference and it's from another
          * SC, add to the internability count. */
         if (this.stablesData.refVarType(params[i]) == REFVAR_OBJECT) {
-
           if (params[i]._SC != this.sc) {
             internability++;
           }
@@ -1007,7 +1006,7 @@ op.serializetobuf = function(sc, sh, type) {
   const buffer = type._STable.REPR.allocate(type._STable);
   core.writeBuffer(buffer, writer.serialize());
   return buffer;
-}
+};
 
 op.scsetobj = function(sc, idx, obj) {
   sc.setObj(idx, obj);
