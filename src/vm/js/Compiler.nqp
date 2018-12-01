@@ -2328,7 +2328,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
-            "'use strict'\n",
+            "'use strict';\n",
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
