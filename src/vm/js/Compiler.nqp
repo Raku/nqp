@@ -1813,7 +1813,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @setup.push("return new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
 
-        @setup.unshift((!$instant ?? 'return ' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
+        @setup.unshift("return nqp.run({self.async}function() \{\n");
         @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }
@@ -2328,6 +2328,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict';\n",
+            $instant ?? "const body = function() \{\n" !! '',
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
@@ -2337,7 +2338,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.setup_cuids,
             self.set_is_thunk_flags,
             self.set_static_info,
-            $chunk
+            $chunk,
+            $instant ?? "\};\nif (require.main === module) \{body();\} else \{module.exports = body;\};" !! '',
         );
     }
 

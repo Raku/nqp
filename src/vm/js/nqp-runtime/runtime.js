@@ -24,6 +24,7 @@ const nativeArgs = require('./native-args.js');
 const JSBI = require('jsbi');
 
 const asIntN = require('./as-int-n.js');
+const globalContext = require('./global-context.js');
 
 const NativeIntArg = exports.NativeIntArg = nativeArgs.NativeIntArg;
 const NativeUIntArg = exports.NativeUIntArg = nativeArgs.NativeUIntArg;
@@ -143,6 +144,17 @@ exports.loaderCtx = null;
 
 /* dependencies */
 
+globalContext.initialize(context => context.loadedCache = new Map());
+
+function loadWithCache(code) {
+  const loadedCache = globalContext.context.loadedCache;
+
+  if (!loadedCache.has(code)) {
+    loadedCache.set(code, code());
+  }
+  return loadedCache.get(code);
+}
+
 if (process.browser) {
   op.loadbytecode = /*async*/ function(ctx, file) {
       if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
@@ -154,7 +166,7 @@ if (process.browser) {
       file = file.replace(/\./g, '_');
       file = file.replace(/\_js$/, '');
       file = file.replace(/::/g, '-');
-      require('./' + file + '.nqp-raw-runtime');
+      loadWithCache(require('./' + file + '.nqp-raw-runtime'));
       exports.loaderCtx = oldLoaderCtx;
   };
 
@@ -187,9 +199,9 @@ if (process.browser) {
     for (const prefix of prefixes) {
       try {
         if (typeof prefix === 'string') {
-            /*await*/ loadFrom.require(prefix + mangled);
+            /*await*/ loadWithCache(loadFrom.require(prefix + mangled));
         } else {
-            /*await*/ prefix.module.require(prefix.prefix + mangled);
+            /*await*/ loadWithCache(prefix.module.require(prefix.prefix + mangled));
         }
 
         found = true;
@@ -210,13 +222,16 @@ if (process.browser) {
 const realModule = module;
 op.loadbytecodefh = function(ctx, fh, file) {
   // HACK - loadbytecodefh shouldn't use eval
-  const module = {require: function(path) { // eslint-disable-line no-unused-vars
+  const module = {require: function(path) {
     return realModule.require(path);
   }};
   const oldLoaderCtx = exports.loaderCtx;
   exports.loaderCtx = ctx;
   const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
   eval(js);
+
+  module.exports();
+
   exports.loaderCtx = oldLoaderCtx;
 };
 
@@ -808,12 +823,8 @@ exports.buildSourceMap = core.buildSourceMap;
 exports.createSourceMap = core.createSourceMap;
 
 exports.ZERO = JSBI.BigInt(0);
-
-
 exports.asIntN = asIntN.asIntN;
 exports.asUintN = asIntN.asUintN;
-
-const globalContext = require('./global-context.js');
 
 module.exports.freshGlobalContext = globalContext.freshGlobalContext;
 module.exports.setGlobalContext = globalContext.setGlobalContext;
