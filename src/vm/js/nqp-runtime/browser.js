@@ -1,5 +1,4 @@
 const op = {};
-const Null = require('./null.js');
 const Hash = require('./hash.js');
 const core = require('./core.js');
 

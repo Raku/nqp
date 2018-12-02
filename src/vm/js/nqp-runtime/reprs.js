@@ -2,7 +2,6 @@
 const sixmodel = require('./sixmodel.js');
 const Hash = require('./hash.js');
 const NQPInt = require('./nqp-int.js');
-const NQPNum = require('./nqp-num.js');
 const NQPException = require('./nqp-exception.js');
 const Null = require('./null.js');
 const nullStr = require('./null_s.js');
@@ -206,7 +205,6 @@ class REPRWithAttributes extends REPR {
     code += '}\n}\n';
     STable.compileAccessor(name, code, setup);
   }
-
 };
 
 class P6opaque extends REPRWithAttributes {
@@ -617,7 +615,6 @@ class P6opaque extends REPRWithAttributes {
       }
     });
   }
-
 };
 
 reprs.P6opaque = P6opaque;
@@ -1111,7 +1108,6 @@ function primType(type) {
 
 // TODO rework VMArray to be more correct
 class VMArray extends REPR {
-
   allocate(STable) {
     const obj = new STable.ObjConstructor();
     obj.array = [];
@@ -2313,7 +2309,6 @@ class MultiDimArray extends REPR {
       }
     }
   }
-
 };
 
 reprs.MultiDimArray = MultiDimArray;

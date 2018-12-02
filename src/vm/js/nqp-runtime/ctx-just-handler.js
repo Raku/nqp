@@ -2,7 +2,6 @@
 const Ctx = require('./ctx.js');
 
 class CtxJustHandler extends Ctx {
-
   $$skipHandlers() {
     return this.$$caller.$$skipHandlers();
   }

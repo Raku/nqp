@@ -195,7 +195,6 @@ const NativeNumArg = nativeArgs.NativeNumArg;
 const NativeStrArg = nativeArgs.NativeStrArg;
 
 const NativeNumRet = nativeArgs.NativeNumRet;
-const NativeIntRet = nativeArgs.NativeIntRet;
 
 const intToObj = exports.intToObj = function(currentHLL, i) {
   const type = currentHLL.get('int_box');

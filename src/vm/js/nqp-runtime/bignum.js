@@ -223,7 +223,7 @@ op.bitneg_I = function(a, type) {
 
 function gcd(a, b) {
   while (!JSBI.equal(b, ZERO)) {
-    let r = JSBI.remainder(a, b);
+    const r = JSBI.remainder(a, b);
     a = b;
     b = r;
   }
@@ -244,7 +244,7 @@ op.gcd_I = function(a, b, type) {
 };
 
 op.abs_I = function(n, type) {
-  let x = getBI(n);
+  const x = getBI(n);
   return makeBI(type, x < ZERO ? JSBI.unaryMinus(x) : x);
 };
 
@@ -264,11 +264,11 @@ op.fromnum_I = function(num, type) {
 
   let expanded = stringy.replace(/\.(\d+)e\+(\d+)/, function(match, floating, exponent) {
     return floating + '0'.repeat(parseInt(exponent - floating.length));
-  })
+  });
 
   expanded = expanded.replace(/e\+(\d+)/, function(match, exponent) {
     return '0'.repeat(parseInt(exponent));
-  })
+  });
 
   return makeBI(type, JSBI.BigInt(expanded));
 };
@@ -332,7 +332,7 @@ function randomWithSameBitSize(n) {
   let needed = bitSize(n);
 
   while (needed >= 64) {
-    let randomBits = core.generator.randomint()
+    const randomBits = core.generator.randomint();
     got = JSBI.bitwiseOr(JSBI.bitwiseOr(JSBI.leftShift(got, SIXTY_FOUR), JSBI.leftShift(JSBI.BigInt(randomBits[0]), THIRTY_TWO)), JSBI.BigInt(randomBits[1]));
     needed -= 64;
   }
@@ -341,7 +341,7 @@ function randomWithSameBitSize(n) {
     return got;
   }
 
-  let randomBits = core.generator.randomint()
+  const randomBits = core.generator.randomint();
   let unused = 0;
 
   if (needed > 32) {
@@ -375,8 +375,8 @@ op.rand_I = function(n, type) {
 
 op.add_i64 = function(a, b) {
   return asIntN.asIntN(64, JSBI.add(a, b));
-}
+};
 
 op.sub_i64 = function(a, b) {
   return asIntN.asIntN(64, JSBI.sub(a, b));
-}
+};

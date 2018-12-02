@@ -4,7 +4,7 @@ const JSBI = require('jsbi');
 const ZERO = JSBI.BigInt(0);
 
 /* Used when evaling runtime compiled methods */
-const nullStr = require('./null_s.js');  // eslint-disable-line no-unused-vars
+const nullStr = require('./null_s.js'); // eslint-disable-line no-unused-vars
 
 const Null = require('./null.js');
 

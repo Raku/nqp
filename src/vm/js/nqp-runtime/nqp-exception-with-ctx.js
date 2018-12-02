@@ -5,6 +5,5 @@ class NQPExceptionWithCtx extends NQPException {
     this.$$ctx = ctx;
     this.$$stack = stack;
   }
-
 };
 module.exports = NQPExceptionWithCtx;

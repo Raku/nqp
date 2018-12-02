@@ -201,7 +201,7 @@ function runNFA(nfa, target, pos) {
           }
         } else if (act == EDGE_CODEPOINT_LL) {
           if (target.charCodeAt(pos) == edgeInfo[i].argI) {
-            const fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            const fate = (edgeInfo[i].act >> 8) & 0xfffff; /* act is probably signed 32 bits */
             nextst.push(to);
             while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
@@ -231,7 +231,7 @@ function runNFA(nfa, target, pos) {
         } else if (act == EDGE_CODEPOINT_I_LL) {
           const codePoint = target.codePointAt(pos);
           if (codePoint === edgeInfo[i].argLc || codePoint === edgeInfo[i].argUc) {
-            const fate = (edgeInfo[i].act >> 8) & 0xfffff;  /* act is probably signed 32 bits */
+            const fate = (edgeInfo[i].act >> 8) & 0xfffff; /* act is probably signed 32 bits */
             nextst.push(to);
             while (usedlonglit <= fate) {
               longlit[usedlonglit++] = 0;
