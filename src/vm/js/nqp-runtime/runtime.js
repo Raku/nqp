@@ -210,7 +210,7 @@ if (process.browser) {
 const realModule = module;
 op.loadbytecodefh = function(ctx, fh, file) {
   // HACK - loadbytecodefh shouldn't use eval
-  const module = {require: function(path) {
+  const module = {require: function(path) { // eslint-disable-line no-unused-vars
     return realModule.require(path);
   }};
   const oldLoaderCtx = exports.loaderCtx;
