@@ -863,12 +863,12 @@ exports.buildSourceMap = new BuildSourceMap();
 
 class JavaScriptCompiler extends NQPObject {
   $$fixupRun(code) {
-    let fixedUp = code.replace(/\/\*\s*return\s\*\/\s*nqp\.run/, 'return nqp.run');
     if (process.browser) {
-        // HACK this is potential trouble
-        fixedUp = fixedUp.replace(/require\("nqp-runtime"\)/g, `require('./runtime.nqp-raw-runtime')`);
+      // HACK this is potential trouble
+      return code.replace(/require\("nqp-runtime"\)/g, `require('./runtime.nqp-raw-runtime')`);
+    } else {
+      return code;
     }
-    return fixedUp;
   }
 
   eval(ctx, _NAMED, self, code) {

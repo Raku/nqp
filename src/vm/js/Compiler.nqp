@@ -1814,7 +1814,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
 
-        @setup.unshift((!$instant ?? '/* return */' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
+        @setup.unshift((!$instant ?? 'return ' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
         @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }
