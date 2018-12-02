@@ -7,7 +7,6 @@ module.exports = {
       "require-jsdoc": "off",
       "max-len": "off",
       "arrow-parens": "off",
-      "no-extend-native": "off",
       "camelcase": "off",
       "guard-for-in": "off",
       "prefer-rest-params": "off",
