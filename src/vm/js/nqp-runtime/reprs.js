@@ -2477,7 +2477,7 @@ class CStruct extends CREPR {
 
 reprs.CUnion = CUnion;
 
-reprs.CStruct = CUnion;
+reprs.CStruct = CStruct;
 
 
 class WrappedJSObject extends REPR {
