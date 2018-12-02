@@ -20,7 +20,6 @@ const constants = require('./constants.js');
 const ref = process.browser ? null : require('ref');
 
 const Union = process.browser ? null : require('ref-union');
-const StructType = process.browser ? null : require('ref-struct');
 
 const codecs = require('./codecs.js');
 
