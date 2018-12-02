@@ -1,7 +1,7 @@
 module.exports = {
     "extends": "google",
     "parserOptions": {
-      "ecmaVersion": 6
+      "ecmaVersion": 10
     },
     "rules": {
       "require-jsdoc": "off",
@@ -14,6 +14,8 @@ module.exports = {
       "prefer-spread": "off",
       "no-invalid-this": "off",
       "no-throw-literal": "off",
-      "prefer-const": "error"
+      "prefer-const": "error",
+      "spaced-comment": "off",
+      "new-cap": "off"
     }
 };
