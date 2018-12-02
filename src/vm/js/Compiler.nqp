@@ -1810,8 +1810,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $create_sc := $comp_mode ?? self.create_sc($node) !! '';
         my @setup := [$pre , self.declare_js_vars($*BLOCK.js_lexicals), $create_sc, $set_code_objects,  self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $set_hll, $post, $body];
         if !$instant {
-            @setup.push('return ');
-            @setup.push("new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
+            @setup.push("return new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
 
         @setup.unshift((!$instant ?? 'return ' !! "module.exports = ") ~ "nqp.run({self.async}function() \{\n");
