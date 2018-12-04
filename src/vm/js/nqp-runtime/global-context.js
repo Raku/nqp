@@ -40,7 +40,6 @@ module.exports.setGlobalContext = function(context) {
   module.exports.context = context;
 
   for (const action of context.restore) {
-    console.log('restoring context', action);
     action(context);
   }
 
