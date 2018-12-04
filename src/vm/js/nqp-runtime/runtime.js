@@ -828,3 +828,6 @@ exports.asUintN = asIntN.asUintN;
 
 module.exports.freshGlobalContext = globalContext.freshGlobalContext;
 module.exports.setGlobalContext = globalContext.setGlobalContext;
+
+module.exports.saveThisGlobalContext = globalContext.saveThisGlobalContext;
+module.exports.restoreThisGlobalContext = globalContext.restoreThisGlobalContext;
