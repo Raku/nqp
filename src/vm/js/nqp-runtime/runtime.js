@@ -150,7 +150,7 @@ function loadWithCache(code) {
   const loadedCache = globalContext.context.loadedCache;
 
   if (!loadedCache.has(code)) {
-    loadedCache.set(code, code());
+    loadedCache.set(code, code(false));
   }
   return loadedCache.get(code);
 }
@@ -446,8 +446,8 @@ exports.NYI = function(msg) {
   return null;
 };
 
-exports.args = function(module) {
-  return require.main === module ? process.argv.slice(1).map(arg => new NativeStrArg(arg)) : [];
+exports.args = function(isMain) {
+  return isMain ? process.argv.slice(1).map(arg => new NativeStrArg(arg)) : [];
 };
 
 exports.NQPException = NQPException;

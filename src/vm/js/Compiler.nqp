@@ -1732,7 +1732,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     method run_with_module($code) {
-        self.await ~ $code ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(module)));\n";
+        self.await ~ $code ~ ".\$\$apply([nqp.loaderCtx, null].concat(nqp.args(isMain)));\n";
     }
 
     multi method as_js(QAST::CompUnit $node, :$want) {
@@ -2328,7 +2328,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict';\n",
-            $instant ?? "const body = function() \{\n" !! '',
+            $instant ?? "const body = function(isMain) \{\n" !! 'const isMain = true;',
             "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
@@ -2339,7 +2339,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.set_is_thunk_flags,
             self.set_static_info,
             $chunk,
-            $instant ?? "\};\nif (require.main === module) \{body();\} else \{module.exports = body;\};" !! '',
+            $instant ?? "\};\nif (/* main check */ require.main === module) \{body(true);\} else \{module.exports = body;\};" !! '',
         );
     }
 
