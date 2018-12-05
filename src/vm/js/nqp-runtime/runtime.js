@@ -552,6 +552,17 @@ exports.run = function(code) {
       }
       browser.op.getstdout().end();
     });
+  } else if (browser && typeof window === 'undefined') {
+    // We are bundled for browser use but in fact running under node.js
+    try {
+      return code();
+    } catch (e) {
+      if (e instanceof browser.Exit) {
+        global.process.exit(e.status);
+      } else {
+        throw e;
+      }
+    }
   } else {
     return code();
   }

@@ -155,8 +155,13 @@ op.cwd = function() {
   return '?';
 };
 
-exports.Exit = class Exit {};
+class Exit {
+  constructor(code) {
+    this.code = code;
+  }
+};
+exports.Exit = Exit;
 
-op.exit = function() {
-  throw new exports.Exit();
+op.exit = function(code) {
+  throw new exports.Exit(code);
 };
