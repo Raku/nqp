@@ -84,7 +84,7 @@ if (maybeWindow.NQP_STDOUT) {
   const TapConsole = require('./tap-console.js');
   STDOUT = new TapConsole();
 } else {
-  STDOUT = new BufferedConsole(output => console.error(output));
+  STDOUT = new BufferedConsole(output => console.log(output));
 }
 
 if (maybeWindow.__karma__) {
