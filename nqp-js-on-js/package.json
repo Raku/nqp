@@ -5,7 +5,7 @@
     "nqp-js-on-js": "nqp-bootstrapped.js"
   },
   "files": [
-    "*.js"
+    "*.js", "*.js.map"
   ],
   "licenses": [
     {
