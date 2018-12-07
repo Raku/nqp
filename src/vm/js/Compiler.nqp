@@ -2325,11 +2325,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             }
             $libpath := "nqp.libpath([{nqp::join(',', @libpath)}]);\n";
         }
+
+        my $require_nqp := "require({quote_string($nqp-runtime || 'nqp-runtime')})";
+
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict';\n",
-            $instant ?? "const body = function(isMain) \{\n" !! 'const isMain = true;',
-            "var nqp = require({quote_string($nqp-runtime || 'nqp-runtime')});\n",
+            $instant ?? "const body = function(nqp, isMain) \{\n" !! 'const isMain = true;',
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
             "const HLL=nqp.getHLL({quote_string($got_compunit ?? $ast.hll !! '')});\n",
@@ -2339,7 +2341,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             self.set_is_thunk_flags,
             self.set_static_info,
             $chunk,
-            $instant ?? "\};\nif (/* main check */ require.main === module) \{body(true);\} else \{module.exports = body;\};" !! '',
+            $instant ?? "\};\nif (require.main === module) \{body($require_nqp, true);\} else \{module.exports = body;\};" !! '',
         );
     }
 

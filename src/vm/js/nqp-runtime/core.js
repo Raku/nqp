@@ -862,19 +862,10 @@ exports.buildSourceMap = new BuildSourceMap();
 
 
 class JavaScriptCompiler extends NQPObject {
-  $$fixupRun(code) {
-    if (process.browser) {
-      // HACK this is potential trouble
-      return code.replace(/require\("nqp-runtime"\)/g, `require('./runtime.nqp-raw-runtime')`);
-    } else {
-      return code;
-    }
-  }
-
   eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       const codeStr = nqp.arg_s(ctx, code);
-      return fromJSToReturnValue(ctx, eval('(function() {' + this.$$fixupRun(codeStr) + '})()'));
+      return fromJSToReturnValue(ctx, eval('(function() {' + codeStr + '})()'));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();
@@ -907,7 +898,7 @@ class JavaScriptCompiler extends NQPObject {
       evaledP6Filenames[fakeFilename] = nqp.toStr(_NAMED.file, ctx);
     }
 
-    const compiled = vm.compileFunction(preamble + this.$$fixupRun(codeStr), [], {filename: fakeFilename});
+    const compiled = vm.compileFunction(preamble + codeStr, [], {filename: fakeFilename});
 
     global.nqpModule = module;
 
@@ -925,7 +916,7 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   compile(ctx, _NAMED, self, code) {
-    const codeStr = this.$$fixupRun(nqp.arg_s(ctx, code));
+    const codeStr = nqp.arg_s(ctx, code);
     const compiled = process.browser
       ? eval('(function() {' + codeStr + '})')
       : vm.compileFunction(codeStr);

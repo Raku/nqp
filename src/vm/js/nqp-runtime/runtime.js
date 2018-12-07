@@ -150,7 +150,7 @@ function loadWithCache(code) {
   const loadedCache = globalContext.context.loadedCache;
 
   if (!loadedCache.has(code)) {
-    loadedCache.set(code, code(false));
+    loadedCache.set(code, code(module.exports, false));
   }
   return loadedCache.get(code);
 }
@@ -230,7 +230,7 @@ op.loadbytecodefh = function(ctx, fh, file) {
   const js = fs.readFileSync(fh.fd, {encoding: 'utf8'});
   eval(js);
 
-  module.exports();
+  module.exports(realModule.exports, false);
 
   exports.loaderCtx = oldLoaderCtx;
 };
