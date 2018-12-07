@@ -4,15 +4,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method await($expr = NO_VALUE) {
          $expr =:= NO_VALUE ?? '/*await*/ ' !! '(/*await*/ ' ~ $expr ~ ')';
-#        if $!async {
-#            $expr =:= NO_VALUE ?? 'await ' !! '(await ' ~ $expr ~ ')';
-#        } else {
-#            $expr =:= NO_VALUE ?? '' !! $expr;
-#        }
     }
 
     method async() {
-        #$!async ?? 'async ' !! '';
         '/*async*/ ';
     }
 
