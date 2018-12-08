@@ -1071,7 +1071,7 @@ class QAST::OperationsJS {
     add_simple_op('hllizefor', $T_OBJ, [$T_OBJ, $T_STR], :ctx, :side_effects, :await);
 
     add_simple_op('hllize', $T_OBJ, [$T_OBJ], :ctx, :side_effects, sub ($ctx, $obj) {
-        "nqp.op.hllizefor($ctx, $obj, {quote_string($*HLL)})"
+        "/*await*/ nqp.op.hllizefor($ctx, $obj, {quote_string($*HLL)})"
     });
 
     add_simple_op('bindcomp', $T_OBJ, [$T_STR, $T_OBJ], :side_effects);

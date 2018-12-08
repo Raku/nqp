@@ -862,10 +862,10 @@ exports.buildSourceMap = new BuildSourceMap();
 
 
 class JavaScriptCompiler extends NQPObject {
-  eval(ctx, _NAMED, self, code) {
+  /*async*/ eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       const codeStr = nqp.arg_s(ctx, code);
-      return fromJSToReturnValue(ctx, eval('(function() {' + codeStr + '})()'));
+      return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();

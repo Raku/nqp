@@ -166,7 +166,7 @@ if (process.browser) {
       file = file.replace(/\./g, '_');
       file = file.replace(/\_js$/, '');
       file = file.replace(/::/g, '-');
-      loadWithCache(require('./' + file + '.nqp-raw-runtime'));
+      /*await*/ loadWithCache(require('./' + file + '.nqp-raw-runtime'));
       exports.loaderCtx = oldLoaderCtx;
   };
 
