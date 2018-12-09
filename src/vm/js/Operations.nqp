@@ -888,9 +888,9 @@ class QAST::OperationsJS {
 
 
     add_simple_op('exception', $T_OBJ, []);
-    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.rethrow($exception)"}, :side_effects, :await);
-    add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"$*CTX.resume($exception)"}, :side_effects);
-    add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"{$*CTX}.throw($exception)"}, :await);
+    add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"/*await*/ $*CTX.rethrow($exception)"}, :side_effects);
+    add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"/*await*/ $*CTX.resume($exception)"}, :side_effects);
+    add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"/*await*/ {$*CTX}.throw($exception)"});
 
     add_simple_op('setpayload', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects);
     add_simple_op('getpayload', $T_OBJ, [$T_OBJ, $T_OBJ]);

@@ -121,7 +121,7 @@ class Ctx extends NQPObject {
         try {
           const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.$$unwind.ret = ctx[handler](wrapped);
+            ctx.$$unwind.ret = /*await*/ ctx[handler](wrapped);
           } else {
             ctx.$$unwind.ret = /*await*/ ctx.$$CONTROL(wrapped);
           }
@@ -281,7 +281,7 @@ class Ctx extends NQPObject {
         try {
           const wrapped = new Ctx(this, this, null);
           if (ctx[handler]) {
-            ctx.$$unwind.ret = ctx[handler](wrapped);
+            ctx.$$unwind.ret = /*await*/ ctx[handler](wrapped);
           } else {
             ctx.$$unwind.ret = /*await*/ ctx.$$CONTROL(wrapped);
           }
@@ -303,14 +303,14 @@ class Ctx extends NQPObject {
           check = check.$$caller;
         }
 
-        this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(1));
+        /*await*/ this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(1));
         return;
       }
 
       ctx = ctx.$$outer;
     }
 
-    this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
+    /*await*/ this.$$getHLL().get('lexical_handler_not_found_error').$$call(this, null, new NQPInt(category), new NQPInt(0));
   }
 
   lookupDynamic(name) {
