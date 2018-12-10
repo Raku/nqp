@@ -620,22 +620,22 @@ reprs.P6opaque = P6opaque;
 
 class KnowHOWREPR extends REPR {
   deserializeFinish(obj, data) {
-    obj.__name = data.str();
-    obj.__attributes = data.variant().array;
-    obj.__methods = data.variant();
+    obj.$$name = data.str();
+    obj.$$attributes = data.variant().array;
+    obj.$$methods = data.variant();
   }
 
   serialize(data, obj) {
-    data.str(obj.__name);
-    data.ref(BOOT.createArray(obj.__attributes));
-    data.ref(obj.__methods);
+    data.str(obj.$$name);
+    data.ref(BOOT.createArray(obj.$$attributes));
+    data.ref(obj.$$methods);
   }
 
   allocate(STable) {
     const obj = new STable.ObjConstructor();
-    obj.__methods = new Hash();
-    obj.__attributes = [];
-    obj.__name = '<anon>';
+    obj.$$methods = new Hash();
+    obj.$$attributes = [];
+    obj.$$name = '<anon>';
     return obj;
   }
 };
@@ -644,11 +644,11 @@ reprs.KnowHOWREPR = KnowHOWREPR;
 
 class KnowHOWAttribute extends REPR {
   deserializeFinish(obj, data) {
-    obj.__name = data.str();
+    obj.$$name = data.str();
   }
 
   serialize(data, obj) {
-    data.str(obj.__name);
+    data.str(obj.$$name);
   }
 };
 

@@ -40,13 +40,13 @@ function createKnowHOWAttribute() {
 
   const methods = {};
   methods.name = function(ctx, _NAMED, self) {
-    return new NQPStr(self.__name);
+    return new NQPStr(self.$$name);
   };
   methods['new'] = function(ctx, _NAMED, self) {
     const attr = r.allocate(self.$$STable);
-    attr.__name = _NAMED.name.$$getStr();
-    attr.__type = _NAMED.type;
-    attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target.$$getInt() : 0;
+    attr.$$name = _NAMED.name.$$getStr();
+    attr.$$type = _NAMED.type;
+    attr.$$boxTarget = _NAMED.box_target ? _NAMED.box_target.$$getInt() : 0;
     return attr;
   };
 
@@ -70,7 +70,7 @@ addToScWithSt(KnowHOW);
 const st = new STable(repr, null);
 
 const KnowHowHOW = repr.allocate(st);
-KnowHowHOW.__name = 'KnowHOW';
+KnowHowHOW.$$name = 'KnowHOW';
 
 addToScWithSt(KnowHowHOW);
 
@@ -98,15 +98,15 @@ function addKnowhowHowMethod(name, method) {
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
-  return new NQPStr(self.__name);
+  return new NQPStr(self.$$name);
 });
 
 addKnowhowHowMethod('attributes', function(ctx, _NAMED, self) {
-  return BOOT.createArray(self.__attributes);
+  return BOOT.createArray(self.$$attributes);
 });
 
 addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
-  return self.__methods;
+  return self.$$methods;
 });
 
 addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
@@ -123,9 +123,9 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
 
   /* See if we were given a name; put it into the meta-object if so. */
   if (_NAMED && _NAMED.name) {
-    HOW.__name = _NAMED.name.$$getStr();
+    HOW.$$name = _NAMED.name.$$getStr();
   } else {
-    HOW.__name = null;
+    HOW.$$name = null;
   }
 
   /* Set .WHO to an empty hash. */
@@ -135,16 +135,16 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
 });
 
 addKnowhowHowMethod('add_attribute', function(ctx, _NAMED, self, type, attr) {
-  self.__attributes.push(attr);
+  self.$$attributes.push(attr);
 });
 
 addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) {
-  self.__methods.content.set(name === 'string' ? name : name.$$getStr(), code);
+  self.$$methods.content.set(name === 'string' ? name : name.$$getStr(), code);
 });
 
 addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   /* Set method cache */
-  typeObject.$$STable.setMethodCache(self.__methods.content);
+  typeObject.$$STable.setMethodCache(self.$$methods.content);
   typeObject.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   /* Set type check cache. */
@@ -167,13 +167,13 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   typeInfo.push(BOOT.createArray(attrInfoList));
 
   /* ...then an array of hashes per attribute... */
-  for (let i = 0; i < self.__attributes.length; i++) {
+  for (let i = 0; i < self.$$attributes.length; i++) {
     const attrInfo = new Hash();
-    const attr = self.__attributes[i];
-    attrInfo.content.set('name', new NQPStr(attr.__name));
-    attrInfo.content.set('type', attr.__type);
-    if (attr.__boxTarget) {
-      attrInfo.content.set('box_target', attr.__boxTarget);
+    const attr = self.$$attributes[i];
+    attrInfo.content.set('name', new NQPStr(attr.$$name));
+    attrInfo.content.set('type', attr.$$type);
+    if (attr.$$boxTarget) {
+      attrInfo.content.set('box_target', attr.$$boxTarget);
     }
     attrInfoList.push(attrInfo);
   }
@@ -206,7 +206,7 @@ addToScWithSt(KnowHOWAttribute);
 
 function bootType(typeName, reprName) {
   const metaObj = KnowHowHOW.$$STable.REPR.allocate(KnowHowHOW.$$STable);
-  metaObj.__name = typeName;
+  metaObj.$$name = typeName;
 
   const typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
