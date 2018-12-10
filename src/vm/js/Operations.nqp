@@ -761,12 +761,7 @@ class QAST::OperationsJS {
 
         my str $method;
         if $node.name {
-            if $comp.is_valid_js_identifier($node.name) {
-                $method := '.' ~ $node.name;
-            }
-            else {
-                $method := '[' ~ quote_string($node.name) ~ ']';
-            }
+            $method := '[' ~ quote_string($node.name) ~ ']';
         }
         else {
             my $method_name := $comp.as_js(@args.shift, :want($T_STR));

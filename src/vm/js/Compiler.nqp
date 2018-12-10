@@ -317,12 +317,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     }
 
-    method is_valid_js_identifier($identifier) {
-        # TODO - implement a simplified version of https://mathiasbynens.be/notes/javascript-identifiers
-        0;
-    }
-
-
     # Boxes/unboxes the return value when neccessary
     method get_return_value(str $expr, @setup, :$want, :$node) {
         my int $unpack_as_type :=
