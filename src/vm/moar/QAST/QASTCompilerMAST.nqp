@@ -2208,14 +2208,14 @@ class MoarVM::Callsites {
                 if $name {
                     my int $idx := nqp::unbox_i($frame.add-string($name));
                     nqp::push_i(@named_idxs, $idx);
-                    nqp::writeuint($identifier, $id_offset, $idx, 4);
+                    nqp::writeuint($identifier, $id_offset, $idx, 9);
                     $id_offset := $id_offset + 4;
                     $result_typeflag := $result_typeflag +| $named;
                 }
             }
             nqp::push_i(@flags, $result_typeflag);
 
-            nqp::writeuint($identifier, $id_offset++, $result_typeflag, 0);
+            nqp::writeuint($identifier, $id_offset++, $result_typeflag, 1);
             $i++;
         }
 
@@ -2228,18 +2228,18 @@ class MoarVM::Callsites {
         my $callsite-idx := nqp::elems(%!callsites);
         %!callsites{$identifier_s} := $callsite-idx;
         my uint $callsites_offset := nqp::elems($!callsites);
-        nqp::writeuint($!callsites, $callsites_offset, $elems, 2);
+        nqp::writeuint($!callsites, $callsites_offset, $elems, 5);
         $callsites_offset := $callsites_offset + 2;
         my $iter := nqp::iterator(@flags);
         while $iter {
-            nqp::writeuint($!callsites, $callsites_offset++, nqp::shift_i($iter), 0);
+            nqp::writeuint($!callsites, $callsites_offset++, nqp::shift_i($iter), 1);
         }
         if $elems +& 1 {
-            nqp::writeuint($!callsites, $callsites_offset++, 0, 0);
+            nqp::writeuint($!callsites, $callsites_offset++, 0, 1);
         }
         $iter := nqp::iterator(@named_idxs);
         while $iter {
-            nqp::writeuint($!callsites, $callsites_offset, nqp::shift_i($iter), 4);
+            nqp::writeuint($!callsites, $callsites_offset, nqp::shift_i($iter), 9);
             $callsites_offset := $callsites_offset + 4;
         }
         $callsite-idx
