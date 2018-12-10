@@ -50,8 +50,8 @@ function scwb() {
     return;
   }
 
-  if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
-    const owned = this._SC.ownedObjects.get(this);
+  if (compilingSCs[compilingSCs.length - 1] !== this.$$SC) {
+    const owned = this.$$SC.ownedObjects.get(this);
     compilingSCs[compilingSCs.length - 1].repossessObject(owned === undefined ? this : owned);
   }
 }
@@ -67,7 +67,7 @@ class STable {
 
     this.lazyMethodCache = false;
 
-    this._SC = undefined;
+    this.$$SC = undefined;
 
     this.ObjConstructor = REPR.createObjConstructor(this);
 
@@ -75,7 +75,7 @@ class STable {
     this.ObjConstructor.prototype.$$clone = function() {
       const clone = new this.$$STable.ObjConstructor();
       for (const i in this) {
-        if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
+        if (Object.prototype.hasOwnProperty.call(this, i) && i != '$$SC') {
           clone[i] = this[i];
         }
       }
@@ -367,7 +367,7 @@ class STable {
     const compilingSCs = globalContext.context.compilingSCs;
 
     if (compilingSCs.length == 0 || globalContext.context.scwbDisableDepth) return;
-    if (compilingSCs[compilingSCs.length - 1] !== this._SC) {
+    if (compilingSCs[compilingSCs.length - 1] !== this.$$SC) {
       compilingSCs[compilingSCs.length - 1].repossessSTable(this);
     }
   }

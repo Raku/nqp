@@ -227,16 +227,16 @@ class BinaryWriteCursor {
     if (!ref.$$STable) {
       throw new NQPException('trying to serialize an object without an STable');
     }
-    if (!ref._SC) {
+    if (!ref.$$SC) {
       /* This object doesn't belong to an SC yet, so it must be serialized
        * as part of this compilation unit. Add it to the work list. */
-      ref._SC = writerSc;
+      ref.$$SC = writerSc;
 
       this.writer.sc.rootObjects.push(ref);
     }
 
     /* Write SC index, then object index. */
-    this.idIdx(this.writer.getSCId(ref._SC), ref._SC.rootObjects.indexOf(ref));
+    this.idIdx(this.writer.getSCId(ref.$$SC), ref.$$SC.rootObjects.indexOf(ref));
   }
 
   stableRef(STable) {
@@ -266,10 +266,10 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_HASH_STR_VAR;
     } else if (ref instanceof CodeRef || typeof ref == 'function') {
       discrim = REFVAR_VM_NULL;
-      if (ref._SC && ref.isStatic) {
+      if (ref.$$SC && ref.isStatic) {
         /* Static code reference. */
         discrim = REFVAR_STATIC_CODEREF;
-      } else if (ref._SC) {
+      } else if (ref.$$SC) {
         /* Closure, but already seen and serialization already handled. */
         discrim = REFVAR_CLONED_CODEREF;
       } else {
@@ -327,8 +327,8 @@ class BinaryWriteCursor {
         break;
       case REFVAR_STATIC_CODEREF:
       case REFVAR_CLONED_CODEREF:
-        const scId = this.writer.getSCId(ref._SC);
-        const idx = ref._SC.rootCodes.indexOf(ref);
+        const scId = this.writer.getSCId(ref.$$SC);
+        const idx = ref.$$SC.rootCodes.indexOf(ref);
         if (idx == -1) {
           throw `can't write code ref`;
         }
@@ -543,7 +543,7 @@ class SerializationWriter {
 
       this.stablesData.ref(st.parametricType);
 
-      if (st.parametricType._SC !== this.sc) {
+      if (st.parametricType.$$SC !== this.sc) {
         internability++;
       }
 
@@ -555,7 +555,7 @@ class SerializationWriter {
         /* If what we write was an object reference and it's from another
          * SC, add to the internability count. */
         if (this.stablesData.refVarType(params[i]) == REFVAR_OBJECT) {
-          if (params[i]._SC != this.sc) {
+          if (params[i].$$SC != this.sc) {
             internability++;
           }
         }
@@ -582,7 +582,7 @@ class SerializationWriter {
   serializeContext(ctx) {
     /* Locate the static code ref this context points to. */
     const staticCodeRef = this.closureToStaticCodeRef(ctx.codeRef(), true);
-    const staticCodeSC = staticCodeRef._SC;
+    const staticCodeSC = staticCodeRef.$$SC;
     if (staticCodeSC == null) {
       throw 'Serialization Error: closure outer is a code object not in an SC';
     }
@@ -635,13 +635,13 @@ class SerializationWriter {
     this.paramInterns.objRef(parametricType);
 
     /* Indexes in this SC of type object and STable. */
-    if (type._SC !== this.sc) {
+    if (type.$$SC !== this.sc) {
         throw new NQPException('Serialization error: parameterized type to intern not in current SC');
     }
 
     this.paramInterns.int32(this.sc.rootObjects.indexOf(type));
 
-    if (type.$$STable._SC !== this.sc) {
+    if (type.$$STable.$$SC !== this.sc) {
       throw new NQPException('Serialization error: STable of parameterized type to intern not in current SC');
     }
 
@@ -659,7 +659,7 @@ class SerializationWriter {
   }
 
   getSerializedContextIdx(ctx) {
-    if (!ctx._SC) {
+    if (!ctx.$$SC) {
       /* TODO - think if it's truly correct */
 
       if (ctx instanceof StaticCtx) {
@@ -672,11 +672,11 @@ class SerializationWriter {
         return 0;
       } else {
         this.contexts.push(ctx);
-        ctx._SC = this.sc;
+        ctx.$$SC = this.sc;
         return this.contexts.length;
       }
     } else {
-      if (ctx._SC != this.sc) {
+      if (ctx.$$SC != this.sc) {
         throw 'Serialization Error: reference to context outside of SC';
       }
       const idx = this.contexts.indexOf(ctx);
@@ -707,7 +707,7 @@ class SerializationWriter {
       }
     }
 
-    if (!staticCode._SC) {
+    if (!staticCode.$$SC) {
       if (fatal) {
         throw 'Serialization Error: could not locate static code ref for closure';
       } else {
@@ -721,7 +721,7 @@ class SerializationWriter {
   serializeClosure(closure) {
     /* Locate the static code object. */
     const staticCodeRef = this.closureToStaticCodeRef(closure, true);
-    const staticCodeSC = staticCodeRef._SC;
+    const staticCodeSC = staticCodeRef.$$SC;
 
     /* Add an entry to the closures table. */
     const staticSCId = this.getSCId(staticCodeSC);
@@ -741,15 +741,15 @@ class SerializationWriter {
       const codeObj = closure.codeObj;
       this.closures.int32(1);
 
-      if (!codeObj._SC) {
+      if (!codeObj.$$SC) {
       }
-      if (!codeObj._SC) {
-        codeObj._SC = this.sc;
+      if (!codeObj.$$SC) {
+        codeObj.$$SC = this.sc;
         this.writer.sc.rootObjects.push(ref);
       }
 
-      this.closures.int32(this.getSCId(codeObj._SC));
-      this.closures.int32(codeObj._SC.rootObjects.indexOf(codeObj));
+      this.closures.int32(this.getSCId(codeObj.$$SC));
+      this.closures.int32(codeObj.$$SC.rootObjects.indexOf(codeObj));
     } else {
       this.closures.int32(0);
       this.closures.int32(0);
@@ -761,7 +761,7 @@ class SerializationWriter {
 
 
     /* Add the closure to this SC, and mark it as as being in it. */
-    closure._SC = this.sc;
+    closure.$$SC = this.sc;
     this.sc.rootCodes.push(closure);
   }
 
@@ -890,12 +890,12 @@ class SerializationWriter {
 
   getSTableRefInfo(st) {
     /* Add to this SC if needed. */
-    if (!st._SC) {
-      st._SC = this.sc;
+    if (!st.$$SC) {
+      st.$$SC = this.sc;
       this.sc.rootSTables.push(st);
     }
 
-    return [this.getSCId(st._SC), st._SC.rootSTables.indexOf(st)];
+    return [this.getSCId(st.$$SC), st.$$SC.rootSTables.indexOf(st)];
   }
 
 
@@ -1018,7 +1018,7 @@ op.scgetobj = function(sc, idx) {
 };
 
 op.getobjsc = function(obj) {
-  return obj._SC || Null;
+  return obj.$$SC || Null;
 };
 
 op.scgetobjidx = function(sc, obj) {
@@ -1030,13 +1030,13 @@ op.scgetobjidx = function(sc, obj) {
 };
 
 op.setobjsc = function(obj, sc) {
-  obj._SC = sc;
+  obj.$$SC = sc;
   return obj;
 };
 
 op.scsetcode = function(sc, idx, obj) {
   sc.rootCodes[idx] = obj;
-  obj._SC = sc;
+  obj.$$SC = sc;
   return obj;
 };
 

@@ -27,8 +27,8 @@ globalContext.initialize(context => context.scs['__6MODEL_CORE__'] = core);
 function addToScWithSt(obj) {
   core.rootObjects.push(obj);
   core.rootSTables.push(obj.$$STable);
-  obj._SC = core;
-  obj.$$STable._SC = core;
+  obj.$$SC = core;
+  obj.$$STable.$$SC = core;
 }
 
 /* Creates and installs the KnowHOWAttribute type. */
@@ -211,7 +211,7 @@ function bootType(typeName, reprName) {
   const typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
 
   core.rootObjects.push(metaObj);
-  metaObj._SC = core;
+  metaObj.$$SC = core;
 
   addToScWithSt(typeObj);
 

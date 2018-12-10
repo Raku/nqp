@@ -54,7 +54,7 @@ op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, 
 
   for (let i = 0; i < sc.codeRefs.length; i++) {
     sc.codeRefs[i].isStatic = true;
-    sc.codeRefs[i]._SC = sc;
+    sc.codeRefs[i].$$SC = sc;
     sc.rootCodes.push(sc.codeRefs[i]);
   }
 
@@ -163,7 +163,7 @@ class BinaryCursor {
     }
     const bootArray = BOOT.createArray(array);
     if (this.sc.currentObject) {
-      bootArray._SC = this.sc;
+      bootArray.$$SC = this.sc;
       this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
     }
     return bootArray;
@@ -249,7 +249,7 @@ class BinaryCursor {
     }
 
     if (this.sc.currentObject) {
-      hash._SC = this.sc;
+      hash.$$SC = this.sc;
       this.sc.ownedObjects.set(hash, this.sc.currentObject);
     }
 
@@ -615,7 +615,7 @@ class BinaryCursor {
       if (closures[i].codeObj) sc.codeRefs[closuresBase + i].codeObj = closures[i].codeObj;
       closures[i].index = closuresBase + i;
 
-      closures[i]._SC = sc;
+      closures[i].$$SC = sc;
       sc.rootCodes.push(closures[i]);
     }
 
@@ -716,7 +716,7 @@ class BinaryCursor {
         REPR.name = repr;
         const HOW = null; /* We will fill that in later once objects are stubbed */
         this.sc.rootSTables[i] = new sixmodel.STable(REPR, HOW);
-        this.sc.rootSTables[i]._SC = this.sc;
+        this.sc.rootSTables[i].$$SC = this.sc;
       }
     }
   }
@@ -742,7 +742,7 @@ class BinaryCursor {
         this.sc.rootObjects[i] = objects[i].isConcrete ?
             new (STableForObj.ObjConstructor)() :
             STableForObj.createTypeObject();
-        this.sc.rootObjects[i]._SC = this.sc;
+        this.sc.rootObjects[i].$$SC = this.sc;
       }
     }
   }
@@ -769,12 +769,12 @@ class BinaryCursor {
         const origSTable = this.sc.deps[entry.origSC].rootSTables[entry.origIndex];
         this.sc.rootSTables[entry.index] = origSTable;
 
-        if (origSTable._SC != this.sc.deps[entry.origSC]) {
+        if (origSTable.$$SC != this.sc.deps[entry.origSC]) {
           throw new NQPException('STable conflict detected during deserialization.\n'
             + '(Probable attempt to load a mutated module or modules that cannot be loaded together).');
         }
 
-        origSTable._SC = this.sc;
+        origSTable.$$SC = this.sc;
       }
     }
   }
@@ -783,14 +783,14 @@ class BinaryCursor {
     for (const entry of repossessed) {
       if (entry.type === 0) {
         const origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
-        if (origObj._SC !== this.sc.deps[entry.origSC]) {
+        if (origObj.$$SC !== this.sc.deps[entry.origSC]) {
           const backup = origObj.$$typeObject ? origObj.$$STable.createTypeObject() : origObj.$$clone();
           conflicts.$$push(backup);
           conflicts.$$push(origObj);
         }
 
         this.sc.rootObjects[entry.index] = origObj;
-        origObj._SC = this.sc;
+        origObj.$$SC = this.sc;
 
         const STableForObj =
             this.sc.deps[objects[entry.index].STable[0]].rootSTables[objects[entry.index].STable[1]];

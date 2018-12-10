@@ -10,13 +10,13 @@ const sixmodel = require('./sixmodel.js');
 class Hash extends NQPObject {
   constructor() {
     super();
-    this._SC = undefined;
+    this.$$SC = undefined;
     this.content = new Map();
   }
 
   $$bindkey(key, value) {
     this.content.set(key, value);
-    if (this._SC !== undefined) this.$$scwb();
+    if (this.$$SC !== undefined) this.$$scwb();
     return value;
   }
 
@@ -29,7 +29,7 @@ class Hash extends NQPObject {
   }
 
   $$deletekey(key) {
-    if (this._SC !== undefined) this.$$scwb();
+    if (this.$$SC !== undefined) this.$$scwb();
     this.content.delete(key);
     return this;
   }

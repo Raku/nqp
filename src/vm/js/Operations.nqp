@@ -1583,10 +1583,10 @@ class QAST::OperationsJS {
     %ops<die_s> := %ops<die>;
 
 
-    add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.$$STable.HOW"}, :decont(0));
-    add_simple_op('how_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.$$STable.HOW"});
-    add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.$$STable.WHO"}, :decont(0));
-    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj.$$STable.WHO = $who, $obj)"}, :side_effects, :decont(0));
+    add_simple_op('how', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.\$\$STable.HOW"}, :decont(0));
+    add_simple_op('how_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.\$\$STable.HOW"});
+    add_simple_op('who', $T_OBJ, [$T_OBJ], sub ($obj) {"$obj.\$\$STable.WHO"}, :decont(0));
+    add_simple_op('setwho', $T_OBJ, [$T_OBJ, $T_OBJ], sub ($obj, $who) {"($obj.\$\$STable.WHO = $who, $obj)"}, :side_effects, :decont(0));
 
     # TODO decont second argument
     add_simple_op('rebless', $T_OBJ, [$T_OBJ, $T_OBJ], :side_effects, :decont(0, 1));
@@ -1603,8 +1603,8 @@ class QAST::OperationsJS {
 
     # HACK
     # TODO think what we should return on 1.WHAT and "foo".WHAT
-    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj.$$STable ? $obj.$$STable.WHAT : nqp.Null)"}, :decont(0));
-    add_simple_op('what_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj.$$STable ? $obj.$$STable.WHAT : nqp.Null)"});
+    add_simple_op('what', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj.\$\$STable ? $obj.\$\$STable.WHAT : nqp.Null)"}, :decont(0));
+    add_simple_op('what_nd', $T_OBJ, [$T_OBJ], sub ($obj) {"($obj.\$\$STable ? $obj.\$\$STable.WHAT : nqp.Null)"});
 
     add_simple_op('knowhowattr', $T_OBJ, [], sub () {"nqp.knowhowattr"});
     add_simple_op('knowhow', $T_OBJ, [], sub () {"nqp.knowhow"});

@@ -2249,7 +2249,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                     my str $attr := $self.expr ~ '.attr$' ~ $hint;
                     if $*BINDVAL {
                         my $bindval := self.as_js_clear_bindval($*BINDVAL, :want($type));
-                        Chunk.new($type, $bindval.expr, [$self, $bindval, "$attr = {$bindval.expr};\n", "if ({$self.expr}._SC !== undefined) {$self.expr}.\$\$scwb();\n"]);
+                        Chunk.new($type, $bindval.expr, [$self, $bindval, "$attr = {$bindval.expr};\n", "if ({$self.expr}.\$\$SC !== undefined) {$self.expr}.\$\$scwb();\n"]);
                     }
                     else {
                         Chunk.new($type, $attr, $self);

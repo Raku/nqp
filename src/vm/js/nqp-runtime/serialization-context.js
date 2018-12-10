@@ -45,9 +45,9 @@ class SerializationContext extends NQPObject {
 
   setObj(idx, obj) {
     this.rootObjects[idx] = obj;
-    if (!obj.$$STable._SC) {
+    if (!obj.$$STable.$$SC) {
       this.rootSTables.push(obj.$$STable);
-      obj.$$STable._SC = this;
+      obj.$$STable.$$SC = this;
     }
   }
 
@@ -60,9 +60,9 @@ class SerializationContext extends NQPObject {
     this.rootSTables.push(STable);
 
     this.repIndexes.push((newSlot << 1) | 1);
-    this.repScs.push(STable._SC);
+    this.repScs.push(STable.$$SC);
 
-    STable._SC = this;
+    STable.$$SC = this;
   }
 
   repossessObject(obj) {
@@ -70,9 +70,9 @@ class SerializationContext extends NQPObject {
     this.rootObjects.push(obj);
 
     this.repIndexes.push((newSlot << 1));
-    this.repScs.push(obj._SC);
+    this.repScs.push(obj.$$SC);
 
-    obj._SC = this;
+    obj.$$SC = this;
   }
 
   $$toBool(ctx) {

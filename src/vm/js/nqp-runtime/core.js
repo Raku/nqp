@@ -377,7 +377,7 @@ op.getcodeobj = function(codeRef) {
 
 op.settypecache = function(obj, cache) {
   obj.$$STable.typeCheckCache = cache.array;
-  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
+  if (obj.$$STable.$$SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
@@ -392,7 +392,7 @@ op.setmethcache = function(obj, cache) {
     console.log('we expect a hash here');
   }
   obj.$$STable.setMethodCache(cache.content);
-  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
+  if (obj.$$STable.$$SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
@@ -402,7 +402,7 @@ op.setmethcacheauth = function(obj, isAuth) {
   } else {
     obj.$$STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
   }
-  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
+  if (obj.$$STable.$$SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
@@ -455,7 +455,7 @@ op.setcodename = function(code, name) {
 
 op.rebless = function(obj, newType) {
   obj.$$STable.REPR.changeType(obj, newType);
-  if (obj._SC !== undefined) obj.$$scwb();
+  if (obj.$$SC !== undefined) obj.$$scwb();
   return obj;
 };
 

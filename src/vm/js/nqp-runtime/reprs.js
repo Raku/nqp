@@ -129,7 +129,7 @@ class REPR {
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
     ObjConstructor.prototype.$$STable = STable;
 
-    ObjConstructor.prototype._SC = undefined;
+    ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
 
     return ObjConstructor;
@@ -183,7 +183,7 @@ class REPRWithAttributes extends REPR {
 
   generateUniversalAccessor(STable, name, action, extraSig, scwb, actionDescription) {
     let code = 'function(classHandle, attrName' + extraSig + ') {\n' +
-        (scwb ? 'if (this._SC !== undefined) this.$$scwb();\n' : '') +
+        (scwb ? 'if (this.$$SC !== undefined) this.$$scwb();\n' : '') +
         'switch (classHandle) {\n';
     let classKeyIndex = 0;
     let setup = '';
@@ -541,7 +541,7 @@ class P6opaque extends REPRWithAttributes {
 
     STable.compileAccessor('$$bindattr$' + slot, 'function(value) {\n' +
         'this.' + attr + ' = value;\n' +
-        'if (this._SC !== undefined) this.$$scwb();\n' +
+        'if (this.$$SC !== undefined) this.$$scwb();\n' +
         'return value;\n' +
         '}\n');
 
@@ -1223,12 +1223,12 @@ class VMArray extends REPR {
         }
 
         $$bindpos(index, value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
         }
 
         $$push(value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           this.array.push(value);
           return value;
         }
@@ -1284,7 +1284,7 @@ class VMArray extends REPR {
         }
 
         $$push_i(value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           this.array.push(this.$$mangle(value));
           return value;
         }
@@ -1296,7 +1296,7 @@ class VMArray extends REPR {
         }
 
         $$bindpos_i(index, value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           this.array[index < 0 ? this.array.length + index : index] = this.$$mangle(value);
           return value;
         }
@@ -1335,12 +1335,12 @@ class VMArray extends REPR {
         }
 
         $$bindpos_n(index, value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
         }
 
         $$push_n(value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           this.array.push(value);
           return value;
         }
@@ -1379,12 +1379,12 @@ class VMArray extends REPR {
         }
 
         $$bindpos_s(index, value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           return this.array[index < 0 ? this.array.length + index : index] = value;
         }
 
         $$push_s(value) {
-          if (this._SC !== undefined) this.$$scwb();
+          if (this.$$SC !== undefined) this.$$scwb();
           this.array.push(value);
           return value;
         }
@@ -1525,7 +1525,7 @@ class VMHash extends REPR {
 
       $$bindkey(key, value) {
         this.content.set(key, value);
-        if (this._SC !== undefined) this.$$scwb();
+        if (this.$$SC !== undefined) this.$$scwb();
         return value;
       }
 
@@ -1538,7 +1538,7 @@ class VMHash extends REPR {
       }
 
       $$deletekey(key) {
-        if (this._SC !== undefined) this.$$scwb();
+        if (this.$$SC !== undefined) this.$$scwb();
         this.content.delete(key);
         return this;
       }
@@ -2505,7 +2505,7 @@ class WrappedJSObject extends REPR {
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
     ObjConstructor.prototype.$$STable = STable;
 
-    ObjConstructor.prototype._SC = undefined;
+    ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
 
     return ObjConstructor;
