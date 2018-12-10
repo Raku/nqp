@@ -224,7 +224,7 @@ class BinaryWriteCursor {
 
   objRef(ref) {
     const writerSc = this.writer.sc;
-    if (!ref._STable) {
+    if (!ref.$$STable) {
       throw new NQPException('trying to serialize an object without an STable');
     }
     if (!ref._SC) {
@@ -260,7 +260,7 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_NUM;
     } else if (ref instanceof NQPStr) {
       discrim = REFVAR_VM_STR;
-    } else if (ref._STable === BOOT.Array._STable) {
+    } else if (ref.$$STable === BOOT.Array.$$STable) {
       discrim = REFVAR_VM_ARR_VAR;
     } else if (ref instanceof Hash) {
       discrim = REFVAR_VM_HASH_STR_VAR;
@@ -316,7 +316,7 @@ class BinaryWriteCursor {
       case REFVAR_VM_ARR_INT:
       case REFVAR_VM_ARR_STR:
       case REFVAR_VM_ARR_VAR:
-        ref._STable.REPR.serialize(this, ref);
+        ref.$$STable.REPR.serialize(this, ref);
         break;
       case REFVAR_VM_HASH_STR_VAR:
         this.varint(ref.$$elems());
@@ -366,10 +366,10 @@ class SerializationWriter {
 
   serializeObject(obj) {
     /* Get index of SC that holds the STable and its index. */
-    if (!obj._STable) {
+    if (!obj.$$STable) {
       throw new NQPException(`Can't serialize an object without an STable`);
     }
-    const ref = this.getSTableRefInfo(obj._STable);
+    const ref = this.getSTableRefInfo(obj.$$STable);
     const sc = ref[0];
     const scIdx = ref[1];
 
@@ -391,10 +391,10 @@ class SerializationWriter {
 
     /* Delegate to its serialization REPR function. */
     if (!obj.$$typeObject) {
-      if (!obj._STable.REPR.serialize) {
-        console.trace(`don't know how to serialize ${obj._STable.REPR.name}`);
+      if (!obj.$$STable.REPR.serialize) {
+        console.trace(`don't know how to serialize ${obj.$$STable.REPR.name}`);
       } else {
-        obj._STable.REPR.serialize(this.objectsData, obj);
+        obj.$$STable.REPR.serialize(this.objectsData, obj);
       }
     }
   }
@@ -641,11 +641,11 @@ class SerializationWriter {
 
     this.paramInterns.int32(this.sc.rootObjects.indexOf(type));
 
-    if (type._STable._SC !== this.sc) {
+    if (type.$$STable._SC !== this.sc) {
       throw new NQPException('Serialization error: STable of parameterized type to intern not in current SC');
     }
 
-    this.paramInterns.int32(this.sc.rootSTables.indexOf(type._STable));
+    this.paramInterns.int32(this.sc.rootSTables.indexOf(type.$$STable));
 
     /* Write parameter count and parameter object refs. */
     this.paramInterns.int32(params.length);
@@ -828,7 +828,7 @@ class SerializationWriter {
 
       if (origIdx < 0) {
         throw 'Could not find object when writing repossessions; ' +
-          (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx]._STable.REPR.name);
+          (isST != 0 ? 'STable' : 'REPR = ' + this.sc.rootObjects[objIdx].$$STable.REPR.name);
       }
 
       /* Write table row. */
@@ -1003,7 +1003,7 @@ op.serialize = function(sc, sh) {
 
 op.serializetobuf = function(sc, sh, type) {
   const writer = new SerializationWriter(sc, sh.array);
-  const buffer = type._STable.REPR.allocate(type._STable);
+  const buffer = type.$$STable.REPR.allocate(type.$$STable);
   core.writeBuffer(buffer, writer.serialize());
   return buffer;
 };

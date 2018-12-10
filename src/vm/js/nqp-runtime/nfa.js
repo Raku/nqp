@@ -43,7 +43,7 @@ function convertState(thing) {
 
 // TODO think about type conversions of the stuff inside the array
 op.nfafromstatelist = /*async*/ function(ctx, rawStates, type) {
-  const nfa = type._STable.REPR.allocate(type._STable);
+  const nfa = type.$$STable.REPR.allocate(type.$$STable);
 
   nfa.fates = rawStates.$$toArray()[0];
 

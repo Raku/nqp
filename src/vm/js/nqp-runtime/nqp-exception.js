@@ -28,7 +28,7 @@ class NQPException extends Error {
 };
 
 const proto = NQPException.prototype; /* Avoid gjslint warning */
-proto._STable = {
+proto.$$STable = {
   HOW: {
     name: function(ctx, _NAMED, how, obj) {
       return 'BOOTException';

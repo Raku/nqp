@@ -55,7 +55,7 @@ const bignum = require('./bignum.js');
 function methodNotFoundError(ctx, obj, name) {
   const handler = ctx ? ctx.$$getHLL().get('method_not_found_error') : undefined;
   if (handler === undefined) {
-    throw new NQPException(`Cannot find method '${name}' on object of type ${obj._STable.debugName}`);
+    throw new NQPException(`Cannot find method '${name}' on object of type ${obj.$$STable.debugName}`);
   } else {
     return handler.$$call(ctx, null, obj, new NativeStrArg(name));
   }
@@ -69,10 +69,10 @@ function slotToAttr(slot) {
 class REPR {
   typeObjectFor(HOW) {
     const st = new sixmodel.STable(this, HOW);
-    this._STable = st;
+    this.$$STable = st;
 
     const obj = st.createTypeObject();
-    this._STable.WHAT = obj;
+    this.$$STable.WHAT = obj;
 
     return obj;
   }
@@ -110,7 +110,7 @@ class REPR {
 
 
       return /*async*/ function() {
-        const how = this._STable.HOW;
+        const how = this.$$STable.HOW;
 
         const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
 
@@ -127,7 +127,7 @@ class REPR {
     };
 
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
-    ObjConstructor.prototype._STable = STable;
+    ObjConstructor.prototype.$$STable = STable;
 
     ObjConstructor.prototype._SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
@@ -200,7 +200,7 @@ class REPRWithAttributes extends REPR {
         classKeyIndex++;
       }
     }
-    code += `default: throw new NQPException('P6opaque: no such attribute \\'' + attrName + '\\' in type ' + classHandle._STable.debugName + ' when trying to ${actionDescription}')`;
+    code += `default: throw new NQPException('P6opaque: no such attribute \\'' + attrName + '\\' in type ' + classHandle.$$STable.debugName + ' when trying to ${actionDescription}')`;
     code += '}\n}\n';
     STable.compileAccessor(name, code, setup);
   }
@@ -356,7 +356,7 @@ class P6opaque extends REPRWithAttributes {
   }
 
   serialize(cursor, obj) {
-    const flattened = obj._STable.REPR.flattenedSTables;
+    const flattened = obj.$$STable.REPR.flattenedSTables;
     if (!flattened) {
       throw 'Representation must be composed before it can be serialized';
     }
@@ -373,16 +373,16 @@ class P6opaque extends REPRWithAttributes {
   }
 
   changeType(obj, newType) {
-    if (!(newType._STable.REPR instanceof P6opaque)) {
+    if (!(newType.$$STable.REPR instanceof P6opaque)) {
       throw new NQPException(
-        `New type for ${obj._STable.debugName} must have a matching representation (P6opaque vs ${newType._STable.REPR.name})"`
+        `New type for ${obj.$$STable.debugName} must have a matching representation (P6opaque vs ${newType.$$STable.REPR.name})"`
       );
     }
 
-    const newREPR = newType._STable.REPR;
+    const newREPR = newType.$$STable.REPR;
 
     const newMapping = newREPR.nameToIndexMapping;
-    const currentMapping = obj._STable.REPR.nameToIndexMapping;
+    const currentMapping = obj.$$STable.REPR.nameToIndexMapping;
 
     /* Ensure the MRO prefixes match up. */
     let currentIndex = 0;
@@ -418,7 +418,7 @@ class P6opaque extends REPRWithAttributes {
       }
     }
 
-    Object.setPrototypeOf(obj, newType._STable.ObjConstructor.prototype);
+    Object.setPrototypeOf(obj, newType.$$STable.ObjConstructor.prototype);
   }
 
   compose(STable, reprInfoHash) {
@@ -462,33 +462,33 @@ class P6opaque extends REPRWithAttributes {
           const attrType = attr.get('type');
           /* old boxing method generation */
           if (attr.get('box_target')) {
-            const REPR = attrType._STable.REPR;
+            const REPR = attrType.$$STable.REPR;
             if (!this.unboxSlots) this.unboxSlots = [];
             this.unboxSlots.push({slot: curAttr, reprId: REPR.ID});
             if (!REPR.generateBoxingMethods) {
               console.log('we do not have a generateBoxingMethods');
               console.log(REPR.name);
             }
-            REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType._STable);
+            REPR.generateBoxingMethods(STable, slotToAttr(curAttr), attrType.$$STable);
           }
 
           slots.push(curAttr);
           names.push(attr.get('name').$$getStr());
 
-          if (attrType !== undefined && attrType !== Null && attrType._STable.REPR.flattenSTable) {
-            this.flattenedSTables.push(attrType._STable);
+          if (attrType !== undefined && attrType !== Null && attrType.$$STable.REPR.flattenSTable) {
+            this.flattenedSTables.push(attrType.$$STable);
           } else {
             this.flattenedSTables.push(null);
           }
 
           if (attr.get('positional_delegate')) {
             this.positionalDelegateSlot = curAttr;
-            this._STable.setPositionalDelegate(slotToAttr(this.positionalDelegateSlot));
+            this.$$STable.setPositionalDelegate(slotToAttr(this.positionalDelegateSlot));
           }
 
           if (attr.get('associative_delegate')) {
             this.associativeDelegateSlot = curAttr;
-            this._STable.setAssociativeDelegate(slotToAttr(this.associativeDelegateSlot));
+            this.$$STable.setAssociativeDelegate(slotToAttr(this.associativeDelegateSlot));
           }
 
           if (attr.get('auto_viv_container')) {
@@ -582,7 +582,7 @@ class P6opaque extends REPRWithAttributes {
     }
 
     STable.compileAccessor('$$setDefaults', 'function() {\n' + defaults + '}');
-    STable.compileAccessor('$$clone', 'function() {var cloned = new this._STable.ObjConstructor();' + clone + 'return cloned}');
+    STable.compileAccessor('$$clone', 'function() {var cloned = new this.$$STable.ObjConstructor();' + clone + 'return cloned}');
     STable.evalGatheredCode();
   }
 
@@ -1102,7 +1102,7 @@ class NFA extends REPR {
 reprs.NFA = NFA;
 
 function primType(type) {
-  return type !== Null ? (type._STable.REPR.boxedPrimitive()): 0;
+  return type !== Null ? (type.$$STable.REPR.boxedPrimitive()): 0;
 }
 
 // TODO rework VMArray to be more correct
@@ -1253,12 +1253,12 @@ class VMArray extends REPR {
     } else if (this.primType === 1 || this.primType === 4 || this.primType == 5) {
       let mangle;
       if (this.type !== Null) {
-        const repr = this.type._STable.REPR;
+        const repr = this.type.$$STable.REPR;
         if (repr instanceof P6int) {
-          const bits = this.type._STable.REPR.bits;
+          const bits = this.type.$$STable.REPR.bits;
           const shift = 32 - bits;
 
-          if (this.type._STable.REPR.isUnsigned) {
+          if (this.type.$$STable.REPR.isUnsigned) {
             mangle = function(value) {
               const trimmed = (value << shift >> shift);
               const ret = trimmed < 0 ? (1 << bits) + trimmed : trimmed;
@@ -2030,10 +2030,10 @@ class Decoder extends REPR {
           return Null;
         }
 
-        const buf = bufType._STable.REPR.allocate(bufType._STable);
+        const buf = bufType.$$STable.REPR.allocate(bufType.$$STable);
 
         const elementSize = core.byteSize(buf);
-        const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+        const isUnsigned = buf.$$STable.REPR.type.$$STable.REPR.isUnsigned;
 
 
         let offset = 0;
@@ -2085,7 +2085,7 @@ class MultiDimArray extends REPR {
       }
 
       $$clone() {
-        const clone = new this._STable.ObjConstructor();
+        const clone = new this.$$STable.ObjConstructor();
         clone.storage = this.storage.slice();
         clone.dimensions = this.dimensions;
         return clone;
@@ -2262,12 +2262,12 @@ class MultiDimArray extends REPR {
   }
 
   serialize(cursor, obj) {
-    for (let i = 0; i < obj._STable.dimensions; i++) {
+    for (let i = 0; i < obj.$$STable.dimensions; i++) {
       cursor.varint(obj.dimensions[i]);
     }
     const size = this.valuesSize(obj);
     for (let i = 0; i < size; i++) {
-      switch (obj._STable.primType) {
+      switch (obj.$$STable.primType) {
         case 0:
           cursor.ref(obj.storage[i]);
           break;
@@ -2286,13 +2286,13 @@ class MultiDimArray extends REPR {
 
   deserializeFinish(obj, data) {
     obj.dimensions = [];
-    for (let i = 0; i < obj._STable.dimensions; i++) {
+    for (let i = 0; i < obj.$$STable.dimensions; i++) {
       obj.dimensions[i] = data.varint();
     }
     const size = this.valuesSize(obj);
     obj.storage = [];
     for (let i = 0; i < size; i++) {
-      switch (obj._STable.primType) {
+      switch (obj.$$STable.primType) {
         case 0:
           obj.storage[i] = data.variant();
           break;
@@ -2330,7 +2330,7 @@ class NativeRef extends REPR {
   compose(STable, reprInfoHash) {
     const nativeref = reprInfoHash.content.get('nativeref').content;
     const type = nativeref.get('type');
-    this.primitiveType = type._STable.REPR.boxedPrimitive();
+    this.primitiveType = type.$$STable.REPR.boxedPrimitive();
     this.refkind = nativeref.get('refkind');
   }
 
@@ -2399,7 +2399,7 @@ class CREPR extends REPRWithAttributes {
 
           this.slotTypes[curAttr] = attrType;
 
-          if (!attrType._STable.REPR.asRefType) {
+          if (!attrType.$$STable.REPR.asRefType) {
             throw new NQPException(`CUnion: Can't use attr ${attr.get('name').$$getStr()} as CUnion attr`);
           }
 
@@ -2422,8 +2422,8 @@ class CREPR extends REPRWithAttributes {
   build(STable) {
     const refTypes = {};
     for (let slot = 0; slot < this.slotTypes.length; slot++) {
-      refTypes[slotToAttr(slot)] = this.slotTypes[slot]._STable.REPR.asRefType();
-      this.slotTypes[slot]._STable.REPR.generateRefAccessors(STable, this.slotTypes[slot]._STable, slot);
+      refTypes[slotToAttr(slot)] = this.slotTypes[slot].$$STable.REPR.asRefType();
+      this.slotTypes[slot].$$STable.REPR.generateRefAccessors(STable, this.slotTypes[slot].$$STable, slot);
     }
 
     this.UnionConstructor = this.createLowlevelConstructor(refTypes);
@@ -2503,7 +2503,7 @@ class WrappedJSObject extends REPR {
     };
 
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
-    ObjConstructor.prototype._STable = STable;
+    ObjConstructor.prototype.$$STable = STable;
 
     ObjConstructor.prototype._SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;

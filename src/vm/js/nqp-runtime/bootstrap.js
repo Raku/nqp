@@ -26,14 +26,14 @@ globalContext.initialize(context => context.scs['__6MODEL_CORE__'] = core);
 
 function addToScWithSt(obj) {
   core.rootObjects.push(obj);
-  core.rootSTables.push(obj._STable);
+  core.rootSTables.push(obj.$$STable);
   obj._SC = core;
-  obj._STable._SC = core;
+  obj.$$STable._SC = core;
 }
 
 /* Creates and installs the KnowHOWAttribute type. */
 function createKnowHOWAttribute() {
-  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW.$$STable.REPR.allocate(KnowHowHOW.$$STable);
 
   const r = new reprs.KnowHOWAttribute();
   const typeObj = r.typeObjectFor(metaObj);
@@ -43,19 +43,19 @@ function createKnowHOWAttribute() {
     return new NQPStr(self.__name);
   };
   methods['new'] = function(ctx, _NAMED, self) {
-    const attr = r.allocate(self._STable);
+    const attr = r.allocate(self.$$STable);
     attr.__name = _NAMED.name.$$getStr();
     attr.__type = _NAMED.type;
     attr.__boxTarget = _NAMED.box_target ? _NAMED.box_target.$$getInt() : 0;
     return attr;
   };
 
-  typeObj._STable.methodCache = new Map();
-  typeObj._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
+  typeObj.$$STable.methodCache = new Map();
+  typeObj.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   for (const method of Object.keys(methods)) {
-    typeObj._STable.ObjConstructor.prototype[method] = methods[method];
-    typeObj._STable.methodCache.set(method, wrapMethod(method, methods[method]));
+    typeObj.$$STable.ObjConstructor.prototype[method] = methods[method];
+    typeObj.$$STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
 
   return typeObj;
@@ -74,12 +74,12 @@ KnowHowHOW.__name = 'KnowHOW';
 
 addToScWithSt(KnowHowHOW);
 
-KnowHOW._STable.HOW = KnowHowHOW;
+KnowHOW.$$STable.HOW = KnowHowHOW;
 
-KnowHOW._STable.methodCache = new Map();
-KnowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
-KnowHowHOW._STable.methodCache = new Map();
-KnowHowHOW._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
+KnowHOW.$$STable.methodCache = new Map();
+KnowHOW.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
+KnowHowHOW.$$STable.methodCache = new Map();
+KnowHowHOW.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
 function wrapMethod(name, method) {
   const codeRef = new CodeRef(name, undefined);
@@ -89,12 +89,12 @@ function wrapMethod(name, method) {
 function addKnowhowHowMethod(name, method) {
   /* TODO - think if setting the object cache would be better */
 
-  KnowHowHOW._STable.ObjConstructor.prototype[name] = method;
-  KnowHOW._STable.ObjConstructor.prototype[name] = method;
+  KnowHowHOW.$$STable.ObjConstructor.prototype[name] = method;
+  KnowHOW.$$STable.ObjConstructor.prototype[name] = method;
 
   const wrapped = wrapMethod(name, method);
-  KnowHOW._STable.methodCache.set(name, wrapped);
-  KnowHowHOW._STable.methodCache.set(name, wrapped);
+  KnowHOW.$$STable.methodCache.set(name, wrapped);
+  KnowHowHOW.$$STable.methodCache.set(name, wrapped);
 }
 
 addKnowhowHowMethod('name', function(ctx, _NAMED, self) {
@@ -111,7 +111,7 @@ addKnowhowHowMethod('methods', function(ctx, _NAMED, self) {
 
 addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
   /* We first create a new HOW instance. */
-  const HOW = self._STable.REPR.allocate(self._STable);
+  const HOW = self.$$STable.REPR.allocate(self.$$STable);
 
   /* See if we have a representation name; if not default to P6opaque. */
   const reprName = (_NAMED && _NAMED.repr) ? _NAMED.repr.$$getStr() : 'P6opaque';
@@ -129,7 +129,7 @@ addKnowhowHowMethod('new_type', function(ctx, _NAMED, self) {
   }
 
   /* Set .WHO to an empty hash. */
-  typeObject._STable.WHO = new Hash();
+  typeObject.$$STable.WHO = new Hash();
 
   return typeObject;
 });
@@ -144,12 +144,12 @@ addKnowhowHowMethod('add_method', function(ctx, _NAMED, self, type, name, code) 
 
 addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
   /* Set method cache */
-  typeObject._STable.setMethodCache(self.__methods.content);
-  typeObject._STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
+  typeObject.$$STable.setMethodCache(self.__methods.content);
+  typeObject.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   /* Set type check cache. */
 
-  typeObject._STable.typeCheckCache = [typeObject];
+  typeObject.$$STable.typeCheckCache = [typeObject];
 
   /* Use any attribute information to produce attribute protocol
      * data. The protocol consists of an array... */
@@ -188,7 +188,7 @@ addKnowhowHowMethod('compose', function(ctx, _NAMED, self, typeObject) {
 
 
   /* Compose the representation using it. */
-  typeObject._STable.REPR.compose(typeObject._STable, reprInfoHash);
+  typeObject.$$STable.REPR.compose(typeObject.$$STable, reprInfoHash);
 
   return typeInfo;
 });
@@ -205,7 +205,7 @@ module.exports.knowhowattr = KnowHOWAttribute;
 addToScWithSt(KnowHOWAttribute);
 
 function bootType(typeName, reprName) {
-  const metaObj = KnowHowHOW._STable.REPR.allocate(KnowHowHOW._STable);
+  const metaObj = KnowHowHOW.$$STable.REPR.allocate(KnowHowHOW.$$STable);
   metaObj.__name = typeName;
 
   const typeObj = (new reprs[reprName]).typeObjectFor(metaObj);
@@ -220,15 +220,15 @@ function bootType(typeName, reprName) {
 
 function bootArray(type) {
   const array = bootType('BOOTArray', 'VMArray');
-  array._STable.REPR.type = Null;
-  array._STable.REPR.primType = type;
-  array._STable.REPR.setupSTableWhenComposed(array._STable);
-  array._STable.setboolspec(8, Null);
+  array.$$STable.REPR.type = Null;
+  array.$$STable.REPR.primType = type;
+  array.$$STable.REPR.setupSTableWhenComposed(array.$$STable);
+  array.$$STable.setboolspec(8, Null);
   return array;
 }
 
 BOOT.Array = bootArray(0);
-BOOT.Array._STable.hllRole = 4;
+BOOT.Array.$$STable.hllRole = 4;
 
 BOOT.IntArray = bootArray(1);
 BOOT.NumArray = bootArray(2);

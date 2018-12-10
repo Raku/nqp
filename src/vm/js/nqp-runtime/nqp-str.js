@@ -31,7 +31,7 @@ class NQPStr extends NQPObject {
   }
 };
 
-NQPStr.prototype._STable = new FakeStable('NQPStr');
-NQPStr.prototype._STable.hllRole = 1;
+NQPStr.prototype.$$STable = new FakeStable('NQPStr');
+NQPStr.prototype.$$STable.hllRole = 1;
 
 module.exports = NQPStr;

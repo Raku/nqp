@@ -131,8 +131,8 @@ class NativeRef {
             // HACK - nqp still uses NQPInt instead of the thing in the hll config
             return new NQPInt(this.get());
           } else {
-            const repr = type._STable.REPR;
-            const obj = repr.allocate(type._STable);
+            const repr = type.$$STable.REPR;
+            const obj = repr.allocate(type.$$STable);
             obj.$$setInt(this.get());
             return obj;
           }
@@ -183,8 +183,8 @@ class NativeRef {
             // HACK - nqp still uses raw javascript numbers instead of the thing in the hll config
             return this.get();
           } else {
-            const repr = type._STable.REPR;
-            const obj = repr.allocate(type._STable);
+            const repr = type.$$STable.REPR;
+            const obj = repr.allocate(type.$$STable);
             obj.$$setNum(this.get());
             return obj;
           }
@@ -239,8 +239,8 @@ class NativeRef {
             // HACK - nqp still uses raw javascript strings instead of the thing in the hll config
             return this.get();
           } else {
-            const repr = type._STable.REPR;
-            const obj = repr.allocate(type._STable);
+            const repr = type.$$STable.REPR;
+            const obj = repr.allocate(type.$$STable);
             obj.$$setStr(this.get());
             return obj;
           }
@@ -296,8 +296,8 @@ class NativeRef {
 
           const type = hll.get('int_box');
 
-          const repr = type._STable.REPR;
-          const obj = repr.allocate(type._STable);
+          const repr = type.$$STable.REPR;
+          const obj = repr.allocate(type.$$STable);
           obj.$$setInt64(this.get());
           return obj;
         }

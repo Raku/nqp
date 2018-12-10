@@ -89,14 +89,14 @@ class Ctx extends NQPObject {
 
   controlException(category) {
     const exType = BOOT.Exception;
-    const exception = exType._STable.REPR.allocate(exType._STable);
+    const exception = exType.$$STable.REPR.allocate(exType.$$STable);
     exception.$$category = category;
     return this.propagateControlException(exception);
   }
 
   controlExceptionLabeled(label, category) {
     const exType = BOOT.Exception;
-    const exception = exType._STable.REPR.allocate(exType._STable);
+    const exception = exType.$$STable.REPR.allocate(exType.$$STable);
     exception.$$category = category | LABELED;
     exception.$$payload = label;
     return this.propagateControlException(exception);
@@ -259,7 +259,7 @@ class Ctx extends NQPObject {
 
   /*async*/ $$throwLexicalException(lookFrom, category, payload) {
     const exType = BOOT.Exception;
-    const exception = exType._STable.REPR.allocate(exType._STable);
+    const exception = exType.$$STable.REPR.allocate(exType.$$STable);
 
     exception.$$category = category;
     exception.$$payload = payload;

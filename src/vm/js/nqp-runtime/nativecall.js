@@ -75,24 +75,24 @@ op.nativecall = function(returns, callObject, args) {
     if (ret === null) {
       return returns;
     } else {
-      const boxed = returns._STable.REPR.allocate(returns._STable);
+      const boxed = returns.$$STable.REPR.allocate(returns.$$STable);
       boxed.$$setStr(ret);
       return boxed;
     }
   } else if (callObject.$$ret === 'cpointer') {
-      const boxed = returns._STable.REPR.allocate(returns._STable);
+      const boxed = returns.$$STable.REPR.allocate(returns.$$STable);
       boxed.$$setPointer(ret);
       return boxed;
   } else if (callObject.$$ret in shortInts) {
-      const boxed = returns._STable.REPR.allocate(returns._STable);
+      const boxed = returns.$$STable.REPR.allocate(returns.$$STable);
       boxed.$$setInt(ret);
       return boxed;
   } else if (callObject.$$ret in longInts) {
-      const boxed = returns._STable.REPR.allocate(returns._STable);
+      const boxed = returns.$$STable.REPR.allocate(returns.$$STable);
       boxed.$$setBignum(JSBI.BigInt(ret));
       return boxed;
   } else if (callObject.$$ret in floats) {
-      const boxed = returns._STable.REPR.allocate(returns._STable);
+      const boxed = returns.$$STable.REPR.allocate(returns.$$STable);
       boxed.$$setNum(ret);
       return boxed;
   } else {
@@ -102,8 +102,8 @@ op.nativecall = function(returns, callObject, args) {
 };
 
 op.nativecallsizeof = function(obj) {
-  if (obj._STable.REPR.nativeCallSize) {
-    return obj._STable.REPR.nativeCallSize();
+  if (obj.$$STable.REPR.nativeCallSize) {
+    return obj.$$STable.REPR.nativeCallSize();
   } else {
     throw new NQPException('can\'t do nativecallsizeof');
   }

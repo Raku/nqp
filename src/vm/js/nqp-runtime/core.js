@@ -66,7 +66,7 @@ const nullStr = require('./null_s.js');
 exports.CodeRef = CodeRef;
 
 op.isinvokable = function(obj) {
-  return (obj instanceof CodeRef || (obj._STable && obj._STable.invocationSpec) ? 1 : 0);
+  return (obj instanceof CodeRef || (obj.$$STable && obj.$$STable.invocationSpec) ? 1 : 0);
 };
 
 op.escape = function(str) {
@@ -180,7 +180,7 @@ op.radix = function(currentHLL, radix, str, zpos, flags) {
 };
 
 op.setdebugtypename = function(type, debugName) {
-  type._STable.debugName = debugName;
+  type.$$STable.debugName = debugName;
   return type;
 };
 
@@ -201,8 +201,8 @@ const intToObj = exports.intToObj = function(currentHLL, i) {
   if (!type) {
     return new NQPInt(i);
   } else {
-    const repr = type._STable.REPR;
-    const obj = repr.allocate(type._STable);
+    const repr = type.$$STable.REPR;
+    const obj = repr.allocate(type.$$STable);
     obj.$$setInt(i);
     return obj;
   }
@@ -213,8 +213,8 @@ exports.int64ToObj = function(currentHLL, i) {
   if (!type) {
     throw new NQPException(`Can't box 64 bit integer: HLL doesn't have int_box`);
   } else {
-    const repr = type._STable.REPR;
-    const obj = repr.allocate(type._STable);
+    const repr = type.$$STable.REPR;
+    const obj = repr.allocate(type.$$STable);
     obj.$$setInt64(i);
     return obj;
   }
@@ -225,8 +225,8 @@ const numToObj = exports.numToObj = function(currentHLL, n) {
   if (!type) {
     return new NQPNum(n);
   } else {
-    const repr = type._STable.REPR;
-    const obj = repr.allocate(type._STable);
+    const repr = type.$$STable.REPR;
+    const obj = repr.allocate(type.$$STable);
     obj.$$setNum(n);
     return obj;
   }
@@ -237,8 +237,8 @@ const strToObj = exports.strToObj = function(currentHLL, s) {
   if (!type) {
     return new NQPStr(s);
   } else {
-    const repr = type._STable.REPR;
-    const obj = repr.allocate(type._STable);
+    const repr = type.$$STable.REPR;
+    const obj = repr.allocate(type.$$STable);
     obj.$$setStr(s);
     return obj;
   }
@@ -294,11 +294,11 @@ exports.named = function(parts) {
 };
 
 exports.op.ishash = function(obj) {
-  return obj instanceof Hash || (obj._STable && obj._STable.REPR instanceof reprs.VMHash) ? 1 : 0;
+  return obj instanceof Hash || (obj.$$STable && obj.$$STable.REPR instanceof reprs.VMHash) ? 1 : 0;
 };
 
 op.create = function(obj) {
-  return obj._STable.REPR.allocate(obj._STable);
+  return obj.$$STable.REPR.allocate(obj.$$STable);
 };
 
 op.bootarray = function() {
@@ -315,13 +315,13 @@ op.defined = function(obj) {
 
 
 op.setinvokespec = function(obj, classHandle, attrName, invocationHandler) {
-  obj._STable.setinvokespec(classHandle, attrName, invocationHandler);
+  obj.$$STable.setinvokespec(classHandle, attrName, invocationHandler);
   return obj;
 };
 
 // Stub
 op.setboolspec = function(obj, mode, method) {
-  obj._STable.setboolspec(mode, method);
+  obj.$$STable.setboolspec(mode, method);
   return obj;
 };
 
@@ -376,14 +376,14 @@ op.getcodeobj = function(codeRef) {
 };
 
 op.settypecache = function(obj, cache) {
-  obj._STable.typeCheckCache = cache.array;
-  if (obj._STable._SC !== undefined) obj._STable.scwb();
+  obj.$$STable.typeCheckCache = cache.array;
+  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
 op.settypecheckmode = function(obj, mode) {
   const TYPE_CHECK_CACHE_FLAG_MASK = 3;
-  obj._STable.modeFlags = mode | (obj.STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
+  obj.$$STable.modeFlags = mode | (obj.STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
   return obj;
 };
 
@@ -391,24 +391,24 @@ op.setmethcache = function(obj, cache) {
   if (!cache instanceof Hash) {
     console.log('we expect a hash here');
   }
-  obj._STable.setMethodCache(cache.content);
-  if (obj._STable._SC !== undefined) obj._STable.scwb();
+  obj.$$STable.setMethodCache(cache.content);
+  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
 op.setmethcacheauth = function(obj, isAuth) {
   if (isAuth) {
-    obj._STable.modeFlags |= constants.METHOD_CACHE_AUTHORITATIVE;
+    obj.$$STable.modeFlags |= constants.METHOD_CACHE_AUTHORITATIVE;
   } else {
-    obj._STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
+    obj.$$STable.modeFlags &= ~constants.METHOD_CACHE_AUTHORITATIVE;
   }
-  if (obj._STable._SC !== undefined) obj._STable.scwb();
+  if (obj.$$STable._SC !== undefined) obj.$$STable.scwb();
   return obj;
 };
 
 op.reprname = function(obj) {
-  if (obj._STable) {
-    return obj._STable.REPR.name;
+  if (obj.$$STable) {
+    return obj.$$STable.REPR.name;
   } else if (obj instanceof Capture) {
     return 'MVMCallCapture';
   } else if (obj instanceof NQPInt) {
@@ -435,7 +435,7 @@ op.newtype = function(how, repr) {
 op.findmethod = /*async*/ function(ctx, obj, name) {
   const method = /*await*/ sixmodel.findMethod(ctx, obj, name);
   if (method === Null) {
-    throw new NQPException(`Cannot find method '${name}' on object of type '${obj._STable.debugName}'`);
+    throw new NQPException(`Cannot find method '${name}' on object of type '${obj.$$STable.debugName}'`);
   }
   return method;
 };
@@ -454,18 +454,18 @@ op.setcodename = function(code, name) {
 };
 
 op.rebless = function(obj, newType) {
-  obj._STable.REPR.changeType(obj, newType);
+  obj.$$STable.REPR.changeType(obj, newType);
   if (obj._SC !== undefined) obj.$$scwb();
   return obj;
 };
 
 op.composetype = function(obj, reprinfo) {
-  obj._STable.REPR.compose(obj._STable, reprinfo);
+  obj.$$STable.REPR.compose(obj.$$STable, reprinfo);
 };
 
 let whereCounter = 0;
 op.where = function(obj) {
-  if (obj._STable || obj instanceof CodeRef || obj === Null || obj instanceof NQPInt) { // HACK
+  if (obj.$$STable || obj instanceof CodeRef || obj === Null || obj instanceof NQPInt) { // HACK
     if (!obj._WHERE) {
       obj._WHERE = ++whereCounter;
     }
@@ -492,8 +492,8 @@ op.curlexpad = function(get, set) {
 
 op.setcontspec = function(type, specType, conf) {
   if (containerSpecs[specType]) {
-    type._STable.containerSpec = new containerSpecs[specType](type._STable);
-    type._STable.containerSpec.configure(conf);
+    type.$$STable.containerSpec = new containerSpecs[specType](type.$$STable);
+    type.$$STable.containerSpec.configure(conf);
   } else {
     throw 'NYI cont spec: ' + specType;
   }
@@ -528,8 +528,8 @@ op.isrwcont = function(cont) {
 };
 
 op.box_n = function(n, type) {
-  const repr = type._STable.REPR;
-  const obj = repr.allocate(type._STable);
+  const repr = type.$$STable.REPR;
+  const obj = repr.allocate(type.$$STable);
   obj.$$setNum(n);
   return obj;
 };
@@ -539,8 +539,8 @@ op.unbox_n = function(obj) {
 };
 
 op.box_s = function(value, type) {
-  const repr = type._STable.REPR;
-  const obj = repr.allocate(type._STable);
+  const repr = type.$$STable.REPR;
+  const obj = repr.allocate(type.$$STable);
   obj.$$setStr(value);
   return obj;
 };
@@ -551,8 +551,8 @@ op.unbox_s = function(obj) {
 
 
 op.box_i = function(i, type) {
-  const repr = type._STable.REPR;
-  const obj = repr.allocate(type._STable);
+  const repr = type.$$STable.REPR;
+  const obj = repr.allocate(type.$$STable);
   obj.$$setInt(i);
   return obj;
 };
@@ -656,7 +656,7 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
       return new NativeNumArg(obj);
     } else {
       const type = HLL.get('int_box');
-      const boxed = type._STable.REPR.allocate(type._STable);
+      const boxed = type.$$STable.REPR.allocate(type.$$STable);
       boxed.$$setInt(obj);
       return boxed;
     }
@@ -667,7 +667,7 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
       return new NativeStrArg(obj);
     } else {
       const type = HLL.get('str_box');
-      const boxed = type._STable.REPR.allocate(type._STable);
+      const boxed = type.$$STable.REPR.allocate(type.$$STable);
       boxed.$$setStr(obj);
       return boxed;
     }
@@ -677,7 +677,7 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
     return obj;
   } else {
     const type = HLL.get('js_box');
-    const wrapped = type._STable.REPR.allocate(type._STable);
+    const wrapped = type.$$STable.REPR.allocate(type.$$STable);
     wrapped.$$jsObject = obj;
     return wrapped;
   }
@@ -723,7 +723,7 @@ function toJSWithCtx(ctx, obj) {
       }
       return returnValueToJSWithCtx(ctx, obj.$$apply(converted));
     };
-  } else if (obj._STable === BOOT.StrArray._STable) {
+  } else if (obj.$$STable === BOOT.StrArray.$$STable) {
     return obj.array;
   } else {
     throw new NQPException(`Can't pass object to js`);
@@ -971,8 +971,8 @@ class FakePerl6HOW extends NQPObject {
     }
 }
 
-FakePerl6.prototype._STable = {};
-FakePerl6.prototype._STable.HOW = new FakePerl6HOW;
+FakePerl6.prototype.$$STable = {};
+FakePerl6.prototype.$$STable.HOW = new FakePerl6HOW;
 
 const fakePerl6 = new FakePerl6();
 
@@ -1055,15 +1055,15 @@ op.setpayload = function(exception, payload) {
 };
 
 op.isnum = function(value) {
-  return (value instanceof NQPNum || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
+  return (value instanceof NQPNum || (value.$$STable && value.$$STable.REPR instanceof reprs.P6int)) ? 1 : 0;
 };
 
 op.isint = function(value) {
-  return (value instanceof NQPInt || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
+  return (value instanceof NQPInt || (value.$$STable && value.$$STable.REPR instanceof reprs.P6int)) ? 1 : 0;
 };
 
 op.isstr = function(value) {
-  return (value instanceof NQPStr || (value._STable && value._STable.REPR instanceof reprs.P6int)) ? 1 : 0;
+  return (value instanceof NQPStr || (value.$$STable && value.$$STable.REPR instanceof reprs.P6int)) ? 1 : 0;
 };
 
 function renameEncoding(encoding) {
@@ -1079,7 +1079,7 @@ exports.isKnownEncoding = isKnownEncoding;
 
 
 function byteSize(buf) {
-  const bits = buf._STable.REPR.type._STable.REPR.bits;
+  const bits = buf.$$STable.REPR.type.$$STable.REPR.bits;
 
   if (bits % 8) {
     throw 'only buffer sizes that are a multiple of 8 are supported';
@@ -1092,7 +1092,7 @@ exports.byteSize = byteSize;
 
 function writeBuffer(highLevel, lowLevel) {
   const elementSize = byteSize(highLevel);
-  const isUnsigned = highLevel._STable.REPR.type._STable.REPR.isUnsigned;
+  const isUnsigned = highLevel.$$STable.REPR.type.$$STable.REPR.isUnsigned;
 
   let offset = 0;
   for (let i = 0; i < lowLevel.length / elementSize; i++) {
@@ -1154,7 +1154,7 @@ op.encoderep = function(str, encoding, replacement, output) {
 
 function toRawBuffer(buf) {
   const elementSize = byteSize(buf);
-  const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+  const isUnsigned = buf.$$STable.REPR.type.$$STable.REPR.isUnsigned;
   const array = buf.array;
 
   const buffer = Buffer.allocUnsafe(array.length * elementSize);
@@ -1250,7 +1250,7 @@ op.objprimspec = function(obj) {
     } else if (obj instanceof NQPStr) {
       return 3;
     } else {
-      return (obj._STable && obj._STable.REPR.boxedPrimitive ? obj._STable.REPR.boxedPrimitive() : 0);
+      return (obj.$$STable && obj.$$STable.REPR.boxedPrimitive ? obj.$$STable.REPR.boxedPrimitive() : 0);
     }
   } else {
     throw new NQPException(`objprimspec can't handle things of type: ${typeof obj}`);
@@ -1258,16 +1258,16 @@ op.objprimspec = function(obj) {
 };
 
 op.objprimbits = function(type) {
-  return type._STable.REPR.bits;
+  return type.$$STable.REPR.bits;
 };
 
 op.objprimunsigned = function(type) {
-  return type._STable.REPR.isUnsigned ? 1 : 0;
+  return type.$$STable.REPR.isUnsigned ? 1 : 0;
 };
 
 /* Parametricity operations. */
 op.setparameterizer = function(ctx, type, parameterizer) {
-  const st = type._STable;
+  const st = type.$$STable;
   /* Ensure that the type is not already parametric or parameterized. */
   if (st.parameterizer) {
     throw new NQPException('This type is already parametric');
@@ -1288,7 +1288,7 @@ op.setparameterizer = function(ctx, type, parameterizer) {
 
 op.parameterizetype = /*async*/ function(ctx, type, params) {
   /* Ensure we have a parametric type. */
-  const st = type._STable;
+  const st = type.$$STable;
   if (!st.parameterizer) {
     throw new NQPException('This type is not parametric');
   }
@@ -1302,7 +1302,7 @@ op.parameterizetype = /*async*/ function(ctx, type, params) {
 
   const result = /*await*/ st.parameterizer.$$call(ctx, {}, st.WHAT, params);
 
-  const newSTable = result._STable;
+  const newSTable = result.$$STable;
   newSTable.parametricType = type;
   newSTable.parameters = params;
   newSTable.modeFlags |= constants.PARAMETERIZED_TYPE;
@@ -1357,7 +1357,7 @@ op.isnanorinf = function(n) {
 };
 
 function typeparameters(ctx, type) {
-  const st = type._STable;
+  const st = type.$$STable;
   if (!st.parametricType) {
     throw new NQPException('This type is not parameterized');
   }
@@ -1372,7 +1372,7 @@ op.typeparameterat = function(ctx, type, idx) {
 };
 
 op.typeparameterized = function(type) {
-  const st = type._STable;
+  const st = type.$$STable;
   return st.parametricType ? st.parametricType : Null;
 };
 
@@ -1534,12 +1534,12 @@ op.setdimensions = function(array, dimensions) {
 /* TODO HLL support */
 op.newexception = function() {
   const exType = BOOT.Exception;
-  return exType._STable.REPR.allocate(exType._STable);
+  return exType.$$STable.REPR.allocate(exType.$$STable);
 };
 
 op.throwextype = function(ctx, category) {
   const exType = BOOT.Exception;
-  const ex = exType._STable.REPR.allocate(exType._STable);
+  const ex = exType.$$STable.REPR.allocate(exType.$$STable);
   ex.$$category = category;
   return ctx.throw(ex);
 };
@@ -1662,8 +1662,8 @@ op.backtracestrings = function(currentHLL, exception) {
 };
 
 op.hintfor = function(classHandle, attrName) {
-  if (!classHandle._STable.REPR.hintfor) return -1;
-  return classHandle._STable.REPR.hintfor(classHandle, attrName);
+  if (!classHandle.$$STable.REPR.hintfor) return -1;
+  return classHandle.$$STable.REPR.hintfor(classHandle, attrName);
 };
 
 op.ctxcaller = function(ctx) {
@@ -1844,7 +1844,7 @@ op.codes = function(str) {
 };
 
 op.islist = function(list) {
-  return (list._STable && list._STable.REPR instanceof reprs.VMArray) ? 1 : 0;
+  return (list.$$STable && list.$$STable.REPR instanceof reprs.VMArray) ? 1 : 0;
 };
 
 op.split = function(currentHLL, separator, string) {
@@ -1884,7 +1884,7 @@ op.pow_n = function(base, exponent) {
 
 op.getlockcondvar = function(lock, type) {
   // STUB
-  return type._STable.REPR.allocate(type._STable);
+  return type.$$STable.REPR.allocate(type.$$STable);
 };
 
 op.condwait = function(cv) {
@@ -1980,7 +1980,7 @@ const getrusage = null; //require('qrusage');
 op.getrusage = function() {
   throw 'getrusage is currently broken';
   const usage = getrusage();
-  const stable = BOOT.IntArray._STable;
+  const stable = BOOT.IntArray.$$STable;
   const utime_sec = Math.floor(usage.utime);
   const utime_usec = (usage.utime - Math.floor(usage.utime)) * 1000000;
 

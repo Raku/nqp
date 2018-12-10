@@ -227,7 +227,7 @@ class FileHandle extends IOHandle {
   }
 
   $$readfh(buf, bytes) {
-    const isUnsigned = buf._STable.REPR.type._STable.REPR.isUnsigned;
+    const isUnsigned = buf.$$STable.REPR.type.$$STable.REPR.isUnsigned;
     const buffer = Buffer.allocUnsafe(bytes);
     const read = fs.readSync(this.fd, buffer, 0, bytes, null);
     if (read === 0) {
@@ -489,9 +489,9 @@ op.rename = function(oldPath, newPath) {
 function wrapBuffer(buffer, type) {
   const elementSize = core.byteSize(type);
 
-  const isUnsigned = type._STable.REPR.type._STable.REPR.isUnsigned;
+  const isUnsigned = type.$$STable.REPR.type.$$STable.REPR.isUnsigned;
 
-  const wrapped = type._STable.REPR.allocate(type._STable);
+  const wrapped = type.$$STable.REPR.allocate(type.$$STable);
 
   let offset = 0;
   for (let i = 0; i < buffer.length / elementSize; i++) {

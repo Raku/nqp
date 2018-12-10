@@ -432,7 +432,7 @@ class BinaryCursor {
         params[i] = this.variant();
       }
 
-      const ptable = STable.parametricType._STable;
+      const ptable = STable.parametricType.$$STable;
 
       if (!ptable.parameterizerCache) {
         ptable.parameterizerCache = [];
@@ -753,7 +753,7 @@ class BinaryCursor {
         continue;
       }
       if (objects[i].isConcrete) {
-        const repr = this.sc.rootObjects[i]._STable.REPR;
+        const repr = this.sc.rootObjects[i].$$STable.REPR;
         if (repr.deserializeFinish) {
           this.sc.currentObject = this.sc.rootObjects[i];
           repr.deserializeFinish(this.sc.rootObjects[i], objects[i].data);
@@ -784,7 +784,7 @@ class BinaryCursor {
       if (entry.type === 0) {
         const origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
         if (origObj._SC !== this.sc.deps[entry.origSC]) {
-          const backup = origObj.$$typeObject ? origObj._STable.createTypeObject() : origObj.$$clone();
+          const backup = origObj.$$typeObject ? origObj.$$STable.createTypeObject() : origObj.$$clone();
           conflicts.$$push(backup);
           conflicts.$$push(origObj);
         }
@@ -799,7 +799,7 @@ class BinaryCursor {
          * repossession (perhaps due to mixing in to it), so put the
          * STable it should now have in place. */
 
-        if (STableForObj !== origObj._STable) {
+        if (STableForObj !== origObj.$$STable) {
           Object.setPrototypeOf(origObj, STableForObj.ObjConstructor.prototype);
         }
       }
@@ -851,20 +851,20 @@ class BinaryCursor {
         params.push(data.objRef(true));
       }
 
-      const ptypeSTableIndex = this.sc.rootSTables.indexOf(ptype._STable);
+      const ptypeSTableIndex = this.sc.rootSTables.indexOf(ptype.$$STable);
       if (ptypeSTableIndex !== -1) {
         if (this.sc.rootSTables[ptypeSTableIndex].HOW === undefined) {
           STables[ptypeSTableIndex][1].stable(this.sc.rootSTables[ptypeSTableIndex]);
         }
       }
 
-      const matching = ptype._STable.lookupParametric(params);
+      const matching = ptype.$$STable.lookupParametric(params);
 
       /* Try to find a matching parameterization. */
       if (matching) {
         this.sc.rootObjects[typeIdx] = matching;
         this.sc.rootObjects[typeIdx].$$avoid = 1;
-        this.sc.rootSTables[stIdx] = matching._STable;
+        this.sc.rootSTables[stIdx] = matching.$$STable;
         this.sc.rootSTables[stIdx].$$avoid = 1;
       }
     }

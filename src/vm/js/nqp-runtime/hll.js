@@ -37,11 +37,11 @@ op.hllizefor = function(ctx, obj, language) {
   const languageHash = getHLL(language);
   const config = languageHash;
   let role;
-  if (obj !== null && obj._STable) {
-    if (obj._STable.hllOwner === languageHash) {
+  if (obj !== null && obj.$$STable) {
+    if (obj.$$STable.hllOwner === languageHash) {
       return obj;
     }
-    if (!(role = obj._STable.hllRole)) {
+    if (!(role = obj.$$STable.hllRole)) {
       return obj;
     }
   }
@@ -63,20 +63,20 @@ op.hllizefor = function(ctx, obj, language) {
   // TODO handle already boxed ones
   } else if (obj instanceof NQPInt) {
     const foreignTypeInt = config.get('foreign_type_int');
-    const repr = foreignTypeInt._STable.REPR;
-    const boxed = repr.allocate(foreignTypeInt._STable);
+    const repr = foreignTypeInt.$$STable.REPR;
+    const boxed = repr.allocate(foreignTypeInt.$$STable);
     boxed.$$setInt(obj.value);
     return boxed;
   } else if (obj instanceof NQPNum) {
     const foreignTypeNum = config.get('foreign_type_num');
-    const repr = foreignTypeNum._STable.REPR;
-    const boxed = repr.allocate(foreignTypeNum._STable);
+    const repr = foreignTypeNum.$$STable.REPR;
+    const boxed = repr.allocate(foreignTypeNum.$$STable);
     boxed.$$setNum(obj.value);
     return boxed;
   } else if (obj instanceof NQPStr) {
     const foreignTypeStr = config.get('foreign_type_str');
-    const repr = foreignTypeStr._STable.REPR;
-    const boxed = repr.allocate(foreignTypeStr._STable);
+    const repr = foreignTypeStr.$$STable.REPR;
+    const boxed = repr.allocate(foreignTypeStr.$$STable);
     boxed.$$setStr(obj.value);
     return boxed;
   } else if (obj === Null) {
@@ -120,23 +120,23 @@ op.sethllconfig = function(language, configHash) {
 
 
 op.settypehll = function(type, language) {
-  type._STable.hllOwner = getHLL(language);
+  type.$$STable.hllOwner = getHLL(language);
   return type;
 };
 
 op.settypehllrole = function(type, role) {
-  type._STable.hllRole = role;
+  type.$$STable.hllRole = role;
   return type;
 };
 
 exports.slurpyArray = function(currentHLL, array) {
   const slurpyArray = currentHLL.get('slurpy_array');
-  return slurpyArray._STable.REPR.allocateFromArray(slurpyArray._STable, array);
+  return slurpyArray.$$STable.REPR.allocateFromArray(slurpyArray.$$STable, array);
 };
 
 exports.list = function(currentHLL, array) {
   const list = currentHLL.get('list');
-  return list._STable.REPR.allocateFromArray(list._STable, array);
+  return list.$$STable.REPR.allocateFromArray(list.$$STable, array);
 };
 
 op.hllbool = function(currentHLL, value) {

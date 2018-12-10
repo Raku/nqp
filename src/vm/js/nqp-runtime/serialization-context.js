@@ -45,9 +45,9 @@ class SerializationContext extends NQPObject {
 
   setObj(idx, obj) {
     this.rootObjects[idx] = obj;
-    if (!obj._STable._SC) {
-      this.rootSTables.push(obj._STable);
-      obj._STable._SC = this;
+    if (!obj.$$STable._SC) {
+      this.rootSTables.push(obj.$$STable);
+      obj.$$STable._SC = this;
     }
   }
 

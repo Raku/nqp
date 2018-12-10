@@ -22,13 +22,13 @@ function intishBool(b) {
 }
 
 function makeNum(type, num) {
-  const instance = type._STable.REPR.allocate(type._STable);
+  const instance = type.$$STable.REPR.allocate(type.$$STable);
   instance.$$setNum(num);
   return instance;
 }
 
 function makeBI(type, num) {
-  const instance = type._STable.REPR.allocate(type._STable);
+  const instance = type.$$STable.REPR.allocate(type.$$STable);
   instance.$$setBignum(num);
   return instance;
 }

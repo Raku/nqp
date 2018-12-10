@@ -262,7 +262,7 @@ op.setdispatcherfor = function(dispatcher, dispatcherFor) {
   let spec;
   if (dispatcherFor instanceof CodeRef) {
     exports.currentDispatcherFor = dispatcherFor;
-  } else if (spec = dispatcherFor._STable.invocationSpec) {
+  } else if (spec = dispatcherFor.$$STable.invocationSpec) {
     if (spec.classHandle) {
       exports.currentDispatcherFor = dispatcherFor.$$getattr(spec.classHandle, spec.attrName);
     } else {
@@ -310,7 +310,7 @@ exports.toNum = /*async*/ function(arg_, ctx) {
     return 0;
   } else if (arg instanceof NQPStr) {
     return coercions.strToNum(arg.value);
-  } else if (arg._STable && arg._STable.methodCache && arg._STable.methodCache.get('Num')) {
+  } else if (arg.$$STable && arg.$$STable.methodCache && arg.$$STable.methodCache.get('Num')) {
     const result = /*await*/ arg.Num(ctx, null, arg); // eslint-disable-line new-cap
     if (typeof result === 'number') {
       return result;
@@ -470,17 +470,17 @@ exports.list = hll.list;
 
 
 exports.list_i = function lowlevelList(array) {
-  const stable = BOOT.IntArray._STable;
+  const stable = BOOT.IntArray.$$STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_n = function lowlevelList(array) {
-  const stable = BOOT.NumArray._STable;
+  const stable = BOOT.NumArray.$$STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
 exports.list_s = function lowlevelList(array) {
-  const stable = BOOT.StrArray._STable;
+  const stable = BOOT.StrArray.$$STable;
   return stable.REPR.allocateFromArray(stable, array);
 };
 
@@ -491,9 +491,9 @@ exports.createIntArray = require('./BOOT.js').createIntArray;
 exports.dumpObj = function(obj) {
   console.log(typeof obj);
   if (typeof obj === 'object') {
-    if (obj._STable) {
-      console.log(obj._STable.REPR.name);
-      const name = obj._STable.HOW.name(null, null, obj._STable.HOW, obj);
+    if (obj.$$STable) {
+      console.log(obj.$$STable.REPR.name);
+      const name = obj.$$STable.HOW.name(null, null, obj.$$STable.HOW, obj);
       console.log(name instanceof NQPStr ? name.value : name);
     } else {
       console.log('no STable', obj.constructor.name);

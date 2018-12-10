@@ -27,18 +27,18 @@ const nativeArgs = require('./native-args.js');
 const NativeStrArg = nativeArgs.NativeStrArg;
 
 /*async*/ function findMethod(ctx, obj, name) {
-  if (obj._STable.methodCache) {
-    const method = obj._STable.methodCache.get(name);
+  if (obj.$$STable.methodCache) {
+    const method = obj.$$STable.methodCache.get(name);
     if (method !== undefined) {
       return method;
     }
-    if (obj._STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+    if (obj.$$STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
       return Null;
     }
   }
 
-  if (/*await*/ obj._STable.HOW.$$can(ctx, 'find_method')) {
-    return /*await*/ obj._STable.HOW.find_method(ctx, null, obj._STable.HOW, obj, new NativeStrArg(name));
+  if (/*await*/ obj.$$STable.HOW.$$can(ctx, 'find_method')) {
+    return /*await*/ obj.$$STable.HOW.find_method(ctx, null, obj.$$STable.HOW, obj, new NativeStrArg(name));
   } else {
     return Null;
   }
@@ -73,7 +73,7 @@ class STable {
 
     /* HACK - it's a bit hackish - think how correct it is */
     this.ObjConstructor.prototype.$$clone = function() {
-      const clone = new this._STable.ObjConstructor();
+      const clone = new this.$$STable.ObjConstructor();
       for (const i in this) {
         if (Object.prototype.hasOwnProperty.call(this, i) && i != '_SC') {
           clone[i] = this[i];
@@ -101,7 +101,7 @@ class STable {
 
     this.ObjConstructor.prototype.$$scwb = scwb;
     this.ObjConstructor.prototype.$$istype = /*async*/ function(ctx, type) {
-      const cache = this._STable.typeCheckCache;
+      const cache = this.$$STable.typeCheckCache;
       if (cache) {
         for (let i = 0; i < cache.length; i++) {
           if (cache[i] === type) {
@@ -112,7 +112,7 @@ class STable {
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
 
-        const HOW = this._STable.HOW;
+        const HOW = this.$$STable.HOW;
         /* This "hack" is stolen from the JVM */
         if (!/*await*/ HOW.$$can(ctx, 'type_check')) {
           return 0;
@@ -125,8 +125,8 @@ class STable {
       }
 
       const TYPE_CHECK_NEEDS_ACCEPTS = 2;
-      if (type._STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
-        return (/*await*/ type._STable.HOW.accepts_type(ctx, null, type._STable.HOW, type, this)).$$toBool(ctx);
+      if (type.$$STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
+        return (/*await*/ type.$$STable.HOW.accepts_type(ctx, null, type.$$STable.HOW, type, this)).$$toBool(ctx);
       }
 
       return 0;
@@ -258,15 +258,15 @@ class STable {
     };
 
     obj.$$getInt = function() {
-      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an int.`);
+      throw new NQPException(`Cannot unbox a type object (${this.$$STable.debugName}) to an int.`);
     };
 
     obj.$$getNum = function() {
-      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an num.`);
+      throw new NQPException(`Cannot unbox a type object (${this.$$STable.debugName}) to an num.`);
     };
 
     obj.$$getStr = function() {
-      throw new NQPException(`Cannot unbox a type object (${this._STable.debugName}) to an str.`);
+      throw new NQPException(`Cannot unbox a type object (${this.$$STable.debugName}) to an str.`);
     };
 
     return obj;

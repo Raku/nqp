@@ -8,7 +8,7 @@ function attrRef_i(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No int attribute reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -20,7 +20,7 @@ function attrRef_n(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No num attribute reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -32,7 +32,7 @@ function attrRef_s(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No str attribute reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -44,7 +44,7 @@ function attrRef_i64(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No int64 attribute reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -75,7 +75,7 @@ op.multidimref_i = function(currentHLL, array, indexes) {
   if (refType === undefined) {
     throw new NQPException('No int multidim positional reference type registered for current HLL');
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => array.$$atposnd_i(indexes);
   ref.set = value => array.$$bindposnd_i(indexes, value);
@@ -87,7 +87,7 @@ op.multidimref_n = function(currentHLL, array, indexes) {
   if (refType === undefined) {
     throw new NQPException('No num multidim positional reference type registered for current HLL');
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => array.$$atposnd_n(indexes);
   ref.set = value => array.$$bindposnd_n(indexes, value);
@@ -99,7 +99,7 @@ op.multidimref_s = function(currentHLL, array, indexes) {
   if (refType === undefined) {
     throw new NQPException('No str multidim positional reference type registered for current HLL');
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => array.$$atposnd_s(indexes);
   ref.set = value => array.$$bindposnd_s(indexes, value);
@@ -111,7 +111,7 @@ helpers.lexRef_i = function(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No int lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -123,7 +123,7 @@ helpers.lexRef_i64 = function(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No int64 lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -137,7 +137,7 @@ helpers.lexRef_s = function(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No str lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -149,7 +149,7 @@ helpers.lexRef_n = function(currentHLL, get, set) {
   if (refType === undefined) {
     throw 'No num lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = get;
   ref.set = set;
@@ -161,7 +161,7 @@ op.atposref_i = function(currentHLL, obj, index) {
   if (refType === undefined) {
     throw 'No int lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos_i(index);
   ref.set = value => obj.$$bindpos_i(index, value);
@@ -173,7 +173,7 @@ op.atposref_n = function(currentHLL, obj, index) {
   if (refType === undefined) {
     throw 'No num lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos_n(index);
   ref.set = value => obj.$$bindpos_n(index, value);
@@ -185,7 +185,7 @@ op.atposref_s = function(currentHLL, obj, index) {
   if (refType === undefined) {
     throw 'No str lexical reference type registered for current HLL';
   }
-  const STable = refType._STable;
+  const STable = refType.$$STable;
   const ref = STable.REPR.allocate(STable);
   ref.get = () => obj.$$atpos_s(index);
   ref.set = value => obj.$$bindpos_s(index, value);

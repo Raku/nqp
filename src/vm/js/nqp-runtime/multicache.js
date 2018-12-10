@@ -37,28 +37,28 @@ class MultiCache {
 
     if (obj instanceof NQPStr) {
       types[i] = 3;
-    } else if (obj._STable) {
+    } else if (obj.$$STable) {
       const deconted = /*await*/ obj.$$decont(ctx);
 
       /* TODO - think if having flags wouldn't be faster/cleaner then weird objects */
       if (obj.$$isrwcont()) {
-        if (obj._STable.REPR instanceof reprs.NativeRef) {
-          types[i] = obj._STable;
+        if (obj.$$STable.REPR instanceof reprs.NativeRef) {
+          types[i] = obj.$$STable;
         } else {
           if (deconted.$$typeObject) {
-            if (deconted._STable.typeObjectCachedAsRW === undefined) {
-              deconted._STable.typeObjectCachedAsRW = {};
+            if (deconted.$$STable.typeObjectCachedAsRW === undefined) {
+              deconted.$$STable.typeObjectCachedAsRW = {};
             }
-            types[i] = deconted._STable.typeObjectCachedAsRW;
+            types[i] = deconted.$$STable.typeObjectCachedAsRW;
           } else {
-            if (deconted._STable.cachedAsRW === undefined) {
-              deconted._STable.cachedAsRW = {};
+            if (deconted.$$STable.cachedAsRW === undefined) {
+              deconted.$$STable.cachedAsRW = {};
             }
-            types[i] = deconted._STable.cachedAsRW;
+            types[i] = deconted.$$STable.cachedAsRW;
           }
         }
       } else {
-        types[i] = deconted.$$typeObject ? deconted : deconted._STable;
+        types[i] = deconted.$$typeObject ? deconted : deconted.$$STable;
       }
     } else if (obj instanceof NativeIntArg) {
       types[i] = 1;
