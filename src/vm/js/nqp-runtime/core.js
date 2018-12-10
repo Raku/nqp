@@ -307,7 +307,7 @@ op.bootarray = function() {
 
 op.defined = function(obj) {
   // TODO - handle more things that aren't defined
-  if (obj === Null || obj.typeObject_) {
+  if (obj === Null || obj.$$typeObject) {
     return 0;
   }
   return 1;
@@ -504,19 +504,19 @@ op.iscont = function(cont) {
 };
 
 op.iscont_i = function(cont) {
-  if (cont.typeObject_) return 0;
+  if (cont.$$typeObject) return 0;
   if (cont.$$iscont_i) return cont.$$iscont_i();
   return 0;
 };
 
 op.iscont_n = function(cont) {
-  if (cont.typeObject_) return 0;
+  if (cont.$$typeObject) return 0;
   if (cont.$$iscont_n) return cont.$$iscont_n();
   return 0;
 };
 
 op.iscont_s = function(cont) {
-  if (cont.typeObject_) return 0;
+  if (cont.$$typeObject) return 0;
   if (cont.$$iscont_s) {
     return cont.$$iscont_s();
   }
@@ -1705,7 +1705,7 @@ op.captureposprimspec = function(capture, idx) {
     return 2;
   } else if (capture.pos[idx] instanceof NativeStrArg) {
     return 3;
-  } else if (capture.pos[idx].typeObject_) {
+  } else if (capture.pos[idx].$$typeObject) {
     return 0;
   } else {
     return op.objprimspec(capture.pos[idx]);

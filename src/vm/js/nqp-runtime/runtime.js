@@ -287,7 +287,7 @@ exports.toStr = /*async*/ function(arg_, ctx) {
     return '';
   } else if (arg === nullStr) {
     return arg;
-  } else if (arg.typeObject_) {
+  } else if (arg.$$typeObject) {
     return '';
   } else if (arg.$$getStr) {
     return arg.$$getStr();
@@ -321,7 +321,7 @@ exports.toNum = /*async*/ function(arg_, ctx) {
     } else {
       throw new NQPException('we can\'t numify result of toNum');
     }
-  } else if (arg.typeObject_) {
+  } else if (arg.$$typeObject) {
     return 0;
   } else if (arg.$$getNum) {
     return arg.$$getNum();

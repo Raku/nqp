@@ -45,7 +45,7 @@ class MultiCache {
         if (obj._STable.REPR instanceof reprs.NativeRef) {
           types[i] = obj._STable;
         } else {
-          if (deconted.typeObject_) {
+          if (deconted.$$typeObject) {
             if (deconted._STable.typeObjectCachedAsRW === undefined) {
               deconted._STable.typeObjectCachedAsRW = {};
             }
@@ -58,7 +58,7 @@ class MultiCache {
           }
         }
       } else {
-        types[i] = deconted.typeObject_ ? deconted : deconted._STable;
+        types[i] = deconted.$$typeObject ? deconted : deconted._STable;
       }
     } else if (obj instanceof NativeIntArg) {
       types[i] = 1;

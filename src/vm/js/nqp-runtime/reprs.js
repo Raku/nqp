@@ -546,7 +546,7 @@ class P6opaque extends REPRWithAttributes {
         '}\n');
 
     if (this.autoVivValues && this.autoVivValues[slot] !== Null) {
-      const isTypeObject = this.autoVivValues[slot].typeObject_;
+      const isTypeObject = this.autoVivValues[slot].$$typeObject;
 
       STable.compileAccessor('$$getattr$' + slot, 'function(value) {\n' +
           'var value = this.' + attr + ';\n' +
@@ -2078,7 +2078,7 @@ class MultiDimArray extends REPR {
   setupSTable(STable) {
     STable.addInternalMethods(class {
       $$numdimensions(value) {
-        if (this.typeObject_) {
+        if (this.$$typeObject) {
           throw new NQPException('Cannot get number of dimensions of a type object');
         }
         return STable.dimensions;
@@ -2092,7 +2092,7 @@ class MultiDimArray extends REPR {
       }
 
       $$dimensions() {
-        if (this.typeObject_) {
+        if (this.$$typeObject) {
           throw new NQPException('Cannot get dimensions of a type object');
         }
         return BOOT.createIntArray(this.dimensions);

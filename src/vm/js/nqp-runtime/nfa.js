@@ -312,7 +312,7 @@ op.nfarunproto = function(nfa, target, pos) {
 op.nfarunalt = function(nfa, target, pos, bstackWrapped, cstackWrapped, marksWrapped) {
   let cstack;
 
-  if (cstackWrapped !== Null && !cstackWrapped.typeObject_) {
+  if (cstackWrapped !== Null && !cstackWrapped.$$typeObject) {
     cstack = cstackWrapped.$$toArray();
   }
   const bstack = bstackWrapped.$$toArray();

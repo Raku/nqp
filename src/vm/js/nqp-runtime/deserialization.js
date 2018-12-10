@@ -784,7 +784,7 @@ class BinaryCursor {
       if (entry.type === 0) {
         const origObj = this.sc.deps[entry.origSC].rootObjects[entry.origIndex];
         if (origObj._SC !== this.sc.deps[entry.origSC]) {
-          const backup = origObj.typeObject_ ? origObj._STable.createTypeObject() : origObj.$$clone();
+          const backup = origObj.$$typeObject ? origObj._STable.createTypeObject() : origObj.$$clone();
           conflicts.$$push(backup);
           conflicts.$$push(origObj);
         }

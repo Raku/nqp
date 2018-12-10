@@ -84,7 +84,7 @@ class STable {
 
     /* Default boolification mode 5 */
     this.ObjConstructor.prototype.$$toBool = function(ctx) {
-      return this.typeObject_ ? 0 : 1;
+      return this.$$typeObject ? 0 : 1;
     };
 
     this.ObjConstructor.prototype.$$decont = function(ctx) {
@@ -95,7 +95,7 @@ class STable {
       return 0;
     };
 
-    this.ObjConstructor.prototype.typeObject_ = 0;
+    this.ObjConstructor.prototype.$$typeObject = 0;
 
     this.ObjConstructor.prototype.$$call = undefined;
 
@@ -170,19 +170,19 @@ class STable {
       };
     } else if (mode == 1) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return this.typeObject_ || this.$$getInt() == 0 ? 0 : 1;
+        return this.$$typeObject || this.$$getInt() == 0 ? 0 : 1;
       };
     } else if (mode == 2) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return this.typeObject_ || this.$$getNum() == 0 ? 0 : 1;
+        return this.$$typeObject || this.$$getNum() == 0 ? 0 : 1;
       };
     } else if (mode == 3) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return this.typeObject_ || this.$$getStr() == '' ? 0 : 1;
+        return this.$$typeObject || this.$$getStr() == '' ? 0 : 1;
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        if (this.typeObject_) return 0;
+        if (this.$$typeObject) return 0;
         const str = this.$$getStr();
         return (str == '' || str == '0') ? 0 : 1;
       };
@@ -190,7 +190,7 @@ class STable {
     // this is the default - do nothing
     } else if (mode == 6) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return (this.typeObject_ || JSBI.equal(this.$$getBignum(), ZERO)) ? 0 : 1;
+        return (this.$$typeObject || JSBI.equal(this.$$getBignum(), ZERO)) ? 0 : 1;
       };
     } else if (mode == 7) {
     // STUB
@@ -243,7 +243,7 @@ class STable {
 
   createTypeObject() {
     const obj = new this.ObjConstructor();
-    obj.typeObject_ = 1;
+    obj.$$typeObject = 1;
     obj.$$atkey = function(key) {
       return Null;
     };

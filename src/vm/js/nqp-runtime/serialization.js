@@ -373,7 +373,7 @@ class SerializationWriter {
     const sc = ref[0];
     const scIdx = ref[1];
 
-    let packed = !obj.typeObject_ ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
+    let packed = !obj.$$typeObject ? OBJECTS_TABLE_ENTRY_IS_CONCRETE : 0;
 
     if (sc <= OBJECTS_TABLE_ENTRY_SC_MAX && scIdx <= OBJECTS_TABLE_ENTRY_SC_IDX_MAX) {
       packed |= (sc << OBJECTS_TABLE_ENTRY_SC_SHIFT) | scIdx;
@@ -390,7 +390,7 @@ class SerializationWriter {
 
 
     /* Delegate to its serialization REPR function. */
-    if (!obj.typeObject_) {
+    if (!obj.$$typeObject) {
       if (!obj._STable.REPR.serialize) {
         console.trace(`don't know how to serialize ${obj._STable.REPR.name}`);
       } else {
