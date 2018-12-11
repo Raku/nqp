@@ -291,8 +291,8 @@ exports.toStr = /*async*/ function(arg_, ctx) {
     return '';
   } else if (arg.$$getStr) {
     return arg.$$getStr();
-  } else if (arg.Str) {
-    const ret = /*await*/ arg.Str(ctx, null, arg); // eslint-disable-line new-cap
+  } else if (arg.p6$Str) {
+    const ret = /*await*/ arg.p6$Str(ctx, null, arg); // eslint-disable-line new-cap
     return (typeof ret === 'string' ? ret : (/*await*/ ret.$$decont(ctx)).$$getStr());
   } else if (arg.$$getNum) {
     return coercions.numToStr(arg.$$getNum());
@@ -311,7 +311,7 @@ exports.toNum = /*async*/ function(arg_, ctx) {
   } else if (arg instanceof NQPStr) {
     return coercions.strToNum(arg.value);
   } else if (arg.$$STable && arg.$$STable.methodCache && arg.$$STable.methodCache.get('Num')) {
-    const result = /*await*/ arg.Num(ctx, null, arg); // eslint-disable-line new-cap
+    const result = /*await*/ arg.p6$Num(ctx, null, arg); // eslint-disable-line new-cap
     if (typeof result === 'number') {
       return result;
     } else if (result.$$getNum) {
@@ -493,7 +493,7 @@ exports.dumpObj = function(obj) {
   if (typeof obj === 'object') {
     if (obj.$$STable) {
       console.log(obj.$$STable.REPR.name);
-      const name = obj.$$STable.HOW.name(null, null, obj.$$STable.HOW, obj);
+      const name = obj.$$STable.HOW.p6$name(null, null, obj.$$STable.HOW, obj);
       console.log(name instanceof NQPStr ? name.value : name);
     } else {
       console.log('no STable', obj.constructor.name);

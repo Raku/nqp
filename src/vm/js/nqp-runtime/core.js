@@ -862,7 +862,7 @@ exports.buildSourceMap = new BuildSourceMap();
 
 
 class JavaScriptCompiler extends NQPObject {
-  /*async*/ eval(ctx, _NAMED, self, code) {
+  /*async*/ p6$eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       const codeStr = nqp.arg_s(ctx, code);
       return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
@@ -915,7 +915,7 @@ class JavaScriptCompiler extends NQPObject {
     return ret;
   }
 
-  compile(ctx, _NAMED, self, code) {
+  p6$compile(ctx, _NAMED, self, code) {
     const codeStr = nqp.arg_s(ctx, code);
     const compiled = process.browser
       ? eval('(function() {' + codeStr + '})')
@@ -932,7 +932,7 @@ class JavaScriptCompiler extends NQPObject {
 globalContext.initialize(context => context.compilerRegistry.set('JavaScript', new JavaScriptCompiler()));
 
 class JSBackendStub extends NQPObject {
-  name(ctx, named) {
+  p6$name(ctx, named) {
     return new NQPStr('js');
   }
 };
@@ -942,7 +942,8 @@ class NQPStub extends NQPObject {
     super();
     this.$$backend = new JSBackendStub();
   }
-  backend(ctx, named) {
+
+  p6$backend(ctx, named) {
     return this.$$backend;
   }
 };
@@ -961,7 +962,7 @@ class FakePerl6 extends NQPObject {
     }
 }
 
-FakePerl6.prototype['cli-options'] = function() {
+FakePerl6.prototype['p6$cli-options'] = function() {
     return new Hash();
 };
 

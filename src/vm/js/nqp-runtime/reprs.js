@@ -87,44 +87,49 @@ class REPR {
   createObjConstructor(STable) {
     const ObjConstructor = function() {};
     const handler = {};
-    handler.get = function(target, name) {
-      if (STable.lazyMethodCache) {
-        STable.setMethodCache(STable.methodCache);
-        const method = STable.methodCache.get(name);
-        if (method !== undefined) {
-          return STable.ObjConstructor.prototype[name];
-        }
-      }
+    handler.get = function(target, jsName) {
 
-      /* are we trying to access an internal property? */
-      /* HACK with then, we likely need to prefix p6 methods to avoid this problem */
-      if (name.substr(0, 2) === '$$' || name == 'then') {
+      if (jsName.substr(0, 2) === '$$') {
+        return undefined;
+      } else if (jsName.substr(0, 3) == 'p6$') {
+        const name = jsName.substr(3);
+
+        if (STable.lazyMethodCache) {
+          STable.setMethodCache(STable.methodCache);
+          const method = STable.methodCache.get(name);
+          if (method !== undefined) {
+            return STable.ObjConstructor.prototype[jsName];
+          }
+        }
+
+        if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
+          return function(ctx, _NAMED, obj) {
+            return methodNotFoundError(ctx, obj, name);
+          };
+        }
+
+
+        return /*async*/ function() {
+          const how = this.$$STable.HOW;
+
+          const method = /*await*/ how.p6$find_method(null, null, how, this, new NativeStrArg(name));
+
+          if (method === Null) {
+            return methodNotFoundError(arguments[0], arguments[2], name);
+          }
+
+          const args = [];
+          for (let i = 0; i < arguments.length; i++) {
+            args.push(arguments[i]);
+          }
+          return method.$$apply(args);
+        };
+      } else {
+        console.log('unprefixed js method', jsName);
         return undefined;
       }
-
-      if (STable.modeFlags & constants.METHOD_CACHE_AUTHORITATIVE) {
-        return function(ctx, _NAMED, obj) {
-          return methodNotFoundError(ctx, obj, name);
-        };
-      }
-
-
-      return /*async*/ function() {
-        const how = this.$$STable.HOW;
-
-        const method = /*await*/ how.find_method(null, null, how, this, new NativeStrArg(name));
-
-        if (method === Null) {
-          return methodNotFoundError(arguments[0], arguments[2], name);
-        }
-
-        const args = [];
-        for (let i = 0; i < arguments.length; i++) {
-          args.push(arguments[i]);
-        }
-        return method.$$apply(args);
-      };
     };
+
 
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
     ObjConstructor.prototype.$$STable = STable;
@@ -2483,23 +2488,29 @@ class WrappedJSObject extends REPR {
   createObjConstructor(STable) {
     const ObjConstructor = function() {};
     const handler = {};
-    handler.get = function(target, name) {
-      if (name.substr(0, 2) === '$$') {
+    handler.get = function(target, mangledName) {
+      if (mangledName.substr(0, 2) === '$$') {
         return undefined;
       }
 
-      return /*async*/ function() {
-        const converted = [];
-        for (let i = 3; i < arguments.length; i++) {
-          converted.push(/*await*/ core.toJSWithCtx(arguments[0], arguments[i].$$decont(arguments[0])));
-        }
+      if (mangledName.substr(0, 3) === 'p6$') {
+        const name = mangledName.substr(3);
 
-        if (this.$$jsObject[name]) {
-          return core.fromJSToReturnValue(arguments[0], this.$$jsObject[name].apply(this.$$jsObject, converted));
-        } else {
-          methodNotFoundError(arguments[0], this, name);
-        }
-      };
+        return /*async*/ function() {
+          const converted = [];
+          for (let i = 3; i < arguments.length; i++) {
+            converted.push(/*await*/ core.toJSWithCtx(arguments[0], arguments[i].$$decont(arguments[0])));
+          }
+
+          if (this.$$jsObject[name]) {
+            return core.fromJSToReturnValue(arguments[0], this.$$jsObject[name].apply(this.$$jsObject, converted));
+          } else {
+            methodNotFoundError(arguments[0], this, name);
+          }
+        };
+      } else {
+        throw new NQPException(`Got raw js method: ${mangledName}`);
+      }
     };
 
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));

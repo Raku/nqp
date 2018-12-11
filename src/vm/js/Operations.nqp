@@ -761,12 +761,12 @@ class QAST::OperationsJS {
 
         my str $method;
         if $node.name {
-            $method := '[' ~ quote_string($node.name) ~ ']';
+            $method := '[' ~ quote_string('p6$' ~ $node.name) ~ ']';
         }
         else {
             my $method_name := $comp.as_js(@args.shift, :want($T_STR));
             @setup.push($method_name);
-            $method := "[{$method_name.expr}]";
+            $method := "[\"p6\$\" + {$method_name.expr}]";
         }
 
         my $compiled_args := $comp.args(@args, :invocant($invocant.expr));
@@ -1157,7 +1157,7 @@ class QAST::OperationsJS {
             my $check_cond;
             if $is_withy {
                 my $deconted := $comp.await("{$cond.expr}.\$\$decont($*CTX)");
-                my $defined := $comp.await("$deconted.defined($*CTX, null, {$cond.expr})");
+                my $defined := $comp.await("$deconted.p6\$defined($*CTX, null, {$cond.expr})");
                 my $retvaled := "nqp.retval(HLL, $defined)";
                 $check_cond := Chunk.new($T_INT, $comp.await("$retvaled.\$\$toBool($*CTX)"), $cond);
             } else {

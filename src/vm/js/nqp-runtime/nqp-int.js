@@ -9,7 +9,7 @@ class NQPInt extends NQPObject {
     this.value = value | 0;
   }
 
-  Str(ctx, _NAMED, self) {
+  p6$Str(ctx, _NAMED, self) {
     return new NQPStr(this.value.toString());
   }
 

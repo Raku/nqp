@@ -52,7 +52,7 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = ({$!compiler.await}$self['!cursor_start_all']({$*CTX}, null, $self)).array;\n",
+            "$start = ({$!compiler.await}$self['p6\$!cursor_start_all']({$*CTX}, null, $self)).array;\n",
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
             "{$!target} = {$!compiler.await}nqp.toStr($start[1], $*CTX);\n",
@@ -85,7 +85,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            $!compiler.await ~ "{$!cursor}['!cursor_fail']({$*CTX}, null, $!cursor);\n",
+            $!compiler.await ~ "{$!cursor}['p6\$!cursor_fail']({$*CTX}, null, $!cursor);\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -287,7 +287,7 @@ class RegexCompiler {
         my @setup;
 
         @setup.push(
-            $!compiler.await ~ "{$!cursor}['!cursor_pass']({$*CTX},"
+            $!compiler.await ~ "{$!cursor}['p6\$!cursor_pass']({$*CTX},"
             ~ "\{backtrack: new nqp.NQPInt({$node.backtrack ne 'r'})\}, $!cursor, new nqp.NQPInt({$!pos})"
         );
 
@@ -331,7 +331,7 @@ class RegexCompiler {
         nqp::unshift(@args, $invocant);
         nqp::unshift(@args, 'null');
         nqp::unshift(@args, $*CTX);
-        $!compiler.await($invocant ~ "[" ~ quote_string($method) ~ "](" ~ nqp::join(",", @args) ~ ")");
+        $!compiler.await($invocant ~ "[" ~ quote_string('p6$' ~ $method) ~ "](" ~ nqp::join(",", @args) ~ ")");
     }
 
     # We never autovifiy $!from and $!pos so we can access them directly
@@ -393,7 +393,7 @@ class RegexCompiler {
             my str $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
 
             $call := Chunk.new($T_OBJ,
-                $!compiler.await ~ $!cursor ~ '[' ~ quote_string($method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
+                $!compiler.await ~ $!cursor ~ '[' ~ quote_string('p6$' ~ $method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
                 $compiled_args);
         }
         else {

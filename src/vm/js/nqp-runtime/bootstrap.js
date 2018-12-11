@@ -54,7 +54,7 @@ function createKnowHOWAttribute() {
   typeObj.$$STable.modeFlags = constants.METHOD_CACHE_AUTHORITATIVE;
 
   for (const method of Object.keys(methods)) {
-    typeObj.$$STable.ObjConstructor.prototype[method] = methods[method];
+    typeObj.$$STable.ObjConstructor.prototype['p6$' + method] = methods[method];
     typeObj.$$STable.methodCache.set(method, wrapMethod(method, methods[method]));
   }
 
@@ -89,8 +89,8 @@ function wrapMethod(name, method) {
 function addKnowhowHowMethod(name, method) {
   /* TODO - think if setting the object cache would be better */
 
-  KnowHowHOW.$$STable.ObjConstructor.prototype[name] = method;
-  KnowHOW.$$STable.ObjConstructor.prototype[name] = method;
+  KnowHowHOW.$$STable.ObjConstructor.prototype['p6$' + name] = method;
+  KnowHOW.$$STable.ObjConstructor.prototype['p6$' + name] = method;
 
   const wrapped = wrapMethod(name, method);
   KnowHOW.$$STable.methodCache.set(name, wrapped);

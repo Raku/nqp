@@ -6,7 +6,7 @@ class NQPException extends Error {
     this.$$message = message;
   }
 
-  Str(ctx, _NAMED, self) {
+  p6$Str(ctx, _NAMED, self) {
     return new NQPStr(this.$$message);
   }
 

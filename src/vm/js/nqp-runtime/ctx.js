@@ -475,15 +475,15 @@ class CtxIter extends NQPObject {
     return this.$$idx < this.$$target;
   }
 
-  Str(ctx, _NAMED, self) {
+  p6$Str(ctx, _NAMED, self) {
     return new NQPStr(this.$$iterkey_s());
   }
 
-  key(ctx, _NAMED, self) {
+  p6$key(ctx, _NAMED, self) {
     return new NQPStr(this.$$iterkey_s());
   }
 
-  value(ctx, _NAMED, self) {
+  p6$value(ctx, _NAMED, self) {
     return this.$$iterval();
   }
 };

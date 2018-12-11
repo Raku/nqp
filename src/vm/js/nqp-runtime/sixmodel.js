@@ -38,7 +38,7 @@ const NativeStrArg = nativeArgs.NativeStrArg;
   }
 
   if (/*await*/ obj.$$STable.HOW.$$can(ctx, 'find_method')) {
-    return /*await*/ obj.$$STable.HOW.find_method(ctx, null, obj.$$STable.HOW, obj, new NativeStrArg(name));
+    return /*await*/ obj.$$STable.HOW.p6$find_method(ctx, null, obj.$$STable.HOW, obj, new NativeStrArg(name));
   } else {
     return Null;
   }
@@ -118,7 +118,7 @@ class STable {
           return 0;
         }
 
-        const typeCheckResult = /*await*/ HOW.type_check(ctx, null, HOW, this, type);
+        const typeCheckResult = /*await*/ HOW.p6$type_check(ctx, null, HOW, this, type);
         if (typeof typeCheckResult === 'number' ? typeCheckResult : typeCheckResult.$$toBool(ctx)) {
           return 1;
         }
@@ -126,7 +126,7 @@ class STable {
 
       const TYPE_CHECK_NEEDS_ACCEPTS = 2;
       if (type.$$STable.modeFlags & TYPE_CHECK_NEEDS_ACCEPTS) {
-        return (/*await*/ type.$$STable.HOW.accepts_type(ctx, null, type.$$STable.HOW, type, this)).$$toBool(ctx);
+        return (/*await*/ type.$$STable.HOW.p6$accepts_type(ctx, null, type.$$STable.HOW, type, this)).$$toBool(ctx);
       }
 
       return 0;
@@ -287,7 +287,7 @@ class STable {
     const proto = this.ObjConstructor.prototype;
 
     methodCache.forEach(function(method, name, map) {
-      proto[name] = function() {
+      proto['p6$' + name] = function() {
         return method.$$call.apply(method, arguments);
       };
     });
