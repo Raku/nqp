@@ -940,10 +940,10 @@ class JSBackendStub extends NQPObject {
 class NQPStub extends NQPObject {
   constructor() {
     super();
-    this.backend_ = new JSBackendStub();
+    this.$$backend = new JSBackendStub();
   }
   backend(ctx, named) {
-    return this.backend_;
+    return this.$$backend;
   }
 };
 
