@@ -242,7 +242,7 @@
   * [tostr](#tostr)
   * [tonum](#tonum)
   * [unbox](#unbox)
-- [Binary Data Opcodes](#-binarydata-opcodes)
+- [Binary Data Opcodes](#-binary-data-opcodes)
   * [writeint](#writeint)
   * [writeuint](#writeuint)
   * [writenum](#writenum)
