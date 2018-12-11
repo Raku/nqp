@@ -383,7 +383,7 @@ op.settypecache = function(obj, cache) {
 
 op.settypecheckmode = function(obj, mode) {
   const TYPE_CHECK_CACHE_FLAG_MASK = 3;
-  obj.$$STable.modeFlags = mode | (obj.STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
+  obj.$$STable.modeFlags = mode | (obj.$$STable.modeFlags & TYPE_CHECK_CACHE_FLAG_MASK);
   return obj;
 };
 
