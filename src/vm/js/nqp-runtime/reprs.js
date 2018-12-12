@@ -88,7 +88,6 @@ class REPR {
     const ObjConstructor = function() {};
     const handler = {};
     handler.get = function(target, jsName) {
-
       if (jsName.substr(0, 2) === '$$') {
         return undefined;
       } else if (jsName.substr(0, 3) == 'p6$') {
@@ -136,6 +135,7 @@ class REPR {
 
     ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
+    ObjConstructor.prototype.then = undefined;
 
     return ObjConstructor;
   }
@@ -2518,6 +2518,7 @@ class WrappedJSObject extends REPR {
 
     ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
+    ObjConstructor.prototype.then = undefined;
 
     return ObjConstructor;
   }
