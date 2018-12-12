@@ -155,6 +155,15 @@ op.cwd = function() {
   return '?';
 };
 
+op.stat = function(file, code) {
+  const EXISTS = 0;
+  if (code == EXISTS && file === '/etc/os-release') {
+    return 0;
+  } else {
+    throw new NQPException('nqp::stat is not supported in the browser');
+  }
+};
+
 class Exit {
   constructor(code) {
     this.code = code;
