@@ -15,7 +15,7 @@ const globalContext = require('./global-context.js');
 
 globalContext.initialize(context => context.hllSyms = new Map());
 
-op.gethllsym = function(hllName, name, value) {
+op.gethllsym = function(hllName, name) {
   const hllSyms = globalContext.context.hllSyms;
   if (hllSyms.has(hllName) && hllSyms.get(hllName).has(name)) {
     return hllSyms.get(hllName).get(name);
