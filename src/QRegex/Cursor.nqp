@@ -397,7 +397,7 @@ role NQPMatchRole is export {
         $caps;
     }
 
-    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, :$build, *%ignore) {
+    method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, :$build, :$fail_cursor, *%ignore) {
         my $new := $build ?? self !! self.CREATE();
         unless $shared {
             $shared := nqp::create(ParseShared);
@@ -428,7 +428,8 @@ role NQPMatchRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
         }
         nqp::bindattr_i($new, $?CLASS, '$!to', -1);  # delegates to $!pos if negative
-        nqp::bindattr($shared, ParseShared, '$!fail_cursor', $new.'!cursor_start_cur'());
+        nqp::bindattr($shared, ParseShared, '$!fail_cursor',
+            nqp::isconcrete($fail_cursor) ?? $fail_cursor !! $new.'!cursor_start_cur'());
         $new
     }
 
