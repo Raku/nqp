@@ -143,8 +143,10 @@ op.getenvhash = function() {
   return new Hash();
 };
 
+const pid = core.randomInt()[0];
+
 op.getpid = function() {
-  return -1;
+  return pid;
 };
 
 op.getppid = function() {
