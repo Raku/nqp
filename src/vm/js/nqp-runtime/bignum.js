@@ -332,7 +332,7 @@ function randomWithSameBitSize(n) {
   let needed = bitSize(n);
 
   while (needed >= 64) {
-    const randomBits = core.generator.randomint();
+    const randomBits = core.randomInt();
     got = JSBI.bitwiseOr(JSBI.bitwiseOr(JSBI.leftShift(got, SIXTY_FOUR), JSBI.leftShift(JSBI.BigInt(randomBits[0]), THIRTY_TWO)), JSBI.BigInt(randomBits[1]));
     needed -= 64;
   }
@@ -341,7 +341,7 @@ function randomWithSameBitSize(n) {
     return got;
   }
 
-  const randomBits = core.generator.randomint();
+  const randomBits = core.randomInt();
   let unused = 0;
 
   if (needed > 32) {
@@ -359,11 +359,6 @@ function randomWithSameBitSize(n) {
 
 op.rand_I = function(n, type) {
   const max = getBI(n);
-
-  if (!core.isXorShiftGenerator) {
-    core.generator = require('xorshift');
-    core.isXorShiftGenerator = true;
-  }
 
   let candidate;
   do {
