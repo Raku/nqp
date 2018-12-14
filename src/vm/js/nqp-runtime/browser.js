@@ -6,6 +6,8 @@ const AnsiToHtml = require('ansi-to-html');
 
 const NQPObject = require('./nqp-object.js');
 
+const NQPException = require('./nqp-exception.js');
+
 exports.op = op;
 
 // allows running code bundles as for browser use outside of the browser
