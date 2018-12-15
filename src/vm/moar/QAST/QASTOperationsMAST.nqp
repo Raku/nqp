@@ -1741,17 +1741,10 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     $regalloc.release_register($callee_reg, $MVM_reg_obj);
 
     # Figure out expected result register type
-    my int $res_kind;
+    my int $res_kind := $qastcomp.type_to_register_kind($op.returns);
+
     # and allocate a register for it. Probably reuse an arg's or the invocant's.
-    my $res_reg;
-    if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
-        $res_reg := MAST::VOID;
-        $res_kind := $MVM_reg_void;
-    }
-    else {
-        $res_kind := $qastcomp.type_to_register_kind($op.returns);
-        $res_reg := $regalloc.fresh_register($res_kind);
-    }
+    my $res_reg := $regalloc.fresh_register($res_kind);
 
     # Generate call.
     if $res_reg.isa(MAST::Local) { # We got a return value
