@@ -6,7 +6,7 @@ class FakeHOW extends NQPObject {
     this.className = className;
   }
 
-  name(ctx, _NAMED, obj) {
+  p6$name(ctx, _NAMED, obj) {
     return this.className;
   }
 }
