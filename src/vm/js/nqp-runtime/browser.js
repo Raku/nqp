@@ -161,7 +161,7 @@ op.cwd = function() {
 
 op.stat = function(file, code) {
   const EXISTS = 0;
-  if (code == EXISTS && file === '/etc/os-release') {
+  if (code == EXISTS && (file === '/etc/os-release' || file === '/bin/uname' || file === '/usr/bin/uname')) {
     return 0;
   } else {
     throw new NQPException('nqp::stat is not supported in the browser');
