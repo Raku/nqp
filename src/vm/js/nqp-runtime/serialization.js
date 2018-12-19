@@ -742,8 +742,6 @@ class SerializationWriter {
       this.closures.int32(1);
 
       if (!codeObj.$$SC) {
-      }
-      if (!codeObj.$$SC) {
         codeObj.$$SC = this.sc;
         this.writer.sc.rootObjects.push(ref);
       }
