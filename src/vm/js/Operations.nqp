@@ -818,7 +818,7 @@ class QAST::OperationsJS {
                 else {
                     my $*CTX := '$$sourceCtx';
                     my $catch_body := $comp.as_js($handler, :want($T_OBJ));
-                    @setup.push("$handler_ctx.\$\${$type} = {$comp.async}function(\$\$sourceCtx) \{\n");
+                    @setup.push("$handler_ctx.\$\${$type} = /*async*/ function(\$\$sourceCtx) \{\n");
                     @setup.push("\$\$sourceCtx.\$\${$type eq 'CATCH' ?? 'catch' !! 'control'}HandlerOuter = $outer_ctx;\n");
                     @setup.push($catch_body);
                     @setup.push( "return {$catch_body.expr};\n" ~ "\};\n");
@@ -1393,14 +1393,14 @@ class QAST::OperationsJS {
                 my $ctx := $*CTX;
 
                 if $*HLL eq 'nqp' {
-                    $post := Chunk.void("{$comp.await} ({$comp.async}function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                    $post := Chunk.void("{$comp.await} (/*async*/ function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
                 } else {
                     my $*CTX := $comp.unique_var('ctx');
 
                     $last_exception := $*BLOCK.add_tmp;
 
                     $post := Chunk.void(
-                        "{$comp.await} ({$comp.async}function() \{",
+                        "{$comp.await} (/*async*/ function() \{",
                         "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
                         "$*CTX.\$\$LAST = function() \{\};",
                         "$last_exception = \{\};\n",
@@ -1519,7 +1519,7 @@ class QAST::OperationsJS {
                 Chunk.new($T_OBJ, $result, [
                     "$unwind_marker = \{\};\n",
                     "$*CTX.\$\$unwind = $unwind_marker;\n",
-                    "$*CTX.\$\${$type} = {$comp.async}function() \{\n",
+                    "$*CTX.\$\${$type} = /*async*/ function() \{\n",
                         $handle_result,
                         "$result = {$handle_result.expr};\n",
                     "\};\n",

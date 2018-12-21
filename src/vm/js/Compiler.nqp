@@ -6,10 +6,6 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
          $expr =:= NO_VALUE ?? '/*await*/ ' !! '(/*await*/ ' ~ $expr ~ ')';
     }
 
-    method async() {
-        '/*async*/ ';
-    }
-
     #= If the env var NQPJS_LOG is set log to nqpjs.log
     method log(*@msgs) {
         my %env := nqp::getenvhash();
@@ -1256,7 +1252,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my str $save_args := $*BLOCK.has_own_variable('$*DISPATCHER') ?? "$*CTX.\$\$args = Array.prototype.slice.call(arguments);\n" !! '';
 
             my @function := [
-                self.async ~ "function {self.mangled_cuid($node.cuid)}({$sig.expr}) \{\n" ,
+                "/*async*/ function {self.mangled_cuid($node.cuid)}({$sig.expr}) \{\n" ,
                 $first_time_marker ?? "let {$first_time_marker}Init = $first_time_marker;\n" !! '',
                 $first_time_marker ?? "$first_time_marker = 0;\n" !! '',
                 self.declare_js_vars($*BLOCK.tmps),
@@ -1801,7 +1797,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             @setup.push("return new nqp.EvalResult({$body.expr}, nqp.createArray(cuids))");
         }
 
-        @setup.unshift("return nqp.run({self.async}function() \{\n");
+        @setup.unshift("return nqp.run(/*async*/ function() \{\n");
         @setup.push("\});\n");
         Chunk.new($T_VOID, "", @setup);
     }
