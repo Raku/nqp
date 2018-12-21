@@ -52,14 +52,14 @@ class RegexCompiler {
 
         Chunk.new($T_OBJ, $!cursor, [
             "{$!label} = {$!initial_label};\n",
-            "$start = ({$!compiler.await}$self['p6\$!cursor_start_all']({$*CTX}, null, $self)).array;\n",
+            "$start = (/*await*/ $self['p6\$!cursor_start_all']({$*CTX}, null, $self)).array;\n",
             "{$!cursor} = $start[0];\n",
             self.set_cursor_var(),
-            "{$!target} = {$!compiler.await}nqp.toStr($start[1], $*CTX);\n",
-            "{$!pos} = {$!compiler.await}nqp.toInt($start[2], $*CTX);\n",
+            "{$!target} = /*await*/ nqp.toStr($start[1], $*CTX);\n",
+            "{$!pos} = /*await*/ nqp.toInt($start[2], $*CTX);\n",
             ($!has_cursor_type ?? '' !! "{$!cursor_type_runtime} = $start[3];\n"),
             "{$!bstack} = $start[4].array;\n",
-            "{$!restart} = {$!compiler.await}nqp.toInt($start[5], $*CTX);\n",
+            "{$!restart} = /*await*/ nqp.toInt($start[5], $*CTX);\n",
             "if ($!pos > $!target.length) \{$!label = $!fail_label\}\n",
             "if ($!restart) \{$!label = $restart_label\}\n",
             "{$!js_loop_label}: while (1) \{\nswitch ({$!label}) \{\n",
@@ -85,7 +85,7 @@ class RegexCompiler {
             self.goto($jump),
 
             self.case($!done_label),
-            $!compiler.await ~ "{$!cursor}['p6\$!cursor_fail']({$*CTX}, null, $!cursor);\n",
+            "/*await*/ {$!cursor}['p6\$!cursor_fail']({$*CTX}, null, $!cursor);\n",
             "break {$!js_loop_label}\n",
             "\}\n\}\n"
         ]);
@@ -287,7 +287,7 @@ class RegexCompiler {
         my @setup;
 
         @setup.push(
-            $!compiler.await ~ "{$!cursor}['p6\$!cursor_pass']({$*CTX},"
+            "/*await*/ {$!cursor}['p6\$!cursor_pass']({$*CTX},"
             ~ "\{backtrack: new nqp.NQPInt({$node.backtrack ne 'r'})\}, $!cursor, new nqp.NQPInt({$!pos})"
         );
 
@@ -331,7 +331,7 @@ class RegexCompiler {
         nqp::unshift(@args, $invocant);
         nqp::unshift(@args, 'null');
         nqp::unshift(@args, $*CTX);
-        $!compiler.await($invocant ~ "[" ~ quote_string('p6$' ~ $method) ~ "](" ~ nqp::join(",", @args) ~ ")");
+        "(/*await*/ " ~ $invocant ~ "[" ~ quote_string('p6$' ~ $method) ~ "](" ~ nqp::join(",", @args) ~ "))";
     }
 
     # We never autovifiy $!from and $!pos so we can access them directly
@@ -393,13 +393,13 @@ class RegexCompiler {
             my str $invocation := $compiled_args.is_args_array ?? ".apply({$!cursor}," !! '(';
 
             $call := Chunk.new($T_OBJ,
-                $!compiler.await ~ $!cursor ~ '[' ~ quote_string('p6$' ~ $method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
+                '/*await*/ ' ~ $!cursor ~ '[' ~ quote_string('p6$' ~ $method) ~ "]" ~ $invocation ~ $compiled_args.expr ~ ')',
                 $compiled_args);
         }
         else {
             #TODO think if arguments are possible, etc.
             my $block := $!compiler.as_js($node[0][0], :want($T_OBJ));
-            $call := Chunk.new($T_OBJ, $!compiler.await ~ $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", $block);
+            $call := Chunk.new($T_OBJ, '/*await*/ ' ~ $block.expr ~ ".\$\$call({$*CTX}, null, $!cursor)", $block);
         }
 
         my str $testop := $node.negate ?? '>=' !! '<';

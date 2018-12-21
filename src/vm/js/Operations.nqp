@@ -39,7 +39,7 @@ class QAST::OperationsJS {
         my int $i := 0;
         for $node.list -> $arg {
             my $chunk := $comp.as_js($arg, :want(@argument_types[$i]));
-            @exprs.push(@decont[$i] ?? $comp.await("{$chunk.expr}.\$\$decont($*CTX)") !! $chunk.expr);
+            @exprs.push(@decont[$i] ?? "(/*await*/ {$chunk.expr}.\$\$decont($*CTX))" !! $chunk.expr);
             @setup.push($chunk);
             $i := $i + 1;
         }
@@ -61,7 +61,7 @@ class QAST::OperationsJS {
         }
 
         my $expr := $cb(|@exprs);
-        Chunk.new($return_type, $await ?? $comp.await($expr) !! $expr, @setup, :$node);
+        Chunk.new($return_type, $await ?? "(/*await*/ $expr)" !! $expr, @setup, :$node);
     }
 
     sub runtime_op($op) {
@@ -164,11 +164,11 @@ class QAST::OperationsJS {
         my $cont := $comp.as_js($node[0], :want($T_OBJ));
         my $value := $comp.as_js($node[1], :want($value_kind));
 
-        my $deconted := $value_kind == $T_OBJ ?? $comp.await("{$value.expr}.\$\$decont($*CTX)") !! $value.expr;
+        my $deconted := $value_kind == $T_OBJ ?? "(/*await*/ {$value.expr}.\$\$decont($*CTX))" !! $value.expr;
         Chunk.new($T_OBJ, $cont.expr, [
             $cont,
             $value,
-            $comp.await ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
+            "/*await*/ " ~ $cont.expr ~ '.$$' ~ $op_name ~ '(' ~ $*CTX ~ ', ' ~ $deconted ~ ");\n"
         ]);
     }
 
@@ -709,7 +709,7 @@ class QAST::OperationsJS {
 
         my str $call := $compiled_args.is_args_array ?? '.$$apply(' !! '.$$call(';
 
-        $comp.get_return_value($comp.await ~ $comp.await($callee.expr ~ ".\$\$decont($*CTX)") ~ $call ~ $compiled_args.expr ~ ')' , [$callee, $compiled_args], :$node, :$want);
+        $comp.get_return_value("/*await*/ (/*await*/ {$callee.expr}.\$\$decont($*CTX))" ~ $call ~ $compiled_args.expr ~ ')', [$callee, $compiled_args], :$node, :$want);
     });
 
     %ops<callstatic> := %ops<call>;
@@ -775,8 +775,7 @@ class QAST::OperationsJS {
 
         @setup.push($compiled_args);
 
-        $comp.get_return_value($comp.await ~ $comp.await("{$invocant.expr}.\$\$decont($*CTX)") ~ $method ~ $call ~ $compiled_args.expr ~ ')', @setup, :$want, :$node);
-
+        $comp.get_return_value("/*await*/ (/*await*/ {$invocant.expr}.\$\$decont($*CTX))" ~ $method ~ $call ~ $compiled_args.expr ~ ')', @setup, :$want, :$node);
     });
 
     add_simple_op('settypefinalize', $T_VOID, [$T_OBJ, $T_INT]);
@@ -833,8 +832,8 @@ class QAST::OperationsJS {
                 my $*CTX := $handler_ctx;
                 my $body := $comp.as_js($protected, :$want);
 
-                my str $catch_wrapped_exception := "{$comp.await}$handler_ctx.catchException(nqp.wrapException(e))";
-                my str $catch_exception := "{$comp.await}$handler_ctx.catchException(e)";
+                my str $catch_wrapped_exception := "/*await*/ $handler_ctx.catchException(nqp.wrapException(e))";
+                my str $catch_exception := "/*await*/ $handler_ctx.catchException(e)";
 
                 if $want != $T_VOID {
                     $try_ret := $*BLOCK.add_tmp;
@@ -846,8 +845,8 @@ class QAST::OperationsJS {
                     %convert{$T_NUM} := 'toNum';
                     %convert{$T_INT} := 'toInt';
                     if nqp::existskey(%convert, $want) {
-                      $catch_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
-                      $catch_wrapped_exception := $comp.await ~ 'nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
+                      $catch_exception := '/*await*/ nqp.' ~ %convert{$want} ~ '(' ~ $catch_exception ~ ')';
+                      $catch_wrapped_exception := '/*await*/ nqp.' ~ %convert{$want} ~ '(' ~ $catch_wrapped_exception ~ ')';
                     }
 
                     $catch_exception := "$try_ret = $catch_exception";
@@ -1156,10 +1155,10 @@ class QAST::OperationsJS {
 
             my $check_cond;
             if $is_withy {
-                my $deconted := $comp.await("{$cond.expr}.\$\$decont($*CTX)");
-                my $defined := $comp.await("$deconted.p6\$defined($*CTX, null, {$cond.expr})");
+                my $deconted := "(/*await*/ {$cond.expr}.\$\$decont($*CTX))";
+                my $defined := "(/*await*/ $deconted.p6\$defined($*CTX, null, {$cond.expr}))";
                 my $retvaled := "nqp.retval(HLL, $defined)";
-                $check_cond := Chunk.new($T_INT, $comp.await("$retvaled.\$\$toBool($*CTX)"), $cond);
+                $check_cond := Chunk.new($T_INT, "(/*await*/ $retvaled.\$\$toBool($*CTX))", $cond);
             } else {
                 $check_cond := $comp.coerce($cond, $T_BOOL);
             }
@@ -1393,14 +1392,14 @@ class QAST::OperationsJS {
                 my $ctx := $*CTX;
 
                 if $*HLL eq 'nqp' {
-                    $post := Chunk.void("{$comp.await} (/*async*/ function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
+                    $post := Chunk.void("/*await*/ (/*async*/ function() \{", $comp.as_js(@operands[2], :want($T_VOID)), '})()');
                 } else {
                     my $*CTX := $comp.unique_var('ctx');
 
                     $last_exception := $*BLOCK.add_tmp;
 
                     $post := Chunk.void(
-                        "{$comp.await} (/*async*/ function() \{",
+                        "/*await*/ (/*async*/ function() \{",
                         "let $*CTX = new nqp.CtxJustHandler($ctx, $ctx, $ctx.\$\$callThis);\n",
                         "$*CTX.\$\$LAST = function() \{\};",
                         "$last_exception = \{\};\n",
@@ -1560,7 +1559,7 @@ class QAST::OperationsJS {
         }
 
         my $category := $comp.as_js(:want($T_INT), $node[0]);
-        Chunk.void($category, $payload, "{$comp.await}$*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
+        Chunk.void($category, $payload, "/*await*/ $*CTX.throwpayloadlex({$category.expr}, {$payload.expr});\n");
     });
 
     add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx, :await);
@@ -1655,7 +1654,7 @@ class QAST::OperationsJS {
     add_op('invokewithcapture', sub ($comp, $node, :$want) {
         my $invokee := $comp.as_js($node[0], :want($T_OBJ));
         my $capture := $comp.as_js($node[1], :want($T_OBJ));
-        my $chunk := Chunk.new($T_OBJ, "nqp.retval(HLL, {$comp.await} {$invokee.expr}.\$\$apply([{$*CTX}].concat({$capture.expr}.named, {$capture.expr}.pos)))", [$invokee, $capture]);
+        my $chunk := Chunk.new($T_OBJ, "nqp.retval(HLL, /*await*/ {$invokee.expr}.\$\$apply([{$*CTX}].concat({$capture.expr}.named, {$capture.expr}.pos)))", [$invokee, $capture]);
         $comp.stored_result($chunk, :$want);
     });
 
@@ -1940,7 +1939,7 @@ class QAST::OperationsJS {
         my int $is_fancy_int := $comp.is_fancy_int($desired);
         nqp::die("Can't coerce OBJ to $desired") unless nqp::existskey(%convert, $desired) || $is_fancy_int;
 
-        my str $rough_convert := $comp.await('nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX})");
+        my str $rough_convert := '(/*await*/ nqp.' ~ %convert{$is_fancy_int ?? $T_INT !! $desired} ~ '(' ~ $chunk.expr ~ ", {$*CTX}))";
         my str $convert := $is_fancy_int
             ?? $comp.int_to_fancy_int($desired, $rough_convert)
             !! $rough_convert;
