@@ -842,3 +842,9 @@ module.exports.setGlobalContext = globalContext.setGlobalContext;
 
 module.exports.saveThisGlobalContext = globalContext.saveThisGlobalContext;
 module.exports.restoreThisGlobalContext = globalContext.restoreThisGlobalContext;
+
+exports.loadCompileTimeDependency = /*async*/ function(unit) {
+  const fakeModule = {};
+  const body = unit(fakeModule);
+  /*await*/ fakeModule.exports(module.exports, false);
+};
