@@ -314,7 +314,7 @@ class QAST::OperationsJS {
                 @setup.push("if ($ret.\$\$toBool($*CTX)) \{\n") if is_chain($part[$arg_idx]);
                 @setup.push($callee);
                 @setup.push($right);
-                @setup.push("$ret = nqp.retval(HLL, {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr}));\n");
+                @setup.push("$ret = nqp.retval(HLL, /*await*/ {$callee.expr}.\$\$call($*CTX, null, {$left.expr}, {$right.expr}));\n");
                 @setup.push("\}") if is_chain($part[$arg_idx]);
 
                 Chunk.new($T_OBJ, $right.expr, @setup, :node($part));
