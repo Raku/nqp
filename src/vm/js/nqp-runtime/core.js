@@ -862,15 +862,23 @@ exports.buildSourceMap = new BuildSourceMap();
 
 
 class JavaScriptCompiler extends NQPObject {
+  $$mangleCode(code) {
+    if ('/*async*/' === 'async') {
+      return code.replace(/\/\*async\*\//g, 'async').replace(/\/\*await\*\//g, 'await');
+    } else {
+      return code;
+    }
+  }
+
   /*async*/ p6$eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
-      const codeStr = nqp.arg_s(ctx, code);
+      const codeStr = this.$$mangleCode(nqp.arg_s(ctx, code));
       return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();
 
-    const codeStr = nqp.toStr(code, ctx);
+    const codeStr = this.$$mangleCode(nqp.toStr(code, ctx));
 
     // TODO - think about the LOAD_BYTECODE_FROM_MODULE HACK
     const preamble = 'var nqp = global.nqp; var module = global.nqpModule;var require = global.nqpRequire;';
