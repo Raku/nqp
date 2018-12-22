@@ -536,7 +536,7 @@ exports.NativeRef = require('./reprs.js').NativeRef;
 exports.getHLL = hll.getHLL;
 
 let once = true;
-exports.run = function(code) {
+exports.run = /*async*/ function(code) {
   if (once && browser && typeof window !== 'undefined' && window.__rakudo__ && window.__rakudo__.waitForStart) {
     once = false;
 
@@ -555,7 +555,7 @@ exports.run = function(code) {
   } else if (browser && typeof window === 'undefined') {
     // We are bundled for browser use but in fact running under node.js
     try {
-      return code();
+      return /*await*/ code();
     } catch (e) {
       if (e instanceof browser.Exit) {
         global.process.exit(e.status);
@@ -564,7 +564,7 @@ exports.run = function(code) {
       }
     }
   } else {
-    return code();
+    return /*await*/ code();
   }
 };
 
