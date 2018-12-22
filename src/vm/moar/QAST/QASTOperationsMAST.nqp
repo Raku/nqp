@@ -2237,7 +2237,6 @@ my %const_map := nqp::hash(
     'MVM_OPERAND_UINT32',       152,
     'MVM_OPERAND_UINT64',       160,
 
-    'BINARY_ENDIAN_NATIVE',       0,
     'BINARY_ENDIAN_LITTLE',       1,
     'BINARY_ENDIAN_BIG',          2,
 
