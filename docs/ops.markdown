@@ -2543,6 +2543,7 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * BINARY_SIZE_64_BIT
     * BINARY_ENDIAN_LITTLE
     * BINARY_ENDIAN_BIG
+    * BINARY_ENDIAN_NATIVE
 
     * TYPE_CHECK_CACHE_DEFINITIVE
     * TYPE_CHECK_CACHE_THEN_METHOD
