@@ -1122,42 +1122,50 @@ const BINARY_SIZE_16_BIT = 4;
 const BINARY_SIZE_32_BIT = 8;
 const BINARY_SIZE_64_BIT = 12;
 
-const isBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
+const isNativelyBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
 
-
-function writeIntToBuffer(isSigned, buffer, offset, value, flags) {
+function isBigEndianFromFlags(flags) {
   const endianFlags = flags & BINARY_ENDIAN_MASK;
+  return (endianFlags === BINARY_ENDIAN_BIG || (endianFlags == 0 && isBigEndian));
+}
+
+function sizeFromFlags(flags) {
   const sizeFlags = flags & ~BINARY_ENDIAN_MASK;
-
-  let sizeInBytes;
-
   if (sizeFlags == BINARY_SIZE_8_BIT) {
-    sizeInBytes = 1;
+    return 1;
   } else if (sizeFlags == BINARY_SIZE_16_BIT) {
-    sizeInBytes = 2;
+    return 2;
   } else if (sizeFlags == BINARY_SIZE_32_BIT) {
-    sizeInBytes = 4;
+    return 4;
   } else if (sizeFlags == BINARY_SIZE_64_BIT) {
     throw new NQPException('64bit writeint is not supported');
   } else {
     throw new NQPException('unsupported flags: ' + flags);
   }
+}
 
+function writeIntToBuffer(isSigned, buffer, offset, value, flags) {
+
+  const sizeInBytes = sizeFromFlags(flags);
   const lowlevelBuffer = Buffer.alloc(sizeInBytes);
+
+  const isBigEndian = isBigEndianFromFlags(flags);
 
   const shift = 32 - sizeInBytes * 8;
 
-  if (endianFlags === BINARY_ENDIAN_BIG || (endianFlags == 0 && isBigEndian)) {
-    if (isSigned) {
-      lowlevelBuffer.writeIntBE((value << shift >> shift), 0, sizeInBytes);
+  if (isSigned) {
+    const wrapped = value << shift >> shift;
+    if (isBigEndian) {
+      lowlevelBuffer.writeIntBE(wrapped, 0, sizeInBytes);
     } else {
-      lowlevelBuffer.writeUIntBE((value << shift >>> shift), 0, sizeInBytes);
+      lowlevelBuffer.writeIntLE(wrapped, 0, sizeInBytes);
     }
-  } else if (endianFlags === BINARY_ENDIAN_LITTLE || (endianFlags == 0 && !isBigEndian)) {
-    if (isSigned) {
-      lowlevelBuffer.writeIntLE((value << shift >> shift), 0, sizeInBytes);
+  } else {
+    const wrapped = value << shift >>> shift;
+    if (isBigEndian) {
+      lowlevelBuffer.writeUIntBE(wrapped, 0, sizeInBytes);
     } else {
-      lowlevelBuffer.writeUIntLE((value << shift >>> shift), 0, sizeInBytes);
+      lowlevelBuffer.writeUIntLE(wrapped, 0, sizeInBytes);
     }
   }
 
@@ -1170,6 +1178,12 @@ op.writeint = function(buffer, offset, value, flags) {
 
 op.writeuint = function(buffer, offset, value, flags) {
   writeIntToBuffer(false, buffer, offset, value, flags);
+};
+
+op.readuint = function(buffer, offset, flags) {
+  const sizeInBytes = sizeFromFlags(flags);
+  const rawData = rawSlice(buffer, offset, offset + sizeInBytes / byteSize(buffer));
+  return isBigEndianFromFlags(flags) ? rawData.readUIntBE(0, sizeInBytes) : rawData.readUIntLE(0, sizeInBytes);
 };
 
 op.encodeconf = function(str, encoding_, output, permissive) {
@@ -1222,6 +1236,10 @@ op.encoderep = function(str, encoding, replacement, output) {
 };
 
 function toRawBuffer(buf) {
+  return rawSlice(buf, 0, buf.array.length);
+}
+
+function rawSlice(buf, start, end) {
   const elementSize = byteSize(buf);
   const isUnsigned = buf.$$STable.REPR.type.$$STable.REPR.isUnsigned;
   const array = buf.array;
@@ -1229,7 +1247,7 @@ function toRawBuffer(buf) {
   const buffer = Buffer.allocUnsafe(array.length * elementSize);
 
   let offset = 0;
-  for (let i = 0; i < array.length; i++) {
+  for (let i = start; i < end; i++) {
     if (isUnsigned) {
       buffer.writeUIntLE(array[i], offset, elementSize);
     } else {
