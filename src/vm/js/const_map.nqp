@@ -77,4 +77,12 @@ my %const_map := nqp::hash(
     'NORMALIZE_NFD',             2,
     'NORMALIZE_NFKC',            3,
     'NORMALIZE_NFKD',            4,
+
+    'BINARY_ENDIAN_LITTLE',       1,
+    'BINARY_ENDIAN_BIG',          2,
+
+    'BINARY_SIZE_8_BIT',          0,
+    'BINARY_SIZE_16_BIT',         4,
+    'BINARY_SIZE_32_BIT',         8,
+    'BINARY_SIZE_64_BIT',        12,
 );

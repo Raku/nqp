@@ -1099,18 +1099,78 @@ function byteSize(buf) {
 
 exports.byteSize = byteSize;
 
-function writeBuffer(highLevel, lowLevel) {
+function writeBuffer(highLevel, highLevelOffset, lowLevel) {
   const elementSize = byteSize(highLevel);
   const isUnsigned = highLevel.$$STable.REPR.type.$$STable.REPR.isUnsigned;
 
   let offset = 0;
   for (let i = 0; i < lowLevel.length / elementSize; i++) {
-    highLevel.array[i] = isUnsigned ? lowLevel.readUIntLE(offset, elementSize) : lowLevel.readIntLE(offset, elementSize);
+    highLevel.array[highLevelOffset + i] = isUnsigned ? lowLevel.readUIntLE(offset, elementSize) : lowLevel.readIntLE(offset, elementSize);
     offset += elementSize;
   }
 }
 
 exports.writeBuffer = writeBuffer;
+
+const BINARY_ENDIAN_LITTLE = 1;
+const BINARY_ENDIAN_BIG = 2;
+
+const BINARY_ENDIAN_MASK = BINARY_ENDIAN_LITTLE | BINARY_ENDIAN_BIG;
+
+const BINARY_SIZE_8_BIT = 0;
+const BINARY_SIZE_16_BIT = 4;
+const BINARY_SIZE_32_BIT = 8;
+const BINARY_SIZE_64_BIT = 12;
+
+const isBigEndian = new Uint8Array(new Uint32Array([0x12345678]).buffer)[0] === 0x12;
+
+
+function writeIntToBuffer(isSigned, buffer, offset, value, flags) {
+  const endianFlags = flags & BINARY_ENDIAN_MASK;
+  const sizeFlags = flags & ~BINARY_ENDIAN_MASK;
+
+  let sizeInBytes;
+
+  if (sizeFlags == BINARY_SIZE_8_BIT) {
+    sizeInBytes = 1;
+  } else if (sizeFlags == BINARY_SIZE_16_BIT) {
+    sizeInBytes = 2;
+  } else if (sizeFlags == BINARY_SIZE_32_BIT) {
+    sizeInBytes = 4;
+  } else if (sizeFlags == BINARY_SIZE_64_BIT) {
+    throw new NQPException('64bit writeint is not supported');
+  } else {
+    throw new NQPException('unsupported flags: ' + flags);
+  }
+
+  const lowlevelBuffer = Buffer.alloc(sizeInBytes);
+
+  const shift = 32 - sizeInBytes * 8;
+
+  if (endianFlags === BINARY_ENDIAN_BIG || (endianFlags == 0 && isBigEndian)) {
+    if (isSigned) {
+      lowlevelBuffer.writeIntBE((value << shift >> shift), 0, sizeInBytes);
+    } else {
+      lowlevelBuffer.writeUIntBE((value << shift >>> shift), 0, sizeInBytes);
+    }
+  } else if (endianFlags === BINARY_ENDIAN_LITTLE || (endianFlags == 0 && !isBigEndian)) {
+    if (isSigned) {
+      lowlevelBuffer.writeIntLE((value << shift >> shift), 0, sizeInBytes);
+    } else {
+      lowlevelBuffer.writeUIntLE((value << shift >>> shift), 0, sizeInBytes);
+    }
+  }
+
+  writeBuffer(buffer, offset, lowlevelBuffer);
+};
+
+op.writeint = function(buffer, offset, value, flags) {
+  writeIntToBuffer(true, buffer, offset, value, flags);
+};
+
+op.writeuint = function(buffer, offset, value, flags) {
+  writeIntToBuffer(false, buffer, offset, value, flags);
+};
 
 op.encodeconf = function(str, encoding_, output, permissive) {
   if (output.array.length) {
@@ -1127,7 +1187,7 @@ op.encodeconf = function(str, encoding_, output, permissive) {
     buffer = Buffer.from(str, encoding);
   }
 
-  writeBuffer(output, buffer);
+  writeBuffer(output, 0, buffer);
 
 
   return output;
@@ -1152,7 +1212,7 @@ op.encoderepconf = function(str, encoding_, replacement, output, permissive) {
     throw new NQPException('encoding unsupported in encoderep');
   }
 
-  writeBuffer(output, buffer);
+  writeBuffer(output, 0, buffer);
 
   return output;
 };

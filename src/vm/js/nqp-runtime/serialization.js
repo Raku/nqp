@@ -1002,7 +1002,7 @@ op.serialize = function(sc, sh) {
 op.serializetobuf = function(sc, sh, type) {
   const writer = new SerializationWriter(sc, sh.array);
   const buffer = type.$$STable.REPR.allocate(type.$$STable);
-  core.writeBuffer(buffer, writer.serialize());
+  core.writeBuffer(buffer, 0, writer.serialize());
   return buffer;
 };
 
