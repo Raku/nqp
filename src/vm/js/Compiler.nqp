@@ -1417,7 +1417,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     multi method as_js(QAST::IVal $node, :$want) {
         if $want == $T_INT64 || $want == $T_UINT64 {
-            Chunk.new($want,'('~$node.value()~'n)', :$node);
+            Chunk.new($want,'nqp.BigInt("'~$node.value()~'")', :$node);
         } else {
             # TODO think about 64bit values
             Chunk.new($T_INT,'('~$node.value()~')', :$node);
