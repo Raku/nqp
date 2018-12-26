@@ -1925,6 +1925,8 @@ class QAST::OperationsJS {
     add_simple_op('writeuint', $T_VOID, [$T_OBJ, $T_INT, $T_UINT32, $T_INT], :side_effects);
     add_simple_op('readint', $T_INT, [$T_OBJ, $T_INT, $T_INT]);
     add_simple_op('readuint', $T_UINT32, [$T_OBJ, $T_INT, $T_INT]);
+    add_simple_op('writenum', $T_VOID, [$T_OBJ, $T_INT, $T_NUM, $T_INT], :side_effects);
+    add_simple_op('readnum', $T_NUM, [$T_OBJ, $T_INT, $T_INT]);
 
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {

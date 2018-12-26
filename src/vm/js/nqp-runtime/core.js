@@ -1138,15 +1138,23 @@ function sizeFromFlags(flags) {
   } else if (sizeFlags == BINARY_SIZE_32_BIT) {
     return 4;
   } else if (sizeFlags == BINARY_SIZE_64_BIT) {
-    throw new NQPException('64bit writeint is not supported');
+    return 8;
   } else {
     throw new NQPException('unsupported flags: ' + flags);
   }
 }
 
+function intSizeFromFlags(flags) {
+  const size = sizeFromFlags(flags);
+  if (size === 8) {
+    throw new NQPException('BINARY_SIZE_64_BIT for (u)ints is not supported');
+  }
+  return size;
+}
+
 function writeIntToBuffer(isSigned, buffer, offset, value, flags) {
 
-  const sizeInBytes = sizeFromFlags(flags);
+  const sizeInBytes = intSizeFromFlags(flags);
   const lowlevelBuffer = Buffer.alloc(sizeInBytes);
 
   const isBigEndian = isBigEndianFromFlags(flags);
@@ -1181,10 +1189,59 @@ op.writeuint = function(buffer, offset, value, flags) {
 };
 
 op.readuint = function(buffer, offset, flags) {
-  const sizeInBytes = sizeFromFlags(flags);
+  const sizeInBytes = intSizeFromFlags(flags);
   const rawData = rawSlice(buffer, offset, offset + sizeInBytes / byteSize(buffer));
   return isBigEndianFromFlags(flags) ? rawData.readUIntBE(0, sizeInBytes) : rawData.readUIntLE(0, sizeInBytes);
 };
+
+op.writenum = function(buffer, offset, value, flags) {
+  const isBigEndian = isBigEndianFromFlags(flags);
+
+  const sizeInBytes = sizeFromFlags(flags);
+  const lowlevelBuffer = Buffer.alloc(sizeInBytes);
+
+  if (sizeInBytes == 4) {
+    if (isBigEndian) {
+      lowlevelBuffer.writeFloatBE(value, 0);
+    } else {
+      lowlevelBuffer.writeFloatLE(value, 0);
+    }
+  } else if (sizeInBytes == 8) {
+    if (isBigEndian) {
+      lowlevelBuffer.writeDoubleBE(value, 0);
+    } else {
+      lowlevelBuffer.writeDoubleLE(value, 0);
+    }
+  } else {
+    throw new NQPException('unsupported size: ' + sizeInBytes*8 + 'bits');
+  }
+
+  writeBuffer(buffer, offset, lowlevelBuffer);
+
+};
+
+op.readnum = function(buffer, offset, flags) {
+  const sizeInBytes = sizeFromFlags(flags);
+  const rawData = rawSlice(buffer, offset, offset + sizeInBytes / byteSize(buffer));
+  const isBigEndian = isBigEndianFromFlags(flags);
+
+  if (sizeInBytes == 4) {
+    if (isBigEndian) {
+      return rawData.readFloatBE(0);
+    } else {
+      return rawData.readFloatLE(0);
+    }
+  } else if (sizeInBytes == 8) {
+    if (isBigEndian) {
+      return rawData.readDoubleBE(0);
+    } else {
+      return rawData.readDoubleLE(0);
+    }
+  } else {
+    throw new NQPException('unsupported size: ' + sizeInBytes*8 + 'bits');
+  }
+};
+
 
 op.encodeconf = function(str, encoding_, output, permissive) {
   if (output.array.length) {
