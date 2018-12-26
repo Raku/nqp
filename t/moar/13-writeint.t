@@ -58,26 +58,50 @@ is(buf_dump($buf), '0x00 0x80 0x00 0x00 0x00', 'nqp::writeuint - 32bit big endia
 # work around NQP's literals defaulting to num
 my uint64 $val := nqp::bitor_i(nqp::bitshiftl_i(0x01234567, 32), 0x89ABCDEF);
 $buf := Buffer.new;
-nqp::writeuint($buf, 1, $val, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_64_BIT);
+
+if nqp::backendconfig(){"intvalsize"} < 8 {
+  nqp::writeuint($buf, 1, 0x89ABCDEF, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_32_BIT);
+  nqp::writeuint($buf, 5, 0x01234567, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_32_BIT);
+}
+else {
+  nqp::writeuint($buf, 1, $val, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_64_BIT);
+}
 
 is(buf_dump($buf), '0x00 0xEF 0xCD 0xAB 0x89 0x67 0x45 0x23 0x01', 'nqp::writeuint with 64bit little endian');
 
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_LITTLE), 0xEF, 'read byte');
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_16_BIT), 0xCDEF, 'read word');
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_32_BIT), 0x89ABCDEF, 'read dword');
-is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_64_BIT), $val, 'read qword');
+
+
+if nqp::backendconfig(){"intvalsize"} < 8 {
+  skip('nqp::readuint with 64bit not supported on <64bit platforms');
+} else {
+  is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_LITTLE +| nqp::const::BINARY_SIZE_64_BIT), $val, 'read qword');
+}
 
 is(nqp::elems($buf), 9, 'nqp::readuint does not change the size of buffer');
 
 $buf := Buffer.new;
-nqp::writeuint($buf, 1, $val, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_64_BIT);
+
+if nqp::backendconfig(){"intvalsize"} < 8 {
+  nqp::writeuint($buf, 1, 0x01234567, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_32_BIT);
+  nqp::writeuint($buf, 5, 0x89ABCDEF, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_32_BIT);
+}
+else {
+  nqp::writeuint($buf, 1, $val, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_64_BIT);
+}
 
 is(buf_dump($buf), '0x00 0x01 0x23 0x45 0x67 0x89 0xAB 0xCD 0xEF', 'nqp::writeuint with 64bit big endian');
 
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_BIG), 0x01, 'read big endian byte');
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_16_BIT), 0x0123, 'read big endian word');
 is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_32_BIT), 0x01234567, 'read big endian dword');
-is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_64_BIT), $val, 'read big endian qword');
+if nqp::backendconfig(){"intvalsize"} < 8 {
+  skip('nqp::readuint with 64bit not supported on <64bit platforms');
+} else {
+  is(nqp::readuint($buf, 1, nqp::const::BINARY_ENDIAN_BIG +| nqp::const::BINARY_SIZE_64_BIT), $val, 'read big endian qword');
+}
 is(nqp::elems($buf), 9, 'nqp::readuint does not change the size of buffer');
 
 $buf := Buffer.new;
