@@ -744,11 +744,17 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
                 if $got == $T_INT64 {
                     return Chunk.new($T_UINT64, "nqp.asUintN(64, {$chunk.expr})", $chunk);
                 }
+                if $got == $T_INT {
+                    return Chunk.new($T_UINT64, "nqp.BigInt({$chunk.expr} >>> 0)", $chunk);
+                }
             }
 
             if $desired == $T_INT64 {
                 if $got == $T_UINT64 {
                     return Chunk.new($T_INT64, "nqp.asIntN(64, {$chunk.expr})", $chunk);
+                }
+                if $got == $T_INT {
+                    return Chunk.new($T_INT64, "nqp.BigInt({$chunk.expr})", $chunk);
                 }
             }
 
