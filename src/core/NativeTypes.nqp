@@ -41,9 +41,7 @@ my native uint16 is repr('P6int') is nativesize(16) is unsigned { }
 my native uint8  is repr('P6int') is nativesize( 8) is unsigned { }
 
 my native num is repr('P6num') { }
-#?if moar
 my native num64 is repr('P6num') is nativesize(64) { }
 my native num32 is repr('P6num') is nativesize(32) { }
-#?endif
 
 my native str is repr('P6str') { }
