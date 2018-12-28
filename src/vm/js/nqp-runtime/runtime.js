@@ -634,7 +634,7 @@ exports.arg_u64 = function(ctx, contedArg) {
   if (arg instanceof NQPInt) {
     return asIntN.asUintN(64, JSBI.BigInt(arg.value));
   } else if (arg.$$getUint64) {
-    return asIntN(arg.$$getUint64());
+    return arg.$$getUint64();
   } else {
     throw new NQPException('Expected native uint64 argument, but got something else');
   }
