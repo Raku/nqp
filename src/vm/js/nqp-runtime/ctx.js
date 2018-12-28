@@ -143,7 +143,6 @@ class Ctx extends NQPObject {
     const uncaught_control = this.$$getHLL().get('uncaught_control');
     if (uncaught_control) {
       try {
-        console.log('uncaught_control');
         /*await*/ uncaught_control.$$call(ctx, null, exception.$$decont(this));
       } catch (e) {
         if (e instanceof ResumeException && e.exception === exception) {
