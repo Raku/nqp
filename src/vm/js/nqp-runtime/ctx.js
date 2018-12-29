@@ -143,7 +143,7 @@ class Ctx extends NQPObject {
     const uncaught_control = this.$$getHLL().get('uncaught_control');
     if (uncaught_control) {
       try {
-        /*await*/ uncaught_control.$$call(ctx, null, exception.$$decont(this));
+        /*await*/ uncaught_control.$$call(this, null, exception.$$decont(this));
       } catch (e) {
         if (e instanceof ResumeException && e.exception === exception) {
           return;
@@ -195,7 +195,7 @@ class Ctx extends NQPObject {
     const uncaught_exception = this.$$getHLL().get('uncaught_exception');
     if (uncaught_exception) {
       try {
-        /*await*/ uncaught_exception.$$call(ctx, null, exception);
+        /*await*/ uncaught_exception.$$call(this, null, exception);
       } catch (e) {
         if (e instanceof ResumeException && e.exception === exception) {
           return;
