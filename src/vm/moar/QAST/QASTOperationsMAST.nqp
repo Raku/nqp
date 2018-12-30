@@ -3159,8 +3159,6 @@ QAST::MASTOperations.add_core_moarop_mapping('atomicbindattr', 'atomicbindattr_o
 QAST::MASTOperations.add_core_moarop_mapping('casattr', 'casattr_o');
 
 # MoarVM-specific compilation ops
-QAST::MASTOperations.add_core_moarop_mapping('masttofile', 'masttofile', 2);
-QAST::MASTOperations.add_core_moarop_mapping('masttocu', 'masttocu');
 QAST::MASTOperations.add_core_moarop_mapping('iscompunit', 'iscompunit');
 QAST::MASTOperations.add_core_moarop_mapping('compunitmainline', 'compunitmainline');
 QAST::MASTOperations.add_core_moarop_mapping('compunitcodes', 'compunitcodes');
