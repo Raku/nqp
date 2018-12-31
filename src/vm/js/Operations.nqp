@@ -1233,7 +1233,7 @@ class QAST::OperationsJS {
             @setup.push("if ($true_count < 2) \{");
             @setup.push($chunk);
             @setup.push(
-                "if ({$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)) \{\n"
+                "if (/*await*/ {$chunk.expr}.\$\$decont($*CTX).\$\$toBool($*CTX)) \{\n"
                 ~ "$true_count++;\n"
                 ~ "$ret = {$chunk.expr};\n"
                 ~ "\}\n"
