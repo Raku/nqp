@@ -1,4 +1,4 @@
-plan(33);
+plan(35);
 
 class Foo {
     has $!answer;
@@ -13,6 +13,14 @@ $first.question(42);
 $second.question(23);
 ok($first.answer  == 42, "attributes work");
 ok($second.answer == 23, "... and are not shared among objects");
+
+dies-ok({
+  Foo.answer;
+}, "can't get an attribute from a type object");
+
+dies-ok({
+  Foo.question(100);
+}, "can't set an attribute on a type object");
 
 class Bar {
 }
