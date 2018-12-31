@@ -2100,6 +2100,7 @@ to read or write:
 
 * `BINARY_ENDIAN_LITTLE`
 * `BINARY_ENDIAN_BIG`
+* `BINARY_ENDIAN_NATIVE`
 
 Operations not configured with one of these options will assume native endian.
 Reading or writing little endian on a little endian machine will, of course,
