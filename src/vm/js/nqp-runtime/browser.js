@@ -178,3 +178,7 @@ exports.Exit = Exit;
 op.exit = function(code) {
   throw new exports.Exit(code);
 };
+
+op.gethostname = function() {
+  return 'unknown';
+};
