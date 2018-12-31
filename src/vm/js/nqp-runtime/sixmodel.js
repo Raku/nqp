@@ -269,6 +269,14 @@ class STable {
       throw new NQPException(`Cannot unbox a type object (${this.$$STable.debugName}) to an str.`);
     };
 
+    obj.$$getattr = function(classHandle, attrName) {
+      throw new NQPException(`Cannot look up attributes in a ${this.$$STable.debugName} type object`);
+    };
+
+    obj.$$bindattr = function(classHandle, attrName, value) {
+      throw new NQPException(`Cannot bind attributes in a ${this.$$STable.debugName} type object`);
+    };
+
     return obj;
   }
 
