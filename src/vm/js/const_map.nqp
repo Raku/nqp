@@ -78,6 +78,7 @@ my %const_map := nqp::hash(
     'NORMALIZE_NFKC',            3,
     'NORMALIZE_NFKD',            4,
 
+    'BINARY_ENDIAN_NATIVE',       0,
     'BINARY_ENDIAN_LITTLE',       1,
     'BINARY_ENDIAN_BIG',          2,
 
