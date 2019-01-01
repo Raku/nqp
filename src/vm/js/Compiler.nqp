@@ -1237,7 +1237,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
               $result_for_exit_handler := $*BLOCK.add_tmp;
               $result_for_exit_handler_chunk := self.coerce(Chunk.new($stmts.type, $stmts.expr), $T_OBJ);
               $wrap_in_try := 1;
-              $exit_handler := "\} finally \{nqp.exitHandler($*CTX, HLL, $result_for_exit_handler);\n";
+              $exit_handler := "\} finally \{/*await*/ nqp.exitHandler($*CTX, HLL, $result_for_exit_handler);\n";
             }
 
             if $*BLOCK.pass_on_exceptions {
