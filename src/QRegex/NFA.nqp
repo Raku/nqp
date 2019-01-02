@@ -28,7 +28,7 @@ class QRegex::NFA {
 
     my $ACTIONS;
     my $nfadeb;
-    my $ind;
+    my int $ind;
 
     sub dentin() {
         if $nfadeb {
@@ -513,7 +513,7 @@ class QRegex::NFA {
         dentout($!states)
     }
 
-    method mergesubrule($start, $to, $fate, $cursor, $name, %caller_seen?) {
+    method mergesubrule(int $start, int $to, int $fate, $cursor, $name, %caller_seen?) {
         my $indent := dentin();
         my %seen := nqp::clone(%caller_seen);
         my @substates;
@@ -588,7 +588,7 @@ class QRegex::NFA {
                 while $s < $send {
                     note("$s:");
                     for @substates[$s] -> $a, $v, $t {
-                        my $act := nqp::bitand_i($a,0xff);
+                        my int $act := nqp::bitand_i($a,0xff);
                         my $action := $ACTIONS[$act];
                         if $act == $EDGE_CODEPOINT || $act == $EDGE_CODEPOINT_LL {
                             note("\t$t $action " ~ nqp::chr($v));
@@ -617,7 +617,7 @@ class QRegex::NFA {
         dentout(self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen));
     }
 
-    method mergesubstates($start, $to, $fate, @substates, $cursor, %seen?) {
+    method mergesubstates(int $start, int $to, int $fate, @substates, $cursor, %seen?) {
         my $indent := dentin();
         note("$indent mergesubstates start $start to $to fate $fate") if $nfadeb;
         $!states[0][$fate] := $fate;  # overridden by !protoregex_nfa
@@ -652,7 +652,7 @@ class QRegex::NFA {
                         }
                     }
                     elsif $substate[$j] == $EDGE_SUBRULE {
-                        my $j2 := $substate[$j+2];
+                        my int $j2 := $substate[$j+2];
                         my $j1 := $substate[$j+1];
                         nqp::splice($substate,[], $j, 3);
                         self.mergesubrule($i, $j2, $fate, $cursor, $j1, %seen);
@@ -814,11 +814,11 @@ class QRegex::NFA {
             note("now $send states before unlinking empties") if $nfadeb;
             $s := 1;
             while $s < $send {
-                my $edges := $!states[$s];
                 if nqp::atpos_i($remap,$s) && $s > 1 {
                     $!states[$s] := [];
                 }
                 else {
+                    my $edges := $!states[$s];
                     my int $eend := nqp::elems($edges);
                     my int $e := 2;
                     while $e < $eend {
@@ -859,8 +859,7 @@ class QRegex::NFA {
                                 $edges[$e + 1] := $sedges[1];
                                 $edges[$e + 2] := $sedges[2];
 
-                                my int $refcnt := nqp::atpos_i($refs,$to);
-                                $refcnt := $refcnt - 1;
+                                my int $refcnt := nqp::atpos_i($refs,$to) - 1;
                                 nqp::bindpos_i($refs,$to,$refcnt);
                                 $!states[$to] := [] unless $refcnt; # remove if no refs remaining
                             }
@@ -908,7 +907,7 @@ class QRegex::NFA {
                 $s := 1;
                 while $s < $send {
                     if +$!states[$s] {
-                        my $newpos := nqp::atpos_i($remap,$s);
+                        my int $newpos := nqp::atpos_i($remap,$s);
                         note("OOPS outrageous $newpos") if $newpos > $s;
                         if $newpos {
                             nqp::bindpos($newstates, $newpos, $!states[$s]);
@@ -919,7 +918,7 @@ class QRegex::NFA {
                                 my int $to := $edges[$e];
                                 my int $act := nqp::bitand_i($edges[$e-2], 0xff);
                                 if $to {
-                                    my $to2 := nqp::atpos_i($remap,$to);
+                                    my int $to2 := nqp::atpos_i($remap,$to);
                                     note("In $s -> $newpos remapping " ~ $ACTIONS[$act] ~ " $to -> $to2") if $nfadeb;
                                     $edges[$e] := $to2;
                                 }
@@ -930,7 +929,7 @@ class QRegex::NFA {
                             while $e < $eend {
                                 my int $act := nqp::bitand_i($edges[$e], 0xff);
                                 if $act < $EDGE_CHARLIST {
-                                    my $f := 0;
+                                    my int $f := 0;
                                     while $f < $e {
                                         if $act == $edges[$f] && $edges[$e+2] == $edges[$f+2] && $edges[$e+1] == $edges[$f+1] {
                                             note("Deleting dup edge at $s $e/$f") if $nfadeb;
