@@ -768,11 +768,12 @@ class QRegex::NFA {
         my int $send := nqp::elems($!states);
         note("------------------------------------------\n   $send states") if $nfadeb;
         $ind := 0 if $nfadeb;
-        my $remap := nqp::list_i();
-        nqp::setelems($remap, $send + 1);
-        my $refs := nqp::list_i();
-        nqp::setelems($refs, $send + 1);
         if $send > 3 {
+            my $remap := nqp::list_i();
+            nqp::setelems($remap, $send + 1);
+            my $refs := nqp::list_i();
+            nqp::setelems($refs, $send + 1);
+
             self.mydump() if $nfadeb;
 
             # first pass, remember single-edge epsilon states
