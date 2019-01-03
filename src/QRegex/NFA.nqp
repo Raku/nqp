@@ -642,7 +642,8 @@ class QRegex::NFA {
                 my int $j := 0;
                 my int $k := nqp::elems($substate);
                 while $j < $k {
-                    $substate[$j+2] := $substate[$j+2] + $substart;
+                    my int $ssj2 := $substate[$j+2];
+                    $substate[$j+2] := $ssj2 + $substart;
                     if $substate[$j] == $EDGE_FATE {
                         if $to > 0 {
                             $substate[$j+1] := $fate;
