@@ -4,6 +4,7 @@ const coercions = require('./coercions.js');
 
 const NQPInt = require('./nqp-int.js');
 
+const JSBI = require('jsbi');
 const asIntN = require('./as-int-n.js');
 
 class CodePair {
@@ -282,6 +283,16 @@ class NativeRef {
 
         $$getInt64() {
           return this.get();
+        }
+
+        // HACK till we get better int64 support in rakudo.js
+        $$getInt() {
+          return JSBI.toNumber(asIntN.asIntN(32, this.get()));
+        }
+
+        // HACK till we get better int64 support in rakudo.js
+        $$assign_i(ctx, value) {
+          this.set(JSBI.BigInt(value));
         }
 
         $$getUint64() {
