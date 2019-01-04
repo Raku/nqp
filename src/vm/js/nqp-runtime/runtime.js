@@ -536,14 +536,22 @@ exports.NativeRef = require('./reprs.js').NativeRef;
 exports.getHLL = hll.getHLL;
 
 let once = true;
-exports.run = /*async*/ function(code) {
+exports.run = /*async*/ function(code, isMain) {
+  const doRun = /*async*/ function() {
+    let ret = /*await*/ code();
+    if (exports.afterRun && isMain === true) {
+      /*await*/ hll.op.gethllsym(exports.afterRun.hll, exports.afterRun.sym).$$call(null, null);
+    }
+    return ret;
+  };
+
   if (once && browser && typeof window !== 'undefined' && window.__rakudo__ && window.__rakudo__.waitForStart) {
     once = false;
 
     window.__rakudo__.waitForStart.push(() => {
       browser.op.getstdout().start();
       try {
-        code();
+        doRun();
       } catch (e) {
         if (e instanceof browser.Exit) {
         } else {
@@ -555,7 +563,7 @@ exports.run = /*async*/ function(code) {
   } else if (browser && typeof window === 'undefined') {
     // We are bundled for browser use but in fact running under node.js
     try {
-      return /*await*/ code();
+      return /*await*/ doRun();
     } catch (e) {
       if (e instanceof browser.Exit) {
         global.process.exit(e.status);
@@ -564,7 +572,7 @@ exports.run = /*async*/ function(code) {
       }
     }
   } else {
-    return /*await*/ code();
+    return /*await*/ doRun();
   }
 };
 

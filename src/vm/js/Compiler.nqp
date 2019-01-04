@@ -1799,7 +1799,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         }
 
         @setup.unshift("return nqp.run(/*async*/ function() \{\n");
-        @setup.push("\});\n");
+        @setup.push("\}, isMain);\n");
         Chunk.new($T_VOID, "", @setup);
     }
 
@@ -2316,7 +2316,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.void(
             $shebang ?? "#!/usr/bin/env node\n" !! '',
             "'use strict';\n",
-            $instant ?? "const body = function(nqp, isMain) \{\n" !! 'const isMain = true;',
+            $instant ?? "const body = function(nqp, isMain) \{\n" !! 'const isMain = "immediate";',
             $libpath,
             (try $*EXECNAME) ?? "nqp.execname({quote_string($*EXECNAME)});\n" !! '',
             "const HLL=nqp.getHLL({quote_string($got_compunit ?? $ast.hll !! '')});\n",
