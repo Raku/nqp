@@ -373,5 +373,5 @@ op.add_i64 = function(a, b) {
 };
 
 op.sub_i64 = function(a, b) {
-  return asIntN.asIntN(64, JSBI.sub(a, b));
+  return asIntN.asIntN(64, JSBI.subtract(a, b));
 };
