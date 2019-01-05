@@ -31,8 +31,6 @@ const null_s = require('./null_s.js');
 
 const BOOT = require('./BOOT.js');
 
-const exceptionsStack = require('./exceptions-stack.js');
-
 const sixmodel = require('./sixmodel.js');
 
 const Capture = require('./capture.js');
@@ -2004,16 +2002,6 @@ op.split = function(currentHLL, separator, string) {
   return hll.slurpyArray(currentHLL, (string !== ''
     ? (separator === '' ? graphemes.break(string) : string.split(graphemes.regexForLiteral(separator)))
     : []).map(str => strToObj(currentHLL, str)));
-};
-
-op.exception = function() {
-  const stack = exceptionsStack();
-  return stack[stack.length - 1];
-};
-
-op.lastexpayload = function() {
-  const stack = exceptionsStack();
-  return stack[stack.length - 1].$$payload;
 };
 
 op.setextype = function(exception, category) {

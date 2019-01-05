@@ -881,7 +881,7 @@ class QAST::OperationsJS {
     });
 
 
-    add_simple_op('exception', $T_OBJ, []);
+    add_simple_op('exception', $T_OBJ, [], sub () {"$*CTX.\$\$exception()"});
     add_simple_op('rethrow', $T_VOID, [$T_OBJ], sub ($exception) {"/*await*/ $*CTX.rethrow($exception)"}, :side_effects);
     add_simple_op('resume', $T_VOID, [$T_OBJ], sub ($exception) {"/*await*/ $*CTX.resume($exception)"}, :side_effects);
     add_simple_op('throw', $T_VOID, [$T_OBJ], :side_effects, sub ($exception) {"/*await*/ {$*CTX}.throw($exception)"});
@@ -1511,14 +1511,18 @@ class QAST::OperationsJS {
             else {
                 my $unwind_marker := $*BLOCK.add_tmp;
 
-                my $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
+                my $handle_result;
+                {
+                    my $*CTX := '$$ctx';
+                    $handle_result := $comp.as_js(:want($T_OBJ), $node[2]);
+                }
                 my str $result := $*BLOCK.add_tmp;
 
 
                 Chunk.new($T_OBJ, $result, [
                     "$unwind_marker = \{\};\n",
                     "$*CTX.\$\$unwind = $unwind_marker;\n",
-                    "$*CTX.\$\${$type} = /*async*/ function() \{\n",
+                    "$*CTX.\$\${$type} = /*async*/ function(\$\$ctx) \{\n",
                         $handle_result,
                         "$result = {$handle_result.expr};\n",
                     "\};\n",
@@ -1564,7 +1568,7 @@ class QAST::OperationsJS {
 
     add_simple_op('throwextype', $T_VOID, [$T_INT], :side_effects, :ctx, :await);
 
-    add_simple_op('lastexpayload', $T_OBJ, [], :!inlinable);
+    add_simple_op('lastexpayload', $T_OBJ, [], sub () {"$*CTX.\$\$lastexpayload()"}, :!inlinable);
 
 
     add_op('control', sub ($comp, $node, :$want) {

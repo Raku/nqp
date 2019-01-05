@@ -3,7 +3,6 @@ const NQPExceptionWithCtx = require('./nqp-exception-with-ctx.js');
 const NQPException = require('./nqp-exception.js');
 const NQPObject = require('./nqp-object.js');
 const Null = require('./null.js');
-const exceptionsStack = require('./exceptions-stack.js');
 
 const BOOT = require('./BOOT.js');
 
@@ -117,9 +116,10 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack().push(exception);
         try {
           const wrapped = new Ctx(this, this, null);
+          wrapped.$$currentException = exception;
+
           if (ctx[handler]) {
             ctx.$$unwind.ret = /*await*/ ctx[handler](wrapped);
           } else {
@@ -131,8 +131,6 @@ class Ctx extends NQPObject {
           } else {
             throw e;
           }
-        } finally {
-          exceptionsStack().pop();
         }
 
         throw ctx.$$unwind;
@@ -173,9 +171,10 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack().push(exception);
+
         try {
           const wrapped = new Ctx(this, this, null);
+          wrapped.$$currentException = exception;
           ctx.$$unwind.ret = /*await*/ ctx.$$CATCH(wrapped);
         } catch (e) {
           if (e instanceof ResumeException && e.exception === exception) {
@@ -183,10 +182,7 @@ class Ctx extends NQPObject {
           } else {
             throw e;
           }
-        } finally {
-          exceptionsStack().pop();
         }
-
         throw ctx.$$unwind;
       }
       ctx = ctx.$$caller;
@@ -210,14 +206,10 @@ class Ctx extends NQPObject {
   }
 
   /*async*/ catchException(exception) {
-    this.exception = exception;
-    exceptionsStack().push(exception);
-    try {
-      // we don't have access to the most correct ctx in case of this sort of exception
-      return /*await*/ this.$$CATCH(this);
-    } finally {
-      exceptionsStack().pop();
-    }
+    // we don't have access to the most correct ctx in case of this sort of exception
+    const wrapped = new Ctx(this, this, null);
+    wrapped.$$currentException = exception;
+    return /*await*/ this.$$CATCH(wrapped);
   }
 
   rethrow(exception) {
@@ -277,9 +269,9 @@ class Ctx extends NQPObject {
         exception.caught = ctx;
         ctx.exception = exception;
 
-        exceptionsStack().push(exception);
         try {
           const wrapped = new Ctx(this, this, null);
+          wrapped.$$currentException = exception;
           if (ctx[handler]) {
             ctx.$$unwind.ret = /*await*/ ctx[handler](wrapped);
           } else {
@@ -291,8 +283,6 @@ class Ctx extends NQPObject {
           } else {
             throw e;
           }
-        } finally {
-          exceptionsStack().pop();
         }
 
         let check = lookFrom;
@@ -376,6 +366,22 @@ class Ctx extends NQPObject {
 
   lookupFromOuter(name) {
     return this.$$outer.lookup(name);
+  }
+
+  $$exception() {
+    let ctx = this;
+    while (ctx) {
+      if (ctx.$$currentException) {
+        return ctx.$$currentException;
+      }
+      ctx = ctx.$$caller;
+    }
+
+    console.log('exception not found');
+  }
+
+  $$lastexpayload() {
+    return this.$$exception().$$payload;
   }
 
   $$getHLL() {
