@@ -2118,6 +2118,15 @@ my %const_map := nqp::hash(
     'RUSAGE_NSIGNALS',           15,
     'RUSAGE_NVCSW',              16,
     'RUSAGE_NIVCSW',             17,
+
+    'BINARY_ENDIAN_NATIVE',       0,
+    'BINARY_ENDIAN_LITTLE',       1,
+    'BINARY_ENDIAN_BIG',          2,
+
+    'BINARY_SIZE_8_BIT',          0,
+    'BINARY_SIZE_16_BIT',         4,
+    'BINARY_SIZE_32_BIT',         8,
+    'BINARY_SIZE_64_BIT',        12,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
