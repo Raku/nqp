@@ -846,7 +846,7 @@ You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 * `atkey(%hash, str $key --> Mu)`
 * `atkey_i(%hash, str $key --> int)`
 * `atkey_u(%hash, str $key --> uint)`
-  * Note, there's no bindkey_u yet since at the moment since atkey_u is only used
+  * Note, there's no bindkey_u yet since at the moment atkey_u is only used
     for getting values from the lexpad
 * `atkey_n(%hash, str $key --> num)`
 * `atkey_s(%hash, str $key --> str)`
