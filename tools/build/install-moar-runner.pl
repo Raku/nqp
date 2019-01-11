@@ -30,7 +30,7 @@ else {
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     if ($relocatable) {
-        printf $fh <<'EOS', $moar;
+        printf $fh <<'EOS';
 #!/bin/bash
 
 # Sourced from https://stackoverflow.com/a/246128/1975049
