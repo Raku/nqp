@@ -1932,6 +1932,8 @@ class QAST::OperationsJS {
     add_simple_op('writenum', $T_VOID, [$T_OBJ, $T_INT, $T_NUM, $T_INT], :side_effects);
     add_simple_op('readnum', $T_NUM, [$T_OBJ, $T_INT, $T_INT]);
 
+    add_simple_op('decodelocaltime', $T_OBJ, [$T_INT], :side_effects);
+
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {
             %hll_unbox{$hll} := nqp::hash();

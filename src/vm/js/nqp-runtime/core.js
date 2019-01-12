@@ -2213,3 +2213,16 @@ op.setjsattr = function(ctx, obj, attr, value) {
 op.getjsattr = function(ctx, obj, attr) {
   return fromJSToObject(ctx, obj.$$jsObject[attr]);
 };
+
+op.decodelocaltime = function(sinceEpoch) {
+  let date = new Date(sinceEpoch * 1000);
+
+  return BOOT.createIntArray([
+    date.getSeconds(),
+    date.getMinutes(),
+    date.getHours(),
+    date.getDate(),
+    date.getMonth()+1,
+    date.getFullYear()
+  ]);
+};
