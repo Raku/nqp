@@ -2033,6 +2033,7 @@ my %const_map := nqp::hash(
     'HLL_ROLE_HASH',        5,
     'HLL_ROLE_CODE',        6,
 
+    'CONTROL_ANY',          2,
     'CONTROL_NEXT',         4,
     'CONTROL_REDO',         8,
     'CONTROL_LAST',         16,
