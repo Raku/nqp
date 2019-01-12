@@ -1,6 +1,6 @@
 # Test nqp::op pseudo-functions.
 
-plan(371);
+plan(373);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -602,6 +602,16 @@ is(
 
 is(nqp::codes('hello'), 5, 'nqp::codes with ascii');
 is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars bigger than a single code unit');
+
+{
+  my @a := nqp::decodelocaltime(nqp::time_i());
+
+  ok(nqp::elems(@a) == 6 || nqp::elems(@a) == 9, 'nqp::decodelocaltime returns correct around of elements');
+  my @b := nqp::decodelocaltime(0);
+  my $year := nqp::atpos_i(@b, 5);
+
+  ok($year == 1970 || $year == 1969, 'the epoch starts in either 1970 or 1969 localtime'); # timezone offset
+}
 
 # Test nqp::slice op
 {
