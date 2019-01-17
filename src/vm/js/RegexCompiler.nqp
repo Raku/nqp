@@ -265,7 +265,7 @@ class RegexCompiler {
             my str $prop := "nqp.uniprop_{$node.negate ?? 'not_' !! ''}{$mangled}";
             my str $try_prop := nqp::elems(@($node)) == 1
                 ?? "$prop($!target, $!pos)"
-                !! "$prop($*CTX, $!cursor, $!target, $!pos, {$arg.expr})";
+                !! "/*await*/ $prop($*CTX, $!cursor, $!target, $!pos, {$arg.expr})";
 
             my str $check;
             if $node.subtype eq 'zerowidth' {

@@ -108,8 +108,8 @@ const numericTypeData = ucd.propTrie('NumericType');
 const bidiClassData = ucd.propTrie('BidiClass');
 const numericValueData = ucd.propTrie('NumericValue');
 
-function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
-    const resultMaybeBoxed = cursor['p6$!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value));
+/*async*/ function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
+    const resultMaybeBoxed = /*await*/ cursor['p6$!DELEGATE_ACCEPTS'](ctx, null, cursor, obj, new NativeStrArg(value));
     const result = typeof resultMaybeBoxed == 'number' ? resultMaybeBoxed : resultMaybeBoxed.$$getInt();
     if (result === (shouldMatch ? 0 : 1)) {
       return -1;
@@ -121,14 +121,14 @@ function delegateAccepts(shouldMatch, ctx, cursor, obj, code, value) {
 
 function propWithArgs(shouldMatch, trie, propName, longNames) {
   const propId = ucd.propId(propName);
-  return function(ctx, cursor, target, offset, obj) {
+  return /*async*/ function(ctx, cursor, target, offset, obj) {
     const code = target.codePointAt(offset);
     if (code === undefined) return -1;
     const propValueId = trie.get(code);
 
     const valueName = ucd.propValues(propId)[propValueId-1][longNames ? 1 : 0];
 
-    return delegateAccepts(shouldMatch, ctx, cursor, obj, code, valueName);
+    return /*await*/ delegateAccepts(shouldMatch, ctx, cursor, obj, code, valueName);
   };
 };
 
@@ -138,12 +138,12 @@ function addPropWithArgs(alias, trie, propName, longNames) {
 }
 
 function matchName(shouldMatch) {
-  return function(ctx, cursor, target, offset, obj) {
+  return /*async*/ function(ctx, cursor, target, offset, obj) {
     const code = target.codePointAt(offset);
     if (code === undefined) return -1;
     const name = core.op.getuniname(code);
 
-    return delegateAccepts(shouldMatch, ctx, cursor, obj, code, name);
+    return /*await*/ delegateAccepts(shouldMatch, ctx, cursor, obj, code, name);
   };
 }
 
