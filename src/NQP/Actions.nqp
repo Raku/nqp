@@ -1584,7 +1584,7 @@ class NQP::Actions is HLL::Actions {
 
     method number($/) {
         my $value := $<dec_number> ?? $<dec_number>.ast !! $<integer>.ast;
-        if ~$<sign> eq '-' { $value := -$value; }
+        if ~$<sign> eq '-' { $value := $<dec_number> ?? nqp::neg_n($value) !! -$value; }
         make $<dec_number> ??
             QAST::NVal.new( :value($value) ) !!
             QAST::IVal.new( :value($value) );

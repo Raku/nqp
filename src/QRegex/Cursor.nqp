@@ -88,7 +88,7 @@ role NQPMatchRole is export {
     method CURSOR() { self }
     method PRECURSOR() { self."!cursor_init"(nqp::getattr_s($!shared, ParseShared, '$!target'), :p($!from)) }
     method Str()       { $!pos >= $!from ?? nqp::substr(nqp::getattr_s($!shared, ParseShared, '$!target'), $!from, nqp::sub_i(self.to, $!from)) !! '' }
-    method Num()       { +self.Str() }
+    method Num()       { nqp::numify(self.Str()) }
     method Bool()      { $!pos >= $!from }
     method chars()     { $!pos >= $!from ?? nqp::sub_i(self.to, $!from) !! 0 }
 

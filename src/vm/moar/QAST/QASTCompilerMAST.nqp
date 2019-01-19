@@ -2341,7 +2341,7 @@ class MoarVM::StringHeap {
 }
 
 sub align_section($size) {
-    my uint32 $aligned := nqp::ceil_n($size / 8) * 8;
+    my uint32 $aligned := nqp::mul_n(nqp::ceil_n(nqp::div_n($size, 8.0)), 8.0);
     $aligned
 }
 class MoarVM::BytecodeWriter {

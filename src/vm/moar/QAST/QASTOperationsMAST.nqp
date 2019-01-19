@@ -2004,16 +2004,13 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
 # Default ways to box/unbox (for no particular HLL).
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
-    my $a := $regalloc.fresh_register($MVM_reg_num64);
-    my $b := $regalloc.fresh_register($MVM_reg_int64);
+    my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
     op_decont($dc, $reg);
-    %core_op_generators{'smrt_numify'}($a, $dc);
-    %core_op_generators{'coerce_ni'}($b, $a);
-    $regalloc.release_register($a, $MVM_reg_num64);
+    %core_op_generators{'smrt_intify'}($res_reg, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($b, $MVM_reg_int64)
+    MAST::InstructionList.new($res_reg, $MVM_reg_int64)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
@@ -2037,14 +2034,14 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
-    my $a := $regalloc.fresh_register($MVM_reg_num64);
+    my $a := $regalloc.fresh_register($MVM_reg_int64);
     my $b := $regalloc.fresh_register($MVM_reg_uint64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
     op_decont($dc, $reg);
-    %core_op_generators{'smrt_numify'}($a, $dc);
-    %core_op_generators{'coerce_nu'}($b, $a);
-    $regalloc.release_register($a, $MVM_reg_num64);
+    %core_op_generators{'smrt_intify'}($a, $dc);
+    %core_op_generators{'coerce_iu'}($b, $a);
+    $regalloc.release_register($a, $MVM_reg_int64);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($b, $MVM_reg_int64)
 });
