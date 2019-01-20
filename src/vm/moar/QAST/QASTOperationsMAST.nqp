@@ -3096,6 +3096,8 @@ QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsize
 
 QAST::MASTOperations.add_core_moarop_mapping('getcodelocation', 'getcodelocation', :decont(0));
 
+QAST::MASTOperations.add_core_moarop_mapping('uname', 'uname');
+
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
 QAST::MASTOperations.add_core_moarop_mapping('sleep', 'sleep', 0);
