@@ -299,6 +299,8 @@
 - [Miscellaneous Opcodes](#-miscellaneous-opcodes)
   * [locallifetime](#locallifetime)
   * [const](#const)
+  * [cpucores](#cpucores)
+  * [getrusage](#getrusage)
   * [debugnoop `jvm`](#debugnoop-jvm)
   * [exit](#exit)
   * [getenvhash](#getenvhash)
@@ -2546,9 +2548,34 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * BINARY_ENDIAN_BIG
     * BINARY_ENDIAN_NATIVE
 
+    * RUSAGE_UTIME_SEC
+    * RUSAGE_UTIME_MSEC
+    * RUSAGE_STIME_SEC
+    * RUSAGE_STIME_MSEC
+
     * TYPE_CHECK_CACHE_DEFINITIVE
     * TYPE_CHECK_CACHE_THEN_METHOD
     * TYPE_CHECK_NEEDS_ACCEPTS
+
+## cpucores
+* `cpucores()`
+
+Returns a native integer for the number of CPU cores that are reported to be
+available.
+
+## getrusage
+* `getrusage(int @rusage)`
+
+Accepts an integer array and fills it with usage data, of which the following
+elements are currently defined:
+
+* `RUSAGE_UTIME_SEC`   Userland CPU usage (seconds part)
+* `RUSAGE_UTIME_MSEC`  Userland CPU usage (micro-seconds part)
+* `RUSAGE_STIME_SEC`   System CPU usage (seconds part)
+* `RUSAGE_STIME_MSEC`  System CPU usage (micro-seconds part)
+
+Elements may be 0 if it is impossible to determine that value in the current
+system.
 
 ## debugnoop `jvm`
 * `debugnoop(Mu $a)`
