@@ -1323,6 +1323,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Stmts $node, :$want) {
+        self.compile_annotation($node);
         my $resultchild := $node.resultchild;
         nqp::die("resultchild out of range, max allowed is "
             ~ nqp::elems(@($node)) - 1 ~ ", got $resultchild")
@@ -1331,6 +1332,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Stmt $node, :$want) {
+        self.compile_annotation($node);
         my %stmt_temps := nqp::clone(%*STMTTEMPS); # guaranteed to be initialized
         my $result     := self.compile_with_stmt_temps($node, %stmt_temps);
         for %stmt_temps -> $temp_key {
@@ -1351,6 +1353,16 @@ my class MASTCompilerInstance {
         self.compile_all_the_stmts(@($node), $resultchild);
     }
 
+    method compile_annotation($qast) {
+        my $node := $qast.node;
+        if nqp::isconcrete($node) && nqp::can($node,'orig') {
+            my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
+            my $line := @line_file[0];
+            my $file := @line_file[1] || $!file;
+            MAST::Annotated.new(:$file, :$line);
+        }
+    }
+
     # This takes any node that is a statement list of some kind and compiles
     # all of the statements within it.
     method compile_all_the_stmts(@stmts, $resultchild?) {
@@ -1363,15 +1375,6 @@ my class MASTCompilerInstance {
         my $WANT := $*WANT;
         my $all_void := nqp::defined($WANT) && $WANT == $MVM_reg_void;
         for @stmts {
-            my $node := $_.node;
-            # Annotate with line number if we have one.
-            if nqp::isconcrete($node) && nqp::can($node,'orig') {
-                my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
-                my $line := @line_file[0];
-                my $file := @line_file[1] || $!file;
-                MAST::Annotated.new(:$file, :$line);
-            }
-
             my int $use_result := 0;
             # Compile this child to MAST, and add its instructions to the end
             # of our instruction list. Also track the last statement.
