@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(24);
+plan(26);
 
 my $MODE_CALL_METHOD := 0;
 my $MODE_UNBOX_INT := 1;
@@ -88,6 +88,9 @@ ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
     ok(!nqp::istrue($zero), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - "0" is false');
     ok(!nqp::istrue($empty), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - "" is false');
     ok(!nqp::istrue($not_empty_or_zero), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - type object is false');
+
+    my $null := nqp::box_s(nqp::null_s, $not_empty_or_zero);
+    ok(!nqp::istrue($null), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - nqp::null_s is false');
 }
 
 {
@@ -109,6 +112,9 @@ ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
     ok(nqp::istrue($zero), 'MODE_UNBOX_STR_NOT_EMPTY - "0" is true');
     ok(!nqp::istrue($empty), 'MODE_UNBOX_STR_NOT_EMPTY - "" is false');
     ok(!nqp::istrue($not_empty), 'MODE_UNBOX_STR_NOT_EMPTY - type object is false');
+
+    my $null := nqp::box_s(nqp::null_s, $not_empty);
+    ok(!nqp::istrue($null), 'MODE_UNBOX_STR_NOT_EMPTY - nqp::null_s is false');
 }
 
 
