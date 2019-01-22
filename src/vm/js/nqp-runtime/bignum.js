@@ -304,7 +304,7 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
       base = JSBI.multiply(base, JSBI.BigInt(radix));
     }
 
-    if (n[0] == '-') result = -result;
+    if (n[0] == '-') result = JSBI.unaryMinus(result);
 
     return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), new NQPInt(extracted.offset)]);
   }
