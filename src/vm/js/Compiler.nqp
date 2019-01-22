@@ -2181,21 +2181,14 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
             my str $suffix := self.suffix_from_type($type);
 
-            if 0 {
-                # TODO - use hint
-                # OPTIMALIZATION OPPORTUNITY
-                # use hint
-            }
-            else {
-                my $class_handle := self.as_js($var[1], :want($T_OBJ));
-                @setup.push($class_handle);
+            my $class_handle := self.as_js($var[1], :want($T_OBJ));
+            @setup.push($class_handle);
 
-                my str $name := quote_string($var.name);
-                my str $value := self.int_to_fancy_int($type, 'value');
+            my str $name := quote_string($var.name);
+            my str $value := self.int_to_fancy_int($type, 'value');
 
-                $get := "{$self.expr}.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
-                $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
-            }
+            $get := "{$self.expr}.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
+            $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
 
 
             Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
