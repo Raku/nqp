@@ -108,7 +108,7 @@ ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
     ok(nqp::istrue($hello), 'MODE_UNBOX_STR_NOT_EMPT - "hello" is true');
     ok(nqp::istrue($zero), 'MODE_UNBOX_STR_NOT_EMPTY - "0" is true');
     ok(!nqp::istrue($empty), 'MODE_UNBOX_STR_NOT_EMPTY - "" is false');
-    ok(!nqp::istrue($not_empty), 'MODE_UNBOX_STR_NOT_EMPTY_OR_ZERO - type object is false');
+    ok(!nqp::istrue($not_empty), 'MODE_UNBOX_STR_NOT_EMPTY - type object is false');
 }
 
 
