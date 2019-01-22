@@ -4,7 +4,7 @@ const JSBI = require('jsbi');
 const ZERO = JSBI.BigInt(0);
 
 /* Used when evaling runtime compiled methods */
-const nullStr = require('./null_s.js'); // eslint-disable-line no-unused-vars
+const nullStr = require('./null_s.js');
 
 const Null = require('./null.js');
 
@@ -178,13 +178,13 @@ class STable {
       };
     } else if (mode == 3) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
-        return this.$$typeObject || this.$$getStr() == '' ? 0 : 1;
+        return (this.$$typeObject || this.$$getStr() === nullStr || this.$$getStr() === '')  ? 0 : 1;
       };
     } else if (mode == 4) {
       this.ObjConstructor.prototype.$$toBool = function(ctx) {
         if (this.$$typeObject) return 0;
         const str = this.$$getStr();
-        return (str == '' || str == '0') ? 0 : 1;
+        return (str === nullStr || str == '' || str == '0') ? 0 : 1;
       };
     } else if (mode == 5) {
     // this is the default - do nothing
