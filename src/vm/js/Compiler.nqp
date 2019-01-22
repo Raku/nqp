@@ -2191,7 +2191,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
 
 
-            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var));
+            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var), [$self, $class_handle]);
         }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
