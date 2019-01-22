@@ -2226,3 +2226,8 @@ op.decodelocaltime = function(sinceEpoch) {
     date.getFullYear()
   ]);
 };
+
+// generate a random positive integer
+exports.fakePid = function() {
+  return (exports.randomInt()[0] << 1 >>> 1);
+};

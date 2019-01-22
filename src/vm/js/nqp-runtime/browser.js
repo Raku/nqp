@@ -145,7 +145,7 @@ op.getenvhash = function() {
   return new Hash();
 };
 
-const pid = Math.abs(core.randomInt()[0]) + 1;
+const pid = core.fakePid();
 
 op.getpid = function() {
   return pid;
