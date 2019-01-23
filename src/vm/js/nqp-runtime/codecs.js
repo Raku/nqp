@@ -337,6 +337,57 @@ class NativeEncoding {
     }
 }
 
+class Utf8 extends NativeEncoding {
+  constructor() {
+    super('utf8');
+  }
+
+  decode(buffer) {
+    const decoded = buffer.toString('utf8');
+    const reencoded = Buffer.from(decoded, 'utf8');
+    if (buffer.equals(reencoded)) {
+      return decoded;
+    } else {
+      const correctPart = buffer.slice(0, bufferDifference(reencoded, buffer));
+      const lines = correctPart.toString('utf8').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
+      throw new NQPException('Malformed UTF-8 at line '
+        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
+        + '(or malformed termination)'
+);
+    }
+  }
+}
+
+class Utf16 extends NativeEncoding {
+  constructor() {
+    super('utf16');
+  }
+
+  decode(buffer) {
+    if (buffer[0] === 0xff && buffer[1] === 0xfe) { // LE BOM
+      buffer = buffer.slice(2);
+    } else if (buffer[0] === 0xfe && buffer[1] === 0xff) { // BE BOM
+      throw new NQPException('Big-endian UTF16 is NYI');
+    }
+
+    const decoded = buffer.toString('utf16le');
+    const reencoded = Buffer.from(decoded, 'utf16le');
+    if (buffer.equals(reencoded)) {
+      return decoded;
+    } else {
+      const correctPart = buffer.slice(0, bufferDifference(reencoded, buffer));
+      const lines = correctPart.toString('utf16le').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
+      throw new NQPException('Malformed UTF-16 at line '
+        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
+        + '(or malformed termination)'
+);
+    }
+  }
+}
+
+module.exports['utf8'] = new Utf8;
+module.exports['utf16'] = new Utf16;
+
 module.exports['utf8-c8'] = new Utf8C8;
 
 module.exports['windows-1251'] = windows1251;
@@ -345,5 +396,3 @@ module.exports.latin1 = latin1;
 module.exports.ascii = ascii;
 
 module.exports['windows-932'] = require('./dbcs-codec.js')['windows-932'];
-
-module.exports.utf8 = new NativeEncoding('utf8');

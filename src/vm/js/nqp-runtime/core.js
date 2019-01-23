@@ -1329,40 +1329,8 @@ function bufferDifference(a, b) {
 op.decodeconf = function(buf, encoding, permissive) {
   let rawBuffer = toRawBuffer(buf);
   // XXX remove the if and do it properly
-  if (encoding === 'windows-1251' || encoding === 'windows-1252' || encoding === 'utf8-c8' || encoding == 'windows-932') {
+  if (encoding === 'windows-1251' || encoding === 'windows-1252' || encoding === 'utf8-c8' || encoding == 'windows-932' || encoding === 'utf8' || encoding === 'utf16') {
     return codecs[encoding].decode(rawBuffer, permissive);
-  } else if (encoding === 'utf8') {
-    const decoded = rawBuffer.toString(renameEncoding(encoding));
-    const reencoded = Buffer.from(decoded, renameEncoding(encoding));
-    if (rawBuffer.equals(reencoded)) {
-      return decoded;
-    } else {
-      const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
-      const lines = correctPart.toString('utf8').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
-      throw new NQPException('Malformed UTF-8 at line '
-        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
-        + '(or malformed termination)'
-);
-    }
-  } else if (encoding === 'utf16') {
-    if (rawBuffer[0] === 0xff && rawBuffer[1] === 0xfe) { // LE BOM
-      rawBuffer = rawBuffer.slice(2);
-    } else if (rawBuffer[0] === 0xfe && rawBuffer[1] === 0xff) { // BE BOM
-      throw new NQPException('Big-endian UTF16 is NYI');
-    }
-
-    const decoded = rawBuffer.toString('utf16le');
-    const reencoded = Buffer.from(decoded, 'utf16le');
-    if (rawBuffer.equals(reencoded)) {
-      return decoded;
-    } else {
-      const correctPart = rawBuffer.slice(0, bufferDifference(reencoded, rawBuffer));
-      const lines = correctPart.toString('utf16le').split(/\r\n|[\n\r\u0085\u2029\f\u000b\u2028]/);
-      throw new NQPException('Malformed UTF-16 at line '
-        + (lines.length) + ' col ' + (lines[lines.length - 1].length + 1)
-        + '(or malformed termination)'
-);
-    }
   } else {
     return rawBuffer.toString(renameEncoding(encoding));
   }
