@@ -1328,8 +1328,7 @@ function bufferDifference(a, b) {
 
 op.decodeconf = function(buf, encoding, permissive) {
   let rawBuffer = toRawBuffer(buf);
-  // XXX remove the if and do it properly
-  if (encoding === 'windows-1251' || encoding === 'windows-1252' || encoding === 'utf8-c8' || encoding == 'windows-932' || encoding === 'utf8' || encoding === 'utf16') {
+  if (encoding in codecs) {
     return codecs[encoding].decode(rawBuffer, permissive);
   } else {
     return rawBuffer.toString(renameEncoding(encoding));
