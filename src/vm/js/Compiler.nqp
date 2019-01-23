@@ -2187,11 +2187,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
             my str $name := quote_string($var.name);
             my str $value := self.int_to_fancy_int($type, 'value');
 
-            $get := "{$self.expr}.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
-            $set := "{$self.expr}.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
+            # We use a tmp variable as $self.expr might contain an await
+            my str $obj := $*BLOCK.add_tmp;
 
+            $get := "$obj.\$\$getattr{$suffix}({$class_handle.expr}, $name)";
+            $set := "$obj.\$\$bindattr{$suffix}({$class_handle.expr}, $name, $value)";
 
-            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var), [$self, $class_handle]);
+            Chunk.new($T_OBJ, "nqp.attrRef{$suffix}(HLL, function() \{return $get\}, function(value) \{$set\})", :node($var), [$self, $class_handle, "$obj = {$self.expr};\n"]);
         }
         elsif $var.scope eq 'attribute' {
             my @types := [$T_OBJ, $T_INT, $T_NUM, $T_STR];
