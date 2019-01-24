@@ -1316,16 +1316,6 @@ function rawSlice(buf, start, end) {
 
 exports.toRawBuffer = toRawBuffer;
 
-function bufferDifference(a, b) {
-  for (let i=0; i < a.length; i++) {
-    if (a[i] != b[i]) {
-      return i;
-    }
-  }
-
-  return a.length;
-}
-
 op.decodeconf = function(buf, encoding, permissive) {
   let rawBuffer = toRawBuffer(buf);
   if (encoding in codecs) {
