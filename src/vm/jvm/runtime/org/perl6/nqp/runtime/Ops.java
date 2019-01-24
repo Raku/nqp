@@ -4465,6 +4465,8 @@ public final class Ops {
             return "windows-1252";
         if (nameIn.equals("windows-1251"))
             return "windows-1251";
+        if (nameIn.equals("utf16be"))
+            return "UTF-16BE";
         return null;
     }
 
@@ -4610,6 +4612,12 @@ public final class Ops {
     public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
         String mangledEncoding = javaEncodingName(encoding);
         if (mangledEncoding != null) {
+            if (mangledEncoding.equals("UTF-16BE")
+                && (buf instanceof VMArrayInstance_u8 || buf instanceof VMArrayInstance_i8)
+                && ((int)buf.elems(tc) % 2 == 1)
+            ) {
+                throw ExceptionHandling.dieInternal(tc, "Malformed UTF-16; odd number of bytes");
+            }
             return decode8(buf, mangledEncoding, tc);
         }
         else if (encoding.equals("utf16") || encoding.equals("utf32")) {
