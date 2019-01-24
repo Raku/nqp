@@ -395,6 +395,45 @@ class Utf16 extends NativeEncoding {
   }
 }
 
+class Utf16BE {
+    constructor(encoding) {
+      this.encoding = encoding;
+    }
+
+    decode(buffer) {
+      if (buffer.length % 2 === 1) {
+        throw new NQPException('Malformed UTF-16; odd number of bytes');
+      }
+
+      const littleEndianBuffer = Buffer.allocUnsafe(buffer.length);
+
+      for (let i = 0; i < buffer.length; i += 2) {
+        littleEndianBuffer[i] = buffer[i + 1];
+        littleEndianBuffer[i + 1] = buffer[i];
+      }
+
+      return littleEndianBuffer.toString('utf16le');
+    }
+
+    encode(str) {
+      const littleEndianBuffer =  Buffer.from(str, 'utf16le');
+      const buffer = Buffer.allocUnsafe(littleEndianBuffer.length);
+
+      for (let i = 0; i < buffer.length; i += 2) {
+        buffer[i] = littleEndianBuffer[i + 1];
+        buffer[i + 1] = littleEndianBuffer[i];
+      }
+
+      return buffer;
+    }
+
+    encodeWithReplacement(str, replacement) {
+      return this.encode(str);
+    }
+}
+
+module.exports['utf16be'] = new Utf16BE;
+
 module.exports['utf8'] = new Utf8;
 module.exports['utf16'] = new Utf16;
 
