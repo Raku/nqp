@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(27);
+plan(30);
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -71,6 +71,21 @@ my $pi_signed := create_buf(int8).new;
 nqp::push_i($pi_signed, -49);
 nqp::push_i($pi_signed, -128);
 is(nqp::decode($pi_signed, "utf8"), 'π', 'nqp::decode with a buffer of signed ints');
+
+{
+  my $malformed_utf16be := $buf8.new;
+  nqp::push_i($malformed_utf16be, 0);
+  nqp::push_i($malformed_utf16be, 72);
+  nqp::push_i($malformed_utf16be, 0);
+
+  dies-ok({
+      nqp::decode($malformed_utf16be, 'utf16be')
+  }, 'nqp::decode dies with utf16be and an odd number of bytes');
+}
+
+my $hello_utf16be := nqp::encode('Hello', 'utf16be', $buf8.new);
+is(buf_dump($hello_utf16be), '0,72,0,101,0,108,0,108,0,111', 'encoding as utf16be works');
+is(nqp::decode($hello_utf16be, 'utf16be'), 'Hello', 'decoding utf16be works');
 
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
