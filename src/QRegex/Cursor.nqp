@@ -242,8 +242,9 @@ role NQPMatchRole is export {
         my $bvalue := nqp::getattr($!braid, Braid, '$!package');
         if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
             my $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-            note("Out-of-sync package detected in " ~ ($tag || '') ~ " at " ~ nqp::substr($target, $!pos-10, 30) ~ "");
-            note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")")
+            my $ERR := NQPFileHandle.new.wrap(nqp::getstderr());
+            $ERR.say("Out-of-sync package detected in " ~ ($tag || '') ~ " at " ~ nqp::substr($target, $!pos-10, 30) ~ "");
+            $ERR.say("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in \$*PACKAGE: " ~ $value.HOW.name($value) ~ ")")
                 unless nqp::isnull($bvalue);
             # nqp::die("croak");
             nqp::bindattr($!braid, Braid, '$!package', $value);
@@ -258,9 +259,10 @@ role NQPMatchRole is export {
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
             if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
-                note("Deprecated use of %*LANG\<$name> assignment detected in " ~ ($tag || '') ~ "; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
+                my $ERR := NQPFileHandle.new.wrap(nqp::getstderr());
+                $ERR.say("Deprecated use of %*LANG\<$name> assignment detected in " ~ ($tag || '') ~ "; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
                     unless nqp::index($name,"-actions") > 0;
-                note("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")")
+                $ERR.say("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")")
                     unless nqp::isnull($bvalue);
                 # XXX Override braid from %*LANG until after everyone fixes their modules.
                 nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
