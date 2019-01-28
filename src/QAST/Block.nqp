@@ -9,6 +9,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     has int $!arity;
     has $!code_object;
     has %!symbol;
+    has %!local_debug_map;
 
     method new(str :$name, str :$blocktype, *@children, *%options) {
         my $node := nqp::create(self);
@@ -90,6 +91,15 @@ class QAST::Block is QAST::Node does QAST::Children {
             $i := $i + 1;
         }
         $result
+    }
+
+    method add_local_debug_mapping(str $local_name, $debug_name) {
+        %!local_debug_map := nqp::hash() unless nqp::ishash(%!local_debug_map);
+        %!local_debug_map{$local_name} := $debug_name;
+    }
+
+    method local_debug_map() {
+        %!local_debug_map || nqp::hash()
     }
 
     method dump_extra_node_info() {
