@@ -80,7 +80,7 @@ class NQP::Optimizer {
             }
         }
 
-        method lexicals_to_locals() {
+        method lexicals_to_locals($block) {
             return 0 if $!poisoned;
             for sorted_keys(%!decls) {
                 # We're looking for lexical var or param decls.
@@ -111,6 +111,9 @@ class NQP::Optimizer {
                             $_.name($new_name);
                         }
                     }
+
+                    # Add a debug mapping.
+                    $block.add_local_debug_mapping($new_name, $name);
                 }
             }
         }
@@ -146,7 +149,7 @@ class NQP::Optimizer {
         my $vars_info := @!block_var_stack.pop();
 
         # Lower any declarations we can.
-        $vars_info.lexicals_to_locals();
+        $vars_info.lexicals_to_locals($block);
 
         # If the block has no lexical declarations remaining, and it was an
         # immediate block, then flatten it in.
