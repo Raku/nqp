@@ -1271,6 +1271,14 @@ my class MASTCompilerInstance {
                 my $subbuffer := $frame.end_subbuffer;
                 $frame.insert_bytecode($subbuffer, 0);
             }
+
+            # Set up debug symbols in the MAST::Frame.
+            for $node.local_debug_map() {
+                my $local_idx := $block.local($_.key);
+                if nqp::isconcrete($local_idx) {
+                    $frame.add_local_debug_name($_.value, $local_idx);
+                }
+            }
         }
 
         if $node.blocktype eq 'raw' || !nqp::istype($outer, BlockInfo) {
@@ -2394,7 +2402,7 @@ class MoarVM::BytecodeWriter {
 
         my uint32 $offset := $header_size;
         $!mbc.write_s("MOARVM\r\n");
-        $!mbc.write_uint32(5); # Version
+        $!mbc.write_uint32(6); # Version
 
         $!mbc.write_uint32($offset); # Offset of SC dependencies table
         $!mbc.write_uint32(nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
@@ -2454,13 +2462,15 @@ class MoarVM::BytecodeWriter {
         }
     }
     method write_frame(MAST::Frame $f, int $idx) {
-        # 11 * 4 + 3 * 2 = 50
+        # 12 * 4 + 3 * 2 = 54
         my @local_types := $f.local_types;
         my @lexical_types := $f.lexical_types;
         my @lexical_names := $f.lexical-name-idxs;
         my @static_lex_values := $f.static_lex_values;
         my uint16 $num_static_lex_values := nqp::elems(@static_lex_values) / 4;
         my @handlers := $f.handlers;
+        my @debug_map_idxs := $f.debug_map_idxs;
+        my int $debug_map_idxs_length := nqp::elems(@debug_map_idxs);
         $!mbc.write_uint32($f.bytecode-offset); # Bytecode segment offset
         $!mbc.write_uint32($f.bytecode-length); # Bytecode length in bytes
         $!mbc.write_uint32(nqp::elems(@local_types)); # Number of locals/registers
@@ -2487,6 +2497,7 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32(0); # No code object SC dependency index
             $!mbc.write_uint32(0); # No SC object index
         }
+        $!mbc.write_uint32(nqp::elems($f.debug_map));
         for @local_types {
             $!mbc.write_uint16(type_to_local_type($_));
         }
@@ -2513,6 +2524,11 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32(nqp::atpos_i(@static_lex_values, 4 * $i + 2));
             $!mbc.write_uint32(nqp::atpos_i(@static_lex_values, 4 * $i + 3));
             $i++;
+        }
+        $i := 0;
+        while $i < $debug_map_idxs_length {
+            $!mbc.write_uint16(nqp::atpos_i(@debug_map_idxs, $i++));
+            $!mbc.write_uint32(nqp::atpos_i(@debug_map_idxs, $i++));
         }
     }
     method collect_bytecode() {
