@@ -2308,7 +2308,7 @@ is_qast(
             QAST::Want.new(
                 QAST::IVal.new( :value(100) ),
                 'N',
-                QAST::NVal.new( :value(200) ),
+                QAST::NVal.new( :value(200.0) ),
                 'I',
                 QAST::IVal.new( :value(300) ),
                 'S',
@@ -2322,11 +2322,11 @@ is_qast(
     QAST::Block.new(
         QAST::Op.new(
             :op<add_n>,
-            QAST::NVal.new( :value(0) ),
+            QAST::NVal.new( :value(0.0) ),
             QAST::Want.new(
                 QAST::IVal.new( :value(100) ),
                 'N',
-                QAST::NVal.new( :value(200) ),
+                QAST::NVal.new( :value(200.0) ),
                 'I',
                 QAST::IVal.new( :value(300) ),
                 'S',
@@ -2344,7 +2344,7 @@ is_qast(
             QAST::Want.new(
                 QAST::IVal.new( :value(100) ),
                 'N',
-                QAST::NVal.new( :value(200) ),
+                QAST::NVal.new( :value(200.0) ),
                 'I',
                 QAST::IVal.new( :value(300) ),
                 'S',
@@ -2361,7 +2361,7 @@ is_qast(
             QAST::Want.new(
                 QAST::IVal.new( :value(100) ),
                 'N',
-                QAST::NVal.new( :value(200) ),
+                QAST::NVal.new( :value(200.0) ),
                 'I',
                 QAST::IVal.new( :value(300) ),
                 'S',
@@ -2379,7 +2379,7 @@ is_qast(
             QAST::Want.new(
                 QAST::IVal.new( :value(100) ),
                 'N',
-                QAST::NVal.new( :value(200) ),
+                QAST::NVal.new( :value(200.0) ),
                 'I',
                 QAST::IVal.new( :value(300) ),
             )

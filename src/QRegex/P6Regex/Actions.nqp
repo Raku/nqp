@@ -654,7 +654,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method arg($/) {
         make $<quote_EXPR>
             ?? $<quote_EXPR>.ast
-            !! QAST::NVal.new( :value(+$<val>) );
+            !! QAST::IVal.new( :value(+$<val>) );
     }
 
     method arglist($/) {

@@ -844,9 +844,9 @@ role NQPMatchRole is export {
         $obj.ACCEPTS($arg) ?? 1 !! 0
     }
 
-    method at($pos) {
+    method at(int $pos) {
         my $cur := self."!cursor_start_cur"();
-        $cur."!cursor_pass"($!pos) if +$pos == $!pos;
+        $cur."!cursor_pass"($!pos) if $pos == $!pos;
         $cur;
     }
 

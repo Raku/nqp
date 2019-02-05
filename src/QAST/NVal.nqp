@@ -1,7 +1,7 @@
 class QAST::NVal is QAST::Node {
     has num $!value;
 
-    method new(:$value, *%options) {
+    method new(num :$value, *%options) {
         my $node := nqp::create(self);
         nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
         nqp::bindattr_n($node, QAST::NVal, '$!value', $value);
