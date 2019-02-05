@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(156);
+plan(157);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -300,3 +300,6 @@ my $casted := nqp::fromI_I($to_be_casted, $other_bi_type);
 ok(nqp::istype($to_be_casted, $bi_type), 'fromI_I result has correct type');
 ok(nqp::unbox_i($to_be_casted) == 100, 'fromI_I result has correct value');
 ok(nqp::istype($to_be_casted, $bi_type) && nqp::unbox_i($to_be_casted) == 100, 'fromI_I argument doesn\'t change');
+
+# https://github.com/perl6/nqp/issues/363
+ok(100000000000000009 != 100000000000000016, 'int literals that are the same float value are unequal');
