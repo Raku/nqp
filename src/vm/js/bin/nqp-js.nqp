@@ -12,7 +12,7 @@ sub MAIN(*@ARGS) {
     #:custom-regex-lib('QRegex')
 
     my @clo := $nqpcomp-cc.commandline_options();
-    @clo.push('source-map');
+    @clo.push('no-source-map');
     @clo.push('beautify');
     @clo.push('substagestats');
     @clo.push('nyi=s');

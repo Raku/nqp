@@ -81,7 +81,7 @@ my class JSWithSourceMap {
     method comp_line_directives() {$!comp_line_directives}
 
     method dump() {
-       "/* With sourcemap for $!file */\n" ~ $!js;
+       $!js;
     }
 }
 
@@ -220,7 +220,7 @@ class JavaScriptBackend {
 
         my $nqp-runtime := %adverbs<nqp-runtime>;
 
-        if %adverbs<source-map> {
+        if !%adverbs<no-source-map> && nqp::istype($parsed, QASTWithMatch) {
             my @js := nqp::list_s();
             my @mapping := nqp::list_i();
 

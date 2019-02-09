@@ -25,7 +25,7 @@ class HLL::Backend::JavaScriptAndMoar {
     }
 
     method js($qast, *%adverbs) {
-        my $js_code := $!js.js($qast, :output(%adverbs<js-output>), :source-map);
+        my $js_code := $!js.js($qast, :output(%adverbs<js-output>));
         say($js_code);
         $qast.ast;
     }
