@@ -1630,9 +1630,11 @@ my class MASTCompilerInstance {
             my $lexref;
             my $outer := 0;
             my $block := $*BLOCK;
+            my $must_be_late_bound;
             # find the block where the lexical was declared, if any
             while nqp::istype($block, BlockInfo) {
                 last if $block.qast.ann('DYN_COMP_WRAPPER');
+                $must_be_late_bound := 1 if $block.qast.ann('DYNAMICALLY_COMPILED');
                 $lex := $block.lexical($name);
                 last if $lex;
                 $lexref := $block.lexicalref($name);
@@ -1640,7 +1642,7 @@ my class MASTCompilerInstance {
                 $block := $block.outer;
                 $outer++;
             }
-            if $lex {
+            if $lex && !$must_be_late_bound {
                 $res_kind := $block.lexical_kind($name);
                 if $outer {
                     # need to create lex that knows how many frames to go out
@@ -1666,7 +1668,7 @@ my class MASTCompilerInstance {
                     %core_op_generators{'getlex'}($res_reg, $lex);
                 }
             }
-            elsif $lexref {
+            elsif $lexref && !$must_be_late_bound{
                 if $*BINDVAL {
                     nqp::die('Cannot bind to QAST::Var resolving to a lexicalref');
                 }
@@ -1681,7 +1683,9 @@ my class MASTCompilerInstance {
                 $*REGALLOC.release_register($tmp_reg, $MVM_reg_obj);
             }
             else {
-                $res_kind := self.type_to_register_kind($node.returns);
+                $res_kind := $lex
+                    ?? $block.lexical_kind($name)
+                    !! self.type_to_register_kind($node.returns);
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
