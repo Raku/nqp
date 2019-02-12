@@ -2212,6 +2212,11 @@ my %const_map := nqp::hash(
     'RUSAGE_NVCSW',              16,
     'RUSAGE_NIVCSW',             17,
 
+    'UNAME_SYSNAME',              0,
+    'UNAME_RELEASE',              1,
+    'UNAME_VERSION',              2,
+    'UNAME_MACHINE',              3,
+
     'MVM_OPERAND_LITERAL',        0,
     'MVM_OPERAND_READ_REG',       1,
     'MVM_OPERAND_WRITE_REG',      2,
