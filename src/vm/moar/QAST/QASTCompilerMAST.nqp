@@ -1634,11 +1634,11 @@ my class MASTCompilerInstance {
             # find the block where the lexical was declared, if any
             while nqp::istype($block, BlockInfo) {
                 last if $block.qast.ann('DYN_COMP_WRAPPER');
-                $must_be_late_bound := 1 if $block.qast.ann('DYNAMICALLY_COMPILED');
                 $lex := $block.lexical($name);
                 last if $lex;
                 $lexref := $block.lexicalref($name);
                 last if $lexref;
+                $must_be_late_bound := 1 if $block.qast.ann('BEGINISH');
                 $block := $block.outer;
                 $outer++;
             }
