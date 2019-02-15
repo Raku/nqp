@@ -178,6 +178,10 @@
             On average, <strong>{{AverageParticipants}}</strong> threads participated in GC.
           </span>
         </p>
+        <p ng-show="{{ScalarReplacements > 1}}">
+          Scalar replacement eliminated <strong>{{ScalarReplacements}}</strong> allocations
+          (that's <strong>{{ScalarReplacementPercent}}%</strong>).
+        </p>
 
         <h3>Dynamic Optimization</h3>
         <p>Of {{OptimizedFrames}} specialized or JIT-compiled frames, there were
@@ -806,6 +810,8 @@
         var inlineEntries = 0;
         var jitEntries    = 0;
         var speshEntries  = 0;
+        var replacements  = 0;
+        var allocations   = 0;
         var deoptOnes     = 0;
         var deoptAlls     = 0;
         var osrs          = 0;
@@ -836,6 +842,14 @@
             deoptOnes     += node.deopt_one || 0;
             deoptAlls     += node.deopt_all || 0;
             osrs          += node.osr || 0;
+            if (node.allocations) {
+                node.allocations.map(function (alloc) {
+                    if (alloc.count)
+                        allocations += alloc.count;
+                    if (alloc.replaced)
+                        replacements += alloc.replaced;
+                });
+            }
             if (node.callees)
                 node.callees.map(walkCallGraphNode);
         }
@@ -877,6 +891,10 @@
         $scope.NurseryAverage = +((gcNurseryTime / 1000) / gcNursery).toFixed(2);
         $scope.FullAverage    = +((gcFullTime / 1000) / gcFull).toFixed(2);
         $scope.AverageParticipants = averageParticipants.toFixed(2);
+        $scope.ScalarReplacements = replacements;
+        $scope.ScalarReplacementPercent = allocations + replacements > 0
+            ? +(100 * replacements / (allocations + replacements)).toFixed(2)
+            : 0;
 
         // Dynamic optimization
         var optimizedFrames    = speshEntries + jitEntries;
