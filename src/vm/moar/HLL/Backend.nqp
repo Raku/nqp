@@ -416,7 +416,7 @@ class HLL::Backend::MoarVM {
                             if %call_graph<allocations> {
                                 for %call_graph<allocations> -> $a {
                                     my @a := nqp::list_s($call_id);
-                                    for <id spesh jit count> -> $f {
+                                    for <id spesh jit count replaced> -> $f {
                                         nqp::push_s(@a, ~($a{$f} // '0'));
                                     }
                                     nqp::push_s($pieces, 'INSERT INTO allocations VALUES (');
@@ -505,7 +505,7 @@ class HLL::Backend::MoarVM {
             $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT);');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, first_entry_time INT, highest_child_id INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
             $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT, thread_id INT, parent_thread_id INT, root_node INT, first_entry_time INT, FOREIGN KEY(root_node) REFERENCES calls(id));');
-            $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
+            $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, replaced INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
             $profile_fh.say('END;');
         }
