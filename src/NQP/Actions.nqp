@@ -688,7 +688,7 @@ class NQP::Actions is HLL::Actions {
 
         # Extra traits, if present.
         if $<nativesize> {
-            $package.HOW.set_nativesize($package, nqp::add_i($<size>, 0));
+            $package.HOW.set_nativesize($package, +$<size>);
         }
         if $<unsigned> {
             $package.HOW.set_unsigned($package, 1);
