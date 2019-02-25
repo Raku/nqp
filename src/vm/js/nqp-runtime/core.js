@@ -839,14 +839,14 @@ function createSourceMap(js, p6, mapping, jsFile, p6File, lineDirectives) {
 
 
 class BuildSourceMap extends NQPObject {
-  $$call(ctx, NAMED, js, p6, mapping, jsFile, p6File, compLineDirectives, sourcemapFile) {
-    js = nqp.arg_s(ctx, js);
-    p6 = nqp.arg_s(ctx, p6);
-    jsFile = nqp.arg_s(ctx, jsFile);
+  /*async*/ $$call(ctx, NAMED, js, p6, mapping, jsFile, p6File, compLineDirectives, sourcemapFile) {
+    js = /*await*/ nqp.arg_s(ctx, js);
+    p6 = /*await*/ nqp.arg_s(ctx, p6);
+    jsFile = /*await*/ nqp.arg_s(ctx, jsFile);
     mapping = mapping.array;
-    p6File = nqp.arg_s(ctx, p6File);
+    p6File = /*await*/ nqp.arg_s(ctx, p6File);
     compLineDirectives = processCompLineDirectives(ctx, compLineDirectives);
-    sourcemapFile = nqp.arg_s(ctx, sourcemapFile);
+    sourcemapFile = /*await*/ nqp.arg_s(ctx, sourcemapFile);
 
     const ret = new Hash();
     ret.content.set('content', new NQPStr(createSourceMap(js, p6, mapping, path.relative(path.dirname(sourcemapFile), jsFile), p6File, compLineDirectives)));
@@ -870,13 +870,13 @@ class JavaScriptCompiler extends NQPObject {
 
   /*async*/ p6$eval(ctx, _NAMED, self, code) {
     if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
-      const codeStr = this.$$mangleCode(nqp.arg_s(ctx, code));
+      const codeStr = this.$$mangleCode(/*await*/ nqp.arg_s(ctx, code));
       return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
     }
 
     const fakeFilename = 'nqpEval' + shortid.generate();
 
-    const codeStr = this.$$mangleCode(nqp.toStr(code, ctx));
+    const codeStr = this.$$mangleCode(/*await*/ nqp.toStr(code, ctx));
 
     // TODO - think about the LOAD_BYTECODE_FROM_MODULE HACK
     const preamble = 'var nqp = global.nqp; var module = global.nqpModule;var require = global.nqpRequire;';
@@ -887,10 +887,10 @@ class JavaScriptCompiler extends NQPObject {
       sourceMaps[fakeFilename] = new SourceMapConsumer(
         createSourceMap(
           codeStr,
-          nqp.toStr(_NAMED['p6-source'], ctx),
+          /*await*/ nqp.toStr(_NAMED['p6-source'], ctx),
           _NAMED.mapping.array,
           fakeFilename,
-          nqp.toStr(_NAMED.file, ctx),
+          /*await*/ nqp.toStr(_NAMED.file, ctx),
           processCompLineDirectives(ctx, _NAMED.comp_line_directives)));
 
       const node = SourceNode.fromStringWithSourceMap(codeStr, sourceMaps[fakeFilename]);
