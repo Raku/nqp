@@ -899,8 +899,8 @@ class QAST::OperationsJS {
 
     add_simple_op('newexception', $T_OBJ, [], :side_effects);
 
-    add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ], :takes_hll);
-    add_simple_op('backtrace', $T_OBJ, [$T_OBJ], :takes_hll);
+    add_simple_op('backtracestrings', $T_OBJ, [$T_OBJ], :takes_hll, :await);
+    add_simple_op('backtrace', $T_OBJ, [$T_OBJ], :takes_hll, :await);
 
     add_simple_op('findmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :await);
     add_simple_op('tryfindmethod', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0), :ctx, :await);

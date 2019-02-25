@@ -53,7 +53,7 @@ const unicodeCollationAlgorithm = require('unicode-collation-algorithm');
 
 const unicodeData = require('nqp-unicode-data');
 
-const resolveSourceMap = process.browser ? null : require('./resolve-sourcemap.js');
+const resolveSourceMap = process.browser ? require('./resolve-sourcemap-browser.js') : require('./resolve-sourcemap.js');
 
 const path = process.browser ? null : require('path');
 
@@ -1674,7 +1674,7 @@ op.getstaticcode = function(codeRef) {
   return codeRef.staticCode;
 };
 
-function backtrace(exception) {
+/*async*/ function backtrace(exception) {
   if (exception.$$ctx) {
     let ctx = exception.$$ctx.$$skipHandlers();
 
@@ -1719,11 +1719,14 @@ function backtrace(exception) {
                 }
               } else {
                 if (file && resolveSourceMap) {
-                  const resolved = resolveSourceMap(file);
+                  const resolved = /*await*/ resolveSourceMap(file);
                   if (resolved !== null) {
                     const original = resolved.originalPositionFor({line: line, column: column});
                     if (original.source) {
                       file = original.source;
+
+                      /* HACK - avoid parcel adding a ../ prefix */
+                      file = file.replace(/^\.\.\/SETTING::/, 'SETTING::');
                       line = original.line;
                       column = original.column;
                     }
@@ -1752,14 +1755,14 @@ function backtrace(exception) {
   }
 };
 
-op.backtrace = function(currentHLL, exception) {
-  return hll.list(currentHLL, backtrace(exception));
+op.backtrace = /*async*/ function(currentHLL, exception) {
+  return hll.list(currentHLL, /*await*/ backtrace(exception));
 };
 
-op.backtracestrings = function(currentHLL, exception) {
+op.backtracestrings = /*async*/ function(currentHLL, exception) {
   const lines = [];
   let first = true;
-  for (const row of backtrace(exception)) {
+  for (const row of /*await*/ backtrace(exception)) {
     const annotations = row.$$atkey('annotations');
     const sub = row.$$atkey('sub');
     lines.push((first ? '  at ' : ' from ') + annotations.$$atkey('file').value + ':'+ annotations.$$atkey('line').value + ' (cuid ' + sub.cuid + ')');
