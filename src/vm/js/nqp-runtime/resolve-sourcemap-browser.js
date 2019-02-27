@@ -9,7 +9,7 @@ if ('/*async*/' === '/*asy' + 'nc*/' || typeof fetch == 'undefined') {
   module.exports = null;
 } else {
   SourceMapConsumer.initialize({
-    'lib/mappings.wasm': require('./mappings-wasm-base64.js')
+    'lib/mappings.wasm': require('./mappings-wasm-base64.js').buffer
   });
 
   module.exports = async function(filename) {
