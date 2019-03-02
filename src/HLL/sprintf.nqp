@@ -84,10 +84,10 @@ my module sprintf {
             nqp::throw($ex);
         }
 
-        sub bad-type-for-directive($type, $directive) {
-            my $message := "Directive $directive not applicable for type " ~ $type.HOW.name($type);
+        sub bad-type-for-directive($type, $directive, $value) {
+            my $message := "Directive $directive not applicable for value of type " ~ $type.HOW.name($type) ~ " ($value)";
             my $payload := nqp::hash('BAD_TYPE_FOR_DIRECTIVE',
-                nqp::hash('TYPE', $type.HOW.name($type), 'DIRECTIVE', $directive));
+                nqp::hash('TYPE', $type.HOW.name($type), 'DIRECTIVE', $directive, 'VALUE', $value));
             panic($message, $payload);
         }
 
@@ -178,7 +178,7 @@ my module sprintf {
         method directive:sym<b>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'b');
+                bad-type-for-directive($next, 'b', @*ARGS_HAVE);
             }
             my $int := intify($next);
             my $pad := padding_char($/);
@@ -208,7 +208,7 @@ my module sprintf {
         method directive:sym<c>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'c');
+                bad-type-for-directive($next, 'c', @*ARGS_HAVE);
             }
             make nqp::chr(intify($next))
         }
@@ -216,7 +216,7 @@ my module sprintf {
         method directive:sym<d>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'd');
+                bad-type-for-directive($next, 'd', @*ARGS_HAVE);
             }
             my $int := intify($next);
             my $pad := padding_char($/);
@@ -401,7 +401,7 @@ my module sprintf {
         method directive:sym<e>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'e');
+                bad-type-for-directive($next, 'e', @*ARGS_HAVE);
             }
             my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -412,7 +412,7 @@ my module sprintf {
         method directive:sym<f>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'f');
+                bad-type-for-directive($next, 'f', @*ARGS_HAVE);
             }
             my $int := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -423,7 +423,7 @@ my module sprintf {
         method directive:sym<g>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'g');
+                bad-type-for-directive($next, 'g', @*ARGS_HAVE);
             }
             my $float := floatify($next);
             my $precision := $<precision> ?? $<precision>.made !! 6;
@@ -434,7 +434,7 @@ my module sprintf {
         method directive:sym<o>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'o');
+                bad-type-for-directive($next, 'o', @*ARGS_HAVE);
             }
             my $int := intify($next);
             $int := nqp::base_I($int, 8);
@@ -453,7 +453,7 @@ my module sprintf {
         method directive:sym<s>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 's');
+                bad-type-for-directive($next, 's', @*ARGS_HAVE);
             }
             my $string := $next;
             if nqp::chars($<precision>) && nqp::chars($string) > $<precision>.made {
@@ -466,7 +466,7 @@ my module sprintf {
         method directive:sym<u>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'u');
+                bad-type-for-directive($next, 'u', @*ARGS_HAVE);
             }
             my $int := intify($next);
             if nqp::islt_I($int, $zero) {
@@ -480,7 +480,7 @@ my module sprintf {
         method directive:sym<x>($/) {
             my $next := next_argument($/);
             CATCH {
-                bad-type-for-directive($next, 'x');
+                bad-type-for-directive($next, 'x', @*ARGS_HAVE);
             }
             my $int := intify($next);
             $int := nqp::base_I($int, 16);
