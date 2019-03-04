@@ -225,7 +225,7 @@ class JavaScriptBackend {
             my @mapping := nqp::list_i();
 
             my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
-            $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime);
+            $backend.emit_with_source_map($parsed.ast, @js, @mapping, :$instant, :$shebang, :$nqp-runtime, :$file);
 
             my $sourcemap_and_js := JSWithSourceMap.new(js => nqp::join('', @js), mapping => @mapping, p6-source => $parsed.match.orig, file => $file, comp_line_directives => @*comp_line_directives);
 

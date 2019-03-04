@@ -1570,13 +1570,27 @@ op.replace = function(str, offset, count, repl) {
 const fs = process.browser ? null : require('fs');
 const sourceMapResolve = process.browser ? null : require('source-map-resolve');
 
-op.getcodelocation = function(code) {
+function pathToFilename(path) {
+  return path.substr(path.lastIndexOf('/') + 1);
+}
+
+op.getcodelocation = /*async*/ function(code) {
   let sourcePath;
   let source;
 
   if (code.staticCode.filename in evaledP6Sources) {
     sourcePath = evaledP6Filenames[code.staticCode.filename];
     source = evaledP6Sources[code.staticCode.filename];
+  } else if (process.browser) {
+    const sourceMap = /*await*/ resolveSourceMap(code.staticCode.filename);
+    const originalFilename = code.staticCode.originalFilename;
+    for (let i = 0; i < sourceMap.sources.length; i++) {
+      const sourceFile = sourceMap.sources[i];
+      if (pathToFilename(sourceFile) === pathToFilename(originalFilename)) {
+        sourcePath = originalFilename;
+        source = sourceMap.sourcesContent[i];
+      }
+    }
   } else {
     const result = sourceMapResolve.resolveSourceMapSync(fs.readFileSync(code.staticCode.filename).toString('utf8'), code.staticCode.filename, fs.readFileSync);
     sourcePath = path.resolve(path.dirname(result.sourcesRelativeTo), result.map.sources[0]);
