@@ -861,7 +861,7 @@ exports.buildSourceMap = new BuildSourceMap();
 
 class JavaScriptCompiler extends NQPObject {
   $$mangleCode(code) {
-    if ('/*async*/' === 'async') {
+    if ('/*async*/' !== '/*asy' + 'nc*/') {
       return code.replace(/\/\*async\*\//g, 'async').replace(/\/\*await\*\//g, 'await');
     } else {
       return code;
@@ -869,7 +869,7 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   /*async*/ p6$eval(ctx, _NAMED, self, code) {
-    if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
+    if (process.browser || !(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       const codeStr = this.$$mangleCode(/*await*/ nqp.arg_s(ctx, code));
       return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
     }
