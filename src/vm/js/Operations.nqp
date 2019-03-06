@@ -1884,7 +1884,7 @@ class QAST::OperationsJS {
 
     add_simple_op('getsockopts', $T_OBJ, [], :ctx);
     add_simple_op('getsockopt', $T_INT, [$T_OBJ, $T_INT], :ctx);
-    add_simple_op('setsockopt', $T_VOID, [$T_OBJ, $T_INY], :ctx, :side_effects);
+    add_simple_op('setsockopt', $T_VOID, [$T_OBJ, $T_INT], :ctx, :side_effects);
 
     add_simple_op('permit', $T_OBJ, [$T_OBJ, $T_INT, $T_INT], :side_effects);
 
