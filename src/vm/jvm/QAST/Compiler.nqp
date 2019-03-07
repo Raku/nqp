@@ -2214,7 +2214,25 @@ QAST::OperationsJAST.map_classlib_core_op('spurtasync', $TYPE_OPS, 'spurtasync',
 
 QAST::OperationsJAST.map_classlib_core_op('getsockopts', $TYPE_IO_OPS, 'getsockopts', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getsockopt', $TYPE_IO_OPS, 'getsockopt', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('setsockopt', $TYPE_IO_OPS, 'setsockopt', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.add_core_op('setsockopt', -> $qastcomp, $op {
+    my @operands := $op.list;
+    if +@operands != 3 {
+        nqp::die("The setsockopt op requires 3 operands");
+    }
+
+    my $il  := JAST::InstructionList.new();
+    my $h   := $qastcomp.as_jast(@operands[0], :want($RT_OBJ));
+    my $opt := $qastcomp.as_jast(@operands[1], :want($RT_INT));
+    my $val := $qastcomp.as_jast(@operands[2], :want($RT_INT));
+    $il.append($h.jast);
+    $il.append($opt.jast);
+    $il.append($val.jast);
+    $*STACK.obtain($il, $h, $opt, $val);
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_IO_OPS,
+        'setsockopt', 'Void', $TYPE_SMO, 'Long', 'Long', $TYPE_TC));
+    result($il, $RT_VOID);
+});
 
 QAST::OperationsJAST.map_classlib_core_op('socket', $TYPE_OPS, 'socket', [$RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('connect', $TYPE_OPS, 'connect', [$RT_OBJ, $RT_STR, $RT_INT], $RT_OBJ, :tc);
