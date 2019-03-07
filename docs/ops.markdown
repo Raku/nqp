@@ -1905,7 +1905,7 @@ nqp::setsockopt.
 Returns the set value for the given option on the socket.
 
 ## setsockopt
-* `setsockopt(Mu $socket, Int $option, Int $value --> Int)`
+* `setsockopt(Mu $socket, Int $option, Int $value --> Nil)`
 
 Sets the value for the given option on the socket.
 
