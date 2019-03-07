@@ -456,10 +456,11 @@ exports.wrapException = function(e) {
   return new NQPException('<<wrapped exception:\n' + e.stack + '\n>>\n');
 };
 
-exports.setCodeRefHLL = function(codeRefs, currentHLL, filename) {
+exports.setCodeRefHLL = function(codeRefs, currentHLL, filename, originalFilename) {
   for (let i = 0; i < codeRefs.length; i++) {
     codeRefs[i].hll = currentHLL;
     codeRefs[i].filename = filename;
+    codeRefs[i].originalFilename = originalFilename;
   }
 };
 

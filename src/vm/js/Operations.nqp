@@ -509,7 +509,7 @@ class QAST::OperationsJS {
 
     add_simple_op('ordbaseat', $T_INT, [$T_STR, $T_INT]);
 
-    add_simple_op('getcodelocation', $T_OBJ, [$T_OBJ]);
+    add_simple_op('getcodelocation', $T_OBJ, [$T_OBJ], :await);
 
     add_simple_op('null', $T_OBJ, [], sub () {"nqp.Null"});
 

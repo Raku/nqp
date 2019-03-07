@@ -1789,7 +1789,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         my int $comp_mode := $node.compilation_mode;
 
-        my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL, __filename);\n";
+        my $perl6_filename := quote_string((try $*PERL6_FILENAME) || '');
+
+        my str $set_hll := "nqp.setCodeRefHLL(cuids, HLL, __filename, $perl6_filename);\n";
 
         my $set_code_objects := self.set_code_objects;
         my $create_sc := $comp_mode ?? self.create_sc($node) !! '';
@@ -2271,7 +2273,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         Chunk.new($chunk.type, $chunk.expr, [self.declare_js_vars($*BLOCK.tmps), self.capture_inners($*BLOCK), self.clone_inners($*BLOCK), $chunk]);
     }
 
-    method as_js_with_prelude($ast, :$instant, :$shebang, :$nqp-runtime) {
+    method as_js_with_prelude($ast, :$instant, :$shebang, :$nqp-runtime, :$file) {
         my $*INSTANT := $instant;
 
         # We handle wval in the pre-serialization code specially.
@@ -2285,6 +2287,8 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
         my $*COMPUNIT;
 
         my $*LOOP;
+
+        my $*PERL6_FILENAME := $file;
 
         my int $got_compunit := nqp::istype($ast, QAST::CompUnit);
 
