@@ -255,7 +255,7 @@ public final class IOOps {
         }
     }
 
-    public static void setsockopt(SixModelObject h, long option, long value, ThreadContext tc) {
+    public static SixModelObject setsockopt(SixModelObject h, long option, long value, ThreadContext tc) {
         Object handle = ((IOHandleInstance) h).handle;
 
         try {
@@ -273,6 +273,10 @@ public final class IOOps {
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
+
+        HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
+        final SixModelObject Null = hllConfig.nullValue;
+        return Null;
     }
 
     public static SixModelObject watchfile(SixModelObject queue, SixModelObject schedulee,

@@ -2214,7 +2214,7 @@ QAST::OperationsJAST.map_classlib_core_op('spurtasync', $TYPE_OPS, 'spurtasync',
 
 QAST::OperationsJAST.map_classlib_core_op('getsockopts', $TYPE_IO_OPS, 'getsockopts', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getsockopt', $TYPE_IO_OPS, 'getsockopt', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('setsockopt', $TYPE_IO_OPS, 'setsockopt', [$RT_OBJ, $RT_INT, $RT_INT], $RT_VOID, :tc);
+QAST::OperationsJAST.map_classlib_core_op('setsockopt', $TYPE_IO_OPS, 'setsockopt', [$RT_OBJ, $RT_INT, $RT_INT], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('socket', $TYPE_OPS, 'socket', [$RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('connect', $TYPE_OPS, 'connect', [$RT_OBJ, $RT_STR, $RT_INT], $RT_OBJ, :tc);
