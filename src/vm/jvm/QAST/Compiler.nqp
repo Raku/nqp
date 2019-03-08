@@ -689,6 +689,9 @@ QAST::OperationsJAST.add_core_op('list_s', -> $qastcomp, $op {
         $arr
     }
 });
+QAST::OperationsJAST.add_core_op('intify', -> $qastcomp, $op {
+    $qastcomp.as_jast($op[0], :want($RT_INT))
+});
 QAST::OperationsJAST.add_core_op('numify', -> $qastcomp, $op {
     $qastcomp.as_jast($op[0], :want($RT_NUM))
 });
