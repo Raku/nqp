@@ -99,11 +99,11 @@ if (maybeWindow.__karma__) {
   maybeWindow.__rakudo__.results = [];
   maybeWindow.__rakudo__.resultCount = 0;
 
-  maybeWindow.__karma__.start = function(results) {
+  maybeWindow.__karma__.start = /*async*/ function(results) {
     STDOUT.karmaResults = results;
 
     for (const code of maybeWindow.__rakudo__.waitForStart) {
-      code();
+      /*await*/ code();
     }
 
     maybeWindow.__karma__.info({total: maybeWindow.__rakudo__.resultCount});

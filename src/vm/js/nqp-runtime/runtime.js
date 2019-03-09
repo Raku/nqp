@@ -549,10 +549,10 @@ exports.run = /*async*/ function(code, isMain) {
   if (once && browser && typeof window !== 'undefined' && window.__rakudo__ && window.__rakudo__.waitForStart) {
     once = false;
 
-    window.__rakudo__.waitForStart.push(() => {
+    window.__rakudo__.waitForStart.push(/*async*/ () => {
       browser.op.getstdout().start();
       try {
-        doRun();
+        /*await*/ doRun();
       } catch (e) {
         if (e instanceof browser.Exit) {
         } else {
