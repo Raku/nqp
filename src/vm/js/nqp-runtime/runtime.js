@@ -572,6 +572,21 @@ exports.run = /*async*/ function(code, isMain) {
         throw e;
       }
     }
+  } else if (once && typeof window !== 'undefined' && window.NQP_END_EVENT) {
+    once = false;
+    let ret;
+    try {
+      ret = /*await*/ doRun()
+    } catch (e) {
+      if (e instanceof browser.Exit) {
+        console.info('exit', e.status);
+      } else {
+        throw e;
+      }
+    }
+
+    console.info('end');
+    return ret;
   } else {
     return /*await*/ doRun();
   }
