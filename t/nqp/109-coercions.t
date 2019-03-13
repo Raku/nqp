@@ -15,10 +15,10 @@ ok(nqp::iseq_n(nqp::numify('−1230E−1'), -123.0), 'numifying works with -1230
 
 is(~100, '100', 'stringifing 100');
 is(~100.0, '100', 'stringifing 100');
-ok(~3.14 == 3.14, 'stringifing 3.14');
-ok(~3.1 == 3.1, 'stringifing 3.1');
-ok(~3.0 == 3, 'stringifing 3.0');
-ok(~0.0 == 0.0, 'stringifing 0.0');
+is(~3.14, '3.14', 'stringifing 3.14');
+is(~3.1, '3.1', 'stringifing 3.1');
+is(~3.0, '3', 'stringifing 3.0');
+is(~0.0, '0', 'stringifing 0.0');
 is(~nqp::nan(), 'NaN', 'stringifing nqp::nan');
 is(~nqp::inf(), 'Inf', 'stringifing nqp::inf');
 is(~nqp::neginf(), '-Inf', 'stringifing nqp::neginf');
