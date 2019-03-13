@@ -1854,7 +1854,8 @@ op.fc = foldCase;
 function tcChar(c) {
   if (c === 'ß') return 'Ss';
   const unicharadata = require('unicharadata');
-  const titled = unicharadata.title(c);
+  /* HACK - unichardata needs to be fixed to work in browsers correctly or replaced */
+  const titled = unicharadata.title ? unicharadata.title(c) : window.unicharadata.title(c);
   return titled === '' ? c : titled;
 }
 
