@@ -327,11 +327,14 @@ my module sprintf {
             $float := nqp::div_n($float, nqp::pow_n(10.0, nqp::sub_n($precision, nqp::add_n($exp, 1.0))));
 #?if jvm
             if $exp == -4 {
-                $float := stringify-to-precision($float, $precision + 3);
-                $float := nqp::substr($float, 0, nqp::chars($float) - 1) if nqp::chars($float) > 1 && $float ~~ /\.\d**4 0+$/;
-                $float := nqp::substr($float, 0, nqp::chars($float) - 1) if nqp::chars($float) > 1 && $float ~~ /\.\d**4 0+$/;
+                my $float_str := stringify-to-precision($float, $precision + 3);
+                $float_str := nqp::substr($float_str, 0, nqp::chars($float_str) - 1) if nqp::chars($float_str) > 1 && $float_str ~~ /\.\d**4 0+$/;
+                $float_str := nqp::substr($float_str, 0, nqp::chars($float_str) - 1) if nqp::chars($float_str) > 1 && $float_str ~~ /\.\d**4 0+$/;
+                $float_str
             }
-            $float
+            else {
+                $float
+            }
 #?endif
         }
         sub fixed-point(num $float, $precision, $size, $pad, $/) {
