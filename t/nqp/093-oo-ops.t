@@ -16,7 +16,7 @@ is($foo.REPR, 'P6opaque', 'calling nqp::reprname using the .REPR syntax');
 is(nqp::reprname($foo), 'P6opaque', 'nqp::reprname on P6opaque');
 
 
-class Foo2 is Foo {
+class Foo2 is mixin is Foo {
     method foo() {
         'reblessed bar';
     }
@@ -54,7 +54,7 @@ ok(nqp::objprimspec(nqp::null()) == 0, 'nqp::objprimspec on a null');
 class Base {
 }
 
-class Extended is Base {
+class Extended is mixin is Base {
     has int $!int_attr;
     has str $!str_attr;
     has num $!num_attr;

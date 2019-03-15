@@ -66,7 +66,7 @@ ok(nqp::isnull(nqp::decont(nqp::null())), 'nqp::decont works on nqp::null');
     is($cont.HOW.name($cont), "Foo", "HOW deconts");
     ok(nqp::eqaddr($cont.WHAT, Foo), "WHAT deconts");
 
-    class FooMore is Foo {
+    class FooMore is mixin is Foo {
         method foo() {
             "more foo";
         }

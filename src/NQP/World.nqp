@@ -369,9 +369,8 @@ class NQP::World is HLL::World {
 
     # Creates a meta-object for a package, adds it to the root objects and
     # stores an event for the action. Returns the created object.
-    method pkg_create_mo($how, :$name, :$repr, :$array_type) {
+    method pkg_create_mo($how, :$name, :$repr, :$array_type, *%args) {
         # Create the meta-object and add to root objects.
-        my %args;
         if nqp::defined($name) { %args<name> := $name; }
         if nqp::defined($repr) { %args<repr> := $repr; }
         my $mo := $how.new_type(|%args);

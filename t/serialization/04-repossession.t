@@ -279,7 +279,7 @@ sub fresh_sc_name() {
             $!int;
         }
     }
-    my class Bar is Foo {
+    my class Bar is mixin is Foo {
         has num $!num;
         method set_num($value) {
             $!num := $value;

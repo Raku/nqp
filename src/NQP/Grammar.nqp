@@ -403,9 +403,10 @@ grammar NQP::Grammar is HLL::Grammar {
 
     rule package_def {
         :my $*PACKAGE;     # The type object for this package.
-	:my $*LANG := self;
+        :my $*LANG := self;
         :my $OUTER := $*W.cur_lexpad();
-	<!!{ $/.clone_braid_from(self) }>
+        :my $is_mixin;
+        <!!{ $/.clone_braid_from(self) }>
         ''
         [
         <name>
@@ -413,6 +414,7 @@ grammar NQP::Grammar is HLL::Grammar {
         [ <?{ $*PKGDECL eq 'role' }> '[' ~ ']' <role_params> ]?
         [ 'is' 'repr(' <repr=.quote_EXPR> ')' ]?
         [ 'is' 'array_type(' <array_type=.typename> ')' ]?
+        [ 'is' 'mixin' { $is_mixin := 1 } ]?
 
         {
             # Construct meta-object for this package, adding it to the
@@ -425,6 +427,9 @@ grammar NQP::Grammar is HLL::Grammar {
             %args<array_type> := NQPMu;
             if $<array_type> {
                 %args<array_type> := $*W.find_sym([~$<array_type><name>]);
+            }
+            if $is_mixin {
+                %args<is_mixin> := 1;
             }
             my $how := self.how($*PKGDECL);
             my $INNER := $*W.cur_lexpad();

@@ -2880,6 +2880,7 @@ QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_s', 'hllboxtype_s');
 QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('newmixintype', 'newmixintype', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('composetype', 'composetype');
 QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setmethcache', 'setmethcache', 0, :decont(0));

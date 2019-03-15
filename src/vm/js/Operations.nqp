@@ -428,6 +428,7 @@ class QAST::OperationsJS {
 
     add_simple_op('reprname', $T_STR, [$T_OBJ], :decont(0));
     add_simple_op('newtype', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0));
+    add_simple_op('newmixintype', $T_OBJ, [$T_OBJ, $T_STR], :side_effects, :decont(0));
 
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);

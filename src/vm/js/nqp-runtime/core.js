@@ -421,7 +421,7 @@ op.reprname = function(obj) {
   }
 };
 
-op.newtype = function(how, repr) {
+op.newtype = op.newmixintype = function(how, repr) {
   if (!reprs[repr]) {
     throw 'Unknown REPR: ' + repr;
   }

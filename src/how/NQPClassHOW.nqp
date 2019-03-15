@@ -83,11 +83,17 @@ knowhow NQPClassHOW {
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$repr = 'P6opaque', :$array_type) {
+    method new_type(:$name = '<anon>', :$repr = 'P6opaque', :$array_type, :$is_mixin) {
         my $metaclass := self.new(:name($name));
-        nqp::setdebugtypename(
-            nqp::setwho(nqp::newtype($metaclass, $repr), {}),
-            $name);
+        my $new_type;
+        if $is_mixin {
+            $new_type := nqp::newmixintype($metaclass, $repr);
+            $metaclass.set_is_mixin($new_type);
+        }
+        else {
+            $new_type := nqp::newtype($metaclass, $repr);
+        }
+        nqp::setdebugtypename(nqp::setwho($new_type, {}), $name)
     }
 
     method add_method($obj, $name, $code_obj) {
@@ -751,8 +757,7 @@ knowhow NQPClassHOW {
 
             # Create new type, derive it from ourself and then add
             # all the roles we're mixing it.
-            $new_type := self.new_type(:name($new_name), :repr($obj.REPR));
-            $new_type.HOW.set_is_mixin($new_type);
+            $new_type := self.new_type(:name($new_name), :repr($obj.REPR), :is_mixin);
             $new_type.HOW.add_parent($new_type, $obj.WHAT);
             $new_type.HOW.add_role($new_type, $role);
             $new_type.HOW.compose($new_type);
