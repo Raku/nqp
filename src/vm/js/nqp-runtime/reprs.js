@@ -46,6 +46,15 @@ const EDGE_CHARRANGE_NEG = 13;
 const EDGE_CODEPOINT_LL = 14;
 const EDGE_CODEPOINT_I_LL = 15;
 
+const EDGE_CODEPOINT_M = 16;
+const EDGE_CODEPOINT_M_NEG = 17;
+const EDGE_CODEPOINT_M_LL = 18;
+const EDGE_CODEPOINT_IM = 19;
+const EDGE_CODEPOINT_IM_NEG = 20;
+const EDGE_CODEPOINT_IM_LL = 21;
+const EDGE_CHARRANGE_M = 22;
+const EDGE_CHARRANGE_M_NEG = 23;
+
 const reprs = {};
 const reprById = [];
 
@@ -1024,6 +1033,9 @@ class NFA extends REPR {
           case EDGE_CODEPOINT:
           case EDGE_CODEPOINT_LL:
           case EDGE_CODEPOINT_NEG:
+          case EDGE_CODEPOINT_M:
+          case EDGE_CODEPOINT_M_LL:
+          case EDGE_CODEPOINT_M_NEG:
           case EDGE_CHARCLASS:
           case EDGE_CHARCLASS_NEG:
             edge.argI = data.varint();
@@ -1038,6 +1050,8 @@ class NFA extends REPR {
           case EDGE_CODEPOINT_I_NEG:
           case EDGE_CHARRANGE:
           case EDGE_CHARRANGE_NEG:
+          case EDGE_CHARRANGE_M:
+          case EDGE_CHARRANGE_M_NEG:
             edge.argLc = data.varint();
             edge.argUc = data.varint();
             break;
@@ -1082,6 +1096,9 @@ class NFA extends REPR {
           case EDGE_CODEPOINT_NEG:
           case EDGE_CHARCLASS:
           case EDGE_CHARCLASS_NEG:
+          case EDGE_CODEPOINT_M:
+          case EDGE_CODEPOINT_M_LL:
+          case EDGE_CODEPOINT_M_NEG:
             cursor.varint(edge.argI);
             break;
           case EDGE_CHARLIST:
@@ -1093,6 +1110,8 @@ class NFA extends REPR {
           case EDGE_CODEPOINT_I_NEG:
           case EDGE_CHARRANGE:
           case EDGE_CHARRANGE_NEG:
+          case EDGE_CHARRANGE_M:
+          case EDGE_CHARRANGE_M_NEG:
             cursor.varint(edge.argLc);
             cursor.varint(edge.argUc);
             break;
