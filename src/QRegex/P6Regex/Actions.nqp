@@ -700,11 +700,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     }
                     if $_[0]<cclass_backslash> {
                         $node := $_[0]<cclass_backslash>.ast;
-#?if !js
-                        # HACK check disabled for js because of lack of proper NFG support
                         $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+#?if moar
                                 || $node.negate || nqp::chars($node[0]) != 1;
+#?endif
+#?if !moar
+                                # HACK expected chars tweaked for js and jvm because of lack of proper NFG support
+                                || $node.negate || nqp::chars($node[0]) != (nqp::ord($node[0]) < 65536 ?? 1 !! 2);
 #?endif
                         $ord0 := $node.ann('codepoint') // ($RXm
                             ?? nqp::ordbaseat($node[0], 0)
@@ -717,11 +720,14 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     }
                     if $_[1][0]<cclass_backslash> {
                         $node := $_[1][0]<cclass_backslash>.ast;
-#?if !js
-                        # HACK check disabled for js because of lack of proper NFG support
                         $/.panic("Illegal range endpoint in regex: " ~ ~$_)
                             if $node.rxtype ne 'literal' && $node.rxtype ne 'enumcharlist'
+#?if moar
                                 || $node.negate || nqp::chars($node[0]) != 1;
+#?endif
+#?if !moar
+                                # HACK expected chars tweaked for js and jvm because of lack of proper NFG support
+                                || $node.negate || nqp::chars($node[0]) != (nqp::ord($node[0]) < 65536 ?? 1 !! 2);
 #?endif
                         $ord1 := $node.ann('codepoint') // ($RXm
                             ?? nqp::ordbaseat($node[0], 0)
