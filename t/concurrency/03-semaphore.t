@@ -38,28 +38,28 @@ my class Semaphore is repr('Semaphore') { }
     my $s  := nqp::box_i(3, Semaphore);
     my $t1 := nqp::newthread({
         nqp::semacquire($s);
-    }, 0);
+    }, 0, 0);
     my $t2 := nqp::newthread({
         nqp::semacquire($s);
-    }, 0);
+    }, 0, 0);
     my $t3 := nqp::newthread({
         nqp::semacquire($s);
-    }, 0);
+    }, 0, 0);
     my $t4 := nqp::newthread({
         ok(!nqp::semtryacquire($s), 'Trying fourth acquire before release fails');
-    }, 0);
+    }, 0, 0);
     my $t5 := nqp::newthread({
         my $before := nqp::time_n();
         nqp::semacquire($s);
         my $after  := nqp::time_n();
         ok($after - $before > 1.0, 'Fourth acquire blocks on empty semaphore');
         ok($released, 'Fourth acquire succeeds after release in other thread');
-    }, 0);
+    }, 0, 0);
     my $t6 := nqp::newthread({
         nqp::sleep(3.0);
         $released := 1;
         nqp::semrelease($s);
-    }, 0);
+    }, 0, 0);
 
     # First, exhaust semaphore capacity
     nqp::threadrun($t1);

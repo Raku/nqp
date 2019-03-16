@@ -45,7 +45,7 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::lock($l);
         ok(1, 'Lock that survived CATCH works in another thread too');
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
     nqp::threadrun($t);
     nqp::threadjoin($t);
 
@@ -70,7 +70,7 @@ my class CondVar is repr('ConditionVariable') { }
             $output := $output ~ 'a';
         }
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     my $t2     := nqp::newthread({
         nqp::lock($l);
@@ -79,7 +79,7 @@ my class CondVar is repr('ConditionVariable') { }
             $output := $output ~ 'b';
         }
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     nqp::threadrun($t1);
     nqp::threadrun($t2);
@@ -111,7 +111,7 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::condsignalall($c);
         $now1 := nqp::time_n();
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
     nqp::threadrun($t1);
 
     my $elems := 0;
@@ -130,7 +130,7 @@ my class CondVar is repr('ConditionVariable') { }
         }
         nqp::push(@log, 'lager');
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
     nqp::threadrun($t2);
 
     nqp::threadjoin($t1);
@@ -161,35 +161,35 @@ my class CondVar is repr('ConditionVariable') { }
         nqp::condsignalone($c1);
         nqp::condsignalall($c2);
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     my $t2 := nqp::newthread({
         nqp::lock($l);
         nqp::condwait($c1);
         $count_one++;
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     my $t3 := nqp::newthread({
         nqp::lock($l);
         nqp::condwait($c1);
         $count_one++;
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     my $t4 := nqp::newthread({
         nqp::lock($l);
         nqp::condwait($c2);
         $count_all++;
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     my $t5 := nqp::newthread({
         nqp::lock($l);
         nqp::condwait($c2);
         $count_all++;
         nqp::unlock($l);
-    }, 0);
+    }, 0, 0);
 
     # Start all waiting threads
     nqp::threadrun($t2);

@@ -3,7 +3,7 @@ plan(24);
 # 2 tests
 {
     my $ran := 0;
-    my $t   := nqp::newthread({ $ran := 1 }, 0);
+    my $t   := nqp::newthread({ $ran := 1 }, 0, 0);
     ok(nqp::defined($t), 'Can create a new non-app-lifetime thread');
     nqp::threadrun($t);
     nqp::threadjoin($t);
@@ -13,7 +13,7 @@ plan(24);
 # 2 tests
 {
     my $start := nqp::time_n();
-    my $t     := nqp::newthread({ nqp::sleep(10.0) }, 1);
+    my $t     := nqp::newthread({ nqp::sleep(10.0) }, 1, 0);
     ok(nqp::defined($t), 'Can create a new app-lifetime thread');
     nqp::threadrun($t);
     ok(nqp::time_n() - $start < 10.0,
@@ -26,7 +26,7 @@ plan(24);
     my $t := nqp::newthread({
         1 until $done;
         ok(1, 'Can write to STDOUT in child thread');
-    }, 0);
+    }, 0, 0);
     ok(1, 'Can write to STDOUT in parent thread before threadrun');
     nqp::threadrun($t);
     ok(1, 'Can write to STDOUT in parent thread after threadrun');
@@ -45,7 +45,7 @@ plan(24);
     my $cid := 0;
     my $t   := nqp::newthread({
         $cid := nqp::threadid(nqp::currentthread());
-    }, 0);
+    }, 0, 0);
     ok(nqp::defined($t), 'Can create another new thread after previous joins');
 
     $tid := nqp::threadid($t);
@@ -69,8 +69,8 @@ plan(24);
 {
     my $a  := 0;
     my $b  := 0;
-    my $t1 := nqp::newthread({ $a := 21 }, 0);
-    my $t2 := nqp::newthread({ $b := 42 }, 0);
+    my $t1 := nqp::newthread({ $a := 21 }, 0, 0);
+    my $t2 := nqp::newthread({ $b := 42 }, 0, 0);
 
     nqp::threadrun($t1);
     nqp::threadrun($t2);
@@ -96,7 +96,7 @@ plan(24);
         nqp::push(@a, '1');
         nqp::threadyield() until nqp::elems(@a) == 3 && @a[2] eq 'b';
         nqp::push(@a, '2');
-    }, 0);
+    }, 0, 0);
 
     # Make sure child thread is at least *runnable* (if not actually running)
     # before running parent thread's code.
@@ -133,13 +133,13 @@ plan(24);
         nqp::push(@a, 'b');
         nqp::threadyield() until nqp::elems(@a) == 4 && @a[3] eq '2';
         nqp::push(@a, 'c');
-    }, 0);
+    }, 0, 0);
     my $t2 := nqp::newthread({
         nqp::threadyield() until nqp::elems(@a) == 1 && @a[0] eq 'a';
         nqp::push(@a, '1');
         nqp::threadyield() until nqp::elems(@a) == 3 && @a[2] eq 'b';
         nqp::push(@a, '2');
-    }, 0);
+    }, 0, 0);
 
     # Make sure $t2 is at least *runnable* (if not actually running)
     # before $t1 becomes runnable.
