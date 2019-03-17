@@ -2212,6 +2212,11 @@ my %const_map := nqp::hash(
     'RUSAGE_NVCSW',              16,
     'RUSAGE_NIVCSW',             17,
 
+    'UNAME_SYSNAME',              0,
+    'UNAME_RELEASE',              1,
+    'UNAME_VERSION',              2,
+    'UNAME_MACHINE',              3,
+
     'MVM_OPERAND_LITERAL',        0,
     'MVM_OPERAND_READ_REG',       1,
     'MVM_OPERAND_WRITE_REG',      2,
@@ -3096,6 +3101,8 @@ QAST::MASTOperations.add_core_moarop_mapping('nativecallglobal', 'nativecallglob
 QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsizeof', :decont(0));
 
 QAST::MASTOperations.add_core_moarop_mapping('getcodelocation', 'getcodelocation', :decont(0));
+
+QAST::MASTOperations.add_core_moarop_mapping('uname', 'uname');
 
 # process related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);

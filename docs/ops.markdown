@@ -301,6 +301,7 @@
   * [const](#const)
   * [cpucores](#cpucores)
   * [getrusage](#getrusage)
+  * [uname](#uname)
   * [debugnoop `jvm`](#debugnoop-jvm)
   * [exit](#exit)
   * [getenvhash](#getenvhash)
@@ -2553,6 +2554,11 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * RUSAGE_STIME_SEC
     * RUSAGE_STIME_MSEC
 
+    * UNAME_SYSNAME
+    * UNAME_RELEASE
+    * UNAME_VERSION
+    * UNAME_MACHINE
+
     * TYPE_CHECK_CACHE_DEFINITIVE
     * TYPE_CHECK_CACHE_THEN_METHOD
     * TYPE_CHECK_NEEDS_ACCEPTS
@@ -2576,6 +2582,17 @@ elements are currently defined:
 
 Elements may be 0 if it is impossible to determine that value in the current
 system.
+
+## uname
+* `uname(--> Mu)`
+
+Returns a string array and fills it with uname data, of which the following
+elements are currently defined:
+
+* `UNAME_SYSNAME`  Name of the operating system implementation
+* `UNAME_RELEASE`  Release level of the operating system
+* `UNAME_VERSION`  Version level of the operating system
+* `UNAME_MACHINE`  Machine hardware platform
 
 ## debugnoop `jvm`
 * `debugnoop(Mu $a)`
