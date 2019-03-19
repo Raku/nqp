@@ -489,21 +489,6 @@ exports.slurpyArray = hll.slurpyArray;
 exports.createArray = require('./BOOT.js').createArray;
 exports.createIntArray = require('./BOOT.js').createIntArray;
 
-exports.dumpObj = function(obj) {
-  console.log(typeof obj);
-  if (typeof obj === 'object') {
-    if (obj.$$STable) {
-      console.log(obj.$$STable.REPR.name);
-      const name = obj.$$STable.HOW.p6$name(null, null, obj.$$STable.HOW, obj);
-      console.log(name instanceof NQPStr ? name.value : name);
-    } else {
-      console.log('no STable', obj.constructor.name);
-    }
-  } else {
-    console.log(obj);
-  }
-};
-
 const containerSpecs = require('./container-specs.js');
 exports.extraRuntime = function(lang, path) {
   if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
