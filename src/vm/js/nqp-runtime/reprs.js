@@ -632,6 +632,20 @@ class P6opaque extends REPRWithAttributes {
         return (this[attr] == undefined) ? 0 : 1;
       }
     });
+
+    STable.addInternalMethod(Symbol.for('nodejs.util.inspect.custom'), function() {
+      const unpacked = {debugName: STable.debugName};
+
+      for (let i = 0; i < repr.nameToIndexMapping.length; i++) {
+        for (let j = 0; j < repr.nameToIndexMapping[i].slots.length; j++) {
+          const slot = repr.nameToIndexMapping[i].slots[j];
+          const name = repr.nameToIndexMapping[i].names[j] + ' (' + repr.nameToIndexMapping[i].classKey.$$STable.debugName + ')';
+
+          unpacked[name] = this[slotToAttr(slot)];
+        }
+      }
+      return unpacked;
+    });
   }
 };
 
