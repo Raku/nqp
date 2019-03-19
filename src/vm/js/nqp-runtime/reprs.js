@@ -142,6 +142,11 @@ class REPR {
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
     ObjConstructor.prototype.$$STable = STable;
 
+    const inspect = Symbol.for('nodejs.util.inspect.custom');
+    ObjConstructor.prototype[inspect] = () => {
+      return '...' + STable.REPR.name + '...';
+    };
+
     ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
     ObjConstructor.prototype.then = undefined;
@@ -2534,6 +2539,9 @@ class WrappedJSObject extends REPR {
 
     ObjConstructor.prototype = Object.create(new Proxy({}, handler));
     ObjConstructor.prototype.$$STable = STable;
+
+    const inspect = Symbol.for('nodejs.util.inspect.custom');
+    ObjConstructor.prototype[inspect] = () => '...';
 
     ObjConstructor.prototype.$$SC = undefined;
     ObjConstructor.prototype._WHERE = undefined;
