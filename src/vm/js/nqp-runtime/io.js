@@ -605,3 +605,11 @@ op.getpid = function() {
 op.getppid = function() {
   return process.ppid;
 };
+
+op.uname = function() {
+  let sysname = os.type();
+  let release = os.release();
+  let version = "";
+  let machine = "";
+  return [sysname, release, version, machine];
+};
