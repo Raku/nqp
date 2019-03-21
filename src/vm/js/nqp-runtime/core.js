@@ -1981,7 +1981,7 @@ op.split = function(currentHLL, separator, string) {
 
 op.setextype = function(exception, category) {
   exception.$$category = category;
-  return exception;
+  return category;
 };
 
 op.getextype = function(exception) {
