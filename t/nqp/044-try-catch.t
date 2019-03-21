@@ -1,6 +1,6 @@
 # Tests for try and catch
 
-plan(60);
+plan(62);
 
 sub oops($msg = "oops!") { # throw an exception
     nqp::die($msg);
@@ -316,6 +316,19 @@ is(nqp::getpayload($control_ex), 'fancy payload', 'CONTROL block works');
 
     is(nqp::getpayload($control_ex), 'fancy warn payload', 'CONTROL block works with WARN');
     is(nqp::getextype($control_ex), nqp::const::CONTROL_WARN, 'nqp::getextype gets the correct type');
+}
+
+{
+    my $control_ex;
+    {
+        THROW(nqp::const::CONTROL_ANY, 'fancy any payload');
+        CONTROL {
+            $control_ex := $!;
+        }
+    }
+
+    is(nqp::getpayload($control_ex), 'fancy any payload', 'CONTROL block works with ANY');
+    is(nqp::getextype($control_ex), nqp::const::CONTROL_ANY, 'nqp::getextype gets the correct type');
 }
 
 my $control_called := 0;
