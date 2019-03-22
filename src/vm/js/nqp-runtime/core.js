@@ -2068,7 +2068,7 @@ op.captureinnerlex = function(codeRef) {
 };
 
 op.cpucores = function() {
-  return 1;
+  return os.cpus().length;
 };
 
 op.atomicinc_i = function(ctx, ref) {
