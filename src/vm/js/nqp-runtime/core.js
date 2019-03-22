@@ -869,7 +869,7 @@ class JavaScriptCompiler extends NQPObject {
   }
 
   /*async*/ p6$eval(ctx, _NAMED, self, code) {
-    if (process.browser || !(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
+    if (!(_NAMED !== null && _NAMED.hasOwnProperty('mapping'))) {
       const codeStr = this.$$mangleCode(/*await*/ nqp.arg_s(ctx, code));
       return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()'));
     }
@@ -878,13 +878,16 @@ class JavaScriptCompiler extends NQPObject {
 
     const codeStr = this.$$mangleCode(/*await*/ nqp.toStr(code, ctx));
 
+    // TODO - get rid of the node.js specific way
     // TODO - think about the LOAD_BYTECODE_FROM_MODULE HACK
     const preamble = 'var nqp = global.nqp; var module = global.nqpModule;var require = global.nqpRequire;';
 
-    global.nqp = nqp;
+    if (!process.browser) {
+      global.nqp = nqp;
+    }
 
     if (_NAMED !== null && _NAMED.hasOwnProperty('mapping')) {
-      sourceMaps[fakeFilename] = new SourceMapConsumer(
+      sourceMaps[fakeFilename] = /*await*/ new SourceMapConsumer(
         createSourceMap(
           codeStr,
           /*await*/ nqp.toStr(_NAMED['p6-source'], ctx),
@@ -896,12 +899,17 @@ class JavaScriptCompiler extends NQPObject {
       const node = SourceNode.fromStringWithSourceMap(codeStr, sourceMaps[fakeFilename]);
 
       // HACK
-      sourceMaps[fakeFilename] = new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString());
+      sourceMaps[fakeFilename] = /*await*/ new SourceMapConsumer(node.toStringWithSourceMap({file: fakeFilename}).map.toString());
     }
 
     if ('p6-source' in _NAMED) {
       evaledP6Sources[fakeFilename] = nqp.toStr(_NAMED['p6-source'], ctx);
       evaledP6Filenames[fakeFilename] = nqp.toStr(_NAMED.file, ctx);
+    }
+
+    if (process.browser) {
+      const sourceURL = '\n//@ sourceURL=' + fakeFilename;
+      return fromJSToReturnValue(ctx, /*await*/ eval('(function() {' + codeStr + '})()' + sourceURL));
     }
 
     const compiled = vm.compileFunction(preamble + codeStr, [], {filename: fakeFilename});
@@ -1720,7 +1728,7 @@ op.getstaticcode = function(codeRef) {
           const wanted = codeRef.$$call.name;
           while (stackIndex < stack.length) {
             if (stack[stackIndex].getFunctionName() == wanted) {
-              file = stack[stackIndex].getFileName();
+              file = stack[stackIndex].getFileName() || stack[stackIndex].getEvalOrigin();
               line = stack[stackIndex].getLineNumber();
               let column = stack[stackIndex].getColumnNumber();
 
@@ -1739,8 +1747,12 @@ op.getstaticcode = function(codeRef) {
                     if (original.source) {
                       file = original.source;
 
+
                       /* HACK - avoid parcel adding a ../ prefix */
                       file = file.replace(/^\.\.\/SETTING::/, 'SETTING::');
+                      /* HACK - hack for SETTING:: getting turned into setting:: due to URL mangling */
+                      file = file.replace(/^setting::/, 'SETTING::');
+
                       line = original.line;
                       column = original.column;
                     }
