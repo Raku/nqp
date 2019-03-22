@@ -633,7 +633,7 @@ class P6opaque extends REPRWithAttributes {
       }
     });
 
-    STable.addInternalMethod(Symbol.for('nodejs.util.inspect.custom'), function() {
+    STable.addCustomInspection(function() {
       const unpacked = {debugName: STable.debugName};
 
       for (let i = 0; i < repr.nameToIndexMapping.length; i++) {

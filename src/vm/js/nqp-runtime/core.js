@@ -862,7 +862,7 @@ exports.buildSourceMap = new BuildSourceMap();
 class JavaScriptCompiler extends NQPObject {
   $$mangleCode(code) {
     if ('/*async*/' !== '/*asy' + 'nc*/') {
-      return code.replace(/\/\*async\*\//g, 'async').replace(/\/\*await\*\//g, 'await');
+      return code.replace(/\/\*async\*\//g, '/*async*/').replace(/\/\*await\*\//g, '/*await*/');
     } else {
       return code;
     }

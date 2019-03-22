@@ -356,6 +356,10 @@ class STable {
     }
   }
 
+  addCustomInspection(callback) {
+    this.addInternalMethod(Symbol.for('nodejs.util.inspect.custom'), callback);
+  }
+
   compileAccessor(accessor, code, setup) {
     this.code = this.code || '';
     this.setup = this.setup || '';
