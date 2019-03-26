@@ -4505,6 +4505,7 @@ class QAST::CompilerJAST {
                             $declarer := $cur_block;
                             $ref := 1;
                             $cur_block := NQPMu;
+                            $type := $RT_OBJ;
                         }
                         else {
                             $cur_block := $cur_block.outer();
