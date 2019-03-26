@@ -40,7 +40,7 @@ dies-ok({
 
 dies-ok({
   nqp::encodeconf('☃', 'windows-1252', $buf8.new, 1);
-}, 'nqp::encodeconf only fuges unmapped chars in permissive mode');
+}, 'nqp::encodeconf only fudges unmapped chars in permissive mode');
 
 is(nqp::decoderepconf($nspecial_windows, 'windows-1252', 'ABCDE', 0), "//ABCDE//ABCDEABCDE//",
 "nqp::decoderepconf works on strict (does do replacement)");
