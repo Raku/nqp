@@ -1741,7 +1741,13 @@ op.getstaticcode = function(codeRef) {
                 }
               } else {
                 if (file && resolveSourceMap) {
-                  const resolved = /*await*/ resolveSourceMap(file);
+                  let resolved = null
+
+                  try {
+                    resolved = /*await*/ resolveSourceMap(file);
+                  } catch (e) {
+                  }
+
                   if (resolved !== null) {
                     const original = resolved.originalPositionFor({line: line, column: column});
                     if (original.source) {
