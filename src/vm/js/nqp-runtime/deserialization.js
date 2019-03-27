@@ -445,6 +445,8 @@ class BinaryCursor {
 
     STable.debugName = this.cstr();
 
+    this.varint();
+
     if (STable.REPR.deserializeReprData) {
       STable.REPR.deserializeReprData(this.clone(), STable);
     }
@@ -536,7 +538,7 @@ class BinaryCursor {
 
     this.sc = sc;
 
-    if (version != 20) {
+    if (version != 21) {
       throw 'Unsupported serialization format version: ' + version;
     }
 

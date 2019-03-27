@@ -25,7 +25,7 @@ const globalContext = require('./global-context.js');
 const op = {};
 exports.op = op;
 
-const CURRENT_VERSION = 20;
+const CURRENT_VERSION = 21;
 const OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
 const OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
 const OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
@@ -568,6 +568,7 @@ class SerializationWriter {
     }
 
     this.stablesData.cstr(st.debugName);
+    this.stablesData.varint(0);
 
     /* Location of REPR data. */
     this.stables.int32(this.stablesData.offset);
