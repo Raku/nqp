@@ -12,6 +12,7 @@ import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 public class ExceptionHandling {
     /* Exception handler categories. */
     public static final int EX_CAT_CATCH = 1;
+    public static final int EX_CAT_ANY = 2;
     public static final int EX_CAT_NEXT = 4;
     public static final int EX_CAT_REDO = 8;
     public static final int EX_CAT_LAST = 16;

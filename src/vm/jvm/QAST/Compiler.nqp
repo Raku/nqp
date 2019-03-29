@@ -70,6 +70,7 @@ my $TYPE_RESUME     := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
+my $EX_CAT_ANY     := 2;
 my $EX_CAT_NEXT    := 4;
 my $EX_CAT_REDO    := 8;
 my $EX_CAT_LAST    := 16;
@@ -86,7 +87,7 @@ my $EX_CAT_CONTROL := $EX_CAT_NEXT +| $EX_CAT_REDO +| $EX_CAT_LAST +|
                       $EX_CAT_TAKE +| $EX_CAT_WARN +|
                       $EX_CAT_SUCCEED +| $EX_CAT_PROCEED +|
                       $EX_CAT_AWAIT +| $EX_CAT_EMIT +| $EX_CAT_DONE +|
-                      $EX_CAT_RETURN;
+                      $EX_CAT_RETURN +| $EX_CAT_ANY;
 
 # Exception handler kinds.
 my $EX_UNWIND_SIMPLE := 0;
@@ -1612,6 +1613,7 @@ my %handler_names := nqp::hash(
     'EMIT',    $EX_CAT_EMIT,
     'DONE',    $EX_CAT_DONE,
     'RETURN',  $EX_CAT_RETURN,
+    'ANY',     $EX_CAT_ANY,
 );
 QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     my @children := nqp::clone($op.list());
