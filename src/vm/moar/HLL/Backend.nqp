@@ -203,6 +203,21 @@ class HLL::Backend::MoarVM {
             $node<highest_child_id> := $node-id-counter;
         }
 
+        sub post_process_thread_data($thread) {
+            unless nqp::existskey($thread, 'gcs') {
+                return
+            }
+            for $thread<gcs> -> $gc {
+                unless nqp::existskey($gc, 'deallocs') {
+                    next
+                }
+
+                for $gc<deallocs> -> $dealloc {
+                    $dealloc<id> := get_remapped_type_id($dealloc<id>);
+                }
+            }
+        }
+
         sub to_json($obj) {
             if nqp::islist($obj) {
                 nqp::push_s(@pieces, '[');
@@ -472,6 +487,9 @@ class HLL::Backend::MoarVM {
             if nqp::existskey($_, "call_graph") {
                 post_process_call_graph_node($_<call_graph>);
             }
+            # Also make sure every gc entry has its deallocation types
+            # remapped to the "new" (shorter) type IDs
+            post_process_thread_data($_);
         }
 
         # The data array is normally a list of threads, but the first entry is
