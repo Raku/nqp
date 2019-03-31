@@ -121,6 +121,48 @@ class HLL::Backend::MoarVM {
 
         my int $node-id-counter := -1;
 
+        sub get_remapped_type_id($id) {
+            my str $newkey;
+
+            if nqp::existskey($id_remap, $id) {
+                $newkey := $id_remap{$id};
+            } else {
+                $newkey := ~(++$new-id-counter);
+                $id_remap{$id} := $newkey;
+            }
+
+            unless nqp::existskey($id_to_thing, $newkey) {
+                my $typename;
+                my $scdesc;
+                try {
+                    my $type := %type-info{$id}[1]<type>;
+                    $typename := $type.HOW.name($type);
+                }
+                unless $typename {
+                    $typename := "<unknown type>";
+                }
+                try {
+                    my $type := %type-info{$id}[1]<type>;
+                    my $sc := nqp::getobjsc($type);
+                    if $sc {
+                        $scdesc := nqp::scgetdesc($sc);
+                    }
+                }
+                unless $scdesc {
+                    $scdesc := "";
+                }
+                %type-info{$id}[1]<typename> := $typename;
+                %type-info{$id}[1]<scdesc> := $scdesc;
+                $id_to_thing{$newkey} := $typename;
+                unless nqp::existskey(%type-info, $newkey) {
+                    nqp::bindkey(%type-info, $newkey, nqp::list());
+                }
+                %type-info{$newkey}[1] := %type-info{$id}[1];
+            }
+
+            $newkey;
+        }
+
         sub post_process_call_graph_node($node) {
             my $this-node-id := ++$node-id-counter;
             try {
@@ -133,42 +175,7 @@ class HLL::Backend::MoarVM {
                 }
                 if nqp::existskey($node, "allocations") {
                     for $node<allocations> -> %alloc_info {
-                        my $orig-id := %alloc_info<id>;
-                        if nqp::existskey($id_remap, %alloc_info<id>) {
-                            %alloc_info<id> := $id_remap{%alloc_info<id>};
-                        } else {
-                            my str $newkey := ~(++$new-id-counter);
-                            $id_remap{%alloc_info<id>} := $newkey;
-                            %alloc_info<id> := $newkey;
-                        }
-                        unless nqp::existskey($id_to_thing, %alloc_info<id>) {
-                            my $typename;
-                            my $scdesc;
-                            try {
-                                my $type := %type-info{$orig-id}[1]<type>;
-                                $typename := $type.HOW.name($type);
-                            }
-                            unless $typename {
-                                $typename := "<unknown type>";
-                            }
-                            try {
-                                my $type := %type-info{$orig-id}[1]<type>;
-                                my $sc := nqp::getobjsc($type);
-                                if $sc {
-                                    $scdesc := nqp::scgetdesc($sc);
-                                }
-                            }
-                            unless $scdesc {
-                                $scdesc := "";
-                            }
-                            %type-info{$orig-id}[1]<typename> := $typename;
-                            %type-info{$orig-id}[1]<scdesc> := $scdesc;
-                            $id_to_thing{%alloc_info<id>} := $typename;
-                            unless nqp::existskey(%type-info, %alloc_info<id>) {
-                                nqp::bindkey(%type-info, %alloc_info<id>, nqp::list());
-                            }
-                            %type-info{%alloc_info<id>}[1] := %type-info{$orig-id}[1];
-                        }
+                        %alloc_info<id> := get_remapped_type_id(%alloc_info<id>);
                         nqp::deletekey(%alloc_info, "type");
                     }
                 }
