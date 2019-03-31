@@ -405,14 +405,28 @@ class HLL::Backend::MoarVM {
                         $thisprof[2] := ~$v;
                     }
                     elsif $k eq 'gcs' {
+                        my str $thread_id := $thread<thread>;
                         for $v -> $gc {
                             my @g := nqp::list_s();
                             for <time retained_bytes promoted_bytes gen2_roots full responsible cleared_bytes start_time sequence> -> $f {
                                 nqp::push_s(@g, ~($gc{$f} // '0'));
                             }
-                            nqp::push_s(@g, ~$thread<thread>);
+                            nqp::push_s(@g, $thread_id);
                             nqp::push_s($pieces, 'INSERT INTO gcs VALUES (');
                             nqp::push_s($pieces, nqp::join(',', @g) ~ ");\n");
+                            if nqp::existskey($gc, 'deallocs') {
+                                my $deallocs := $gc<deallocs>;
+
+                                for $deallocs -> $entry {
+                                    @g := nqp::list_s($thread_id, $gc<sequence>);
+                                    for <id nursery_fresh nursery_seen gen2> -> $f {
+                                        nqp::push_s(@g, ~($entry{$f} // '0'));
+                                    }
+
+                                    nqp::push_s($pieces, 'INSERT INTO deallocations VALUES (');
+                                    nqp::push_s($pieces, nqp::join(',', @g) ~ ");\n");
+                                }
+                            }
                         }
                     }
                     elsif $k eq 'parent' {
@@ -531,6 +545,7 @@ class HLL::Backend::MoarVM {
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, first_entry_time INT, highest_child_id INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
             $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT, thread_id INT, parent_thread_id INT, root_node INT, first_entry_time INT, FOREIGN KEY(root_node) REFERENCES calls(id));');
             $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, replaced INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
+            $profile_fh.say('CREATE TABLE deallocations(gc_seq_num INT, gc_thread_id INT, type_id INT, nursery_fresh INT, nursery_seen INT, gen2 INT, PRIMARY KEY(gc_seq_num, gc_thread_id, type_id), FOREIGN KEY(gc_seq_num, gc_thread_id) REFERENCES gcs(sequence_num, thread_id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
             $profile_fh.say('END;');
         }
