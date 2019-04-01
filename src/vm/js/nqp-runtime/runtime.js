@@ -157,7 +157,7 @@ function loadWithCache(code) {
 
 if (process.browser) {
   op.loadbytecode = /*async*/ function(ctx, file) {
-      if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
+      if (file == 'Perl6/BOOTSTRAP.js') {
         file = 'Perl6::BOOTSTRAP';
       }
 
@@ -176,7 +176,7 @@ if (process.browser) {
 } else {
   op.loadbytecode = /*async*/ function(ctx, file) {
     // HACK - temporary hack for rakudo-js
-    if (file == '/nqp/lib/Perl6/BOOTSTRAP.js') {
+    if (file == 'Perl6/BOOTSTRAP.js') {
       file = 'Perl6::BOOTSTRAP';
     }
 
