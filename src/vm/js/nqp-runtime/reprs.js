@@ -636,12 +636,16 @@ class P6opaque extends REPRWithAttributes {
     STable.addCustomInspection(function() {
       const unpacked = {debugName: STable.debugName};
 
-      for (let i = 0; i < repr.nameToIndexMapping.length; i++) {
-        for (let j = 0; j < repr.nameToIndexMapping[i].slots.length; j++) {
-          const slot = repr.nameToIndexMapping[i].slots[j];
-          const name = repr.nameToIndexMapping[i].names[j] + ' (' + repr.nameToIndexMapping[i].classKey.$$STable.debugName + ')';
+      if (this.$$typeObject) {
+        unpacked.typeObject = true;
+      } else {
+        for (let i = 0; i < repr.nameToIndexMapping.length; i++) {
+          for (let j = 0; j < repr.nameToIndexMapping[i].slots.length; j++) {
+            const slot = repr.nameToIndexMapping[i].slots[j];
+            const name = repr.nameToIndexMapping[i].names[j] + ' (' + repr.nameToIndexMapping[i].classKey.$$STable.debugName + ')';
 
-          unpacked[name] = this[slotToAttr(slot)];
+            unpacked[name] = this[slotToAttr(slot)];
+          }
         }
       }
       return unpacked;
