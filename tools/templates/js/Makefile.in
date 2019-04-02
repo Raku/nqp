@@ -1,0 +1,2 @@
+
+@include_capture(@moar@ --libpath=@moar_stage0@ @moar_stage0@@slash@nqp.moarvm @script(gen-js-makefile.nqp)@)@
