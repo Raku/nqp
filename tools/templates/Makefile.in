@@ -18,3 +18,4 @@ qregex-test:@for_backends( @backend_prefix@-qregex-test)@
 
 t/*/*.t: all
 	$(PROVE) -r -v --exec ./nqp@bat@ $@
+

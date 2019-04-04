@@ -44,3 +44,4 @@ MoarVM
 MANIFEST
 /bin
 /nqp.bat
+package-lock.json
