@@ -324,3 +324,5 @@ j-qregex-test: $(J_RUNNER)
 
 j-qregex-test-loud: $(J_RUNNER)
 	$(PROVE) -r -v --exec .@slash@$(J_RUNNER) @nfp(t/qregex)@
+
+# vim: ft=make noexpandtab ts=4 sw=4

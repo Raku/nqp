@@ -124,6 +124,4 @@ PROVE_OPTIONS   = -j0$(TEST_JOBS)
 PROVE           = prove $(PROVE_OPTIONS)
 BASE_DIR		= @base_dir@
 
-# nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
-#                   performing win32 slash and makefile conversions
-
+# vim: ft=make noexpandtab ts=4 sw=4

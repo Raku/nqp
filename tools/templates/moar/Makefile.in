@@ -318,5 +318,4 @@ m-qregex-test: $(M_RUNNER)
 m-qregex-test-loud: $(M_RUNNER)
 	$(PROVE) -r -v --exec ".@slash@$(M_RUNNER)" @nfp(t/qregex)@
 
-# nqp::makefile <-- tells NQP::Configure to treat this file as a makefile,
-#                   performing win32 slash and makefile conversions
+# vim: ft=make noexpandtab ts=4 sw=4
