@@ -71,7 +71,7 @@ MAIN: {
     }
 
     $cfg->configure_from_options;
-    $cfg->configure_prefix;
+    $cfg->configure_refine_vars;
     $cfg->configure_relocatability;
     $cfg->configure_repo_urls;
     $cfg->configure_commands;
