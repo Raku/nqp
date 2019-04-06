@@ -9,13 +9,27 @@ use Getopt::Long;
 use Cwd qw/abs_path cwd/;
 use File::Spec;
 use File::Path;
-use lib qw<tools/lib ../tools/lib>;
-use NQP::Config qw<nfp>;
 
-use NQP::Configure qw(cmp_rev gen_moar
-  fill_template_file fill_template_text
-  probe_node
-  slurp system_or_die verify_install sorry);
+BEGIN {
+    print "Updating nqp-configure submodule";
+    my $msg = qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
+    if ($? >> 8 == 0) { print "OK\n" }
+    else {
+        if ($msg =~ /[']([^']+)[']\s+already exists and is not an empty/) {
+            print "\n===SORRY=== ERROR: Cannot update submodule because directory exists and is not empty.\n" .
+            ">>> Please delete the following folder and try again:\n$1\n\n";
+            exit 1;
+        }
+    }
+}
+
+use lib qw<tools/lib 3rdparty/nqp-configure/lib>;
+use NQP::Config qw<nfp system_or_die>;
+
+#use NQP::Configure qw(cmp_rev gen_moar
+#  fill_template_file fill_template_text
+#  probe_node
+#  slurp system_or_die verify_install sorry);
 
 my $cfg = tie my %config, 'NQP::Config', lang => 'NQP';
 
