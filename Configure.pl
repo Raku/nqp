@@ -11,7 +11,7 @@ use File::Spec;
 use File::Path;
 
 BEGIN {
-    print "Updating nqp-configure submodule";
+    print "Updating nqp-configure submodule...\n";
     my $msg = qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
     if ($? >> 8 == 0) { print "OK\n" }
     else {
