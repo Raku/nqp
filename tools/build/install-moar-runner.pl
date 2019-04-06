@@ -31,7 +31,7 @@ else {
         or die "Could not open $install_to: $!";
     if ($relocatable) {
         printf $fh <<'EOS';
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Sourced from https://stackoverflow.com/a/246128/1975049
 SOURCE="${BASH_SOURCE[0]}"
