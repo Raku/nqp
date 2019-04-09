@@ -9,38 +9,43 @@ use Getopt::Long;
 use Cwd qw/abs_path cwd/;
 use File::Spec;
 use File::Path;
+use FindBin;
 
 BEGIN {
-    unless (-e '3rdparty/nqp-configure/LICENSE') {
+    unless ( -e '3rdparty/nqp-configure/LICENSE' ) {
         print "Updating nqp-configure submodule...\n";
-        my $msg = qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
-        if ($? >> 8 == 0) { print "OK\n" }
+        my $msg =
+qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
+        if ( $? >> 8 == 0 ) { print "OK\n" }
         else {
-            if ($msg =~ /[']([^']+)[']\s+already exists and is not an empty/) {
-                print "\n===SORRY=== ERROR: Cannot update submodule because directory exists and is not empty.\n" .
-                ">>> Please delete the following folder and try again:\n$1\n\n";
+            if ( $msg =~ /[']([^']+)[']\s+already exists and is not an empty/ )
+            {
+                print
+"\n===SORRY=== ERROR: Cannot update submodule because directory exists and is not empty.\n"
+                  . ">>> Please delete the following folder and try again:\n$1\n\n";
                 exit 1;
             }
         }
     }
 }
 
-use lib qw<tools/lib 3rdparty/nqp-configure/lib>;
+use lib ("$FindBin::Bin/tools/lib", "$FindBin::Bin/3rdparty/nqp-configure/lib");
 use NQP::Config qw<nfp system_or_die>;
+use NQP::Config::NQP;
 
 #use NQP::Configure qw(cmp_rev gen_moar
 #  fill_template_file fill_template_text
 #  probe_node
 #  slurp system_or_die verify_install sorry);
 
-my $cfg = tie my %config, 'NQP::Config', lang => 'NQP';
+my $cfg  = NQP::Config::NQP->new;
 
 MAIN: {
     if ( -r "config.default" ) {
         unshift @ARGV, shellwords( slurp('config.default') );
     }
 
-    $config{'nqp_config_status'} = join( ' ', map { "\"$_\"" } @ARGV );
+    $cfg->set( 'nqp_config_status', join( ' ', map { "\"$_\"" } @ARGV ) );
 
     GetOptions(
         $cfg->options,      'help!',
@@ -55,7 +60,7 @@ MAIN: {
         'ignore-errors',    'link',
         'git-depth=s',      'git-reference=s',
         'github-user=s',    'nqp-repo=s',
-        'moar-repo=s',      
+        'moar-repo=s',
       )
       or do {
         print_help();
@@ -90,8 +95,9 @@ MAIN: {
     }
 
     # XXX Why Windows only?
-    mkpath( $config{prefix} )
-      if $config{prefix} && $cfg->is_win && !-d $config{prefix};
+    my $prefix = $cfg->cfg('prefix');
+    mkpath( $prefix )
+      if $prefix && $cfg->is_win && !-d $prefix;
 
     # Save options in config.status
     $cfg->save_config_status;

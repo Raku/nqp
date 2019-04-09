@@ -7,11 +7,6 @@ use NQP::Config qw<nfp cmp_rev slurp system_or_die>;
 
 use base qw<NQP::Config>;
 
-sub TIEHASH {
-    my $class = shift;
-    return $class->SUPER::TIEHASH( lang => 'NQP', @_ );
-}
-
 sub configure_backends {
     my $self            = shift;
     my $options         = $self->{options};
