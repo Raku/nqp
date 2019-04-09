@@ -156,6 +156,14 @@ General Options:
     --with-jline='/path/to/jar'
     --with-jna='/path/to/jar'
                        Provide paths to already installed jars
+    --github-user=<user>
+                       Fetch all repositories (rakudo, nqp, roast, MoarVM) from
+                       this github user. Note that the user must have all
+                       required repos forked from the originals.
+    --nqp-repo=<url>
+    --moar-repo=<url>
+                       User specified URL to fetch corresponding components
+                       from. The URL will also be used to setup git push.
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https
     --make-install     Immediately run `MAKE install` after configuring
