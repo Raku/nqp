@@ -6,6 +6,7 @@ use warnings;
 use 5.008;
 
 use Config;
+use File::Spec;
 
 binmode STDOUT, ':utf8';
 
@@ -14,15 +15,16 @@ my ($prefix, $thirdPartyJars) = @ARGV;
 my $cpsep = $^O eq 'MSWin32' ? ';' : ':';
 my $jardir = ".";
 my $libdir = ".";
+my $slash = File::Spec->catdir('', '');
 
 if ($prefix ne '.') {
-    $jardir = "${prefix}/share/nqp/runtime";
-    $libdir = "${prefix}/share/nqp/lib";
+    $jardir = File::Spec->catdir($prefix, qw<share nqp runtime>);
+    $libdir = File::Spec->catdir($prefix, qw<share nqp lib>);
 	my @jars = grep { s/^.*\/// } split($cpsep, $thirdPartyJars);
-	$thirdPartyJars = join($cpsep, grep { s/^/${jardir}\// } @jars);
+	$thirdPartyJars = join($cpsep, grep { s/^/${jardir}${slash}/ } @jars);
 }
 
-$thirdPartyJars .= "${cpsep}${jardir}/nqp-runtime.jar${cpsep}${libdir}/nqp.jar";
+$thirdPartyJars .= "${cpsep}${jardir}${slash}nqp-runtime.jar${cpsep}${libdir}${slash}nqp.jar";
 
 s/\\/\\\\/g for ($prefix, $thirdPartyJars, $libdir);
 
