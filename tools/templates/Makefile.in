@@ -16,7 +16,7 @@ qregex-test:@for_backends( @backend_prefix@-qregex-test)@
 
 @for_backends(@ctx_include(Makefile)@)@
 
-t/*/*.t: all
+@nfp(t/*/*.t)@: all
 	$(PROVE) -r -v --exec ./nqp@bat@ $@
 
 # vim: ft=make noexpandtab ts=4 sw=4
