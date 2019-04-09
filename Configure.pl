@@ -29,7 +29,8 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
     }
 }
 
-use lib ("$FindBin::Bin/tools/lib", "$FindBin::Bin/3rdparty/nqp-configure/lib");
+use lib ( "$FindBin::Bin/tools/lib",
+    "$FindBin::Bin/3rdparty/nqp-configure/lib" );
 use NQP::Config qw<nfp system_or_die>;
 use NQP::Config::NQP;
 
@@ -38,7 +39,7 @@ use NQP::Config::NQP;
 #  probe_node
 #  slurp system_or_die verify_install sorry);
 
-my $cfg  = NQP::Config::NQP->new;
+my $cfg = NQP::Config::NQP->new;
 
 MAIN: {
     if ( -r "config.default" ) {
@@ -96,7 +97,7 @@ MAIN: {
 
     # XXX Why Windows only?
     my $prefix = $cfg->cfg('prefix');
-    mkpath( $prefix )
+    mkpath($prefix)
       if $prefix && $cfg->is_win && !-d $prefix;
 
     # Save options in config.status
