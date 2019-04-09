@@ -20,7 +20,7 @@ my $slash = File::Spec->catdir('', '');
 if ($prefix ne '.') {
     $jardir = File::Spec->catdir($prefix, qw<share nqp runtime>);
     $libdir = File::Spec->catdir($prefix, qw<share nqp lib>);
-	my @jars = grep { s/^.*\/// } split($cpsep, $thirdPartyJars);
+	my @jars = grep { s/^.*\Q${slash}\E// } split($cpsep, $thirdPartyJars);
 	$thirdPartyJars = join($cpsep, grep { s/^/${jardir}${slash}/ } @jars);
 }
 
