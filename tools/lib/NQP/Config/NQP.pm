@@ -49,6 +49,12 @@ sub configure_misc {
 
     $config->{moar_stage0} = nfp("src/vm/moar/stage0");
     $config->{jvm_stage0}  = nfp("src/vm/jvm/stage0");
+
+    $config->{nqplibdir} = nfp(
+          $self->opt('libdir')
+        ? $self->opt('libdir') . "/nqp"
+        : '$(NQP_LANG_DIR)/lib'
+    );
 }
 
 sub configure_moar_backend {
@@ -172,8 +178,8 @@ sub gen_moar {
     my $moar_exe = $options->{'with-moar'}
       || File::Spec->catfile( $moar_prefix, 'bin', "moar$exe" );
     my $moar_version_output = "";
-    
-    if ($self->is_executable($moar_exe)) {
+
+    if ( $self->is_executable($moar_exe) ) {
         $moar_version_output = qx{ $moar_exe --version };
 
         if ($moar_version_output) {
@@ -194,7 +200,9 @@ sub gen_moar {
 "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
         $try_generate = $gen_moar unless $options->{'ignore-errors'};
     }
-    elsif ( $moar_version_output && $moar_version_output =~ /This is MoarVM version/i ) {
+    elsif ($moar_version_output
+        && $moar_version_output =~ /This is MoarVM version/i )
+    {
         push @errors,
           "Found a MoarVM binary but was not able to get its version number.\n"
           . "If running `git describe` inside the MoarVM repository does not work,\n"
@@ -204,7 +212,7 @@ sub gen_moar {
 
     $self->sorry(@errors) if @errors && !$gen_moar;
 
-    if (defined $try_generate) {
+    if ( defined $try_generate ) {
 
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );

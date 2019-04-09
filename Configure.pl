@@ -93,11 +93,6 @@ MAIN: {
     mkpath( $config{prefix} )
       if $config{prefix} && $cfg->is_win && !-d $config{prefix};
 
-    $config{nqplibdir} =
-        $cfg->opt('libdir')
-      ? $cfg->opt('libdir') . "/nqp"
-      : '$(NQP_LANG_DIR)/lib';
-
     # Save options in config.status
     $cfg->save_config_status;
 
