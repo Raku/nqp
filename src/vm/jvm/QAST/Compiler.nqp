@@ -2230,7 +2230,7 @@ QAST::OperationsJAST.add_core_op('setsockopt', -> $qastcomp, $op {
     $*STACK.obtain($il, $h, $opt, $val);
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_IO_OPS,
-        'setsockopt', 'Void', $TYPE_SMO, 'Long', 'Long', $TYPE_TC));
+        'setsockopt', 'Void', $TYPE_SMO, 'Long', 'Long', $TYPE_TC ));
     result($il, $RT_VOID);
 });
 

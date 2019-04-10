@@ -4,14 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.ProcessBuilder.Redirect;
-import java.net.SocketOption;
 import java.net.SocketOptions;
-import java.net.StandardSocketOptions;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.perl6.nqp.io.AsyncProcessHandle;
 import org.perl6.nqp.io.AsyncServerSocketHandle;
 import org.perl6.nqp.io.AsyncSocketHandle;
@@ -260,13 +259,13 @@ public final class IOOps {
 
         try {
             if (handle instanceof AsyncSocketHandle) {
-                ((AsyncSocketHandle) handle).setOption(tc, (int) option, (int) value);
+                ((AsyncSocketHandle) handle).setOption(tc, (int) option, value);
             } else if (handle instanceof AsyncServerSocketHandle) {
-                ((AsyncServerSocketHandle) handle).setOption(tc, (int) option, (int) value);
+                ((AsyncServerSocketHandle) handle).setOption(tc, (int) option, value);
             } else if (handle instanceof SocketHandle) {
-                ((SocketHandle) handle).setOption(tc, (int) option, (int) value);
+                ((SocketHandle) handle).setOption(tc, (int) option, value);
             } else if (handle instanceof ServerSocketHandle) {
-                ((ServerSocketHandle) handle).setOption(tc, (int) option, (int) value);
+                ((ServerSocketHandle) handle).setOption(tc, (int) option, value);
             } else {
                 throw ExceptionHandling.dieInternal(tc, "Setting socket options is not supported for this type of socket");
             }

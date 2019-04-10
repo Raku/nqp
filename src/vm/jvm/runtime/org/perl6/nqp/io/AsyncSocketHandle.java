@@ -10,6 +10,7 @@ import java.nio.channels.AsynchronousCloseException;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.channels.ClosedChannelException;
+import java.util.concurrent.TimeUnit;
 
 import org.perl6.nqp.runtime.Buffers;
 import org.perl6.nqp.runtime.ExceptionHandling;
@@ -229,45 +230,53 @@ public class AsyncSocketHandle implements IIOClosable, IIOCancelable, IIOOptions
 
     public long getOption(ThreadContext tc, int option) throws IOException {
         switch (option) {
-            case SocketOptions.SO_SNDBUF:
-                return channel.getOption(StandardSocketOptions.SO_SNDBUF);
-            case SocketOptions.SO_RCVBUF:
-                return channel.getOption(StandardSocketOptions.SO_RCVBUF);
             case SocketOptions.SO_KEEPALIVE:
                 return channel.getOption(StandardSocketOptions.SO_KEEPALIVE) ? 1 : 0;
+            case SocketOptions.SO_RCVBUF:
+                return channel.getOption(StandardSocketOptions.SO_RCVBUF);
             case SocketOptions.SO_REUSEADDR:
                 return channel.getOption(StandardSocketOptions.SO_REUSEADDR) ? 1 : 0;
+            case SocketOptions.SO_SNDBUF:
+                return channel.getOption(StandardSocketOptions.SO_SNDBUF);
             case SocketOptions.TCP_NODELAY:
                 return channel.getOption(StandardSocketOptions.TCP_NODELAY) ? 1 : 0;
+            case SocketOptions.SO_BINDADDR:
+            case SocketOptions.SO_BROADCAST:
+            case SocketOptions.SO_LINGER:
+            case SocketOptions.SO_OOBINLINE:
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket.");
             default:
-                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket");
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by the JVM.");
         }
     }
 
-    public long setOption(ThreadContext tc, int option, int value) throws IOException {
+    public void setOption(ThreadContext tc, int option, long value) throws IOException {
         switch (option) {
-            case SocketOptions.SO_SNDBUF:
-                channel.setOption(StandardSocketOptions.SO_SNDBUF, value);
-                break;
-            case SocketOptions.SO_RCVBUF:
-                channel.setOption(StandardSocketOptions.SO_RCVBUF, value);
-                break;
             case SocketOptions.SO_KEEPALIVE:
                 channel.setOption(StandardSocketOptions.SO_KEEPALIVE,
                         (value == 0) ? false : true);
+                break;
+            case SocketOptions.SO_RCVBUF:
+                channel.setOption(StandardSocketOptions.SO_RCVBUF, (int) value);
                 break;
             case SocketOptions.SO_REUSEADDR:
                 channel.setOption(StandardSocketOptions.SO_REUSEADDR,
                         (value == 0) ? false : true);
                 break;
+            case SocketOptions.SO_SNDBUF:
+                channel.setOption(StandardSocketOptions.SO_SNDBUF, (int) value);
+                break;
             case SocketOptions.TCP_NODELAY:
                 channel.setOption(StandardSocketOptions.TCP_NODELAY,
                         (value == 0) ? false : true);
                 break;
+            case SocketOptions.SO_BINDADDR:
+            case SocketOptions.SO_BROADCAST:
+            case SocketOptions.SO_LINGER:
+            case SocketOptions.SO_OOBINLINE:
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket.");
             default:
-                throw ExceptionHandling.dieInternal(tc, "This option is not supported by this type of socket");
+                throw ExceptionHandling.dieInternal(tc, "This option is not supported by the JVM.");
         }
-
-        return 0;
     }
 }
