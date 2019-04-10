@@ -985,27 +985,33 @@ public final class Ops {
     }
 
     public static long unlink(String path, ThreadContext tc) {
-        try {
-            if(!Files.deleteIfExists(Paths.get(path))) {
-                return -2;
-            }
+        Path path_o = Paths.get(path);
+        if (Files.isDirectory(path_o)) {
+            die_s("Failed to delete file: is a directory", tc);
         }
-        catch (Exception e) {
-            die_s(IOExceptionMessages.message(e), tc);
+        else {
+            try {
+                Files.deleteIfExists(path_o);
+            }
+            catch (Exception e) {
+                die_s(IOExceptionMessages.message(e), tc);
+            }
         }
         return 0;
     }
 
     public static long rmdir(String path, ThreadContext tc) {
         Path path_o = Paths.get(path);
-        try {
-            if (!Files.isDirectory(path_o)) {
-                return -2;
-            }
-            Files.delete(path_o);
+        if (!Files.isDirectory(path_o)) {
+            die_s("Failed to rmdir: not a directory", tc);
         }
-        catch (Exception e) {
-            die_s(IOExceptionMessages.message(e), tc);
+        else {
+            try {
+                Files.delete(path_o);
+            }
+            catch (Exception e) {
+                die_s(IOExceptionMessages.message(e), tc);
+            }
         }
         return 0;
     }
