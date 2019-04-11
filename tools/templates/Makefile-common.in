@@ -107,12 +107,13 @@ COMMON_SOURCES = \
   $(QREGEX_SOURCES) \
   $(NQP_MO_SOURCES) \
 
-PERL          = @perl@
-MKPATH        = $(PERL) -MExtUtils::Command -e mkpath
-CHMOD         = $(PERL) -MExtUtils::Command -e chmod
-CP            = $(PERL) -MExtUtils::Command -e cp
-RM_RF         = $(PERL) -MExtUtils::Command -e rm_rf
-RM_F          = $(PERL) -MExtUtils::Command -e rm_f
+PERL		= @perl@
+MKPATH		= @mkpath@
+CHMOD		= @chmod@
+CP			= @cp@
+RM_RF		= @rm_rf@
+RM_F		= @rm_f@
+RM_L		= @rm_l@
 @shell@
 
 SYSROOT         = @sysroot@
