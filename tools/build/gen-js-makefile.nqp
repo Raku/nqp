@@ -74,8 +74,8 @@ sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
 
     rule($target, $sources,
         make_parents($target),
-        $gen-version ?? "\$(PERL) \@script(gen-version.pl)@ \$(PREFIX) \$(NQP_LIB_DIR) > $version" !! '',
-        "\$(PERL) \@script(gen-cat.pl)@ js \@nfp($sources)@ {$gen-version ?? $version !! ''} > \@nfp($target)@"
+        $gen-version ?? "\$(PERL5) \@script(gen-version.pl)@ \$(PREFIX) \$(NQP_LIB_DIR) > $version" !! '',
+        "\$(PERL5) \@script(gen-cat.pl)@ js \@nfp($sources)@ {$gen-version ?? $version !! ''} > \@nfp($target)@"
     ); 
 }
 
@@ -117,8 +117,8 @@ constant('JS_NQP', nfp('$(BASE_DIR)/$(M_RUNNER)'));
 constant('JS_RUNNER', 'nqp-js$(BAT)');
 constant('JS_CROSS_RUNNER', 'nqp-js-cross$(BAT)');
 
-rule('$(JS_RUNNER)', '@script(gen-js-runner.pl)@','$(PERL) @script(gen-js-runner.pl)@');
-rule('$(JS_CROSS_RUNNER)', '@script(gen-js-cross-runner.pl)@','$(PERL) @script(gen-js-cross-runner.pl)@ @nfp($(BASE_DIR)/$(M_RUNNER))@');
+rule('$(JS_RUNNER)', '@script(gen-js-runner.pl)@','$(PERL5) @script(gen-js-runner.pl)@');
+rule('$(JS_CROSS_RUNNER)', '@script(gen-js-cross-runner.pl)@','$(PERL5) @script(gen-js-cross-runner.pl)@ @nfp($(BASE_DIR)/$(M_RUNNER))@');
 
 out('js-runner-default: js-all');
 
@@ -152,10 +152,10 @@ my $sprintf-moarvm := cross-compile(:stage(2), :source('src/HLL/sprintf.nqp'), :
 deps('js-stage1-compiler', '$(JS_STAGE1_COMPILER)');
 
 rule('js-test', 'js-cross gen/js/qregex.t $(JS_CROSS_RUNNER)',  
-	"\$(PERL) {nfp('src/vm/js/bin/run_tests.pl')}");
+	"\$(PERL5) {nfp('src/vm/js/bin/run_tests.pl')}");
 
 rule('js-test-bootstrapped', "js-bootstrap {nfp('gen/js/qregex.t')}",
-	"\$(PERL) {nfp('src/vm/js/bin/run_tests_bootstrapped.pl')}");
+	"\$(PERL5) {nfp('src/vm/js/bin/run_tests_bootstrapped.pl')}");
 
 rule('gen/js/qregex.t', '@script(process-qregex-tests)@',
 	"\$(JS_NQP) \@script(process-qregex-tests)@ > {nfp('gen/js/qregex.t')}");
@@ -189,8 +189,8 @@ rule('js-install', 'js-all',
   '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)',
   '$(MKPATH) ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js'),
   |@cp_all,
-  '$(PERL) @script(npm-install-or-link.pl)@ ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js src/vm/js/nqp-runtime nqp-runtime @link@'),
-  '$(PERL) @script(install-js-runner.pl)@ "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
+  '$(PERL5) @script(npm-install-or-link.pl)@ ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js src/vm/js/nqp-runtime nqp-runtime @link@'),
+  '$(PERL5) @script(install-js-runner.pl)@ "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
 );
 
 constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
@@ -243,7 +243,7 @@ rule('js-runner-default-install', 'js-runner-default js-install',
   '$(CHMOD) 755 ' ~ nfp('$(DESTDIR)$(BIN_DIR)/nqp$(BAT)'));
 
 rule('js-deps', '',
-  '$(PERL) ' ~nfp('tools/build/npm-install-or-link.pl . src/vm/js/nqp-runtime nqp-runtime @link@'));
+  '$(PERL5) ' ~nfp('tools/build/npm-install-or-link.pl . src/vm/js/nqp-runtime nqp-runtime @link@'));
 
 deps("js-all", "js-deps", "js-cross", $nqp-bootstrapped);
 

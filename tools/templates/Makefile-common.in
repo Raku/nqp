@@ -107,7 +107,7 @@ COMMON_SOURCES = \
   $(QREGEX_SOURCES) \
   $(NQP_MO_SOURCES) \
 
-PERL		= @perl@
+PERL5		= @perl@
 MKPATH		= @mkpath@
 CHMOD		= @chmod@
 CP			= @cp@

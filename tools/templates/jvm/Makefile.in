@@ -117,13 +117,13 @@ j-install: j-all
 	$(CP) $(NQP_JAR) $(P5QREGEX_JAR) $(DESTDIR)$(NQP_LIB_DIR)
 	$(CP) $(EVAL_CLIENT) $(DESTDIR)$(BIN_DIR)
 	$(CHMOD) 0755 @nfp($(DESTDIR)$(BIN_DIR)/eval-client.pl)@
-	$(PERL) @script(install-jvm-runner.pl)@ "$(DESTDIR)" $(PREFIX)
+	$(PERL5) @script(install-jvm-runner.pl)@ "$(DESTDIR)" $(PREFIX)
 
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) @script(gen-jvm-properties.pl)@
-	$(PERL) -MExtUtils::Command -e mkpath bin
+	$(PERL5) -MExtUtils::Command -e mkpath bin
 	$(JAVAC) -source 1.8 -cp $(THIRDPARTY_JARS) -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
-	$(PERL) @script(gen-jvm-properties.pl)@ . $(THIRDPARTY_JARS) > jvmconfig.properties
-	$(PERL) @script(gen-jvm-properties.pl)@ @prefix@ $(THIRDPARTY_JARS) > @nfp(bin/jvmconfig.properties)@
+	$(PERL5) @script(gen-jvm-properties.pl)@ . $(THIRDPARTY_JARS) > jvmconfig.properties
+	$(PERL5) @script(gen-jvm-properties.pl)@ @prefix@ $(THIRDPARTY_JARS) > @nfp(bin/jvmconfig.properties)@
 	$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
 
 J_CLEANUPS = *.class *.jar $(J_STAGE1_DIR) $(J_STAGE2_DIR) bin nqp nqp.bat jvmconfig.properties $(J_RUNNER)
@@ -137,7 +137,7 @@ $(J_STAGE1_DIR): $(J_STAGE1_OUTPUT)
 
 @nfp($(J_STAGE1_DIR)/$(NQP_MO_JAR):)@ $(J_STAGE0_DIR) $(NQP_MO_SOURCES)
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(NQP_MO_SOURCES) > @nfp($(J_STAGE1_DIR)/$(NQP_MO_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(NQP_MO_SOURCES) > @nfp($(J_STAGE1_DIR)/$(NQP_MO_COMBINED))@
 	$(J_STAGE0_NQP) --setting=NULL --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(NQP_MO_JAR))@ @nfp($(J_STAGE1_DIR)/$(NQP_MO_COMBINED))@
 
@@ -147,56 +147,56 @@ $(J_STAGE1_DIR): $(J_STAGE1_OUTPUT)
 
 @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_JAR):)@ $(J_STAGE0_DIR) $(CORE_SETTING_SOURCES) @nfp($(J_STAGE1_DIR)/$(NQP_MO_JAR))@ @nfp($(J_STAGE1_DIR)/$(MODULE_LOADER_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(CORE_SETTING_SOURCES) > @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(CORE_SETTING_SOURCES) > @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting=NULL --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(CORE_SETTING_JAR))@ @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(QASTNODE_JAR):)@ $(J_STAGE0_DIR) $(QASTNODE_SOURCES) @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(QASTNODE_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QASTNODE_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(QASTNODE_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QASTNODE_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(QASTNODE_JAR))@ @nfp($(J_STAGE1_DIR)/$(QASTNODE_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(QREGEX_JAR):)@ $(J_STAGE0_DIR) $(QREGEX_SOURCES) @nfp($(J_STAGE1_DIR)/$(QASTNODE_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(QREGEX_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QREGEX_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(QREGEX_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QREGEX_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(QREGEX_JAR))@ @nfp($(J_STAGE1_DIR)/$(QREGEX_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(HLL_JAR):)@ $(J_STAGE0_DIR) $(J_HLL_SOURCES) @nfp($(J_STAGE1_DIR)/$(QREGEX_JAR))@ @nfp($(J_STAGE1_DIR)/$(JASTNODES_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_HLL_SOURCES) > @nfp($(J_STAGE1_DIR)/$(HLL_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_HLL_SOURCES) > @nfp($(J_STAGE1_DIR)/$(HLL_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(HLL_JAR))@ @nfp($(J_STAGE1_DIR)/$(HLL_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(JASTNODES_JAR):)@ $(J_STAGE0_DIR) $(JASTNODES_SOURCES) @nfp($(J_STAGE1_DIR)/$(CORE_SETTING_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(JASTNODES_SOURCES) > @nfp($(J_STAGE1_DIR)/$(JASTNODES_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(JASTNODES_SOURCES) > @nfp($(J_STAGE1_DIR)/$(JASTNODES_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(JASTNODES_JAR))@ @nfp($(J_STAGE1_DIR)/$(JASTNODES_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(QAST_JAR):)@ $(J_STAGE0_DIR) $(J_QAST_SOURCES) @nfp($(J_STAGE1_DIR)/$(HLL_JAR))@ @nfp($(J_STAGE1_DIR)/$(JASTNODES_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_QAST_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QAST_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_QAST_SOURCES) > @nfp($(J_STAGE1_DIR)/$(QAST_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(QAST_JAR))@ @nfp($(J_STAGE1_DIR)/$(QAST_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(P6QREGEX_JAR):)@ $(J_STAGE0_DIR) $(P6QREGEX_SOURCES) @nfp($(J_STAGE1_DIR)/$(QAST_JAR))@
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(P6QREGEX_SOURCES) > @nfp($(J_STAGE1_DIR)/$(P6QREGEX_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(P6QREGEX_SOURCES) > @nfp($(J_STAGE1_DIR)/$(P6QREGEX_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar --stable-sc=stage1 \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(P6QREGEX_JAR))@ @nfp($(J_STAGE1_DIR)/$(P6QREGEX_COMBINED))@
 
 @nfp($(J_STAGE1_DIR)/$(NQP_JAR):)@ $(J_STAGE0_DIR) @nfp($(J_STAGE1_DIR)/$(P6QREGEX_JAR))@ $(J_SOURCES)
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL) @script(gen-version.pl)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE1_DIR)/$(NQP_COMBINED))@
+	$(PERL5) @script(gen-version.pl)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE1_DIR)/$(NQP_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --target=jar --no-regex-lib --stable-sc=stage1 --javaclass=nqp \
 	    @nfp(--output=$(J_STAGE1_DIR)/$(NQP_JAR))@ @nfp($(J_STAGE1_DIR)/$(NQP_COMBINED))@
@@ -205,7 +205,7 @@ $(J_STAGE2_DIR): $(J_STAGE2_OUTPUT)
 
 @nfp($(J_STAGE2_DIR)/$(NQP_MO_JAR):)@ $(J_STAGE1_DIR) $(NQP_MO_SOURCES)
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(NQP_MO_SOURCES) > @nfp($(J_STAGE2_DIR)/$(NQP_MO_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(NQP_MO_SOURCES) > @nfp($(J_STAGE2_DIR)/$(NQP_MO_COMBINED))@
 	$(J_STAGE1_NQP) --setting=NULL --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(NQP_MO_JAR))@ @nfp($(J_STAGE2_DIR)/$(NQP_MO_COMBINED))@
 
@@ -215,56 +215,56 @@ $(J_STAGE2_DIR): $(J_STAGE2_OUTPUT)
 
 @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_JAR):)@ $(J_STAGE1_DIR) $(CORE_SETTING_SOURCES) @nfp($(J_STAGE2_DIR)/$(NQP_MO_JAR))@ @nfp($(J_STAGE2_DIR)/$(MODULE_LOADER_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(CORE_SETTING_SOURCES) > @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(CORE_SETTING_SOURCES) > @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting=NULL --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(CORE_SETTING_JAR))@ @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(QASTNODE_JAR):)@ $(J_STAGE1_DIR) $(QASTNODE_SOURCES) @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(QASTNODE_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QASTNODE_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(QASTNODE_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QASTNODE_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(QASTNODE_JAR))@ @nfp($(J_STAGE2_DIR)/$(QASTNODE_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(QREGEX_JAR):)@ $(J_STAGE1_DIR) $(QREGEX_SOURCES) @nfp($(J_STAGE2_DIR)/$(QASTNODE_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QREGEX_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QREGEX_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(QREGEX_JAR))@ @nfp($(J_STAGE2_DIR)/$(QREGEX_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(HLL_JAR):)@ $(J_STAGE1_DIR) $(J_HLL_SOURCES) @nfp($(J_STAGE2_DIR)/$(QREGEX_JAR))@ @nfp($(J_STAGE2_DIR)/$(JASTNODES_JAR))@
 	$(MKPATH) @nfp($(J_STAGE2_DIR)/gen)@
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_HLL_SOURCES) > @nfp($(J_STAGE2_DIR)/$(HLL_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_HLL_SOURCES) > @nfp($(J_STAGE2_DIR)/$(HLL_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(HLL_JAR))@ @nfp($(J_STAGE2_DIR)/$(HLL_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(JASTNODES_JAR):)@ $(J_STAGE1_DIR) $(JASTNODES_SOURCES) @nfp($(J_STAGE2_DIR)/$(CORE_SETTING_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(JASTNODES_SOURCES) > @nfp($(J_STAGE2_DIR)/$(JASTNODES_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(JASTNODES_SOURCES) > @nfp($(J_STAGE2_DIR)/$(JASTNODES_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(JASTNODES_JAR))@ @nfp($(J_STAGE2_DIR)/$(JASTNODES_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(QAST_JAR):)@ $(J_STAGE1_DIR) $(J_QAST_SOURCES) @nfp($(J_STAGE2_DIR)/$(HLL_JAR))@ @nfp($(J_STAGE2_DIR)/$(JASTNODES_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_QAST_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QAST_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_QAST_SOURCES) > @nfp($(J_STAGE2_DIR)/$(QAST_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(QAST_JAR))@ @nfp($(J_STAGE2_DIR)/$(QAST_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(P6QREGEX_JAR):)@ $(J_STAGE1_DIR) $(P6QREGEX_SOURCES) @nfp($(J_STAGE2_DIR)/$(QAST_JAR))@
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(P6QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(P6QREGEX_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(P6QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(P6QREGEX_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --no-regex-lib --target=jar \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(P6QREGEX_JAR))@ @nfp($(J_STAGE2_DIR)/$(P6QREGEX_COMBINED))@
 
 @nfp($(J_STAGE2_DIR)/$(NQP_JAR):)@ $(J_STAGE1_DIR) @nfp($(J_STAGE2_DIR)/$(P6QREGEX_JAR))@ $(J_SOURCES)
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-version.pl)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@
-	$(PERL) @script(gen-cat.pl)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE2_DIR)/$(NQP_COMBINED))@
+	$(PERL5) @script(gen-version.pl)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE2_DIR)/$(NQP_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
 	    @nfp(--output=$(J_STAGE2_DIR)/$(NQP_JAR))@ @nfp($(J_STAGE2_DIR)/$(NQP_COMBINED))@
@@ -289,7 +289,7 @@ j-runner-default-install: j-runner-default j-install
 
 $(P5QREGEX_JAR): $(ALL_OUTPUT) $(P5QREGEX_SOURCES)
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL) @script(gen-cat.pl)@ jvm $(P5QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
+	$(PERL5) @script(gen-cat.pl)@ jvm $(P5QREGEX_SOURCES) > @nfp($(J_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
 	.@slash@$(J_RUNNER) --target=jar --output=$(P5QREGEX_JAR) \
 	    @nfp($(J_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
 
