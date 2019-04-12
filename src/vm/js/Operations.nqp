@@ -1907,6 +1907,8 @@ class QAST::OperationsJS {
 
     add_simple_op('getrusage', $T_OBJ, [$T_OBJ], :side_effects);
 
+    add_simple_op('uname', $T_OBJ, [], :side_effects);
+
     add_simple_op('cpucores', $T_INT, []);
 
     add_simple_op('unicmp_s', $T_INT, [$T_STR, $T_STR, $T_INT, $T_INT, $T_INT]);

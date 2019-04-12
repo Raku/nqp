@@ -87,4 +87,9 @@ my %const_map := nqp::hash(
     'BINARY_SIZE_16_BIT',         4,
     'BINARY_SIZE_32_BIT',         8,
     'BINARY_SIZE_64_BIT',        12,
+
+    'UNAME_SYSNAME',              0,
+    'UNAME_RELEASE',              1,
+    'UNAME_VERSION',              2,
+    'UNAME_MACHINE',              3
 );

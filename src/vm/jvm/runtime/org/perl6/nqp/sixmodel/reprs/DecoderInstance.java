@@ -2,13 +2,18 @@ package org.perl6.nqp.sixmodel.reprs;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import org.perl6.nqp.runtime.Buffers;
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 import org.perl6.nqp.sixmodel.StorageSpec;
@@ -63,8 +68,17 @@ public class DecoderInstance extends SixModelObject {
 
         CharBuffer target = CharBuffer.allocate((int)chars + 1);
         eatDecodedChars(target, (int)(chars + 1));
-        if (target.position() != chars + 1)
-            eatUndecodedBytes(target, false);
+        if (target.position() != chars + 1) {
+            try {
+                eatUndecodedBytes(target, false);
+            }
+            catch (MalformedInputException e) {
+                Ops.die_s("Will not decode invalid " + charset, tc);
+            }
+            catch (CharacterCodingException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+        }
 
         String normalized = Normalizer.normalize(
             decodedBuffer(target),
@@ -95,7 +109,15 @@ public class DecoderInstance extends SixModelObject {
         int maxChars = availableDecodedChars() + availableUndecodedBytes();
         CharBuffer target = CharBuffer.allocate(maxChars);
         eatAllDecodedChars(target);
-        eatUndecodedBytes(target, true);
+        try {
+            eatUndecodedBytes(target, true);
+        }
+        catch (MalformedInputException e) {
+            Ops.die_s("Will not decode invalid " + charset, tc);
+        }
+        catch (CharacterCodingException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
 
         String normalized = Normalizer.normalize(
             decodedBuffer(target),
@@ -116,7 +138,15 @@ public class DecoderInstance extends SixModelObject {
         if (toDecode != null) {
             if (toDecode.size() == 0)
                 toDecode.add(ByteBuffer.allocate(0));
-            eatUndecodedBytes(target, true);
+            try {
+                eatUndecodedBytes(target, true);
+            }
+            catch (MalformedInputException e) {
+                Ops.die_s("Will not decode invalid " + charset, tc);
+            }
+            catch (CharacterCodingException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
             decoder.flush(target);
             decoder.reset();
         }
@@ -153,7 +183,13 @@ public class DecoderInstance extends SixModelObject {
             /* Otherwise decode one of them. */
             ByteBuffer decodee = toDecode.get(0);
             CharBuffer target = CharBuffer.allocate(decodee.limit());
-            decoder.decode(decodee, target, eof && toDecode.size() == 1);
+
+            CoderResult result = decoder.decode(decodee, target, eof && toDecode.size() == 1);
+            /* TODO It looks like we read binary data with UTF_8 during
+             * normal operation; don't die then. */
+            if (result.isMalformed() && charset != StandardCharsets.UTF_8)
+                Ops.die_s("Will not decode invalid " + charset, tc);
+
             decoded.add(decodedBuffer(target));
             if (decodee.remaining() == 0)
                 toDecode.remove(0);
@@ -262,11 +298,15 @@ public class DecoderInstance extends SixModelObject {
         }
     }
 
-    private void eatUndecodedBytes(CharBuffer target, boolean eof) {
+    private void eatUndecodedBytes(CharBuffer target, boolean eof) throws CharacterCodingException {
         if (toDecode != null) {
             while (toDecode.size() > 0) {
                 ByteBuffer use = toDecode.get(0);
-                decoder.decode(use, target, eof && toDecode.size() == 1);
+
+                CoderResult result = decoder.decode(use, target, eof && toDecode.size() == 1);
+                if (result.isError())
+                    result.throwException();
+
                 if (use.position() == use.limit())
                     toDecode.remove(0);
                 else

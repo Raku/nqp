@@ -8,6 +8,8 @@ const NQPObject = require('./nqp-object.js');
 
 const NQPException = require('./nqp-exception.js');
 
+const BOOT = require('./BOOT.js');
+
 exports.op = op;
 
 // allows running code bundles as for browser use outside of the browser
@@ -181,4 +183,14 @@ op.exit = function(code) {
 
 op.gethostname = function() {
   return 'unknown';
+};
+
+op.uname = function() {
+  let sysname = 'unknown';
+  let release = 'unknown';
+  let version = 'unknown';
+  let machine = 'unknown';
+
+  const stable = BOOT.StrArray.$$STable;
+  return stable.REPR.allocateFromArray(stable, [sysname, release, version, machine]);
 };

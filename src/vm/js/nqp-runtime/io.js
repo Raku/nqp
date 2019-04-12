@@ -26,6 +26,8 @@ const Null = require('./null.js');
 const NQPInt = require('./nqp-int.js');
 const NQPStr = require('./nqp-str.js');
 
+const BOOT = require('./BOOT.js');
+
 function boolish(bool) {
   return bool ? 1 : 0;
 }
@@ -606,10 +608,21 @@ op.getppid = function() {
   return process.ppid;
 };
 
+function uname(flag) {
+  const result = child_process.spawnSync('uname', [flag]);
+  if (result.error) {
+    return "";
+  } else {
+    return result.stdout.toString().replace(/\n$/, '');
+  }
+}
+
 op.uname = function() {
   let sysname = os.type();
   let release = os.release();
-  let version = "";
-  let machine = "";
-  return [sysname, release, version, machine];
+  let version = uname('-v');
+  let machine = uname('-m');
+
+  const stable = BOOT.StrArray.$$STable;
+  return stable.REPR.allocateFromArray(stable, [sysname, release, version, machine]);
 };
