@@ -1578,6 +1578,19 @@ public final class Ops {
     }
 
     /* Dynamic lexicals. */
+    public static SixModelObject bindlexdyn(String name, SixModelObject value, ThreadContext tc) {
+        CallFrame curFrame = tc.curFrame.caller;
+        while (curFrame != null) {
+            Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (idx != null) {
+                curFrame.oLex[idx] = value;
+                return value;
+            }
+            curFrame = curFrame.caller;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Dynamic variable '" + name + "' not found");
+    }
+    /* TODO remove after adjustment of usage in src/vm/jvm/QAST/Compiler.nqp and rebootstrap */
     public static SixModelObject bindlexdyn(SixModelObject value, String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
