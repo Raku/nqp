@@ -14,13 +14,13 @@ import org.perl6.nqp.truffle.sixmodel.reprs.Uninstantiable;
 public class REPRRegistry {
     private static REPR create(String name, STable stable) {
         switch (name) {
-            case "P6opaque": return new P6opaque(stable);
-            case "KnowHOWREPR": return new KnowHOWREPR(stable);
             case "KnowHOWAttribute": return new KnowHOWAttribute(stable);
-            case "Uninstantiable": return new Uninstantiable();
+            case "KnowHOWREPR": return new KnowHOWREPR(stable);
             case "P6int": return new P6int(stable);
             case "P6num": return new P6num(stable);
+            case "P6opaque": return new P6opaque(stable);
             case "P6str": return new P6str(stable);
+            case "Uninstantiable": return new Uninstantiable();
             default: throw new RuntimeException("No REPR " + name);
         }
     }
