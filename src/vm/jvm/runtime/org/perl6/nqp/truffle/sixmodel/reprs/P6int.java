@@ -3,20 +3,20 @@ import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 import org.perl6.nqp.truffle.sixmodel.STable;
 
 
-public class P6str extends FixedSizeObjectREPR {
-    public P6str(STable stable) {
+public class P6int extends FixedSizeObjectREPR {
+    public P6int(STable stable) {
         super(stable);
     }
 
     public Object allocate() {
-        return new P6strInstance(stable);
+        return new P6intInstance(stable);
     }
 
     public Object deserializeStub() {
-        return new P6strInstance(stable);
+        return new P6intInstance(stable);
     }
 
     public void deserializeFinish(SerializationReader reader, Object obj) {
-      ((P6strInstance) obj).value = reader.readString();
+      ((P6intInstance) obj).value = reader.readLong();
     }
 }

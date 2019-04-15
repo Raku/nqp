@@ -17,6 +17,6 @@ public class P6num extends FixedSizeObjectREPR {
     }
 
     public void deserializeFinish(SerializationReader reader, Object obj) {
-      ((P6numInstance) obj).value = reader.readDouble(); 
+      ((P6numInstance) obj).value = reader.readDouble();
     }
 }
