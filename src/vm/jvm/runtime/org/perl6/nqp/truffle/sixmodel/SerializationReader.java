@@ -717,18 +717,19 @@ public class SerializationReader {
     }
 
 //
-//    public long readLong() {
-//        return orig.getLong();
-//    }
-//
+    public long readLong() {
+        return orig.getLong();
+    }
+
 //    public int readInt32() {
 //        return orig.getInt();
 //    }
 //
-//    public double readDouble() {
-//        return orig.getDouble();
-//    }
-//
+
+    public double readDouble() {
+        return orig.getDouble();
+    }
+
     public String readString() {
         return lookupString(orig.getInt());
     }
