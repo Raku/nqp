@@ -14,6 +14,8 @@ import org.perl6.nqp.truffle.sixmodel.reprs.P6opaque;
 import org.perl6.nqp.truffle.sixmodel.reprs.P6str;
 import org.perl6.nqp.truffle.sixmodel.reprs.ReentrantMutex;
 import org.perl6.nqp.truffle.sixmodel.reprs.Uninstantiable;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArray;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMIter;
 
 public class REPRRegistry {
     private static REPR create(String name, STable stable) {
@@ -29,6 +31,8 @@ public class REPRRegistry {
             case "P6str": return new P6str(stable);
             case "ReentrantMutex": return new ReentrantMutex(stable);
             case "Uninstantiable": return new Uninstantiable();
+            case "VMArray": return new VMArray(stable);
+            case "VMIter": return new VMIter(stable);
             default: throw new RuntimeException("No REPR " + name);
         }
     }
