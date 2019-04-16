@@ -225,8 +225,6 @@ sub gen_moar {
         my $cwd = cwd;
         chdir( $self->base_path('MoarVM') ) or die $!;
 
-        $prefix =
-          File::Spec::Unix->catdir( File::Spec::Win32->splitdir($prefix) );
         print "\nConfiguring and building MoarVM ...\n";
         my @cmd =
           ( $^X, "Configure.pl", @opts, "--prefix=$prefix", '--make-install' );
