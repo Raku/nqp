@@ -208,12 +208,10 @@ class HLL::Backend::MoarVM {
                 return
             }
             for $thread<gcs> -> $gc {
-                unless nqp::existskey($gc, 'deallocs') {
-                    next
-                }
-
-                for $gc<deallocs> -> $dealloc {
-                    $dealloc<id> := get_remapped_type_id($dealloc<id>);
+                if nqp::existskey($gc, 'deallocs') {
+                    for $gc<deallocs> -> $dealloc {
+                        $dealloc<id> := get_remapped_type_id($dealloc<id>);
+                    }
                 }
             }
         }
