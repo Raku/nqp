@@ -1578,7 +1578,7 @@ public final class Ops {
     }
 
     /* Dynamic lexicals. */
-    public static SixModelObject bindlexdyn(SixModelObject value, String name, ThreadContext tc) {
+    public static SixModelObject bindlexdyn(String name, SixModelObject value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
             Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);

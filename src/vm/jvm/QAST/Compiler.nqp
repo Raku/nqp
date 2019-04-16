@@ -4537,10 +4537,11 @@ class QAST::CompilerJAST {
                         $*STACK.obtain($il, $valres);
                     }
                     $il.append(JAST::PushSVal.new( :value($name) ));
+                    $il.append($SWAP) if $*BINDVAL;
                     $il.append($ALOAD_1);
                     $il.append($*BINDVAL
                         ?? JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                                "bindlexdyn", $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC )
+                                "bindlexdyn", $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC )
                         !! JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                                 "getlexdyn", $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
                     return result($il, $RT_OBJ);
