@@ -2716,11 +2716,11 @@ Turns on one of MoarVM's profilers. The configuration must have a `kind` key tha
 
 * `instrumented`
   
-  takes no further configuration options
+  takes no further configuration options. records call graph, garbage collection, and object allocation information.
 
 * `heap`
 
-  takes a path / filename in the `path` key
+  takes a path / filename in the `path` key. writes a snapshot of the heap's structure (objects and their connections) to the file every time the GC runs.
 
 If a profiler is already active, an exception will be thrown; only one profiler can run at a time.
 
@@ -2735,7 +2735,7 @@ Turns off the profiler and returns data gathered.
 
 * `heap`
 
-  currently doesn't return anything
+  currently doesn't return anything. it does, however, cause one heap snapshot to be taken immediately.
 
 # <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
