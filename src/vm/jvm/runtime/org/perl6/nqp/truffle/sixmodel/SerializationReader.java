@@ -491,9 +491,9 @@ public class SerializationReader {
                 st.hllRole = orig.getLong();
             }
 
-//            /* Type parametricity. */
-//            if (version >= 9) {
-//                long paraFlag = orig.getLong();
+            /* Type parametricity. */
+            if (version >= 9) {
+                long paraFlag = orig.getLong();
 //                /* If it's a parametric type... */
 //                if (paraFlag == 1) {
 //                    ParametricType pt = new ParametricType();
@@ -511,11 +511,12 @@ public class SerializationReader {
 //                        pt.parameters.bind_pos_boxed(tc, j, readRef());
 //                    st.parametricity = pt;
 //                }
-//                else if (paraFlag != 0) {
-//                    throw new RuntimeException("Unknown STable parametricity flag");
-//                }
-//            }
-//
+//                else
+                if (paraFlag != 0) {
+                    throw new RuntimeException("Unknown STable parametricity flag");
+                }
+            }
+
 //            /* If the REPR has a function to deserialize representation data, call it. */
 //            st.REPR.deserialize_repr_data(tc, st, this);
         }
