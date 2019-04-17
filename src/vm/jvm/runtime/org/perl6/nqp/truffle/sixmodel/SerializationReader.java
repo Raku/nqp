@@ -451,14 +451,14 @@ public class SerializationReader {
 
             /* Mode flags. */
             st.modeFlags = (int)orig.getLong();
-//
-//            /* Boolification spec. */
-//            if (orig.getLong() != 0) {
-//                st.BoolificationSpec = new BoolificationSpec();
-//                st.BoolificationSpec.Mode = (int)orig.getLong();
-//                st.BoolificationSpec.Method = readRef();
-//            }
-//
+
+            /* Boolification spec. */
+            if (orig.getLong() != 0) {
+                st.boolificationSpec = new BoolificationSpec();
+                st.boolificationSpec.mode = (int)orig.getLong();
+                st.boolificationSpec.method = readRef();
+            }
+
 //            /* Container spec. */
 //            if (orig.getLong() != 0) {
 //                if (version >= 5) {

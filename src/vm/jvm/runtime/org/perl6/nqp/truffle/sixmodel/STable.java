@@ -58,7 +58,7 @@ public class STable {
      * Information - if any - about how we can turn something of this type
      * into a boolean.
      */
-    //public BoolificationSpec BoolificationSpec;
+    public BoolificationSpec boolificationSpec;
 
     /**
      * The underlying package stash.
