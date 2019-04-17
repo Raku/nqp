@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle.sixmodel;
 
+import org.perl6.nqp.truffle.runtime.HLL;
 import java.util.HashMap;
 
 public class STable {
@@ -70,4 +71,19 @@ public class STable {
      * Serialization context that this s-table belongs to.
      */
     public SerializationContext sc;
+
+    /**
+     * The HLL that this type is owned by, if any.
+     */
+    public HLL hllOwner;
+
+    /**
+     * The role that the type plays in the HLL, if any.
+     */
+    public long hllRole;
+
+    /**
+     * Debug name for the type, for understanding what it is while debugging.
+     */
+    public String debugName;
 }

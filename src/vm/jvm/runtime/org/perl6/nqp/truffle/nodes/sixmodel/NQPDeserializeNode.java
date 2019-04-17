@@ -13,6 +13,7 @@ import org.perl6.nqp.truffle.runtime.NQPListStr;
 import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.Base64;
+import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 
@@ -25,15 +26,17 @@ public final class NQPDeserializeNode extends NQPStrNode {
     @Child private NQPNode conflictNode;
 
     private final HashMap<String, SerializationContext> scs;
+    private final HashMap<String, HLL> hlls;
 
     @Deserializer
-    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, @Global HashMap<String, SerializationContext> scs) {
+    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, @Global HashMap<String, SerializationContext> scs, @Global HashMap<String, HLL> hlls) {
         this.blobNode = blobNode;
         this.scNode = scNode;
         this.shNode = shNode;
         this.crNode = crNode;
         this.conflictNode = conflictNode;
         this.scs = scs;
+        this.hlls = hlls;
     }
 
     @Override
@@ -56,7 +59,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
             cr[i] = (NQPCodeRef) crList.atpos(i);
         }
 
-        SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs);
+        SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs, hlls);
         sr.deserialize();
 
         return blob; 

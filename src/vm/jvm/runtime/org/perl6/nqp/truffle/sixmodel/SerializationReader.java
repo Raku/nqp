@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.runtime.NQPHash;
@@ -82,6 +83,8 @@ public class SerializationReader {
     /* Serialization contexts we depend on. */
     private HashMap<String, SerializationContext> scs;
 
+    private HashMap<String, HLL> hlls;
+
     SerializationContext[] dependentSCs;
 
     /* The object we're currently deserializing. */
@@ -89,12 +92,13 @@ public class SerializationReader {
 
     REPR[] reprs;
 
-    public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs) {
+    public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs, HashMap<String, HLL> hlls) {
         this.sc = sc;
         this.sh = sh;
         this.cr = cr;
         this.orig = orig;
         this.scs = scs;
+        this.hlls = hlls;
     }
 
     public void deserialize() {
@@ -481,12 +485,12 @@ public class SerializationReader {
                 }
             }
 
-//            /* HLL stuff. */
-//            if (version >= 6) {
-//                st.hllOwner = tc.gc.getHLLConfigFor(readStr());
-//                st.hllRole = orig.getLong();
-//            }
-//
+            /* HLL stuff. */
+            if (version >= 6) {
+                st.hllOwner = hlls.get(readString());
+                st.hllRole = orig.getLong();
+            }
+
 //            /* Type parametricity. */
 //            if (version >= 9) {
 //                long paraFlag = orig.getLong();
