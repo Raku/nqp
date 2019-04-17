@@ -52,7 +52,7 @@ public class STable {
      * If this is invokable, then this contains information needed to
      * figure out how to invoke it. If not, it'll be null.
      */
-    //public InvocationSpec invocationSpec;
+    public InvocationSpec invocationSpec;
 
     /**
      * Information - if any - about how we can turn something of this type

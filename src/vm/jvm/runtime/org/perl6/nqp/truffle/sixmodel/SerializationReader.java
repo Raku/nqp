@@ -470,17 +470,17 @@ public class SerializationReader {
                 }
             }
 
-//            /* Invocation spec. */
-//            if (version >= 5) {
-//                if (orig.getLong() != 0) {
-//                    st.InvocationSpec = new InvocationSpec();
-//                    st.InvocationSpec.ClassHandle = readRef();
-//                    st.InvocationSpec.AttrName = lookupString(orig.getInt());
-//                    st.InvocationSpec.Hint = (int)orig.getLong();
-//                    st.InvocationSpec.InvocationHandler = readRef();
-//                }
-//            }
-//
+            /* Invocation spec. */
+            if (version >= 5) {
+                if (orig.getLong() != 0) {
+                    st.invocationSpec = new InvocationSpec();
+                    st.invocationSpec.classHandle = readRef();
+                    st.invocationSpec.attrName = lookupString(orig.getInt());
+                    orig.getLong(); /* The hint is unused */
+                    st.invocationSpec.invocationHandler = readRef();
+                }
+            }
+
 //            /* HLL stuff. */
 //            if (version >= 6) {
 //                st.hllOwner = tc.gc.getHLLConfigFor(readStr());
