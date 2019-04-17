@@ -19,4 +19,6 @@ public abstract class REPR {
      * references may not be) and should do the rest of the work. */
     public abstract Object deserializeStub();
     public abstract void deserializeFinish(SerializationReader reader, Object obj);
+    public void deserializeReprData(SerializationReader reader, STable stable) {
+    }
 }

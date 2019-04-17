@@ -517,8 +517,8 @@ public class SerializationReader {
                 }
             }
 
-//            /* If the REPR has a function to deserialize representation data, call it. */
-//            st.REPR.deserialize_repr_data(tc, st, this);
+            /* If the REPR has a function to deserialize representation data, call it. */
+            st.repr.deserializeReprData(this, st);
         }
     }
 
