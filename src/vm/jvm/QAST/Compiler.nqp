@@ -1741,7 +1741,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
     my $exitlbl := JAST::Label.new( :name($qastcomp.unique('unwindexit')) );
-    $qastcomp.unwind_check($catchil, $handler, :handler_cares($has_label));
+    $qastcomp.unwind_check($catchil, $handler, :outer($*HANDLER_IDX), :handler_cares($has_label));
     $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'result', $TYPE_SMO ));
     $catchil.append(JAST::Instruction.new( :op('astore'), $result ));
     $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));

@@ -447,15 +447,11 @@ sub catch_unlabeled_first($throws) {
     $caught;
 };
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('handler with handler seems to have a bug on the jvm');
-} else {
-    is(
-        catch_unlabeled_first(-> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)}),
-        'labeled',
-        "a nqp::handle without label doesn't catch  labeled exceptions"
-    );
-}
+is(
+    catch_unlabeled_first(-> {THROW(nqp::add_i(nqp::const::CONTROL_TAKE, nqp::const::CONTROL_LABELED), Label2)}),
+    'labeled',
+    "a nqp::handle without label doesn't catch  labeled exceptions"
+);
 
 my $*SCOPE := 'outer';
 sub scope0() {

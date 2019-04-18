@@ -119,7 +119,9 @@ role NQPMatchRole is export {
                 }
                 nqp::push(@chunks, "\n");
                 if nqp::can($value, 'dump') {
-                    nqp::push(@chunks, $value.dump($indent + 2));
+                    nqp::push(@chunks, nqp::eqaddr($value, self)
+                        ?? nqp::x(' ', $indent + 2) ~ "- <self-reference>\n"
+                        !! $value.dump($indent + 2));
                 }
             }
 
