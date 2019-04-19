@@ -33,6 +33,16 @@ class HLL::Backend::MoarVM {
         # Doesn't do anything just yet
     }
 
+    method profiler_snapshot(:$kind, :$filename) {
+        if $kind eq "heap" {
+            nqp::mvmstartprofile(nqp::hash("kind", "heap", "path", $filename));
+            return nqp::mvmendprofile();
+        }
+        else {
+            nqp::die("MoarVM's profiler_snapshot only supports kind => 'heap', not $kind");
+        }
+    }
+
     my $prof_start_sub;
     my $prof_end_sub;
     method ensure_prof_routines() {
