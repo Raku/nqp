@@ -624,21 +624,15 @@ public class SerializationReader {
             return NQPNull.SINGLETON;
         case REFVAR_OBJECT:
             return readObjRef();
-//        case REFVAR_VM_INT:
-//            SixModelObject BOOTInt = tc.gc.BOOTInt;
-//            SixModelObject iResult = BOOTInt.st.REPR.allocate(tc, BOOTInt.st);
-//            iResult.set_int(tc, orig.getLong());
-//            return iResult;
+        case REFVAR_VM_INT:
+            return orig.getLong();
 //        case REFVAR_VM_NUM:
 //            SixModelObject BOOTNum = tc.gc.BOOTNum;
 //            SixModelObject nResult = BOOTNum.st.REPR.allocate(tc, BOOTNum.st);
 //            nResult.set_num(tc, orig.getDouble());
 //            return nResult;
-//        case REFVAR_VM_STR:
-//            SixModelObject BOOTStr = tc.gc.BOOTStr;
-//            SixModelObject sResult = BOOTStr.st.REPR.allocate(tc, BOOTStr.st);
-//            sResult.set_str(tc, lookupString(orig.getInt()));
-//            return sResult;
+        case REFVAR_VM_STR:
+            return readString();
         case REFVAR_VM_ARR_VAR: {
             NQPList array = new NQPList();
               int elems = orig.getInt();
@@ -700,11 +694,11 @@ public class SerializationReader {
             throw new RuntimeException("Invalid SC object index " + idx);
         return sc.getObject(idx);
     }
-//
-//    public STable readSTableRef() {
-//        return lookupSTable(orig.getInt(), orig.getInt());
-//    }
-//
+
+    public STable readSTableRef() {
+        return lookupSTable(orig.getInt(), orig.getInt());
+    }
+
 
     public Object readCodeRef() {
         SerializationContext sc = locateSC(orig.getInt());

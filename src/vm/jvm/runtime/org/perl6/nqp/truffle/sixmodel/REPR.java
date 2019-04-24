@@ -21,4 +21,8 @@ public abstract class REPR {
     public abstract void deserializeFinish(SerializationReader reader, Object obj);
     public void deserializeReprData(SerializationReader reader, STable stable) {
     }
+
+    public Object deserializeInline(SerializationReader reader) {
+        throw new RuntimeException("Can't serialize this repr inline: " + this.getClass().getName());
+    }
 }

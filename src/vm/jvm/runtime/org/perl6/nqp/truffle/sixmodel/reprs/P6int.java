@@ -19,4 +19,9 @@ public class P6int extends FixedSizeObjectREPR {
     public void deserializeFinish(SerializationReader reader, Object obj) {
       ((P6intInstance) obj).value = reader.readLong();
     }
+
+    @Override
+    public Object deserializeInline(SerializationReader reader) {
+      return reader.readLong();
+    }
 }
