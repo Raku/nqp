@@ -5,7 +5,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
-import org.perl6.nqp.truffle.nodes.NQPObjNode;
+import org.perl6.nqp.truffle.nodes.NQPObjNodeWithSTableGetting;
 import com.oracle.truffle.api.nodes.IndirectCallNode;
 import org.perl6.nqp.truffle.sixmodel.TypeObject;
 import com.oracle.truffle.api.object.DynamicObject;
@@ -19,7 +19,7 @@ import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "callmethod")
-public final class NQPCallmethodNode extends NQPObjNode {
+public final class NQPCallmethodNode extends NQPObjNodeWithSTableGetting {
     public static final long NAMED = 1;
     public static final long FLAT = 2;
 
@@ -44,16 +44,6 @@ public final class NQPCallmethodNode extends NQPObjNode {
         this.argumentFlags = argumentFlags;
         this.argumentNames = argumentNames;
         this.argumentNodes = argumentNodes;
-    }
-
-    STable getStable(Object invocant) {
-        if (P6opaqueObjectLayoutImpl.INSTANCE.isP6opaqueObject(invocant)) {
-            return P6opaqueObjectLayoutImpl.INSTANCE.getStable((DynamicObject) invocant);
-        } else if (invocant instanceof TypeObject) {
-            return ((TypeObject) invocant).stable;
-        } else {
-            throw new RuntimeException("callmethod on: , can't get Stable" + invocant.getClass().getName());
-        }
     }
 
     @Override
