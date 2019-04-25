@@ -130,14 +130,4 @@ public abstract class NQPDispatchNode extends Node {
         NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
         return callNode.call(function.getCallTarget(), arguments);
     }
-
-
-    /*
-    @Fallback
-    protected Object unknownFunction(Object function, @SuppressWarnings("unused") Object[] arguments) {
-          throw SLUndefinedNameException.undefinedFunction(this, function);
-          return null;
-    }
-    */
-
 }
