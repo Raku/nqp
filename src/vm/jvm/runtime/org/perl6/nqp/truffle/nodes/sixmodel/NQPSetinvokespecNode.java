@@ -2,12 +2,12 @@ package org.perl6.nqp.truffle.nodes.expression;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
-import org.perl6.nqp.truffle.nodes.NQPNodeWithSTableGetting;
+import org.perl6.nqp.truffle.nodes.NQPObjNodeWithSTableGetting;
 import org.perl6.nqp.truffle.sixmodel.InvocationSpec;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "setinvokespec")
-public final class NQPSetinvokespecNode extends NQPNodeWithSTableGetting {
+public final class NQPSetinvokespecNode extends NQPObjNodeWithSTableGetting {
     @Child private NQPNode objNode;
     @Child private NQPNode classHandleNode;
     @Child private NQPNode attrNameNode;
@@ -33,10 +33,5 @@ public final class NQPSetinvokespecNode extends NQPNodeWithSTableGetting {
         getStable(obj).invocationSpec = spec;
 
         return obj;
-    }
-
-    @Override
-    public void executeVoid(VirtualFrame frame) {
-        execute(frame);
     }
 }
