@@ -1145,7 +1145,7 @@ class QAST::TruffleCompiler does SerializeOnce {
                 self.NYI("var declaration type {$node.decl}");
             }
 
-            return TAST.new($OBJ, $*BINDVAL
+            return TAST.new($type, $*BINDVAL
                 ?? [
                     "bind-{nqp::lc(%type_names{$type})}-{$node.scope}",
                     $node.name,
