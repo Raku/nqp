@@ -5,6 +5,7 @@ import org.perl6.nqp.truffle.runtime.NQPListIterator;
 import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
 
 public abstract class NQPToBooleanNode extends NQPBaseNode {
     public abstract boolean executeBoolean(Object value);
@@ -41,6 +42,11 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
 
     @Specialization(guards = "isNull(value)")
     protected boolean doNQPNull(Object value) {
+        return false;
+    }
+
+    @Specialization
+    protected boolean doTypeObject(TypeObject typeObject) {
         return false;
     }
 
