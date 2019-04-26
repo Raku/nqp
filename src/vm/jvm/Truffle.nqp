@@ -571,6 +571,29 @@ class QAST::OperationsTruffle {
         });
     }
 
+    # TODO avoid copy & paste - move it into code shared between backends
+    add_op('defor', sub ($comp, $node, :$want) {
+        if +$node.list != 2 {
+            nqp::die("Operation 'defor' needs 2 operands");
+        }
+        my str $tmp := $node.unique('defined');
+        $comp.as_truffle(QAST::Stmts.new(
+            QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name($tmp), :scope('local'), :decl('var') ),
+                $node[0]
+            ),
+            QAST::Op.new(
+                :op('if'),
+                QAST::Op.new(
+                    :op('defined'),
+                    QAST::Var.new( :name($tmp), :scope('local') )
+                ),
+                QAST::Var.new( :name($tmp), :scope('local') ),
+                $node[1]
+            )), :$want)
+    });
+
     method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%hll_ops, $hll) && nqp::existskey(%hll_ops{$hll}, $name) {
