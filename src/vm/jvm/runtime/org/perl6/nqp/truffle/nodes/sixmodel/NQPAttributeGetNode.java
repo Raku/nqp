@@ -1,5 +1,6 @@
 package org.perl6.nqp.truffle.nodes.sixmodel;
 import com.oracle.truffle.api.frame.VirtualFrame;
+import com.oracle.truffle.api.object.DynamicObject;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
@@ -24,8 +25,9 @@ public final class NQPAttributeGetNode extends NQPObjNode {
         Object obj = objNode.execute(frame);
         Object classHandle = classHandleNode.execute(frame);
 
-        //return attribute-get(objNode.execute(frame), classHandleNode.execute(frame), nameNode.executeStr(frame), dNode.execute(frame));
-        System.out.println("attribute-get: " + name);
-        return NQPNull.SINGLETON;
+        // TODO: take classHandle into account
+
+        System.out.println("getting: " + name);
+        return ((DynamicObject) obj).get(name);
     }
 }
