@@ -51,7 +51,6 @@ public final class NQPCallmethodNode extends NQPObjNodeWithSTableGetting {
         Object invocant = invocantNode.execute(frame);
         String method = this.methodNode.executeStr(frame);
 
-        System.out.println("calling method: " + method);
 
         /* TODO - specialization and all the cool inline caching */
 
@@ -63,10 +62,25 @@ public final class NQPCallmethodNode extends NQPObjNodeWithSTableGetting {
             Object[] arguments = NQPArguments.unpack(frame, contextSlot, 1, argumentFlags, argumentNames, argumentNodes);
             NQPArguments.setUserArgument(arguments, 0, invocant);
 
-            NQPCodeRef function = (NQPCodeRef) foundMethod;
-            NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
-            IndirectCallNode callNode = IndirectCallNode.create();
-            return callNode.call(function.getCallTarget(), arguments);
+            if (foundMethod instanceof NQPCodeRef) {
+                NQPCodeRef function = (NQPCodeRef) foundMethod;
+                NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
+                IndirectCallNode callNode = IndirectCallNode.create();
+                return callNode.call(function.getCallTarget(), arguments);
+            } else {
+                STable methodStable = getStable(foundMethod);
+
+                if (methodStable.invocationSpec != null) {
+                    Object extracted = ((DynamicObject) foundMethod).get(methodStable.invocationSpec.attrName);
+
+                    NQPCodeRef function = (NQPCodeRef) extracted;
+                    NQPArguments.setOuterFrame(arguments, function.getOuterFrame());
+                    IndirectCallNode callNode = IndirectCallNode.create();
+                    return callNode.call(function.getCallTarget(), arguments);
+                }
+
+                throw new RuntimeException("NYI");
+            }
         } else {
             System.out.println("Can't find method" + method);
             return org.perl6.nqp.truffle.runtime.NQPNull.SINGLETON;
