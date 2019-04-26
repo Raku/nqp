@@ -5,10 +5,10 @@ import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.sixmodel.STable;
 
 abstract class FixedSizeObjectREPR extends REPR {
-    protected STable stable;
+    protected final STable stable;
 
     public FixedSizeObjectREPR(STable stable) {
-        stable = stable;
+        this.stable = stable;
     }
 
     @Override
