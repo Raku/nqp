@@ -170,6 +170,10 @@ class QAST::OperationsTruffle {
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
 
+    add_simple_op('writefh', $INT, [$OBJ, $OBJ]);
+
+    add_simple_op('encode', $OBJ, [$STR, $STR, $OBJ], :side_effects);
+
     add_simple_op('null', $OBJ, []);
 
     add_simple_op('null_s', $STR, []);

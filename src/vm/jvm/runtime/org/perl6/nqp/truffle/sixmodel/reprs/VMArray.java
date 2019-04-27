@@ -9,9 +9,7 @@ public class VMArray extends FixedSizeObjectREPR {
     }
 
     public Object allocate() {
-        System.out.println("NYI allocating a VMArray");
-          return null;
-//        return new VMArrayInstance(stable);
+        return new VMArrayInstanceUInt8(stable);
     }
 
     public Object deserializeStub() {
