@@ -1273,10 +1273,12 @@ my class MASTCompilerInstance {
             }
 
             # Set up debug symbols in the MAST::Frame.
-            for $node.local_debug_map() {
-                my $local_idx := $block.local($_.key);
+            my %debug_map := $node.local_debug_map();
+            for sorted_keys(%debug_map) -> $key {
+                my $value := %debug_map{$key};
+                my $local_idx := $block.local($key);
                 if nqp::isconcrete($local_idx) {
-                    $frame.add_local_debug_name($_.value, $local_idx);
+                    $frame.add_local_debug_name($value, $local_idx);
                 }
             }
         }
@@ -1343,7 +1345,7 @@ my class MASTCompilerInstance {
         self.compile_annotation($node);
         my %stmt_temps := nqp::clone(%*STMTTEMPS); # guaranteed to be initialized
         my $result     := self.compile_with_stmt_temps($node, %stmt_temps);
-        for %stmt_temps -> $temp_key {
+        for sorted_keys(%stmt_temps) -> $temp_key {
             if !nqp::existskey(%*STMTTEMPS, $temp_key) &&
                     !nqp::eqaddr($*BLOCK.local($temp_key), $result.result_reg) {
                 $*BLOCK.release_temp($temp_key);
