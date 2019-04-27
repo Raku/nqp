@@ -27,7 +27,6 @@ public final class NQPAttributeGetNode extends NQPObjNode {
 
         // TODO: take classHandle into account
 
-        System.out.println("getting: " + name);
         return ((DynamicObject) obj).get(name);
     }
 }
