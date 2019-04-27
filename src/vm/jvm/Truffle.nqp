@@ -275,6 +275,7 @@ class QAST::OperationsTruffle {
 
     add_simple_op('setinvokespec', $OBJ, [$OBJ, $OBJ, $STR, $OBJ], :side_effects, :decont(0));
     add_simple_op('setdebugtypename', $OBJ, [$OBJ, $STR], :side_effects);
+    add_simple_op('decoderconfigure', $OBJ, [$OBJ, $STR, $OBJ], :side_effects);
 
     add_op('hash', sub ($comp, $node, :$want) {
         my @tree := ['hash'];
