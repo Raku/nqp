@@ -19,7 +19,7 @@ public class DynamicContext {
             return contents.get(name);
         } else {
             if (outer != null) {
-                return this.lookup(name);
+                return outer.lookup(name);
             } else {
                 return NQPNull.SINGLETON;
             }

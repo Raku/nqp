@@ -1078,7 +1078,10 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
 
             @body.push($node.cuid);
-            @body.push(['get-parent-context']);
+
+            my $setup_context := [];
+
+            @body.push($setup_context);
 
             my @*DECLARATIONS := ['stmts'];
             @body.push(@*DECLARATIONS);
@@ -1086,6 +1089,12 @@ class QAST::TruffleCompiler does SerializeOnce {
             my int $start_of_body := +@body;
 
             self.compile_all_the_children($node, $RETVAL, @body);
+
+            if $*BLOCK.has_dynamic_context {
+                $setup_context[0] := 'create-new-context';
+            } else {
+                $setup_context[0] := 'get-parent-context';
+            }
 
             my @compiled_params := self.compile_params($*BLOCK.params);
 
@@ -1127,6 +1136,8 @@ class QAST::TruffleCompiler does SerializeOnce {
         my $type := self.figure_out_type($node);
 
         if $node.scope eq 'lexical' && self.is_dynamic_var($node) {
+            $*BLOCK.has_dynamic_context(1);
+
             if $node.decl eq 'var' {
                 # TODO avoid double binds
                 @*DECLARATIONS.push(["dynamic-bind-direct", $node.name, ["null"]]);
@@ -1135,7 +1146,6 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
 
             if $*BINDVAL {
-                $*BLOCK.has_dynamic_context(1);
                 my $value := self.as_truffle_clear_bindval($*BINDVAL, :want($type));
                 return TAST.new($OBJ, ["dynamic-bind-direct", $node.name, $value.tree]);
             } else {

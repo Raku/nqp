@@ -22,7 +22,6 @@ public class NQPCreateNewContextNode extends NQPObjNode {
     @Override
     public Object execute(VirtualFrame frame) {
         Object[] arguments = frame.getArguments();
-        System.out.println("found parent context:" + NQPArguments.getDynamicContext(arguments));
         frame.setObject(contextSlot, new DynamicContext(NQPArguments.getDynamicContext(arguments)));
         return NQPNull.SINGLETON;
     }
