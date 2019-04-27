@@ -532,6 +532,7 @@ class QAST::OperationsTruffle {
     add_simple_op('who', $OBJ, [$OBJ], :decont(0));
     add_simple_op('how', $OBJ, [$OBJ], :decont(0));
     add_simple_op('create', $OBJ, [$OBJ]);
+    add_simple_op('newtype', $OBJ, [$OBJ, $STR], :side_effects, :decont(0));
 
     add_simple_op('ctx', $OBJ, []);
     add_simple_op('ctxlexpad', $OBJ, [$OBJ], :!inlineable);
