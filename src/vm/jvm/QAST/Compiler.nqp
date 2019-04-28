@@ -384,7 +384,7 @@ class QAST::OperationsJAST {
         }
     }
 
-    # Sets returns on an op node if we it has a native result type.
+    # Sets returns on an op node if it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
         if nqp::existskey(%hll_result_type, $hll) {
@@ -1573,7 +1573,7 @@ QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
         nqp::die("First child of a 'bind' op must be a QAST::Var");
     }
 
-    # Set the QAST of the think we're to bind, then delegate to
+    # Set the QAST of the thing we're to bind, then delegate to
     # the compilation of the QAST::Var to handle the rest.
     my $*BINDVAL := @children[1];
     $qastcomp.as_jast(@children[0])
@@ -1628,8 +1628,8 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
         return $qastcomp.as_jast($protected);
     }
 
-    # Otherwise, we need to generate an install a handler block, which will
-    # decide that to do by category.
+    # Otherwise, we need to install a handler block, which will
+    # decide what to do by category.
     my $mask := 0;
     my $hblock := QAST::Block.new(
         QAST::Op.new(
@@ -1644,7 +1644,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     for @children -> $type, $handler {
         if $type eq 'LABELED' {
             $has_label := 1;
-            # Rethrow if a label was requested for which we are not in charge for.
+            # Rethrow if a label was requested which we are not in charge for.
             $hblock.push(
                 QAST::Op.new(
                     :op('if'),
@@ -1719,7 +1719,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     $*STACK.obtain($tryil, $prores);
     $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
 
-    # Handle any runtime exceptions (Throwable) that are not ControlException
+    # Handle any runtime exceptions (Throwable) that are not ControlException.
     my $erril := JAST::InstructionList.new();
     my $nclab   := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
     $erril.append($DUP);
@@ -2999,7 +2999,7 @@ class QAST::CompilerJAST {
             $csa.append(JAST::PushIndex.new( :value(+@!callsites) ));
             $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CSD ));
 
-            # All all the callsites
+            # Add all the callsites.
             my int $i := 0;
             for @!callsites -> @cs {
                 my @cs_flags := @cs[0];
@@ -3396,7 +3396,7 @@ class QAST::CompilerJAST {
             nqp::die("Out-of-order access or re-use of stack items");
         }
 
-        # Spills the currnet stack contents to local variables.
+        # Spills the current stack contents to local variables.
         method spill_to_locals($il) {
             sub obtain_temp($type) {
                 if $type == $RT_VOID {
@@ -4002,7 +4002,7 @@ class QAST::CompilerJAST {
                 my $name := $_[0];
                 my $type := $_[1];
                 $*JMETH.add_local($name, jtype($type));
-                # use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
+                # Use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
                 if $type == $RT_INT {
                     $*JMETH.append(JAST::PushIVal.new( :value(0) ));
                 }
@@ -4031,7 +4031,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 'return_' ~ typechar($body.type), 'Void', jtype($body.type), $TYPE_CF ));
 
-            # make sure this goes before the body
+            # Make sure this goes before the body.
             my int $save_sites := $block.num_save_sites;
             if $save_sites {
                 $*JMETH.append(JAST::Instruction.new( :op('aload'), 'resume' ));
@@ -5234,7 +5234,7 @@ class QAST::CompilerJAST {
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifeq'), $faillabel ));
 
-        # Backtrack the cursor stack
+        # Backtrack the cursor stack.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append(JAST::Instruction.new( :op('ifnull'), $jumplabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
