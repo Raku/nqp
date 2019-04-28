@@ -1640,10 +1640,10 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
                 QAST::Op.new( :op('exception') )
             )));
     my $push_target := $hblock;
-    my $has_label   := 0;
+    my $handler_cares := 0;
     for @children -> $type, $handler {
+        $handler_cares := 1 if $type eq 'CONTROL' || $type eq 'LABELED';
         if $type eq 'LABELED' {
-            $has_label := 1;
             # Rethrow if a label was requested which we are not in charge for.
             $hblock.push(
                 QAST::Op.new(
@@ -1741,7 +1741,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
     my $exitlbl := JAST::Label.new( :name($qastcomp.unique('unwindexit')) );
-    $qastcomp.unwind_check($catchil, $handler, :outer($*HANDLER_IDX), :handler_cares($has_label));
+    $qastcomp.unwind_check($catchil, $handler, :outer($*HANDLER_IDX), :$handler_cares);
     $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'result', $TYPE_SMO ));
     $catchil.append(JAST::Instruction.new( :op('astore'), $result ));
     $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
