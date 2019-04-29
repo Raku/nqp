@@ -106,18 +106,14 @@ while $str -> $got {
     $str := '';
 }
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('repeat until seems to have a bug on the jvm', 2);
-} else {
-    my $x := 0;
-    repeat until $x >= 2 -> $another_x {
-      if $x == 0 {
-        ok(nqp::isnull($another_x), 'repeat until -> get null before condition');
-      } else {
-        is($another_x, 0, 'repeat until -> gets condition');
-      }
-      $x := $x + 1;
-    }
+my $x := 0;
+repeat until $x >= 2 -> $another_x {
+  if $x == 0 {
+    ok(nqp::isnull($another_x), 'repeat until -> get null before condition');
+  } else {
+    is($another_x, 0, 'repeat until -> gets condition');
+  }
+  $x := $x + 1;
 }
 
 sub cond($y) {
