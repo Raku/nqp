@@ -599,11 +599,11 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method verbose-config() {
         my $bname := $!backend.name;
-        for $!backend.config {
-            nqp::say($bname ~ '::' ~ $_.key ~ '=' ~ $_.value);
+        for sorted_keys($!backend.config) -> $key {
+            nqp::say($bname ~ '::' ~ $key ~ '=' ~ $!backend.config{$key});
         }
-        for %!config {
-            nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
+        for sorted_keys(%!config) -> $key {
+            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %!config{$key});
         }
         nqp::exit(0);
     }

@@ -1091,6 +1091,7 @@ for ('', 'repeat_') -> $repness {
             my @operands;
             my $orig_type;
             my $label;
+            my $im_local;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 elsif $_.named eq 'label' { $label := $_; }
@@ -1101,7 +1102,22 @@ for ('', 'repeat_') -> $repness {
             }
 
             # See if there's an immediate block wanting to be passed the condition.
+            # If so, set up variable now, so that it is known if evaluation starts
+            # with loop body (repeat_ variants).
             my $has_im := needs_cond_passed(@operands[1]);
+            if $has_im {
+                $im_local := QAST::Node.unique('__IM_');
+                @operands[0] := QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($im_local), :scope('local'), :decl('var') ),
+                    @operands[0]);
+                $orig_type := @operands[1].blocktype;
+                @operands[1].blocktype('declaration');
+                @operands[1] := QAST::Op.new(
+                    :op('call'), @operands[1],
+                    QAST::Var.new( :name($im_local), :scope('local') )
+                );
+            }
 
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
@@ -1131,17 +1147,6 @@ for ('', 'repeat_') -> $repness {
             $testil.append($cond_res.jast);
             $*STACK.obtain($testil, $cond_res);
             if $has_im {
-                my $im_local := QAST::Node.unique('__IM_');
-                $*BLOCK.add_local(QAST::Var.new(
-                    :name($im_local),
-                    :returns(typeobj_from_rttype($cond_res.type))
-                ));
-                $orig_type := @operands[1].blocktype;
-                @operands[1].blocktype('declaration');
-                @operands[1] := QAST::Op.new(
-                    :op('call'), @operands[1],
-                    QAST::Var.new( :name($im_local), :scope('local') )
-                );
                 $testil.append(dup_ins($cond_res.type));
                 $testil.append(JAST::Instruction.new( :op(store_ins($cond_res.type)), $im_local ));
             }
