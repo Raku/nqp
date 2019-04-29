@@ -772,6 +772,22 @@ class HLL::Compiler does HLL::Backend::Default {
             0;
         }
     }
+
+    method profiler-snapshot(*%args) {
+        my $backend;
+        if nqp::isconcrete(self) {
+            $backend := $!backend;
+        }
+        else {
+            $backend := self.default_backend();
+        }
+        if nqp::can($backend, 'profiler_snapshot') {
+            $backend.profiler_snapshot(|%args);
+        }
+        else {
+            nqp::die("The backend { $backend.HOW.name($backend) } doesn't support profiler-snapshot");
+        }
+    }
 }
 
 my $compiler := HLL::Compiler.new();
