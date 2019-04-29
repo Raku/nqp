@@ -107,7 +107,7 @@ COMMON_SOURCES = \
   $(QREGEX_SOURCES) \
   $(NQP_MO_SOURCES) \
 
-PERL5		= @perl@
+PERL5		= @shquot(@perl@)@
 MKPATH		= @mkpath@
 CHMOD		= @chmod@
 CP			= @cp@
@@ -116,13 +116,13 @@ RM_F		= @rm_f@
 RM_L		= @rm_l@
 @shell@
 
-SYSROOT         = @sysroot@
-PREFIX          = @prefix@
+SYSROOT         = @nfp(@sysroot@)@
+PREFIX          = @nfp(@prefix@)@
 BIN_DIR         = @nfp($(PREFIX)/bin)@
 NQP_LANG_DIR    = @nfp($(PREFIX)/share/nqp)@
-NQP_LIB_DIR     = @nqplibdir@
+NQP_LIB_DIR     = @nfp(@nqplibdir@)@
 PROVE_OPTIONS   = -j0$(TEST_JOBS)
 PROVE           = prove $(PROVE_OPTIONS)
-BASE_DIR		= @base_dir@
+BASE_DIR		= @nfp(@base_dir@)@
 
 # vim: ft=make noexpandtab ts=4 sw=4

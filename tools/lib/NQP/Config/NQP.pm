@@ -3,7 +3,7 @@ use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use NQP::Config qw<nfp cmp_rev slurp system_or_die>;
+use NQP::Config qw<cmp_rev slurp system_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -42,13 +42,16 @@ sub configure_misc {
             slurp( $self->build_file_path( 'MOAR_REVISION', required => 1 ) ) );
     }
 
-    $config->{moar_stage0} = nfp("src/vm/moar/stage0");
-    $config->{jvm_stage0}  = nfp("src/vm/jvm/stage0");
+    $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
+    $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
 
-    $config->{nqplibdir} = nfp(
-          $self->opt('libdir')
-        ? $self->opt('libdir') . "/nqp"
-        : '$(NQP_LANG_DIR)/lib'
+    $config->{nqplibdir} = $self->nfp(
+        (
+              $self->opt('libdir')
+            ? $self->opt('libdir') . "/nqp"
+            : '$(NQP_LANG_DIR)/lib'
+        ),
+        no_quote => 1,
     );
 }
 
@@ -95,7 +98,7 @@ sub configure_js_backend {
 
     $self->backend_config(
         'js',
-        js_build_dir => nfp("$config->{base_dir}/gen/js"),
+        js_build_dir => nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
         js_blib      => "node_modules",
     );
 }

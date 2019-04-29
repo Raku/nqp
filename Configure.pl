@@ -31,7 +31,7 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
 
 use lib ( "$FindBin::Bin/tools/lib",
     "$FindBin::Bin/3rdparty/nqp-configure/lib" );
-use NQP::Config qw<nfp system_or_die>;
+use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
 
 my $cfg = NQP::Config::NQP->new;
@@ -74,6 +74,7 @@ MAIN: {
 "===WARNING!===\nErrors are being ignored.\nIn the case of any errors the script may behave unexpectedly.\n";
     }
 
+    $cfg->configure_paths;
     $cfg->configure_from_options;
     $cfg->configure_refine_vars;
     $cfg->configure_relocatability;
