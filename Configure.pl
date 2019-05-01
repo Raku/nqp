@@ -29,7 +29,7 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
     }
 }
 
-use lib ( "$FindBin::Bin/tools/lib",
+use lib ( "../3rdparty/nqp-configure/lib", "$FindBin::Bin/tools/lib",
     "$FindBin::Bin/3rdparty/nqp-configure/lib" );
 use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
@@ -159,7 +159,7 @@ General Options:
                        required repos forked from the originals.
     --nqp-repo=<url>
     --moar-repo=<url>
-                       User specified URL to fetch corresponding components
+                       User-defined URL to fetch corresponding components
                        from. The URL will also be used to setup git push.
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https

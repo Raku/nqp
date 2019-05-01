@@ -3,7 +3,8 @@ use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use NQP::Config qw<cmp_rev slurp system_or_die>;
+use IPC::Cmd qw<run>;
+use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -88,7 +89,7 @@ sub configure_js_backend {
     }
     $js_config->{node} = $node;
 
-    my $node_version = `$node --version`;
+    my $node_version = run_or_die( [ $node, q<--version> ] );
     my ( $major, $minor, $path ) = $node_version =~ /v(\d+)\.(\d+)\.(\d+)/;
     unless ( $major > 10 || $major == 10 && $minor >= 10 ) {
         chomp($node_version);
@@ -178,7 +179,7 @@ sub gen_moar {
     my $moar_version_output = "";
 
     if ( $self->is_executable($moar_exe) ) {
-        $moar_version_output = qx{ $moar_exe --version };
+        $moar_version_output = run_or_die( [ $moar_exe, '--version' ] );
 
         if ($moar_version_output) {
             $moar_have = $moar_version_output =~ /version (\S+)/ ? $1 : undef;
@@ -191,7 +192,8 @@ sub gen_moar {
     my $moar_ok =
       $moar_have && cmp_rev( $moar_have, $moar_want, "MoarVM" ) >= 0;
     if ($moar_ok) {
-        say "Found $moar_exe version $moar_have, which is new enough.\n";
+        $self->msg(
+            "Found $moar_exe version $moar_have, which is new enough.\n");
     }
     elsif ($moar_have) {
         push @errors,
@@ -230,7 +232,8 @@ sub gen_moar {
 
         print "\nConfiguring and building MoarVM ...\n";
         my @cmd =
-          ( $^X, "Configure.pl", @opts, "--prefix=$prefix", '--make-install' );
+          ( $^X, "Configure.pl", @opts, qq{--prefix=$prefix},
+            '--make-install' );
         print "@cmd\n";
         system_or_die(@cmd);
 
@@ -249,14 +252,35 @@ sub gen_moar {
 #`$moar_path --libpath="$libpath" "$nqp_moarvm" -e "print(nqp::backendconfig()<make>)"`;
 }
 
+# Command line options not to be included into configure_opts config variable.
+sub ignorable_opt {
+    my $self = shift;
+    my $opt  = shift;
+    return $opt =~ /^
+            (?:
+                gen-
+                | (?:
+                    help
+                    | no-clean
+                    | ignore-errors
+                    | make-install
+                    | expand
+                    | out
+                  ) 
+                  $
+            )
+        /x;
+}
+
 sub probe_node {
     my $self = shift;
 
     # Debian ships a 'node' binary that is related to amateur radio.
     # the javascript thingy is called 'nodejs' there
     for my $binary (qw/node nodejs /) {
-        my $version_str = qx/$binary -v 2>&1/;
-        if ( $version_str =~ /^v\d/ ) {
+        my $version_str;
+        my $ok = run( command => [ $binary, '-v' ], buffer => \$version_str );
+        if ( $ok && $version_str =~ /^v\d/ ) {
             return $binary;
         }
     }
