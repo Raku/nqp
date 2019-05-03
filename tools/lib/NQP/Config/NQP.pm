@@ -99,7 +99,7 @@ sub configure_js_backend {
 
     $self->backend_config(
         'js',
-        js_build_dir => nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
+        js_build_dir => $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
         js_blib      => "node_modules",
     );
 }
