@@ -1,0 +1,2 @@
+@setenv(JAR_DIR)@@q(@jar_dir@)@
+@setenv(LIB_DIR)@@q(@lib_dir@)@

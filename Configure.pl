@@ -29,8 +29,10 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
     }
 }
 
-use lib ( "../3rdparty/nqp-configure/lib", "$FindBin::Bin/tools/lib",
-    "$FindBin::Bin/3rdparty/nqp-configure/lib" );
+use lib ( 
+    "$FindBin::Bin/tools/lib",
+    "$FindBin::Bin/3rdparty/nqp-configure/lib" 
+);
 use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
 
@@ -57,7 +59,7 @@ MAIN: {
         'git-depth=s',      'git-reference=s',
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
-        'out=s',
+        'out=s',            'set-var=s@',
       )
       or do {
         print_help();
@@ -84,13 +86,6 @@ MAIN: {
 
     $cfg->configure_backends;
     $cfg->configure_misc;
-
-    if ( $cfg->active_backend('jvm') ) {
-        $cfg->fill_template_file(
-            $cfg->base_path('tools/build/install-jvm-runner.pl.in'),
-            $cfg->base_path('tools/build/install-jvm-runner.pl'),
-        );
-    }
 
     # XXX Why Windows only?
     my $prefix = $cfg->cfg('prefix');
@@ -178,6 +173,9 @@ General Options:
                        generated. The result is send to stdout unless --out
                        specified.
     --out=<file>       Filename to send output of --expand into.
+    --set-var="config_variable=value"
+                       Sets a config_variable to "value". Can be used multiple
+                       times.
 
 Please note that the --gen-moar option is there for convenience only and will
 actually immediately - at Configure time - compile and install moar. Moar will
