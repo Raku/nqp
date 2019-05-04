@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-use 5.008;
+use v5.10;
 
 use Config;
 use File::Spec;

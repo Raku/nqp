@@ -131,8 +131,8 @@ j-install: j-all
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) @mkquot(@script(gen-jvm-properties.pl)@)@
 	$(PERL5) -MExtUtils::Command -e mkpath bin
 	$(JAVAC) -source 1.8 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
-	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . $(THIRDPARTY_JARS) > jvmconfig.properties
-	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @prefix@ $(THIRDPARTY_JARS) > @nfpq(bin/jvmconfig.properties)@
+	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
+	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
 	$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
 
 J_CLEANUPS = *.class *.jar @q($(J_STAGE1_DIR))@ @q($(J_STAGE2_DIR))@ bin nqp nqp.bat jvmconfig.properties @q($(J_RUNNER))@
