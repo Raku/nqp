@@ -21,7 +21,6 @@ Makefile
 *~
 /nqp
 /*.html
-tools/build/install-jvm-runner.pl
 config.status
 config.default
 node_modules
@@ -44,3 +43,4 @@ MoarVM
 MANIFEST
 /bin
 /nqp.bat
+package-lock.json

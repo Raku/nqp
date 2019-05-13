@@ -1024,8 +1024,10 @@ function getConfigFromPerl() {
     perllibs => $Config{perllibs},
   );
 
+  my $jquot = sub { my $s = shift; $s =~ s/(["\\\\])/\\\\$1/g; $s };
+
   # using a JSON module would be much better but we don't want a dependency
-  print "{" . (join ',', map {'"nativecall.' . $_ . '": "' . $nativecall{$_} . '"'} keys %nativecall) . "}\n";
+  print "{" . (join ',', map {'"nativecall.' . $_ . '": "' . $jquot->($nativecall{$_}) . '"'} keys %nativecall) . "}\n";
   `;
 
 

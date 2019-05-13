@@ -1,0 +1,129 @@
+# common definitions used by all backends
+
+COMMON_HLL_SOURCES = \
+  @nfp(src/HLL/Grammar.nqp)@ \
+  @nfp(src/HLL/Actions.nqp)@ \
+  @nfp(src/HLL/Compiler.nqp)@ \
+  @nfp(src/HLL/CommandLine.nqp)@ \
+  @nfp(src/HLL/World.nqp)@ \
+  @nfp(src/HLL/sprintf.nqp)@ \
+
+HLL_COMBINED = NQPHLL.nqp
+
+CORE_SETTING_SOURCES = \
+  @nfp(src/core/NativeTypes.nqp)@ \
+  @nfp(src/core/NQPRoutine.nqp)@ \
+  @nfp(src/core/NQPMu.nqp)@ \
+  @nfp(src/core/NQPCapture.nqp)@ \
+  @nfp(src/core/IO.nqp)@ \
+  @nfp(src/core/Regex.nqp)@ \
+  @nfp(src/core/Hash.nqp)@ \
+  @nfp(src/core/NQPLock.nqp)@ \
+  @nfp(src/core/testing.nqp)@ \
+  @nfp(src/core/YOUAREHERE.nqp)@ \
+
+CORE_SETTING_COMBINED = NQPCORE.setting
+
+QASTNODE_SOURCES = \
+  @nfp(src/QAST/CompileTimeValue.nqp)@ \
+  @nfp(src/QAST/SpecialArg.nqp)@ \
+  @nfp(src/QAST/Children.nqp)@ \
+  @nfp(src/QAST/Node.nqp)@ \
+  @nfp(src/QAST/NodeList.nqp)@ \
+  @nfp(src/QAST/Regex.nqp)@ \
+  @nfp(src/QAST/IVal.nqp)@ \
+  @nfp(src/QAST/NVal.nqp)@ \
+  @nfp(src/QAST/SVal.nqp)@ \
+  @nfp(src/QAST/BVal.nqp)@ \
+  @nfp(src/QAST/WVal.nqp)@ \
+  @nfp(src/QAST/Want.nqp)@ \
+  @nfp(src/QAST/Var.nqp)@ \
+  @nfp(src/QAST/VarWithFallback.nqp)@ \
+  @nfp(src/QAST/ParamTypeCheck.nqp)@ \
+  @nfp(src/QAST/Op.nqp)@ \
+  @nfp(src/QAST/VM.nqp)@ \
+  @nfp(src/QAST/Stmts.nqp)@ \
+  @nfp(src/QAST/Stmt.nqp)@ \
+  @nfp(src/QAST/Block.nqp)@ \
+  @nfp(src/QAST/Unquote.nqp)@ \
+  @nfp(src/QAST/CompUnit.nqp)@ \
+  @nfp(src/QAST/InlinePlaceholder.nqp)@ \
+
+QASTNODE_COMBINED = QASTNode.nqp
+
+P5QREGEX_SOURCES = \
+  @nfp(src/QRegex/P5Regex/Grammar.nqp)@ \
+  @nfp(src/QRegex/P5Regex/Actions.nqp)@ \
+  @nfp(src/QRegex/P5Regex/Compiler.nqp)@ \
+
+P5QREGEX_COMBINED = NQPP5QRegex.nqp
+
+P6QREGEX_SOURCES  = \
+  @nfp(src/QRegex/P6Regex/Grammar.nqp)@ \
+  @nfp(src/QRegex/P6Regex/Actions.nqp)@ \
+  @nfp(src/QRegex/P6Regex/Compiler.nqp)@ \
+  @nfp(src/QRegex/P6Regex/Optimizer.nqp)@ \
+
+P6QREGEX_COMBINED = NQPP6QRegex.nqp
+
+QREGEX_SOURCES = \
+  @nfp(src/QRegex/NFA.nqp)@ \
+  @nfp(src/QRegex/Cursor.nqp)@ \
+
+QREGEX_COMBINED = QRegex.nqp
+
+COMMON_NQP_SOURCES  = \
+  @nfp(src/NQP/World.nqp)@ \
+  @nfp(src/NQP/Grammar.nqp)@ \
+  @nfp(src/NQP/Optimizer.nqp)@ \
+  @nfp(src/NQP/Actions.nqp)@ \
+  @nfp(src/NQP/Compiler.nqp)@ \
+
+NQP_COMBINED = NQP.nqp
+
+# No QAST_SOURCES because it's just a single file that does not need combining
+
+QAST_COMBINED = QAST.nqp
+
+NQP_MO_SOURCES = \
+  @nfp(src/how/Archetypes.nqp)@ \
+  @nfp(src/how/RoleToRoleApplier.nqp)@ \
+  @nfp(src/how/NQPConcreteRoleHOW.nqp)@ \
+  @nfp(src/how/RoleToClassApplier.nqp)@ \
+  @nfp(src/how/NQPCurriedRoleHOW.nqp)@ \
+  @nfp(src/how/NQPParametricRoleHOW.nqp)@ \
+  @nfp(src/how/NQPClassHOW.nqp)@ \
+  @nfp(src/how/NQPNativeHOW.nqp)@ \
+  @nfp(src/how/NQPAttribute.nqp)@ \
+  @nfp(src/how/NQPModuleHOW.nqp)@ \
+  @nfp(src/how/EXPORTHOW.nqp)@ \
+
+NQP_MO_COMBINED = nqpmo.nqp
+
+COMMON_SOURCES = \
+  $(CORE_SETTING_SOURCES) \
+  $(QASTNODE_SOURCES) \
+  $(P5QREGEX_SOURCES) \
+  $(QREGEX_SOURCES) \
+  $(NQP_MO_SOURCES) \
+
+PERL5		= @shquot(@perl@)@
+CONFIGURE   = $(PERL5) @shquot(@configure_script@)@ @configure_opts()@
+MKPATH		= @mkpath@
+CHMOD		= @chmod@
+CP			= @cp@
+RM_RF		= @rm_rf@
+RM_F		= @rm_f@
+RM_L		= @rm_l@
+@shell@
+
+SYSROOT         = @nfp(@sysroot@)@
+PREFIX          = @nfp(@prefix@)@
+BIN_DIR         = @nfp(@prefix@/bin)@
+NQP_LANG_DIR    = @nfp($(PREFIX)/share/nqp)@
+NQP_LIB_DIR     = @nfp(@nqplibdir@)@
+PROVE_OPTIONS   = -j0$(TEST_JOBS)
+PROVE           = prove $(PROVE_OPTIONS)
+BASE_DIR		= @nfp(@base_dir@)@
+
+# vim: ft=make noexpandtab ts=4 sw=4

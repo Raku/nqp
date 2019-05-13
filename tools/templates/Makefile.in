@@ -1,0 +1,22 @@
+# Template Makefile
+
+LAUNCHER = @default_prefix@-runner-default
+
+all:@for_backends( @backend_prefix@-all)@ $(LAUNCHER)
+
+install:@for_backends( @backend_prefix@-install)@ $(LAUNCHER)-install
+
+clean:@for_backends( @backend_prefix@-clean)@
+
+test:@for_backends( @backend_prefix@-test)@
+
+qregex-test:@for_backends( @backend_prefix@-qregex-test)@
+
+@include(Makefile-common)@
+
+@for_backends(@ctx_include(Makefile)@)@
+
+@nfp(t/*/*.t)@: all
+	$(PROVE) -r -v --exec @nfp(./nqp@bat@)@ $@
+
+# vim: ft=make noexpandtab ts=4 sw=4

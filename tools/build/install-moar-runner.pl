@@ -62,7 +62,7 @@ rreadlink() (
 
 DIR=$(dirname -- "$(rreadlink "$0")")
 
-exec $DIR/moar  --execname="$0" --libpath="$DIR/../share/nqp/lib" $DIR/../share/nqp/lib/nqp.moarvm "$@"
+exec "$DIR/moar"  --execname="$0" --libpath="$DIR/../share/nqp/lib" "$DIR/../share/nqp/lib/nqp.moarvm" "$@"
 EOS
     }
     else {
