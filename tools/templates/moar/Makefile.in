@@ -270,7 +270,7 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ .
 
 $(M_RUNNER): @@configure_script@@ @@nfp(@templates_dir@/@platform@/nqp-m)@@
-	$(PERL5) @shquot(@configure_script@)@ @configure_opts@ --expand=@nfpq(@templates_dir@/@platform@/nqp-m)@ --out=@q($(M_RUNNER))@
+	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@nfpq(@templates_dir@/@platform@/nqp-m)@ --out=@q($(M_RUNNER))@
 	$(CHMOD) 0755 @q($(M_RUNNER))@
 
 m-runner-default: m-all

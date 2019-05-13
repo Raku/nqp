@@ -252,7 +252,7 @@ sub gen_moar {
 #`$moar_path --libpath="$libpath" "$nqp_moarvm" -e "print(nqp::backendconfig()<make>)"`;
 }
 
-# Command line options not to be included into configure_opts config variable.
+# Command line options not to be included into configure_opts macro output
 sub ignorable_opt {
     my $self = shift;
     my $opt  = shift;
@@ -266,6 +266,7 @@ sub ignorable_opt {
                     | make-install
                     | expand
                     | out
+                    | backends
                   ) 
                   $
             )

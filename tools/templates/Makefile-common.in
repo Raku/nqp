@@ -108,7 +108,7 @@ COMMON_SOURCES = \
   $(NQP_MO_SOURCES) \
 
 PERL5		= @shquot(@perl@)@
-CONFIGURE   = $(PERL5) @shquot(@configure_script@)@ @configure_opts@
+CONFIGURE   = $(PERL5) @shquot(@configure_script@)@ @configure_opts()@
 MKPATH		= @mkpath@
 CHMOD		= @chmod@
 CP			= @cp@
