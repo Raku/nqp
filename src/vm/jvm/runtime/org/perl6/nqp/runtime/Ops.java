@@ -11,6 +11,7 @@ import java.lang.invoke.MethodType;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.ProcessHandle;
 import java.lang.ProcessBuilder.Redirect;
 import java.lang.Thread;
 import java.math.BigDecimal;
@@ -69,7 +70,7 @@ import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
 import org.perl6.nqp.io.IIOSyncWritable;
 import org.perl6.nqp.io.IIOPossiblyTTY;
-import org.perl6.nqp.io.ProcessHandle;
+import org.perl6.nqp.io.SyncProcessHandle;
 import org.perl6.nqp.io.ProcessChannel;
 import org.perl6.nqp.io.ServerSocketHandle;
 import org.perl6.nqp.io.SocketHandle;
@@ -139,11 +140,35 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 
+import sun.misc.Unsafe;
+
 /**
  * Contains complex operations that are more involved than the simple ops that the
  * JVM makes available.
  */
 public final class Ops {
+    /**
+     * Temporary workaround to avoid warnings about 'illegal reflective access'
+     * (taken from https://stackoverflow.com/a/46458447).
+     * Please note that this is needed for Rakudo, too.
+     * Once something else (e.g. VarHandle) is used instead
+     * of sun.misc.Unsafe this workaround can be removed.
+     */
+    public static void disableWarning() {
+        try {
+            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            Unsafe u = (Unsafe)theUnsafe.get(null);
+
+            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field logger = cls.getDeclaredField("logger");
+            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
+        }
+        catch (Exception e) {
+            // ignore (that's the raison d'être for this method)
+        }
+    }
+
     /* I/O opcodes */
     public static String print(String v, ThreadContext tc) {
         tc.gc.out.print(v);
@@ -1088,7 +1113,7 @@ public final class Ops {
     public static SixModelObject syncpipe(ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new ProcessHandle(tc);
+        h.handle = new SyncProcessHandle(tc);
         return h;
     }
 
@@ -1157,23 +1182,23 @@ public final class Ops {
         if (in instanceof IOHandleInstance) {
             if ((flags & PIPE_CAPTURE_IN) != 0)
                 /* getOutputStream() returns the output stream connected to the normal input of the subprocess. */
-                ((ProcessHandle)((IOHandleInstance)in).handle).bindChannel(tc, process, process.getOutputStream());
+                ((SyncProcessHandle)((IOHandleInstance)in).handle).bindChannel(tc, process, process.getOutputStream());
 
             if ((flags & PIPE_INHERIT_IN) != 0) {
                 /* If our stdin is connected to an output stream of another process, we need to let it run in a thread. */
                 ProcessChannel pc = new ProcessChannel(process, process.getOutputStream(),
-                    ((ProcessChannel)((ProcessHandle)((IOHandleInstance)in).handle).chan).in);
+                    ((ProcessChannel)((SyncProcessHandle)((IOHandleInstance)in).handle).chan).in);
                 new Thread(pc).start();
             }
         }
 
         if ((flags & PIPE_CAPTURE_OUT) != 0 && out instanceof IOHandleInstance)
             /* getInputStream() returns the input stream connected to the normal output of the subprocess. */
-            ((ProcessHandle)((IOHandleInstance)out).handle).bindChannel(tc, process, process.getInputStream());
+            ((SyncProcessHandle)((IOHandleInstance)out).handle).bindChannel(tc, process, process.getInputStream());
 
         if ((flags & PIPE_CAPTURE_ERR) != 0 && err instanceof IOHandleInstance)
             /* getErrorStream() returns the input stream connected to the error output of the subprocess. */
-            ((ProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
+            ((SyncProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
     }
 
     private static long spawn(ThreadContext tc, List<String> args, SixModelObject envObj, String dir,
@@ -5625,17 +5650,21 @@ public final class Ops {
     }
 
     public static long getpid(ThreadContext tc) {
-        /* Questionably portable; see:
-         * http://boxysystems.com/index.php/java-tip-find-process-id-of-running-java-process/
-         */
         try {
-            java.lang.management.RuntimeMXBean runtime = java.lang.management.ManagementFactory.getRuntimeMXBean();
-            Field jvm = runtime.getClass().getDeclaredField("jvm");
-            jvm.setAccessible(true);
-            Object mgmt = jvm.get(runtime);
-            Method pid_method = mgmt.getClass().getDeclaredMethod("getProcessId");
-            pid_method.setAccessible(true);
-            return (Integer)pid_method.invoke(mgmt);
+            ProcessHandle ph = ProcessHandle.current();
+            long res = ph.pid();
+            return res;
+        }
+        catch (Throwable t) {
+            throw ExceptionHandling.dieInternal(tc, t);
+        }
+    }
+
+    public static long getppid(ThreadContext tc) {
+        try {
+            ProcessHandle ph = ProcessHandle.current();
+            long res = ph.parent().get().pid();
+            return res;
         }
         catch (Throwable t) {
             throw ExceptionHandling.dieInternal(tc, t);

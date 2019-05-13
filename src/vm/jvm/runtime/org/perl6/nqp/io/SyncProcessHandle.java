@@ -9,11 +9,11 @@ import java.nio.charset.Charset;
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class ProcessHandle extends SyncHandle {
+public class SyncProcessHandle extends SyncHandle {
 
     public Process process;
 
-    public ProcessHandle(ThreadContext tc) {
+    public SyncProcessHandle(ThreadContext tc) {
         setEncoding(tc, Charset.forName("UTF-8"));
     }
 
