@@ -4,7 +4,7 @@ sudo: false
 fast_finish: true
 install: "echo"
 dist: xenial
-jdk: opendjk11
+jdk: openjdk11
 
 addons:
   apt:
