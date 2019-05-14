@@ -1,16 +1,25 @@
-language: "java"
-    
+language: java
+
 sudo: false
-dist: trusty
-
+fast_finish: true
 install: "echo"
-#install: travis_wait 30 mvn install
+dist: trusty
+jdk: oraclejdk9
 
-#script: "perl Configure.pl $NQP_OPTIONS; make test"
-script: 
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    packages:
+    # install toolchains
+    - gcc-6
+    - oracle-java9-installer
+
+script:
     - perl Configure.pl $NQP_OPTIONS
-    - make
-    - travis_wait 30 make test
+    - make test
+    - make install
 
 branches:
    only:

@@ -384,7 +384,7 @@ class QAST::OperationsJAST {
         }
     }
 
-    # Sets returns on an op node if we it has a native result type.
+    # Sets returns on an op node if it has a native result type.
     method attach_result_type($hll, $node) {
         my $op := $node.op;
         if nqp::existskey(%hll_result_type, $hll) {
@@ -1091,6 +1091,7 @@ for ('', 'repeat_') -> $repness {
             my @operands;
             my $orig_type;
             my $label;
+            my $im_local;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 elsif $_.named eq 'label' { $label := $_; }
@@ -1101,7 +1102,22 @@ for ('', 'repeat_') -> $repness {
             }
 
             # See if there's an immediate block wanting to be passed the condition.
+            # If so, set up variable now, so that it is known if evaluation starts
+            # with loop body (repeat_ variants).
             my $has_im := needs_cond_passed(@operands[1]);
+            if $has_im {
+                $im_local := QAST::Node.unique('__IM_');
+                @operands[0] := QAST::Op.new(
+                    :op('bind'),
+                    QAST::Var.new( :name($im_local), :scope('local'), :decl('var') ),
+                    @operands[0]);
+                $orig_type := @operands[1].blocktype;
+                @operands[1].blocktype('declaration');
+                @operands[1] := QAST::Op.new(
+                    :op('call'), @operands[1],
+                    QAST::Var.new( :name($im_local), :scope('local') )
+                );
+            }
 
             # Create labels.
             my $while_id := $qastcomp.unique($op_name);
@@ -1131,17 +1147,6 @@ for ('', 'repeat_') -> $repness {
             $testil.append($cond_res.jast);
             $*STACK.obtain($testil, $cond_res);
             if $has_im {
-                my $im_local := QAST::Node.unique('__IM_');
-                $*BLOCK.add_local(QAST::Var.new(
-                    :name($im_local),
-                    :returns(typeobj_from_rttype($cond_res.type))
-                ));
-                $orig_type := @operands[1].blocktype;
-                @operands[1].blocktype('declaration');
-                @operands[1] := QAST::Op.new(
-                    :op('call'), @operands[1],
-                    QAST::Var.new( :name($im_local), :scope('local') )
-                );
                 $testil.append(dup_ins($cond_res.type));
                 $testil.append(JAST::Instruction.new( :op(store_ins($cond_res.type)), $im_local ));
             }
@@ -1573,7 +1578,7 @@ QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
         nqp::die("First child of a 'bind' op must be a QAST::Var");
     }
 
-    # Set the QAST of the think we're to bind, then delegate to
+    # Set the QAST of the thing we're to bind, then delegate to
     # the compilation of the QAST::Var to handle the rest.
     my $*BINDVAL := @children[1];
     $qastcomp.as_jast(@children[0])
@@ -1628,8 +1633,8 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
         return $qastcomp.as_jast($protected);
     }
 
-    # Otherwise, we need to generate an install a handler block, which will
-    # decide that to do by category.
+    # Otherwise, we need to install a handler block, which will
+    # decide what to do by category.
     my $mask := 0;
     my $hblock := QAST::Block.new(
         QAST::Op.new(
@@ -1640,11 +1645,11 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
                 QAST::Op.new( :op('exception') )
             )));
     my $push_target := $hblock;
-    my $has_label   := 0;
+    my $handler_cares := 0;
     for @children -> $type, $handler {
+        $handler_cares := 1 if $type eq 'CONTROL' || $type eq 'LABELED';
         if $type eq 'LABELED' {
-            $has_label := 1;
-            # Rethrow if a label was requested for which we are not in charge for.
+            # Rethrow if a label was requested which we are not in charge for.
             $hblock.push(
                 QAST::Op.new(
                     :op('if'),
@@ -1719,7 +1724,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     $*STACK.obtain($tryil, $prores);
     $tryil.append(JAST::Instruction.new( :op('astore'), $result ));
 
-    # Handle any runtime exceptions (Throwable) that are not ControlException
+    # Handle any runtime exceptions (Throwable) that are not ControlException.
     my $erril := JAST::InstructionList.new();
     my $nclab   := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
     $erril.append($DUP);
@@ -1741,7 +1746,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # after unwind" flag, used to force this whole block to exit.
     my $catchil := JAST::InstructionList.new();
     my $exitlbl := JAST::Label.new( :name($qastcomp.unique('unwindexit')) );
-    $qastcomp.unwind_check($catchil, $handler, :handler_cares($has_label));
+    $qastcomp.unwind_check($catchil, $handler, :outer($*HANDLER_IDX), :$handler_cares);
     $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'result', $TYPE_SMO ));
     $catchil.append(JAST::Instruction.new( :op('astore'), $result ));
     $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
@@ -2843,6 +2848,7 @@ QAST::OperationsJAST.map_classlib_core_op('getsignals', $TYPE_IO_OPS, 'getsignal
 QAST::OperationsJAST.map_classlib_core_op('sleep', $TYPE_OPS, 'sleep', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('getenvhash', $TYPE_OPS, 'getenvhash', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getpid', $TYPE_OPS, 'getpid', [], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getppid', $TYPE_OPS, 'getppid', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('jvmgetproperties', $TYPE_OPS, 'jvmgetproperties', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getrusage', $TYPE_OPS, 'getrusage', [$RT_OBJ], $RT_OBJ, :tc);
 
@@ -2999,7 +3005,7 @@ class QAST::CompilerJAST {
             $csa.append(JAST::PushIndex.new( :value(+@!callsites) ));
             $csa.append(JAST::Instruction.new( :op('anewarray'), $TYPE_CSD ));
 
-            # All all the callsites
+            # Add all the callsites.
             my int $i := 0;
             for @!callsites -> @cs {
                 my @cs_flags := @cs[0];
@@ -3396,7 +3402,7 @@ class QAST::CompilerJAST {
             nqp::die("Out-of-order access or re-use of stack items");
         }
 
-        # Spills the currnet stack contents to local variables.
+        # Spills the current stack contents to local variables.
         method spill_to_locals($il) {
             sub obtain_temp($type) {
                 if $type == $RT_VOID {
@@ -4002,7 +4008,7 @@ class QAST::CompilerJAST {
                 my $name := $_[0];
                 my $type := $_[1];
                 $*JMETH.add_local($name, jtype($type));
-                # use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
+                # Use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
                 if $type == $RT_INT {
                     $*JMETH.append(JAST::PushIVal.new( :value(0) ));
                 }
@@ -4031,7 +4037,7 @@ class QAST::CompilerJAST {
             $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                 'return_' ~ typechar($body.type), 'Void', jtype($body.type), $TYPE_CF ));
 
-            # make sure this goes before the body
+            # Make sure this goes before the body.
             my int $save_sites := $block.num_save_sites;
             if $save_sites {
                 $*JMETH.append(JAST::Instruction.new( :op('aload'), 'resume' ));
@@ -4537,10 +4543,11 @@ class QAST::CompilerJAST {
                         $*STACK.obtain($il, $valres);
                     }
                     $il.append(JAST::PushSVal.new( :value($name) ));
+                    $il.append($SWAP) if $*BINDVAL;
                     $il.append($ALOAD_1);
                     $il.append($*BINDVAL
                         ?? JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-                                "bindlexdyn", $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC )
+                                "bindlexdyn", $TYPE_SMO, $TYPE_STR, $TYPE_SMO, $TYPE_TC )
                         !! JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
                                 "getlexdyn", $TYPE_SMO, $TYPE_STR, $TYPE_TC ));
                     return result($il, $RT_OBJ);
@@ -5233,7 +5240,7 @@ class QAST::CompilerJAST {
         $il.append($LCMP);
         $il.append(JAST::Instruction.new( :op('ifeq'), $faillabel ));
 
-        # Backtrack the cursor stack
+        # Backtrack the cursor stack.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append(JAST::Instruction.new( :op('ifnull'), $jumplabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));

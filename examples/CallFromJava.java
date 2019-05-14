@@ -5,7 +5,7 @@
 // 4
 
 
-// Note: curently nqp only functions properly in the application class path.
+// Note: currently nqp only functions properly in the application class path.
 
 package examples;
 import org.perl6.nqp.runtime.*;
@@ -26,7 +26,7 @@ public class CallFromJava {
     }
 
     private SixModelObject eval(String nqp) {
-        Ops.invokeDirect(t, Ops.findmethod(t, nqpComp, "compile"),
+        Ops.invokeDirect(t, Ops.findmethod(nqpComp, "compile", t),
                 new CallSiteDescriptor(new byte[] { ARG_OBJ, ARG_STR }, null),
                 new Object[] { nqpComp, nqp });
 
@@ -40,5 +40,3 @@ public class CallFromJava {
         nqp.eval(args[2]);
     }
 }
-
-

@@ -30,19 +30,39 @@ else {
     open my $fh, ">", $install_to
         or die "Could not open $install_to: $!";
     if ($relocatable) {
-        printf $fh <<'EOS';
-#!/bin/bash
+        print $fh <<'EOS';
+#!/bin/sh
 
-# Sourced from https://stackoverflow.com/a/246128/1975049
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do
-  DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null && pwd )"
+# Sourced from https://stackoverflow.com/a/29835459/1975049
+rreadlink() (
+  target=$1 fname= targetDir= CDPATH=
+  { \unalias command; \unset -f command; } >/dev/null 2>&1
+  [ -n "$ZSH_VERSION" ] && options[POSIX_BUILTINS]=on
+  while :; do
+      [ -L "$target" ] || [ -e "$target" ] || { command printf '%s\n' "ERROR: '$target' does not exist." >&2; return 1; }
+      command cd "$(command dirname -- "$target")"
+      fname=$(command basename -- "$target")
+      [ "$fname" = '/' ] && fname=''
+      if [ -L "$fname" ]; then
+        target=$(command ls -l "$fname")
+        target=${target#* -> }
+        continue
+      fi
+      break
+  done
+  targetDir=$(command pwd -P)
+  if [ "$fname" = '.' ]; then
+    command printf '%s\n' "${targetDir%/}"
+  elif  [ "$fname" = '..' ]; then
+    command printf '%s\n' "$(command dirname -- "${targetDir}")"
+  else
+    command printf '%s\n' "${targetDir%/}/$fname"
+  fi
+)
 
-exec $DIR/moar  --execname="$0" --libpath="$DIR/../share/nqp/lib" $DIR/../share/nqp/lib/nqp.moarvm "$@"
+DIR=$(dirname -- "$(rreadlink "$0")")
+
+exec "$DIR/moar"  --execname="$0" --libpath="$DIR/../share/nqp/lib" "$DIR/../share/nqp/lib/nqp.moarvm" "$@"
 EOS
     }
     else {

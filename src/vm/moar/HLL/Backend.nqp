@@ -33,6 +33,16 @@ class HLL::Backend::MoarVM {
         # Doesn't do anything just yet
     }
 
+    method profiler_snapshot(:$kind, :$filename) {
+        if $kind eq "heap" {
+            nqp::mvmstartprofile(nqp::hash("kind", "heap", "path", $filename));
+            return nqp::mvmendprofile();
+        }
+        else {
+            nqp::die("MoarVM's profiler_snapshot only supports kind => 'heap', not $kind");
+        }
+    }
+
     my $prof_start_sub;
     my $prof_end_sub;
     method ensure_prof_routines() {
@@ -121,6 +131,48 @@ class HLL::Backend::MoarVM {
 
         my int $node-id-counter := -1;
 
+        sub get_remapped_type_id($id) {
+            my str $newkey;
+
+            if nqp::existskey($id_remap, $id) {
+                $newkey := $id_remap{$id};
+            } else {
+                $newkey := ~(++$new-id-counter);
+                $id_remap{$id} := $newkey;
+            }
+
+            unless nqp::existskey($id_to_thing, $newkey) {
+                my $typename;
+                my $scdesc;
+                try {
+                    my $type := %type-info{$id}[1]<type>;
+                    $typename := $type.HOW.name($type);
+                }
+                unless $typename {
+                    $typename := "<unknown type>";
+                }
+                try {
+                    my $type := %type-info{$id}[1]<type>;
+                    my $sc := nqp::getobjsc($type);
+                    if $sc {
+                        $scdesc := nqp::scgetdesc($sc);
+                    }
+                }
+                unless $scdesc {
+                    $scdesc := "";
+                }
+                %type-info{$id}[1]<typename> := $typename;
+                %type-info{$id}[1]<scdesc> := $scdesc;
+                $id_to_thing{$newkey} := $typename;
+                unless nqp::existskey(%type-info, $newkey) {
+                    nqp::bindkey(%type-info, $newkey, nqp::list());
+                }
+                %type-info{$newkey}[1] := %type-info{$id}[1];
+            }
+
+            $newkey;
+        }
+
         sub post_process_call_graph_node($node) {
             my $this-node-id := ++$node-id-counter;
             try {
@@ -133,42 +185,7 @@ class HLL::Backend::MoarVM {
                 }
                 if nqp::existskey($node, "allocations") {
                     for $node<allocations> -> %alloc_info {
-                        my $orig-id := %alloc_info<id>;
-                        if nqp::existskey($id_remap, %alloc_info<id>) {
-                            %alloc_info<id> := $id_remap{%alloc_info<id>};
-                        } else {
-                            my str $newkey := ~(++$new-id-counter);
-                            $id_remap{%alloc_info<id>} := $newkey;
-                            %alloc_info<id> := $newkey;
-                        }
-                        unless nqp::existskey($id_to_thing, %alloc_info<id>) {
-                            my $typename;
-                            my $scdesc;
-                            try {
-                                my $type := %type-info{$orig-id}[1]<type>;
-                                $typename := $type.HOW.name($type);
-                            }
-                            unless $typename {
-                                $typename := "<unknown type>";
-                            }
-                            try {
-                                my $type := %type-info{$orig-id}[1]<type>;
-                                my $sc := nqp::getobjsc($type);
-                                if $sc {
-                                    $scdesc := nqp::scgetdesc($sc);
-                                }
-                            }
-                            unless $scdesc {
-                                $scdesc := "";
-                            }
-                            %type-info{$orig-id}[1]<typename> := $typename;
-                            %type-info{$orig-id}[1]<scdesc> := $scdesc;
-                            $id_to_thing{%alloc_info<id>} := $typename;
-                            unless nqp::existskey(%type-info, %alloc_info<id>) {
-                                nqp::bindkey(%type-info, %alloc_info<id>, nqp::list());
-                            }
-                            %type-info{%alloc_info<id>}[1] := %type-info{$orig-id}[1];
-                        }
+                        %alloc_info<id> := get_remapped_type_id(%alloc_info<id>);
                         nqp::deletekey(%alloc_info, "type");
                     }
                 }
@@ -194,6 +211,19 @@ class HLL::Backend::MoarVM {
                 }
             }
             $node<highest_child_id> := $node-id-counter;
+        }
+
+        sub post_process_thread_data($thread) {
+            unless nqp::existskey($thread, 'gcs') {
+                return
+            }
+            for $thread<gcs> -> $gc {
+                if nqp::existskey($gc, 'deallocs') {
+                    for $gc<deallocs> -> $dealloc {
+                        $dealloc<id> := get_remapped_type_id($dealloc<id>);
+                    }
+                }
+            }
         }
 
         sub to_json($obj) {
@@ -383,14 +413,28 @@ class HLL::Backend::MoarVM {
                         $thisprof[2] := ~$v;
                     }
                     elsif $k eq 'gcs' {
+                        my str $thread_id := $thread<thread>;
                         for $v -> $gc {
                             my @g := nqp::list_s();
                             for <time retained_bytes promoted_bytes gen2_roots full responsible cleared_bytes start_time sequence> -> $f {
                                 nqp::push_s(@g, ~($gc{$f} // '0'));
                             }
-                            nqp::push_s(@g, ~$thread<thread>);
+                            nqp::push_s(@g, $thread_id);
                             nqp::push_s($pieces, 'INSERT INTO gcs VALUES (');
                             nqp::push_s($pieces, nqp::join(',', @g) ~ ");\n");
+                            if nqp::existskey($gc, 'deallocs') {
+                                my $deallocs := $gc<deallocs>;
+
+                                for $deallocs -> $entry {
+                                    @g := nqp::list_s($thread_id, $gc<sequence>);
+                                    for <id nursery_fresh nursery_seen gen2> -> $f {
+                                        nqp::push_s(@g, ~($entry{$f} // '0'));
+                                    }
+
+                                    nqp::push_s($pieces, 'INSERT INTO deallocations VALUES (');
+                                    nqp::push_s($pieces, nqp::join(',', @g) ~ ");\n");
+                                }
+                            }
                         }
                     }
                     elsif $k eq 'parent' {
@@ -465,6 +509,9 @@ class HLL::Backend::MoarVM {
             if nqp::existskey($_, "call_graph") {
                 post_process_call_graph_node($_<call_graph>);
             }
+            # Also make sure every gc entry has its deallocation types
+            # remapped to the "new" (shorter) type IDs
+            post_process_thread_data($_);
         }
 
         # The data array is normally a list of threads, but the first entry is
@@ -502,10 +549,11 @@ class HLL::Backend::MoarVM {
             $profile_fh.say('BEGIN;');
             $profile_fh.say('CREATE TABLE types(id INTEGER PRIMARY KEY ASC, name TEXT, extra_info JSON, type_links JSON);');
             $profile_fh.say('CREATE TABLE routines(id INTEGER PRIMARY KEY ASC, name TEXT, line INT, file TEXT);');
-            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT);');
+            $profile_fh.say('CREATE TABLE gcs(time INT, retained_bytes INT, promoted_bytes INT, gen2_roots INT, full INT, responsible INT, cleared_bytes INT, start_time INT, sequence_num INT, thread_id INT, PRIMARY KEY(sequence_num, thread_id));');
             $profile_fh.say('CREATE TABLE calls(id INTEGER PRIMARY KEY ASC, parent_id INT, routine_id INT, osr INT, spesh_entries INT, jit_entries INT, inlined_entries INT, inclusive_time INT, exclusive_time INT, entries INT, deopt_one INT, deopt_all INT, rec_depth INT, first_entry_time INT, highest_child_id INT, FOREIGN KEY(routine_id) REFERENCES routines(id));');
             $profile_fh.say('CREATE TABLE profile(total_time INT, spesh_time INT, thread_id INT, parent_thread_id INT, root_node INT, first_entry_time INT, FOREIGN KEY(root_node) REFERENCES calls(id));');
             $profile_fh.say('CREATE TABLE allocations(call_id INT, type_id INT, spesh INT, jit INT, count INT, replaced INT, PRIMARY KEY(call_id, type_id), FOREIGN KEY(call_id) REFERENCES calls(id), FOREIGN KEY(type_id) REFERENCES types(id));');
+            $profile_fh.say('CREATE TABLE deallocations(gc_seq_num INT, gc_thread_id INT, type_id INT, nursery_fresh INT, nursery_seen INT, gen2 INT, PRIMARY KEY(gc_seq_num, gc_thread_id, type_id), FOREIGN KEY(gc_seq_num, gc_thread_id) REFERENCES gcs(sequence_num, thread_id), FOREIGN KEY(type_id) REFERENCES types(id));');
             to_sql($data);
             $profile_fh.say('END;');
         }

@@ -6,17 +6,17 @@ use warnings;
 use 5.008;
 use File::Spec;
 
-my ($where, $install_what, $link_what, $link) = @ARGV;
+my ( $where, $install_what, $link_what, $link ) = @ARGV;
 
-unless (File::Spec->file_name_is_absolute($install_what)) {
+unless ( File::Spec->file_name_is_absolute($install_what) ) {
     $install_what = File::Spec->rel2abs($install_what);
 }
 
 chdir($where);
-if ($link) {
-    system("npm link $link_what");
+my $cmd;
+$cmd = $link ? "npm link $link_what" : "npm install $install_what";
+system($cmd);
+if ( $? != 0 ) {
+    print "=== SORRY! === `$cmd` failed with exit code $? (", ( $? >> 8 ), ")\n";
 }
-else {
-    system("npm install $install_what");
-}
-
+exit( $? >> 8 );

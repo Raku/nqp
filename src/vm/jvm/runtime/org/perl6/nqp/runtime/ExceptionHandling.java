@@ -252,7 +252,7 @@ all:
         }
     }
 
-    /* Unahndled exception. Exit with stack trace. */
+    /* Unhandled exception. Exit with stack trace. */
     private static SixModelObject panic(ThreadContext tc, long category,
             VMExceptionInstance exObj) {
         StringBuilder message = new StringBuilder();

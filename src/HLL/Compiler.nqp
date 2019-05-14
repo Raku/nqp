@@ -130,9 +130,9 @@ class HLL::Compiler does HLL::Backend::Default {
                 if !$target {
                     self.autoprint($output);
                 } elsif $!backend.is_textual_stage($target) {
-                   nqp::say($output);
+                    nqp::say($output);
                 } else {
-                   self.dumper($output, $target, |%adverbs);
+                    self.dumper($output, $target, |%adverbs);
                 }
             }
         }
@@ -250,7 +250,7 @@ class HLL::Compiler does HLL::Backend::Default {
         for %opts {
             %adverbs{$_.key} := $_.value;
         }
-        self.usage($program-name) if %adverbs<help>  || %adverbs<h>;
+        self.usage($program-name) if %adverbs<help> || %adverbs<h>;
 
         if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
@@ -317,7 +317,7 @@ class HLL::Compiler does HLL::Backend::Default {
                         ?? self.interactive(|%adverbs)
                         !! self.evalfiles('-', |%adverbs);
                 }
-                elsif %adverbs<combine>    { $result := self.evalfiles(@a, |%adverbs) }
+                elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
                 else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
                 if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
@@ -343,7 +343,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 $error     := $_;
             }
         }
-        if ($has_error) {
+        if $has_error {
             if %adverbs<ll-exception> || !nqp::can(self, 'handle-exception') {
                 my $err := stderr();
                 my $message := nqp::getmessage($error);
@@ -525,15 +525,15 @@ class HLL::Compiler does HLL::Backend::Default {
         if %adverbs<transcode> {
             $s := $!backend.apply_transcodings($s, %adverbs<transcode>);
         }
-	    my $outer_ctx := %adverbs<outer_ctx>;
+        my $outer_ctx := %adverbs<outer_ctx>;
         if nqp::existskey(%adverbs, 'grammar') {
-	        $grammar := %adverbs<grammar>;
-	        $actions := %adverbs<actions>;
-	    }
-	    else {
-	        $grammar := self.parsegrammar;
-	        $actions := self.parseactions;
-	    }
+            $grammar := %adverbs<grammar>;
+            $actions := %adverbs<actions>;
+        }
+        else {
+            $grammar := self.parsegrammar;
+            $actions := self.parseactions;
+        }
         $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
         my $match   := $grammar.parse($s, p => 0, actions => $actions);
         $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
@@ -599,11 +599,11 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method verbose-config() {
         my $bname := $!backend.name;
-        for $!backend.config {
-            nqp::say($bname ~ '::' ~ $_.key ~ '=' ~ $_.value);
+        for sorted_keys($!backend.config) -> $key {
+            nqp::say($bname ~ '::' ~ $key ~ '=' ~ $!backend.config{$key});
         }
-        for %!config {
-            nqp::say($!language ~ '::' ~ $_.key ~ '=' ~ $_.value);
+        for sorted_keys(%!config) -> $key {
+            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %!config{$key});
         }
         nqp::exit(0);
     }
@@ -770,6 +770,22 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         else {
             0;
+        }
+    }
+
+    method profiler-snapshot(*%args) {
+        my $backend;
+        if nqp::isconcrete(self) {
+            $backend := $!backend;
+        }
+        else {
+            $backend := self.default_backend();
+        }
+        if nqp::can($backend, 'profiler_snapshot') {
+            $backend.profiler_snapshot(|%args);
+        }
+        else {
+            nqp::die("The backend { $backend.HOW.name($backend) } doesn't support profiler-snapshot");
         }
     }
 }

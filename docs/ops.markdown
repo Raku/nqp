@@ -308,12 +308,14 @@
   * [getsignals](#getsignals)
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
-  * [getppid `moar`](#getppid)
+  * [getppid](#getppid)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [sha1](#sha1)
   * [sleep](#sleep)
   * [takeclosure](#takeclosure)
   * [time](#time)
+  * [mvmstartprofile](#mvmstartprofile)
+  * [mvmendprofile](#mvmendprofile)
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
   * [nativecallrefresh](#nativecallrefresh)
 - [Asynchronous Operations](#-asynchronous-operations)
@@ -2706,6 +2708,34 @@ Creates a lexical closure from the block's outer scope.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
+
+## mvmstartprofile
+* `mvmstartprofile(hash $config)`
+
+Turns on one of MoarVM's profilers. The configuration must have a `kind` key that specifies which profiler will be turned on:
+
+* `instrumented`
+  
+  takes no further configuration options. records call graph, garbage collection, and object allocation information.
+
+* `heap`
+
+  takes a path / filename in the `path` key. writes a snapshot of the heap's structure (objects and their connections) to the file every time the GC runs.
+
+If a profiler is already active, an exception will be thrown; only one profiler can run at a time.
+
+## mvmendprofile
+* `mvmendprofile(--> Object)`
+
+Turns off the profiler and returns data gathered.
+
+* `instrumented`
+
+  returns all data from the profile as an array with lots of internal structure
+
+* `heap`
+
+  currently doesn't return anything. it does, however, cause one heap snapshot to be taken immediately.
 
 # <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
