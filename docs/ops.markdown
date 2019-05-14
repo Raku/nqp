@@ -308,7 +308,7 @@
   * [getsignals](#getsignals)
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
-  * [getppid `moar`](#getppid)
+  * [getppid](#getppid)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [sha1](#sha1)
   * [sleep](#sleep)
