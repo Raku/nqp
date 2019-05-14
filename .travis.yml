@@ -3,18 +3,14 @@ language: java
 sudo: false
 fast_finish: true
 install: "echo"
-dist: trusty
-jdk: oraclejdk9
+dist: xenial
+jdk: opendjk11
 
 addons:
   apt:
     sources:
     # add PPAs with more up-to-date toolchains
     - ubuntu-toolchain-r-test
-    packages:
-    # install toolchains
-    - gcc-6
-    - oracle-java9-installer
 
 script:
     - perl Configure.pl $NQP_OPTIONS
