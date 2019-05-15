@@ -3,7 +3,7 @@ use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use IPC::Cmd qw<run>;
+use IPC::Cmd qw<run can_run>;
 use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
@@ -23,8 +23,19 @@ sub configure_backends {
             $self->use_backend($be);
         }
     }
-    if ( defined $options->{'gen-moar'} || !$self->active_backends ) {
-        $self->use_backend('moar');
+    else {
+        my $have_gen_moar = defined $options->{'gen-moar'};
+        if ( $have_gen_moar || can_run('moar') ) {
+            say "===WARNING!===\n",
+              "  No backends specified on the command line.\n",
+              "  Using 'moar' because we found it in the PATH."
+              unless $have_gen_moar;
+            $self->use_backend('moar');
+        }
+        else {
+            $self->sorry( "No backends specified on the command line.\n"
+                  . "Please use --backends or --gen-moar" );
+        }
     }
     if ( $self->active_backend('js') and !$self->active_backend('moar') ) {
         $self->sorry(
@@ -99,8 +110,9 @@ sub configure_js_backend {
 
     $self->backend_config(
         'js',
-        js_build_dir => $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
-        js_blib      => "node_modules",
+        js_build_dir =>
+          $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
+        js_blib => "node_modules",
     );
 }
 
