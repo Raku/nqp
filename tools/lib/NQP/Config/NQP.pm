@@ -27,7 +27,7 @@ sub configure_backends {
     else {
         my $have_gen_moar = defined $options->{'gen-moar'};
         my $moar_exe = can_run( $self->moar_config->{moar} ) || can_run('moar');
-        if ( $moar_exe ) {
+        if ( $moar_exe || $have_gen_moar ) {
             say "===WARNING!===\n",
               "  No backends specified on the command line.\n",
               "  Using 'moar' because we found '$moar_exe' executable."
