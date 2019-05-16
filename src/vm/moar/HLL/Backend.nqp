@@ -59,7 +59,15 @@ class HLL::Backend::MoarVM {
         }
     }
     method run_profiled($what, $filename, $kind) {
-        $kind := 'instrumented' unless $kind;
+        unless $kind {
+            if $filename ~~ / '.html' | '.json' | '.sql' $ / {
+                $kind := 'instrumented';
+	    } elsif $filename ~~ / '.mvmheap' $ / {
+                $kind := 'heap';
+	    } else {
+                $kind := 'instrumented';
+            }
+        }
 
         self.ensure_prof_routines();
 
