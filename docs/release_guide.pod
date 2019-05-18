@@ -12,7 +12,7 @@ must be tagged for release immediately prior to the Rakudo release.
 
 MoarVM tries to have a synchronised release schedule with NQP
 and Rakudo, so there's most probably a release tag for MoarVM
-that you can bump F<tools/build/MOAR_REVISION> to. Release tags
+that you can bump F<tools/templates/MOAR_REVISION> to. Release tags
 for MoarVM have the format C<2016.02>. Find all of the tags with
 C<git tag> in an up-to-date MoarVM checkout.
 
