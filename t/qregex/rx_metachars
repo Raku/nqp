@@ -102,7 +102,7 @@ b&			bcd		[Null regex]	conjunction (&) - null right arg illegal
 &			&		[Null regex]	conjunction (&) - literal must be escaped
 a&|b			a&|b		[Null regex]	alternation and conjunction (&|) - parse error
 &			&		[Null regex]	conjunction (&) - literal must be escaped
-a|&b			a|&b		[Null regex]	alternation and conjunction (|&) - parse error
+a|&b			a|&b		y	alternation and conjunction (|&) - leading & inside | is okay
 |d|b			abc		y	leading alternation ignored
  |d|b			abc		y	leading alternation ignored
 |d |b			abc		y	leading alternation ignored
