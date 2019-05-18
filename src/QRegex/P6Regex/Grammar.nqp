@@ -132,15 +132,6 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
             for $OLDRX { %*RX{$_.key} := $_.value; }
         }
         <.ws>
-        [
-          <!rxstopper>
-          [
-          |  '||' { $*SEQ := 1; }
-          |  '|'
-          |  '&&'
-          |  '&'
-          ] <.ws>
-        ]?
         <termseq>
         [
         || <?infixstopper>
@@ -168,21 +159,25 @@ grammar QRegex::P6Regex::Grammar is HLL::Grammar {
     }
 
     token termaltseq {
+        [ <!rxstopper> '||' { $*SEQ := 1; } <.ws> ]?
         <termconjseq>
         [ <!infixstopper> '||' <.ws> { $*SEQ := 1; } <termconjseq> ]*
     }
 
     token termconjseq {
+        [ <!rxstopper> '&&' { $*SEQ := 0; } <.ws> ]?
         <termalt>
         [ <!infixstopper> '&&' <.ws> { $*SEQ := 0; } <termalt> ]*
     }
 
     token termalt {
+        [ <!rxstopper> '|' <.ws> ]?
         <termconj>
         [ <!infixstopper> '|' <![|]> <.ws> { $*SEQ := 0; } <termconj> ]*
     }
 
     token termconj {
+        [ <!rxstopper> '&' <.ws> ]?
         <termish>
         [ <!infixstopper> '&' <![&]> <.ws> { $*SEQ := 0; } <termish> ]*
     }
