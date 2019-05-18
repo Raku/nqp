@@ -73,7 +73,7 @@ class HLL::Backend::MoarVM {
 
         if $kind eq "heap" {
             unless $filename {
-                $filename := 'heap-snapshot-' ~ nqp::time_n();
+                $filename := 'heap-snapshot-' ~ nqp::time_n() ~ '.mvmheap';
             }
             $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
         } else {
