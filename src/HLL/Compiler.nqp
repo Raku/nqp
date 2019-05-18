@@ -178,8 +178,14 @@ class HLL::Compiler does HLL::Backend::Default {
             }
 
             if nqp::existskey(%adverbs, 'profile') {
-                $output := $!backend.run_profiled({ $output(|@args) },
-                    %adverbs<profile-filename> || %adverbs<profile>, %adverbs<profile-kind>);
+                if nqp::existskey(%adverbs, 'profile-compile') || nqp::existskey(%adverbs, 'profile-stage') {
+                    note("Currently you cannot profile both compilation and runtime, ignoring --profile");
+                    $output := $output(|@args);
+                }
+                else {
+                    $output := $!backend.run_profiled({ $output(|@args) },
+                        %adverbs<profile-filename> || %adverbs<profile>, %adverbs<profile-kind>);
+                }
             }
             elsif %adverbs<trace> {
                 $output := $!backend.run_traced(%adverbs<trace>, { $output(|@args) });
@@ -488,7 +494,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
 
             $result := %adverbs<profile-stage> eq $_
-                ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile>, %adverbs<profile-kind>)
+                ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>)
                 !! run();
 
             my $diff := nqp::time_n() - $timestamp;
