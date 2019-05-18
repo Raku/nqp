@@ -53,7 +53,7 @@ sub configure_misc {
     if ( $self->active_backend('moar') ) {
         ( $config->{moar_want} ) =
           split( ' ',
-            slurp( $self->build_file_path( 'MOAR_REVISION', required => 1 ) ) );
+            slurp( $self->template_file_path( 'MOAR_REVISION', required => 1 ) ) );
     }
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
