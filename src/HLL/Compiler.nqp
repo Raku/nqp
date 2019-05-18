@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-stage=s repl-mode=s'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -164,7 +164,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if nqp::existskey(%adverbs, 'profile-compile') {
             $output := $!backend.run_profiled({
                 self.compile($code, :compunit_ok(1), |%adverbs);
-            }, %adverbs<profile-compile>, %adverbs<profile-filename>);
+            }, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>);
         }
         else {
             $output := self.compile($code, :compunit_ok(1), |%adverbs);
@@ -179,7 +179,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
             if nqp::existskey(%adverbs, 'profile') {
                 $output := $!backend.run_profiled({ $output(|@args) },
-                    %adverbs<profile>, %adverbs<profile-filename>);
+                    %adverbs<profile-filename> || %adverbs<profile>, %adverbs<profile-kind>);
             }
             elsif %adverbs<trace> {
                 $output := $!backend.run_traced(%adverbs<trace>, { $output(|@args) });
@@ -488,7 +488,7 @@ class HLL::Compiler does HLL::Backend::Default {
             }
 
             $result := %adverbs<profile-stage> eq $_
-                ?? $!backend.run_profiled(&run, '', %adverbs<profile-filename>)
+                ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile>, %adverbs<profile-kind>)
                 !! run();
 
             my $diff := nqp::time_n() - $timestamp;
