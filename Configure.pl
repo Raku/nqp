@@ -31,7 +31,7 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
 
 use lib ( 
     "$FindBin::Bin/tools/lib",
-    "$FindBin::Bin/3rdparty/nqp-configure/lib" 
+    "$FindBin::Bin/3rdparty/nqp-configure/lib",
 );
 use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
@@ -60,6 +60,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
+        'no-relocatable',
       )
       or do {
         print_help();

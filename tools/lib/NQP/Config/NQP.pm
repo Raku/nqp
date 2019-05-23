@@ -1,9 +1,10 @@
+## Please see file perltidy.ERR
 package NQP::Config::NQP;
 use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use IPC::Cmd qw<run>;
+use IPC::Cmd qw<run can_run>;
 use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
@@ -23,8 +24,20 @@ sub configure_backends {
             $self->use_backend($be);
         }
     }
-    if ( defined $options->{'gen-moar'} || !$self->active_backends ) {
-        $self->use_backend('moar');
+    else {
+        my $have_gen_moar = defined $options->{'gen-moar'};
+        my $moar_exe = can_run( $self->moar_config->{moar} ) || can_run('moar');
+        if ( $moar_exe || $have_gen_moar ) {
+            say "===WARNING!===\n",
+              "  No backends specified on the command line.\n",
+              "  Using 'moar' because we found '$moar_exe' executable."
+              unless $have_gen_moar;
+            $self->use_backend('moar');
+        }
+        else {
+            $self->sorry( "No backends specified on the command line.\n"
+                  . "Please use --backends or --gen-moar" );
+        }
     }
     if ( $self->active_backend('js') and !$self->active_backend('moar') ) {
         $self->sorry(
@@ -40,7 +53,7 @@ sub configure_misc {
     if ( $self->active_backend('moar') ) {
         ( $config->{moar_want} ) =
           split( ' ',
-            slurp( $self->build_file_path( 'MOAR_REVISION', required => 1 ) ) );
+            slurp( $self->template_file_path( 'MOAR_REVISION', required => 1 ) ) );
     }
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
@@ -99,8 +112,9 @@ sub configure_js_backend {
 
     $self->backend_config(
         'js',
-        js_build_dir => $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
-        js_blib      => "node_modules",
+        js_build_dir =>
+          $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
+        js_blib => "node_modules",
     );
 }
 
@@ -150,6 +164,20 @@ sub post_active_backends {
     $self->sorry(@errors) if @errors;
 }
 
+sub moar_config {
+    my $self        = shift;
+    my $moar_config = $self->backend_config('moar');
+    return $moar_config if $moar_config->{moar};
+    my $sdkroot = $self->cfg('sdkroot');
+    my $prefix  = $self->cfg('prefix');
+    my $moar_prefix =
+      $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
+    my $moar_exe = $self->opt('with-moar')
+      || File::Spec->catfile( $moar_prefix, 'bin', "moar" . $self->cfg('exe') );
+    return $self->backend_config( 'moar',
+        { moar => $moar_exe, moar_prefix => $moar_prefix, } );
+}
+
 sub gen_moar {
     my $self = shift;
 
@@ -164,18 +192,13 @@ sub gen_moar {
     my @errors;
 
     my $prefix   = $config->{prefix};
-    my $exe      = $config->{exe};
-    my $sdkroot  = $config->{sdkroot};
     my $gen_moar = $options->{'gen-moar'};
     my @opts     = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
     my $startdir     = $config->{base_dir};
     my $git_protocol = $options->{'git-protocol'} || 'https';
     my $try_generate;
-    my $moar_prefix =
-      $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
-    my $moar_exe = $options->{'with-moar'}
-      || File::Spec->catfile( $moar_prefix, 'bin', "moar$exe" );
+    my $moar_exe            = $self->moar_config->{moar};
     my $moar_version_output = "";
 
     if ( $self->is_executable($moar_exe) ) {
@@ -231,8 +254,7 @@ sub gen_moar {
         chdir( $self->base_path('MoarVM') ) or die $!;
 
         print "\nConfiguring and building MoarVM ...\n";
-        my @cmd =
-          ( $^X, "Configure.pl", @opts, qq{--prefix=$prefix},
+        my @cmd = ( $^X, "Configure.pl", @opts, qq{--prefix=$prefix},
             '--make-install' );
         print "@cmd\n";
         system_or_die(@cmd);
@@ -240,8 +262,6 @@ sub gen_moar {
         chdir($cwd);
     }
 
-    $self->backend_config( 'moar',
-        { moar => $moar_exe, moar_prefix => $moar_prefix, } );
     $self->{impls}{moar}{ok} = 1;
 
 # XXX What'd be the point of overriding the autodetected make with
@@ -252,27 +272,6 @@ sub gen_moar {
 #`$moar_path --libpath="$libpath" "$nqp_moarvm" -e "print(nqp::backendconfig()<make>)"`;
 }
 
-# Command line options not to be included into configure_opts macro output
-sub ignorable_opt {
-    my $self = shift;
-    my $opt  = shift;
-    return $opt =~ /^
-            (?:
-                gen-
-                | (?:
-                    help
-                    | no-clean
-                    | ignore-errors
-                    | make-install
-                    | expand
-                    | out
-                    | backends
-                  ) 
-                  $
-            )
-        /x;
-}
-
 sub probe_node {
     my $self = shift;
 
@@ -280,7 +279,10 @@ sub probe_node {
     # the javascript thingy is called 'nodejs' there
     for my $binary (qw/node nodejs /) {
         my $version_str;
-        my $ok = run( command => [ $binary, '-v' ], buffer => \$version_str );
+        my $ok = run(
+            command => [ $binary, '-v' ],
+            buffer  => \$version_str
+        );
         if ( $ok && $version_str =~ /^v\d/ ) {
             return $binary;
         }

@@ -58,23 +58,34 @@ class HLL::Backend::MoarVM {
                 )))));
         }
     }
-    method run_profiled($what, $kind, $filename?) {
-        $kind := 'instrumented' unless $kind;
-
-        my @END := nqp::gethllsym('perl6', '@END_PHASERS');
-        @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
-            if nqp::defined(@END);
+    method run_profiled($what, $filename, $kind) {
+        unless $kind {
+            if $filename ~~ / '.html' | '.json' | '.sql' $ / {
+                $kind := 'instrumented';
+	    } elsif $filename ~~ / '.mvmheap' $ / {
+                $kind := 'heap';
+	    } else {
+                $kind := 'instrumented';
+            }
+        }
 
         self.ensure_prof_routines();
 
         if $kind eq "heap" {
-            unless nqp::defined($filename) {
-                $filename := 'heap-snapshot-' ~ nqp::time_n();
+            unless $filename {
+                $filename := 'heap-snapshot-' ~ nqp::time_n() ~ '.mvmheap';
             }
             $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
         } else {
+            unless $filename {
+                $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+            }
             $prof_start_sub(nqp::hash('kind', $kind));
         }
+
+        my @END := nqp::gethllsym('perl6', '@END_PHASERS');
+        @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
+            if nqp::defined(@END);
 
         my $res  := $what();
         unless nqp::defined(@END) {
