@@ -12,7 +12,8 @@ use File::Path;
 use FindBin;
 
 BEGIN {
-    unless ( -e '3rdparty/nqp-configure/LICENSE' ) {
+    my $force_update = !!grep { $_ eq '--submodule-update' } @ARGV;
+    if ( $force_update || !-e '3rdparty/nqp-configure/LICENSE' ) {
         print "Updating nqp-configure submodule...\n";
         my $msg =
 qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
@@ -29,10 +30,8 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
     }
 }
 
-use lib ( 
-    "$FindBin::Bin/tools/lib",
-    "$FindBin::Bin/3rdparty/nqp-configure/lib",
-);
+use lib ( "$FindBin::Bin/tools/lib",
+    "$FindBin::Bin/3rdparty/nqp-configure/lib", );
 use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
 
@@ -60,7 +59,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'no-relocatable',
+        'no-relocatable',   'submodule-update',
       )
       or do {
         print_help();
@@ -100,7 +99,7 @@ MAIN: {
 
     $cfg->expand_template;
 
-    unless ( $cfg->opt('expand') ) {
+    unless ( $cfg->opt('expand') || defined $cfg->opt('submodule-update') ) {
         my $make = $cfg->cfg('make');
         unless ( $cfg->opt('no-clean') ) {
             no warnings;
