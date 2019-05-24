@@ -170,7 +170,7 @@ sub moar_config {
     return $moar_config if $moar_config->{moar};
     my $sdkroot = $self->cfg('sdkroot');
     my $prefix  = $self->cfg('prefix');
-    my $moar_prefix =
+    my $moar_prefix = $self->opt('with-moar-root') or
       $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
     my $moar_exe = $self->opt('with-moar')
       || File::Spec->catfile( $moar_prefix, 'bin', "moar" . $self->cfg('exe') );
