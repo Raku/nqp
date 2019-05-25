@@ -37,9 +37,7 @@ qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet up
     }
 }
 
-use lib (
-    "../3rdparty/nqp-configure/lib",
-    "$FindBin::Bin/tools/lib",
+use lib ( "$FindBin::Bin/tools/lib",
     "$FindBin::Bin/3rdparty/nqp-configure/lib", );
 use NQP::Config qw<system_or_die>;
 use NQP::Config::NQP;
