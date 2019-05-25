@@ -208,17 +208,17 @@ sub moar_config {
             $moar_exe ||= File::Spec->catfile( $moar_prefix, 'bin',
                 "moar" . $self->cfg('exe') );
         }
-        elsif ( !defined $self->opt('sysroot') ) {
-
-            # Pick from PATH
+        elsif ( !defined $self->opt('sysroot') ) {    # Pick from PATH
             $moar_exe = can_run('moar');
-            if ($moar_exe) {
-                my ( $vol, $dir, undef ) = File::Spec->splitpath($moar_exe);
-                $moar_prefix = File::Spec->catpath( $vol,
-                    File::Spec->catdir( $dir, File::Spec->updir ) );
-            }
         }
     }
+
+    if ( !$moar_prefix && $moar_exe ) {
+        my ( $vol, $dir, undef ) = File::Spec->splitpath($moar_exe);
+        $moar_prefix = File::Spec->catpath( $vol,
+            File::Spec->catdir( $dir, File::Spec->updir ) );
+    }
+
     return $self->backend_config( 'moar',
         { moar => $moar_exe, moar_prefix => $moar_prefix, } );
 }
