@@ -47,7 +47,7 @@ MAIN: {
     GetOptions(
         $cfg->options,      'help!',
         'prefix=s',         'libdir=s',
-        'sysroot=s',        'sdkroot=s',
+        'sdkroot=s',        'sysroot=s',
         'backends=s',       'no-clean',
         'with-moar=s',      'gen-moar:s',
         'moar-option=s@',   'with-asm=s',
@@ -78,13 +78,12 @@ MAIN: {
 
     $cfg->configure_paths;
     $cfg->configure_from_options;
-    $cfg->configure_refine_vars;
     $cfg->configure_relocatability;
     $cfg->configure_repo_urls;
     $cfg->configure_commands;
     $cfg->configure_jars;
-
     $cfg->configure_backends;
+    $cfg->configure_refine_vars;
     $cfg->configure_misc;
 
     # XXX Why Windows only?
