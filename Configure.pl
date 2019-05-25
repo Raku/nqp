@@ -12,21 +12,28 @@ use File::Path;
 use FindBin;
 
 BEGIN {
-    my $force_update = !!grep { $_ eq '--submodule-update' } @ARGV;
-    if ( $force_update || !-e '3rdparty/nqp-configure/LICENSE' ) {
+    my $set_config = !qx{git config nqp.initialized};
+    if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
         print "Updating nqp-configure submodule...\n";
         my $msg =
 qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
-        if ( $? >> 8 == 0 ) { print "OK\n" }
+        if ( $? >> 8 == 0 ) {
+            say "OK";
+            $set_config = 1;
+        }
         else {
             if ( $msg =~ /[']([^']+)[']\s+already exists and is not an empty/ )
             {
-                print
-"\n===SORRY=== ERROR: Cannot update submodule because directory exists and is not empty.\n"
+                print "\n===SORRY=== ERROR: "
+                  . "Cannot update submodule because directory exists and is not empty.\n"
                   . ">>> Please delete the following folder and try again:\n$1\n\n";
                 exit 1;
             }
         }
+    }
+    if ($set_config) {
+        system("git config submodule.recurse true");
+        system("git config nqp.initialized 1");
     }
 }
 
@@ -59,7 +66,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'no-relocatable',   'submodule-update',
+        'no-relocatable',
       )
       or do {
         print_help();
@@ -98,7 +105,7 @@ MAIN: {
 
     $cfg->expand_template;
 
-    unless ( $cfg->opt('expand') || defined $cfg->opt('submodule-update') ) {
+    unless ( $cfg->opt('expand') ) {
         my $make = $cfg->cfg('make');
         unless ( $cfg->opt('no-clean') ) {
             no warnings;

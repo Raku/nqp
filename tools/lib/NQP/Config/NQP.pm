@@ -51,13 +51,16 @@ sub configure_refine_vars {
     my $self = shift;
 
     unless ( $self->cfg('prefix') ) {
-        my $moar_prefix = $self->moar_config->{moar_prefix};
+        my $moar_conf   = $self->moar_config;
+        my $moar_prefix = $moar_conf->{moar_prefix};
+        my $moar        = $moar_conf->{moar};
         if ($moar_prefix) {
             $self->set( prefix => $moar_prefix );
             $self->note(
                 'ATTENTION',
-                "No --prefix supplied, using moar executable location.\n",
-                "Building and installing to '$moar_prefix'"
+                "No --prefix supplied, ",
+                "building and installing to '$moar_prefix'\n",
+                "Based on found executable $moar"
             );
         }
     }
@@ -205,7 +208,8 @@ sub moar_config {
             $moar_exe ||= File::Spec->catfile( $moar_prefix, 'bin',
                 "moar" . $self->cfg('exe') );
         }
-        elsif (!defined $self->opt('sysroot')) {
+        elsif ( !defined $self->opt('sysroot') ) {
+
             # Pick from PATH
             $moar_exe = can_run('moar');
             if ($moar_exe) {
