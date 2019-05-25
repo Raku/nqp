@@ -1,4 +1,3 @@
-## Please see file perltidy.ERR
 package NQP::Config::NQP;
 use v5.10.1;
 use strict;
@@ -26,7 +25,7 @@ sub configure_backends {
     }
     else {
         my $have_gen_moar = defined $options->{'gen-moar'};
-        my $moar_exe = can_run( $self->moar_config->{moar} ) || can_run('moar');
+        my $moar_exe      = $self->moar_config->{moar};
         if ( $moar_exe || $have_gen_moar ) {
             say "===WARNING!===\n",
               "  No backends specified on the command line.\n",
@@ -52,8 +51,12 @@ sub configure_misc {
 
     if ( $self->active_backend('moar') ) {
         ( $config->{moar_want} ) =
-          split( ' ',
-            slurp( $self->template_file_path( 'MOAR_REVISION', required => 1 ) ) );
+          split(
+            ' ',
+            slurp(
+                $self->template_file_path( 'MOAR_REVISION', required => 1 )
+            )
+          );
     }
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
@@ -168,12 +171,22 @@ sub moar_config {
     my $self        = shift;
     my $moar_config = $self->backend_config('moar');
     return $moar_config if $moar_config->{moar};
-    my $sdkroot = $self->cfg('sdkroot');
-    my $prefix  = $self->cfg('prefix');
+    my $sdkroot  = $self->cfg('sdkroot');
+    my $prefix   = $self->cfg('prefix');
+    my $moar_exe = $self->opt('with-moar');
+    unless ($moar_exe) {
+        my $moar_dir =
+          $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
+        $moar_exe =
+          File::Spec->catfile( $moar_dir, 'bin', "moar" . $self->cfg('exe') );
+        if ( !can_run($moar_exe) && ( my $mbin = can_run('moar') ) )
+        {    # Pick from PATH
+            $moar_exe = $mbin;
+        }
+    }
     my $moar_prefix =
-      $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
-    my $moar_exe = $self->opt('with-moar')
-      || File::Spec->catfile( $moar_prefix, 'bin', "moar" . $self->cfg('exe') );
+      File::Spec->catpath( ( File::Spec->splitpath($moar_exe) )[ 0, 1 ],
+        File::Spec->updir );
     return $self->backend_config( 'moar',
         { moar => $moar_exe, moar_prefix => $moar_prefix, } );
 }
