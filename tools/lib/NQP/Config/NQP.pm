@@ -1,3 +1,4 @@
+## Please see file perltidy.ERR
 package NQP::Config::NQP;
 use v5.10.1;
 use strict;
@@ -25,12 +26,13 @@ sub configure_backends {
     }
     else {
         my $have_gen_moar = defined $options->{'gen-moar'};
-        my $moar_exe      = $self->moar_config->{moar};
+        my $moar_exe      = can_run( $self->moar_config->{moar} );
         if ( $moar_exe || $have_gen_moar ) {
-            say "===WARNING!===\n",
-              "  No backends specified on the command line.\n",
-              "  Using 'moar' because we found '$moar_exe' executable."
-              unless $have_gen_moar;
+            $self->note(
+                "WARNING!",
+                "No backends specified on the command line.\n",
+                "Using 'moar' because we found '$moar_exe' executable."
+            ) unless $have_gen_moar;
             $self->use_backend('moar');
         }
         else {
@@ -43,6 +45,24 @@ sub configure_backends {
                 "When building the js backend you must also build moar\n"
               . "Please build with --backends=moar,js\n" );
     }
+}
+
+sub configure_refine_vars {
+    my $self = shift;
+
+    unless ( $self->cfg('prefix') ) {
+        my $moar_prefix = $self->moar_config->{moar_prefix};
+        if ($moar_prefix) {
+            $self->set( prefix => $moar_prefix );
+            $self->note(
+                'ATTENTION',
+                "No --prefix supplied, using moar executable location.\n",
+                "Building and installing to '$moar_prefix'"
+            );
+        }
+    }
+
+    $self->SUPER::configure_refine_vars(@_);
 }
 
 sub configure_misc {
@@ -170,23 +190,31 @@ sub post_active_backends {
 sub moar_config {
     my $self        = shift;
     my $moar_config = $self->backend_config('moar');
+
     return $moar_config if $moar_config->{moar};
-    my $sdkroot  = $self->cfg('sdkroot');
-    my $prefix   = $self->cfg('prefix');
+
     my $moar_exe = $self->opt('with-moar');
-    unless ($moar_exe) {
-        my $moar_dir =
-          $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
-        $moar_exe =
-          File::Spec->catfile( $moar_dir, 'bin', "moar" . $self->cfg('exe') );
-        if ( !can_run($moar_exe) && ( my $mbin = can_run('moar') ) )
-        {    # Pick from PATH
-            $moar_exe = $mbin;
+    my $prefix   = $self->cfg('prefix');
+    my $moar_prefix;
+
+    if ( !$moar_exe ) {
+        if ($prefix) {
+            my $sdkroot = $self->cfg('sdkroot');
+            $moar_prefix =
+              $sdkroot ? File::Spec->catdir( $sdkroot, $prefix ) : $prefix;
+            $moar_exe ||= File::Spec->catfile( $moar_prefix, 'bin',
+                "moar" . $self->cfg('exe') );
+        }
+        elsif (!defined $self->opt('sysroot')) {
+            # Pick from PATH
+            $moar_exe = can_run('moar');
+            if ($moar_exe) {
+                my ( $vol, $dir, undef ) = File::Spec->splitpath($moar_exe);
+                $moar_prefix = File::Spec->catpath( $vol,
+                    File::Spec->catdir( $dir, File::Spec->updir ) );
+            }
         }
     }
-    my $moar_prefix =
-      File::Spec->catpath( ( File::Spec->splitpath($moar_exe) )[ 0, 1 ],
-        File::Spec->updir );
     return $self->backend_config( 'moar',
         { moar => $moar_exe, moar_prefix => $moar_prefix, } );
 }
