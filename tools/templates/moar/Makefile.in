@@ -106,7 +106,7 @@ m-install: m-all
 	$(CP) $(NQP_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(CP) $(P5QREGEX_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(CP) @nfp(src/vm/moar/profiler/template.html)@ @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html)@
-	$(PERL5) @shquot(@script(install-moar-runner.pl)@)@ "$(DESTDIR)" @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ @nfpq(@moar@)@
+	$(PERL5) @shquot(@script(install-moar-runner.pl)@)@ "$(DESTDIR)" @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ @nfpq(@moar@)@ @relocatable@
 
 # FIXME:
 M_CLEANUPS = *.moarvm  @nfp(gen/moar/*)@ $(M_RUNNER)

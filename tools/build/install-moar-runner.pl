@@ -6,9 +6,7 @@ use warnings;
 use 5.008;
 use File::Spec;
 
-my $relocatable = 1;
-
-my ($destdir, $prefix, $lib_dir, $moar) = @ARGV;
+my ($destdir, $prefix, $lib_dir, $moar, $relocatable) = @ARGV;
 my $realpath = $destdir.$prefix;
 
 unless (File::Spec->file_name_is_absolute($prefix)) {
