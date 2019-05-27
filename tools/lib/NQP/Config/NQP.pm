@@ -199,7 +199,7 @@ sub moar_config {
 
     return $moar_config if $moar_config->{moar};
 
-    my $moar_exe = $self->opt('with-moar');
+    my $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
 
