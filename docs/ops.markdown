@@ -2757,7 +2757,7 @@ following structure (times are in microseconds, sizes are in bytes):
     ├ parent => 0                       - OS thread ID of parent thread
     ├ spesh_time => 0                   - amount of time spent in spesh
     ├ start_time => 0                   - when thread was started
-    └ total_time => 21004               - total time spent in thread
+    ├ total_time => 21004               - total time spent in thread
     ├ call_graph                        - hash with first Callee info
     │ ├ id => 140328666076608             - unique ID of this Callee
     │ ├ first_entry_time => 0             - when Callee was first called
