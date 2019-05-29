@@ -99,7 +99,7 @@ MAIN: {
       if $prefix && $cfg->is_win && !-d $prefix;
 
     # Save options in config.status
-    $cfg->save_config_status;
+    $cfg->save_config_status unless $cfg->has_option('expand');
 
     $cfg->configure_active_backends;
 
