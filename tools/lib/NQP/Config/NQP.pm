@@ -4,7 +4,7 @@ use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use IPC::Cmd qw<run can_run>;
+use IPC::Cmd qw<run>;
 use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
@@ -26,7 +26,7 @@ sub configure_backends {
     }
     else {
         my $have_gen_moar = defined $options->{'gen-moar'};
-        my $moar_exe      = can_run( $self->moar_config->{moar} );
+        my $moar_exe      = $self->is_executable( $self->moar_config->{moar} );
         if ( $moar_exe || $have_gen_moar ) {
             $self->note(
                 "WARNING!",
@@ -102,6 +102,9 @@ sub configure_moar_backend {
     $self->gen_moar;
 
     $self->{config}{moar} = $imoar->{config}{moar};
+
+    $self->sorry( "No moar executable found in " . $self->cfg('prefix') )
+      unless $self->is_executable( $self->{config}{moar} );
 }
 
 sub configure_js_backend {
@@ -208,9 +211,10 @@ sub moar_config {
             $moar_exe ||= File::Spec->catfile( $moar_prefix, 'bin',
                 "moar" . $self->cfg('exe') );
         }
-        elsif ( !defined $self->opt('sysroot') ) {    # Pick from PATH
-            $moar_exe = can_run('moar');
-        }
+
+        #elsif ( !defined $self->opt('sysroot') ) {    # Pick from PATH
+        #    $moar_exe = can_run('moar');
+        #}
     }
 
     if ( !$moar_prefix && $moar_exe ) {
