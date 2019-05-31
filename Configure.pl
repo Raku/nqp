@@ -66,7 +66,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'no-relocatable',
+        'relocatable',
       )
       or do {
         print_help();
