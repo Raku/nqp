@@ -85,14 +85,16 @@ sub configure_misc {
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
 
-    $config->{nqplibdir} = $self->nfp(
-        (
-              $self->opt('libdir')
-            ? $self->opt('libdir') . "/nqp"
-            : '$(NQP_LANG_DIR)/lib'
-        ),
-        no_quote => 1,
-    );
+    if ( !$config->{nqplibdir} ) {
+        $config->{nqplibdir} = $self->nfp(
+            (
+                  $self->opt('libdir')
+                ? $self->opt('libdir') . "/nqp"
+                : '$(NQP_HOME)/lib'
+            ),
+            no_quote => 1,
+        );
+    }
 }
 
 sub configure_moar_backend {

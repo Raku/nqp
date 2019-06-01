@@ -1,2 +1,2 @@
 #!/bin/sh
-exec @shquot(@moar@)@ --execname="$0" nqp.moarvm "$@"
+exec @nfpq(@moar@)@ --execname="$0" --libpath=@nfpq(@nqplibdir@)@ @nfpq(@nqplibdir@/nqp.moarvm)@ "$@"

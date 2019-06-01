@@ -1,0 +1,2 @@
+#!/bin/sh
+exec @shquot(@moar@)@ --execname="$0" nqp.moarvm "$@"
