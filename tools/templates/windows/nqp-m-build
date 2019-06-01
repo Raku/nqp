@@ -1,2 +1,2 @@
-@@shquot(@moar@)@ --execname="%%\~dpf0" nqp.moarvm %*
+@@shquot(@moar@)@ --execname="%~dpf0" nqp.moarvm %*
 
