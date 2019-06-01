@@ -32,7 +32,7 @@ sub configure_backends {
                 "WARNING!",
                 "No backends specified on the command line.\n",
                 "Using 'moar' because we found '$moar_exe' executable."
-            ) unless $have_gen_moar;
+            ) unless $have_gen_moar || $options->{'with-moar'};
             $self->use_backend('moar');
         }
         else {
