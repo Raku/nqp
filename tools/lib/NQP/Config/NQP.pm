@@ -201,11 +201,14 @@ sub moar_config {
 
     return $moar_config if $moar_config->{moar};
 
-    my $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
+    my $moar_exe;
 
-    if ( !$moar_exe ) {
+    if ( $self->opt('with-moar') ) {
+        $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
+    }
+    else {
         if ($prefix) {
             my $sdkroot = $self->cfg('sdkroot');
             $moar_prefix =
