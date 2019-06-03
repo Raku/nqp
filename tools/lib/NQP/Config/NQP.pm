@@ -247,6 +247,7 @@ sub gen_moar {
 
     my $prefix   = $config->{prefix};
     my $gen_moar = $options->{'gen-moar'};
+    my $has_gen_moar = defined $gen_moar;
     my @opts     = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
     my $startdir     = $config->{base_dir};
@@ -263,7 +264,7 @@ sub gen_moar {
         }
     }
     else {
-        $try_generate = $gen_moar;
+        $try_generate = $has_gen_moar;
     }
 
     my $moar_ok =
@@ -275,7 +276,7 @@ sub gen_moar {
     elsif ($moar_have) {
         push @errors,
 "Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
-        $try_generate = $gen_moar unless $options->{'ignore-errors'};
+        $try_generate = $has_gen_moar unless $options->{'ignore-errors'};
     }
     elsif ($moar_version_output
         && $moar_version_output =~ /This is MoarVM version/i )
@@ -284,12 +285,19 @@ sub gen_moar {
           "Found a MoarVM binary but was not able to get its version number.\n"
           . "If running `git describe` inside the MoarVM repository does not work,\n"
           . "you need to make sure to checkout tags of the repository and run \nConfigure.pl and make install again\n";
-        $try_generate = $gen_moar;
+        $try_generate = $has_gen_moar;
     }
 
-    $self->sorry(@errors) if @errors && !$gen_moar;
+    if (@errors) {
+        if ($try_generate) {
+            $self->note("ATTENTION!", $_) foreach @errors;
+        }
+        else {
+            $self->sorry(@errors);
+        }
+    }
 
-    if ( defined $try_generate ) {
+    if ( $try_generate ) {
 
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );
