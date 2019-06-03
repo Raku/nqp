@@ -32,7 +32,7 @@ sub configure_backends {
                 "WARNING!",
                 "No backends specified on the command line.\n",
                 "Using 'moar' because we found '$moar_exe' executable."
-            ) unless $have_gen_moar;
+            ) unless $have_gen_moar || $options->{'with-moar'};
             $self->use_backend('moar');
         }
         else {
@@ -85,14 +85,16 @@ sub configure_misc {
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
 
-    $config->{nqplibdir} = $self->nfp(
-        (
-              $self->opt('libdir')
-            ? $self->opt('libdir') . "/nqp"
-            : '$(NQP_LANG_DIR)/lib'
-        ),
-        no_quote => 1,
-    );
+    if ( !$config->{nqplibdir} ) {
+        $config->{nqplibdir} = $self->nfp(
+            (
+                  $self->opt('libdir')
+                ? $self->opt('libdir') . "/nqp"
+                : '$(NQP_HOME)/lib'
+            ),
+            no_quote => 1,
+        );
+    }
 }
 
 sub configure_moar_backend {
@@ -199,11 +201,14 @@ sub moar_config {
 
     return $moar_config if $moar_config->{moar};
 
-    my $moar_exe = $self->opt('with-moar');
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
+    my $moar_exe;
 
-    if ( !$moar_exe ) {
+    if ( $self->opt('with-moar') ) {
+        $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
+    }
+    else {
         if ($prefix) {
             my $sdkroot = $self->cfg('sdkroot');
             $moar_prefix =
