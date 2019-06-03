@@ -4,7 +4,7 @@ use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
-use IPC::Cmd qw<run can_run>;
+use IPC::Cmd qw<run>;
 use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
@@ -26,13 +26,13 @@ sub configure_backends {
     }
     else {
         my $have_gen_moar = defined $options->{'gen-moar'};
-        my $moar_exe      = can_run( $self->moar_config->{moar} );
+        my $moar_exe      = $self->is_executable( $self->moar_config->{moar} );
         if ( $moar_exe || $have_gen_moar ) {
             $self->note(
                 "WARNING!",
                 "No backends specified on the command line.\n",
                 "Using 'moar' because we found '$moar_exe' executable."
-            ) unless $have_gen_moar;
+            ) unless $have_gen_moar || $options->{'with-moar'};
             $self->use_backend('moar');
         }
         else {
@@ -85,14 +85,16 @@ sub configure_misc {
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
 
-    $config->{nqplibdir} = $self->nfp(
-        (
-              $self->opt('libdir')
-            ? $self->opt('libdir') . "/nqp"
-            : '$(NQP_LANG_DIR)/lib'
-        ),
-        no_quote => 1,
-    );
+    if ( !$config->{nqplibdir} ) {
+        $config->{nqplibdir} = $self->nfp(
+            (
+                  $self->opt('libdir')
+                ? $self->opt('libdir') . "/nqp"
+                : '$(NQP_HOME)/lib'
+            ),
+            no_quote => 1,
+        );
+    }
 }
 
 sub configure_moar_backend {
@@ -102,6 +104,9 @@ sub configure_moar_backend {
     $self->gen_moar;
 
     $self->{config}{moar} = $imoar->{config}{moar};
+
+    $self->sorry( "No moar executable found in " . $self->cfg('prefix') )
+      unless $self->is_executable( $self->{config}{moar} );
 }
 
 sub configure_js_backend {
@@ -196,11 +201,14 @@ sub moar_config {
 
     return $moar_config if $moar_config->{moar};
 
-    my $moar_exe = $self->opt('with-moar');
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
+    my $moar_exe;
 
-    if ( !$moar_exe ) {
+    if ( $self->opt('with-moar') ) {
+        $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
+    }
+    else {
         if ($prefix) {
             my $sdkroot = $self->cfg('sdkroot');
             $moar_prefix =
@@ -208,9 +216,10 @@ sub moar_config {
             $moar_exe ||= File::Spec->catfile( $moar_prefix, 'bin',
                 "moar" . $self->cfg('exe') );
         }
-        elsif ( !defined $self->opt('sysroot') ) {    # Pick from PATH
-            $moar_exe = can_run('moar');
-        }
+
+        #elsif ( !defined $self->opt('sysroot') ) {    # Pick from PATH
+        #    $moar_exe = can_run('moar');
+        #}
     }
 
     if ( !$moar_prefix && $moar_exe ) {

@@ -89,7 +89,7 @@ testclean:
 
 m-all: $(NQP_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
 
-m-install: m-all
+m-install: m-all @@configure_script@@ @@template(@platform@/nqp-m-@relocatable@)@@
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
 	$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(MKPATH) @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler)@
@@ -106,7 +106,8 @@ m-install: m-all
 	$(CP) $(NQP_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(CP) $(P5QREGEX_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(CP) @nfp(src/vm/moar/profiler/template.html)@ @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html)@
-	$(PERL5) @shquot(@script(install-moar-runner.pl)@)@ "$(DESTDIR)" @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ @nfpq(@moar@)@
+	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --set-var=nqplibdir=@shquot(@nqplibdir@)@ --expand=@shquot(@template(@platform@/nqp-m-@relocatable@)@)@ --out=@q($(DESTDIR)$(BIN_DIR)/$(M_RUNNER))@
+	$(CHMOD) 0755 @q($(DESTDIR)$(BIN_DIR)/$(M_RUNNER))@
 
 # FIXME:
 M_CLEANUPS = *.moarvm  @nfp(gen/moar/*)@ $(M_RUNNER)
@@ -269,8 +270,8 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ .
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ .
 
-$(M_RUNNER): @@configure_script@@ @@nfp(@templates_dir@/@platform@/nqp-m)@@
-	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@nfpq(@templates_dir@/@platform@/nqp-m)@ --out=@q($(M_RUNNER))@
+$(M_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build)@@
+	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@template(@platform@/nqp-m-build)@ --out=@q($(M_RUNNER))@
 	$(CHMOD) 0755 @q($(M_RUNNER))@
 
 m-runner-default: m-all

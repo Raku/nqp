@@ -66,7 +66,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'no-relocatable',
+        'relocatable',
       )
       or do {
         print_help();
@@ -99,7 +99,7 @@ MAIN: {
       if $prefix && $cfg->is_win && !-d $prefix;
 
     # Save options in config.status
-    $cfg->save_config_status;
+    $cfg->save_config_status unless $cfg->has_option('expand');
 
     $cfg->configure_active_backends;
 

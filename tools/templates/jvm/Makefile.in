@@ -4,7 +4,7 @@ JAVAC  = javac
 JAR    = jar
 J_RUNNER = nqp-j$(BAT)
 
-NQP_JAR_DIR = @nfp($(NQP_LANG_DIR)/runtime)@
+NQP_JAR_DIR = @nfp($(NQP_HOME)/runtime)@
 JVM_BUILD_DIR = @nfp(gen/jvm)@
 J_RUNNER_JAR_DIR = @nfp($(JVM_BUILD_DIR)/share/runtime)@
 J_RUNNER_LIB_DIR = @nfp($(JVM_BUILD_DIR)/share/lib)@

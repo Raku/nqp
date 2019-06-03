@@ -71,21 +71,25 @@ class HLL::Backend::MoarVM {
 
         self.ensure_prof_routines();
 
+        my $conf-hash;
+
         if $kind eq "heap" {
             unless $filename {
                 $filename := 'heap-snapshot-' ~ nqp::time_n() ~ '.mvmheap';
             }
-            $prof_start_sub(nqp::hash('kind', $kind, 'path', $filename));
+            $conf-hash := nqp::hash('kind', $kind, 'path', $filename);
         } else {
             unless $filename {
                 $filename := 'profile-' ~ nqp::time_n() ~ '.html';
             }
-            $prof_start_sub(nqp::hash('kind', $kind));
+            $conf-hash := nqp::hash('kind', $kind);
         }
 
         my @END := nqp::gethllsym('perl6', '@END_PHASERS');
         @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
             if nqp::defined(@END);
+
+        $prof_start_sub($conf-hash);
 
         my $res  := $what();
         unless nqp::defined(@END) {
