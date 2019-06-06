@@ -17,9 +17,9 @@ const ZERO = JSBI.BigInt(0);
 
 const constants = require('./constants.js');
 
-const ref = process.browser ? null : require('ref');
+const ref = process.browser ? null : require('ref-napi');
 
-const Union = process.browser ? null : require('ref-union');
+const Union = null; //process.browser ? null : require('ref-union');
 
 const codecs = require('./codecs.js');
 
