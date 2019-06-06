@@ -1,7 +1,7 @@
 'use strict';
 const op = {};
 const ffi = require('ffi-napi');
-const ref = require('ref');
+const ref = require('ref-napi');
 
 const JSBI = require('jsbi');
 
