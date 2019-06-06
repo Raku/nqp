@@ -330,7 +330,7 @@ class JavaScriptBackend {
         my $tmp_file := self.tmp_file;
 
         my $code := open($tmp_file, :w);
-        $code.print($js);
+        $code.print(nqp::istype($js, JSWithSourceMap) ?? $js.js !! $js);
         close($code);
 
         sub (*@args) {
