@@ -8,7 +8,7 @@
   "private": true,
   "repository": "http://github.com/perl6/nqp/",
   "devDependencies": {
-    "eslint": "^5.9.0",
+    "eslint": "^5.16.0",
     "eslint-config-google": "^0.8.0"
   },
   "dependencies": {
