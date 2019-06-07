@@ -2091,6 +2091,14 @@ op.cpucores = function() {
   return os.cpus().length;
 };
 
+op.freemem = function() {
+  return os.freemem();
+};
+
+op.totalmem = function() {
+  return os.totalmem();
+};
+
 op.atomicinc_i = function(ctx, ref) {
   const value = ref.$$getInt();
   ref.$$assign_i(ctx, value+1);

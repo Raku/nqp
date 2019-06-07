@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.ProcessHandle;
 import java.lang.ProcessBuilder.Redirect;
+import java.lang.Runtime;
 import java.lang.Thread;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -4289,17 +4290,17 @@ public final class Ops {
     public static long ordfirst(String str) {
         if (str.isEmpty()) {
             return -1;
-	}
-	else {
+        }
+        else {
             return str.codePointAt(0);
-	}
+        }
     }
 
     public static long ordat(String str, long offset) {
         if (offset < 0 || offset >= str.length()) {
             return -1;
         }
-	else {
+        else {
             return str.codePointAt((int)offset);
         }
     }
@@ -4308,7 +4309,7 @@ public final class Ops {
         if (offset < 0 || offset >= str.length()) {
             return -1;
         }
-	else {
+        else {
             int code = str.codePointAt((int)offset);
             String letter = new String(new int[]{code}, 0, 1);
             return Normalizer.normalize(letter, Normalizer.Form.NFD).codePointAt(0);
@@ -5803,6 +5804,14 @@ public final class Ops {
 
     public static long cpucores(ThreadContext tc) {
         return Runtime.getRuntime().availableProcessors();
+    }
+
+    public static long freemem(ThreadContext tc) {
+        return Runtime.getRuntime().freeMemory();
+    }
+
+    public static long totalmem(ThreadContext tc) {
+        return Runtime.getRuntime().totalMemory();
     }
 
     public static SixModelObject lock(SixModelObject lock, ThreadContext tc) {
