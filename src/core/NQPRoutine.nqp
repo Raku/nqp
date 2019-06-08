@@ -363,6 +363,98 @@ my knowhow NQPSignature {
     method definednesses() { $!definednesses }
 }
 
+# Data on the captures that a particular rule has.
+my knowhow RegexCaptures {
+    # An integer array of positional capture counts.
+    has @!pos-capture-counts;
+
+    # A string array of named capture names and a matching integer array of
+    # capture counts.
+    has @!named-capture-names;
+    has @!named-capture-counts;
+
+    # Form this data structure from a capnames hash.
+    method from-capnames(%capnames) {
+        nqp::create(self).'!from-capnames'(%capnames)
+    }
+
+    method !from-capnames(%capnames) {
+        # Initialize.
+        @!pos-capture-counts := nqp::list_i();
+        @!named-capture-names := nqp::list_s();
+        @!named-capture-counts := nqp::list_i();
+
+        # Go over the captures and build up the data structure.
+        for %capnames {
+            my $name := nqp::iterkey_s($_);
+            if $name ne '' {
+                my $count := nqp::iterval($_);
+                if nqp::ord($name) != 36 && nqp::ord($name) < 58 {
+                    nqp::bindpos_i(@!pos-capture-counts, +$name, $count);
+                }
+                else {
+                    nqp::push_s(@!named-capture-names, $name);
+                    nqp::push_i(@!named-capture-counts, $count);
+                }
+            }
+        }
+
+        self
+    }
+
+    # Are there any captures?
+    method has-captures() {
+        nqp::elems(@!named-capture-counts) || nqp::elems(@!pos-capture-counts)
+    }
+
+    # Build a list of positional captures, or return a shared empty list if
+    # there are none. This only populates the slots which need an array.
+    my $EMPTY-LIST := nqp::list();
+    my $EMPTY-HASH := nqp::list();
+    method prepare-list() {
+        my int $n := nqp::elems(@!pos-capture-counts);
+        if $n > 0 {
+            my $result := nqp::list();
+            my int $i := 0;
+            while $i < $n {
+                nqp::bindpos($result, $i, nqp::list())
+                    if nqp::atpos_i(@!pos-capture-counts, $i) >= 2;
+                $i++;
+            }
+            $result
+        }
+        else {
+            $EMPTY-LIST
+        }
+    }
+
+    # Build a hash of named camptures, or return a shared empty hash if there
+    # are none. This only poplates the slots that need an array.
+    method prepare-hash() {
+        my int $n := nqp::elems(@!named-capture-counts);
+        if $n > 0 {
+            my $result := nqp::hash();
+            my int $i := 0;
+            while $i < $n {
+                if nqp::atpos_i(@!named-capture-counts, $i) >= 2 {
+                    nqp::bindkey($result,
+                        nqp::atpos_s(@!named-capture-names, $i),
+                        nqp::list());
+                }
+                $i++;
+            }
+            $result
+        }
+        else {
+            $EMPTY-HASH
+        }
+    }
+
+    # Get the name of the only capture, if there is only one.
+    method onlyname() { '' }
+}
+
+
 my knowhow NQPRegex {
     has $!do;
     has $!caps;
@@ -371,12 +463,8 @@ my knowhow NQPRegex {
     has $!generic_nfa;
     has @!nested_codes;
     has $!clone_callback;
-    method SET_CAPS($caps) {
-        my %h_caps;
-        for $caps {
-            %h_caps{$_.key} := $_.value unless $_.key eq '';
-        }
-        $!caps := %h_caps;
+    method SET_CAPS(%capnames) {
+        $!caps := RegexCaptures.from-capnames(%capnames);
     }
     method SET_NFA($nfa) {
         $!nfa := self.'!hllize_nfa'($nfa);

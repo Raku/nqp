@@ -343,64 +343,6 @@ role NQPMatchRole is export {
 #        self;
 #    }
 
-    my $NO_CAPS := nqp::hash();
-    method CAPHASH() {
-        my $caps    := nqp::hash();
-        my %caplist := $NO_CAPS;
-        my $iter;
-        my str $curcap;
-        my $cs;
-        my int $csi;
-        my int $cselems;
-        my $subcur;
-        my $submatch;
-        my str $name;
-
-        if !nqp::isnull($!regexsub) && nqp::defined($!regexsub) {
-            %caplist := nqp::can($!regexsub, 'CAPS') ?? $!regexsub.CAPS() !! nqp::null();
-            if !nqp::isnull(%caplist) && %caplist {
-                $iter := nqp::iterator(%caplist);
-                while $iter {
-                    $curcap := nqp::iterkey_s(nqp::shift($iter));
-                    $caps{$curcap} := nqp::list() if nqp::atkey(%caplist, $curcap) >= 2;
-                }
-            }
-        }
-        if !nqp::isnull($!cstack) && $!cstack {
-            $cs      := $!cstack;
-            $cselems := nqp::elems($cs);
-            while $csi < $cselems {
-                $subcur   := nqp::atpos($cs, $csi);
-                $submatch := $subcur.MATCH;
-                $name     := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                unless nqp::isnull_s($name) {
-                    if nqp::index($name, '=') < 0 {
-                        %caplist{$name} >= 2
-                            ?? nqp::push($caps{$name}, $submatch)
-                            !! nqp::bindkey($caps, $name, $submatch);
-                    }
-                    else {
-                        for nqp::split('=', $name) -> $name {
-                            %caplist{$name} >= 2
-                                ?? nqp::push($caps{$name}, $submatch)
-                                !! nqp::bindkey($caps, $name, $submatch);
-                        }
-                    }
-                }
-                ++$csi;
-            }
-        }
-
-        # Once we've produced the captures, and if we know we're finished and
-        # will never be backtracked into, we can release cstack and regexsub.
-        unless nqp::defined($!bstack) {
-            $!cstack   := nqp::null();
-            $!regexsub := nqp::null();
-        }
-
-        $caps;
-    }
-
     method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, :$build, :$fail_cursor, *%ignore) {
         my $new := $build ?? self !! self.CREATE();
         unless $shared {
@@ -1137,40 +1079,31 @@ role NQPMatchRole is export {
 
 class NQPMatch is NQPCapture does NQPMatchRole {
     my @EMPTY_LIST := [];
-    my $NO_CAPS    := nqp::hash();
+    my %EMPTY_HASH := nqp::hash();
     my $DID_MATCH := nqp::create(NQPdidMATCH);
     method MATCH() {
         my $match := nqp::getattr(self, NQPMatch, '$!match');
         if nqp::isnull($match) || !nqp::istype($match, NQPdidMATCH) {
             # Set up basic state of (old) Match.
             my $list;
-            my $hash := nqp::hash();
+            my $hash;
             nqp::bindattr(self, NQPMatch, '$!match',
                 nqp::getattr_i(self, NQPMatch, '$!pos') >= nqp::getattr_i(self, NQPMatch, '$!from')
                     ?? $DID_MATCH
                     !! nqp::null());
 
             # For captures with lists, initialize the lists.
-            my %caplist       := $NO_CAPS;
-            my $rxsub         := nqp::getattr(self, NQPMatch, '$!regexsub');
-            my str $onlyname  := '';
-            my int $namecount := 0;
+            my $rxsub := nqp::getattr(self, NQPMatch, '$!regexsub');
+            my str $onlyname;
+            my int $hascaps;
             if !nqp::isnull($rxsub) && nqp::defined($rxsub) {
-                %caplist := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
-                if !nqp::isnull(%caplist) && nqp::istrue(%caplist) {
-                    my $iter := nqp::iterator(%caplist);
-                    while $iter {
-                        my $curcap   := nqp::shift($iter);
-                        my str $name := nqp::iterkey_s($curcap);
-                        ++$namecount;
-                        if nqp::iterval($curcap) >= 2 {
-                            $onlyname := $name if $namecount == 1;
-                            nqp::ord($name) < 58
-                                ?? nqp::bindpos(
-                                        nqp::defor($list, $list := nqp::list()),
-                                        $name, nqp::list())
-                                !! nqp::bindkey($hash, $name, nqp::list());
-                        }
+                my $capdesc := nqp::can($rxsub, 'CAPS') ?? $rxsub.CAPS() !! nqp::null();
+                if !nqp::isnull($capdesc) {
+                    $hascaps := $capdesc.has-captures();
+                    if $hascaps {
+                        $list := $capdesc.prepare-list();
+                        $hash := $capdesc.prepare-hash();
+                        $onlyname := $capdesc.onlyname();
                     }
                 }
             }
@@ -1178,12 +1111,12 @@ class NQPMatch is NQPCapture does NQPMatchRole {
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPMatch, '$!cstack');
             if nqp::isnull($cs) || !nqp::istrue($cs) {}
-            elsif $namecount == 1 && $onlyname ne '' && !nqp::eqat($onlyname, '$!', 0) {
+            elsif $onlyname ne '' {
                 # If there's only one destination, avoid repeated hash lookups
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
                 my $dest;
-                if nqp::ord($onlyname) < 58 {
+                if nqp::ord($onlyname) != 38 && nqp::ord($onlyname) < 58 {
                     $dest := nqp::atpos($list, $onlyname);
                 }
                 else {
@@ -1197,44 +1130,39 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     ++$csi;
                 }
             }
-            elsif !nqp::isnull(%caplist) && %caplist  {
+            elsif $hascaps {
                 my int $cselems := nqp::elems($cs);
                 my int $csi;
-#                note($cselems);
                 while $csi < $cselems {
                     my $subcur   := nqp::atpos($cs, $csi);
                     my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
-                    if !nqp::isnull_s($name) && nqp::defined($name) && $name ne '' {
+                    if !nqp::isnull_s($name) && $name ne '' {
                         my $submatch := $subcur.MATCH();
                         if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!to') {
                             nqp::bindattr_i(self, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
-                            my int $needs_list := %caplist{$name} >= 2;
                             if nqp::ord($name) < 58 {
-                                $list := nqp::list() unless nqp::isconcrete($list);
-                                $needs_list
+                                nqp::islist(nqp::atpos($list, $name))
                                     ?? nqp::push(nqp::atpos($list, $name), $submatch)
                                     !! nqp::bindpos($list, $name, $submatch);
                             }
                             else {
-                                $needs_list
-                                    ?? nqp::push($hash{$name}, $submatch)
+                                nqp::islist(nqp::atkey($hash, $name))
+                                    ?? nqp::push(nqp::atkey($hash, $name), $submatch)
                                     !! nqp::bindkey($hash, $name, $submatch);
                             }
                         }
                         else {
                             for nqp::split('=', $name) -> $name {
-                                my int $needs_list := %caplist{$name} >= 2;
                                 if nqp::ord($name) < 58 {
-                                    $list := nqp::list() unless nqp::isconcrete($list);
-                                    $needs_list
+                                    nqp::islist(nqp::atkey($hash, $name))
                                         ?? nqp::push(nqp::atpos($list, $name), $submatch)
                                         !! nqp::bindpos($list, $name, $submatch);
                                 }
                                 else {
-                                    $needs_list
-                                        ?? nqp::push($hash{$name}, $submatch)
+                                    nqp::islist(nqp::atkey($hash, $name))
+                                        ?? nqp::push(nqp::atkey($hash, $name), $submatch)
                                         !! nqp::bindkey($hash, $name, $submatch);
                                 }
                             }
@@ -1242,33 +1170,9 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     }
                     ++$csi;
                 }
-#                {
-#                    my $iter := nqp::iterator(%caplist);
-#                    while $iter {
-#                        my $curcap := nqp::shift($iter);
-#                        my str $name := nqp::iterkey_s($curcap);
-#                        my int $iv := nqp::iterval($curcap);
-#                        if $iv >= 2 {
-#                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atpos($list, $name)));
-#                            }
-#                            else {
-#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::elems(nqp::atkey($hash, $name)));
-#                            }
-#                        }
-#                        elsif $iv >= 1 {
-#                            if nqp::iscclass(nqp::const::CCLASS_NUMERIC, $name, 0) {
-#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atpos($list, $name)));
-#                            }
-#                            else {
-#                                stderr().print("\t" ~ $name ~ "\t" ~ nqp::defined(nqp::atkey($hash, $name)));
-#                            }
-#                        }
-#                    }
-#                }
             }
-            nqp::bindattr(self, NQPCapture, '@!array', nqp::isconcrete($list) ?? $list !! @EMPTY_LIST);
-            nqp::bindattr(self, NQPCapture, '%!hash', $hash);
+            nqp::bindattr(self, NQPCapture, '@!array', nqp::defor($list, @EMPTY_LIST));
+            nqp::bindattr(self, NQPCapture, '%!hash', nqp::defor($hash, %EMPTY_HASH));
 
             # Once we've produced the captures, and if we know we're finished and
             # will never be backtracked into, we can release cstack and regexsub.
