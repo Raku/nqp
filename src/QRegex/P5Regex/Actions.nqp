@@ -392,13 +392,13 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         $block;
     }
 
-    sub capnames($ast, $count) {
+    sub capnames($ast, int $count) {
         my %capnames;
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'concat' {
             for $ast.list {
                 my %x := capnames($_, $count);
-                for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
+                for %x { %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), $_.value); }
                 $count := %x{''};
             }
         }
@@ -407,7 +407,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             for $ast.list {
                 my %x := capnames($_, $count);
                 for %x {
-                    %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
+                    %capnames{$_.key} := (%capnames{$_.key} // 0) < 2 && %x{$_.key} == 1 ?? 1 !! 2;
                 }
                 $count := %x{''};
             }
@@ -435,7 +435,7 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 %capnames{$_} := 1;
             }
             my %x := capnames($ast[0], $count);
-            for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
+            for %x { %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), %x{$_.key}) }
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' {

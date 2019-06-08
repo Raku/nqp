@@ -894,16 +894,18 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         if $rxtype eq 'concat' || $rxtype eq 'goal' || $rxtype eq 'conjseq' {
             for $ast.list {
                 my %x := capnames($_, $count);
-                for %x { %capnames{$_.key} := +%capnames{$_.key} + $_.value; }
+                for %x {
+                    %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), $_.value);
+                }
                 $count := %x{''};
             }
         }
         elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
-            my $max := $count;
+            my int $max := $count;
             for $ast.list {
                 my %x := capnames($_, $count);
                 for %x {
-                    %capnames{$_.key} := +%capnames{$_.key} < 2 && %x{$_.key} == 1 ?? 1 !! 2;
+                    %capnames{$_.key} := (%capnames{$_.key} // 0) < 2 && %x{$_.key} == 1 ?? 1 !! 2;
                 }
                 $max := %x{''} if %x{''} > $max;
             }
@@ -914,7 +916,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             if $name eq '' { $name := $count; $ast.name($name); }
             my @names := nqp::split('=', $name);
             for @names {
-                my $n := nqp::radix(10, $_, 0, 0)[0];
+                my int $n := nqp::radix(10, $_, 0, 0)[0];
                 if $_ eq '0' || $n > 0 {
                     $count := $n + 1;
                     %capnames{$n} := 1
@@ -936,7 +938,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                 }
             }
             my %x := capnames($ast[0], $count);
-            for %x { %capnames{$_.key} := +%capnames{$_.key} + %x{$_.key} }
+            for %x { %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), %x{$_.key}) }
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' || $rxtype eq 'dynquant' {
