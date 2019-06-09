@@ -144,14 +144,13 @@ exports.loaderCtx = null;
 
 /* dependencies */
 
-globalContext.initialize(context => context.loadedCache = new Map());
-
 function loadWithCache(code) {
   const loadedCache = globalContext.context.loadedCache;
 
   if (!loadedCache.has(code)) {
     loadedCache.set(code, code(module.exports, false));
   }
+
   return loadedCache.get(code);
 }
 
@@ -842,16 +841,15 @@ for (const prop in props) {
 exports.buildSourceMap = core.buildSourceMap;
 exports.createSourceMap = core.createSourceMap;
 
-exports.ZERO = JSBI.BigInt(0);
-exports.asIntN = asIntN.asIntN;
+exports.ZERO    = JSBI.BigInt(0);
+exports.asIntN  = asIntN.asIntN;
 exports.asUintN = asIntN.asUintN;
-exports.BigInt = JSBI.BigInt;
+exports.BigInt  = JSBI.BigInt;
 
-module.exports.freshGlobalContext = globalContext.freshGlobalContext;
-module.exports.setGlobalContext = globalContext.setGlobalContext;
-
-module.exports.saveThisGlobalContext = globalContext.saveThisGlobalContext;
-module.exports.restoreThisGlobalContext = globalContext.restoreThisGlobalContext;
+module.exports.freshGlobalContext       = (setup)    => globalContext.freshGlobalContext(setup);
+module.exports.setGlobalContext         = (context)  => globalContext.setGlobalContext(context);
+module.exports.saveThisGlobalContext    = (callback) => globalContext.saveThisGlobalContext(callback);
+module.exports.restoreThisGlobalContext = (callback) => globalContext.restoreThisGlobalContext(callback);
 
 exports.loadCompileTimeDependency = /*async*/ function(unit) {
   const fakeModule = {};

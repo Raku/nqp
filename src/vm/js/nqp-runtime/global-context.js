@@ -1,59 +1,76 @@
+'use strict';
+
 class GlobalContext {
   constructor() {
     this.restore = [];
-    this.save = [];
+    this.save    = [];
+
+    // Serialization context properties.
+    this.scs              = new Map();
+    this.compilingSCs     = [];
+    this.scwbDisableDepth = 0;
+    this.neverRepossess   = new WeakSet();
+
+    // HLL properties.
+    this.hllSyms          = new Map();
+    this.hllConfigs       = new Map();
+    this.compilerRegistry = new Map();
+
+    // Runtime properties.
+    this.loadedCache = new WeakMap();
   }
-};
+}
 
-module.exports.context = new GlobalContext();
-
-const initialization = [];
-
-module.exports.initialize = function(setup) {
-  setup(module.exports.context);
-  initialization.push(setup);
-};
-
-module.exports.freshGlobalContext = function(setup) {
-  const old = module.exports.context;
-
-  for (const save of old.save) {
-    save(old);
-  }
-
-  module.exports.context = new GlobalContext();
-
-  for (const setup of initialization) {
-    setup(module.exports.context);
+class GlobalContextWrapper {
+  constructor() {
+    this.context        = new GlobalContext();
+    this.initialization = [];
   }
 
-  return old;
-};
-
-module.exports.setGlobalContext = function(context) {
-  const old = module.exports.context;
-
-  for (const save of old.save) {
-    save(old);
+  initialize(setup) {
+    setup(this.context);
+    this.initialization.push(setup);
   }
 
-  module.exports.context = context;
+  freshGlobalContext(setup) {
+    const old = this.context;
+    for (const save of old.save) {
+      save(old);
+    }
 
-  for (const action of context.restore) {
-    action(context);
+    this.context = new GlobalContext();
+    for (const setup of this.initialization) {
+      setup(this.context);
+    }
+
+    return old;
   }
 
-  return old;
+  setGlobalContext(context) {
+    const old = this.context;
+    for (const save of old.save) {
+      save(old);
+    }
+
+    this.context = context;
+    for (const action of this.context.restore) {
+      action(this.context);
+    }
+
+    return old;
+  }
+
+  restoreThisGlobalContext(callback) {
+    callback(this.context);
+    this.context.restore.push(callback);
+  }
+
+  saveThisGlobalContext(callback) {
+    callback(this.context);
+    this.context.save.push(callback);
+  }
+
+  // Think about compiling SCs.
 };
 
-module.exports.restoreThisGlobalContext = function(callback) {
-  callback(module.exports.context);
-  module.exports.context.restore.push(callback);
-};
-
-module.exports.saveThisGlobalContext = function(callback) {
-  callback(module.exports.context);
-  module.exports.context.save.push(callback);
-};
-
-// Think about compilingSCs
+module.exports = new GlobalContextWrapper();

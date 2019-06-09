@@ -21,8 +21,7 @@ const globalContext = require('./global-context.js');
 
 const core = new SerializationContext('__6MODEL_CORE__');
 core.description = 'core SC';
-
-globalContext.initialize(context => context.scs['__6MODEL_CORE__'] = core);
+globalContext.initialize(context => context.scs.set('__6MODEL_CORE__', core));
 
 function addToScWithSt(obj) {
   core.rootObjects.push(obj);

@@ -13,8 +13,6 @@ exports.op = op;
 
 const globalContext = require('./global-context.js');
 
-globalContext.initialize(context => context.hllSyms = new Map());
-
 op.gethllsym = function(hllName, name) {
   const hllSyms = globalContext.context.hllSyms;
   if (hllSyms.has(hllName) && hllSyms.get(hllName).has(name)) {
@@ -88,22 +86,25 @@ op.hllizefor = function(ctx, obj, language) {
   }
 };
 
-globalContext.initialize(context => context.hllConfigs = {});
-
 function getHLL(language) {
   const hllConfigs = globalContext.context.hllConfigs;
 
-  if (!hllConfigs[language]) {
-    hllConfigs[language] = new Map;
-    hllConfigs[language].set('slurpy_array', BOOT.Array);
-    hllConfigs[language].set('list', BOOT.Array);
-    hllConfigs[language].set('true_value', Null);
-    hllConfigs[language].set('false_value', Null);
-
-    // For serialization purposes
-    hllConfigs[language].set('name', language);
+  if (hllConfigs.has(language)) {
+    return hllConfigs.get(language);
   }
-  return hllConfigs[language];
+
+  const hllConfig = new Map([
+    ['slurpy_array', BOOT.Array],
+    ['list',         BOOT.Array],
+    ['true_value',   Null      ],
+    ['false_value',  Null      ],
+    // For serialization purposes.
+    ['name',         language  ],
+  ]);
+
+  hllConfigs.set(language, hllConfig);
+
+  return hllConfig;
 }
 
 exports.getHLL = getHLL;

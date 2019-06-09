@@ -10,12 +10,6 @@ const Null = require('./null.js');
 
 const globalContext = require('./global-context.js');
 
-globalContext.initialize(context => {
-  context.compilingSCs = [];
-  context.scwbDisableDepth = 0;
-  context.neverRepossess = new Map();
-});
-
 const constants = require('./constants.js');
 
 /* Needed for setting defaults values of attrs for objects */
@@ -46,7 +40,7 @@ const NativeStrArg = nativeArgs.NativeStrArg;
 function scwb() {
   const compilingSCs = globalContext.context.compilingSCs;
 
-  if (compilingSCs.length == 0 || globalContext.context.scwbDisableDepth || globalContext.context.neverRepossess.get(this)) {
+  if (compilingSCs.length == 0 || globalContext.context.scwbDisableDepth || globalContext.context.neverRepossess.has(this)) {
     return;
   }
 
