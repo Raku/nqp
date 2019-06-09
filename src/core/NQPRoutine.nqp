@@ -373,6 +373,10 @@ my knowhow RegexCaptures {
     has @!named-capture-names;
     has @!named-capture-counts;
 
+    # If there's only one name and captured multiple times, then we fast-path it
+    # in MATCH. If such a case, this holds the only name.
+    has str $!onlyname;
+
     # Form this data structure from a capnames hash.
     method from-capnames(%capnames) {
         nqp::create(self).'!from-capnames'(%capnames)
@@ -385,6 +389,8 @@ my knowhow RegexCaptures {
         @!named-capture-counts := nqp::list_i();
 
         # Go over the captures and build up the data structure.
+        my int $num-names := 0;
+        my str $onlyname := '';
         for %capnames {
             my $name := nqp::iterkey_s($_);
             if $name ne '' {
@@ -396,8 +402,14 @@ my knowhow RegexCaptures {
                     nqp::push_s(@!named-capture-names, $name);
                     nqp::push_i(@!named-capture-counts, $count);
                 }
+                $num-names++;
+                if $count >= 2 && nqp::ord($name) != 36 {
+                    $onlyname := $name;
+                }
             }
         }
+
+        $!onlyname := $num-names == 1 && $onlyname ne '' ?? $onlyname !! '';
 
         self
     }
@@ -451,7 +463,7 @@ my knowhow RegexCaptures {
     }
 
     # Get the name of the only capture, if there is only one.
-    method onlyname() { '' }
+    method onlyname() { $!onlyname }
 }
 
 
