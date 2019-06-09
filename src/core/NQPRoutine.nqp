@@ -377,6 +377,12 @@ my knowhow RegexCaptures {
     # in MATCH. If such a case, this holds the only name.
     has str $!onlyname;
 
+    # Flags to allow us to more quickly figure stuff out.
+    my $HAS_CAPTURES := 1;
+    my $HAS_QUANT_LIST_CAPTURES := 2;
+    my $HAS_QUANT_HASH_CAPTURES := 4;
+    has int $!flags;
+
     # Form this data structure from a capnames hash.
     method from-capnames(%capnames) {
         nqp::create(self).'!from-capnames'(%capnames)
@@ -389,34 +395,41 @@ my knowhow RegexCaptures {
         @!named-capture-counts := nqp::list_i();
 
         # Go over the captures and build up the data structure.
-        my int $num-names := 0;
+        my int $num-captures := 0;
         my str $onlyname := '';
+        my int $quant-list-captures := 0;
+        my int $quant-hash-captures := 0;
         for %capnames {
             my $name := nqp::iterkey_s($_);
             if $name ne '' {
                 my $count := nqp::iterval($_);
                 if nqp::ord($name) != 36 && nqp::ord($name) < 58 {
                     nqp::bindpos_i(@!pos-capture-counts, +$name, $count);
+                    $quant-list-captures++ if $count >= 2;
                 }
                 else {
                     nqp::push_s(@!named-capture-names, $name);
                     nqp::push_i(@!named-capture-counts, $count);
+                    $quant-hash-captures++ if $count >= 2;
                 }
-                $num-names++;
+                $num-captures++;
                 if $count >= 2 && nqp::ord($name) != 36 {
                     $onlyname := $name;
                 }
             }
         }
 
-        $!onlyname := $num-names == 1 && $onlyname ne '' ?? $onlyname !! '';
+        $!onlyname := $num-captures == 1 && $onlyname ne '' ?? $onlyname !! '';
+        $!flags := ($num-captures ?? $HAS_CAPTURES !! 0) +
+            ($quant-list-captures ?? $HAS_QUANT_LIST_CAPTURES !! 0) +
+            ($quant-hash-captures ?? $HAS_QUANT_HASH_CAPTURES !! 0);
 
         self
     }
 
     # Are there any captures?
     method has-captures() {
-        nqp::elems(@!named-capture-counts) || nqp::elems(@!pos-capture-counts)
+        nqp::bitand_i($!flags, $HAS_CAPTURES)
     }
 
     # Build a list of positional captures, or return a shared empty list if
@@ -427,11 +440,13 @@ my knowhow RegexCaptures {
         my int $n := nqp::elems(@!pos-capture-counts);
         if $n > 0 {
             my $result := nqp::list();
-            my int $i := 0;
-            while $i < $n {
-                nqp::bindpos($result, $i, nqp::list())
-                    if nqp::atpos_i(@!pos-capture-counts, $i) >= 2;
-                $i++;
+            if nqp::bitand_i($!flags, $HAS_QUANT_LIST_CAPTURES) {
+                my int $i := 0;
+                while $i < $n {
+                    nqp::bindpos($result, $i, nqp::list())
+                        if nqp::atpos_i(@!pos-capture-counts, $i) >= 2;
+                    $i++;
+                }
             }
             $result
         }
@@ -446,14 +461,16 @@ my knowhow RegexCaptures {
         my int $n := nqp::elems(@!named-capture-counts);
         if $n > 0 {
             my $result := nqp::hash();
-            my int $i := 0;
-            while $i < $n {
-                if nqp::atpos_i(@!named-capture-counts, $i) >= 2 {
-                    nqp::bindkey($result,
-                        nqp::atpos_s(@!named-capture-names, $i),
-                        nqp::list());
+            if nqp::bitand_i($!flags, $HAS_QUANT_HASH_CAPTURES) {
+                my int $i := 0;
+                while $i < $n {
+                    if nqp::atpos_i(@!named-capture-counts, $i) >= 2 {
+                        nqp::bindkey($result,
+                            nqp::atpos_s(@!named-capture-names, $i),
+                            nqp::list());
+                    }
+                    $i++;
                 }
-                $i++;
             }
             $result
         }
