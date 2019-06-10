@@ -891,7 +891,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     sub capnames($ast, int $count) {
         my %capnames;
         my $rxtype := $ast.rxtype;
-        if $rxtype eq 'concat' || $rxtype eq 'goal' || $rxtype eq 'conjseq' {
+        if $rxtype eq 'concat' || $rxtype eq 'goal' || $rxtype eq 'conjseq' || $rxtype eq 'conj' {
             for $ast.list {
                 my %x := capnames($_, $count);
                 for %x {
