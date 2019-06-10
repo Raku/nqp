@@ -439,8 +439,9 @@ class QRegex::P5Regex::Actions is HLL::Actions {
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' {
-            my %astcap := capnames($ast[0], $count);
-            $count := %astcap{''};
+            my %x := capnames($ast[0], $count);
+            for %x { %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), $_.value); }
+            $count := %x{''};
         }
         %capnames{''} := $count;
         nqp::deletekey(%capnames, '$!from');
