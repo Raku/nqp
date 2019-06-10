@@ -378,9 +378,9 @@ my knowhow RegexCaptures {
     has str $!onlyname;
 
     # Flags to allow us to more quickly figure stuff out.
-    my $HAS_CAPTURES := 1;
-    my $HAS_QUANT_LIST_CAPTURES := 2;
-    my $HAS_QUANT_HASH_CAPTURES := 4;
+    my int $HAS_CAPTURES := 1;
+    my int $HAS_QUANT_LIST_CAPTURES := 2;
+    my int $HAS_QUANT_HASH_CAPTURES := 4;
     has int $!flags;
 
     # Form this data structure from a capnames hash.
