@@ -2871,7 +2871,7 @@ QAST::OperationsJAST.map_classlib_core_op('semrelease', $TYPE_OPS, 'semrelease',
 QAST::OperationsJAST.map_classlib_core_op('queuepoll', $TYPE_OPS, 'queuepoll', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('cpucores', $TYPE_OPS, 'cpucores', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('freemem', $TYPE_OPS, 'freemem', [], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('totalmem', $TYPE_OPS, 'freemem', [], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('totalmem', $TYPE_OPS, 'totalmem', [], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('threadlockcount', $TYPE_OPS, 'threadlockcount', [$RT_OBJ], $RT_INT, :tc);
 
 # asynchrony related ops
