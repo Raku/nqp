@@ -344,7 +344,7 @@ role NQPMatchRole is export {
 #    }
 
     method !cursor_init($orig, :$p = 0, :$c, :$shared, :$braid, :$build, :$fail_cursor, *%ignore) {
-        my $new := $build ?? self !! self.CREATE();
+        my $new := $build ?? self !! nqp::create(self);
         unless $shared {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
@@ -365,13 +365,17 @@ role NQPMatchRole is export {
         }
         nqp::die("No braid in cursor_init!") unless $braid;
         nqp::bindattr($new, $?CLASS, '$!braid', $braid );
-        if nqp::defined($c) {
+        if nqp::isconcrete($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
-            nqp::bindattr_i($new, $?CLASS, '$!pos', $c);
+            nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($c));
+        }
+        elsif nqp::isconcrete($p) {
+            nqp::bindattr_i($new, $?CLASS, '$!from', nqp::unbox_i($p));
+            nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($p));
         }
         else {
-            nqp::bindattr_i($new, $?CLASS, '$!from', $p);
-            nqp::bindattr_i($new, $?CLASS, '$!pos', $p);
+            nqp::bindattr_i($new, $?CLASS, '$!from', 0);
+            nqp::bindattr_i($new, $?CLASS, '$!pos', 0);
         }
         nqp::bindattr_i($new, $?CLASS, '$!to', -1);  # delegates to $!pos if negative
         nqp::bindattr($shared, ParseShared, '$!fail_cursor',
