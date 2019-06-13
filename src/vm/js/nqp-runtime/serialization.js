@@ -262,6 +262,10 @@ class BinaryWriteCursor {
       discrim = REFVAR_VM_STR;
     } else if (ref.$$STable === BOOT.Array.$$STable) {
       discrim = REFVAR_VM_ARR_VAR;
+    } else if (ref.$$STable === BOOT.IntArray.$$STable) {
+      discrim = REFVAR_VM_ARR_INT;
+    } else if (ref.$$STable === BOOT.StrArray.$$STable) {
+      discrim = REFVAR_VM_ARR_STR;
     } else if (ref instanceof Hash) {
       discrim = REFVAR_VM_HASH_STR_VAR;
     } else if (ref instanceof CodeRef || typeof ref == 'function') {

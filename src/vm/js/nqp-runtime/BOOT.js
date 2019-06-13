@@ -7,3 +7,7 @@ module.exports.createArray = function(array) {
 module.exports.createIntArray = function(array) {
   return exports.IntArray.$$STable.REPR.allocateFromArray(exports.IntArray.$$STable, array);
 };
+
+module.exports.createStrArray = function(array) {
+  return exports.StrArray.$$STable.REPR.allocateFromArray(exports.StrArray.$$STable, array);
+};

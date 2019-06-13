@@ -157,13 +157,13 @@ class BinaryCursor {
   * @param {Function} readElem - a callback that reads in a single element
   * @return {Object} bootArray containing the elements
   */
-  array(readElem) {
+  array(readElem, create) {
     const elems = this.varint();
     const array = [];
     for (let i = 0; i < elems; i++) {
       array.push(readElem(this));
     }
-    const bootArray = BOOT.createArray(array);
+    const bootArray = create(array);
     if (this.sc.currentObject) {
       bootArray.$$SC = this.sc;
       this.sc.ownedObjects.set(bootArray, this.sc.currentObject);
@@ -326,11 +326,11 @@ class BinaryCursor {
       case REFVAR_VM_STR:
         return new NQPStr(this.str());
       case REFVAR_VM_ARR_VAR:
-        return this.array(cursor => cursor.variant());
+        return this.array(cursor => cursor.variant(), array => BOOT.createArray(array));
       case REFVAR_VM_ARR_STR:
-        return this.array(cursor => cursor.str());
+        return this.array(cursor => cursor.str(), array => BOOT.createStrArray(array));
       case REFVAR_VM_ARR_INT:
-        return this.array(cursor => cursor.varint());
+        return this.array(cursor => cursor.varint(), array => BOOT.createIntArray(array));
       case REFVAR_VM_HASH_STR_VAR:
         return this.hashOfVariants(this);
       case REFVAR_STATIC_CODEREF:
