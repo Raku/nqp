@@ -45,7 +45,7 @@ const REFVAR_CLONED_CODEREF = 12;
 /** All the loaded serialization contexts using their unique IDs as keys */
 
 module.exports.wval = function(handle, idx) {
-  return globalContext.context.scs[handle].rootObjects[idx];
+  return globalContext.context.scs.get(handle).rootObjects[idx];
 };
 
 op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, setupWVals) {
@@ -65,7 +65,9 @@ op.deserialize = function(currentHLL, blob, sc, sh, codeRefs, conflicts, cuids, 
 };
 
 op.createsc = function(handle) {
-  return (globalContext.context.scs[handle] = new SerializationContext(handle));
+  const sc = new SerializationContext(handle);
+  globalContext.context.scs.set(handle, sc);
+  return sc;
 };
 
 op.scsetdesc = function(sc, desc) {
@@ -552,7 +554,7 @@ class BinaryCursor {
     this.sc.deps = deps;
 
     for (const i in dependencies) {
-      const dep = globalContext.context.scs[dependencies[i][0]];
+      const dep = globalContext.context.scs.get(dependencies[i][0]);
       if (!dep) {
         console.log(
             'Missing dependencie, can\'t find serialization context handle:',
@@ -630,7 +632,7 @@ class BinaryCursor {
         if (codeRef.staticVars) {
           for (const name in codeRef.staticVars) {
             if (codeRef.staticVars[name] instanceof Array) {
-              codeRef.staticVars[name] = globalContext.context.scs[codeRef.staticVars[name][0]].rootObjects[codeRef.staticVars[name][1]];
+              codeRef.staticVars[name] = globalContext.context.scs.get(codeRef.staticVars[name][0]).rootObjects[codeRef.staticVars[name][1]];
             } else if (typeof codeRef.staticVars[name] === 'number') {
               codeRef.staticVars[name] = sc.rootObjects[codeRef.staticVars[name]];
             }
@@ -640,7 +642,7 @@ class BinaryCursor {
         if (codeRef.contVars) {
           for (const name in codeRef.contVars) {
             if (codeRef.contVars[name] instanceof Array) {
-              codeRef.contVars[name] = globalContext.context.scs[codeRef.contVars[name][0]].rootObjects[codeRef.contVars[name][1]];
+              codeRef.contVars[name] = globalContext.context.scs.get(codeRef.contVars[name][0]).rootObjects[codeRef.contVars[name][1]];
             } else if (typeof codeRef.contVars[name] === 'number') {
               codeRef.contVars[name] = sc.rootObjects[codeRef.contVars[name]];
             }

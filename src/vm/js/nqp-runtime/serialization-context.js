@@ -2,8 +2,6 @@
 
 const globalContext = require('./global-context.js');
 
-globalContext.initialize(context => context.scs = {});
-
 const NQPObject = require('./nqp-object.js');
 
 /**

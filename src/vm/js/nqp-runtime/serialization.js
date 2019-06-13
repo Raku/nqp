@@ -1040,7 +1040,7 @@ op.scsetcode = function(sc, idx, obj) {
 };
 
 op.neverrepossess = function(obj) {
-  globalContext.context.neverRepossess.set(obj, true);
+  globalContext.context.neverRepossess.add(obj);
   return obj;
 };
 

@@ -597,9 +597,6 @@ op.scwbdisable = function() {
   return ++globalContext.context.scwbDisableDepth;
 };
 
-
-globalContext.initialize(context => context.compilerRegistry = new Map());
-
 op.bindcomp = function(language, compiler) {
   globalContext.context.compilerRegistry.set(language, compiler);
   return compiler;
@@ -857,7 +854,6 @@ class BuildSourceMap extends NQPObject {
 
 exports.createSourceMap = createSourceMap;
 exports.buildSourceMap = new BuildSourceMap();
-
 
 class JavaScriptCompiler extends NQPObject {
   $$mangleCode(code) {
