@@ -1,6 +1,6 @@
 # checking basic operands and circumfix:( )
 
-plan(33);
+plan(39);
 
 ##Additive operators
 ok(      1+2  == 3, 'Checking addition 1+2');
@@ -16,6 +16,14 @@ ok(   4*(3+5) == 32, 'Checking parenthesized statements 4*(3+5)');
 ok(   12/4*3  ==  9, 'Checking compound statements 12/4*3');
 ok( 12/(4*3)  ==  1, 'Checking compound statements 12/(4*3)');
 ok(   5-3*2   == -1, 'Checking compound statements 5-3*2');
+
+##Exponentiation operator
+ok(     2**6  == 64, 'Checking exponentiation 2**6');
+ok(  2**2**3  == 256, 'Checking associativity 2**2**3');
+ok(   1+2**3  == 9,  'Checking precedence against additive');
+ok(   3*2**3  == 24, 'Checking precedence against multiplicative');
+ok(    -2**2  == +4, 'Checking precedence against tight unary minus');
+ok(   - 2**2  == -4, 'Checking precedence against loose unary minus');
 
 ##Modulo operator
 ok(      8%3  == 2, 'Checking modulo 8%3');
