@@ -744,7 +744,7 @@ grammar NQP::Grammar is HLL::Grammar {
 
     my %methodop       := nqp::hash('prec', 'y=', 'assoc', 'unary');
     my %autoincrement  := nqp::hash('prec', 'x=', 'assoc', 'unary');
-    my %exponentiation := nqp::hash('prec', 'w=', 'assoc', 'left');
+    my %exponentiation := nqp::hash('prec', 'w=', 'assoc', 'right');
     my %symbolic_unary := nqp::hash('prec', 'v=', 'assoc', 'unary');
     my %multiplicative := nqp::hash('prec', 'u=', 'assoc', 'left');
     my %additive       := nqp::hash('prec', 't=', 'assoc', 'left');
