@@ -70,7 +70,8 @@ class HLL::Backend::MoarVM {
 
         if $immediately_install {
 #?if stage2
-            nqp::installconfprog($buf, @stringheap, @entrypoints);
+            # activate once moarvm has confprog in master and dependency is bumped
+            #nqp::installconfprog($buf, @stringheap, @entrypoints);
 #?endif
         }
         else {
