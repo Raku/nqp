@@ -29,7 +29,7 @@ class HLL::Compiler does HLL::Backend::Default {
 #?endif
 #?if moar
         ~ ' confprog=s'
-#endif
+#?endif
         );
         %!config     := nqp::hash();
     }
