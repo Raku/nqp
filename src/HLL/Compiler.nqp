@@ -27,6 +27,9 @@ class HLL::Compiler does HLL::Backend::Default {
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
+#?if moar
+        ~ ' confprog=s'
+#endif
         );
         %!config     := nqp::hash();
     }
@@ -175,6 +178,12 @@ class HLL::Compiler does HLL::Backend::Default {
             $output := $!backend.compunit_mainline($output);
             if nqp::defined($outer_ctx) {
                 nqp::forceouterctx($output, $outer_ctx);
+            }
+
+            if %adverbs<confprog> {
+                if nqp::can($!backend, 'confprog') {
+                    $!backend.confprog(%adverbs<confprog>, |%adverbs);
+                }
             }
 
             if nqp::existskey(%adverbs, 'profile') {

@@ -10,8 +10,77 @@ my sub literal_subst(str $source, str $pattern, $replacement) {
     $result;
 }
 
+
 class HLL::Backend::MoarVM {
     our %moar_config := nqp::backendconfig();
+    
+    my sub read_ui32($fh, $buf?) {
+        unless $buf { $buf := nqp::create($NQPBuf) }
+        nqp::readfh($fh, $buf, 4);
+        nqp::readuint($buf, 0, nqp::const::BINARY_SIZE_32_BIT);
+    }
+    my sub read_i16($fh, $buf?) {
+        unless $buf { $buf := nqp::create($NQPBuf) }
+        nqp::readfh($fh, $buf, 2);
+        nqp::readint($buf, 0, nqp::const::BINARY_SIZE_16_BIT);
+    }
+    my sub read_confprog($path, $immediately_install = 0) {
+        my $fh := nqp::open($path, "r");
+        my int $pos := 0;
+        my str $comparison := "MOARVMCONFPROGVER001";
+
+        my $buf := nqp::readfh($fh, nqp::create($NQPBuf), nqp::chars($comparison));
+
+        while $pos < nqp::chars($comparison) {
+            if nqp::atpos_i($buf, $pos) != nqp::ordbaseat($comparison, $pos) {
+                nqp::die("Malformed confprog file, expected magic cookie at the start");
+            }
+            $pos++;
+        }
+
+        my $decoder := NQPDecoder.new("utf8");
+
+        my @stringheap := nqp::list_s();
+
+        my int $stringcount := read_ui32($fh);
+        $pos := 0;
+        while $pos < $stringcount {
+            my int $strlen := read_ui32($fh);
+            my $strbuf := nqp::readfh($fh, nqp::create($NQPBuf), $strlen);
+            $decoder.add-bytes($strbuf);
+            nqp::push_s(@stringheap, my $str := $decoder.consume-all-chars());
+            say($str);
+            unless $decoder.is-empty() {
+                nqp::die("left-over bytes after decoding { nqp::elems(@stringheap) }st string");
+            }
+            $pos++;
+        }
+
+        my int $entrypointcount := read_ui32($fh);
+        my @entrypoints := nqp::list_i();
+
+        $pos := 0;
+        while $pos < $entrypointcount {
+            nqp::push_i(@entrypoints, read_i16($fh));
+            $pos++;
+        }
+
+        my int $bytecodesize := read_ui32($fh);
+        $buf := nqp::readfh($fh, $buf, $bytecodesize);
+
+        if $immediately_install {
+#?if stage2
+            nqp::installconfprog($buf, @stringheap, @entrypoints);
+#?endif
+        }
+        else {
+            return nqp::hash(
+                "bytecode", $buf,
+                "strings", @stringheap,
+                "entrypoints", @entrypoints
+            );
+        }
+    }
 
     method apply_transcodings($s, $transcode) {
         $s
@@ -31,6 +100,10 @@ class HLL::Backend::MoarVM {
 
     method nqpevent($spec?) {
         # Doesn't do anything just yet
+    }
+
+    method confprog($confprog-filename, *%adverbs) {
+        read_confprog($confprog-filename, 1);
     }
 
     method profiler_snapshot(:$kind, :$filename) {
