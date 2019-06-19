@@ -2581,6 +2581,23 @@ elements are currently defined:
 * `RUSAGE_UTIME_MSEC`  Userland CPU usage (micro-seconds part)
 * `RUSAGE_STIME_SEC`   System CPU usage (seconds part)
 * `RUSAGE_STIME_MSEC`  System CPU usage (micro-seconds part)
+* `RUSAGE_MAXRSS`      Maximum resident set size (in bytes/Kbytes)
+* `RUSAGE_IXRSS`       Integral shared text memory size (in bytes/Kbytes)
+* `RUSAGE_IDRSS`       Integral unshared data size (in bytes/Kbytes)
+* `RUSAGE_ISRSS`       Integral unshared stack size (in bytes/Kbytes)
+* `RUSAGE_MINFLT`      Number of page reclaims (lower part)
+* `RUSAGE_MAJFLT`      Number of page reclaims (upper part)
+* `RUSAGE_NSWAP`       Number of swaps
+* `RUSAGE_INBLOCK`     Number of block input operations
+* `RUSAGE_OUBLOCK`     Number of block output operations
+* `RUSAGE_MSGSND`      Number of messages sen
+* `RUSAGE_MSGRCVA`     Number of messages received
+* `RUSAGE_NSIGNALS`    Number of signals received
+* `RUSAGE_NVCSW`       Number of voluntary context switches
+* `RUSAGE_NIVCSW`      Number of involuntary context switches
+
+Currently, the elements ending in `RSS` appear to return values in **bytes**
+rather than **Kbytes** on MacOS.
 
 Elements may be 0 if it is impossible to determine that value in the current
 system.
