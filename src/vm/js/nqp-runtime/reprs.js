@@ -2569,10 +2569,25 @@ class WrappedJSObject extends REPR {
   }
 
   setupSTable(STable) {
+    this.hardcodedInvokeSpec = true;
+
     STable.addInternalMethods(class {
       $$can(ctx, name) {
         return typeof this.$$jsObject[name] === 'function';
       }
+
+      /*async*/ $$apply(args) {
+        const converted = [];
+        for (let i = 2; i < args.length; i++) {
+          converted.push(/*await*/ core.toJSWithCtx(args[0], args[i]));
+        }
+        return core.fromJSToReturnValue(args[0], this.$$jsObject.apply(null, converted));
+      }
+
+      $$call(args) {
+        return this.$$apply(arguments);
+      }
+
     });
   }
 }

@@ -198,6 +198,10 @@ class STable {
   }
 
   setinvokespec(classHandle, attrName, invocationHandler) {
+    if (this.REPR.hardcodedInvokeSpec) {
+      return;
+    }
+
     if (classHandle !== Null) {
       /* TODO  - think if we can use direct access here */
       const getter = this.REPR.getterForAttr(classHandle, attrName);

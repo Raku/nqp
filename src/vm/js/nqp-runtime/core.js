@@ -636,9 +636,7 @@ function fromJSToObject(ctx, obj) {
 }
 
 function fromJS(HLL, obj, isReturnValue, isArgument) {
-  if (typeof obj === 'function') {
-    return new WrappedFunction(obj);
-  } else if (obj === undefined || obj === null) {
+  if (obj === undefined || obj === null) {
     return HLL.get('null_value');
   } else if (obj === true) {
     return HLL.get('true_value');
@@ -672,6 +670,11 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
     return obj;
   } else {
     const type = HLL.get('js_box');
+
+    if (!type && typeof obj === 'function') {
+      return new WrappedFunction(obj);
+    }
+
     const wrapped = type.$$STable.REPR.allocate(type.$$STable);
     wrapped.$$jsObject = obj;
     return wrapped;
