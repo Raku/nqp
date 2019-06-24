@@ -46,12 +46,16 @@ class HLL::Backend::MoarVM {
         $pos := 0;
         while $pos < $stringcount {
             my int $strlen := read_ui32($fh);
-            my $strbuf := nqp::readfh($fh, nqp::create($NQPBuf), $strlen);
-            $decoder.add-bytes($strbuf);
-            nqp::push_s(@stringheap, my $str := $decoder.consume-all-chars());
-            say($str);
-            unless $decoder.is-empty() {
-                nqp::die("left-over bytes after decoding { nqp::elems(@stringheap) }st string");
+            if $strlen == 0 {
+                nqp::push_s(@stringheap, "");
+            }
+            else {
+                my $strbuf := nqp::readfh($fh, nqp::create($NQPBuf), $strlen);
+                $decoder.add-bytes($strbuf);
+                nqp::push_s(@stringheap, my $str := $decoder.consume-all-chars());
+                unless $decoder.is-empty() {
+                    nqp::die("left-over bytes after decoding { nqp::elems(@stringheap) }st string");
+                }
             }
             $pos++;
         }
