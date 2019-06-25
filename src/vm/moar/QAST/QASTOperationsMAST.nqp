@@ -2186,6 +2186,10 @@ my %const_map := nqp::hash(
     'C_TYPE_FLOAT',             -1,
     'C_TYPE_DOUBLE',            -2,
     'C_TYPE_LONGDOUBLE',        -3,
+    'C_TYPE_WCHAR_T',           -9,
+    'C_TYPE_WINT_T',            -10,
+    'C_TYPE_CHAR16_T',          -11,
+    'C_TYPE_CHAR32_T',          -12,
 
     'NORMALIZE_NONE',            0,
     'NORMALIZE_NFC',             1,
