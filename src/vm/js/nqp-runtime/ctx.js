@@ -442,6 +442,18 @@ class Ctx extends NQPObject {
     throw `Can't bind dynamic: ${name}`;
   }
 
+  bindDynamicFromCaller(name, value) {
+    let ctx = this.$$caller;
+    while (ctx) {
+      if (ctx.hasOwnProperty(name)) {
+        ctx[name] = value;
+        return ctx[name];
+      }
+      ctx = ctx.$$caller;
+    }
+    throw `Can't bind dynamic: ${name}`;
+  }
+
   $$iterator() {
     return new CtxIter(this);
   }
