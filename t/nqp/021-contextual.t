@@ -1,6 +1,6 @@
 # Tests for contextual variables
 
-plan(31);
+plan(33);
 
 sub foo() { $*VAR }
 
@@ -149,3 +149,17 @@ my sub layer1() {
 
     top();
 }
+
+sub test_bindlexdyn() {
+    my $*foo := 'baz';
+    nqp::bindlexdyn('$*foo', 'bound');
+    is($*foo, 'baz', "nqp::bindlexdyn doesn't change the value in this scope");
+}
+
+sub outer_for_test_bindlexdyn() {
+    my $*foo := "bar";
+    test_bindlexdyn();
+    is($*foo, 'bound', 'nqp::bindlexdyn sets right value');
+}
+
+outer_for_test_bindlexdyn();
