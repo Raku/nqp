@@ -198,9 +198,9 @@ if (process.browser) {
     for (const prefix of prefixes) {
       try {
         if (typeof prefix === 'string') {
-            /*await*/ loadWithCache(loadFrom.require(prefix + mangled));
+            /*await*/ loadWithCache(loadFrom.require(prefix + '/' + mangled));
         } else {
-            /*await*/ loadWithCache(prefix.module.require(prefix.prefix + mangled));
+            /*await*/ loadWithCache(prefix.module.require(prefix.prefix + '/' + mangled));
         }
 
         found = true;
