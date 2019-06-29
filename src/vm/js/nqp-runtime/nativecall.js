@@ -112,3 +112,15 @@ op.nativecallsizeof = function(obj) {
 op.initnativecall = function() {
   return 1;
 };
+
+op.iswcharunsigned = function() {
+  /* XXX: we can't implement this properly until ref-napi supports wide
+   * strings. */
+  return process.platform === 'win32';
+};
+
+op.iswintunsigned = function() {
+  /* XXX: we can't implement this properly until ref-napi supports wide
+   * strings. */
+  return 0;
+};

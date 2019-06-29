@@ -707,6 +707,10 @@ const C_TYPE_LONGLONG = -5;
 const C_TYPE_SIZE_T = -6;
 const C_TYPE_BOOL = -7;
 const C_TYPE_ATOMIC_INT = -8;
+const C_TYPE_WCHAR_T = -9;
+const C_TYPE_WINT_T = -10;
+const C_TYPE_CHAR16_T = -11;
+const C_TYPE_CHAR32_T = -12;
 
 function cType(ctype) {
   switch (ctype) {
@@ -725,6 +729,13 @@ function cType(ctype) {
       return ref.types.size_t;
     case C_TYPE_BOOL:
       return ref.types.bool;
+    case C_TYPE_WCHAR_T:
+    case C_TYPE_WINT_T:
+      throw new NQPException('NativeCall wide string support NYI on the JS backend');
+    case C_TYPE_CHAR16_T:
+      return ref.types.uint16;
+    case C_TYPE_CHAR32_T:
+      return ref.types.uint32;
   }
 }
 
