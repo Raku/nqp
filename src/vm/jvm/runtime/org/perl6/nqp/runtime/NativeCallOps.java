@@ -1041,4 +1041,41 @@ public final class NativeCallOps {
             }
         }
     }
+
+    /* JNA doesn't really support wchar_t and wint_t themselves, just arrays of
+     * wchar_t. We're forced to take a wild guess what their sign is. */
+
+    public static long iswcharunsigned() {
+        final String os          = System.getProperty("os.name");
+        final String arch        = System.getProperty("os.arch");
+        final long   isUnsigned;
+        if (os.startsWith("Windows")) {
+            isUnsigned = 1L;
+        } else if (os.equals("AIX")) {
+            isUnsigned = 1L;
+        } else if (os.equals("FreeBSD") && (arch.equals("arm") || arch.equals("arm64"))) {
+            isUnsigned = 1L;
+        } else {
+            /* wchar_t is signed... probably. We don't actually know.
+             * If the library was compiled with GCC, it could actually have an
+             * unsigned wchar_t, but we can't tell if it was or not! 🙄 */
+            isUnsigned = 0L;
+        }
+        return isUnsigned;
+    }
+
+    public static long iswintunsigned() {
+        final String os         = System.getProperty("os.name");
+        final String arch       = System.getProperty("os.arch");
+        final long   isUnsigned;
+        if (os.equals("FreeBSD") && (arch.equals("arm") || arch.equals("arm64"))) {
+            isUnsigned = 1L;
+        } else {
+            /* wint_t is signed... probably. We don't actually know.
+             * On most platforms, architectures, and compilers, wint_t is
+             * signed, so it's fairly safe to assume it is here. */
+            isUnsigned = 0L;
+        }
+        return isUnsigned;
+    }
 }
