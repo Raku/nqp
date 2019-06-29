@@ -1,6 +1,6 @@
 BAT          = @bat@
 M_RUNNER     = nqp-m$(BAT)
-M_RUNNER_BIN = $(BASE_DIR)/$(M_RUNNER)
+M_RUNNER_BIN = @nfp($(BASE_DIR)/$(M_RUNNER))@
 # It's ok to shell quote this one as it only used in a command line
 M_GEN_CAT    = @shquot(@script(gen-cat.pl)@)@ moar
 
@@ -285,7 +285,7 @@ m-runner-default-install: m-runner-default m-install
 $(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_RUNNER)
 	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
 	$(PERL5) $(M_GEN_CAT) stage2 $(P5QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
-	@nfpq($(M_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
+	@q($(M_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
 	    @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
 
 m-bootstrap-files: $(M_STAGE2_OUTPUT)
@@ -304,10 +304,10 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 ## testing
 
 m-test: m-all
-	$(PROVE) -r --exec @nfpq($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r --exec @q($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
 
 m-test-loud: m-all
-	$(PROVE) -r -v --exec @nfpq($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r -v --exec @q($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
 
 m-core-test: $(M_RUNNER)
 	$(PROVE) -r --exec @nfpq($(M_RUNNER))@ @nfp(t/nqp)@
