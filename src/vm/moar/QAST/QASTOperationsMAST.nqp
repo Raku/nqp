@@ -3103,6 +3103,8 @@ QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallref
 QAST::MASTOperations.add_core_moarop_mapping('nativecallcast', 'nativecallcast');
 QAST::MASTOperations.add_core_moarop_mapping('nativecallglobal', 'nativecallglobal');
 QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsizeof', :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('iswcharunsigned', 'iswcharunsigned');
+QAST::MASTOperations.add_core_moarop_mapping('iswintunsigned', 'iswintunsigned');
 
 QAST::MASTOperations.add_core_moarop_mapping('getcodelocation', 'getcodelocation', :decont(0));
 
