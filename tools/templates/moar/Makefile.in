@@ -11,15 +11,15 @@ M_STAGE2_DIR = @nfp(gen/moar/stage2)@
 M_STAGE0_NQP = @q(@moar@)@ --libpath=$(M_STAGE0_DIR) @nfp($(M_STAGE0_DIR)/nqp.moarvm)@ --bootstrap
 M_STAGE1_NQP = @q(@moar@)@ --libpath=$(M_STAGE1_DIR) @nfp($(M_STAGE1_DIR)/nqp.moarvm)@ --bootstrap
 
-NQP_MO_MOAR     = nqpmo.moarvm
+NQP_MO_MOAR  = nqpmo.moarvm
 
 MODULE_LOADER_MOAR = ModuleLoader.moarvm
 
-CORE_SETTING_MOAR     = NQPCORE.setting.moarvm
+CORE_SETTING_MOAR  = NQPCORE.setting.moarvm
 
-QASTNODE_MOAR     = QASTNode.moarvm
+QASTNODE_MOAR  = QASTNode.moarvm
 
-QREGEX_MOAR     = QRegex.moarvm
+QREGEX_MOAR    = QRegex.moarvm
 
 HLL_MOAR       = NQPHLL.moarvm
 M_HLL_SOURCES  = @nfp(src/vm/moar/HLL/Backend.nqp)@ $(COMMON_HLL_SOURCES)
@@ -27,18 +27,18 @@ M_HLL_SOURCES  = @nfp(src/vm/moar/HLL/Backend.nqp)@ $(COMMON_HLL_SOURCES)
 MASTOPS_MOAR   = MASTOps.moarvm
 MASTNODES_MOAR = MASTNodes.moarvm
 
-QAST_MOAR     = QAST.moarvm
-M_QAST_SOURCES  = \
+QAST_MOAR      = QAST.moarvm
+M_QAST_SOURCES = \
   @nfp(src/vm/moar/QAST/QASTRegexCompilerMAST.nqp)@ \
   @nfp(src/vm/moar/QAST/QASTOperationsMAST.nqp)@ \
   @nfp(src/vm/moar/QAST/QASTCompilerMAST.nqp)@
 
-P6QREGEX_MOAR     = NQPP6QRegex.moarvm
+P6QREGEX_MOAR = NQPP6QRegex.moarvm
 
-P5QREGEX_MOAR     = NQPP5QRegex.moarvm
+P5QREGEX_MOAR = NQPP5QRegex.moarvm
 
-NQP_MOAR     = nqp.moarvm
-M_NQP_SOURCES= @nfp(src/vm/moar/NQP/Ops.nqp)@ $(COMMON_NQP_SOURCES)
+NQP_MOAR      = nqp.moarvm
+M_NQP_SOURCES = @nfp(src/vm/moar/NQP/Ops.nqp)@ $(COMMON_NQP_SOURCES)
 
 M_SOURCES = \
   $(COMMON_SOURCES) \
@@ -271,7 +271,7 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ .
 
 $(M_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build)@@
-	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@template(@platform@/nqp-m-build)@ --out=@q($(M_RUNNER))@
+	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@shquot(@template(@platform@/nqp-m-build)@)@ --out=@q($(M_RUNNER))@
 	$(CHMOD) 0755 @q($(M_RUNNER))@
 
 m-runner-default: m-all
