@@ -40,6 +40,10 @@ public class NativeCall extends REPR {
         UINT,
         ULONG,
         ULONGLONG,
+        WCHAR_T,
+        WINT_T,
+        CHAR16_T,
+        CHAR32_T,
         CHAR_RW,
         SHORT_RW,
         INT_RW,
@@ -52,6 +56,10 @@ public class NativeCall extends REPR {
         UINT_RW,
         ULONG_RW,
         ULONGLONG_RW,
+        WCHAR_T_RW,
+        WINT_T_RW,
+        CHAR16_T_RW,
+        CHAR32_T_RW,
         CPOINTER_RW;
     }
 

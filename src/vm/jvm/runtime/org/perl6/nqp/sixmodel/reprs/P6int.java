@@ -19,13 +19,18 @@ public class P6int extends REPR {
     /**
      * Possible C types we can handle.
      */
-    public final static byte P6INT_C_TYPE_CHAR     =  -1;
-    public final static byte P6INT_C_TYPE_SHORT    =  -2;
-    public final static byte P6INT_C_TYPE_INT      =  -3;
-    public final static byte P6INT_C_TYPE_LONG     =  -4;
-    public final static byte P6INT_C_TYPE_LONGLONG =  -5;
-    public final static byte P6INT_C_TYPE_SIZE_T   =  -6;
-    public final static byte P6INT_C_TYPE_BOOL     =  -7;
+    public final static byte P6INT_C_TYPE_CHAR       =  -1;
+    public final static byte P6INT_C_TYPE_SHORT      =  -2;
+    public final static byte P6INT_C_TYPE_INT        =  -3;
+    public final static byte P6INT_C_TYPE_LONG       =  -4;
+    public final static byte P6INT_C_TYPE_LONGLONG   =  -5;
+    public final static byte P6INT_C_TYPE_SIZE_T     =  -6;
+    public final static byte P6INT_C_TYPE_BOOL       =  -7;
+//  public final static byte P6INT_C_TYPE_ATOMIC_INT =  -8;
+    public final static byte P6INT_C_TYPE_WCHAR_T    =  -9;
+    public final static byte P6INT_C_TYPE_WINT_T     =  -10;
+    public final static byte P6INT_C_TYPE_CHAR16_T   =  -11;
+    public final static byte P6INT_C_TYPE_CHAR32_T   =  -12;
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
@@ -73,6 +78,19 @@ public class P6int extends REPR {
                     case P6INT_C_TYPE_BOOL:
                         /* Let's just hope that a bool is 1 byte in size, always. */
                         ((StorageSpec)st.REPRData).bits = Byte.SIZE;
+                        break;
+                    case P6INT_C_TYPE_WCHAR_T:
+                        ((StorageSpec)st.REPRData).bits = (short)(8 * Native.WCHAR_SIZE);
+                        break;
+                    case P6INT_C_TYPE_WINT_T:
+                        /* JNA assumes wint_t is an int. */
+                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
+                        break;
+                    case P6INT_C_TYPE_CHAR16_T:
+                        ((StorageSpec)st.REPRData).bits = Short.SIZE;
+                        break;
+                    case P6INT_C_TYPE_CHAR32_T:
+                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
                         break;
                     default:
                         ((StorageSpec)st.REPRData).bits = bitwidth;

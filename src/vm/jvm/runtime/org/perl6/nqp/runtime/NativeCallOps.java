@@ -149,14 +149,17 @@ public final class NativeCallOps {
                             ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getShort(0));
                             break;
                         case USHORT_RW:
+                        case CHAR16_T_RW:
                             int sval = ((Memory) cArgs[i]).getShort(0);
                             sval += sval < 0 ? 0x10000 : 0;
                             ((NativeRefInstance) o).store_i(tc, sval);
                             break;
                         case INT_RW:
+                        case WINT_T_RW: /* JNA assumes wint_t is int. */
                             ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getInt(0));
                             break;
                         case UINT_RW:
+                        case CHAR32_T_RW:
                             long ival = ((Memory) cArgs[i]).getInt(0);
                             ival += ival < 0 ? 0x100000000L : 0;
                             ((NativeRefInstance) o).store_i(tc, ival);
@@ -174,6 +177,9 @@ public final class NativeCallOps {
                             break;
                         case DOUBLE_RW:
                             ((NativeRefInstance) o).store_n(tc, ((Memory) cArgs[i]).getDouble(0));
+                            break;
+                        case WCHAR_T_RW:
+                            ((NativeRefInstance) o).store_i(tc, ((Memory) cArgs[i]).getChar(0));
                             break;
                         case CPOINTER_RW:
                             o = Ops.decont(o, tc);
@@ -403,6 +409,7 @@ public final class NativeCallOps {
         case SHORT:
             return Short.class;
         case INT:
+        case WINT_T: /* JNA assumes wint_t is int. */
             return Integer.class;
         case LONG:
             return NativeLong.class;
@@ -411,8 +418,10 @@ public final class NativeCallOps {
         case UCHAR:
             return Byte.class;
         case USHORT:
+        case CHAR16_T:
             return Short.class;
         case UINT:
+        case CHAR32_T:
             return Integer.class;
         case ULONG:
             return NativeLong.class;
@@ -422,6 +431,8 @@ public final class NativeCallOps {
             return Float.class;
         case DOUBLE:
             return Double.class;
+        case WCHAR_T:
+            return Character.class;
         case ASCIISTR:
         case UTF8STR:
         case UTF16STR:
@@ -452,6 +463,7 @@ public final class NativeCallOps {
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Short((short) o.get_int(tc));
         case INT:
+        case WINT_T: /* JNA assumes wint_t is an int. */
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Integer((int) o.get_int(tc));
@@ -468,10 +480,12 @@ public final class NativeCallOps {
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Byte((byte) o.get_int(tc));
         case USHORT:
+        case CHAR16_T:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Short((short) o.get_int(tc));
         case UINT:
+        case CHAR32_T:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Integer((int) o.get_int(tc));
@@ -491,6 +505,10 @@ public final class NativeCallOps {
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
             return new Double((double) o.get_num(tc));
+        case WCHAR_T:
+            o = Ops.decont(o, tc);
+            if (Ops.isconcrete(o, tc) == 0) return null;
+            return new Character((char) o.get_int(tc));
         case ASCIISTR:
         case UTF8STR:
         case UTF16STR: {
@@ -573,7 +591,8 @@ public final class NativeCallOps {
             return m;
         }
         case SHORT_RW:
-        case USHORT_RW: {
+        case USHORT_RW:
+        case CHAR16_T_RW: {
             if (Ops.iscont_i(o) == 0)
                 throw ExceptionHandling.dieInternal(tc,
                     String.format("Native call expected argument that references a native integer, but got %s", o));
@@ -582,7 +601,9 @@ public final class NativeCallOps {
             return m;
         }
         case INT_RW:
-        case UINT_RW: {
+        case UINT_RW:
+        case WINT_T_RW: /* JNA assumes wint_t is an int. */
+        case CHAR32_T_RW: {
             if (Ops.iscont_i(o) == 0)
                 throw ExceptionHandling.dieInternal(tc,
                     String.format("Native call expected argument that references a native integer, but got %s", o));
@@ -624,6 +645,14 @@ public final class NativeCallOps {
             m.setDouble(0, (double) ((NativeRefInstance) o).fetch_n(tc));
             return m;
         }
+        case WCHAR_T_RW: {
+            if (Ops.iscont_i(o) == 0)
+                throw ExceptionHandling.dieInternal(tc,
+                    String.format("Native call expected argument that references a native integer, but got %s", o));
+            Memory m = new Memory(Character.SIZE);
+            m.setChar(0, (char) ((NativeRefInstance) o).fetch_i(tc));
+            return m;
+        }
         case CPOINTER_RW: {
             Memory m = new Memory(Pointer.SIZE);
             o        = Ops.decont(o, tc);
@@ -657,7 +686,8 @@ public final class NativeCallOps {
             nqpobj.set_int(tc, val);
             break;
         }
-        case INT: {
+        case INT:
+        case WINT_T: { /* JNA assumes wint_t is an int. */
             nqpobj = type.st.REPR.allocate(tc, type.st);
             int val = ((Integer) o).intValue();
             nqpobj.set_int(tc, val);
@@ -683,7 +713,8 @@ public final class NativeCallOps {
             nqpobj.set_int(tc, val);
             break;
         }
-        case USHORT: {
+        case USHORT:
+        case CHAR16_T: {
             nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((Short) o).shortValue();
             if (val < 0)
@@ -691,7 +722,8 @@ public final class NativeCallOps {
             nqpobj.set_int(tc, val);
             break;
         }
-        case UINT: {
+        case UINT:
+        case CHAR32_T: {
             nqpobj = type.st.REPR.allocate(tc, type.st);
             long val = ((Integer) o).intValue();
             if (val < 0)
@@ -723,6 +755,12 @@ public final class NativeCallOps {
             nqpobj = type.st.REPR.allocate(tc, type.st);
             double val = ((Double) o).doubleValue();
             nqpobj.set_num(tc, val);
+            break;
+        }
+        case WCHAR_T: {
+            nqpobj = type.st.REPR.allocate(tc, type.st);
+            char val = ((Character) o).charValue();
+            nqpobj.set_int(tc, val);
             break;
         }
         case ASCIISTR:
