@@ -118,8 +118,6 @@ sub configure_js_backend {
 
     $ijs->{ok} = 1;
 
-    my $stage0 = $config->{moar_stage0};
-
     $js_config->{link} = $options->{link};
     my $node = $self->probe_node;
     unless ($node) {
