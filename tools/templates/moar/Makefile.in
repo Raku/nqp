@@ -1,8 +1,10 @@
-BAT          = @bat@
-M_RUNNER     = nqp-m$(BAT)
-M_RUNNER_BIN = @nfp($(BASE_DIR)/$(M_RUNNER))@
+BAT                = @bat@
+M_DEFAULT_RUNNER   = nqp@moar::exe@
+M_BUILD_RUNNER     = nqp-m@moar::exe@
+M_BUILD_RUNNER_BIN = @nfp($(BASE_DIR)/$(M_BUILD_RUNNER))@
+M_RUNNER           = nqp-m$(BAT)
 # It's ok to shell quote this one as it only used in a command line
-M_GEN_CAT    = @shquot(@script(gen-cat.pl)@)@ moar
+M_GEN_CAT          = @shquot(@script(gen-cat.pl)@)@ moar
 
 M_STAGE0_DIR = @moar_stage0@
 M_STAGE1_DIR = @nfp(gen/moar/stage1)@
@@ -87,7 +89,7 @@ realclean: clean
 
 testclean:
 
-m-all: $(NQP_MOAR) $(M_RUNNER) $(P5QREGEX_MOAR)
+m-all: $(NQP_MOAR) $(M_BUILD_RUNNER) $(P5QREGEX_MOAR)
 
 m-install: m-all @@configure_script@@ @@template(@platform@/nqp-m-@relocatable@)@@
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
@@ -110,7 +112,7 @@ m-install: m-all @@configure_script@@ @@template(@platform@/nqp-m-@relocatable@)
 	$(CHMOD) 0755 @q($(DESTDIR)$(BIN_DIR)/$(M_RUNNER))@
 
 # FIXME:
-M_CLEANUPS = *.moarvm  @nfp(gen/moar/*)@ $(M_RUNNER)
+M_CLEANUPS = *.moarvm  @nfp(gen/moar/*)@ $(M_BUILD_RUNNER) $(M_DEFAULT_RUNNER) nqp-m.c nqp-m@moar::obj@ nqpmc nqp@moar::obj@
 
 m-clean:
 	$(RM_RF) $(M_CLEANUPS)
@@ -270,22 +272,34 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ .
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ .
 
-$(M_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build)@@
-	$(PERL5) @shquot(@configure_script@)@ @configure_opts()@ --expand=@shquot(@template(@platform@/nqp-m-build)@)@ --out=@q($(M_RUNNER))@
-	$(CHMOD) 0755 @q($(M_RUNNER))@
+$(M_BUILD_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
+	$(RM_F) @q($(M_BUILD_RUNNER))@
+	$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp-m.c \
+		--set-var=MOAR=@moar@ \
+		--set-var=base_dir=$(BASE_DIR) \
+		--set-var=exec_name=@nfp($(BASE_DIR)/$(M_BUILD_RUNNER))@ \
+		--set-var=mbc=$(NQP_MOAR)
+	$(M_CC) @moar::ccswitch@ @moar::cflags@ @moar::ccout@nqp-m@moar::obj@ nqp-m.c
+	$(M_LD) @moar::ldout@$@ nqp-m@moar::obj@
 
-m-runner-default: m-all
-	$(CP) @q($(M_RUNNER))@ @nfpq($(BASE_DIR)/nqp$(BAT))@
-	$(CHMOD) 0755 nqp$(BAT)
+m-runner-default: m-all @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
+	$(RM_F) @q($(M_DEFAULT_RUNNER))@
+	$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp.c \
+		--set-var=MOAR=@moar@ \
+		--set-var=base_dir=$(BASE_DIR) \
+		--set-var=exec_name=@nfp($(BASE_DIR)/$(M_DEFAULT_RUNNER))@ \
+		--set-var=mbc=$(NQP_MOAR)
+	$(M_CC) @moar::ccswitch@ @moar::cflags@ @moar::ccout@nqp@moar::obj@ nqp.c
+	$(M_LD) @moar::ldout@$@ nqp-m@moar::obj@
 
 m-runner-default-install: m-runner-default m-install
 	$(CP) @nfpq($(DESTDIR)$(BIN_DIR)/$(M_RUNNER))@ @nfpq($(DESTDIR)$(BIN_DIR)/nqp$(BAT))@
 	$(CHMOD) 0755 @nfpq($(DESTDIR)$(BIN_DIR)/nqp$(BAT))@
 
-$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_RUNNER)
+$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_BUILD_RUNNER)
 	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
 	$(PERL5) $(M_GEN_CAT) stage2 $(P5QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
-	@q($(M_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
+	@q($(M_BUILD_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
 	    @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
 
 m-bootstrap-files: $(M_STAGE2_OUTPUT)
@@ -304,21 +318,21 @@ m-bootstrap-files: $(M_STAGE2_OUTPUT)
 ## testing
 
 m-test: m-all
-	$(PROVE) -r --exec @q($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r --exec @q($(M_BUILD_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
 
 m-test-loud: m-all
-	$(PROVE) -r -v --exec @q($(M_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r -v --exec @q($(M_BUILD_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
 
-m-core-test: $(M_RUNNER)
-	$(PROVE) -r --exec @nfpq($(M_RUNNER))@ @nfp(t/nqp)@
+m-core-test: $(M_BUILD_RUNNER)
+	$(PROVE) -r --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/nqp)@
 
-m-core-test-loud: $(M_RUNNER)
-	$(PROVE) -r -v --exec @nfpq($(M_RUNNER))@ @nfp(t/nqp)@
+m-core-test-loud: $(M_BUILD_RUNNER)
+	$(PROVE) -r -v --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/nqp)@
 
-m-qregex-test: $(M_RUNNER)
-	$(PROVE) -r --exec @nfpq($(M_RUNNER))@ @nfp(t/qregex)@
+m-qregex-test: $(M_BUILD_RUNNER)
+	$(PROVE) -r --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/qregex)@
 
-m-qregex-test-loud: $(M_RUNNER)
-	$(PROVE) -r -v --exec @nfpq($(M_RUNNER))@ @nfp(t/qregex)@
+m-qregex-test-loud: $(M_BUILD_RUNNER)
+	$(PROVE) -r -v --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/qregex)@
 
 # vim: ft=make noexpandtab ts=4 sw=4

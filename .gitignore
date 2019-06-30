@@ -27,6 +27,8 @@ node_modules
 nqp-runtime.jar
 *.class
 *.jar
+/nqp.c
+/nqp-m.c
 /nqp-j
 /nqp-p
 /nqp-m
@@ -34,7 +36,6 @@ nqp-runtime.jar
 /nqp-js-cross
 /nqp-j.bat
 /nqp-p.bat
-/nqp-m.bat
 /nqp-js.bat
 /nqp-js-cross.bat
 /jvmconfig.properties
