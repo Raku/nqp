@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Cwd;
 use IPC::Cmd qw<run>;
-use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
+use NQP::Config qw<slurp read_config_from_command cmp_rev system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -228,8 +228,15 @@ sub moar_config {
             File::Spec->catdir( $dir, File::Spec->updir ) );
     }
 
+    my %c = read_config_from_command(
+        '"' . $self->nfp( $moar_exe ) . '"'
+        . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
+        . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
+        . ' --bootstrap --show-config' );
+    %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
+
     return $self->backend_config( 'moar',
-        { moar => $moar_exe, moar_prefix => $moar_prefix, } );
+        { %c, moar => $moar_exe, moar_prefix => $moar_prefix, } );
 }
 
 sub gen_moar {
