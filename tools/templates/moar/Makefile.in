@@ -325,7 +325,7 @@ m-runner-default: m-all @@configure_script@@ @@template(@platform@/nqp-m-build.c
 		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/$(M_NQP))@)@ \
 		--set-var=mbc=$(NQP_MOAR)
 	@moar::cc@ @moar::ccswitch@ @moar::cflags@ @moar::ccout@nqp@moar::obj@ nqp.c
-	@moar::ld@ @moar::ldout@$@ nqp-m@moar::obj@
+	@moar::ld@ @moar::ldout@$(M_NQP) nqp-m@moar::obj@
 
 m-runner-default-install: m-runner-default m-install
 	$(CP) $(M_INST_NQP) @nfpq($(DESTDIR)$(BIN_DIR)/$(M_NQP))@
