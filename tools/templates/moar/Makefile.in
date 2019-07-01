@@ -133,7 +133,7 @@ M_CLEANUPS = \
   nqpmc \
   nqp@moar::obj@ \
   $(M_BUILD_RUNNER) \
-  $(M_DEFAULT_RUNNER) \
+  $(M_NQP) \
   $(M_INST_NQP_M) \
   $(M_INST_NQP)
 
@@ -318,11 +318,11 @@ $(M_BUILD_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
 	@moar::ld@ @moar::ldout@$@ nqp-m@moar::obj@
 
 m-runner-default: m-all @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
-	$(RM_F) @q($(M_DEFAULT_RUNNER))@
+	$(RM_F) @q($(M_NQP))@
 	$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp.c \
 		--set-var=MOAR=@shquot(@nfp(@moar@)@)@ \
 		--set-var=base_dir=@shquot(@nfp($(BASE_DIR))@)@  \
-		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/$(M_DEFAULT_RUNNER))@)@ \
+		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/$(M_NQP))@)@ \
 		--set-var=mbc=$(NQP_MOAR)
 	@moar::cc@ @moar::ccswitch@ @moar::cflags@ @moar::ccout@nqp@moar::obj@ nqp.c
 	@moar::ld@ @moar::ldout@$@ nqp-m@moar::obj@
