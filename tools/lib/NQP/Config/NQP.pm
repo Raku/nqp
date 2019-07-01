@@ -100,13 +100,67 @@ sub configure_misc {
 sub configure_moar_backend {
     my $self  = shift;
     my $imoar = $self->{impls}{moar};
+    my $config = $self->{config};
 
     $self->gen_moar;
+
+    my $moar_config = $self->moar_config;
 
     $self->{config}{moar} = $imoar->{config}{moar};
 
     $self->sorry( "No moar executable found in " . $self->cfg('prefix') )
       unless $self->is_executable( $self->{config}{moar} );
+
+    if ( $config->{relocatable} eq 'reloc' ) {
+        $config->{static_nqp_home}          = '';
+        $config->{static_nqp_home_define}   = '';
+    }
+    else {
+        my $qchar = $config->{quote};
+        $config->{static_nqp_home} =
+          File::Spec->rel2abs(
+            File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
+          );
+        $config->{static_nqp_home_define} =
+          '-DSTATIC_NQP_HOME='
+          . $qchar . $self->c_escape_string( $config->{static_nqp_home} ) . $qchar;
+    }
+
+    # Strip rpath from ldflags so we can set it differently ourself.
+    $config->{ldflags} = $moar_config->{'moar::ldflags'};
+    $config->{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
+    $config->{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
+    $config->{ldflags} .= ' '
+      . (
+          $config->{relocatable} eq 'reloc'
+        ? $moar_config->{'moar::ldrpath_relocatable'}
+        : $moar_config->{'moar::ldrpath'}
+      );
+    $config->{ldlibs}          = $moar_config->{'moar::ldlibs'};
+    $config->{'mingw_unicode'} = '';
+
+    my @c_runner_libs;
+    if ( $self->is_win ) {
+        if ( File::Spec->catdir( $config->{prefix}, 'bin' ) ne
+            $moar_config->{'moar::libdir'} )
+        {
+            $config->{m_install} = "\t"
+              . q<$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
+        }
+        if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
+            $config->{'mingw_unicode'} = '-municode';
+        }
+        push @c_runner_libs, sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
+    }
+    $config->{c_runner_libs} = join( " ", @c_runner_libs );
+    $config->{moar_lib}      = sprintf(
+        (
+              $moar_config->{'moar::ldimp'}
+            ? $moar_config->{'moar::ldimp'}
+            : $moar_config->{'moar::ldusr'}
+        ),
+        $moar_config->{'moar::name'}
+    );
 }
 
 sub configure_js_backend {
