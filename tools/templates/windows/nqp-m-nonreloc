@@ -1,1 +1,0 @@
-\@ @nfpq(@moar@)@ --execname="%~dpf0" --libpath=@nfpq(@nqplibdir@)@ @nfpq(@nqplibdir@/nqp.moarvm)@ %*

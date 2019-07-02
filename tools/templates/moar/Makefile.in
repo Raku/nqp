@@ -104,7 +104,7 @@ testclean:
 
 m-all: $(NQP_MOAR) $(M_BUILD_RUNNER) $(M_INST_NQP_M) $(M_INST_NQP) $(P5QREGEX_MOAR)
 
-m-install: m-all @@configure_script@@ @@template(@platform@/nqp-m-@relocatable@)@@
+m-install: m-all @@configure_script@@
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
 	$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(MKPATH) @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler)@

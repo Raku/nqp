@@ -1,1 +1,0 @@
-\@ %~dp0\\moar.exe --execname="%~dpf0" --libpath=%~dp0\\..\\share\\nqp\\lib %~dp0\\..\\share\\nqp\\lib\\nqp.moarvm %*
