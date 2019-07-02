@@ -128,13 +128,16 @@ m-install: m-all @@configure_script@@
 M_CLEANUPS = \
   *.moarvm \
   @nfp(gen/moar/*)@ \
+  nqpmc \
   nqp-m.c \
   nqp-m@moar::obj@ \
-  nqpmc \
-  nqp@moar::obj@ \
   $(M_BUILD_RUNNER) \
+  nqp.c \
+  nqp@moar::obj@ \
   $(M_NQP) \
+  inst-nqp-m@moar::obj@ \
   $(M_INST_NQP_M) \
+  inst-nqp@moar::obj@ \
   $(M_INST_NQP)
 
 m-clean:
