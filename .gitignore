@@ -38,6 +38,8 @@ nqp-runtime.jar
 /nqp-p.bat
 /nqp-js.bat
 /nqp-js-cross.bat
+/inst-nqp
+/inst-nqp-m
 /jvmconfig.properties
 /*.moarvm
 MoarVM
