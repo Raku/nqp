@@ -13,7 +13,7 @@ sub foo() {
   is(nqp::atkey($lexpad,'$bar'), "hi","accessing a different variable using nqp::curlexpad()");
 
   ok(nqp::atkey_i($lexpad, '$int') == 150, "accessing an int variable using nqp::atkey_i");
-  ok(nqp::atkey_n($lexpad, '$num') == 7.5, "accessing a num variable using nqp::atkey_n");
+  ok(nqp::iseq_n(nqp::atkey_n($lexpad, '$num'), 7.5), "accessing a num variable using nqp::atkey_n");
   is(nqp::atkey_s($lexpad, '$str'), "hello", "accessing a str variable using nqp::atkey_s");
 
 
@@ -28,7 +28,7 @@ sub foo() {
   ok($int == 300, "binding to a native int variable using curlexpad and nqp::bindkey_i");
 
   nqp::bindkey_n($lexpad, '$num', 3.14);
-  ok($num == 3.14, "binding to a native num variable using curlexpad and nqp::bindkey_n");
+  ok(nqp::iseq_n($num, 3.14), "binding to a native num variable using curlexpad and nqp::bindkey_n");
 
   nqp::bindkey_s($lexpad, '$str', 'hi');
   is($str, "hi", "binding to a native str variable using curlexpad and nqp::bindkey_s");

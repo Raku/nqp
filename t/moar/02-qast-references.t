@@ -82,7 +82,7 @@ $num_boxer.HOW.add_attribute($num_boxer, NQPAttribute.new(
     :name('$!value'), :type(num), :box_target(1)
 ));
 $num_boxer.HOW.add_parent($num_boxer, NQPMu);
-$num_boxer.HOW.add_method($num_boxer, 'twice', method () {~(nqp::getattr_n(self, $num_boxer, '$!value')*2)});
+$num_boxer.HOW.add_method($num_boxer, 'twice', method () {~(nqp::mul_n(nqp::getattr_n(self, $num_boxer, '$!value'), 2.0))});
 $num_boxer.HOW.compose($num_boxer);
 
 my $str_boxer := NQPClassHOW.new_type(:name('boxing_str'), :repr('P6opaque'));
@@ -568,7 +568,7 @@ test_qast_result(
     -> $r {
         my $foo := nqp::atpos($r, 0);
         ok(nqp::getattr_i($foo, E, '$!x') == 99, 'attributeref works (int)');
-        ok(nqp::getattr_n($foo, E, '$!y') == 3.14, 'attributeref works (num)');
+        ok(nqp::iseq_n(nqp::getattr_n($foo, E, '$!y'), 3.14), 'attributeref works (num)');
         ok(nqp::getattr_s($foo, E, '$!z') eq 'funny', 'attributeref works (str)');
 
         ok(nqp::iscont(nqp::atpos($r, 1)) == 1, 'iscont on int attributref');

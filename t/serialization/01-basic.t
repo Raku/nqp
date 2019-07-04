@@ -102,7 +102,7 @@ sub fresh_out_sc() {
 
     ok(nqp::scobjcount($dsc) == 1,   'deserialized SC has a single object');
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T2),     'deserialized object has correct type');
-    ok(nqp::unbox_n(nqp::scgetobj($dsc, 0)) == 6.9, 'deserialized object has correct value');
+    ok(nqp::iseq_n(nqp::unbox_n(nqp::scgetobj($dsc, 0)), 6.9), 'deserialized object has correct value');
 }
 
 # Serializing an SC with a single object with P6str REPR.
@@ -643,9 +643,9 @@ sub fresh_out_sc() {
         }
         method BUILD() {
             my @a := nqp::list_n();
-            nqp::bindpos_n(@a, 0, 101);
-            nqp::bindpos_n(@a, 1, 102);
-            nqp::bindpos_n(@a, 2, 103);
+            nqp::bindpos_n(@a, 0, 101.0);
+            nqp::bindpos_n(@a, 1, 102.0);
+            nqp::bindpos_n(@a, 2, 103.0);
             $!a := @a;
         }
         method a() { $!a }
@@ -660,9 +660,9 @@ sub fresh_out_sc() {
 
     ok(nqp::istype(nqp::scgetobj($dsc, 0), T18),          'deserialized object has correct type');
     ok(nqp::elems(nqp::scgetobj($dsc, 0).a) == 3,         'num array came back with correct element count');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 0) == 101,  'num array first element is correct');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 1) == 102,  'num array second element is correct');
-    ok(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 2) == 103,  'num array third element is correct');
+    ok(nqp::iseq_n(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 0), 101.0),  'num array first element is correct');
+    ok(nqp::iseq_n(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 1), 102.0),  'num array second element is correct');
+    ok(nqp::iseq_n(nqp::atpos_n(nqp::scgetobj($dsc, 0).a, 2), 103.0),  'num array third element is correct');
 }
 
 # integers

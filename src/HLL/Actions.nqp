@@ -149,7 +149,7 @@ class HLL::Actions {
 
     method integer($/) { make $<VALUE>.made; }
 
-    method dec_number($/) { make +$/; }
+    method dec_number($/) { make nqp::numify(~$/); }
 
     method decint($/) { make self.string_to_int( $/, 10); }
     method hexint($/) { make self.string_to_int( $/, 16); }

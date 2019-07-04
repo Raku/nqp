@@ -3960,6 +3960,40 @@ public final class Ops {
         // If anything else, we can't do it.
         throw ExceptionHandling.dieInternal(tc, "Cannot numify this");
     }
+    public static long smart_intify(SixModelObject obj, ThreadContext tc) {
+        obj = decont(obj, tc);
+
+        // If it's null, it's 0
+        if (obj == null)
+            return 0;
+
+        // If it can unbox as an int or a num, that wins right off.
+        StorageSpec ss = obj.st.REPR.get_storage_spec(tc, obj.st);
+        if ((ss.can_box & StorageSpec.CAN_BOX_INT) != 0)
+            return obj.get_int(tc);
+        if ((ss.can_box & StorageSpec.CAN_BOX_NUM) != 0)
+            return (long)obj.get_num(tc);
+
+        // Otherwise, look for an Int method.
+        SixModelObject intMeth = obj.st.MethodCache.get("Int");
+        if (intMeth != null) {
+            invokeDirect(tc, intMeth, invocantCallSite, new Object[] { obj });
+            return result_i(tc.curFrame);
+        }
+
+        // If it's a type object, zero.
+        if (obj instanceof TypeObject)
+            return 0;
+
+        // See if it can unbox to a primitive we can numify.
+        if ((ss.can_box & StorageSpec.CAN_BOX_STR) != 0)
+            return coerce_s2i(obj.get_str(tc));
+        if (obj instanceof VMArrayInstance || obj instanceof VMHashInstance)
+            return obj.elems(tc);
+
+        // If anything else, we can't do it.
+        throw ExceptionHandling.dieInternal(tc, "Cannot intify this");
+    }
 
     /* Math operations. */
     public static double sec_n(double val) {
@@ -6498,8 +6532,8 @@ public final class Ops {
             int curEdge = 0;
             nfa.states[i] = new NFAStateInfo[edges];
             for (int j = 0; j < elems; j += 3) {
-                int act = (int)smart_numify(edgeInfo.at_pos_boxed(tc, j), tc);
-                int to = (int)smart_numify(edgeInfo.at_pos_boxed(tc, j + 2), tc);
+                int act = (int)smart_intify(edgeInfo.at_pos_boxed(tc, j), tc);
+                int to = (int)smart_intify(edgeInfo.at_pos_boxed(tc, j + 2), tc);
 
                 nfa.states[i][curEdge] = new NFAStateInfo();
                 nfa.states[i][curEdge].act = act;
@@ -6512,7 +6546,7 @@ public final class Ops {
                 case NFA.EDGE_CODEPOINT_NEG:
                 case NFA.EDGE_CHARCLASS:
                 case NFA.EDGE_CHARCLASS_NEG:
-                    nfa.states[i][curEdge].arg_i = (int)smart_numify(edgeInfo.at_pos_boxed(tc, j + 1), tc);
+                    nfa.states[i][curEdge].arg_i = (int)smart_intify(edgeInfo.at_pos_boxed(tc, j + 1), tc);
                     break;
                 case NFA.EDGE_CHARLIST:
                 case NFA.EDGE_CHARLIST_NEG:
@@ -6524,8 +6558,8 @@ public final class Ops {
                 case NFA.EDGE_CHARRANGE:
                 case NFA.EDGE_CHARRANGE_NEG: {
                     SixModelObject arg = edgeInfo.at_pos_boxed(tc, j + 1);
-                    nfa.states[i][curEdge].arg_lc = (char)smart_numify(arg.at_pos_boxed(tc, 0), tc);
-                    nfa.states[i][curEdge].arg_uc = (char)smart_numify(arg.at_pos_boxed(tc, 1), tc);
+                    nfa.states[i][curEdge].arg_lc = (char)smart_intify(arg.at_pos_boxed(tc, 0), tc);
+                    nfa.states[i][curEdge].arg_uc = (char)smart_intify(arg.at_pos_boxed(tc, 1), tc);
                     break;
                 }
                 }

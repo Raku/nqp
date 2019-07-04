@@ -63,9 +63,9 @@ nqp::assign_i($int_ref, 200);
 is($foo.get_int, 200, 'nqp::assign_i on result of nqp::getattrref_i works');
 
 my $num_ref := nqp::getattrref_n($foo, Foo, '$!num');
-is(nqp::decont_n($num_ref), 3.14, 'nqp::decont_n on result of nqp::getattrref_n works');
+ok(nqp::iseq_n(nqp::decont_n($num_ref), 3.14), 'nqp::decont_n on result of nqp::getattrref_n works');
 nqp::assign_n($num_ref, 0.123);
-is($foo.get_num, 0.123, 'nqp::assign_n on result of nqp::getattrref_n works');
+ok(nqp::iseq_n($foo.get_num, 0.123), 'nqp::assign_n on result of nqp::getattrref_n works');
 
 ok(!nqp::iscont_i($num_ref), 'nqp::iscont_i on num attribute ref instance');
 ok(nqp::iscont_n($num_ref), 'nqp::iscont_n on num attribute ref instance');
@@ -92,9 +92,9 @@ is(nqp::atpos_i($array_i, 2), 200, 'nqp::assign_i on result of nqp::atposref_i w
 my $array_n := nqp::list_n();
 nqp::bindpos_n($array_n, 2, 3.14);
 my $pos_ref_n := nqp::atposref_n($array_n, 2);
-is(nqp::decont_n($pos_ref_n), 3.14, 'nqp::decont_n on result of nqp::atposref_n works');
+ok(nqp::iseq_n(nqp::decont_n($pos_ref_n), 3.14), 'nqp::decont_n on result of nqp::atposref_n works');
 nqp::assign_n($pos_ref_n, 1.234);
-is(nqp::atpos_n($array_n, 2), 1.234, 'nqp::assign_n on result of nqp::atposref_n works');
+ok(nqp::iseq_n(nqp::atpos_n($array_n, 2), 1.234), 'nqp::assign_n on result of nqp::atposref_n works');
 
 my $array_s := nqp::list_s();
 nqp::bindpos_s($array_s, 2, "fancy value");

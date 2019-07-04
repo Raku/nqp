@@ -688,7 +688,7 @@ class NQP::Actions is HLL::Actions {
 
         # Extra traits, if present.
         if $<nativesize> {
-            $package.HOW.set_nativesize($package, nqp::add_i($<size>, 0));
+            $package.HOW.set_nativesize($package, +$<size>);
         }
         if $<unsigned> {
             $package.HOW.set_unsigned($package, 1);
@@ -1584,7 +1584,7 @@ class NQP::Actions is HLL::Actions {
 
     method number($/) {
         my $value := $<dec_number> ?? $<dec_number>.ast !! $<integer>.ast;
-        if ~$<sign> eq '-' { $value := -$value; }
+        if ~$<sign> eq '-' { $value := $<dec_number> ?? nqp::neg_n($value) !! nqp::neg_i($value); }
         make $<dec_number> ??
             QAST::NVal.new( :value($value) ) !!
             QAST::IVal.new( :value($value) );

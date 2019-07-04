@@ -3,7 +3,7 @@ plan(14 + 3*300);
 # Precision and value drift tests for floating point numerics
 
 sub is ($got, $expected, $desc = "$got is exactly equal to $expected") {
-    ok(?(my $test := $got == $expected), $desc);
+    ok(?(my $test := nqp::iseq_n($got, $expected)), $desc);
     unless $test {
         say("# got:      $got");
         say("# expected: $expected");
@@ -12,7 +12,7 @@ sub is ($got, $expected, $desc = "$got is exactly equal to $expected") {
 }
 
 sub isn't ($got, $expected, $desc = "$got is NOT equal to $expected") {
-    ok(?(my $test := $got != $expected), $desc);
+    ok(?(my $test := nqp::isne_n($got, $expected)), $desc);
     unless $test {
         say("# got value: $got");
         say("# had value: $expected");
@@ -64,18 +64,18 @@ sub () {
         my $res := '';
         my int $rounds;
         $res := $res ~ nqp::ceil_n(nqp::rand_n(9.9e0))
-            while nqp::rand_n(1e0) > .2e0 && $rounds++ < 30;
+            while nqp::isgt_n(nqp::rand_n(1e0), .2e0) && $rounds++ < 30;
         $res := '0' if ! $res;
         $res := $res ~ '.';
         $rounds := 0;
         $res := $res ~ nqp::ceil_n(nqp::rand_n(9.9e0))
-            while nqp::rand_n(1e0) > .2e0 && $rounds++ < 30;
+            while nqp::isgt_n(nqp::rand_n(1e0), .2e0) && $rounds++ < 30;
         $res := $res ~ '0' if nqp::eqat($res, '.', nqp::chars($res)-1);
         $res := $res ~ 'e';
-        $res := $res ~ (nqp::rand_n(1e0) > .5e0
+        $res := $res ~ (nqp::isgt_n(nqp::rand_n(1e0), .5e0)
             ??       nqp::ceil_n(nqp::rand_n(100e0))
             !! "-" ~ nqp::ceil_n(nqp::rand_n(100e0)));
-        $res := "-$res" if nqp::rand_n(1e0) > .5e0;
+        $res := "-$res" if nqp::isgt_n(nqp::rand_n(1e0), .5e0);
         $res;
     }
 
