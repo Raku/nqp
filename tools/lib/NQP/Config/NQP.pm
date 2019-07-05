@@ -112,32 +112,32 @@ sub configure_moar_backend {
       unless $self->is_executable( $self->{config}{moar} );
 
     if ( $config->{relocatable} eq 'reloc' ) {
-        $config->{static_nqp_home}          = '';
-        $config->{static_nqp_home_define}   = '';
+        $imoar->{config}{static_nqp_home}        = '';
+        $imoar->{config}{static_nqp_home_define} = '';
     }
     else {
         my $qchar = $config->{quote};
-        $config->{static_nqp_home} =
+        $imoar->{config}{static_nqp_home} =
           File::Spec->rel2abs(
             File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
           );
-        $config->{static_nqp_home_define} =
+        $imoar->{config}{static_nqp_home_define} =
           '-DSTATIC_NQP_HOME='
-          . $qchar . $self->c_escape_string( $config->{static_nqp_home} ) . $qchar;
+          . $qchar . $self->c_escape_string( $imoar->{config}{static_nqp_home} ) . $qchar;
     }
 
     # Strip rpath from ldflags so we can set it differently ourself.
-    $config->{ldflags} = $moar_config->{'moar::ldflags'};
-    $config->{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
-    $config->{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
-    $config->{ldflags} .= ' '
+    $imoar->{config}{ldflags} = $moar_config->{'moar::ldflags'};
+    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
+    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
+    $imoar->{config}{ldflags} .= ' '
       . (
           $config->{relocatable} eq 'reloc'
         ? $moar_config->{'moar::ldrpath_relocatable'}
         : $moar_config->{'moar::ldrpath'}
       );
-    $config->{ldlibs}          = $moar_config->{'moar::ldlibs'};
-    $config->{'mingw_unicode'} = '';
+    $imoar->{config}{ldlibs}        = $moar_config->{'moar::ldlibs'};
+    $imoar->{config}{mingw_unicode} = '';
 
     my @c_runner_libs;
     if ( $self->is_win ) {
@@ -148,12 +148,12 @@ sub configure_moar_backend {
               . q<$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
         }
         if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
-            $config->{'mingw_unicode'} = '-municode';
+            $imoar->{config}{mingw_unicode} = '-municode';
         }
         push @c_runner_libs, sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
     }
-    $config->{c_runner_libs} = join( " ", @c_runner_libs );
-    $config->{moar_lib}      = sprintf(
+    $imoar->{config}{c_runner_libs} = join( " ", @c_runner_libs );
+    $imoar->{config}{moar_lib}      = sprintf(
         (
               $moar_config->{'moar::ldimp'}
             ? $moar_config->{'moar::ldimp'}
