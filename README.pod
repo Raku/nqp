@@ -57,6 +57,11 @@ command like:
 
     $ ./nqp hello.nqp
 
+If attempting to run NQP on the JVM results in NQP claiming it couldn't reserve
+enough memory, you may need to increase the memory limit of your shell like so:
+
+    $ ulimit -d 6144000
+
 By default, NQP searches for the MoarVM executable and installs to the
 directory C<./install>. You can change that with the C<--prefix> option to
 Configure.pl.
