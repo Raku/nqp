@@ -16,9 +16,9 @@ public class P6num extends REPR {
     /**
      * Possible C types we can handle.
      */
-    public final static byte P6NUM_C_TYPE_FLOAT      =  -1;
-    public final static byte P6NUM_C_TYPE_DOUBLE     =  -2;
-    public final static byte P6NUM_C_TYPE_LONGDOUBLE =  -3;
+    public final static byte P6NUM_C_TYPE_FLOAT      =  -32;
+    public final static byte P6NUM_C_TYPE_DOUBLE     =  -33;
+    public final static byte P6NUM_C_TYPE_LONGDOUBLE =  -34;
 
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
