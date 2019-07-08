@@ -309,6 +309,7 @@ sub gen_moar {
     my $has_gen_moar = defined $gen_moar;
     my @opts     = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
+    push @opts, '--relocatable' if $options->{relocatable};
     my $startdir     = $config->{base_dir};
     my $git_protocol = $options->{'git-protocol'} || 'https';
     my $try_generate;
