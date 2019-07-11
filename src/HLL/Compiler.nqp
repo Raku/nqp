@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s bytecode|b'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -164,13 +164,18 @@ class HLL::Compiler does HLL::Backend::Default {
             return self.needs-more-input();
         }
 
-        if nqp::existskey(%adverbs, 'profile-compile') {
-            $output := $!backend.run_profiled({
-                self.compile($code, :compunit_ok(1), |%adverbs);
-            }, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>);
-        }
-        else {
-            $output := self.compile($code, :compunit_ok(1), |%adverbs);
+        if nqp::existskey(%adverbs, 'bytecode') {
+            $output := $code;
+        } else {
+
+            if nqp::existskey(%adverbs, 'profile-compile') {
+                $output := $!backend.run_profiled({
+                    self.compile($code, :compunit_ok(1), |%adverbs);
+                }, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>);
+            }
+            else {
+                $output := self.compile($code, :compunit_ok(1), |%adverbs);
+            }
         }
 
         if $!backend.is_compunit($output) && %adverbs<target> eq '' {
@@ -410,8 +415,8 @@ class HLL::Compiler does HLL::Backend::Default {
         $!user_progname := join(',', @files);
         my @codes;
         for @files -> $filename {
-            my $err := 0;
-            my $in-handle;
+        my $err := 0;
+        my $in-handle;
             try {
                 if $filename eq '-' {
                     $in-handle := stdin();
@@ -419,6 +424,10 @@ class HLL::Compiler does HLL::Backend::Default {
                 elsif nqp::stat($filename, nqp::const::STAT_ISDIR) {
                     note("Can not run directory $filename.");
                     $err := 1;
+                }
+                elsif nqp::defined(%adverbs<bytecode>) {
+                    nqp::loadbytecode($filename);
+                    nqp::exit(0);
                 }
                 else {
                     $in-handle := open($filename, :r, :enc($encoding));
@@ -429,6 +438,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
             }
             nqp::exit(1) if $err;
+            #nqp::exit(0) if nqp::defined(%adverbs<bytecode>);
             try {
                 nqp::push(@codes, $in-handle.slurp());
                 unless $filename eq '-' {
