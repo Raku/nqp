@@ -2113,6 +2113,7 @@ my %const_map := nqp::hash(
     'P6STR_C_TYPE_CHAR',        -64,
     'P6STR_C_TYPE_WCHAR_T',     -65,
     'P6STR_C_TYPE_CHAR16_T',    -66,
+    'P6STR_C_TYPE_CHAR32_T',    -67,
 
     'NORMALIZE_NONE',            0,
     'NORMALIZE_NFC',             1,
