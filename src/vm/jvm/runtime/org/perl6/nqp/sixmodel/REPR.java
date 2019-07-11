@@ -11,6 +11,30 @@ import org.perl6.nqp.runtime.ThreadContext;
  */
 public abstract class REPR {
     /**
+     * Possible C types we can handle.
+     */
+    public final static byte P6INT_C_TYPE_CHAR       = -1;
+    public final static byte P6INT_C_TYPE_SHORT      = -2;
+    public final static byte P6INT_C_TYPE_INT        = -3;
+    public final static byte P6INT_C_TYPE_LONG       = -4;
+    public final static byte P6INT_C_TYPE_LONGLONG   = -5;
+    public final static byte P6INT_C_TYPE_BOOL       = -6;
+    public final static byte P6INT_C_TYPE_SIZE_T     = -7;
+    public final static byte P6INT_C_TYPE_ATOMIC_INT = -8;
+    public final static byte P6INT_C_TYPE_WCHAR_T    = -9;
+    public final static byte P6INT_C_TYPE_WINT_T     = -10;
+    public final static byte P6INT_C_TYPE_CHAR16_T   = -11;
+    public final static byte P6INT_C_TYPE_CHAR32_T   = -12;
+
+    public final static byte P6NUM_C_TYPE_FLOAT      = -32;
+    public final static byte P6NUM_C_TYPE_DOUBLE     = -33;
+    public final static byte P6NUM_C_TYPE_LONGDOUBLE = -34;
+
+    public final static byte P6STR_C_TYPE_CHAR       = -64;
+    public final static byte P6STR_C_TYPE_WCHAR_T    = -65;
+    public final static byte P6STR_C_TYPE_CHAR16_T   = -66;
+    public final static byte P6STR_C_TYPE_CHAR32_T   = -67;
+    /**
      * The ID of the representation. Purely internal, may vary from run to run in
      * some cases, don't persist.
      */

@@ -15,92 +15,114 @@ import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6int extends REPR {
-
-    /**
-     * Possible C types we can handle.
-     */
-    public final static byte P6INT_C_TYPE_CHAR       =  -1;
-    public final static byte P6INT_C_TYPE_SHORT      =  -2;
-    public final static byte P6INT_C_TYPE_INT        =  -3;
-    public final static byte P6INT_C_TYPE_LONG       =  -4;
-    public final static byte P6INT_C_TYPE_LONGLONG   =  -5;
-    public final static byte P6INT_C_TYPE_SIZE_T     =  -6;
-    public final static byte P6INT_C_TYPE_BOOL       =  -7;
-//  public final static byte P6INT_C_TYPE_ATOMIC_INT =  -8;
-    public final static byte P6INT_C_TYPE_WCHAR_T    =  -9;
-    public final static byte P6INT_C_TYPE_WINT_T     =  -10;
-    public final static byte P6INT_C_TYPE_CHAR16_T   =  -11;
-    public final static byte P6INT_C_TYPE_CHAR32_T   =  -12;
-
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
+
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
 
         StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
+        ss.inlineable      = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_INT;
-        ss.bits = 64;
-        ss.can_box = StorageSpec.CAN_BOX_INT;
-        st.REPRData = ss;
+        ss.bits            = Long.SIZE;
+        ss.is_unsigned     = 0;
+        ss.can_box         = StorageSpec.CAN_BOX_INT;
+
+        P6intREPRData rd = new P6intREPRData();
+        rd.type        = REPR.P6INT_C_TYPE_LONGLONG;
+        rd.bits        = Long.SIZE;
+        rd.is_unsigned = 0;
+        rd.ss          = ss;
+        st.REPRData = rd;
 
         return st.WHAT;
     }
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        P6intREPRData  rd          = (P6intREPRData) st.REPRData;
         SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
+
         if (integerInfo != null) {
-            SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
-            if (bits != null) {
-                short bitwidth = (short)bits.get_int(tc);
-                switch (bitwidth) {
-                    case P6INT_C_TYPE_CHAR:
-                        ((StorageSpec)st.REPRData).bits = Byte.SIZE;
+            SixModelObject nativetype = integerInfo.at_key_boxed(tc, "nativetype");
+            SixModelObject bits       = integerInfo.at_key_boxed(tc, "bits");
+            SixModelObject unsigned   = integerInfo.at_key_boxed(tc, "unsigned");
+            if (nativetype != null) {
+                rd.type = (byte) nativetype.get_int(tc);
+                if (bits != null) {
+                    rd.bits = (short) bits.get_int(tc);
+                }
+                else {
+                    switch (rd.type) {
+                        case REPR.P6INT_C_TYPE_CHAR:
+                            rd.bits = Byte.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_SHORT:
+                            rd.bits = Short.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_INT:
+                            rd.bits = Integer.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_LONG:
+                            /* NativeLong.SIZE is in bytes, not bits. */
+                            rd.bits = (short)(8 * NativeLong.SIZE);
+                            break;
+                        case REPR.P6INT_C_TYPE_LONGLONG:
+                            /* There is no LongLong in Java. */
+                            rd.bits = Long.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_BOOL:
+                            /* Let's just hope that a bool is 1 byte in size, always. */
+                            rd.bits = Byte.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_SIZE_T:
+                            rd.bits = (short)(8 * Native.SIZE_T_SIZE);
+                            break;
+                        case REPR.P6INT_C_TYPE_WCHAR_T:
+                            rd.bits = (short)(8 * Native.WCHAR_SIZE);
+                            break;
+                        case REPR.P6INT_C_TYPE_WINT_T:
+                            /* wint_t is an int... maybe? We can't possibly
+                             * know without using JNI, but it is an int
+                             * (usually) on Linux so let's go with that. */
+                            rd.bits = Integer.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_CHAR16_T:
+                            rd.bits = Short.SIZE;
+                            break;
+                        case REPR.P6INT_C_TYPE_CHAR32_T:
+                            rd.bits = Integer.SIZE;
+                            break;
+                    }
+                }
+            }
+            else if (bits != null) {
+                rd.bits = (short) bits.get_int(tc);
+                switch (rd.bits) {
+                    case 8:
+                        rd.type = REPR.P6INT_C_TYPE_CHAR;
                         break;
-                    case P6INT_C_TYPE_SHORT:
-                        ((StorageSpec)st.REPRData).bits = Short.SIZE;
+                    case 16:
+                        rd.type = REPR.P6INT_C_TYPE_SHORT;
                         break;
-                    case P6INT_C_TYPE_INT:
-                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
+                    case 32:
+                        rd.type = REPR.P6INT_C_TYPE_INT;
                         break;
-                    case P6INT_C_TYPE_LONG:
-                        /* NativeLong.SIZE is in bytes, not bits. */
-                        ((StorageSpec)st.REPRData).bits = (short)(8 * NativeLong.SIZE);
-                        break;
-                    case P6INT_C_TYPE_LONGLONG:
-                        /* There is no LongLong in Java */
-                        ((StorageSpec)st.REPRData).bits = Long.SIZE;
-                        break;
-                    case P6INT_C_TYPE_SIZE_T:
-                        ((StorageSpec)st.REPRData).bits = (short)(8 * Native.SIZE_T_SIZE);
-                        break;
-                    case P6INT_C_TYPE_BOOL:
-                        /* Let's just hope that a bool is 1 byte in size, always. */
-                        ((StorageSpec)st.REPRData).bits = Byte.SIZE;
-                        break;
-                    case P6INT_C_TYPE_WCHAR_T:
-                        ((StorageSpec)st.REPRData).bits = (short)(8 * Native.WCHAR_SIZE);
-                        break;
-                    case P6INT_C_TYPE_WINT_T:
-                        /* JNA assumes wint_t is an int. */
-                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
-                        break;
-                    case P6INT_C_TYPE_CHAR16_T:
-                        ((StorageSpec)st.REPRData).bits = Short.SIZE;
-                        break;
-                    case P6INT_C_TYPE_CHAR32_T:
-                        ((StorageSpec)st.REPRData).bits = Integer.SIZE;
-                        break;
-                    default:
-                        ((StorageSpec)st.REPRData).bits = bitwidth;
+                    case 64:
+                        rd.type = REPR.P6INT_C_TYPE_LONGLONG;
                         break;
                 }
             }
+            else {
+                rd.type = REPR.P6INT_C_TYPE_LONGLONG;
+                rd.bits = Long.SIZE;
+            }
 
-            SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
             if (unsigned != null)
-                ((StorageSpec)st.REPRData).is_unsigned = (short)unsigned.get_int(tc);
+                rd.is_unsigned = (short) unsigned.get_int(tc);
+
+            rd.ss.bits        = rd.bits;
+            rd.ss.is_unsigned = rd.is_unsigned;
         }
     }
 
@@ -111,7 +133,8 @@ public class P6int extends REPR {
     }
 
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
-        return (StorageSpec)st.REPRData;
+        P6intREPRData rd = (P6intREPRData) st.REPRData;
+        return rd.ss;
     }
 
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
@@ -202,8 +225,10 @@ public class P6int extends REPR {
      */
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
-        writer.writeInt(((StorageSpec)st.REPRData).bits);
-        writer.writeInt(((StorageSpec)st.REPRData).is_unsigned);
+        P6intREPRData rd = (P6intREPRData)st.REPRData;
+        writer.writeInt(rd.type);
+        writer.writeInt(rd.bits);
+        writer.writeInt(rd.is_unsigned);
     }
 
     /**
@@ -212,18 +237,57 @@ public class P6int extends REPR {
      */
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
+        P6intREPRData rd = new P6intREPRData();
+        if (reader.version >= 12) {
+            rd.type        = (byte)  reader.readLong();
+            rd.bits        = (short) reader.readLong();
+            rd.is_unsigned = (short) reader.readLong();
+        }
+        else if (reader.version >= 8) {
+            rd.bits        = (short) reader.readLong();
+            rd.is_unsigned = (short) reader.readLong();
+            switch (rd.bits) {
+                case 8:
+                    rd.type = REPR.P6INT_C_TYPE_CHAR;
+                    break;
+                case 16:
+                    rd.type = REPR.P6INT_C_TYPE_SHORT;
+                    break;
+                case 32:
+                    rd.type = REPR.P6INT_C_TYPE_INT;
+                    break;
+                case 64:
+                    rd.type = REPR.P6INT_C_TYPE_LONGLONG;
+                    break;
+            }
+        }
+        else if (reader.version >= 7) {
+            rd.bits        = (short) reader.readLong();
+            rd.is_unsigned = 0;
+            switch (rd.bits) {
+                case 8:
+                    rd.type = REPR.P6INT_C_TYPE_CHAR;
+                    break;
+                case 16:
+                    rd.type = REPR.P6INT_C_TYPE_SHORT;
+                    break;
+                case 32:
+                    rd.type = REPR.P6INT_C_TYPE_INT;
+                    break;
+                case 64:
+                    rd.type = REPR.P6INT_C_TYPE_LONGLONG;
+                    break;
+            }
+        }
+
         StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
+        ss.inlineable      = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_INT;
-        if (reader.version >= 7)
-            ss.bits = (short)reader.readLong();
-        else
-            ss.bits = 64;
-        if (reader.version >= 8)
-            ss.is_unsigned = (short)reader.readLong();
-        else
-            ss.is_unsigned = 0;
-        ss.can_box = StorageSpec.CAN_BOX_INT;
-        st.REPRData = ss;
+        ss.bits            = rd.bits;
+        ss.is_unsigned     = rd.is_unsigned;
+        ss.can_box         = StorageSpec.CAN_BOX_INT;
+        rd.ss = ss;
+
+        st.REPRData = rd;
     }
 }

@@ -13,7 +13,6 @@ import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.runtime.ThreadContext;
 
-
 public class NativeCall extends REPR {
     /* The available native call argument types. */
     public enum ArgType {
