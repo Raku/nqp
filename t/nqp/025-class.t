@@ -46,7 +46,7 @@ class ABC {
     }
 }
 
-ok(nqp::add_n(ABC, 0) == 0.0, "a typeobject numifies correctly");
+ok(nqp::iseq_n(nqp::add_n(ABC, 0.0), 0.0), "a typeobject numifies correctly");
 ok(nqp::add_i(ABC, 0) == 0, "a typeobject intifies correct");
 
 my $abc := ABC.new();

@@ -93,6 +93,10 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
         $tmp));
 });
 
+$ops.add_hll_op('nqp', 'intify', -> $qastcomp, $op {
+    $qastcomp.as_jast($op[0], :want($RT_INT))
+});
+
 $ops.add_hll_op('nqp', 'numify', -> $qastcomp, $op {
     $qastcomp.as_jast($op[0], :want($RT_NUM))
 });
@@ -146,8 +150,7 @@ QAST::OperationsJAST.add_hll_unbox('nqp', $RT_INT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append(JAST::Instruction.new( :op('aload_1') ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-        'smart_numify', 'Double', $TYPE_SMO, $TYPE_TC ));
-    $il.append(JAST::Instruction.new( :op('d2l') ));
+        'smart_intify', 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('nqp', $RT_NUM, -> $qastcomp {

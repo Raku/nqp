@@ -48,8 +48,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(0)) == 41, 'normal int array can be read with multi-dim op (1)');
     ok(nqp::atposnd_i(@normal_b, nqp::list_i(1)) == 42, 'normal int array can be read with multi-dim op (2)');
     my @normal_c := nqp::list_n(4.1e0, 4.2e0);
-    ok(nqp::atposnd_n(@normal_c, nqp::list_i(0)) == 4.1e0, 'normal num array can be read with multi-dim op (1)');
-    ok(nqp::atposnd_n(@normal_c, nqp::list_i(1)) == 4.2e0, 'normal num array can be read with multi-dim op (2)');
+    ok(nqp::iseq_n(nqp::atposnd_n(@normal_c, nqp::list_i(0)), 4.1e0), 'normal num array can be read with multi-dim op (1)');
+    ok(nqp::iseq_n(nqp::atposnd_n(@normal_c, nqp::list_i(1)), 4.2e0), 'normal num array can be read with multi-dim op (2)');
     my @normal_d := nqp::list_s('omg', 'wat');
     is(nqp::atposnd_s(@normal_d, nqp::list_i(0)), 'omg', 'normal str array can be read with multi-dim op (1)');
     is(nqp::atposnd_s(@normal_d, nqp::list_i(1)), 'wat', 'normal str array can be read with multi-dim op (2)');
@@ -79,8 +79,8 @@ is-dims(nqp::list_i(1), [1], 'dimensions on normal array (3)');
     my @normal_c := nqp::list_n();
     nqp::bindposnd_n(@normal_c, nqp::list_i(0), 4.1e0);
     nqp::bindposnd_n(@normal_c, nqp::list_i(1), 4.2e0);
-    ok(nqp::atpos_n(@normal_c, 0) == 4.1e0, 'normal num array can be bound with multi-dim op (1)');
-    ok(nqp::atpos_n(@normal_c, 1) == 4.2e0, 'normal num array can be bound with multi-dim op (2)');
+    ok(nqp::iseq_n(nqp::atpos_n(@normal_c, 0), 4.1e0), 'normal num array can be bound with multi-dim op (1)');
+    ok(nqp::iseq_n(nqp::atpos_n(@normal_c, 1), 4.2e0), 'normal num array can be bound with multi-dim op (2)');
     my @normal_d := nqp::list_s();
     nqp::bindposnd_s(@normal_d, nqp::list_i(0), 'omg');
     nqp::bindposnd_s(@normal_d, nqp::list_i(1), 'wat');
@@ -561,7 +561,7 @@ dies-ok({ nqp::dimensions($array_type_2d) }, "Can't use dimensions on a type obj
         nqp::hash('dimensions', 1, 'type', num)));
     my $array := nqp::create($array_type);
     nqp::setdimensions($array, nqp::list_i(1));
-    ok(nqp::iseq_n(nqp::atpos_n($array, 0), 0), 'atpos_n on MultiDimArray - uninitialized');
+    ok(nqp::iseq_n(nqp::atpos_n($array, 0), 0.0), 'atpos_n on MultiDimArray - uninitialized');
 }
 
 {
@@ -619,19 +619,19 @@ nqp::sethllconfig('nqp', $hllconfig);
     my $array := nqp::create($array_type);
     nqp::setdimensions($array, nqp::list_i(4, 3));
 
-    is(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(1,1))), 0, 'decont_n with default value');
+    ok(nqp::iseq_n(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(1,1))), 0), 'decont_n with default value');
 
     nqp::assign(nqp::multidimref_n($array, nqp::list_i(1,1)), 10.1);
 
-    is(nqp::atposnd_n($array, nqp::list_i(1,1)), 10.1, 'assign binds value');
+    ok(nqp::iseq_n(nqp::atposnd_n($array, nqp::list_i(1,1)), 10.1), 'assign binds value');
 
     nqp::assign_n(nqp::multidimref_n($array, nqp::list_i(1,2)), 20.2);
 
-    is(nqp::atposnd_n($array, nqp::list_i(1,2)), 20.2, 'assign_i binds value');
+    ok(nqp::iseq_n(nqp::atposnd_n($array, nqp::list_i(1,2)), 20.2), 'assign_i binds value');
 
     nqp::bindposnd_n($array, nqp::list_i(0,2), 30.3);
 
-    is(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(0,2))), 30.3, 'can get value with decont_n');
+    ok(nqp::iseq_n(nqp::decont_n(nqp::multidimref_n($array, nqp::list_i(0,2))), 30.3), 'can get value with decont_n');
 }
 
 {

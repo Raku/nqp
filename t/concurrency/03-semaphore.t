@@ -52,7 +52,7 @@ my class Semaphore is repr('Semaphore') { }
         my $before := nqp::time_n();
         nqp::semacquire($s);
         my $after  := nqp::time_n();
-        ok($after - $before > 1.0, 'Fourth acquire blocks on empty semaphore');
+        ok(nqp::isgt_n(nqp::sub_n($after, $before), 1.0), 'Fourth acquire blocks on empty semaphore');
         ok($released, 'Fourth acquire succeeds after release in other thread');
     }, 0);
     my $t6 := nqp::newthread({
