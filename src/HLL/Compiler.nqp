@@ -164,18 +164,13 @@ class HLL::Compiler does HLL::Backend::Default {
             return self.needs-more-input();
         }
 
-        if nqp::existskey(%adverbs, 'bytecode') {
-            $output := $code;
-        } else {
-
-            if nqp::existskey(%adverbs, 'profile-compile') {
-                $output := $!backend.run_profiled({
-                    self.compile($code, :compunit_ok(1), |%adverbs);
-                }, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>);
-            }
-            else {
-                $output := self.compile($code, :compunit_ok(1), |%adverbs);
-            }
+        if nqp::existskey(%adverbs, 'profile-compile') {
+            $output := $!backend.run_profiled({
+                self.compile($code, :compunit_ok(1), |%adverbs);
+            }, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>);
+        }
+        else {
+            $output := self.compile($code, :compunit_ok(1), |%adverbs);
         }
 
         if $!backend.is_compunit($output) && %adverbs<target> eq '' {
@@ -425,7 +420,7 @@ class HLL::Compiler does HLL::Backend::Default {
                     note("Can not run directory $filename.");
                     $err := 1;
                 }
-                elsif nqp::defined(%adverbs<bytecode>) {
+                elsif nqp::defined(%adverbs<bytecode>) || nqp::defined(%adverbs<b>) {
                     nqp::loadbytecode($filename);
                     nqp::exit(0);
                 }
