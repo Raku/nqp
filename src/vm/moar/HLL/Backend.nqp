@@ -518,7 +518,7 @@ class HLL::Backend::MoarVM {
                                 my $deallocs := $gc<deallocs>;
 
                                 for $deallocs -> $entry {
-                                    @g := nqp::list_s($thread_id, $gc<sequence>);
+                                    @g := nqp::list_s($gc<sequence>, $thread_id);
                                     for <id nursery_fresh nursery_seen gen2> -> $f {
                                         nqp::push_s(@g, ~($entry{$f} // '0'));
                                     }
