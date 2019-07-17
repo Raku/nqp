@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(156);
+plan(157);
 
 my $knowhow := nqp::knowhow();
 my $bi_type := $knowhow.new_type(:name('TestBigInt'), :repr('P6bigint'));
@@ -139,41 +139,41 @@ is(str(nqp::pow_I(box(-1), $big_odd, $n_type, $bi_type)), -1, 'pow -1 ** large_o
 
 {
     my $r := nqp::pow_I(box(-2), $big_even, $n_type, $bi_type);
-    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow -2 ** large_even_number');
+    ok(nqp::iseq_n($r, nqp::inf()) && nqp::istype($r, $n_type), 'pow -2 ** large_even_number');
 }
 {
     my $r := nqp::pow_I(box(-2), $big_odd, $n_type, $bi_type);
-    ok($r == nqp::neginf() && nqp::istype($r, $n_type), 'pow -2 ** large_odd_number');
+    ok(nqp::iseq_n($r, nqp::neginf()) && nqp::istype($r, $n_type), 'pow -2 ** large_odd_number');
 }
 {
     my $r := nqp::pow_I(box(2), $big_odd, $n_type, $bi_type);
-    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow 2 ** large_even_number');
+    ok(nqp::iseq_n($r, nqp::inf()) && nqp::istype($r, $n_type), 'pow 2 ** large_even_number');
 }
 {
     my $r := nqp::pow_I(box(2), $big_even, $n_type, $bi_type);
-    ok($r == nqp::inf() && nqp::istype($r, $n_type), 'pow 2 ** large_odd_number');
+    ok(nqp::iseq_n($r, nqp::inf()) && nqp::istype($r, $n_type), 'pow 2 ** large_odd_number');
 }
 
 {
     my $r := nqp::pow_I(box(2), box(-3), $n_type, $bi_type);
-    ok($r == 0.125 && nqp::istype($r, $n_type), 'pow 2 ** -3');
+    ok(nqp::iseq_n($r, 0.125) && nqp::istype($r, $n_type), 'pow 2 ** -3');
 }
 
 # test conversion to float
 # try it with 2 ** 100, because that's big enough not to fit into a single
 # int, but can be represented exactly in a double
 $big := nqp::pow_I(box(2), box(100), $n_type, $bi_type);
-ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(2, 100)), '2**100 to float');
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(2.0, 100.0)), '2**100 to float');
 $big := nqp::pow_I(box(-2), box(101), $n_type, $bi_type);
-ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2, 101)), '(-2)**101 to float');
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::pow_n(-2.0, 101.0)), '(-2)**101 to float');
 # the mantissa can hold much information accurately, so test that too
 my $factor := 123456789;
 $big := nqp::mul_I($big, box($factor), $bi_type);
-ok(nqp::iseq_n(nqp::tonum_I($big), nqp::mul_n($factor, nqp::pow_n(-2, 101))), "$factor * (-2)**101 to float");
+ok(nqp::iseq_n(nqp::tonum_I($big), nqp::mul_n($factor, nqp::pow_n(-2.0, 101.0))), "$factor * (-2)**101 to float");
 
 $big := 1e16;
 my $converted := nqp::tonum_I(nqp::fromstr_I('10000000000000000', $bi_type));
-ok(nqp::abs_n($big - $converted) / $big < 1e-4, 'bigint -> float, 1e16');
+ok(nqp::islt_n(nqp::div_n(nqp::abs_n(nqp::sub_n($big, $converted)), $big), 1e-4), 'bigint -> float, 1e16');
 
 my $float := 123456789e240;
 ok(nqp::iseq_n($float, nqp::tonum_I(nqp::fromnum_I($float, $bi_type))),
@@ -213,7 +213,7 @@ ok(str(nqp::expmod_I(
     $bi_type,
 )) eq '1527229998585248450016808958343740453059', 'nqp::expmod_I');
 
-ok(nqp::div_In(box(1234500), box(100)) == 12345, 'div_In sanity');
+ok(nqp::iseq_n(nqp::div_In(box(1234500), box(100)), 12345.0), 'div_In sanity');
 my $n := nqp::div_In(
     nqp::pow_I(box(203), box(200), $n_type, $bi_type),
     nqp::pow_I(box(200), box(200), $n_type, $bi_type),
@@ -221,12 +221,12 @@ my $n := nqp::div_In(
 
 my $huge := nqp::pow_I(box(10), box(300), $n_type, $bi_type);
 
-ok(nqp::div_In(box(1), $huge) == 1e-300, 'super small result from div_In work');
-ok(nqp::div_In(box(-1), box(5)) == -0.2, 'div_In -1 by 5');
-ok(nqp::div_In(box(-1), box(20)) == -0.05, 'div_In -1 by 20');
-ok(nqp::div_In(box(1), box(-200)) == -0.005, 'div_In 1 by -20');
+ok(nqp::iseq_n(nqp::div_In(box(1), $huge), 1e-300), 'super small result from div_In work');
+ok(nqp::iseq_n(nqp::div_In(box(-1), box(5)), -0.2), 'div_In -1 by 5');
+ok(nqp::iseq_n(nqp::div_In(box(-1), box(20)), -0.05), 'div_In -1 by 20');
+ok(nqp::iseq_n(nqp::div_In(box(1), box(-200)), -0.005), 'div_In 1 by -20');
 
-ok(nqp::abs_n($n - 19.6430286394751) < 1e-10, 'div_In with big numbers');
+ok(nqp::islt_n(nqp::abs_n(nqp::sub_n($n, 19.6430286394751)), 1e-10), 'div_In with big numbers');
 
 my $maxRand := nqp::fromstr_I('10000000000000000000000000000000000000000', $bi_type);
 my $rand := nqp::rand_I($maxRand, $bi_type);
@@ -272,14 +272,14 @@ ok(nqp::isbig_I(box(-2)) == 0, 'isbig on small value');
 ok(nqp::isbig_I(box(12)) == 0, 'isbig on small value');
 ok(nqp::isbig_I(nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type)) == 1, 'isbig on huge value');
 
-ok(nqp::div_In(box(-1), box(0)) == nqp::neginf(), 'nqp::div_In -1/0 == Inf');
-ok(nqp::div_In(box(1), box(0)) == nqp::inf(), 'nqp::div_In 1/0 == Inf');
+ok(nqp::iseq_n(nqp::div_In(box(-1), box(0)), nqp::neginf()), 'nqp::div_In -1/0 == Inf');
+ok(nqp::iseq_n(nqp::div_In(box(1), box(0)), nqp::inf()), 'nqp::div_In 1/0 == Inf');
 
-ok(nqp::div_In(box(-12), box(0)) == nqp::neginf(), 'nqp::div_In -12/0 = -Inf');
-ok(nqp::div_In(box(12), box(0)) == nqp::inf(), 'nqp::div_In 12/0 == Inf');
+ok(nqp::iseq_n(nqp::div_In(box(-12), box(0)), nqp::neginf()), 'nqp::div_In -12/0 = -Inf');
+ok(nqp::iseq_n(nqp::div_In(box(12), box(0)), nqp::inf()), 'nqp::div_In 12/0 == Inf');
 
 my sub isnan($n) {
-    nqp::isnanorinf($n) && $n != nqp::inf() && $n != nqp::neginf();
+    nqp::isnanorinf($n) && nqp::isne_n($n, nqp::inf()) && nqp::isne_n($n, nqp::neginf());
 }
 
 ok(isnan(nqp::div_In(box(0), box(0))), 'nqp::div_In 0/0 == NaN');
@@ -300,3 +300,6 @@ my $casted := nqp::fromI_I($to_be_casted, $other_bi_type);
 ok(nqp::istype($to_be_casted, $bi_type), 'fromI_I result has correct type');
 ok(nqp::unbox_i($to_be_casted) == 100, 'fromI_I result has correct value');
 ok(nqp::istype($to_be_casted, $bi_type) && nqp::unbox_i($to_be_casted) == 100, 'fromI_I argument doesn\'t change');
+
+# https://github.com/perl6/nqp/issues/363
+ok(100000000000000009 != 100000000000000016, 'int literals that are the same float value are unequal');

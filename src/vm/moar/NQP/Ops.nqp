@@ -89,6 +89,10 @@ $ops.add_hll_op('nqp', 'postdec', -> $qastcomp, $op {
         $tmp));
 });
 
+$ops.add_hll_op('nqp', 'intify', -> $qastcomp, $op {
+    $qastcomp.as_mast($op[0], :want($MVM_reg_int64))
+});
+
 $ops.add_hll_op('nqp', 'numify', -> $qastcomp, $op {
     $qastcomp.as_mast($op[0], :want($MVM_reg_num64))
 });

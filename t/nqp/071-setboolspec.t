@@ -62,7 +62,7 @@ ok(nqp::istrue($foo) == 0, 'MODE_CALL_METHOD');
 
     # Try some basic operations with it.
     my $half := nqp::box_n(0.5, $num);
-    my $zero := nqp::box_n(0, $num);
+    my $zero := nqp::box_n(0.0, $num);
 
     ok(nqp::istrue($half), 'MODE_UNBOX_NUM - 0.5 is true');
     ok(!nqp::istrue($zero), 'MODE_UNBOX_NUM - 0 is false');

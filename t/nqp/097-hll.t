@@ -151,7 +151,7 @@ my $int := nqp::hllizefor(1, 'boxxy');
 my $str := nqp::hllizefor('trolling', 'boxxy');
 
 ok(nqp::istype($num, BoxxyNum), 'got the right type for num');
-ok(nqp::unbox_n($num) == 1.3, 'got the right value for num');
+ok(nqp::iseq_n(nqp::unbox_n($num), 1.3), 'got the right value for num');
 ok(nqp::istype($str, BoxxyStr), 'got the right type for str');
 is(nqp::unbox_s($str), "trolling", 'got the right value for str');
 ok(nqp::istype($int, BoxxyInt), 'got the right type for int');

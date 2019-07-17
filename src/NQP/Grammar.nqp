@@ -793,33 +793,33 @@ grammar NQP::Grammar is HLL::Grammar {
     token postfix:sym<++> { <sym>  <O(|%autoincrement, :op<postinc>)> }
     token postfix:sym<--> { <sym>  <O(|%autoincrement, :op<postdec>)> }
 
-    token infix:sym<**>   { <sym>  <O(|%exponentiation, :op<pow_n>)> }
+    token infix:sym<**>   { <sym>  <O(|%exponentiation, :op<pow_i>)> }
 
-    token prefix:sym<+>   { <sym>  <O(|%symbolic_unary, :op<numify>)> }
+    token prefix:sym<+>   { <sym>  <O(|%symbolic_unary, :op<intify>)> }
     token prefix:sym<~>   { <sym>  <O(|%symbolic_unary, :op<stringify>)> }
-    token prefix:sym<->   { <sym>  <![>]> <!number> <O(|%symbolic_unary, :op<neg_n>)> }
+    token prefix:sym<->   { <sym>  <![>]> <!number> <O(|%symbolic_unary, :op<neg_i>)> }
     token prefix:sym<?>   { <sym>  <O(|%symbolic_unary, :op<istrue>)> }
     token prefix:sym<!>   { <sym>  <O(|%symbolic_unary, :op<falsey>)> }
     token prefix:sym<|>   { <sym>  <O(|%symbolic_unary)> }
 
-    token infix:sym<*>    { <sym>  <O(|%multiplicative, :op<mul_n>)> }
-    token infix:sym</>    { <sym>  <O(|%multiplicative, :op<div_n>)> }
-    token infix:sym<%>    { <sym>  <O(|%multiplicative, :op<mod_n>)> }
+    token infix:sym<*>    { <sym>  <O(|%multiplicative, :op<mul_i>)> }
+    token infix:sym</>    { <sym>  <O(|%multiplicative, :op<div_i>)> }
+    token infix:sym<%>    { <sym>  <O(|%multiplicative, :op<mod_i>)> }
     token infix:sym<+&>   { <sym>  <O(|%multiplicative, :op<bitand_i>)> }
 
-    token infix:sym<+>    { <sym>  <O(|%additive, :op<add_n>)> }
-    token infix:sym<->    { <sym>  <O(|%additive, :op<sub_n>)> }
+    token infix:sym<+>    { <sym>  <O(|%additive, :op<add_i>)> }
+    token infix:sym<->    { <sym>  <O(|%additive, :op<sub_i>)> }
     token infix:sym<+|>   { <sym>  <O(|%additive, :op<bitor_i>)> }
     token infix:sym<+^>   { <sym>  <O(|%additive, :op<bitxor_i>)> }
 
     token infix:sym<~>    { <sym>  <O(|%concatenation, :op<concat>)> }
 
-    token infix:sym«==»   { <sym>  <O(|%relational, :op<iseq_n>)> }
-    token infix:sym«!=»   { <sym>  <O(|%relational, :op<isne_n>)> }
-    token infix:sym«<=»   { <sym>  <O(|%relational, :op<isle_n>)> }
-    token infix:sym«>=»   { <sym>  <O(|%relational, :op<isge_n>)> }
-    token infix:sym«<»    { <sym>  <O(|%relational, :op<islt_n>)> }
-    token infix:sym«>»    { <sym>  <O(|%relational, :op<isgt_n>)> }
+    token infix:sym«==»   { <sym>  <O(|%relational, :op<iseq_i>)> }
+    token infix:sym«!=»   { <sym>  <O(|%relational, :op<isne_i>)> }
+    token infix:sym«<=»   { <sym>  <O(|%relational, :op<isle_i>)> }
+    token infix:sym«>=»   { <sym>  <O(|%relational, :op<isge_i>)> }
+    token infix:sym«<»    { <sym>  <O(|%relational, :op<islt_i>)> }
+    token infix:sym«>»    { <sym>  <O(|%relational, :op<isgt_i>)> }
     token infix:sym«eq»   { <sym>  <O(|%relational, :op<iseq_s>)> }
     token infix:sym«ne»   { <sym>  <O(|%relational, :op<isne_s>)> }
     token infix:sym«le»   { <sym>  <O(|%relational, :op<isle_s>)> }
