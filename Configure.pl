@@ -12,28 +12,30 @@ use File::Path;
 use FindBin;
 
 BEGIN {
-    my $set_config = !qx{git config nqp.initialized};
-    if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
-        print "Updating nqp-configure submodule...\n";
-        my $msg =
-qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
-        if ( $? >> 8 == 0 ) {
-            say "OK";
-            $set_config = 1;
-        }
-        else {
-            if ( $msg =~ /[']([^']+)[']\s+already exists and is not an empty/ )
-            {
-                print "\n===SORRY=== ERROR: "
-                  . "Cannot update submodule because directory exists and is not empty.\n"
-                  . ">>> Please delete the following folder and try again:\n$1\n\n";
-                exit 1;
+    if ( -d '.git' ) {
+        my $set_config = !qx{git config nqp.initialized};
+        if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
+            print "Updating nqp-configure submodule...\n";
+            my $msg =
+    qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
+            if ( $? >> 8 == 0 ) {
+                say "OK";
+                $set_config = 1;
+            }
+            else {
+                if ( $msg =~ /[']([^']+)[']\s+already exists and is not an empty/ )
+                {
+                    print "\n===SORRY=== ERROR: "
+                      . "Cannot update submodule because directory exists and is not empty.\n"
+                      . ">>> Please delete the following folder and try again:\n$1\n\n";
+                    exit 1;
+                }
             }
         }
-    }
-    if ($set_config) {
-        system("git config submodule.recurse true");
-        system("git config nqp.initialized 1");
+        if ($set_config) {
+            system("git config submodule.recurse true");
+            system("git config nqp.initialized 1");
+        }
     }
 }
 
