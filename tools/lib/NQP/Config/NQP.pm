@@ -253,7 +253,7 @@ sub moar_config {
     my $self        = shift;
     my $moar_config = $self->backend_config('moar');
 
-    return $moar_config if $moar_config->{moar};
+    return $moar_config if $moar_config && keys %{$moar_config} > 2;
 
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
@@ -282,12 +282,15 @@ sub moar_config {
             File::Spec->catdir( $dir, File::Spec->updir ) );
     }
 
-    my %c = read_config_from_command(
-        '"' . $self->nfp( $moar_exe ) . '"'
-        . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
-        . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
-        . ' --bootstrap --show-config' );
-    %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
+    my %c;
+    if ( $self->is_executable($self->nfp($moar_exe)) ) {
+        %c = read_config_from_command(
+            '"' . $self->nfp( $moar_exe ) . '"'
+            . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
+            . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
+            . ' --bootstrap --show-config' );
+        %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
+    }
 
     return $self->backend_config( 'moar',
         { %c, moar => $moar_exe, moar_prefix => $moar_prefix, } );
@@ -300,7 +303,6 @@ sub gen_moar {
 
     my $options = $self->{options};
     my $config  = $self->config;
-    my %moar_config;
 
     my $moar_want = $config->{moar_want};
     my $moar_have;

@@ -91,8 +91,8 @@ MAIN: {
     $cfg->configure_repo_urls;
     $cfg->configure_commands;
     $cfg->configure_jars;
-    $cfg->configure_backends;
     $cfg->configure_refine_vars;
+    $cfg->configure_backends;
     $cfg->configure_misc;
 
     # XXX Why Windows only?
