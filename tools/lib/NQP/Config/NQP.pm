@@ -130,12 +130,14 @@ sub configure_moar_backend {
     $imoar->{config}{ldflags} = $moar_config->{'moar::ldflags'};
     $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
     $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
-    $imoar->{config}{ldflags} .= ' '
-      . (
-          $config->{relocatable} eq 'reloc'
-        ? $moar_config->{'moar::ldrpath_relocatable'}
-        : $moar_config->{'moar::ldrpath'}
-      );
+    if ( $self->cfg('prefix') ne '/usr' ) {
+        $imoar->{config}{ldflags} .= ' '
+          . (
+              $config->{relocatable} eq 'reloc'
+            ? $moar_config->{'moar::ldrpath_relocatable'}
+            : $moar_config->{'moar::ldrpath'}
+          );
+    }
     $imoar->{config}{ldlibs}        = $moar_config->{'moar::ldlibs'};
     $imoar->{config}{mingw_unicode} = '';
 
