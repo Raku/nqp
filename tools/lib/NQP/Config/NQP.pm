@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Cwd;
 use IPC::Cmd qw<run>;
-use NQP::Config qw<cmp_rev slurp system_or_die run_or_die>;
+use NQP::Config qw<slurp read_config_from_command cmp_rev system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -100,13 +100,69 @@ sub configure_misc {
 sub configure_moar_backend {
     my $self  = shift;
     my $imoar = $self->{impls}{moar};
+    my $config = $self->{config};
 
     $self->gen_moar;
+
+    my $moar_config = $self->moar_config;
 
     $self->{config}{moar} = $imoar->{config}{moar};
 
     $self->sorry( "No moar executable found in " . $self->cfg('prefix') )
       unless $self->is_executable( $self->{config}{moar} );
+
+    if ( $config->{relocatable} eq 'reloc' ) {
+        $imoar->{config}{static_nqp_home}        = '';
+        $imoar->{config}{static_nqp_home_define} = '';
+    }
+    else {
+        my $qchar = $config->{quote};
+        $imoar->{config}{static_nqp_home} =
+          File::Spec->rel2abs(
+            File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
+          );
+        $imoar->{config}{static_nqp_home_define} =
+          '-DSTATIC_NQP_HOME='
+          . $qchar . $self->c_escape_string( $imoar->{config}{static_nqp_home} ) . $qchar;
+    }
+
+    # Strip rpath from ldflags so we can set it differently ourself.
+    $imoar->{config}{ldflags} = $moar_config->{'moar::ldflags'};
+    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
+    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
+    if ( $self->cfg('prefix') ne '/usr' ) {
+        $imoar->{config}{ldflags} .= ' '
+          . (
+              $config->{relocatable} eq 'reloc'
+            ? $moar_config->{'moar::ldrpath_relocatable'}
+            : $moar_config->{'moar::ldrpath'}
+          );
+    }
+    $imoar->{config}{ldlibs}        = $moar_config->{'moar::ldlibs'};
+    $imoar->{config}{mingw_unicode} = '';
+
+    my @c_runner_libs;
+    if ( $self->is_win ) {
+        if ( File::Spec->catdir( $config->{prefix}, 'bin' ) ne
+            $moar_config->{'moar::libdir'} )
+        {
+            $config->{m_install} = "\t"
+              . q<$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
+        }
+        if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
+            $imoar->{config}{mingw_unicode} = '-municode';
+        }
+        push @c_runner_libs, sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
+    }
+    $imoar->{config}{c_runner_libs} = join( " ", @c_runner_libs );
+    $imoar->{config}{moar_lib}      = sprintf(
+        (
+              $moar_config->{'moar::ldimp'}
+            ? $moar_config->{'moar::ldimp'}
+            : $moar_config->{'moar::ldusr'}
+        ),
+        $moar_config->{'moar::name'}
+    );
 }
 
 sub configure_js_backend {
@@ -117,8 +173,6 @@ sub configure_js_backend {
     my $js_config = $ijs->{config};
 
     $ijs->{ok} = 1;
-
-    my $stage0 = $config->{moar_stage0};
 
     $js_config->{link} = $options->{link};
     my $node = $self->probe_node;
@@ -199,7 +253,7 @@ sub moar_config {
     my $self        = shift;
     my $moar_config = $self->backend_config('moar');
 
-    return $moar_config if $moar_config->{moar};
+    return $moar_config if $moar_config && keys %{$moar_config} > 2;
 
     my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
@@ -228,8 +282,18 @@ sub moar_config {
             File::Spec->catdir( $dir, File::Spec->updir ) );
     }
 
+    my %c;
+    if ( $self->is_executable($self->nfp($moar_exe)) ) {
+        %c = read_config_from_command(
+            '"' . $self->nfp( $moar_exe ) . '"'
+            . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
+            . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
+            . ' --bootstrap --show-config' );
+        %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
+    }
+
     return $self->backend_config( 'moar',
-        { moar => $moar_exe, moar_prefix => $moar_prefix, } );
+        { %c, moar => $moar_exe, moar_prefix => $moar_prefix, } );
 }
 
 sub gen_moar {
@@ -239,7 +303,6 @@ sub gen_moar {
 
     my $options = $self->{options};
     my $config  = $self->config;
-    my %moar_config;
 
     my $moar_want = $config->{moar_want};
     my $moar_have;
@@ -250,6 +313,7 @@ sub gen_moar {
     my $has_gen_moar = defined $gen_moar;
     my @opts     = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
+    push @opts, '--relocatable' if $options->{relocatable};
     my $startdir     = $config->{base_dir};
     my $git_protocol = $options->{'git-protocol'} || 'https';
     my $try_generate;
