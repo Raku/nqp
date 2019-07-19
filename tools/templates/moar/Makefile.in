@@ -300,19 +300,21 @@ $(NQP_MOAR): $(M_STAGE2_OUTPUT)
 
 
 CC_M_INST_NQP=@moar::cc@ @moar::ccswitch@ @moar::cflags@ @static_nqp_home_define@ $(M_MOAR_INC_PATHS)
-LD_M_INST_NQP=@moar::ld@ @ldflags@ @mingw_unicode@ @moar::lddir@"@moar::libdir@" @c_runner_libs@ @moar_lib@
+LD_M_INST_NQP=@moar::ld@ @ldflags@ @mingw_unicode@
+LD_M_INST_NQP_POST=@moar::lddir@"@moar::libdir@" @c_runner_libs@ @moar_lib@
 
 $(M_INST_NQP): @nfp(src/vm/moar/runner/main.c)@
 	$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
 	$(CC_M_INST_NQP) @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/$(M_NQP))@)@)@)@ @moar::ccout@inst-nqp@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
-	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp@moar::obj@
+	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp@moar::obj@ $(LD_M_INST_NQP_POST)
 
 $(M_INST_NQP_M): @nfp(src/vm/moar/runner/main.c)@
 	$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
 	$(CC_M_INST_NQP) @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/$(M_NQP_M))@)@)@)@ @moar::ccout@inst-nqp-m@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
-	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp-m@moar::obj@
+	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp-m@moar::obj@ $(LD_M_INST_NQP_POST)
+
 
 CC_M_BUILD_RUNNER=@moar::cc@ @moar::ccswitch@ @moar::cflags@
 LD_M_BUILD_RUNNER=@moar::ld@
