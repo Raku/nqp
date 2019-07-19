@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s bytecode|b'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s bytecode|b compile=s'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -267,6 +267,11 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         self.usage($program-name) if %adverbs<help> || %adverbs<h>;
 
+        if %adverbs<compile> {
+            %adverbs<target> := 'mbc'; # FIXME - This needs to be changed to allow for other backends
+            %adverbs<output> := %adverbs<compile> ~ ".bc";
+        }
+
         if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
         }
@@ -373,7 +378,86 @@ class HLL::Compiler does HLL::Backend::Default {
                 self.handle-exception($error);
             }
         }
+        if %adverbs<compile> {
+            my $command := "./linker/elfmaker " ~ %adverbs<output>;
+            self.syscall($command);
+            $command := "gcc -O3 -o " ~ %adverbs<compile> ~ " ./linker/attempt2.c " ~ %adverbs<output>;
+            self.syscall($command);
+            $command := "chmod 755 " ~ %adverbs<compile>;
+            self.syscall($command);
+        }
         $result;
+    }
+
+    method syscall($command) {
+        note($command);
+        my $is-windows := nqp::backendconfig()<osname> eq 'MSWin32';
+        my class Queue is repr('ConcBlockingQueue') { }
+        my $queue := nqp::create(Queue);
+        my class VMDecoder is repr('Decoder') {}
+        my $dec := nqp::create(VMDecoder);
+        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+        my sub create_buf($type) {
+            my $buf := nqp::newtype(nqp::null(), 'VMArray');
+            nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+            nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+            $buf;
+        }
+
+        my $args;
+        my $done         := 0;
+        my $read-all1    := 0;
+        my $read-all2    := 0;
+        my $called_ready := 0;
+
+        # task-specific vars
+        my @stdout_bytes;
+        my @stderr_bytes;
+        my $config := nqp::hash(
+            'done', -> $status {
+                $done := $done + 1;
+            },
+            'ready', -> $stdin?, $stdout?, $stderr? {
+                $called_ready := $called_ready + 1;
+            },
+            'stdout_bytes', -> $seq, $data, $err {
+                if nqp::isconcrete($data) {
+                    @stdout_bytes[$seq] := $data;
+                }
+                else {
+                    ++$read-all1;
+                }
+            },
+            'stderr_bytes', -> $seq, $data, $err {
+                if nqp::isconcrete($data) {
+                    @stderr_bytes[$seq] := $data;
+                }
+                else {
+                    ++$read-all2;
+                }
+            },
+            'buf_type', create_buf(uint8)
+        );
+
+        # define a task
+        $args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
+                            !! nqp::list('/bin/sh', '-c', $command);
+        my $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
+        nqp::permit($task, 1, -1);
+        nqp::permit($task, 2, -1);
+
+        # run the task
+        while !$done || !$read-all1 || !$read-all2 {
+            if nqp::shift($queue) -> $task {
+                if nqp::list($task) {
+                    my $code := nqp::shift($task);
+                    $code(|$task);
+                }
+                else {
+                    $task();
+                }
+            }
+        }
     }
 
     method process_args(@args) {
@@ -433,7 +517,6 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
             }
             nqp::exit(1) if $err;
-            #nqp::exit(0) if nqp::defined(%adverbs<bytecode>);
             try {
                 nqp::push(@codes, $in-handle.slurp());
                 unless $filename eq '-' {
