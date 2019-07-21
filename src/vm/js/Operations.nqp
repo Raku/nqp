@@ -534,6 +534,7 @@ class QAST::OperationsJS {
     add_simple_op('getstdout', $T_OBJ, [], :side_effects);
     add_simple_op('getstdin', $T_OBJ, [], :side_effects);
 
+    add_simple_op('fdopen', $T_OBJ, [$T_INT], :side_effects);
     add_simple_op('open', $T_OBJ, [$T_STR, $T_STR], :side_effects);
 
     add_simple_op('opendir', $T_OBJ, [$T_STR], :side_effects);
@@ -1028,6 +1029,9 @@ class QAST::OperationsJS {
 
     add_simple_op('lstat', $T_INT, [$T_STR, $T_INT], :side_effects);
     add_simple_op('lstat_time', $T_NUM, [$T_STR, $T_INT], :side_effects);
+
+    add_simple_op('fstat', $T_INT, [$T_INT, $T_INT], :side_effects);
+    add_simple_op('fstat_time', $T_NUM, [$T_INT, $T_INT], :side_effects);
 
     add_simple_op('fileislink', $T_INT, [$T_STR], :side_effects);
 

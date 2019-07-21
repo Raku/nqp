@@ -1,30 +1,32 @@
-function stat(fs, file, code, lstat) {
-  const EXISTS = 0;
-  const FILESIZE = 1;
-  const ISDIR = 2;
-  const ISREG = 3;
-  const ISDEV = 4;
-  const CREATETIME = 5;
-  const ACCESSTIME = 6;
-  const MODIFYTIME = 7;
-  const CHANGETIME = 8;
-  const BACKUPTIME = 9;
-  const UID = 10;
-  const GID = 11;
-  const ISLNK = 12;
-  const PLATFORM_DEV = -1;
-  const PLATFORM_INODE = -2;
-  const PLATFORM_MODE = -3;
-  const PLATFORM_NLINKS = -4;
-  const PLATFORM_DEVTYPE = -5;
+function stat(fs, file, code, lstat, fstat) {
+  const EXISTS             = 0;
+  const FILESIZE           = 1;
+  const ISDIR              = 2;
+  const ISREG              = 3;
+  const ISDEV              = 4;
+  const CREATETIME         = 5;
+  const ACCESSTIME         = 6;
+  const MODIFYTIME         = 7;
+  const CHANGETIME         = 8;
+  const BACKUPTIME         = 9;
+  const UID                = 10;
+  const GID                = 11;
+  const ISLNK              = 12;
+  const PLATFORM_DEV       = -1;
+  const PLATFORM_INODE     = -2;
+  const PLATFORM_MODE      = -3;
+  const PLATFORM_NLINKS    = -4;
+  const PLATFORM_DEVTYPE   = -5;
   const PLATFORM_BLOCKSIZE = -6;
-  const PLATFORM_BLOCKS = -7;
+  const PLATFORM_BLOCKS    = -7;
 
   // we can't use fs.existsSync(file) as it follows symlinks
   let stats;
   try {
     if (lstat || code == ISLNK) {
       stats = fs.lstatSync(file);
+    } else if (fstat) {
+      stmts = fs.fstatSync(file);
     } else {
       stats = fs.statSync(file);
     }
