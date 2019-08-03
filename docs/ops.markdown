@@ -3055,26 +3055,50 @@ Abbreviated as SC.
 You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
 For test examples, see t/serialization/
 
+## createsc
 * `createsc($handle-string)`
 creates a serialization context and returns it.
 
+## scsetdesc
 * `scsetdesc($sc, $descriptor-string)`
+
 Set a descriptor for `$sc` created by `createsc()`
 
+## scgetdesc
 * `scgetdesc($sc)`
+
 Get the descriptor set by `scsetdec`
 
+## scgethandle
 * `scgethandle($sc)`
+
 Get the handle string used by `createsc` to create the SC `$sc`
 
-* `nqp::pushcompc($sc)`
-* `nqp::popcompsc($sc)`
+## pushcompsc
+* `pushcompc($sc)`
+
+## popcompsc
+* `popcompsc($sc)`
+
+## scsetobjc
 * `scsetobj($sc, $idx, $obj)`
+
+## setobjsc
 * `setobjsc($obj, $sc)`
+
+## getobjsc
 * `getobjsc($obj)`
+
+## scgetojidx
 * `scgetobjidx()`
+
+## serialize
 * `serialize()`
+
+## deserialize
 * `deserialize()`
+
+## scojcount
 * `scobjcount()`
 
 ## 
