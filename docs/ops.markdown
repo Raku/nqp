@@ -1,3 +1,7 @@
+# Introduction
+
+The opcode set is dynamic.
+
 # NQP Opcode List
 
 ## Table of Contents
@@ -343,6 +347,20 @@
   * [atomicstore `moar`](#atomicstore-moar)
   * [atomicstore_i `moar`](#atomicstore_i-moar)
   * [barrierfull `moar`](#barrierfull-moar)
+- [Serialization context]
+  * [createsc](#createsc)
+  * [scsetdesc](#scsetdesc)
+  * [scgetdesc](#scgetdesc)
+  * [scgethandle](#scgethandle)
+  * [pushcompc](#pushcompsc)
+  * [popcompsc()](#popcompsc)
+  * [scsetobj()](#scsetob)
+  * [setobjsc()](#seetobjsc)
+  * [getobjsc()](#getobjsc)
+  * [scgetobjidx()](#scgetobjidx)
+  * [serialize()](#serialize)
+  * [deserialize()](#deserialize)
+  * [scobjcount()](#scobjcount)
 
 # NQP Opcodes
 
@@ -3031,3 +3049,32 @@ is, with appropriate barriering to ensure the changed value is "published").
 * `barrierfull()`
 
 Performs a full memory barrier.
+
+# Serialization context
+Abbreviated as SC.
+You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
+For test examples, see t/serialization/
+
+* `createsc($handle-string)`
+creates a serialization context and returns it.
+
+* `scsetdesc($sc, $descriptor-string)`
+Set a descriptor for `$sc` created by `createsc()`
+
+* `scgetdesc($sc)`
+Get the descriptor set by `scsetdec`
+
+* `scgethandle($sc)`
+Get the handle string used by `createsc` to create the SC `$sc`
+
+* `nqp::pushcompc($sc)`
+* `nqp::popcompsc($sc)`
+* `scsetobj($sc, $idx, $obj)`
+* `setobjsc($obj, $sc)`
+* `getobjsc($obj)`
+* `scgetobjidx()`
+* `serialize()`
+* `deserialize()`
+* `scobjcount()`
+
+## 
