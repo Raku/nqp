@@ -1,8 +1,12 @@
 # Introduction
 
 The opcode set is dynamic.
+This document is about core opcodes.
+For Perl 6 opcodes added by the rakudo compiler
+see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the rakudo
+repository. They are of the form `nqp::p6*`.
 
-# NQP Opcode List
+The tool [tools/find-undocumented-ops.p6](https://github.com/perl6/nqp/blob/master/tools/find-undocumented-ops.p6) can be used to find undocumented opcodes.
 
 ## Table of Contents
 
@@ -353,14 +357,14 @@ The opcode set is dynamic.
   * [scgetdesc](#scgetdesc)
   * [scgethandle](#scgethandle)
   * [pushcompc](#pushcompsc)
-  * [popcompsc()](#popcompsc)
-  * [scsetobj()](#scsetob)
-  * [setobjsc()](#seetobjsc)
-  * [getobjsc()](#getobjsc)
-  * [scgetobjidx()](#scgetobjidx)
-  * [serialize()](#serialize)
-  * [deserialize()](#deserialize)
-  * [scobjcount()](#scobjcount)
+  * [popcompsc](#popcompsc)
+  * [scsetobj](#scsetobj)
+  * [setobjsc](#seetobjsc)
+  * [getobjsc](#getobjsc)
+  * [scgetobjidx](#scgetobjidx)
+  * [serialize](#serialize)
+  * [deserialize](#deserialize)
+  * [scobjcount](#scobjcount)
 
 # NQP Opcodes
 
@@ -3053,8 +3057,7 @@ Performs a full memory barrier.
 # Serialization context
 Abbreviated as SC.
 You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
-For test examples, see t/serialization/
-
+For test examples, see [t/serialization/](https://github.com/perl6/nqp/tree/master/t/serialization)
 ## createsc
 * `createsc($handle-string)`
 creates a serialization context and returns it.
