@@ -7,6 +7,7 @@ see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.ma
 repository. They are of the form `nqp::p6*`.
 
 The tool [tools/find-undocumented-ops.p6](https://github.com/perl6/nqp/blob/master/tools/find-undocumented-ops.p6) can be used to find undocumented opcodes.
+For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/perl6/nqp/blob/master/docs/qast.markdown).
 
 ## Table of Contents
 
