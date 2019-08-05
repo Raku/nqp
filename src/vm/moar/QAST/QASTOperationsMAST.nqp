@@ -603,8 +603,10 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
                 unless nqp::istype($_, QAST::Block);
             my $cuid  := $_.cuid();
             my $frame := $qastcomp.mast_frames{$cuid};
-            %core_op_generators{'getcode'}($item_reg, $frame);
-            %core_op_generators{'push_o'}($arr_reg, $item_reg);
+            if $frame {
+                %core_op_generators{'getcode'}($item_reg, $frame);
+                %core_op_generators{'push_o'}($arr_reg, $item_reg);
+            }
         }
         $regalloc.release_register($item_reg, $MVM_reg_obj);
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
