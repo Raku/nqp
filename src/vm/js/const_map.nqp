@@ -91,5 +91,10 @@ my %const_map := nqp::hash(
     'UNAME_SYSNAME',              0,
     'UNAME_RELEASE',              1,
     'UNAME_VERSION',              2,
-    'UNAME_MACHINE',              3
+    'UNAME_MACHINE',              3,
+
+    'SOCKET_FAMILY_UNSPEC', 0,
+    'SOCKET_FAMILY_INET',   1,
+    'SOCKET_FAMILY_INET6',  2,
+    'SOCKET_FAMILY_UNIX',   3
 );
