@@ -35,7 +35,7 @@ github by visiting http://github.com/perl6/nqp/tree/master and clicking
 
 NQP can run on three different backends: MoarVM, the JVM, and JavaScript.
 The JVM and JavaScript backends are currently experimental.  The JVM backend
-requires JDK 1.8.
+requires JDK 1.9 (Also known as JDK 9)
 
 Decide on which backends you want it to run, and configure and build it as
 follows:
