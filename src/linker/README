@@ -1,0 +1,21 @@
+Hi! This is still a work in progress, so be aware that here there be bugs.
+
+If any changes are made to main.c, run the following in this folder:
+	make clean; make elfmaker
+
+If you want to compile a program that uses modules, run the following from your perl6 root directory:
+	perl6 -I./lib --compile=test ./test2.p6;
+	perl6 -I./lib --bm=<files_from_./lib/.precomp> --compile=test ./test2.p6
+
+If you want to compile a program that does not use modules, run the following from your perl6 root directory:
+	perl6 --compile=foo foo.pl6
+
+If you want to run your generated executable, run the following:
+	./foo
+
+IMPORTANT NOTES:
+- Currently, to compile, you do need to run the command from the root of your perl6 directory.
+
+- At the moment, when the executable runs, it will successfully execute all of the code, and will then produce an error that says "Error while reading from file: Cannot find method 'slurp' on object of type NQPMu". This error does not mean that your code did not fully execute.
+
+- Right now, only programs that use <= 1 module are supported by this.
