@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         sprintf(command, "echo %s >> manifest.txt", argv[i]);
         system(command);
     }
-    sprintf(command, "tar -cvf archive.tar -T manifest.txt --transform='s!^.*/!!'");
+    sprintf(command, "tar -cf archive.tar -T manifest.txt --transform='s!^.*/!!'");
     system(command);
     free(command);
 
@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
     rodata_size = fread(rodata_sgmt, 1, rodata_size, tarball);
     fclose(tarball);
     remove("archive.tar");
+    remove("manifest.txt");
 
     Elf64_Shdr rodata_hdr;
     rodata_hdr.sh_name = 1;		/* Section name (string tbl index) */

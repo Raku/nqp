@@ -268,7 +268,6 @@ class HLL::Compiler does HLL::Backend::Default {
         self.usage($program-name) if %adverbs<help> || %adverbs<h>;
 
         if %adverbs<compile> {
-            note("I'm in the first compile");
             %adverbs<target> := 'mbc'; # FIXME - This needs to be changed to allow for other backends
             %adverbs<output> := %adverbs<compile> ~ ".bc";
         }
@@ -380,16 +379,13 @@ class HLL::Compiler does HLL::Backend::Default {
             }
         }
         if %adverbs<compile> {
-            note("I'm in the second compile!");
             my $command;
             if (%adverbs<bm>) {
                 $command := "./nqp/src/linker/elfmaker " ~ %adverbs<output> ~ " " ~ %adverbs<bm>;
-                note("Hi!");
                 note($command);
             }
             else {
                 $command := "./nqp/src/linker/elfmaker " ~ %adverbs<output>;
-                note("Goodbye!");
                 note($command);
             }
             self.syscall($command);
