@@ -23,7 +23,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s bytecode|b compile=s'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s bytecode|b compile=s bm=s'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -268,6 +268,7 @@ class HLL::Compiler does HLL::Backend::Default {
         self.usage($program-name) if %adverbs<help> || %adverbs<h>;
 
         if %adverbs<compile> {
+            note("I'm in the first compile");
             %adverbs<target> := 'mbc'; # FIXME - This needs to be changed to allow for other backends
             %adverbs<output> := %adverbs<compile> ~ ".bc";
         }
@@ -380,9 +381,20 @@ class HLL::Compiler does HLL::Backend::Default {
             }
         }
         if %adverbs<compile> {
-            my $command := "./linker/elfmaker " ~ %adverbs<output>;
+            note("I'm in the second compile!");
+            my $command;
+            if (%adverbs<bm>) {
+                $command := "./nqp/src/linker/elfmaker " ~ %adverbs<output> ~ " " ~ %adverbs<bm>;
+                note("Hi!");
+                note($command);
+            }
+            else {
+                $command := "./nqp/src/linker/elfmaker " ~ %adverbs<output>;
+                note("Goodbye!");
+                note($command);
+            }
             self.syscall($command);
-            $command := "gcc -O3 -o " ~ %adverbs<compile> ~ " ./linker/attempt2.c " ~ %adverbs<output>;
+            $command := "gcc -O3 -o " ~ %adverbs<compile> ~ " ./nqp/src/linker/attempt2.c " ~ %adverbs<output>;
             self.syscall($command);
             $command := "chmod 755 " ~ %adverbs<compile>;
             self.syscall($command);
@@ -506,8 +518,12 @@ class HLL::Compiler does HLL::Backend::Default {
                     $err := 1;
                 }
                 elsif nqp::defined(%adverbs<bytecode>) || nqp::defined(%adverbs<b>) {
+                    if (nqp::defined(%adverbs<bm>)) {
+                        note(%adverbs<bm>);
+                        nqp::loadbytecode(%adverbs<bm>);
+                    }
                     nqp::loadbytecode($filename);
-                    nqp::exit(0);
+                    # nqp::exit(0);
                 }
                 else {
                     $in-handle := open($filename, :r, :enc($encoding));
