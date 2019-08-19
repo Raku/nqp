@@ -27,7 +27,7 @@ int err;
 
 int main(int argc, char* argv[])
 {
-    char* command = calloc(100, sizeof(char));
+    char* command = calloc(200, sizeof(char));
     char *data_start     = _binary_test_txt_start;
     char *data_end       = _binary_test_txt_end;
     size_t data_size  = _binary_test_txt_end - _binary_test_txt_start;
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     sprintf(command, "sed -i -n -u '/^MOARVM*/,$p' %s/*", &temp_name[1]);
     system(command);
 
-    sprintf(command, "x=$(ls %s | grep -v '\\.bc'); perl6 --bm=./%s/$x -b ./%s/%s.bc", &temp_name[1], &temp_name[1], &temp_name[1], argv[0]);
+    sprintf(command, "x=$(ls %s | grep -v '\\.bc'); if [ \"$x\" ]; then perl6 --bm=./%s/$x -b ./%s/%s.bc; else perl6 -b ./%s/%s.bc; fi", &temp_name[1], &temp_name[1], &temp_name[1], argv[0], &temp_name[1], argv[0]);
     err = system(command);
     
     remove(tar_ball);
