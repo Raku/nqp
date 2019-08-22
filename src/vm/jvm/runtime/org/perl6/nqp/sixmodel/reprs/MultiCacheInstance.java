@@ -73,17 +73,23 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
+                long flag;
                 SixModelObject cont = (SixModelObject)args[i];
-                SixModelObject decont = Ops.decont(cont, tc);
-                long flag = ((long)decont.st.hashCode()) << 3;
-                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
-                    flag |= 4;    /* Native ref vs. non-native ref */
-                    flag |= 2;    /* Native refs are always writable. */
+                if (cont == null) {
+                    flag = 0;
                 }
-                else if (Ops.isrwcont(cont, tc) == 1)
-                    flag |= 2;
-                if (!(decont instanceof TypeObject))
-                    flag |= 1;
+                else {
+                    SixModelObject decont = Ops.decont(cont, tc);
+                    flag = ((long)decont.st.hashCode()) << 3;
+                    if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                        flag |= 4;    /* Native ref vs. non-native ref */
+                        flag |= 2;    /* Native refs are always writable. */
+                    }
+                    else if (Ops.isrwcont(cont, tc) == 1)
+                        flag |= 2;
+                    if (!(decont instanceof TypeObject))
+                        flag |= 1;
+                }
                 argTup[numArgs++] = flag;
                 break;
             default:
@@ -161,17 +167,23 @@ public class MultiCacheInstance extends SixModelObject {
             case CallSiteDescriptor.ARG_OBJ:
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
+                long flag;
                 SixModelObject cont = (SixModelObject)args[i];
-                SixModelObject decont = Ops.decont(cont, tc);
-                long flag = ((long)decont.st.hashCode()) << 3;
-                if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
-                    flag |= 4;    /* Native ref vs. non-native ref */
-                    flag |= 2;    /* Native refs are always writable. */
+                if (cont == null) {
+                    flag = 0;
                 }
-                else if (Ops.isrwcont(cont, tc) == 1)
-                    flag |= 2;
-                if (!(decont instanceof TypeObject))
-                    flag |= 1;
+                else {
+                    SixModelObject decont = Ops.decont(cont, tc);
+                    flag = ((long)decont.st.hashCode()) << 3;
+                    if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                        flag |= 4;    /* Native ref vs. non-native ref */
+                        flag |= 2;    /* Native refs are always writable. */
+                    }
+                    else if (Ops.isrwcont(cont, tc) == 1)
+                        flag |= 2;
+                    if (!(decont instanceof TypeObject))
+                        flag |= 1;
+                }
                 argTup[numArgs++] = flag;
                 break;
             default:
