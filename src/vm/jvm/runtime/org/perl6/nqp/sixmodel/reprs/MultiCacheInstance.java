@@ -9,6 +9,7 @@ import org.perl6.nqp.sixmodel.TypeObject;
 public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_MAX_ARITY = 4;
     private static final int MD_CACHE_MAX_ENTRIES = 32;
+    private static final int MD_CACHE_NULL = 0;
     private static final int MD_CACHE_INT = 1;
     private static final int MD_CACHE_NUM = 2;
     private static final int MD_CACHE_STR = 3;
@@ -54,45 +55,12 @@ public class MultiCacheInstance extends SixModelObject {
         long argTup[] = new long[MD_CACHE_MAX_ARITY];
         boolean hasNamed = false;
         for (int i = 0; i < argFlags.length; i++) {
-            switch (argFlags[i]) {
-            case CallSiteDescriptor.ARG_INT:
+            if (denotesPositionalArgument(argFlags[i])) {
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return;
-                argTup[numArgs++] = MD_CACHE_INT;
-                break;
-            case CallSiteDescriptor.ARG_NUM:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return;
-                argTup[numArgs++] = MD_CACHE_NUM;
-                break;
-            case CallSiteDescriptor.ARG_STR:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return;
-                argTup[numArgs++] = MD_CACHE_STR;
-                break;
-            case CallSiteDescriptor.ARG_OBJ:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return;
-                long flag;
-                SixModelObject cont = (SixModelObject)args[i];
-                if (cont == null) {
-                    flag = 0;
-                }
-                else {
-                    SixModelObject decont = Ops.decont(cont, tc);
-                    flag = ((long)decont.st.hashCode()) << 3;
-                    if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
-                        flag |= 4;    /* Native ref vs. non-native ref */
-                        flag |= 2;    /* Native refs are always writable. */
-                    }
-                    else if (Ops.isrwcont(cont, tc) == 1)
-                        flag |= 2;
-                    if (!(decont instanceof TypeObject))
-                        flag |= 1;
-                }
-                argTup[numArgs++] = flag;
-                break;
-            default:
+                argTup[numArgs++] = getTypeId(argFlags[i], args[i], tc);
+            }
+            else {
                 if ((argFlags[i] & CallSiteDescriptor.ARG_FLAT) != 0)
                     return;
                 hasNamed = true;
@@ -148,45 +116,12 @@ public class MultiCacheInstance extends SixModelObject {
         long argTup[] = new long[MD_CACHE_MAX_ARITY];
         boolean hasNamed = false;
         for (int i = 0; i < argFlags.length; i++) {
-            switch (argFlags[i]) {
-            case CallSiteDescriptor.ARG_INT:
+            if (denotesPositionalArgument(argFlags[i])) {
                 if (numArgs >= MD_CACHE_MAX_ARITY)
                     return null;
-                argTup[numArgs++] = MD_CACHE_INT;
-                break;
-            case CallSiteDescriptor.ARG_NUM:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return null;
-                argTup[numArgs++] = MD_CACHE_NUM;
-                break;
-            case CallSiteDescriptor.ARG_STR:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return null;
-                argTup[numArgs++] = MD_CACHE_STR;
-                break;
-            case CallSiteDescriptor.ARG_OBJ:
-                if (numArgs >= MD_CACHE_MAX_ARITY)
-                    return null;
-                long flag;
-                SixModelObject cont = (SixModelObject)args[i];
-                if (cont == null) {
-                    flag = 0;
-                }
-                else {
-                    SixModelObject decont = Ops.decont(cont, tc);
-                    flag = ((long)decont.st.hashCode()) << 3;
-                    if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
-                        flag |= 4;    /* Native ref vs. non-native ref */
-                        flag |= 2;    /* Native refs are always writable. */
-                    }
-                    else if (Ops.isrwcont(cont, tc) == 1)
-                        flag |= 2;
-                    if (!(decont instanceof TypeObject))
-                        flag |= 1;
-                }
-                argTup[numArgs++] = flag;
-                break;
-            default:
+                argTup[numArgs++] = getTypeId(argFlags[i], args[i], tc);
+            }
+            else {
                 if ((argFlags[i] & CallSiteDescriptor.ARG_FLAT) != 0)
                     return null;
                 hasNamed = true;
@@ -218,5 +153,38 @@ public class MultiCacheInstance extends SixModelObject {
         }
 
         return null;
+    }
+
+    private boolean denotesPositionalArgument(byte argFlag) {
+        return argFlag == CallSiteDescriptor.ARG_INT || argFlag == CallSiteDescriptor.ARG_NUM
+            || argFlag == CallSiteDescriptor.ARG_STR || argFlag == CallSiteDescriptor.ARG_OBJ;
+    }
+
+    private long getTypeId(byte flag, Object arg, ThreadContext tc) {
+        switch (flag) {
+        case CallSiteDescriptor.ARG_INT:
+            return MD_CACHE_INT;
+        case CallSiteDescriptor.ARG_NUM:
+            return MD_CACHE_NUM;
+        case CallSiteDescriptor.ARG_STR:
+            return MD_CACHE_STR;
+        case CallSiteDescriptor.ARG_OBJ:
+            if (arg == null)
+                return MD_CACHE_NULL;
+            SixModelObject cont = (SixModelObject)arg;
+            SixModelObject decont = Ops.decont(cont, tc);
+            long typeId = ((long)decont.st.hashCode()) << 3;
+            if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+                typeId |= 4;    /* Native ref vs. non-native ref */
+                typeId |= 2;    /* Native refs are always writable. */
+            }
+            else if (Ops.isrwcont(cont, tc) == 1)
+                typeId |= 2;
+            if (!(decont instanceof TypeObject))
+                typeId |= 1;
+            return typeId;
+        default:
+            return -1;
+        }
     }
 }
