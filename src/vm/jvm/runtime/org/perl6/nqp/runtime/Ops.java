@@ -2013,7 +2013,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2034,7 +2034,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2055,7 +2055,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2103,7 +2103,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2127,7 +2127,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2151,7 +2151,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
