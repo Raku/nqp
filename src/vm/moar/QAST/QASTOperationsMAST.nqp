@@ -3199,6 +3199,9 @@ QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol
 # MoarVM-specific configuration program op
 QAST::MASTOperations.add_core_moarop_mapping('installconfprog', 'installconfprog');
 
+# MoarVM-specific event subscription op
+QAST::MASTOperations.add_core_moarop_mapping('vmeventsubscribe', 'vmeventsubscribe');
+
 # MoarVM-specific specializer plugin ops
 QAST::MASTOperations.add_core_moarop_mapping('speshreg', 'speshreg', 2);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardtype', 'speshguardtype', 0);
