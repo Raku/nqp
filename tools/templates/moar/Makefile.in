@@ -107,6 +107,7 @@ m-all: $(NQP_MOAR) $(M_BUILD_RUNNER) $(M_INST_NQP_M) $(M_INST_NQP) $(P5QREGEX_MO
 
 m-install: m-all @@configure_script@@
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
+	$(MKPATH) @q($(DESTDIR)$(NQP_HOME))@
 	$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(MKPATH) @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler)@
 	$(CP) $(NQP_MO_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
@@ -209,7 +210,7 @@ $(M_STAGE1_DIR): $(M_STAGE1_OUTPUT)
 
 @nfp($(M_STAGE1_DIR)/$(NQP_MOAR))@: $(M_STAGE0_DIR) @nfp($(M_STAGE1_DIR)/$(P6QREGEX_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QAST_MOAR))@ $(M_SOURCES)
 	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE1_DIR)/nqp-config.nqp)@
+	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE1_DIR)/nqp-config.nqp)@
 	$(PERL5) $(M_GEN_CAT) stage1 $(M_NQP_SOURCES) @nfpq($(M_STAGE1_DIR)/nqp-config.nqp)@ > @nfpq($(M_STAGE1_DIR)/$(NQP_COMBINED))@
 	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib --stable-sc=stage1 \
@@ -280,7 +281,7 @@ $(M_STAGE2_DIR): $(M_STAGE1_OUTPUT)
 
 @nfp($(M_STAGE2_DIR)/$(NQP_MOAR))@: $(M_STAGE1_DIR) @nfp($(M_STAGE2_DIR)/$(QAST_MOAR))@ @nfp($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ $(M_SOURCES)
 	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE2_DIR)/nqp-config.nqp)@
+	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE2_DIR)/nqp-config.nqp)@
 	$(PERL5) $(M_GEN_CAT) stage2 $(M_NQP_SOURCES) @nfpq($(M_STAGE2_DIR)/nqp-config.nqp)@ > @nfpq($(M_STAGE2_DIR)/$(NQP_COMBINED))@
 	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
 	    --setting=NQPCORE --target=mbc --no-regex-lib \

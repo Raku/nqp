@@ -68,7 +68,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable',
+        'relocatable',      'nqp-home=s',
       )
       or do {
         print_help();
@@ -145,6 +145,7 @@ General Options:
     --sdkroot=dir      When given, use for searching build tools here, e.g.
                        nqp, java etc.
     --sysroot=dir      When given, use for searching runtime components here
+    --nqp-home=dir     Directory to install NQP files to
     --backends=list    Backends to use: $backends
     --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
     --moar-option='--option=value'

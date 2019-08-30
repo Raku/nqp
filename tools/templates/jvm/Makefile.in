@@ -111,6 +111,7 @@ j-all: $(ALL_OUTPUT) $(J_RUNNER) $(P5QREGEX_JAR)
 j-install: j-all
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
 	$(MKPATH) @q($(DESTDIR)$(NQP_JAR_DIR))@
+	$(MKPATH) @q($(DESTDIR)$(NQP_HOME))@
 	$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
 	$(CP) @q($(ASM))@ @q($(ASMTREE))@ @q($(DESTDIR)$(NQP_JAR_DIR))@
 	$(CP) @q($(JLINE))@ @q($(JNA))@ @q($(DESTDIR)$(NQP_JAR_DIR))@
@@ -131,8 +132,8 @@ j-install: j-all
 $(RUNTIME_JAR): $(RUNTIME_JAVAS) @mkquot(@script(gen-jvm-properties.pl)@)@
 	$(PERL5) -MExtUtils::Command -e mkpath bin
 	$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
-	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
-	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
+	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
+	$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
 	$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
 
 J_CLEANUPS = *.class *.jar @q($(J_STAGE1_DIR))@ @q($(J_STAGE2_DIR))@ bin nqp nqp.bat jvmconfig.properties @q($(J_RUNNER))@
@@ -204,7 +205,7 @@ $(J_STAGE1_DIR): $(J_STAGE1_OUTPUT)
 
 @nfp($(J_STAGE1_DIR)/$(NQP_JAR):)@ $(J_STAGE0_DIR) @nfp($(J_STAGE1_DIR)/$(P6QREGEX_JAR))@ $(J_SOURCES)
 	$(MKPATH) $(J_STAGE1_DIR)
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@
+	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@
 	$(PERL5) @shquot(@script(gen-cat.pl)@)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE1_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE1_DIR)/$(NQP_COMBINED))@
 	$(J_STAGE0_NQP) --module-path=$(J_STAGE1_DIR) --setting-path=$(J_STAGE1_DIR) \
 	    --setting=NQPCORE --target=jar --no-regex-lib --stable-sc=stage1 --javaclass=nqp \
@@ -272,7 +273,7 @@ $(J_STAGE2_DIR): $(J_STAGE2_OUTPUT)
 
 @nfp($(J_STAGE2_DIR)/$(NQP_JAR):)@ $(J_STAGE1_DIR) @nfp($(J_STAGE2_DIR)/$(P6QREGEX_JAR))@ $(J_SOURCES)
 	$(MKPATH) $(J_STAGE2_DIR)
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ $(PREFIX) $(NQP_LIB_DIR) > @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@
+	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@
 	$(PERL5) @shquot(@script(gen-cat.pl)@)@ jvm $(J_NQP_SOURCES) @nfp($(J_STAGE2_DIR)/nqp-config.nqp)@ > @nfp($(J_STAGE2_DIR)/$(NQP_COMBINED))@
 	$(J_STAGE1_NQP) --module-path=$(J_STAGE2_DIR) --setting-path=$(J_STAGE2_DIR) \
 	    --setting=NQPCORE --target=jar --no-regex-lib --javaclass=nqp \
