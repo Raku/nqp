@@ -55,7 +55,7 @@ MAIN: {
 
     GetOptions(
         $cfg->options,      'help!',
-        'prefix=s',         'libdir=s',
+        'prefix=s',         'nqp-home=s',
         'sdkroot=s',        'sysroot=s',
         'backends=s',       'no-clean',
         'with-moar=s',      'gen-moar:s',
@@ -68,7 +68,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable',      'nqp-home=s',
+        'relocatable',
       )
       or do {
         print_help();
