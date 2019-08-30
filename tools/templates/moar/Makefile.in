@@ -9,6 +9,7 @@ M_INST_NQP_M = inst-nqp-m@moar::exe@
 M_GEN_CAT          = @shquot(@script(gen-cat.pl)@)@ moar
 
 M_MOAR_INC_PATHS = \
+  @moar::cincludes@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/moar)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libatomic_ops)@ \
