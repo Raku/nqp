@@ -117,7 +117,7 @@ constant('JS_RUNNER', 'nqp-js$(BAT)');
 constant('JS_CROSS_RUNNER', 'nqp-js-cross$(BAT)');
 
 rule('$(JS_RUNNER)', '@script(gen-js-runner.pl)@','$(PERL5) @script(gen-js-runner.pl)@');
-rule('$(JS_CROSS_RUNNER)', '@script(gen-js-cross-runner.pl)@','$(PERL5) @script(gen-js-cross-runner.pl)@ @nfp($(BASE_DIR)/$(M_RUNNER))@');
+rule('$(JS_CROSS_RUNNER)', '@script(gen-js-cross-runner.pl)@','$(PERL5) @script(gen-js-cross-runner.pl)@ @nfp($(BASE_DIR)/$(M_BUILD_RUNNER))@');
 
 out('js-runner-default: js-all');
 
