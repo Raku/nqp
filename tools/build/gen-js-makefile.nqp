@@ -157,7 +157,7 @@ rule('js-test-bootstrapped', "js-bootstrap {nfp('gen/js/qregex.t')}",
 	"\$(PERL5) {nfp('src/vm/js/bin/run_tests_bootstrapped.pl')}");
 
 rule('gen/js/qregex.t', '@script(process-qregex-tests)@',
-	"\$(JS_NQP) \@script(process-qregex-tests)@ > {nfp('gen/js/qregex.t')}");
+	"\$(M_BUILD_RUNNER_BIN) \@script(process-qregex-tests)@ > {nfp('gen/js/qregex.t')}");
 
 rule('js-clean', '', 
     '$(RM_RF) ' ~ nfp('$(JS_BUILD_DIR)/stage1 $(JS_BUILD_DIR)/stage2 $(JS_BUILD_DIR)/qregex.t $(BASE_DIR)/package-lock.json'),
