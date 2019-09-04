@@ -301,5 +301,10 @@ ok(nqp::istype($to_be_casted, $bi_type), 'fromI_I result has correct type');
 ok(nqp::unbox_i($to_be_casted) == 100, 'fromI_I result has correct value');
 ok(nqp::istype($to_be_casted, $bi_type) && nqp::unbox_i($to_be_casted) == 100, 'fromI_I argument doesn\'t change');
 
-# https://github.com/perl6/nqp/issues/363
-ok(100000000000000009 != 100000000000000016, 'int literals that are the same float value are unequal');
+if nqp::getcomp('nqp').backend.name eq 'js' {
+    skip("skipping test that uses a 64bit int on a 32bit backend");
+}
+else {
+    # https://github.com/perl6/nqp/issues/363
+    ok(100000000000000009 != 100000000000000016, 'int literals that are the same float value are unequal');
+}
