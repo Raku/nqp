@@ -164,7 +164,7 @@ if (process.browser) {
       exports.loaderCtx = ctx;
       file = file.replace(/\./g, '_');
       file = file.replace(/\_js$/, '');
-      file = file.replace(/::/g, '-');
+      file = file.replace(/::/g, '/');
       /*await*/ loadWithCache(require('./' + file + '.nqp-raw-runtime'));
       exports.loaderCtx = oldLoaderCtx;
   };
@@ -187,7 +187,7 @@ if (process.browser) {
 
     const oldLoaderCtx = exports.loaderCtx;
     exports.loaderCtx = ctx;
-    const mangled = file.replace(/::/g, '-');
+    const mangled = file.replace(/::/g, '/');
 
     const prefixes = libpath.slice();
 

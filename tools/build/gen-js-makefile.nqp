@@ -89,8 +89,7 @@ sub cross-compile(:$stage, :$source, :$target, :$setting='NQPCORE', :$no-regex-l
     nqp::unshift($deps, $source);
     nqp::unshift($deps, '$(JS_STAGE1_COMPILER)');
 
-    my $replaced-target := subst($target, /\//, '-');
-    my $js := "$nqp-js-on-js/$replaced-target.js";
+    my $js := "$nqp-js-on-js/$target.js";
 
 
     rule($moarvm, nqp::join(' ', $deps), 
@@ -174,19 +173,19 @@ rule("js-lint", '',
 	"gjslint --strict --max_line_length=200 --nojsdoc {nfp('src/vm/js/nqp-runtime/*.js')}");
 
 
-my @install := <nqp-js-on-js/nqp-bootstrapped.js nqp-js-on-js/ModuleLoader.js nqp-js-on-js/package.json nqp-js-on-js/NQPCORE.setting.js nqp-js-on-js/NQPHLL.js nqp-js-on-js/nqpmo.js nqp-js-on-js/NQPP5QRegex.js nqp-js-on-js/NQPP6QRegex.js nqp-js-on-js/QAST-Compiler.js nqp-js-on-js/QAST.js nqp-js-on-js/QASTNode.js nqp-js-on-js/QRegex.js nqp-js-on-js/sprintf.js nqp-js-on-js/NQPCORE.setting.js.map nqp-js-on-js/NQPHLL.js.map nqp-js-on-js/nqpmo.js.map nqp-js-on-js/NQPP5QRegex.js.map nqp-js-on-js/NQPP6QRegex.js.map nqp-js-on-js/QAST-Compiler.js.map nqp-js-on-js/QAST.js.map nqp-js-on-js/QASTNode.js.map nqp-js-on-js/QRegex.js.map nqp-js-on-js/sprintf.js.map>;
+my @install := <nqp-bootstrapped.js ModuleLoader.js package.json NQPCORE.setting.js NQPHLL.js nqpmo.js NQPP5QRegex.js NQPP6QRegex.js QAST/Compiler.js QAST.js QASTNode.js QRegex.js sprintf.js NQPCORE.setting.js.map NQPHLL.js.map nqpmo.js.map NQPP5QRegex.js.map NQPP6QRegex.js.map QAST/Compiler.js.map QAST.js.map QASTNode.js.map QRegex.js.map sprintf.js.map>;
 
 my @cp_all;
 for @install -> $file {
-
-    $file := nfp($file);
-    @cp_all.push("\$(CP) $file {nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js')}");
+    my $source := nfp('nqp-js-on-js/' ~ $file);
+    @cp_all.push("\$(CP) $source {nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js/' ~ $file)}");
 }
 
 rule('js-install', 'js-all',
   '$(MKPATH) $(DESTDIR)$(BIN_DIR)',
   '$(MKPATH) $(DESTDIR)$(NQP_LIB_DIR)',
   '$(MKPATH) ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js'),
+  '$(MKPATH) ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js/QAST'),
   |@cp_all,
   '$(PERL5) @script(npm-install-or-link.pl)@ ' ~ nfp('$(DESTDIR)$(NQP_LIB_DIR)/nqp-js-on-js src/vm/js/nqp-runtime nqp-runtime @link@'),
   '$(PERL5) @script(install-js-runner.pl)@ "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
