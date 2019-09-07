@@ -156,10 +156,6 @@ function loadWithCache(code) {
 
 if (process.browser) {
   op.loadbytecode = /*async*/ function(ctx, file) {
-      if (file == 'Perl6/BOOTSTRAP.js') {
-        file = 'Perl6::BOOTSTRAP';
-      }
-
       const oldLoaderCtx = exports.loaderCtx;
       exports.loaderCtx = ctx;
       file = file.replace(/\./g, '_');
@@ -174,11 +170,6 @@ if (process.browser) {
   };
 } else {
   op.loadbytecode = /*async*/ function(ctx, file) {
-    // HACK - temporary hack for rakudo-js
-    if (file == 'Perl6/BOOTSTRAP.js') {
-      file = 'Perl6::BOOTSTRAP';
-    }
-
     let loadFrom;
     if (ctx && ((loadFrom = ctx.lookupDynamic('$*LOADBYTECODE_FROM')) !== Null)) {
     } else {
