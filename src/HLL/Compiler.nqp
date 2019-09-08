@@ -282,7 +282,8 @@ class HLL::Compiler does HLL::Backend::Default {
             my $split := nqp::split('|||', %adverbs<libpath>);
             $*LIBPATH := nqp::list_s();
             for $split -> $str {
-                nqp::push_s($*LIBPATH, $str);
+                my $absolute := nqp::getcomp('JavaScript').eval('return (function(path) {return require("path").resolve(process.cwd(), path)})')(~$str);
+                nqp::push_s($*LIBPATH, $absolute);
             }
             nqp::getcomp('JavaScript').eval('return (function(paths) {nqp.libpath(paths)})')($*LIBPATH);
         }
