@@ -530,17 +530,19 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
             }
             nqp::exit(1) if $err;
-            try {
-                nqp::push(@codes, $in-handle.slurp());
-                unless $filename eq '-' {
-                    $in-handle.close;
+            if (nqp::defined($in-handle)) {
+                try {
+                    nqp::push(@codes, $in-handle.slurp());
+                    unless $filename eq '-' {
+                        $in-handle.close;
+                    }
+                    CATCH {
+                        note("Error while reading from file: $_");
+                        $err := 1;
+                    }
                 }
-                CATCH {
-                    note("Error while reading from file: $_");
-                    $err := 1;
-                }
+                nqp::exit(1) if $err;
             }
-            nqp::exit(1) if $err;
         }
         my $code := join('', @codes);
         my $?FILES := %adverbs<source-name> || join(' ', @files);
