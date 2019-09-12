@@ -276,8 +276,8 @@ grammar Rubyish::Grammar is HLL::Grammar {
          <EXPR> *%% <comma>
     }
 
-    token value:sym<integer> { \d+ }
-    token value:sym<float>   { \d* '.' \d+ }
+    token value:sym<integer> { <integer> }
+    token value:sym<float>   { <dec_number> }
     token value:sym<array>   {'[' ~ ']' <paren-list> }
     token value:sym<hash>    {'{' ~ '}' <paren-list> }
     token value:sym<nil>     { <sym> }
@@ -885,11 +885,13 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method value:sym<integer>($/) {
-        make QAST::IVal.new( :value(+$/.Str) )
+        my $value := $<integer>.ast;
+        make QAST::IVal.new( :value($value) )
     }
 
     method value:sym<float>($/) {
-        make QAST::NVal.new( :value(+$/.Str) )
+        my $value := $<dec_number>.ast;
+        make QAST::NVal.new( :value($value) )
     }
 
     method paren-list($/) {
@@ -921,11 +923,11 @@ class Rubyish::Actions is HLL::Actions {
     }
 
     method value:sym<true>($/) {
-        make QAST::IVal.new( :value<1> );
+        make QAST::IVal.new( :value(1) );
     }
 
     method value:sym<false>($/) {
-        make QAST::IVal.new( :value<0> );
+        make QAST::IVal.new( :value(0) );
     }
 
     method interp($/) { make $<stmtlist>.ast }

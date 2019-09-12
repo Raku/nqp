@@ -1431,9 +1431,9 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
     }
 
     multi method as_js(QAST::NVal $node, :$want) {
-        if $node.value == nqp::inf {
+        if nqp::iseq_n($node.value, nqp::inf) {
             Chunk.new($T_NUM,'Infinity', :$node);
-        } elsif $node.value == nqp::neginf {
+        } elsif nqp::iseq_n($node.value, nqp::neginf) {
             Chunk.new($T_NUM,'(-Infinity)', :$node);
         } else {
             Chunk.new($T_NUM,'('~$node.value()~')', :$node);

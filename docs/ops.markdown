@@ -1,4 +1,13 @@
-# NQP Opcode List
+# Introduction
+
+The opcode set is dynamic.
+This document is about core opcodes.
+For Perl 6 opcodes added by the rakudo compiler
+see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the rakudo
+repository. They are of the form `nqp::p6*`.
+
+The tool [tools/find-undocumented-ops.p6](https://github.com/perl6/nqp/blob/master/tools/find-undocumented-ops.p6) can be used to find undocumented opcodes.
+For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/perl6/nqp/blob/master/docs/qast.markdown).
 
 ## Table of Contents
 
@@ -343,6 +352,20 @@
   * [atomicstore `moar`](#atomicstore-moar)
   * [atomicstore_i `moar`](#atomicstore_i-moar)
   * [barrierfull `moar`](#barrierfull-moar)
+- [Serialization context]
+  * [createsc](#createsc)
+  * [scsetdesc](#scsetdesc)
+  * [scgetdesc](#scgetdesc)
+  * [scgethandle](#scgethandle)
+  * [pushcompc](#pushcompsc)
+  * [popcompsc](#popcompsc)
+  * [scsetobj](#scsetobj)
+  * [setobjsc](#seetobjsc)
+  * [getobjsc](#getobjsc)
+  * [scgetobjidx](#scgetobjidx)
+  * [serialize](#serialize)
+  * [deserialize](#deserialize)
+  * [scobjcount](#scobjcount)
 
 # NQP Opcodes
 
@@ -3031,3 +3054,55 @@ is, with appropriate barriering to ensure the changed value is "published").
 * `barrierfull()`
 
 Performs a full memory barrier.
+
+# Serialization context
+Abbreviated as SC.
+You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
+For test examples, see [t/serialization/](https://github.com/perl6/nqp/tree/master/t/serialization)
+## createsc
+* `createsc($handle-string)`
+creates a serialization context and returns it.
+
+## scsetdesc
+* `scsetdesc($sc, $descriptor-string)`
+
+Set a descriptor for `$sc` created by `createsc()`
+
+## scgetdesc
+* `scgetdesc($sc)`
+
+Get the descriptor set by `scsetdec`
+
+## scgethandle
+* `scgethandle($sc)`
+
+Get the handle string used by `createsc` to create the SC `$sc`
+
+## pushcompsc
+* `pushcompc($sc)`
+
+## popcompsc
+* `popcompsc($sc)`
+
+## scsetobjc
+* `scsetobj($sc, $idx, $obj)`
+
+## setobjsc
+* `setobjsc($obj, $sc)`
+
+## getobjsc
+* `getobjsc($obj)`
+
+## scgetojidx
+* `scgetobjidx()`
+
+## serialize
+* `serialize()`
+
+## deserialize
+* `deserialize()`
+
+## scojcount
+* `scobjcount()`
+
+## 

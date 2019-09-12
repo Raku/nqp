@@ -287,7 +287,8 @@ class HLL::Compiler does HLL::Backend::Default {
             my $split := nqp::split('|||', %adverbs<libpath>);
             $*LIBPATH := nqp::list_s();
             for $split -> $str {
-                nqp::push_s($*LIBPATH, $str);
+                my $absolute := nqp::getcomp('JavaScript').eval('return (function(path) {return require("path").resolve(process.cwd(), path)})')(~$str);
+                nqp::push_s($*LIBPATH, $absolute);
             }
             nqp::getcomp('JavaScript').eval('return (function(paths) {nqp.libpath(paths)})')($*LIBPATH);
         }
@@ -529,17 +530,19 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
             }
             nqp::exit(1) if $err;
-            try {
-                nqp::push(@codes, $in-handle.slurp());
-                unless $filename eq '-' {
-                    $in-handle.close;
+            if (nqp::defined($in-handle)) {
+                try {
+                    nqp::push(@codes, $in-handle.slurp());
+                    unless $filename eq '-' {
+                        $in-handle.close;
+                    }
+                    CATCH {
+                        note("Error while reading from file: $_");
+                        $err := 1;
+                    }
                 }
-                CATCH {
-                    note("Error while reading from file: $_");
-                    $err := 1;
-                }
+                nqp::exit(1) if $err;
             }
-            nqp::exit(1) if $err;
         }
         my $code := join('', @codes);
         my $?FILES := %adverbs<source-name> || join(' ', @files);
@@ -595,7 +598,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 }
                 next;
             }
-            $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats);
+            $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats) && $_ ne "parse";
             my num $timestamp := nqp::time_n();
 
             my sub run() {
@@ -608,6 +611,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
             my num $diff := nqp::sub_n(nqp::time_n(), $timestamp);
             if nqp::defined($stagestats) {
+                $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if $_ eq "parse";
                 $stderr.print(nqp::sprintf("%7.3f", [$diff]));
                 $!backend.force_gc() if nqp::bitand_i($stagestats, 0x4);
                 $stderr.print($!backend.vmstat())
@@ -617,6 +621,7 @@ class HLL::Compiler does HLL::Backend::Default {
                    $stderr.print("continue> ");
                    $stdin.get;
                 }
+                $stderr.flush;
             }
             last if $_ eq $target;
         }

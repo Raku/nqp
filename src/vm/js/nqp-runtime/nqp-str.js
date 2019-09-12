@@ -29,6 +29,10 @@ class NQPStr extends NQPObject {
   $$getStr() {
     return this.value;
   }
+
+  $$decont_s() {
+    return this.value;
+  }
 };
 
 NQPStr.prototype.$$STable = new FakeStable('NQPStr');

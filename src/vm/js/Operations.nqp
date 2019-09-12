@@ -609,6 +609,9 @@ class QAST::OperationsJS {
     add_op('istrue', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_BOOL));
     });
+    add_op('intify', sub ($comp, $node, :$want) {
+        $comp.as_js($node[0], :want($T_INT));
+    });
     add_op('stringify', sub ($comp, $node, :$want) {
         $comp.as_js($node[0], :want($T_STR));
     });

@@ -28,7 +28,8 @@ public class ArgsExpectation {
                 if (csd.argFlags.length != 0)
                     ExceptionHandling.dieInternal(tc,
                         "Wrong number of arguments passed; expected 0..0, but got " +
-                        csd.numPositionals);
+                        csd.argFlags.length +
+                        " (" + csd.numPositionals + " of those positional)");
             }
             cr.staticInfo.mh.invokeExact(tc, cr, csd);
             break;
@@ -63,13 +64,15 @@ public class ArgsExpectation {
                     default:
                         ExceptionHandling.dieInternal(tc,
                             "Wrong number of arguments passed; expected 1..1, but got " +
-                            csd.numPositionals);
+                            csd.argFlags.length +
+                            " (" + csd.numPositionals + " of those positional)");
                     }
                 }
                 else {
                     ExceptionHandling.dieInternal(tc,
                         "Wrong number of arguments passed; expected 1..1, but got " +
-                        csd.numPositionals);
+                        csd.argFlags.length +
+                        " (" + csd.numPositionals + " of those positional)");
                 }
             }
             break;
@@ -105,7 +108,8 @@ public class ArgsExpectation {
                     default:
                         ExceptionHandling.dieInternal(tc,
                             "Wrong number of arguments passed; expected 2..2, but got " +
-                            csd.numPositionals);
+                            csd.argFlags.length +
+                            " (" + csd.numPositionals + " of those positional)");
                     }
                     switch (csd.argFlags[1]) {
                     case CallSiteDescriptor.ARG_OBJ:
@@ -123,14 +127,16 @@ public class ArgsExpectation {
                     default:
                         ExceptionHandling.dieInternal(tc,
                             "Wrong number of arguments passed; expected 2..2, but got " +
-                            csd.numPositionals);
+                            csd.argFlags.length +
+                            " (" + csd.numPositionals + " of those positional)");
                     }
                     cr.staticInfo.mh.invokeExact(tc, cr, csd, arg1, arg2);
                 }
                 else {
                     ExceptionHandling.dieInternal(tc,
                         "Wrong number of arguments passed; expected 2..2, but got " +
-                        csd.numPositionals);
+                        csd.argFlags.length +
+                        " (" + csd.numPositionals + " of those positional)");
                 }
             }
             break;

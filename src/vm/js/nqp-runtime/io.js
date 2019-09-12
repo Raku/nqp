@@ -382,6 +382,10 @@ class StdHandle extends IOHandle {
   constructor() {
     super();
   }
+
+  $$flushfh() {
+    return this;
+  }
 };
 
 class Stderr extends StdHandle {

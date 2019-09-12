@@ -149,7 +149,7 @@ class BinaryWriteCursor {
       this.uint8(0x80 | (value + 129));
     } else {
       const rest = storageNeeded - 1;
-      const nybble = rest == 4 ? 0 : value >> 8 * rest;
+      const nybble = rest == 4 ? (value >= 0 ? 0 : -1) : value >> 8 * rest;
 
       /* All the other high bits should be the same as the top bit of the
              nybble we keep. Or we have a bug.  */

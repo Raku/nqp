@@ -436,25 +436,62 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject connect(SixModelObject obj, String host, long port, ThreadContext tc) {
+	public static final int SOCKET_FAMILY_UNSPEC = 0;
+	public static final int SOCKET_FAMILY_INET   = 1;
+	public static final int SOCKET_FAMILY_INET6  = 2;
+	public static final int SOCKET_FAMILY_UNIX   = 3;
+
+    public static SixModelObject connect(SixModelObject obj, String host, long port, long family, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
-        if (h.handle instanceof SocketHandle) {
-            ((SocketHandle)h.handle).connect(tc, host, (int) port);
-        } else {
-            ExceptionHandling.dieInternal(tc,
-                "This handle does not support connect");
-        }
+
+		switch ((int) family) {
+			case SOCKET_FAMILY_UNSPEC:
+			case SOCKET_FAMILY_INET:
+			case SOCKET_FAMILY_INET6:
+				if (h.handle instanceof SocketHandle) {
+					((SocketHandle)h.handle).connect(tc, host, (int) port);
+				} else {
+					ExceptionHandling.dieInternal(tc,
+						"This handle does not support connect");
+				}
+				break;
+			case SOCKET_FAMILY_UNIX:
+				ExceptionHandling.dieInternal(tc,
+					"UNIX sockets are not supported on the JVM");
+				break;
+			default:
+				ExceptionHandling.dieInternal(tc,
+					"Unsupported socket family: " + Long.toString(family));
+				break;
+		}
+
         return obj;
     }
 
-    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long backlog, ThreadContext tc) {
+    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long family, long backlog, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
-        if (h.handle instanceof IIOBindable) {
-            ((IIOBindable)h.handle).bind(tc, host, (int) port, (int)backlog);
-        } else {
-            ExceptionHandling.dieInternal(tc,
-                "This handle does not support bind");
-        }
+
+		switch ((int) family) {
+			case SOCKET_FAMILY_UNSPEC:
+			case SOCKET_FAMILY_INET:
+			case SOCKET_FAMILY_INET6:
+				if (h.handle instanceof IIOBindable) {
+					((IIOBindable)h.handle).bind(tc, host, (int) port, (int) backlog);
+				} else {
+					ExceptionHandling.dieInternal(tc,
+						"This handle does not support bind");
+				}
+				break;
+			case SOCKET_FAMILY_UNIX:
+				ExceptionHandling.dieInternal(tc,
+					"UNIX sockets are not supported on the JVM");
+				break;
+			default:
+				ExceptionHandling.dieInternal(tc,
+					"Unsupported socket family: " + Long.toString(family));
+				break;
+		}
+
         return obj;
     }
 
@@ -1976,7 +2013,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1997,7 +2034,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2018,7 +2055,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2066,7 +2103,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2090,7 +2127,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -2114,7 +2151,7 @@ public final class Ops {
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return ((SixModelObject)args[lookup >> 3]).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }

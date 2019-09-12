@@ -87,7 +87,7 @@ public class CallSiteDescriptor {
                 hasFlattening = true;
                 break;
             default:
-                new RuntimeException("Unhandld argument flag: " + af);
+                new RuntimeException("Unhandled argument flag: " + af);
             }
         }
     }

@@ -2251,6 +2251,11 @@ my %const_map := nqp::hash(
     'BINARY_SIZE_16_BIT',         4,
     'BINARY_SIZE_32_BIT',         8,
     'BINARY_SIZE_64_BIT',        12,
+
+    'SOCKET_FAMILY_UNSPEC',       0,
+    'SOCKET_FAMILY_INET',         1,
+    'SOCKET_FAMILY_INET6',        2,
+    'SOCKET_FAMILY_UNIX',         3,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
@@ -3193,6 +3198,9 @@ QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol
 
 # MoarVM-specific configuration program op
 QAST::MASTOperations.add_core_moarop_mapping('installconfprog', 'installconfprog');
+
+# MoarVM-specific event subscription op
+QAST::MASTOperations.add_core_moarop_mapping('vmeventsubscribe', 'vmeventsubscribe');
 
 # MoarVM-specific specializer plugin ops
 QAST::MASTOperations.add_core_moarop_mapping('speshreg', 'speshreg', 2);

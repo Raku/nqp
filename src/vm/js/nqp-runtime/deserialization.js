@@ -289,7 +289,7 @@ class BinaryCursor {
       return result;
     }
 
-    result = (first & 0x0F) << 8 * need;
+    result = need == 4 ? 0 : (first & 0x0F) << 8 * need;
 
     let shiftPlaces = 0;
     for (let i = 0; i < need; i++) {
