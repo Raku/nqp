@@ -1,0 +1,142 @@
+
+@bpv(GEN_CAT)@ = $(PERL5) @shquot(@script(gen-cat.pl)@)@ @backend@
+@bpv(BUILD_DIR)@ = @nfp(gen/@backend@)@
+
+@bpv(STAGE0_DIR)@ = @nfp(src/vm/@backend@/stage0)@
+@for_stages(@bpv(@ucstage@_DIR)@ = @nfp(@bpm(BUILD_DIR)@/@lcstage@)@
+)@
+
+@bsv(NQP_MO)@			= nqpmo.@bext@
+@bsv(MODULE_LOADER)@	= ModuleLoader.@bext@
+@bsv(CORE_SETTING)@		= NQPCORE.setting.@bext@
+@bsv(QASTNODE)@			= QASTNode.@bext@
+@bsv(QREGEX)@			= QRegex.@bext@
+@bsv(HLL)@				= NQPHLL.@bext@
+@bsv(QAST)@				= QAST.@bext@
+@bsv(P6QREGEX)@			= NQPP6QRegex.@bext@
+@bsv(P5QREGEX)@			= NQPP5QRegex.@bext@
+
+@if(backend!=js @bpv(PRECOMP_STAGE1_FLAGS)@ = --stable-sc=stage1
+@bpv(PRECOMP_STAGE2_FLAGS)@ =
+
+)@
+@bpv(HLL_SOURCES)@		= @nfp(src/vm/@backend@/HLL/Backend.nqp)@ $(COMMON_HLL_SOURCES)
+@bpv(QAST_SOURCES)@		= \
+    @insert_filelist(qast_sources)@
+@bpv(MODULE_LOADER_SOURCES)@ = @nfp(src/vm/@backend@/ModuleLoader.nqp)@
+
+@bsv(NQP)@				= nqp.@bext@
+@bpv(NQP_SOURCES)@		= @bpm(NQP_SOURCES_EXTRA)@ $(COMMON_NQP_SOURCES)
+
+@bpv(SOURCES)@ = \
+  $(COMMON_SOURCES) \
+  @bpm(QAST_SOURCES)@ \
+  @bpm(HLL_SOURCES)@ \
+  @bpm(NQP_SOURCES)@ \
+  @bpm(MODULE_LOADER_SOURCES)@
+
+@bsv(ASTNODES)@ = @uc(@backend_prefix@)@ASTNodes.@bext@
+@for_stages(
+@bpv(@ucstage@_OUTPUT)@ = \
+  @nfp(@stage_dir@/@bsm(NQP_MO)@)@ \
+  @nfp(@stage_dir@/@bsm(MODULE_LOADER)@)@ \
+  @nfp(@stage_dir@/@bsm(CORE_SETTING)@)@ \
+  @nfp(@stage_dir@/@bsm(QASTNODE)@)@ \
+  @nfp(@stage_dir@/@bsm(QREGEX)@)@ \
+  @nfp(@stage_dir@/@bsm(HLL)@)@ \
+@if(backend==moar   @nfp(@stage_dir@/@bsm(ASTOPS)@)@ \
+)@@if(backend!=js   @nfp(@stage_dir@/@bsm(ASTNODES)@)@ \
+)@  @nfp(@stage_dir@/@bsm(QAST)@)@ \
+  @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ \
+  @nfp(@stage_dir@/@bsm(NQP)@)@
+)@
+
+@backend_prefix@-all:: @backend_prefix@-dirs
+
+@backend_prefix@-dirs::
+	@echo(+++ Preparing build directories)@
+	@noecho@$(MKPATH)@for_stages( @stage_dir@)@
+
+@for_stages(
+# --- @uc(@backend@)@ @ucstage@ RULES ---
+
+# Combined sources
+@bpv(NQP_MO_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(NQP_MO_COMBINED))@
+@bpv(CORE_SETTING_COMBINED_@ucstage@)@	= @nfp(@stage_dir@/$(CORE_SETTING_COMBINED))@
+@bpv(QASTNODE_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(QASTNODE_COMBINED))@
+@bpv(QAST_COMBINED_@ucstage@)@			= @nfp(@stage_dir@/$(QAST_COMBINED))@
+@bpv(ASTNODES_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/@uc(@backend_prefix@)@ASTNodes.nqp)@
+@bpv(QREGEX_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(QREGEX_COMBINED))@
+@bpv(HLL_COMBINED_@ucstage@)@			= @nfp(@stage_dir@/$(HLL_COMBINED))@
+@bpv(P6QREGEX_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(P6QREGEX_COMBINED))@
+
+# Precompiled files
+@bsv(NQP_MO_@ucstage@)@						= @nfp(@stage_dir@/@bsm(NQP_MO)@)@
+@bsv(MODULE_LOADER_@ucstage@)@				= @nfp(@stage_dir@/@bsm(MODULE_LOADER)@)@
+@bsv(CORE_SETTING_@ucstage@)@				= @nfp(@stage_dir@/@bsm(CORE_SETTING)@)@
+@bsv(QASTNODE_@ucstage@)@					= @nfp(@stage_dir@/@bsm(QASTNODE)@)@
+@make_pp_pfx@ifdef @bsv(ASTOPS)@
+@bsv(ASTOPS_@ucstage@)@						= @nfp(@stage_dir@/@bsm(ASTOPS)@)@
+@make_pp_pfx@else
+@bsv(ASTOPS_@ucstage@)@						= 
+@make_pp_pfx@endif
+@bsv(ASTNODES_@ucstage@)@					= @nfp(@stage_dir@/@bsm(ASTNODES)@)@
+@bsv(QREGEX_@ucstage@)@						= @nfp(@stage_dir@/@bsm(QREGEX)@)@
+@bsv(HLL_@ucstage@)@						= @nfp(@stage_dir@/@bsm(HLL)@)@
+@bsv(QAST_@ucstage@)@						= @nfp(@stage_dir@/@bsm(QAST)@)@
+@bsv(P6QREGEX_@ucstage@)@					= @nfp(@stage_dir@/@bsm(P6QREGEX)@)@
+@bsv(NQP_@ucstage@)@						= @nfp(@stage_dir@/@bsm(NQP)@)@
+
+# Building rules
+@stage_dir@: @bpm(@ucstage@_OUTPUT)@
+
+@stage_gencat(@bpm(NQP_MO_COMBINED_@ucstage@)@:						@prev_stage_dir@  @use_prereqs($(NQP_MO_SOURCES))@)@
+@stage_gencat(@bpm(CORE_SETTING_COMBINED_@ucstage@)@:				@prev_stage_dir@  @use_prereqs($(CORE_SETTING_SOURCES))@)@
+@stage_gencat(@bpm(QASTNODE_COMBINED_@ucstage@)@:					@prev_stage_dir@  @use_prereqs($(QASTNODE_SOURCES))@)@
+@stage_gencat(@bpm(ASTNODES_COMBINED_@ucstage@)@:					@prev_stage_dir@  @use_prereqs(@bpm(ASTNODES_SOURCES)@)@)@
+@stage_gencat(@bpm(QREGEX_COMBINED_@ucstage@)@:						@prev_stage_dir@  @use_prereqs($(QREGEX_SOURCES))@)@
+@stage_gencat(@bpm(HLL_COMBINED_@ucstage@)@:						@prev_stage_dir@  @use_prereqs(@bpm(HLL_SOURCES)@)@)@
+@stage_gencat(@bpm(QAST_COMBINED_@ucstage@)@:						@prev_stage_dir@  @use_prereqs(@bpm(QAST_SOURCES)@)@)@
+@stage_gencat(@bpm(P6QREGEX_COMBINED_@ucstage@)@:					@prev_stage_dir@  @use_prereqs($(P6QREGEX_SOURCES))@)@
+
+@stage_precomp(@bsm(NQP_MO_@ucstage@)@:						@use_prereqs(@bpm(NQP_MO_COMBINED_@ucstage@)@)@ @setting(NULL)@)@
+@stage_precomp(@bsm(MODULE_LOADER_@ucstage@)@:				@prev_stage_dir@ @use_prereqs(@bpm(MODULE_LOADER_SOURCES)@)@ @setting(NULL)@)@
+@stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@ @setting(NULL)@)@
+@stage_precomp(@bsm(QASTNODE_@ucstage@)@:					@use_prereqs(@bpm(QASTNODE_COMBINED_@ucstage@)@)@ @bsm(CORE_SETTING_@ucstage@)@)@
+@if(backend==moar @stage_precomp(@bsm(ASTOPS_@ucstage@)@:	@use_prereqs(@bpm(ASTOPS_SOURCES)@)@ @bsm(CORE_SETTING_@ucstage@)@)@
+)@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(ASTOPS_@ucstage@)@)@
+@stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(QREGEX_@ucstage@)@)@
+@stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
+
+@nfp(@stage_dir@/@bsm(NQP)@)@: @prev_stage_dir@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
+	@echo(+++ Generating	NQP)@
+	@noecho@$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
+	@noecho@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
+	@noecho@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
+	    --setting=NQPCORE --target=mbc --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ \
+	    --output=@nfpq(@stage_dir@/@bsm(NQP)@)@ @nfpq(@stage_dir@/$(NQP_COMBINED))@
+)@
+
+@bsm(NQP)@: @bpm(STAGE2_OUTPUT)@
+	@echo(+++ Installing stage2 locally)@
+	@noecho@$(CP) @bsm(NQP_MO_STAGE2)@ .
+	@noecho@$(CP) @bsm(MODULE_LOADER_STAGE2)@ .
+	@noecho@$(CP) @bsm(CORE_SETTING_STAGE2)@ .
+	@noecho@$(CP) @bsm(QASTNODE_STAGE2)@ .
+	@noecho@$(CP) @bsm(QREGEX_STAGE2)@ .
+	@noecho@$(CP) @bsm(HLL_STAGE2)@ .
+	@noecho@$(CP) @bsm(ASTOPS_STAGE2)@ .
+	@noecho@$(CP) @bsm(ASTNODES_STAGE2)@ .
+	@noecho@$(CP) @bsm(QAST_STAGE2)@ .
+	@noecho@$(CP) @bsm(P6QREGEX_STAGE2)@ .
+	@noecho@$(CP) @bsm(NQP_STAGE2)@ .
+
+@bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bsm(NQP)@ @bpm(BUILD_RUNNER)@
+	@echo(+++ Compiling	$@)@
+	@noecho@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
+	@noecho@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
+	    @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
+
+# vim: ft=make tw=4 sw=4 noexpandtab

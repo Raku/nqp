@@ -107,6 +107,7 @@ COMMON_SOURCES = \
   $(QREGEX_SOURCES) \
   $(NQP_MO_SOURCES) \
 
+BAT    		= @bat@
 PERL5		= @shquot(@perl@)@
 CONFIGURE   = $(PERL5) @shquot(@configure_script@)@ @configure_opts()@
 MKPATH		= @mkpath@

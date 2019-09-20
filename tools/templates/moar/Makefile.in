@@ -1,12 +1,10 @@
-BAT                = @bat@
-M_NQP              = nqp@moar::exe@
-M_NQP_M            = nqp-m@moar::exe@
-M_BUILD_RUNNER     = nqp-m@moar::exe@
-M_BUILD_RUNNER_BIN = @nfp($(BASE_DIR)/$(M_BUILD_RUNNER))@
-M_INST_NQP = inst-nqp@moar::exe@
-M_INST_NQP_M = inst-nqp-m@moar::exe@
+@bpv(NQP)@              = nqp@moar::exe@
+@bpv(NQP_M)@            = nqp-m@moar::exe@
+@bpv(BUILD_RUNNER)@     = nqp-m@moar::exe@
+@bpv(BUILD_RUNNER_BIN)@ = @nfp($(BASE_DIR)/@bpm(BUILD_RUNNER)@)@
+@bpv(INST_NQP)@			= inst-nqp@moar::exe@
+@bpv(INST_NQP_M)@		= inst-nqp-m@moar::exe@
 # It's ok to shell quote this one as it only used in a command line
-M_GEN_CAT          = @shquot(@script(gen-cat.pl)@)@ moar
 
 M_MOAR_INC_PATHS = \
   @moar::cincludes@ \
@@ -20,69 +18,19 @@ M_MOAR_INC_PATHS = \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libtommath)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libuv)@
 
-M_STAGE0_DIR = @moar_stage0@
-M_STAGE1_DIR = @nfp(gen/moar/stage1)@
-M_STAGE2_DIR = @nfp(gen/moar/stage2)@
+@for_stages(@bpv(@ucstage@_GEN_CAT)@ = @bpm(GEN_CAT)@ @lcstage@
+)@
 
-M_STAGE0_NQP = @q(@moar@)@ --libpath=$(M_STAGE0_DIR) @nfp($(M_STAGE0_DIR)/nqp.moarvm)@ --bootstrap
-M_STAGE1_NQP = @q(@moar@)@ --libpath=$(M_STAGE1_DIR) @nfp($(M_STAGE1_DIR)/nqp.moarvm)@ --bootstrap
+@bpv(STAGE0_NQP)@ = @q(@moar@)@ --libpath=@bpm(STAGE0_DIR)@ @nfp(@bpm(STAGE0_DIR)@/nqp.@bext@)@ --bootstrap
+@bpv(STAGE1_NQP)@ = @q(@moar@)@ --libpath=@bpm(STAGE1_DIR)@ @nfp(@bpm(STAGE1_DIR)@/nqp.@bext@)@ --bootstrap
 
-NQP_MO_MOAR  = nqpmo.moarvm
+@bsv(ASTOPS)@   		= MASTOps.@bext@
+@bpv(ASTOPS_SOURCES)@	= @nfp(@moar_prefix@/share/nqp/lib/MAST/Ops.nqp)@
+@bpv(ASTNODES_SOURCES)@	= @nfp(@moar_prefix@/share/nqp/lib/MAST/Nodes.nqp)@
 
-MODULE_LOADER_MOAR = ModuleLoader.moarvm
+@bpv(NQP_SOURCES_EXTRA)@ = @nfp(src/vm/@backend@/NQP/Ops.nqp)@
 
-CORE_SETTING_MOAR  = NQPCORE.setting.moarvm
-
-QASTNODE_MOAR  = QASTNode.moarvm
-
-QREGEX_MOAR    = QRegex.moarvm
-
-HLL_MOAR       = NQPHLL.moarvm
-M_HLL_SOURCES  = @nfp(src/vm/moar/HLL/Backend.nqp)@ $(COMMON_HLL_SOURCES)
-
-MASTOPS_MOAR   = MASTOps.moarvm
-MASTNODES_MOAR = MASTNodes.moarvm
-
-QAST_MOAR      = QAST.moarvm
-M_QAST_SOURCES = \
-  @nfp(src/vm/moar/QAST/QASTRegexCompilerMAST.nqp)@ \
-  @nfp(src/vm/moar/QAST/QASTOperationsMAST.nqp)@ \
-  @nfp(src/vm/moar/QAST/QASTCompilerMAST.nqp)@
-
-P6QREGEX_MOAR = NQPP6QRegex.moarvm
-
-P5QREGEX_MOAR = NQPP5QRegex.moarvm
-
-NQP_MOAR      = nqp.moarvm
-M_NQP_SOURCES = @nfp(src/vm/moar/NQP/Ops.nqp)@ $(COMMON_NQP_SOURCES)
-
-M_SOURCES = \
-  $(COMMON_SOURCES) \
-  $(M_QAST_SOURCES) \
-  $(M_HLL_SOURCES) \
-  $(M_NQP_SOURCES) \
-  @nfp(src/vm/moar/ModuleLoader.nqp)@ \
-
-M_STAGE1_OUTPUT = \
-  @nfp($(M_STAGE1_DIR)/$(NQP_MO_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(MODULE_LOADER_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(CORE_SETTING_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(HLL_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(MASTNODES_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(QAST_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(P6QREGEX_MOAR))@ \
-  @nfp($(M_STAGE1_DIR)/$(NQP_MOAR))@ \
-
-M_STAGE2_OUTPUT = \
-  @nfpl($(M_STAGE2_DIR)/$(NQP_MO_MOAR) $(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@ \
-  @nfpl($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR) $(M_STAGE2_DIR)/$(QASTNODE_MOAR))@ \
-  @nfpl($(M_STAGE2_DIR)/$(QREGEX_MOAR) $(M_STAGE2_DIR)/$(HLL_MOAR))@ \
-  @nfpl($(M_STAGE2_DIR)/$(MASTOPS_MOAR) $(M_STAGE2_DIR)/$(MASTNODES_MOAR))@ \
-  @nfpl($(M_STAGE2_DIR)/$(QAST_MOAR) $(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ \
-  @nfpl($(M_STAGE2_DIR)/$(NQP_MOAR))@ \
+@include(Makefile-backend-common)@
 
 manifest:
 	echo MANIFEST >MANIFEST
@@ -103,7 +51,7 @@ realclean: clean
 
 testclean:
 
-m-all: $(NQP_MOAR) $(M_BUILD_RUNNER) $(M_INST_NQP_M) $(M_INST_NQP) $(P5QREGEX_MOAR)
+m-all:: @bsm(NQP)@ $(M_BUILD_RUNNER) $(M_INST_NQP_M) $(M_INST_NQP) $(P5QREGEX_MOAR)
 
 m-install: m-all @@configure_script@@
 	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
@@ -128,7 +76,7 @@ m-install: m-all @@configure_script@@
 # FIXME:
 M_CLEANUPS = \
   *.moarvm \
-  @nfp(gen/moar/*)@ \
+  @nfp(@bpm(BUILD_DIR)@/*)@ \
   nqpmc \
   nqp-m.c \
   nqp-m@moar::obj@ \
@@ -143,162 +91,6 @@ M_CLEANUPS = \
 
 m-clean:
 	$(RM_RF) $(M_CLEANUPS)
-
-$(M_STAGE1_DIR): $(M_STAGE1_OUTPUT)
-
-@nfp($(M_STAGE1_DIR)/$(NQP_MO_MOAR))@: $(M_STAGE0_DIR) $(NQP_MO_SOURCES)
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(NQP_MO_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(NQP_MO_COMBINED))@
-	$(M_STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(NQP_MO_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(NQP_MO_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(MODULE_LOADER_MOAR))@: $(M_STAGE0_DIR) @nfp(src/vm/moar/ModuleLoader.nqp)@
-	$(M_STAGE0_NQP) --setting=NULL --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(MODULE_LOADER_MOAR))@ @nfp(src/vm/moar/ModuleLoader.nqp)@
-
-@nfp($(M_STAGE1_DIR)/$(CORE_SETTING_MOAR))@: $(M_STAGE0_DIR) $(CORE_SETTING_SOURCES) @nfp($(M_STAGE1_DIR)/$(NQP_MO_MOAR))@ @nfp($(M_STAGE1_DIR)/$(MODULE_LOADER_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(CORE_SETTING_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(CORE_SETTING_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting=NULL --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(CORE_SETTING_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(CORE_SETTING_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@: $(M_STAGE0_DIR) $(QASTNODE_SOURCES) @nfp($(M_STAGE1_DIR)/$(CORE_SETTING_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(QASTNODE_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(QASTNODE_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) --stable-sc=stage1 \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(QASTNODE_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@: $(M_STAGE0_DIR) $(QREGEX_SOURCES) @nfp($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(QREGEX_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(QREGEX_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) --stable-sc=stage1 \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(QREGEX_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(QREGEX_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(HLL_MOAR))@: $(M_STAGE0_DIR) $(M_HLL_SOURCES) @nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(M_HLL_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(HLL_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(HLL_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(HLL_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@: $(M_STAGE0_DIR) @nfp($(M_STAGE1_DIR)/$(CORE_SETTING_MOAR))@ @@nfp(@moar_prefix@/share/nqp/lib/MAST/Ops.nqp)@@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@ @nfpq(@moar_prefix@/share/nqp/lib/MAST/Ops.nqp)@
-
-@nfp($(M_STAGE1_DIR)/$(MASTNODES_MOAR))@: $(M_STAGE0_DIR) @nfp($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@ @@nfp(@moar_prefix@/share/nqp/lib/MAST/Nodes.nqp)@@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(MASTNODES_MOAR))@ @nfpq(@moar_prefix@/share/nqp/lib/MAST/Nodes.nqp)@
-
-@nfp($(M_STAGE1_DIR)/$(QAST_MOAR))@: $(M_STAGE0_DIR) $(M_QAST_SOURCES) @nfp($(M_STAGE1_DIR)/$(HLL_MOAR))@ @nfp($(M_STAGE1_DIR)/$(MASTNODES_MOAR))@ @nfp($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(M_QAST_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(QAST_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(QAST_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(QAST_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(P6QREGEX_MOAR))@: $(M_STAGE0_DIR) $(P6QREGEX_SOURCES) @nfp($(M_STAGE1_DIR)/$(QAST_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@ @nfp($(M_STAGE1_DIR)/$(HLL_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(P6QREGEX_SOURCES) > @nfpq($(M_STAGE1_DIR)/$(P6QREGEX_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(P6QREGEX_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(P6QREGEX_COMBINED))@
-
-@nfp($(M_STAGE1_DIR)/$(NQP_MOAR))@: $(M_STAGE0_DIR) @nfp($(M_STAGE1_DIR)/$(P6QREGEX_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QAST_MOAR))@ $(M_SOURCES)
-	$(MKPATH) @nfpq($(M_STAGE1_DIR)/gen)@
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE1_DIR)/nqp-config.nqp)@
-	$(PERL5) $(M_GEN_CAT) stage1 $(M_NQP_SOURCES) @nfpq($(M_STAGE1_DIR)/nqp-config.nqp)@ > @nfpq($(M_STAGE1_DIR)/$(NQP_COMBINED))@
-	$(M_STAGE0_NQP) --module-path=$(M_STAGE1_DIR) --setting-path=$(M_STAGE1_DIR) \
-	    --setting=NQPCORE --target=mbc --no-regex-lib --stable-sc=stage1 \
-	    --output=@nfpq($(M_STAGE1_DIR)/$(NQP_MOAR))@ @nfpq($(M_STAGE1_DIR)/$(NQP_COMBINED))@
-
-$(M_STAGE2_DIR): $(M_STAGE1_OUTPUT)
-
-@nfp($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@: $(M_STAGE1_DIR) $(NQP_MO_SOURCES)
-	$(MKPATH) @nfp($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(NQP_MO_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(NQP_MO_COMBINED))@
-	$(M_STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(NQP_MO_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@: $(M_STAGE1_DIR) @nfp(src/vm/moar/ModuleLoader.nqp)@
-	$(M_STAGE1_NQP) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@ @nfp(src/vm/moar/ModuleLoader.nqp)@
-
-@nfp($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@: $(M_STAGE1_DIR) $(CORE_SETTING_SOURCES) @nfp($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@ @nfp($(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(CORE_SETTING_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(CORE_SETTING_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting=NULL --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(CORE_SETTING_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(QASTNODE_MOAR))@: $(M_STAGE1_DIR) $(QASTNODE_SOURCES) @nfp($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(QASTNODE_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(QASTNODE_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(QASTNODE_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(QASTNODE_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(QREGEX_MOAR))@: $(M_STAGE1_DIR) $(QREGEX_SOURCES) @nfp($(M_STAGE2_DIR)/$(QASTNODE_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(QREGEX_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(QREGEX_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(QREGEX_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(HLL_MOAR))@: $(M_STAGE1_DIR) $(M_HLL_SOURCES) @nfp($(M_STAGE2_DIR)/$(QREGEX_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(M_HLL_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(HLL_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(HLL_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(HLL_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(MASTOPS_MOAR))@: $(M_STAGE1_DIR) @nfp($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@ @@nfp(@moar_prefix@/share/nqp/lib/MAST/Ops.nqp)@@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(MASTOPS_MOAR))@ @nfpq(@moar_prefix@/share/nqp/lib/MAST/Ops.nqp)@
-
-@nfp($(M_STAGE2_DIR)/$(MASTNODES_MOAR))@: $(M_STAGE1_DIR) @nfp($(M_STAGE2_DIR)/$(MASTOPS_MOAR))@ @@nfp(@moar_prefix@/share/nqp/lib/MAST/Nodes.nqp)@@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(MASTNODES_MOAR))@ @nfpq(@moar_prefix@/share/nqp/lib/MAST/Nodes.nqp)@
-
-@nfp($(M_STAGE2_DIR)/$(QAST_MOAR))@: $(M_STAGE1_DIR) $(M_QAST_SOURCES) @nfp($(M_STAGE2_DIR)/$(HLL_MOAR))@ @nfp($(M_STAGE2_DIR)/$(MASTNODES_MOAR))@ @nfp($(M_STAGE1_DIR)/$(MASTOPS_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QREGEX_MOAR))@ @nfp($(M_STAGE1_DIR)/$(QASTNODE_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(M_QAST_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(QAST_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(QAST_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(QAST_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@: $(M_STAGE1_DIR) $(P6QREGEX_SOURCES) @nfp($(M_STAGE2_DIR)/$(QAST_MOAR))@ @nfp($(M_STAGE2_DIR)/$(QREGEX_MOAR))@ @nfp($(M_STAGE2_DIR)/$(HLL_MOAR))@
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(P6QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --no-regex-lib --target=mbc \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_COMBINED))@
-
-@nfp($(M_STAGE2_DIR)/$(NQP_MOAR))@: $(M_STAGE1_DIR) @nfp($(M_STAGE2_DIR)/$(QAST_MOAR))@ @nfp($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ $(M_SOURCES)
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq($(M_STAGE2_DIR)/nqp-config.nqp)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(M_NQP_SOURCES) @nfpq($(M_STAGE2_DIR)/nqp-config.nqp)@ > @nfpq($(M_STAGE2_DIR)/$(NQP_COMBINED))@
-	$(M_STAGE1_NQP) --module-path=$(M_STAGE2_DIR) --setting-path=$(M_STAGE2_DIR) \
-	    --setting=NQPCORE --target=mbc --no-regex-lib \
-	    --output=@nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ @nfpq($(M_STAGE2_DIR)/$(NQP_COMBINED))@
-
-$(NQP_MOAR): $(M_STAGE2_OUTPUT)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QASTNODE_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QREGEX_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(HLL_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MASTOPS_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MASTNODES_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QAST_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ .
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ .
-
 
 CC_M_INST_NQP=@moar::cc@ @moar::ccswitch@ @moar::cflags@ @static_nqp_home_define@ $(M_MOAR_INC_PATHS)
 LD_M_INST_NQP=@moar::ld@ @ldflags@ @mingw_unicode@
@@ -343,11 +135,11 @@ m-runner-default: m-all @@configure_script@@ @@template(@platform@/nqp-m-build.c
 m-runner-default-install: m-runner-default m-install
 	$(CP) $(M_INST_NQP) @nfpq($(DESTDIR)$(BIN_DIR)/$(M_NQP))@
 
-$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_BUILD_RUNNER)
-	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-	$(PERL5) $(M_GEN_CAT) stage2 $(P5QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
-	@q($(M_BUILD_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
-	    @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
+#$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_BUILD_RUNNER)
+#	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
+#	$(PERL5) $(M_GEN_CAT) stage2 $(P5QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
+#	@q($(M_BUILD_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
+#	    @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
 
 m-bootstrap-files: $(M_STAGE2_OUTPUT)
 	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@ $(M_STAGE0_DIR)
