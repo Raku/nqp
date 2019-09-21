@@ -54,11 +54,19 @@
 @backend_prefix@-all:: @backend_prefix@-dirs
 
 @backend_prefix@-dirs::
-	@echo(+++ Preparing build directories)@
+	@echo(+++ Preparing @uc(@backend@)@ build directories)@
 	@noecho@$(MKPATH)@for_stages( @stage_dir@)@
+
+@backend_prefix@-stage0::
+	@echo(++++++ BUILDING @uc(@backend@)@ BACKEND)@
 
 @for_stages(
 # --- @uc(@backend@)@ @ucstage@ RULES ---
+
+@backend_prefix@-@lcstage@-print::
+	@echo(++++++ @ucstage@ ++++++)@
+
+@backend_prefix@-@lcstage@:: @backend_prefix@-@lcprev_stage@ @backend_prefix@-@lcstage@-print @bpm(@ucstage@_OUTPUT)@
 
 # Combined sources
 @bpv(NQP_MO_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(NQP_MO_COMBINED))@
@@ -99,44 +107,81 @@
 @stage_gencat(@bpm(QAST_COMBINED_@ucstage@)@:						@prev_stage_dir@  @use_prereqs(@bpm(QAST_SOURCES)@)@)@
 @stage_gencat(@bpm(P6QREGEX_COMBINED_@ucstage@)@:					@prev_stage_dir@  @use_prereqs($(P6QREGEX_SOURCES))@)@
 
-@stage_precomp(@bsm(NQP_MO_@ucstage@)@:						@use_prereqs(@bpm(NQP_MO_COMBINED_@ucstage@)@)@ @setting(NULL)@)@
-@stage_precomp(@bsm(MODULE_LOADER_@ucstage@)@:				@prev_stage_dir@ @use_prereqs(@bpm(MODULE_LOADER_SOURCES)@)@ @setting(NULL)@)@
-@stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@ @setting(NULL)@)@
+@stage_precomp(@bsm(NQP_MO_@ucstage@)@:						@use_prereqs(@bpm(NQP_MO_COMBINED_@ucstage@)@)@@setting(NULL)@@no_module_path()@)@
+@stage_precomp(@bsm(MODULE_LOADER_@ucstage@)@:				@prev_stage_dir@ @use_prereqs(@bpm(MODULE_LOADER_SOURCES)@)@@setting(NULL)@@no_module_path()@)@
+@stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@@setting(NULL)@)@
 @stage_precomp(@bsm(QASTNODE_@ucstage@)@:					@use_prereqs(@bpm(QASTNODE_COMBINED_@ucstage@)@)@ @bsm(CORE_SETTING_@ucstage@)@)@
 @if(backend==moar @stage_precomp(@bsm(ASTOPS_@ucstage@)@:	@use_prereqs(@bpm(ASTOPS_SOURCES)@)@ @bsm(CORE_SETTING_@ucstage@)@)@
 )@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(ASTOPS_@ucstage@)@)@
 @stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(QASTNODE_@ucstage@)@)@
-@stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(QREGEX_@ucstage@)@)@
+@stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(QREGEX_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@)@
 @stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 @stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @prev_stage_dir@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
-	@echo(+++ Generating	NQP)@
+	@echo(+++ Creating	stage @stage@ NQP)@
 	@noecho@$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
 	@noecho@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
 	@noecho@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
-	    --setting=NQPCORE --target=mbc --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ \
+	    --setting=NQPCORE --target=@btarget@ --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ @bpm(NQP_@ucstage@_FLAGS)@ \
 	    --output=@nfpq(@stage_dir@/@bsm(NQP)@)@ @nfpq(@stage_dir@/$(NQP_COMBINED))@
 )@
 
-@bsm(NQP)@: @bpm(STAGE2_OUTPUT)@
-	@echo(+++ Installing stage2 locally)@
-	@noecho@$(CP) @bsm(NQP_MO_STAGE2)@ .
-	@noecho@$(CP) @bsm(MODULE_LOADER_STAGE2)@ .
-	@noecho@$(CP) @bsm(CORE_SETTING_STAGE2)@ .
-	@noecho@$(CP) @bsm(QASTNODE_STAGE2)@ .
-	@noecho@$(CP) @bsm(QREGEX_STAGE2)@ .
-	@noecho@$(CP) @bsm(HLL_STAGE2)@ .
-	@noecho@$(CP) @bsm(ASTOPS_STAGE2)@ .
-	@noecho@$(CP) @bsm(ASTNODES_STAGE2)@ .
-	@noecho@$(CP) @bsm(QAST_STAGE2)@ .
-	@noecho@$(CP) @bsm(P6QREGEX_STAGE2)@ .
-	@noecho@$(CP) @bsm(NQP_STAGE2)@ .
+@bsm(NQP)@: @backend_prefix@-stage2 #@bpm(STAGE2_OUTPUT)@
+	@echo(+++ Installing @uc(@backend@)@ stage 2 files locally)@
+	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ .
 
 @bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bsm(NQP)@ @bpm(BUILD_RUNNER)@
 	@echo(+++ Compiling	$@)@
 	@noecho@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
 	@noecho@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
 	    @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
+
+@bpv(CLEANUPS)@ = \
+	*.@bext@ \
+	@nfpq(@bpm(BUILD_DIR)@/*)@ \
+@for_stages(	@shquot(@stage_dir@)@ \
+)@	@bpm(BUILD_RUNNER)@ \
+	@bpm(NQP)@
+
+@backend_prefix@-all:: @bsm(NQP)@ @bpm(BUILD_RUNNER)@ @bsm(P5QREGEX)@
+
+@backend_prefix@-clean::
+	@echo(+++ Cleaning @uc(@backend@)@ backend)@
+	@noecho@$(RM_RF) @bpm(CLEANUPS)@ @bpm(CLEANUPS_EXTRA)@
+
+@backend_prefix@-install-dirs::
+	@echo(+++ Creating @uc(@backend@)@ installation directories)@
+	@noecho@$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
+	@noecho@$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
+	@noecho@$(MKPATH) @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+
+@backend_prefix@-install:: @backend_prefix@-all @backend_prefix@-install-dirs @@configure_script@@
+	@echo(+++ Installing into $(DESTDIR)$(PREFIX))@
+	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
+
+@backend_prefix@-bootstrap-files: @bpm(STAGE2_OUTPUT)@
+	@echo(+++ BOOTSTRAPPING into @bpm(STAGE0_DIR)@)@
+	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ @bpm(STAGE0_DIR)@
+
+## testing
+
+@backend_prefix@-test: @backend_prefix@-all
+	$(PROVE) -r --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+
+@backend_prefix@-test-loud: @backend_prefix@-all
+	$(PROVE) -r -v --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+
+@backend_prefix@-core-test: @bpm(BUILD_RUNNER)@
+	$(PROVE) -r --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/nqp)@
+
+@backend_prefix@-core-test-loud: @bpm(BUILD_RUNNER)@
+	$(PROVE) -r -v --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/nqp)@
+
+@backend_prefix@-qregex-test: @bpm(BUILD_RUNNER)@
+	$(PROVE) -r --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/qregex)@
+
+@backend_prefix@-qregex-test-loud: @bpm(BUILD_RUNNER)@
+	$(PROVE) -r -v --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/qregex)@
 
 # vim: ft=make tw=4 sw=4 noexpandtab

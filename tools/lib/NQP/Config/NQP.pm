@@ -149,7 +149,7 @@ sub configure_moar_backend {
             $moar_config->{'moar::libdir'} )
         {
             $config->{m_install} = "\t"
-              . q<$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
+              . q<@noecho@$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
         }
         if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
             $imoar->{config}{mingw_unicode} = '-municode';
@@ -470,12 +470,14 @@ TPL
 sub _m_stage_precomp {
     my $self = shift;
     my $text = shift;
-    $self->cfg->set('nqp_setting', 'NQPCORE', in_ctx => '.make_receipe');
+    $self->set_in_receipe( 'nqp_setting', 'NQPCORE' );
+    $self->set_in_receipe( 'setting_path_param',
+        ' --setting-path=@stage_dir@' );
+    $self->set_in_receipe( 'module_path_param', ' --module-path=@stage_dir@' );
     return $self->expand(<<TPL);
 $text
 \t\@echo(+++ Compiling\t\$\@)@
-\t\@noecho\@\@bpm(STAGE\@prev_stage\@_NQP)\@ --module-path=\@stage_dir\@ --setting-path=\@stage_dir\@ --no-regex-lib --target=\@btarget\@ \\
-\t\t--setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
+\t\@noecho\@\@bpm(STAGE\@prev_stage\@_NQP)\@\@expand(\@setting_path_param\@\@module_path_param\@)\@ --no-regex-lib --target=\@btarget\@ --setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
 TPL
 }
 
@@ -483,8 +485,18 @@ TPL
 sub _m_setting {
     my $self = shift;
     my $text = shift;
-    $self->cfg->set('nqp_setting', $text, in_ctx => '.make_receipe');
-    return ""
+    $self->set_in_receipe( 'nqp_setting', $text );
+    if ( $self->expand($text) eq 'NULL' ) {
+        $self->set_in_receipe( 'setting_path_param', '' );
+    }
+    return "";
+}
+
+# Set module_path_param variable for precomp receipe
+sub _m_no_module_path {
+    my $self = shift;
+    $self->set_in_receipe( 'module_path_param', '' );
+    return "";
 }
 
 NQP::Macros->register_macro(
@@ -499,6 +511,7 @@ NQP::Macros->register_macro(
 );
 NQP::Macros->register_macro( 'for_stages', \&_m_for_stages, preexapnd => 0 );
 NQP::Macros->register_macro( 'setting',    \&_m_setting,    preexapnd => 1 );
+NQP::Macros->register_macro( 'no_module_path', \&_m_no_module_path );
 
 1;
 

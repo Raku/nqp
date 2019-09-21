@@ -4,9 +4,10 @@
 @bpv(BUILD_RUNNER_BIN)@ = @nfp($(BASE_DIR)/@bpm(BUILD_RUNNER)@)@
 @bpv(INST_NQP)@			= inst-nqp@moar::exe@
 @bpv(INST_NQP_M)@		= inst-nqp-m@moar::exe@
+@bsv(NQP_LIB_DIR)@		= $(NQP_LIB_DIR)
 # It's ok to shell quote this one as it only used in a command line
 
-M_MOAR_INC_PATHS = \
+@bpv(MOAR_INC_PATHS)@ = \
   @moar::cincludes@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/moar)@ \
@@ -32,146 +33,75 @@ M_MOAR_INC_PATHS = \
 
 @include(Makefile-backend-common)@
 
-manifest:
-	echo MANIFEST >MANIFEST
-	git ls-files >>MANIFEST
+@backend_prefix@-all:: @bpm(INST_NQP_M)@ @bpm(INST_NQP)@
 
-release: manifest
-	[ -n "$(VERSION)" ] || ( echo "\nTry 'make release VERSION=yyyy.mm'\n\n"; exit 1 )
-	bash -c '[ "$$(cat VERSION)" == "$(VERSION)" ] || ( echo -e "\nVersion on command line and in VERSION file differ\n"; exit 1 )'
-	[ -d nqp-$(VERSION) ] || ln -s . nqp-$(VERSION)
-	$(PERL5) -ne 'print "nqp-$(VERSION)/$$_"' MANIFEST |\
-	    tar -zcv --owner=0 --group=0 --numeric-owner -T - -f nqp-$(VERSION).tar.gz
-	rm nqp-$(VERSION)
+@backend_prefix@-install-dirs::
+	@noecho@$(MKPATH) @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler)@
 
-distclean: realclean
-
-realclean: clean
-	$(RM_F) Makefile MANIFEST config.status nqp$(BAT)
-
-testclean:
-
-m-all:: @bsm(NQP)@ $(M_BUILD_RUNNER) $(M_INST_NQP_M) $(M_INST_NQP) $(P5QREGEX_MOAR)
-
-m-install: m-all @@configure_script@@
-	$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
-	$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(MKPATH) @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler)@
-	$(CP) $(NQP_MO_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(MODULE_LOADER_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(CORE_SETTING_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(QASTNODE_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(QREGEX_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(HLL_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(MASTOPS_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(MASTNODES_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(QAST_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(P6QREGEX_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(NQP_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) $(P5QREGEX_MOAR) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	$(CP) @nfp(src/vm/moar/profiler/template.html)@ @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html)@
-	$(CP) $(M_INST_NQP_M) @nfpq($(DESTDIR)$(BIN_DIR)/$(M_NQP_M))@
+@backend_prefix@-install::
+	@echo(+++ Installing @uc(@backend@)@ specifics)@
+	@noecho@$(CP) @bsm(ASTOPS)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
+	@noecho@$(CP) @nfp(src/vm/moar/profiler/template.html)@ @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html)@
+	@noecho@$(CP) @bpm(INST_NQP_M)@ @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP_M)@)@
 @expand(@m_install@)@
 
 # FIXME:
-M_CLEANUPS = \
-  *.moarvm \
-  @nfp(@bpm(BUILD_DIR)@/*)@ \
+@bpv(CLEANUPS_EXTRA)@ = \
   nqpmc \
   nqp-m.c \
   nqp-m@moar::obj@ \
-  $(M_BUILD_RUNNER) \
   nqp.c \
   nqp@moar::obj@ \
-  $(M_NQP) \
   inst-nqp-m@moar::obj@ \
-  $(M_INST_NQP_M) \
+  @bpm(INST_NQP_M)@ \
   inst-nqp@moar::obj@ \
-  $(M_INST_NQP)
+  @bpm(INST_NQP)@
 
-m-clean:
-	$(RM_RF) $(M_CLEANUPS)
+@bpv(CC_INST_NQP)@=@moar::cc@ @moar::ccswitch@ @moar::cflags@ @static_nqp_home_define@ @bpm(MOAR_INC_PATHS)@
+@bpv(LD_INST_NQP)@=@moar::ld@ @ldflags@ @mingw_unicode@
+@bpv(LD_INST_NQP_POST)@=@moar::lddir@"@moar::libdir@" @c_runner_libs@ @moar_lib@
 
-CC_M_INST_NQP=@moar::cc@ @moar::ccswitch@ @moar::cflags@ @static_nqp_home_define@ $(M_MOAR_INC_PATHS)
-LD_M_INST_NQP=@moar::ld@ @ldflags@ @mingw_unicode@
-LD_M_INST_NQP_POST=@moar::lddir@"@moar::libdir@" @c_runner_libs@ @moar_lib@
+@bpv(CC_BUILD_RUNNER)@=@moar::cc@ @moar::ccswitch@ @moar::cflags@
+@bpv(LD_BUILD_RUNNER)@=@moar::ld@ @ldflags@ @mingw_unicode@
 
-$(M_INST_NQP): @nfp(src/vm/moar/runner/main.c)@
-	$(RM_F) $@
+@bpm(INST_NQP)@: @nfp(src/vm/moar/runner/main.c)@
+	@echo(+++ Compiling	$@)@
+	@noecho@$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
-	$(CC_M_INST_NQP) @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/$(M_NQP))@)@)@)@ @moar::ccout@inst-nqp@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
-	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp@moar::obj@ $(LD_M_INST_NQP_POST)
+	@noecho@@bpm(CC_INST_NQP)@ @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP)@)@)@)@)@ @moar::ccout@inst-nqp@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
+	@noecho@@bpm(LD_INST_NQP)@ @moar::ldout@$@ inst-nqp@moar::obj@ @bpm(LD_INST_NQP_POST)@
 
-$(M_INST_NQP_M): @nfp(src/vm/moar/runner/main.c)@
-	$(RM_F) $@
+@bpm(INST_NQP_M)@: @nfp(src/vm/moar/runner/main.c)@
+	@echo(+++ Compiling	$@)@
+	@noecho@$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
-	$(CC_M_INST_NQP) @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/$(M_NQP_M))@)@)@)@ @moar::ccout@inst-nqp-m@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
-	$(LD_M_INST_NQP) @moar::ldout@$@ inst-nqp-m@moar::obj@ $(LD_M_INST_NQP_POST)
+	@noecho@@bpm(CC_INST_NQP)@ @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP_M)@)@)@)@)@ @moar::ccout@inst-nqp-m@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
+	@noecho@@bpm(LD_INST_NQP)@ @moar::ldout@$@ inst-nqp-m@moar::obj@ @bpm(LD_INST_NQP_POST)@
 
-
-CC_M_BUILD_RUNNER=@moar::cc@ @moar::ccswitch@ @moar::cflags@
-LD_M_BUILD_RUNNER=@moar::ld@ @ldflags@ @mingw_unicode@
-
-$(M_BUILD_RUNNER): @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
-	$(RM_F) @q($(M_BUILD_RUNNER))@
-	$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp-m.c \
+@bpm(BUILD_RUNNER)@: @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
+	@echo(+++ Setting up	$@)@
+	@noecho@$(RM_F) @q(@bpm(BUILD_RUNNER)@)@
+	@noecho@$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp-m.c \
 		--set-var=MOAR=@shquot(@nfp(@moar@)@)@ \
 		--set-var=base_dir=@shquot(@nfp($(BASE_DIR))@)@  \
-		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/$(M_BUILD_RUNNER))@)@ \
-		--set-var=mbc=$(NQP_MOAR)
-	$(CC_M_BUILD_RUNNER) @moar::ccout@nqp-m@moar::obj@ nqp-m.c
-	$(LD_M_BUILD_RUNNER) @moar::ldout@$@ nqp-m@moar::obj@
+		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/@bpm(BUILD_RUNNER)@)@)@ \
+		--set-var=mbc=@bsm(NQP)@
+	@noecho@@bpm(CC_BUILD_RUNNER)@ @moar::ccout@nqp-m@moar::obj@ nqp-m.c
+	@noecho@@bpm(LD_BUILD_RUNNER)@ @moar::ldout@$@ nqp-m@moar::obj@
 
-m-runner-default: m-all @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
-	$(RM_F) @q($(M_NQP))@
-	$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp.c \
+@backend_prefix@-runner-default: @backend_prefix@-all @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
+	@echo(+++ Compiling @uc(@backend@)@ default runner)@
+	@noecho@$(RM_F) @q(@bpm(NQP)@)@
+	@noecho@$(CONFIGURE) --expand @@template(@platform@/nqp-m-build.c)@@ --out nqp.c \
 		--set-var=MOAR=@shquot(@nfp(@moar@)@)@ \
 		--set-var=base_dir=@shquot(@nfp($(BASE_DIR))@)@  \
-		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/$(M_NQP))@)@ \
-		--set-var=mbc=$(NQP_MOAR)
-	$(CC_M_BUILD_RUNNER) @moar::ccout@nqp@moar::obj@ nqp.c
-	$(LD_M_BUILD_RUNNER) @moar::ldout@$(M_NQP) nqp-m@moar::obj@
+		--set-var=exec_name=@shquot(@nfp($(BASE_DIR)/@bpm(NQP)@)@)@ \
+		--set-var=mbc=@bsm(NQP)@
+	@noecho@@bpm(CC_BUILD_RUNNER)@ @moar::ccout@nqp@moar::obj@ nqp.c
+	@noecho@@bpm(LD_BUILD_RUNNER)@ @moar::ldout@@bpm(NQP)@ nqp-m@moar::obj@
 
-m-runner-default-install: m-runner-default m-install
-	$(CP) $(M_INST_NQP) @nfpq($(DESTDIR)$(BIN_DIR)/$(M_NQP))@
-
-#$(P5QREGEX_MOAR): $(P5QREGEX_SOURCES) $(NQP_MOAR) $(M_BUILD_RUNNER)
-#	$(MKPATH) @nfpq($(M_STAGE2_DIR)/gen)@
-#	$(PERL5) $(M_GEN_CAT) stage2 $(P5QREGEX_SOURCES) > @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
-#	@q($(M_BUILD_RUNNER_BIN))@ --target=mbc --output=$(P5QREGEX_MOAR) \
-#	    @nfpq($(M_STAGE2_DIR)/$(P5QREGEX_COMBINED))@
-
-m-bootstrap-files: $(M_STAGE2_OUTPUT)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MO_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MODULE_LOADER_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(CORE_SETTING_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QASTNODE_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QREGEX_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(HLL_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MASTOPS_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(MASTNODES_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(QAST_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(P6QREGEX_MOAR))@ $(M_STAGE0_DIR)
-	$(CP) @nfpq($(M_STAGE2_DIR)/$(NQP_MOAR))@ $(M_STAGE0_DIR)
-
-## testing
-
-m-test: m-all
-	$(PROVE) -r --exec @q($(M_BUILD_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
-
-m-test-loud: m-all
-	$(PROVE) -r -v --exec @q($(M_BUILD_RUNNER_BIN))@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
-
-m-core-test: $(M_BUILD_RUNNER)
-	$(PROVE) -r --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/nqp)@
-
-m-core-test-loud: $(M_BUILD_RUNNER)
-	$(PROVE) -r -v --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/nqp)@
-
-m-qregex-test: $(M_BUILD_RUNNER)
-	$(PROVE) -r --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/qregex)@
-
-m-qregex-test-loud: $(M_BUILD_RUNNER)
-	$(PROVE) -r -v --exec @nfpq($(M_BUILD_RUNNER))@ @nfp(t/qregex)@
+@backend_prefix@-runner-default-install: @backend_prefix@-runner-default @backend_prefix@-install
+	@echo(+++ Installing default runner)@
+	@noecho@$(CP) @bpm(INST_NQP)@ @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP)@)@
 
 # vim: ft=make noexpandtab ts=4 sw=4
