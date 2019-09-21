@@ -31,6 +31,8 @@
 
 @bpv(NQP_SOURCES_EXTRA)@ = @nfp(src/vm/@backend@/NQP/Ops.nqp)@
 
+@bpv(EXTRA_TESTS)@ = @nfp(t/concurrency)@
+
 @include(Makefile-backend-common)@
 
 @backend_prefix@-all:: @bpm(INST_NQP_M)@ @bpm(INST_NQP)@

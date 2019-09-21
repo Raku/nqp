@@ -167,10 +167,10 @@
 ## testing
 
 @backend_prefix@-test: @backend_prefix@-all
-	$(PROVE) -r --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/@backend@ t/serialization t/nativecall)@ @bpm(EXTRA_TESTS)@
 
 @backend_prefix@-test-loud: @backend_prefix@-all
-	$(PROVE) -r -v --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency)@
+	$(PROVE) -r -v --exec @q(@bpm(BUILD_RUNNER_BIN)@)@ @nfpl(t/nqp t/hll t/qregex t/p5regex t/qast t/@backend@ t/serialization t/nativecall)@ @bpm(EXTRA_TESTS)@
 
 @backend_prefix@-core-test: @bpm(BUILD_RUNNER)@
 	$(PROVE) -r --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/nqp)@
