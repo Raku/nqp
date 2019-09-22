@@ -68,7 +68,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable',
+        'relocatable',      'silent-build!'
       )
       or do {
         print_help();
@@ -185,6 +185,7 @@ General Options:
     --set-var="config_variable=value"
                        Sets a config_variable to "value". Can be used multiple
                        times.
+    --no-silent-build  Don't echo commands in Makefile target receipt.
 
 Please note that the --gen-moar option is there for convenience only and will
 actually immediately - at Configure time - compile and install moar. Moar will
