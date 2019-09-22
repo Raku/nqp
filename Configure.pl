@@ -17,13 +17,14 @@ BEGIN {
         if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
             print "Updating nqp-configure submodule...\n";
             my $msg =
-    qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
+qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
             if ( $? >> 8 == 0 ) {
                 say "OK";
                 $set_config = 1;
             }
             else {
-                if ( $msg =~ /[']([^']+)[']\s+already exists and is not an empty/ )
+                if ( $msg =~
+                    /[']([^']+)[']\s+already exists and is not an empty/ )
                 {
                     print "\n===SORRY=== ERROR: "
                       . "Cannot update submodule because directory exists and is not empty.\n"
@@ -57,18 +58,18 @@ MAIN: {
         $cfg->options,      'help!',
         'prefix=s',         'libdir=s',
         'sdkroot=s',        'sysroot=s',
-        'backends=s',       'no-clean',
+        'backends=s',       'clean!',
         'with-moar=s',      'gen-moar:s',
         'moar-option=s@',   'with-asm=s',
         'with-asm-tree=s',  'with-jline=s',
         'with-jna=s',       'make-install!',
         'makefile-timing!', 'git-protocol=s',
-        'ignore-errors',    'link',
+        'ignore-errors!',   'link',
         'git-depth=s',      'git-reference=s',
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable',      'silent-build!'
+        'relocatable!',     'silent-build!'
       )
       or do {
         print_help();
@@ -109,7 +110,7 @@ MAIN: {
 
     unless ( $cfg->opt('expand') ) {
         my $make = $cfg->cfg('make');
-        unless ( $cfg->opt('no-clean') ) {
+        if ( $cfg->opt('clean') ) {
             no warnings;
             print "Cleaning up ...\n";
             if ( open my $CLEAN, '-|', "$make clean" ) {
