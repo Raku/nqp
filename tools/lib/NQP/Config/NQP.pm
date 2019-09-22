@@ -410,6 +410,97 @@ sub probe_node {
     return;
 }
 
+package NQP::Macros::NQP;
+use strict;
+use warnings;
+
+sub _m_for_stages {
+    my $self = shift;
+    my $text = shift;
+
+    my $out  = "";
+    my $bpfx = $self->cfg->cfg('backend_prefix');
+    foreach my $stage ( 1 .. 2 ) {
+        my $prev_stage = $stage - 1;
+        my $lc_stage   = "stage$stage";
+        my $lc_prev    = "stage$prev_stage";
+        my %config     = (
+            stage          => $stage,
+            ucstage        => uc($lc_stage),
+            lcstage        => $lc_stage,
+            prev_stage     => $prev_stage,
+            ucprev_stage   => uc($lc_prev),
+            lcprev_stage   => $lc_prev,
+            stage_dir      => '$(' . uc($bpfx) . "_STAGE${stage}_DIR)",
+            prev_stage_dir => '$(' . uc($bpfx) . "_STAGE${prev_stage}_DIR)",
+        );
+        my $stage_ctx = {
+            stage   => $stage,
+            configs => [ \%config ],
+        };
+        my $s = $self->cfg->push_ctx($stage_ctx);
+        $out .= $self->_expand($text);
+    }
+
+    return $out;
+}
+
+sub _m_stage_gencat {
+    my $self = shift;
+    my $text = shift;
+    return $self->expand(<<TPL);
+$text
+\t\@echo(+++ Generating\t\$\@)@
+\t\@noecho\@\@bpm(\@ucstage\@_GEN_CAT)\@ \@prereqs\@ > \$\@
+TPL
+}
+
+sub _m_stage_precomp {
+    my $self = shift;
+    my $text = shift;
+    $self->set_in_receipe( 'nqp_setting', 'NQPCORE' );
+    $self->set_in_receipe( 'setting_path_param',
+        ' --setting-path=@stage_dir@' );
+    $self->set_in_receipe( 'module_path_param', ' --module-path=@stage_dir@' );
+    return $self->expand(<<TPL);
+$text
+\t\@echo(+++ Compiling\t\$\@)@
+\t\@noecho\@\@bpm(STAGE\@prev_stage\@_NQP)\@\@expand(\@setting_path_param\@\@module_path_param\@)\@ --no-regex-lib --target=\@btarget\@ --setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
+TPL
+}
+
+# Set nqp_setting variable for precomp receipe
+sub _m_setting {
+    my $self = shift;
+    my $text = shift;
+    $self->set_in_receipe( 'nqp_setting', $text );
+    if ( $self->expand($text) eq 'NULL' ) {
+        $self->set_in_receipe( 'setting_path_param', '' );
+    }
+    return "";
+}
+
+# Set module_path_param variable for precomp receipe
+sub _m_no_module_path {
+    my $self = shift;
+    $self->set_in_receipe( 'module_path_param', '' );
+    return "";
+}
+
+NQP::Macros->register_macro(
+    'stage_gencat', \&_m_stage_gencat,
+    in_receipe => 1,
+    preexapnd  => 0,
+);
+NQP::Macros->register_macro(
+    'stage_precomp', \&_m_stage_precomp,
+    in_receipe => 1,
+    preexpand  => 0,
+);
+NQP::Macros->register_macro( 'for_stages', \&_m_for_stages, preexapnd => 0 );
+NQP::Macros->register_macro( 'setting',    \&_m_setting,    preexapnd => 1 );
+NQP::Macros->register_macro( 'no_module_path', \&_m_no_module_path );
+
 1;
 
 # vim: ft=perl
