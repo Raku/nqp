@@ -49,6 +49,7 @@ sub configure_backends {
 
 sub configure_refine_vars {
     my $self = shift;
+    my $config = $self->{config};
 
     unless ( $self->cfg('prefix') ) {
         my $moar_conf   = $self->moar_config;
@@ -66,6 +67,13 @@ sub configure_refine_vars {
     }
 
     $self->SUPER::configure_refine_vars(@_);
+
+    $config->{nqp_home} = $self->nfp(
+        File::Spec->rel2abs(
+          $config->{nqp_home} ||
+          File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
+        )
+    );
 }
 
 sub configure_misc {
@@ -84,17 +92,6 @@ sub configure_misc {
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
-
-    if ( !$config->{nqplibdir} ) {
-        $config->{nqplibdir} = $self->nfp(
-            (
-                  $self->opt('libdir')
-                ? $self->opt('libdir') . "/nqp"
-                : '$(NQP_HOME)/lib'
-            ),
-            no_quote => 1,
-        );
-    }
 }
 
 sub configure_moar_backend {
@@ -117,10 +114,7 @@ sub configure_moar_backend {
     }
     else {
         my $qchar = $config->{quote};
-        $imoar->{config}{static_nqp_home} =
-          File::Spec->rel2abs(
-            File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
-          );
+        $imoar->{config}{static_nqp_home} = $config->{nqp_home};
         $imoar->{config}{static_nqp_home_define} =
           '-DSTATIC_NQP_HOME='
           . $qchar . $self->c_escape_string( $imoar->{config}{static_nqp_home} ) . $qchar;

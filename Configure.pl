@@ -55,7 +55,7 @@ MAIN: {
 
     GetOptions(
         $cfg->options,      'help!',
-        'prefix=s',         'libdir=s',
+        'prefix=s',         'nqp-home=s',
         'sdkroot=s',        'sysroot=s',
         'backends=s',       'no-clean',
         'with-moar=s',      'gen-moar:s',
@@ -145,6 +145,7 @@ General Options:
     --sdkroot=dir      When given, use for searching build tools here, e.g.
                        nqp, java etc.
     --sysroot=dir      When given, use for searching runtime components here
+    --nqp-home=dir     Directory to install NQP files to
     --backends=list    Backends to use: $backends
     --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
     --moar-option='--option=value'

@@ -10,7 +10,7 @@ use File::Spec;
 
 binmode STDOUT, ':utf8';
 
-my ($prefix, $thirdPartyJars) = @ARGV;
+my ($prefix, $nqp_home, $thirdPartyJars) = @ARGV;
 
 my $cpsep = $^O eq 'MSWin32' ? ';' : ':';
 my $jardir = ".";
@@ -18,8 +18,8 @@ my $libdir = ".";
 my $slash = File::Spec->catdir('', '');
 
 if ($prefix ne '.') {
-    $jardir = File::Spec->catdir($prefix, qw<share nqp runtime>);
-    $libdir = File::Spec->catdir($prefix, qw<share nqp lib>);
+    $jardir = File::Spec->catdir($nqp_home, 'runtime');
+    $libdir = File::Spec->catdir($nqp_home, 'lib');
 	my @jars = grep { s/^.*\Q${slash}\E// } split($cpsep, $thirdPartyJars);
 	$thirdPartyJars = join($cpsep, grep { s/^/${jardir}${slash}/ } @jars);
 }
