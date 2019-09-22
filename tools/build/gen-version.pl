@@ -15,6 +15,7 @@ use File::Find;
 use POSIX 'strftime';
 
 my $prefix = shift // '';
+my $nqp_home = shift // '';
 my $libdir = shift // '';
 
 open(my $fh, '<', 'VERSION') or die $!;
@@ -37,6 +38,7 @@ print <<"END_VERSION";
 sub hll-config(\$config) {
     \$config<version>       := '$VERSION';
     \$config<prefix>        := '$prefix';
+    \$config<nqp_home>      := '$nqp_home';
     \$config<libdir>        := '$libdir';
     \$config<source-digest> := '$source_digest';
 }

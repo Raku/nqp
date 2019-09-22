@@ -56,7 +56,7 @@ MAIN: {
 
     GetOptions(
         $cfg->options,      'help!',
-        'prefix=s',         'libdir=s',
+        'prefix=s',         'nqp-home=s',
         'sdkroot=s',        'sysroot=s',
         'backends=s',       'clean!',
         'with-moar=s',      'gen-moar:s',
@@ -146,6 +146,7 @@ General Options:
     --sdkroot=dir      When given, use for searching build tools here, e.g.
                        nqp, java etc.
     --sysroot=dir      When given, use for searching runtime components here
+    --nqp-home=dir     Directory to install NQP files to
     --backends=list    Backends to use: $backends
     --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
     --moar-option='--option=value'
@@ -185,7 +186,7 @@ General Options:
     --set-var="config_variable=value"
                        Sets a config_variable to "value". Can be used multiple
                        times.
-   --no-silent-build   Don't echo commands in Makefile target receipt.
+    --no-silent-build  Don't echo commands in Makefile target receipt.
 
 Please note that the --gen-moar option is there for convenience only and will
 actually immediately - at Configure time - compile and install moar. Moar will

@@ -1,11 +1,11 @@
+## Please see file perltidy.ERR
 package NQP::Config::NQP;
 use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
 use IPC::Cmd qw<run>;
-use NQP::Config
-  qw<slurp read_config_from_command cmp_rev system_or_die run_or_die>;
+use NQP::Config qw<slurp read_config_from_command cmp_rev system_or_die run_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -49,6 +49,7 @@ sub configure_backends {
 
 sub configure_refine_vars {
     my $self = shift;
+    my $config = $self->{config};
 
     unless ( $self->cfg('prefix') ) {
         my $moar_conf   = $self->moar_config;
@@ -66,6 +67,13 @@ sub configure_refine_vars {
     }
 
     $self->SUPER::configure_refine_vars(@_);
+
+    $config->{nqp_home} = $self->nfp(
+        File::Spec->rel2abs(
+          $config->{nqp_home} ||
+          File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
+        )
+    );
 }
 
 sub configure_misc {
@@ -84,22 +92,11 @@ sub configure_misc {
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
-
-    if ( !$config->{nqplibdir} ) {
-        $config->{nqplibdir} = $self->nfp(
-            (
-                  $self->opt('libdir')
-                ? $self->opt('libdir') . "/nqp"
-                : '$(NQP_HOME)/lib'
-            ),
-            no_quote => 1,
-        );
-    }
 }
 
 sub configure_moar_backend {
-    my $self   = shift;
-    my $imoar  = $self->{impls}{moar};
+    my $self  = shift;
+    my $imoar = $self->{impls}{moar};
     my $config = $self->{config};
 
     $self->gen_moar;
@@ -117,21 +114,16 @@ sub configure_moar_backend {
     }
     else {
         my $qchar = $config->{quote};
-        $imoar->{config}{static_nqp_home} =
-          File::Spec->rel2abs(
-            File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' ) );
+        $imoar->{config}{static_nqp_home} = $config->{nqp_home};
         $imoar->{config}{static_nqp_home_define} =
-            '-DSTATIC_NQP_HOME='
-          . $qchar
-          . $self->c_escape_string( $imoar->{config}{static_nqp_home} )
-          . $qchar;
+          '-DSTATIC_NQP_HOME='
+          . $qchar . $self->c_escape_string( $imoar->{config}{static_nqp_home} ) . $qchar;
     }
 
     # Strip rpath from ldflags so we can set it differently ourself.
     $imoar->{config}{ldflags} = $moar_config->{'moar::ldflags'};
     $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
-    $imoar->{config}{ldflags} =~
-      s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
+    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
     if ( $self->cfg('prefix') ne '/usr' ) {
         $imoar->{config}{ldflags} .= ' '
           . (
@@ -149,13 +141,12 @@ sub configure_moar_backend {
             $moar_config->{'moar::libdir'} )
         {
             $config->{m_install} = "\t"
-              . q<@noecho@$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
+              . q<$(CP) @nfpq(@moar::libdir@/@moar::moar@)@ @nfpq($(DESTDIR)$(PREFIX)/bin)@>;
         }
         if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
             $imoar->{config}{mingw_unicode} = '-municode';
         }
-        push @c_runner_libs,
-          sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
+        push @c_runner_libs, sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
     }
     $imoar->{config}{c_runner_libs} = join( " ", @c_runner_libs );
     $imoar->{config}{moar_lib}      = sprintf(
@@ -258,12 +249,12 @@ sub moar_config {
 
     return $moar_config if $moar_config && keys %{$moar_config} > 2;
 
-    my $prefix = $self->cfg('prefix');
+    my $prefix   = $self->cfg('prefix');
     my $moar_prefix;
     my $moar_exe;
 
     if ( $self->opt('with-moar') ) {
-        $moar_exe = File::Spec->rel2abs( $self->opt('with-moar') );
+        $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
     }
     else {
         if ($prefix) {
@@ -286,16 +277,13 @@ sub moar_config {
     }
 
     my %c;
-    if ( $self->is_executable( $self->nfp($moar_exe) ) ) {
-        %c =
-          read_config_from_command( '"'
-              . $self->nfp($moar_exe) . '"'
-              . ' --libpath='
-              . $self->nfp('src/vm/moar/stage0') . ' '
-              . $self->nfp('src/vm/moar/stage0/nqp.moarvm')
-              . ' --bootstrap --show-config' );
-        %c = map { rindex( $_, 'moar::', 0 ) == 0 ? ( $_ => $c{$_} ) : () }
-          keys %c;
+    if ( $self->is_executable($self->nfp($moar_exe)) ) {
+        %c = read_config_from_command(
+            '"' . $self->nfp( $moar_exe ) . '"'
+            . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
+            . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
+            . ' --bootstrap --show-config' );
+        %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
     }
 
     return $self->backend_config( 'moar',
@@ -314,10 +302,10 @@ sub gen_moar {
     my $moar_have;
     my @errors;
 
-    my $prefix       = $config->{prefix};
-    my $gen_moar     = $options->{'gen-moar'};
+    my $prefix   = $config->{prefix};
+    my $gen_moar = $options->{'gen-moar'};
     my $has_gen_moar = defined $gen_moar;
-    my @opts         = @{ $options->{'moar-option'} || [] };
+    my @opts     = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
     push @opts, '--relocatable' if $options->{relocatable};
     my $startdir     = $config->{base_dir};
@@ -360,14 +348,14 @@ sub gen_moar {
 
     if (@errors) {
         if ($try_generate) {
-            $self->note( "ATTENTION!", $_ ) foreach @errors;
+            $self->note("ATTENTION!", $_) foreach @errors;
         }
         else {
             $self->sorry(@errors);
         }
     }
 
-    if ($try_generate) {
+    if ( $try_generate ) {
 
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );
@@ -421,97 +409,6 @@ sub probe_node {
     }
     return;
 }
-
-package NQP::Macros::NQP;
-use strict;
-use warnings;
-
-sub _m_for_stages {
-    my $self = shift;
-    my $text = shift;
-
-    my $out  = "";
-    my $bpfx = $self->cfg->cfg('backend_prefix');
-    foreach my $stage ( 1 .. 2 ) {
-        my $prev_stage = $stage - 1;
-        my $lc_stage   = "stage$stage";
-        my $lc_prev    = "stage$prev_stage";
-        my %config     = (
-            stage          => $stage,
-            ucstage        => uc($lc_stage),
-            lcstage        => $lc_stage,
-            prev_stage     => $prev_stage,
-            ucprev_stage   => uc($lc_prev),
-            lcprev_stage   => $lc_prev,
-            stage_dir      => '$(' . uc($bpfx) . "_STAGE${stage}_DIR)",
-            prev_stage_dir => '$(' . uc($bpfx) . "_STAGE${prev_stage}_DIR)",
-        );
-        my $stage_ctx = {
-            stage   => $stage,
-            configs => [ \%config ],
-        };
-        my $s = $self->cfg->push_ctx($stage_ctx);
-        $out .= $self->_expand($text);
-    }
-
-    return $out;
-}
-
-sub _m_stage_gencat {
-    my $self = shift;
-    my $text = shift;
-    return $self->expand(<<TPL);
-$text
-\t\@echo(+++ Generating\t\$\@)@
-\t\@noecho\@\@bpm(\@ucstage\@_GEN_CAT)\@ \@prereqs\@ > \$\@
-TPL
-}
-
-sub _m_stage_precomp {
-    my $self = shift;
-    my $text = shift;
-    $self->set_in_receipe( 'nqp_setting', 'NQPCORE' );
-    $self->set_in_receipe( 'setting_path_param',
-        ' --setting-path=@stage_dir@' );
-    $self->set_in_receipe( 'module_path_param', ' --module-path=@stage_dir@' );
-    return $self->expand(<<TPL);
-$text
-\t\@echo(+++ Compiling\t\$\@)@
-\t\@noecho\@\@bpm(STAGE\@prev_stage\@_NQP)\@\@expand(\@setting_path_param\@\@module_path_param\@)\@ --no-regex-lib --target=\@btarget\@ --setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
-TPL
-}
-
-# Set nqp_setting variable for precomp receipe
-sub _m_setting {
-    my $self = shift;
-    my $text = shift;
-    $self->set_in_receipe( 'nqp_setting', $text );
-    if ( $self->expand($text) eq 'NULL' ) {
-        $self->set_in_receipe( 'setting_path_param', '' );
-    }
-    return "";
-}
-
-# Set module_path_param variable for precomp receipe
-sub _m_no_module_path {
-    my $self = shift;
-    $self->set_in_receipe( 'module_path_param', '' );
-    return "";
-}
-
-NQP::Macros->register_macro(
-    'stage_gencat', \&_m_stage_gencat,
-    in_receipe => 1,
-    preexapnd  => 0,
-);
-NQP::Macros->register_macro(
-    'stage_precomp', \&_m_stage_precomp,
-    in_receipe => 1,
-    preexpand  => 0,
-);
-NQP::Macros->register_macro( 'for_stages', \&_m_for_stages, preexapnd => 0 );
-NQP::Macros->register_macro( 'setting',    \&_m_setting,    preexapnd => 1 );
-NQP::Macros->register_macro( 'no_module_path', \&_m_no_module_path );
 
 1;
 
