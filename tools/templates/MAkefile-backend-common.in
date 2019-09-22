@@ -159,6 +159,7 @@
 @backend_prefix@-install:: @backend_prefix@-all @backend_prefix@-install-dirs @@configure_script@@
 	@echo(+++ Installing into $(DESTDIR)$(PREFIX))@
 	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
+	@noecho@$(CP) @bsm(P5QREGEX)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
 
 @backend_prefix@-bootstrap-files: @bpm(STAGE2_OUTPUT)@
 	@echo(+++ BOOTSTRAPPING into @bpm(STAGE0_DIR)@)@
