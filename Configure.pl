@@ -54,7 +54,7 @@ MAIN: {
     $cfg->set( 'nqp_config_status', join( ' ', map { "\"$_\"" } @ARGV ) );
 
     GetOptions(
-        $cfg->options,      'help!',
+        %{$cfg->options},   'help!',
         'prefix=s',         'nqp-home=s',
         'sdkroot=s',        'sysroot=s',
         'backends=s',       'no-clean',
@@ -68,7 +68,7 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable',      'silent-build!'
+        'relocatable',
       )
       or do {
         print_help();
