@@ -1,0 +1,3 @@
+src/vm/moar/QAST/QASTRegexCompilerMAST.nqp
+src/vm/moar/QAST/QASTOperationsMAST.nqp
+src/vm/moar/QAST/QASTCompilerMAST.nqp
