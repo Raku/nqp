@@ -1,5 +1,7 @@
 # Template Makefile
 
+.NOTPARALLEL:
+
 LAUNCHER = @default_prefix@-runner-default
 
 all:@for_backends( @backend_prefix@-all)@ $(LAUNCHER)
