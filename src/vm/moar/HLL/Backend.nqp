@@ -465,7 +465,7 @@ class HLL::Backend::MoarVM {
                 my $v := $mapping{$k};
                 if nqp::ishash($v) {
                     if !$is-first {
-                        nqp::push_s($pieces, ",\n('");
+                        nqp::push_s($pieces, ", ('");
                     }
                     else { $is-first := 0 }
                     nqp::push_s($pieces,
@@ -492,7 +492,7 @@ class HLL::Backend::MoarVM {
                 my $v := $mapping{$k};
                 if !nqp::ishash($v) {
                     if !$is-first {
-                        nqp::push_s($pieces, ",\n('");
+                        nqp::push_s($pieces, ", ('");
                     }
                     else { $is-first := 0 }
                     my $type-info := %type-info{nqp::iterkey_s($k)};
@@ -542,7 +542,7 @@ class HLL::Backend::MoarVM {
 
                         for $v -> $gc {
                             if !$is-first {
-                                nqp::push_s($pieces, ",\n(");
+                                nqp::push_s($pieces, ", (");
                             }
                             else { $is-first := 0 }
                             my @g := nqp::list_s();
@@ -571,7 +571,7 @@ class HLL::Backend::MoarVM {
 
                                     for $deallocs -> $entry {
                                         if !$is-first {
-                                            nqp::push_s($pieces, ",\n(");
+                                            nqp::push_s($pieces, ", (");
                                         }
                                         else { $is-first := 0 }
                                         @g := nqp::list_s($gc<sequence>, $thread_id);
@@ -611,7 +611,7 @@ class HLL::Backend::MoarVM {
                                 $is_first := 0;
                             }
                             else {
-                                nqp::push_s($pieces, "),\n");
+                                nqp::push_s($pieces, "), ");
                             }
                             my str $routine_id := ~%call_graph<id>;
                             %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
@@ -626,7 +626,7 @@ class HLL::Backend::MoarVM {
                                         nqp::push_s(@a, ~($a{$f} // '0'));
                                     }
                                     if nqp::elems($allocation_pieces) > 1 {
-                                        nqp::push_s($allocation_pieces, ",\n(");
+                                        nqp::push_s($allocation_pieces, ", (");
                                     }
                                     nqp::push_s($allocation_pieces, nqp::join(',', @a) ~ ")");
                                 }
