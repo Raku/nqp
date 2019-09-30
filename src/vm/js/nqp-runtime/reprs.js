@@ -2526,10 +2526,26 @@ reprs.CUnion = CUnion;
 reprs.CStruct = CStruct;
 
 
+/*async*/ function callJsMethod(obj, name, args) {
+  const converted = [];
+  for (let i = 3; i < args.length; i++) {
+    converted.push(/*await*/ core.toJSWithCtx(args[0], args[i].$$decont(args[0])));
+  }
+
+  if (obj.$$jsObject[name]) {
+    return core.fromJSToReturnValue(args[0], obj.$$jsObject[name].apply(obj.$$jsObject, converted));
+  } else {
+    return methodNotFoundError(args[0], obj, name);
+  }
+}
+
 class WrappedJSObject extends REPR {
+
   createObjConstructor(STable) {
     const ObjConstructor = function() {};
     const handler = {};
+
+
     handler.get = function(target, mangledName) {
       if (mangledName.substr(0, 2) === '$$') {
         return undefined;
@@ -2537,18 +2553,8 @@ class WrappedJSObject extends REPR {
 
       if (mangledName.substr(0, 3) === 'p6$') {
         const name = mangledName.substr(3);
-
-        return /*async*/ function() {
-          const converted = [];
-          for (let i = 3; i < arguments.length; i++) {
-            converted.push(/*await*/ core.toJSWithCtx(arguments[0], arguments[i].$$decont(arguments[0])));
-          }
-
-          if (this.$$jsObject[name]) {
-            return core.fromJSToReturnValue(arguments[0], this.$$jsObject[name].apply(this.$$jsObject, converted));
-          } else {
-            methodNotFoundError(arguments[0], this, name);
-          }
+        return function() {
+          return callJsMethod(this, name, arguments);
         };
       } else {
         throw new NQPException(`Got raw js method: ${mangledName}`);
@@ -2571,6 +2577,10 @@ class WrappedJSObject extends REPR {
   setupSTable(STable) {
     this.hardcodedInvokeSpec = true;
 
+    function isInternal(ctx, named) {
+      return named != null && named.INTERNAL && named.INTERNAL.$$toBool(ctx);
+    }
+
     STable.addInternalMethods(class {
       $$can(ctx, name) {
         return typeof this.$$jsObject[name] === 'function';
@@ -2579,15 +2589,49 @@ class WrappedJSObject extends REPR {
       /*async*/ $$apply(args) {
         const converted = [];
         for (let i = 2; i < args.length; i++) {
-          converted.push(/*await*/ core.toJSWithCtx(args[0], args[i]));
+          converted.push(/*await*/ core.toJSWithCtx(args[0], args[i].$$decont(args[0])));
         }
-        return core.fromJSToReturnValue(args[0], this.$$jsObject.apply(null, converted));
+        const ret = this.$$jsObject.apply(null, converted);
+        return core.fromJSToReturnValue(args[0], ret);
       }
 
       $$call(args) {
         return this.$$apply(arguments);
       }
 
+      p6$item(ctx, _NAMED, self) {
+        if (isInternal(ctx, _NAMED)) {
+          return callJsMethod(this, 'item', arguments);
+        }
+        return this;
+      }
+
+      p6$Nil(ctx, _NAMED, self) {
+        if (isInternal(ctx, _NAMED)) {
+          return callJsMethod(this, 'Nil', arguments);
+        }
+        return this;
+        /* TODO */
+      }
+
+      p6$sink(ctx, _NAMED, self) {
+        if (isInternal(ctx, _NAMED)) {
+          return callJsMethod(this, 'sink', arguments);
+        }
+        return this;
+      }
+
+      p6$new(ctx, _NAMED, self, ...args) {
+        if (isInternal(ctx, _NAMED)) {
+          return callJsMethod(this, 'new', arguments);
+        }
+
+        const converted = [];
+        for (let i = 0; i < args.length; i++) {
+          converted.push(/*await*/ core.toJSWithCtx(ctx, args[i].$$decont(ctx)));
+        }
+        return core.fromJSToReturnValue(ctx, new this.$$jsObject(...converted));
+      }
     });
   }
 }
