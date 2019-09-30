@@ -689,7 +689,7 @@ function argToJSWithCtx(ctx, obj) {
   } else if (obj instanceof NativeStrArg) {
     return obj.value;
   } else {
-    return toJSWithCtx(ctx, obj);
+    return toJSWithCtx(ctx, obj.$$decont(ctx));
   }
 }
 
@@ -701,7 +701,7 @@ function returnValueToJSWithCtx(ctx, obj) {
   } else if (typeof obj === 'string') {
     return obj;
   } else {
-    return toJSWithCtx(ctx, obj);
+    return toJSWithCtx(ctx, obj.$$decont(obj));
   }
 }
 
