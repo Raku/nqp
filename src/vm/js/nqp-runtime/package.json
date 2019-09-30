@@ -1,6 +1,6 @@
 {
   "name": "nqp-runtime",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "description": "the runtime for the js backend for nqp",
   "bugs": {
     "url:": "https://github.com/perl6/nqp/issues",
@@ -29,7 +29,7 @@
     "source-map": "0.5.7",
     "source-map-resolve": "^0.5.1",
     "stack-trace": "0.0.10",
-    "unicharadata": "*",
+    "unicharadata": "9.0.0-alpha.6",
     "unicode-collation-algorithm": "0.0.3",
     "xorshift": "^1.1.0",
     "xregexp": "^3.2.0"
