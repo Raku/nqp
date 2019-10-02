@@ -1974,7 +1974,8 @@ with the same value.
 
 `decont(Mu $val --> Mu)`
 
-Extract, or **de**-**cont**ainerize, a value from a `Scalar` container:
+Extract, or **de**-**cont**ainerize, a value from a `Scalar` container.
+If the argument is not a container, the argument is returned unchanged :
 
     use nqp;
     my $a = (1, 2, 3);
