@@ -713,6 +713,14 @@ function toJSWithCtx(ctx, obj) {
     return obj.$$getNum();
   } else if (HLL.get('js_box') && obj.$$istype(ctx, HLL.get('js_box'))) {
     return obj.$$jsObject;
+  } else if (obj === HLL.get('true_value')) {
+    return true;
+  } else if (obj === HLL.get('false_value')) {
+    return false;
+  } else if (obj === HLL.get('null_value')) {
+    return null;
+  } else if (obj.$$getBignum) {
+    return BigInt(obj.$$getBignum().toString());
   } else if (op.isinvokable(obj)) {
     return function() {
       const converted = [null, {}];
