@@ -165,7 +165,7 @@ knowhow NQPConcreteRoleHOW {
         @attrs
     }
 
-    method roles($obj) {
+    method roles($obj, :$transitive = 0) {
         @!roles
     }
 
