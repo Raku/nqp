@@ -2632,7 +2632,27 @@ class WrappedJSObject extends REPR {
         }
         return core.fromJSToReturnValue(ctx, new this.$$jsObject(...converted));
       }
+
+      $$requireStub(name, prefix) {
+        this.$$name = name;
+        this.$$prefix = prefix;
+      }
     });
+  }
+
+  serialize(cursor, obj) {
+    if (obj.$$name) {
+      cursor.str(obj.$$name);
+      cursor.str(obj.$$prefix);
+    } else {
+      throw new NQPException(`Can't serialize wrapped js object`);
+    }
+  }
+
+  deserializeFinish(obj, data) {
+    const name = data.str();
+    const prefix = data.str();
+    obj.$$jsObject = require(require.resolve(name, {paths: [prefix]}));
   }
 }
 

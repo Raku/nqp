@@ -1943,6 +1943,9 @@ class QAST::OperationsJS {
 
     add_simple_op('decodelocaltime', $T_OBJ, [$T_INT], :side_effects);
 
+    add_simple_op('jsruntimerequire', $T_OBJ, [$T_STR, $T_STR], :ctx, :side_effects);
+    add_simple_op('jscompiletimerequire', $T_OBJ, [$T_STR, $T_STR], :ctx, :side_effects);
+
     method add_hll_unbox($hll, $type, $method_name) {
         unless nqp::existskey(%hll_unbox, $hll) {
             %hll_unbox{$hll} := nqp::hash();

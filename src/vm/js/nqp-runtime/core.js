@@ -950,6 +950,20 @@ class JavaScriptCompiler extends NQPObject {
   }
 };
 
+op.jsruntimerequire = function(ctx, name, prefix) {
+  return fromJSToReturnValue(ctx, require(require.resolve(name, {paths: [prefix]})));
+};
+
+op.jscompiletimerequire = function(ctx, name, prefix) {
+  const required = op.jsruntimerequire(ctx, name, prefix);
+
+  if (required.$$requireStub) {
+    required.$$requireStub(name, prefix);
+  }
+
+  return required;
+};
+
 globalContext.initialize(context => context.compilerRegistry.set('JavaScript', new JavaScriptCompiler()));
 
 class JSBackendStub extends NQPObject {
