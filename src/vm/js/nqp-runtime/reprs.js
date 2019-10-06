@@ -2606,14 +2606,6 @@ class WrappedJSObject extends REPR {
         return this;
       }
 
-      p6$Nil(ctx, _NAMED, self) {
-        if (isInternal(ctx, _NAMED)) {
-          return callJsMethod(this, 'Nil', arguments);
-        }
-        return this;
-        /* TODO */
-      }
-
       p6$sink(ctx, _NAMED, self) {
         if (isInternal(ctx, _NAMED)) {
           return callJsMethod(this, 'sink', arguments);
