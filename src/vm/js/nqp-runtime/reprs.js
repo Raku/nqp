@@ -2621,7 +2621,7 @@ class WrappedJSObject extends REPR {
         return this;
       }
 
-      p6$new(ctx, _NAMED, self, ...args) {
+      /*async*/ p6$new(ctx, _NAMED, self, ...args) {
         if (isInternal(ctx, _NAMED)) {
           return callJsMethod(this, 'new', arguments);
         }
