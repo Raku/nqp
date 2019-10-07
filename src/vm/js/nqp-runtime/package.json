@@ -21,7 +21,7 @@
     "mkdirp": "^0.5.1",
     "node-int64": "^0.4.0",
     "nqp-js-ucd": "0.0.1",
-    "nqp-unicode-data": "^2.0.0",
+    "nqp-unicode-data": "^3.0.0",
     "ref-napi": "^1.4.1",
     "sha1": "^1.1.1",
     "shortid": "2.2.8",
