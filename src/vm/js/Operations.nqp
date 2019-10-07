@@ -1932,7 +1932,7 @@ class QAST::OperationsJS {
     add_simple_op('isne_snfg', $T_INT, [$T_STR, $T_STR]);
 
     add_simple_op('getjsattr', $T_OBJ, [$T_OBJ, $T_STR], :decont(0), :ctx);
-    add_simple_op('setjsattr', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :decont(0, 2), :ctx, :side_effects);
+    add_simple_op('setjsattr', $T_OBJ, [$T_OBJ, $T_STR, $T_OBJ], :decont(0, 2), :ctx, :side_effects, :await);
 
     add_simple_op('writeint', $T_VOID, [$T_OBJ, $T_INT, $T_INT, $T_INT], :side_effects);
     add_simple_op('writeuint', $T_VOID, [$T_OBJ, $T_INT, $T_UINT32, $T_INT], :side_effects);

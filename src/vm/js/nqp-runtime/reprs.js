@@ -2529,7 +2529,7 @@ reprs.CStruct = CStruct;
 /*async*/ function callJsMethod(obj, name, args) {
   const converted = [];
   for (let i = 3; i < args.length; i++) {
-    converted.push(/*await*/ core.toJSWithCtx(args[0], args[i].$$decont(args[0])));
+    converted.push(/*await*/ core.toJSWithCtx(args[0], /*await*/ args[i].$$decont(args[0])));
   }
 
   if (obj.$$jsObject[name]) {
@@ -2589,7 +2589,7 @@ class WrappedJSObject extends REPR {
       /*async*/ $$apply(args) {
         const converted = [];
         for (let i = 2; i < args.length; i++) {
-          converted.push(/*await*/ core.toJSWithCtx(args[0], args[i].$$decont(args[0])));
+          converted.push(/*await*/ core.toJSWithCtx(args[0], /*await*/ args[i].$$decont(args[0])));
         }
         const ret = this.$$jsObject.apply(null, converted);
         return core.fromJSToReturnValue(args[0], ret);
@@ -2620,7 +2620,7 @@ class WrappedJSObject extends REPR {
 
         const converted = [];
         for (let i = 0; i < args.length; i++) {
-          converted.push(/*await*/ core.toJSWithCtx(ctx, args[i].$$decont(ctx)));
+          converted.push(/*await*/ core.toJSWithCtx(ctx, /*await*/ args[i].$$decont(ctx)));
         }
         return core.fromJSToReturnValue(ctx, new this.$$jsObject(...converted));
       }

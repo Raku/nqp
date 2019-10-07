@@ -681,7 +681,7 @@ function fromJS(HLL, obj, isReturnValue, isArgument) {
   }
 }
 
-function argToJSWithCtx(ctx, obj) {
+/*async*/ function argToJSWithCtx(ctx, obj) {
   if (obj instanceof NativeIntArg || obj instanceof NativeUIntArg) {
     return obj.value;
   } else if (obj instanceof NativeNumArg) {
@@ -689,11 +689,11 @@ function argToJSWithCtx(ctx, obj) {
   } else if (obj instanceof NativeStrArg) {
     return obj.value;
   } else {
-    return toJSWithCtx(ctx, obj.$$decont(ctx));
+    return /*await*/ toJSWithCtx(ctx, /*await*/ obj.$$decont(ctx));
   }
 }
 
-function returnValueToJSWithCtx(ctx, obj) {
+/*async*/ function returnValueToJSWithCtx(ctx, obj) {
   if (obj instanceof NativeNumRet) {
     return obj.value;
   } else if (obj instanceof NativeNumArg) {
@@ -701,17 +701,17 @@ function returnValueToJSWithCtx(ctx, obj) {
   } else if (typeof obj === 'string') {
     return obj;
   } else {
-    return toJSWithCtx(ctx, obj.$$decont(obj));
+    return /*await*/ toJSWithCtx(ctx, /*await*/ obj.$$decont(obj));
   }
 }
 
-function toJSWithCtx(ctx, obj) {
+/*async*/ function toJSWithCtx(ctx, obj) {
   const HLL = ctx.$$getHLL();
-  if (HLL.get('str_box') && obj.$$istype(ctx, HLL.get('str_box'))) {
+  if (HLL.get('str_box') && /*await*/ obj.$$istype(ctx, HLL.get('str_box'))) {
     return obj.$$getStr();
-  } else if (HLL.get('num_box') && obj.$$istype(ctx, HLL.get('num_box'))) {
+  } else if (HLL.get('num_box') && /*await*/ obj.$$istype(ctx, HLL.get('num_box'))) {
     return obj.$$getNum();
-  } else if (HLL.get('js_box') && obj.$$istype(ctx, HLL.get('js_box'))) {
+  } else if (HLL.get('js_box') && /*await*/ obj.$$istype(ctx, HLL.get('js_box'))) {
     return obj.$$jsObject;
   } else if (obj === HLL.get('true_value')) {
     return true;
@@ -722,12 +722,12 @@ function toJSWithCtx(ctx, obj) {
   } else if (obj.$$getBignum) {
     return BigInt(obj.$$getBignum().toString());
   } else if (op.isinvokable(obj)) {
-    return function() {
+    return /*async*/ function() {
       const converted = [null, {}];
       for (let i = 0; i < arguments.length; i++) {
         converted.push(fromJSToArgument(arguments[i]));
       }
-      return returnValueToJSWithCtx(ctx, obj.$$apply(converted));
+      return /*await*/ returnValueToJSWithCtx(ctx, /*await*/ obj.$$apply(converted));
     };
   } else if (obj.$$STable === BOOT.StrArray.$$STable) {
     return obj.array;
@@ -2230,8 +2230,8 @@ op.isne_snfg = function(a, b) {
   return (a.normalize('NFC') === b.normalize('NFC')) ? 0 : 1;
 };
 
-op.setjsattr = function(ctx, obj, attr, value) {
-  return obj.$$jsObject[attr] = toJSWithCtx(ctx, value);
+op.setjsattr = /*async*/ function(ctx, obj, attr, value) {
+  return obj.$$jsObject[attr] = /*await*/ toJSWithCtx(ctx, value);
 };
 
 op.getjsattr = function(ctx, obj, attr) {
