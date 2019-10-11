@@ -86,6 +86,16 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [hash](#hash)
   * [iterkey](#iterkey)
   * [iterval](#iterval)
+- [Coercion Opcodes](#-coercion-opcodes)
+  * [coerce_in](#coerce_in)
+  * [coerce_ni](#coerce_ni)
+  * [coerce_is](#coerce_is)
+  * [coerce_ns](#coerce_ns)
+  * [coerce_sn](#coerce_sb)
+  * [coerce_si](#coerce_si)
+  * [smrt_intify](#smrt_intify)
+  * [smrt_numify](#smrt_numify)
+  * [smrt_strify](#smrt_strify)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
   * [chr](#chr)
@@ -430,6 +440,7 @@ The opcodes are grouped into the following categories:
 * [Relational / Logic Opcodes](#logic)
 * [Array Opcodes](#array)
 * [Hash Opcodes](#hash)
+* [Corcion Opcodes](#coercion)
 * [String Opcodes](#string)
 * [Unicode Property Opcodes](#unicode)
 * [Conditional Opcodes](#conditional)
@@ -931,6 +942,39 @@ while $iter {
 * `iterval($pair --> Mu)`
 
 Returns the value associated with the given key-value pair.
+
+# <a id="coercion"</a> Coercion opcodes
+
+coerce_* opcodes do lower level conversion between int, num and str.
+smrt_intify, smrt_numify, smrt_strify respectively try to use the .Int, .Num or .Str method.
+If absent rely on lower level conversions.
+
+## coerce_in
+* `coerce_in(int --> num)`
+
+## coerce_ni
+* `coerce_in(num --> int)`
+
+## coerce_is
+* `coerce_is(int --> str)`
+
+## coerce_ns
+* `coerce_ns(num --> str)`
+
+## coerce_sn
+* `coerce_sn(str --> num)`
+
+## coerce_si
+* `coerce_si(str --> int)`
+
+## smrt_intify
+* `smrt_intify($o --> int)`
+
+## smrt_numify
+* `smrt_numify($o --> num)`
+
+## smrt_strify
+* `smrt_strify($o --> str)`
 
 # <a id="string"></a> String Opcodes
 
