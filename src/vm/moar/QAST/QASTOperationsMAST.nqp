@@ -1487,11 +1487,31 @@ my $call_gen := sub ($qastcomp, $op) {
     my $return_type;
     my @args := $op.list;
     if $op.name {
-        $callee := $qastcomp.as_mast(QAST::Op.new(
-            :op('decont'),
-            $op.op eq 'callstatic'
-                ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
-                !! QAST::Var.new( :name($op.name), :scope('lexical') )));
+        my $temp_callee := QAST::Node.unique('_temp_callee');
+        $callee := $qastcomp.as_mast(
+            QAST::Stmts.new(
+                QAST::Op.new(
+                    :op<if>,
+                    QAST::Op.new(
+                        :op<isnull>,
+                        QAST::Op.new(
+                            :op<bind>,
+                            QAST::Var.new(:name($temp_callee), :decl<var>, :scope<local>),
+                            QAST::Op.new(
+                                :op<decont>,
+                                $op.op eq 'callstatic'
+                                    ?? QAST::VM.new( :moarop<getlexstatic_o>, QAST::SVal.new( :value($op.name) ) )
+                                    !! QAST::Var.new( :name($op.name), :scope<lexical> ))
+                        )
+                    ),
+                    QAST::Op.new(
+                        :op<die>,
+                        QAST::SVal.new( :value('Cannot find callee ' ~ $op.name ~ ' in the lexical scope') )
+                    ),
+                    QAST::Var.new(:name($temp_callee), :scope<local>)
+                )
+            )
+        );
     }
     elsif +@args {
         @args := nqp::clone(@args);
