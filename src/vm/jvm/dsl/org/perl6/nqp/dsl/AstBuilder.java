@@ -18,6 +18,7 @@ public @interface AstBuilder {
     Class scopeClass();
     Class hllClass();
     Class contextSlotClass();
+    Class globalContextClass();
 
     boolean tastToByteCode();
     boolean tastToNode();

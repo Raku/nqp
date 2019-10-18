@@ -18,15 +18,11 @@ public final class NQPLoadbytecodeNode extends NQPStrNode {
     private final GlobalContext globalContext;
     private final FrameSlot contextSlot;
 
+    @Deserializer
     public NQPLoadbytecodeNode(GlobalContext globalContext, FrameSlot contextSlot, NQPNode argNode) {
         this.globalContext = globalContext;
         this.contextSlot = contextSlot;
         this.argNode = argNode;
-    }
-
-    @Deserializer("loadbytecode")
-    public static NQPLoadbytecodeNode deserialize(NQPScope scope, NQPNode argNode) {
-        return new NQPLoadbytecodeNode(scope.getGlobalContext(), scope.getContextSlot(), argNode);
     }
 
     @Override

@@ -41,6 +41,7 @@ public class Processor extends AbstractProcessor {
         TypeMirror scopeClass;
         TypeMirror hllClass;
         TypeMirror contextSlotClass;
+        TypeMirror globalContextClass;
 
         AstTypes(AstBuilder annotation) {
             try {
@@ -102,6 +103,12 @@ public class Processor extends AbstractProcessor {
             } catch (MirroredTypeException e) {
                 contextSlotClass = e.getTypeMirror();
             }
+
+            try {
+                annotation.globalContextClass();
+            } catch (MirroredTypeException e) {
+                globalContextClass = e.getTypeMirror();
+            }
         }
     }
 
@@ -162,6 +169,9 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 writer.append("scope.getContextSlot()");
+                i--;
+            } else if (paramType.equals(astTypes.globalContextClass)) {
+                writer.append("scope.getGlobalContext()");
                 i--;
             } else if (global != null) {
                 writer.append("scope.getGlobalContext()." + param.getSimpleName());
@@ -284,6 +294,8 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 i--;
+            } else if (paramType.equals(astTypes.globalContextClass)) {
+                i--;
             } else if (global != null) {
                 i--;
             } else {
@@ -328,6 +340,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("scope.getCurrentHLL()");
             } else if (paramType.equals(astTypes.contextSlotClass)) {
                 writer.append("scope.getContextSlot()");
+            } else if (paramType.equals(astTypes.globalContextClass)) {
+                writer.append("scope.getGlobalContext()");
             } else if (global != null) {
                 writer.append("scope.getGlobalContext()." + param.getSimpleName());
             } else {

@@ -68,6 +68,7 @@ import java.nio.ByteOrder;
     strsClass = String[].class,
     scopeClass = NQPScope.class,
     contextSlotClass = FrameSlot.class,
+    globalContextClass = GlobalContext.class,
     hllClass = HLL.class,
     tastToByteCode = false,
     tastToNode = false,
