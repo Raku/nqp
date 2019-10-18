@@ -7,12 +7,12 @@ import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.dsl.Global;
 
-@NodeInfo(shortName = "knowhowattribute")
-public final class NQPKnowhowattributeNode extends NQPObjNode {
+@NodeInfo(shortName = "knowhowattr")
+public final class NQPKnowhowattrNode extends NQPObjNode {
     private final Object knowhowAttribute;
 
     @Deserializer
-    public NQPKnowhowattributeNode(@Global Object knowhowAttribute) {
+    public NQPKnowhowattrNode(@Global Object knowhowAttribute) {
         this.knowhowAttribute = knowhowAttribute;
     }
 
