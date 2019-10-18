@@ -11,11 +11,9 @@ public class Bootstrapper {
     private static void bootstrapKnowHOW(GlobalContext globalContext) {
         /* Create our KnowHOW type object. Note we don't have a HOW just yet, so
          * pass in NULL. */
-        STable stable = new STable(null);
+        TypeObject knowhow = REPRRegistry.typeObjectFor("KnowHOWREPR", null);
 
-        stable.repr = REPRRegistry.createFromName("KnowHOWREPR", stable);
-
-        TypeObject knowhow = REPRRegistry.typeObjectFor("KnowHOWREPR", stable);
+        STable stable = knowhow.stable;
 
         /* We create a KnowHOW instance that can describe itself. This means
          * (once we tie the knot) that .HOW.HOW.HOW.HOW etc will always return
