@@ -69,7 +69,8 @@ MAIN: {
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
-        'relocatable!',     'silent-build!'
+        'relocatable!',     'silent-build!',
+        'force-rebuild!'
       )
       or do {
         print_help();
@@ -149,6 +150,7 @@ General Options:
     --nqp-home=dir     Directory to install NQP files to
     --backends=list    Backends to use: $backends
     --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
+    --force-rebuild    Forces rebuild of moar if used with --gen-moar
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
     --with-moar='/path/to/moar'
