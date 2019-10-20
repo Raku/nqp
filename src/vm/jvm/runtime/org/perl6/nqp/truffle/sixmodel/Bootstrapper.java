@@ -1,6 +1,7 @@
 package org.perl6.nqp.truffle.sixmodel;
 
 import org.perl6.nqp.truffle.GlobalContext;
+import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.reprs.KnowHOWREPRInstance;
 
 public class Bootstrapper {
@@ -14,7 +15,7 @@ public class Bootstrapper {
         globalContext.BOOTArray = bootType(globalContext, "BOOTArray", "VMArray");
         globalContext.BOOTIter = bootType(globalContext, "BOOTIter", "VMIter");
 
-        //tc.gc.BOOTArray.st.hllRole = HLLConfig.ROLE_ARRAY;
+        globalContext.BOOTArray.stable.hllRole = HLL.ROLE_ARRAY;
         //Ops.setboolspec(tc.gc.BOOTArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
         //Ops.setboolspec(tc.gc.BOOTIter, BoolificationSpec.MODE_ITER, null, tc);
     }

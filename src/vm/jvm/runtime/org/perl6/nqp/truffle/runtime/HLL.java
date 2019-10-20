@@ -12,6 +12,14 @@ public final class HLL {
     public TypeObject arrayIteratorType;
     public TypeObject hashIteratorType;
 
+    public static final int ROLE_NONE  = 0;
+    public static final int ROLE_INT   = 1;
+    public static final int ROLE_NUM   = 2;
+    public static final int ROLE_STR   = 3;
+    public static final int ROLE_ARRAY = 4;
+    public static final int ROLE_HASH  = 5;
+    public static final int ROLE_CODE  = 6;
+
     public HLL(GlobalContext globalContext) {
         symbols = new HashMap<>();
 
