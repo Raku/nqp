@@ -9,6 +9,7 @@ JVM_BUILD_DIR = gen/jvm
 TRUFFLE_BUILD_DIR = gen/truffle
 
 TRUFFLE_JAVAS = \
+  src/vm/jvm/runtime/org/perl6/nqp/truffle/io/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/doubleconv/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/runtime/*.java \
   src/vm/jvm/runtime/org/perl6/nqp/truffle/nodes/*.java \

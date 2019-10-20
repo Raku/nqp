@@ -11,6 +11,7 @@ public final class HLL {
     public TypeObject slurpyArrayType;
     public TypeObject arrayIteratorType;
     public TypeObject hashIteratorType;
+    public TypeObject ioType;
 
     public static final int ROLE_NONE  = 0;
     public static final int ROLE_INT   = 1;
@@ -26,6 +27,7 @@ public final class HLL {
         listType = globalContext.BOOTArray;
         slurpyArrayType = globalContext.BOOTArray;
         arrayIteratorType = globalContext.BOOTIter;
+        ioType = globalContext.BOOTIO;
     }
 
     public Object getSymbol(String key) {

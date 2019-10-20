@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.perl6.nqp.truffle.sixmodel.reprs.ConditionVariable;
 import org.perl6.nqp.truffle.sixmodel.reprs.ConcBlockingQueue;
 import org.perl6.nqp.truffle.sixmodel.reprs.Decoder;
+import org.perl6.nqp.truffle.sixmodel.reprs.IOHandle;
 import org.perl6.nqp.truffle.sixmodel.reprs.KnowHOWAttribute;
 import org.perl6.nqp.truffle.sixmodel.reprs.KnowHOWREPR;
 import org.perl6.nqp.truffle.sixmodel.reprs.P6int;
@@ -23,6 +24,7 @@ public class REPRRegistry {
             case "ConcBlockingQueue": return new ConcBlockingQueue(stable);
             case "ConditionVariable": return new ConditionVariable(stable);
             case "Decoder": return new Decoder(stable);
+            case "IOHandle": return new IOHandle(stable);
             case "KnowHOWAttribute": return new KnowHOWAttribute(stable);
             case "KnowHOWREPR": return new KnowHOWREPR(stable);
             case "P6int": return new P6int(stable);

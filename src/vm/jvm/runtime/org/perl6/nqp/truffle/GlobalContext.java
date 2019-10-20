@@ -45,6 +45,9 @@ import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.sixmodel.TypeObject;
 import org.perl6.nqp.truffle.sixmodel.Bootstrapper;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.io.PrintStream;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,12 +62,28 @@ public class GlobalContext {
 
     public TypeObject BOOTArray;
     public TypeObject BOOTIter;
+    public TypeObject BOOTIO;
+
+    /** Redirected output for eval-server. */
+    public PrintStream out;
+    /** Redirected error for eval-server. */
+    public PrintStream err;
+    /** Redirected input for eval-server. */
+    public InputStream in = System.in;
 
     public GlobalContext() {
         hlls = new HashMap<>();
         scs = new HashMap<>();
         compilingSCs = new ArrayList<>();
         Bootstrapper.bootstrap(this);
+
+        try {
+            out = new PrintStream(System.out, true, "UTF-8");
+            err = new PrintStream(System.err, true, "UTF-8");
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

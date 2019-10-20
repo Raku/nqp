@@ -167,6 +167,8 @@ class QAST::OperationsTruffle {
     add_simple_op('loadbytecode', $STR, [$STR]);
     add_simple_op('forceouterctx', $OBJ, [$OBJ, $OBJ]);
 
+    add_simple_op('getstdout', $OBJ, [], :side_effects);
+
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
 

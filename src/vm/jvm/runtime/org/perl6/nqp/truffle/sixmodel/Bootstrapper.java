@@ -14,6 +14,7 @@ public class Bootstrapper {
     public static void bootstrapTypes(GlobalContext globalContext) {
         globalContext.BOOTArray = bootType(globalContext, "BOOTArray", "VMArray");
         globalContext.BOOTIter = bootType(globalContext, "BOOTIter", "VMIter");
+        globalContext.BOOTIO = bootType(globalContext, "BOOTIO", "IOHandle");
 
         globalContext.BOOTArray.stable.hllRole = HLL.ROLE_ARRAY;
         //Ops.setboolspec(tc.gc.BOOTArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
