@@ -53,6 +53,8 @@ import org.perl6.nqp.truffle.nodes.NQPStrNode;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
+
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.runtime.Coercions;
 
@@ -85,6 +87,11 @@ public class NQPSmartStringifyNode extends NQPStrNode {
 
     protected final boolean isNull(Object value) {
         return value == NQPNull.SINGLETON;
+    }
+
+    @Specialization
+    protected String doTypeObject(TypeObject typeObject) {
+        return "";
     }
 
     @Deserializer("smart-stringify")
