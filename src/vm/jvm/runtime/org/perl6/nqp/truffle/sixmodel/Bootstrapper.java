@@ -1,11 +1,43 @@
 package org.perl6.nqp.truffle.sixmodel;
 
 import org.perl6.nqp.truffle.GlobalContext;
+import org.perl6.nqp.truffle.sixmodel.reprs.KnowHOWREPRInstance;
 
 public class Bootstrapper {
     public static void bootstrap(GlobalContext globalContext) {
         bootstrapKnowHOW(globalContext);
         bootstrapKnowHOWAttribute(globalContext);
+        bootstrapTypes(globalContext);
+    }
+
+    public static void bootstrapTypes(GlobalContext globalContext) {
+        globalContext.BOOTArray = bootType(globalContext, "BOOTArray", "VMArray");
+        globalContext.BOOTIter = bootType(globalContext, "BOOTIter", "VMIter");
+
+        //tc.gc.BOOTArray.st.hllRole = HLLConfig.ROLE_ARRAY;
+        //Ops.setboolspec(tc.gc.BOOTArray, BoolificationSpec.MODE_HAS_ELEMS, null, tc);
+        //Ops.setboolspec(tc.gc.BOOTIter, BoolificationSpec.MODE_ITER, null, tc);
+    }
+
+    private static TypeObject bootType(GlobalContext globalContext, String typeName, String reprName) {
+        Object knowhowHow = globalContext.knowhow.stable.how;
+        KnowHOWREPRInstance metaObj = (KnowHOWREPRInstance) ((KnowHOWREPRInstance)knowhowHow).stable.repr.allocate();
+        metaObj.name = typeName;
+
+        TypeObject typeObj = REPRRegistry.typeObjectFor(reprName, metaObj);
+
+        //typeObj.st.MethodCache = meta_obj.methods;
+        //typeObj.st.ModeFlags = STable.METHOD_CACHE_AUTHORITATIVE;
+
+        SerializationContext sc = globalContext.scs.get("__6MODEL_CORE__");
+        sc.addObject(typeObj);
+        typeObj.sc = sc;
+        sc.addObject(typeObj.stable.how);
+        ((KnowHOWREPRInstance) typeObj.stable.how).sc = sc;
+        sc.addSTable(typeObj.stable);
+        typeObj.stable.sc = sc;
+
+        return typeObj;
     }
 
     private static void bootstrapKnowHOW(GlobalContext globalContext) {

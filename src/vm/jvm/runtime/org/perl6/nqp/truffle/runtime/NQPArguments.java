@@ -1,6 +1,7 @@
 package org.perl6.nqp.truffle.runtime;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 
 import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.FrameSlot;
@@ -94,7 +95,7 @@ public final class NQPArguments {
             values[i] = argumentNodes[i].execute(frame);
 
             if ((argumentFlags[i] & NAMED) == 0) {
-                count += ((argumentFlags[i] & FLAT) != 0) ? ((NQPList) values[i]).elems() : 1;
+                count += ((argumentFlags[i] & FLAT) != 0) ? ((VMArrayInstance) values[i]).elems() : 1;
             }
         }
 
@@ -114,7 +115,7 @@ public final class NQPArguments {
             } else if ((argumentFlags[i] & NAMED) != 0) {
                 NQPArguments.setNamedArgument(arguments, argumentNames[nameIndex++], values[i]);
             } else if ((argumentFlags[i] & FLAT) != 0) {
-                NQPList array = (NQPList) values[i];
+                VMArrayInstance array = (VMArrayInstance) values[i];
                 for (int j = 0; j < array.elems(); j++) {
                     NQPArguments.setUserArgument(arguments, positional++, array.atpos(j));
                 }

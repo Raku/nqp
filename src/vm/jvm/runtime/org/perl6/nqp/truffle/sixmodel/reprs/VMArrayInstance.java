@@ -1,14 +1,15 @@
-package org.perl6.nqp.truffle.runtime;
+package org.perl6.nqp.truffle.sixmodel.reprs;
 
-import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import java.util.ArrayList;
 
-public final class NQPList {
+import org.perl6.nqp.truffle.runtime.NQPNull;
+import org.perl6.nqp.truffle.sixmodel.STable;
+
+public class VMArrayInstance extends FixedSizeObject {
     private ArrayList<Object> contents;
 
-    public SerializationContext sc;
-
-    public NQPList() {
+    public VMArrayInstance(STable stable) {
+        super(stable);
         this.contents = new ArrayList<>();
     }
 

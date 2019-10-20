@@ -25,4 +25,12 @@ public abstract class REPR {
     public Object deserializeInline(SerializationReader reader) {
         throw new RuntimeException("Can't serialize this repr inline: " + this.getClass().getName());
     }
+
+    public StorageSpec getStorageSpec() {
+        return StorageSpec.BOXED;
+    }
+
+    public void compose(Object reprInfo) {
+        // By default, nothing to do.
+    }
 }

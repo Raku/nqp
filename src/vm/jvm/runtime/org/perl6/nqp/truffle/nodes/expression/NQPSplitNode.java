@@ -3,7 +3,8 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "split")
@@ -11,8 +12,11 @@ public final class NQPSplitNode extends NQPObjNode {
     @Child private NQPNode delimiterNode;
     @Child private NQPNode stringNode;
 
+    private final HLL hll;
+
     @Deserializer
-    public NQPSplitNode(NQPNode delimiterNode, NQPNode stringNode) {
+    public NQPSplitNode(HLL hll, NQPNode delimiterNode, NQPNode stringNode) {
+        this.hll = hll;
         this.delimiterNode = delimiterNode;
         this.stringNode = stringNode;
     }
@@ -22,8 +26,7 @@ public final class NQPSplitNode extends NQPObjNode {
         String delimiter = delimiterNode.executeStr(frame);
         String string = stringNode.executeStr(frame);
 
-        // TODO: use slurpy_array from HLL
-        NQPList array = new NQPList();
+        VMArrayInstance array = (VMArrayInstance) hll.listType.stable.repr.allocate();
 
         int slen = string.length();
         if (slen == 0) {

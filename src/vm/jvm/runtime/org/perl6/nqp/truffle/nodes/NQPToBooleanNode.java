@@ -1,12 +1,12 @@
 package org.perl6.nqp.truffle.nodes;
 
 import com.oracle.truffle.api.dsl.Specialization;
-import org.perl6.nqp.truffle.runtime.NQPListIterator;
-import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
 import org.perl6.nqp.truffle.sixmodel.TypeObject;
 import org.perl6.nqp.truffle.sixmodel.reprs.FixedSizeObject;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMIterInstance;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 
 public abstract class NQPToBooleanNode extends NQPBaseNode {
     public abstract boolean executeBoolean(Object value);
@@ -27,13 +27,13 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
     }
 
     @Specialization
-    protected boolean doNQPList(NQPList value) {
+    protected boolean doVMArrayInstance(VMArrayInstance value) {
         return value.elems() != 0;
     }
 
     @Specialization
-    protected boolean doNQPListIterator(NQPListIterator value) {
-        return ((NQPListIterator) value).boolify();
+    protected boolean doVMIterInstance(VMIterInstance value) {
+        return ((VMIterInstance) value).boolify();
     }
 
     @Specialization

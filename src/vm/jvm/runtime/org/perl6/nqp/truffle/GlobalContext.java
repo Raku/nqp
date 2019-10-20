@@ -57,6 +57,9 @@ public class GlobalContext {
     public TypeObject knowhow;
     public TypeObject knowhowAttribute;
 
+    public TypeObject BOOTArray;
+    public TypeObject BOOTIter;
+
     public GlobalContext() {
         hlls = new HashMap<>();
         scs = new HashMap<>();

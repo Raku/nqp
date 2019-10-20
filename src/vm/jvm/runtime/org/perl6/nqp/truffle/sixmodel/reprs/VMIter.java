@@ -2,24 +2,23 @@ package org.perl6.nqp.truffle.sixmodel.reprs;
 import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 import org.perl6.nqp.truffle.sixmodel.STable;
 
-
 public class VMIter extends FixedSizeObjectREPR {
     public VMIter(STable stable) {
         super(stable);
     }
 
+    @Override
     public Object allocate() {
-        System.out.println("NYI allocating a VMIter");
-          return null;
-//        return new VMIterInstance(stable);
+        return new VMIterInstance(stable);
     }
 
+    @Override
     public Object deserializeStub() {
-        System.out.println("NYI deserializing a VMIter");
-        return null;
-        //return new VMIterInstance(stable);
+        throw new RuntimeException("VMIter does not participate in serialization");
     }
 
+    @Override
     public void deserializeFinish(SerializationReader reader, Object obj) {
+        throw new RuntimeException("VMIter does not participate in serialization");
     }
 }

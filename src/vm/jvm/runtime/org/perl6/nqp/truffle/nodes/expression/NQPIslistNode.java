@@ -3,7 +3,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.truffle.runtime.NQPListInt;
 import org.perl6.nqp.truffle.runtime.NQPListNum;
 import org.perl6.nqp.truffle.runtime.NQPListStr;
@@ -21,6 +21,6 @@ public final class NQPIslistNode extends NQPIntNode {
     @Override
     public long executeInt(VirtualFrame frame) {
         Object arg = argNode.execute(frame);
-        return (arg instanceof NQPList || arg instanceof NQPListInt || arg instanceof NQPListNum || arg instanceof NQPListStr) ? 1 : 0;
+        return (arg instanceof VMArrayInstance || arg instanceof NQPListInt || arg instanceof NQPListNum || arg instanceof NQPListStr) ? 1 : 0;
     }
 }

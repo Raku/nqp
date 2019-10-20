@@ -12,7 +12,8 @@ import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.runtime.NQPHash;
 
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 
 
 public class SerializationReader {
@@ -20,7 +21,7 @@ public class SerializationReader {
     private final int CURRENT_VERSION = 11;
 
     /* The minimum version of the serialization format. */
-    private final int MIN_VERSION = 4;
+    private final int MIN_VERSION = 8;
 
     /* Various sizes (in bytes). */
     private final int V10_HEADER_SIZE           = 4 * 16;
@@ -92,13 +93,16 @@ public class SerializationReader {
 
     REPR[] reprs;
 
-    public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs, HashMap<String, HLL> hlls) {
+    TypeObject BOOTArray;
+
+    public SerializationReader(SerializationContext sc, String[] sh, NQPCodeRef[] cr, ByteBuffer orig, HashMap<String, SerializationContext> scs, HashMap<String, HLL> hlls, TypeObject BOOTArray) {
         this.sc = sc;
         this.sh = sh;
         this.cr = cr;
         this.orig = orig;
         this.scs = scs;
         this.hlls = hlls;
+        this.BOOTArray = BOOTArray;
     }
 
     public void deserialize() {
@@ -634,7 +638,7 @@ public class SerializationReader {
         case REFVAR_VM_STR:
             return readString();
         case REFVAR_VM_ARR_VAR: {
-            NQPList array = new NQPList();
+            VMArrayInstance array = (VMArrayInstance) BOOTArray.stable.repr.allocate();
               int elems = orig.getInt();
             for (int i = 0; i < elems; i++) {
                 array.push(readRef());

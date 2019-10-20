@@ -3,7 +3,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "pop")
@@ -17,6 +17,6 @@ public final class NQPPopNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return ((NQPList) argNode.execute(frame)).pop();
+        return ((VMArrayInstance) argNode.execute(frame)).pop();
     }
 }

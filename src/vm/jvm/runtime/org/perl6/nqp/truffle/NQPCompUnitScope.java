@@ -61,7 +61,7 @@ public class NQPCompUnitScope extends NQPScope {
         HashMap<String, HLL> hlls = outer.getGlobalContext().hlls;
 
         if (!hlls.containsKey(hll)) {
-            hlls.put(hll, new HLL());
+            hlls.put(hll, new HLL(outer.getGlobalContext()));
         }
 
         this.currentHLL = hlls.get(hll);

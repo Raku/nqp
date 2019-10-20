@@ -3,7 +3,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.dsl.Deserializer;
 
@@ -20,7 +20,7 @@ public final class NQPExistsposNode extends NQPIntNode {
 
     @Override
     public long executeInt(VirtualFrame frame) {
-        NQPList list = (NQPList) listNode.execute(frame);
+        VMArrayInstance list = (VMArrayInstance) listNode.execute(frame);
         long key = keyNode.executeInt(frame);
 
         if (key < 0) {

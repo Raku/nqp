@@ -7,8 +7,9 @@ import com.oracle.truffle.api.nodes.NodeInfo;
 
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
+import org.perl6.nqp.truffle.runtime.HLL;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.truffle.NQPScope;
 
 import org.perl6.nqp.dsl.Deserializer;
@@ -17,10 +18,11 @@ import org.perl6.nqp.dsl.Deserializer;
 public final class NQPListBlockNode extends NQPObjNode {
     NQPScope scope;
     String[] cuids;
-
+    private final HLL hll;
 
     @Deserializer("list_b")
-    public NQPListBlockNode(NQPScope scope, String[] cuids) {
+    public NQPListBlockNode(HLL hll, NQPScope scope, String[] cuids) {
+        this.hll = hll;
         this.scope = scope;
         this.cuids = cuids;
     }
@@ -28,7 +30,7 @@ public final class NQPListBlockNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        NQPList list = new NQPList();
+        VMArrayInstance list = (VMArrayInstance) hll.listType.stable.repr.allocate();
 
         for (String cuid : cuids) {
             list.push(scope.getCuid(cuid));

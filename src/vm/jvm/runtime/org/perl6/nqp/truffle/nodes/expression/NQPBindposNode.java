@@ -3,7 +3,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.dsl.Deserializer;
 
 @NodeInfo(shortName = "bindpos")
@@ -21,6 +21,6 @@ public final class NQPBindposNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return ((NQPList) listNode.execute(frame)).bindpos(indexNode.executeInt(frame), valueNode.execute(frame));
+        return ((VMArrayInstance) listNode.execute(frame)).bindpos(indexNode.executeInt(frame), valueNode.execute(frame));
     }
 }

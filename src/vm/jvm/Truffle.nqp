@@ -538,8 +538,12 @@ class QAST::OperationsTruffle {
     add_simple_op('defined', $INT, [$OBJ], :decont(0));
     add_simple_op('who', $OBJ, [$OBJ], :decont(0));
     add_simple_op('how', $OBJ, [$OBJ], :decont(0));
-    add_simple_op('create', $OBJ, [$OBJ]);
+    add_simple_op('create', $OBJ, [$OBJ], :side_effects);
     add_simple_op('newtype', $OBJ, [$OBJ, $STR], :side_effects, :decont(0));
+
+    add_simple_op('composetype', $OBJ, [$OBJ, $OBJ], :side_effects);
+    add_simple_op('sethllconfig', $OBJ, [$STR, $OBJ], :side_effects);
+
 
     add_simple_op('knowhow', $OBJ, []);
     add_simple_op('knowhowattr', $OBJ, []);

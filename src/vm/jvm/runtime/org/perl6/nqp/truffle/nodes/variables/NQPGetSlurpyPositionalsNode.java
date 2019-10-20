@@ -49,10 +49,12 @@ import com.oracle.truffle.api.frame.FrameSlotKind;
 import com.oracle.truffle.api.frame.VirtualFrame;
 
 import org.perl6.nqp.truffle.runtime.NQPArguments;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.runtime.HLL;
 
 import org.perl6.nqp.truffle.nodes.NQPObjNode;
 import org.perl6.nqp.truffle.nodes.NQPNode;
+
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 
 import org.perl6.nqp.dsl.Deserializer;
 
@@ -62,25 +64,27 @@ import org.perl6.nqp.truffle.FoundLexical;
 public class NQPGetSlurpyPositionalsNode extends NQPObjNode {
     private final FrameSlot slot;
     private final int index;
+    private final HLL hll;
 
-    public NQPGetSlurpyPositionalsNode(FrameSlot slot, int index) {
+    public NQPGetSlurpyPositionalsNode(HLL hll, FrameSlot slot, int index) {
+        this.hll = hll;
         this.slot = slot;
         this.index = index;
     }
 
     @Deserializer("get-lexical-slurpy-positionals")
-    public static NQPGetSlurpyPositionalsNode getLexicalPositional(NQPScope scope, String name, long index) {
-        return new NQPGetSlurpyPositionalsNode(scope.addLexical(name), (int) index);
+    public static NQPGetSlurpyPositionalsNode getLexicalPositional(HLL hll, NQPScope scope, String name, long index) {
+        return new NQPGetSlurpyPositionalsNode(hll, scope.addLexical(name), (int) index);
     }
 
     @Deserializer("get-local-slurpy-positionals")
-    public static NQPGetSlurpyPositionalsNode getLocalSlurpyPositionals(NQPScope scope, String name, long index) {
-        return new NQPGetSlurpyPositionalsNode(scope.addLocal(name), (int) index);
+    public static NQPGetSlurpyPositionalsNode getLocalSlurpyPositionals(HLL hll, NQPScope scope, String name, long index) {
+        return new NQPGetSlurpyPositionalsNode(hll, scope.addLocal(name), (int) index);
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
-        NQPList slurpy = new NQPList();
+        VMArrayInstance slurpy = (VMArrayInstance) hll.slurpyArrayType.stable.repr.allocate();
         Object[] args = frame.getArguments();
         int count = NQPArguments.getUserArgumentCount(args);
       

@@ -3,7 +3,7 @@ import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPStrNode;
-import org.perl6.nqp.truffle.runtime.NQPList;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.truffle.runtime.NQPListStr;
 import org.perl6.nqp.dsl.Deserializer;
 
@@ -22,8 +22,8 @@ public final class NQPJoinNode extends NQPStrNode {
     public String executeStr(VirtualFrame frame) {
         String delim = delimNode.executeStr(frame);
         Object uncast = listNode.execute(frame);
-        if (uncast instanceof NQPList) {
-            NQPList list = (NQPList) uncast;
+        if (uncast instanceof VMArrayInstance) {
+            VMArrayInstance list = (VMArrayInstance) uncast;
             long elems = list.elems();
             if (elems == 0) {
                 return "";

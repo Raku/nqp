@@ -52,8 +52,6 @@ import org.perl6.nqp.truffle.nodes.NQPObjNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.NQPArguments;
-import org.perl6.nqp.truffle.runtime.NQPList;
-import org.perl6.nqp.truffle.runtime.NQPHash;
 
 import com.oracle.truffle.api.CompilerDirectives.CompilationFinal;
 import org.perl6.nqp.dsl.Deserializer;

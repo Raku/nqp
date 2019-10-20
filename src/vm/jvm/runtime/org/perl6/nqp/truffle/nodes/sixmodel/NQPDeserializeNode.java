@@ -10,12 +10,13 @@ import org.perl6.nqp.truffle.NQPScope;
 import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPStrNode;
 import org.perl6.nqp.truffle.runtime.NQPListStr;
-import org.perl6.nqp.truffle.runtime.NQPList;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.Base64;
 import org.perl6.nqp.truffle.runtime.HLL;
+import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
 import org.perl6.nqp.truffle.sixmodel.SerializationReader;
 import org.perl6.nqp.truffle.sixmodel.SerializationContext;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
 
 @NodeInfo(shortName = "deserialize")
 public final class NQPDeserializeNode extends NQPStrNode {
@@ -27,9 +28,10 @@ public final class NQPDeserializeNode extends NQPStrNode {
 
     private final HashMap<String, SerializationContext> scs;
     private final HashMap<String, HLL> hlls;
+    private final TypeObject BOOTArray;
 
     @Deserializer
-    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, @Global HashMap<String, SerializationContext> scs, @Global HashMap<String, HLL> hlls) {
+    public NQPDeserializeNode(NQPNode blobNode, NQPNode scNode, NQPNode shNode, NQPNode crNode, NQPNode conflictNode, @Global HashMap<String, SerializationContext> scs, @Global HashMap<String, HLL> hlls, @Global TypeObject BOOTArray) {
         this.blobNode = blobNode;
         this.scNode = scNode;
         this.shNode = shNode;
@@ -37,6 +39,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
         this.conflictNode = conflictNode;
         this.scs = scs;
         this.hlls = hlls;
+        this.BOOTArray = BOOTArray;
     }
 
     @Override
@@ -44,7 +47,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
         String blob = blobNode.executeStr(frame);
         SerializationContext sc = (SerializationContext) scNode.execute(frame);
         NQPListStr shList = (NQPListStr) shNode.execute(frame);
-        NQPList crList = (NQPList) crNode.execute(frame);
+        VMArrayInstance crList = (VMArrayInstance) crNode.execute(frame);
         Object conflict = conflictNode.execute(frame);
 
         ByteBuffer binaryBlob = Base64.decode(blob);
@@ -59,7 +62,7 @@ public final class NQPDeserializeNode extends NQPStrNode {
             cr[i] = (NQPCodeRef) crList.atpos(i);
         }
 
-        SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs, hlls);
+        SerializationReader sr = new SerializationReader(sc, sh, cr, binaryBlob, scs, hlls, BOOTArray);
         sr.deserialize();
 
         return blob; 
