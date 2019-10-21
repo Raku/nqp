@@ -614,6 +614,22 @@ class QAST::OperationsTruffle {
             )), :$want)
     });
 
+    add_op('xor', sub ($comp, $node, :$want) {
+        my @tree := ['xor', -1];
+
+        my int $index := 0;
+        for $node.list {
+            if $_.named eq 'false' {
+                @tree[1] := $index;
+            }
+            @tree.push($comp.as_truffle($_, :want($OBJ)).tree);
+            $index := $index + 1;
+        }
+
+        TAST.new($OBJ, @tree);
+    });
+
+
     method compile_op($comp, $op, $hll, :$want) {
         my str $name := $op.op;
         if nqp::existskey(%hll_ops, $hll) && nqp::existskey(%hll_ops{$hll}, $name) {
