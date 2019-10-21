@@ -7,6 +7,7 @@ import org.perl6.nqp.truffle.sixmodel.TypeObject;
 import org.perl6.nqp.truffle.sixmodel.reprs.FixedSizeObject;
 import org.perl6.nqp.truffle.sixmodel.reprs.VMIterInstance;
 import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.truffle.runtime.NQPHash;
 
 public abstract class NQPToBooleanNode extends NQPBaseNode {
     public abstract boolean executeBoolean(Object value);
@@ -28,6 +29,11 @@ public abstract class NQPToBooleanNode extends NQPBaseNode {
 
     @Specialization
     protected boolean doVMArrayInstance(VMArrayInstance value) {
+        return value.elems() != 0;
+    }
+
+    @Specialization
+    protected boolean doHash(NQPHash value) {
         return value.elems() != 0;
     }
 
