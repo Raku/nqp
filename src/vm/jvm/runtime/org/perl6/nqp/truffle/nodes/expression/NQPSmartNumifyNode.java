@@ -65,27 +65,27 @@ import org.perl6.nqp.truffle.Debug;
 public class NQPSmartNumifyNode extends NQPNumNode {
 
     @Specialization
-    protected double numifyDouble(Double value) {
+    protected double doDouble(Double value) {
         return value;
     }
 
     @Specialization
-    protected double numifyLong(Long value) {
+    protected double doLong(Long value) {
         return (long) value;
     }
 
     @Specialization
-    protected double numifyString(String value) {
+    protected double doString(String value) {
         return Coercions.strToNum(value);
     }
 
     @Specialization(guards = "isNull(value)")
-    protected double numifyNull(Object value) {
+    protected double doNull(Object value) {
         return 0;
     }
 
     @Specialization
-    protected double numifyList(VMArrayInstance value) {
+    protected double doList(VMArrayInstance value) {
         return value.elems();
     }
 
