@@ -1171,7 +1171,7 @@ class QAST::TruffleCompiler does SerializeOnce {
     }
 
     # TODO native types for variables
-    multi method as_truffle(QAST::Var $node, :$want) {
+    method compile_var(QAST::Var $node, :$want) {
         my $type := self.figure_out_type($node);
 
         if $node.scope eq 'lexical' && self.is_dynamic_var($node) {
@@ -1258,6 +1258,30 @@ class QAST::TruffleCompiler does SerializeOnce {
         }
         else {
             self.NYI("var scope {$node.scope}");
+        }
+    }
+
+    multi method as_truffle(QAST::Var $node, :$want) {
+        self.compile_var($node, :$want);
+    }
+
+    multi method as_truffle(QAST::VarWithFallback $node, :$want) {
+        my $var := self.compile_var($node, :$want);
+
+        my int $can_be_null :=
+          $var.type == $OBJ
+          || $var.type == $CALL_ARG
+          || $var.type == $RETVAL;
+
+        if $*BINDVAL || !$can_be_null {
+            $var;
+        }
+        else {
+            my $fallback := self.as_truffle($node.fallback, :want($OBJ));
+            return TAST.new($OBJ, [
+                'fallback',
+                $var.tree,
+                $fallback.tree]);
         }
     }
 
