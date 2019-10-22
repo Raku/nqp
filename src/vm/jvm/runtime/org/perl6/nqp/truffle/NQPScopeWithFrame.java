@@ -133,6 +133,11 @@ public class NQPScopeWithFrame extends NQPScope {
     }
 
     @Override
+    public ThreadContext getThreadContext() {
+        return outer.getThreadContext();
+    }
+
+    @Override
     public NQPCodeRef getCuid(String cuid) {
         return outer.getCuid(cuid);
     }

@@ -9,6 +9,7 @@ import org.perl6.nqp.truffle.ByteCodeRunnerGen;
 import org.perl6.nqp.truffle.runtime.DynamicContext;
 import org.perl6.nqp.truffle.GlobalContext;
 import org.perl6.nqp.truffle.NQPScope;
+import org.perl6.nqp.truffle.ThreadContext;
 import com.oracle.truffle.api.frame.FrameUtil;
 import com.oracle.truffle.api.frame.FrameSlot;
 
@@ -16,11 +17,13 @@ import com.oracle.truffle.api.frame.FrameSlot;
 public final class NQPLoadbytecodeNode extends NQPStrNode {
     @Child private NQPNode argNode;
     private final GlobalContext globalContext;
+    private final ThreadContext threadContext;
     private final FrameSlot contextSlot;
 
     @Deserializer
-    public NQPLoadbytecodeNode(GlobalContext globalContext, FrameSlot contextSlot, NQPNode argNode) {
+    public NQPLoadbytecodeNode(GlobalContext globalContext, ThreadContext threadContext, FrameSlot contextSlot, NQPNode argNode) {
         this.globalContext = globalContext;
+        this.threadContext = threadContext;
         this.contextSlot = contextSlot;
         this.argNode = argNode;
     }
@@ -37,7 +40,7 @@ public final class NQPLoadbytecodeNode extends NQPStrNode {
 
         DynamicContext context = (DynamicContext) FrameUtil.getObjectSafe(frame, contextSlot);
 
-        (new ByteCodeRunnerGen()).runByteCode(globalContext, context, fileName);
+        (new ByteCodeRunnerGen()).runByteCode(globalContext, threadContext, context, fileName);
 
         return fileName;
     }

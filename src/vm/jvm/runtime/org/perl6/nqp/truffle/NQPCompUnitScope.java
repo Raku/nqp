@@ -74,6 +74,10 @@ public class NQPCompUnitScope extends NQPScope {
         return outer.getGlobalContext();
     }
 
+    @Override
+    public ThreadContext getThreadContext() {
+        return outer.getThreadContext();
+    }
 
     @Override
     public FrameSlot getContextSlot() {

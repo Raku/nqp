@@ -44,6 +44,7 @@ package org.perl6.nqp.truffle.svm;
 import java.io.PrintStream;
 import org.perl6.nqp.truffle.ByteCodeRunnerGen;
 import org.perl6.nqp.truffle.GlobalContext;
+import org.perl6.nqp.truffle.ThreadContext;
 
 public class Truffle6 {
     public static void help(PrintStream stream) {
@@ -59,7 +60,7 @@ public class Truffle6 {
         } else if (args[0] == "--help") {
             help(System.out);
         } else {
-            (new ByteCodeRunnerGen()).runByteCode(new GlobalContext(), args[0]);
+            (new ByteCodeRunnerGen()).runByteCode(new GlobalContext(), new ThreadContext(), args[0]);
         }
     }
 }

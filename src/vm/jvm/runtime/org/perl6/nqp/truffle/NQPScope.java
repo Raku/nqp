@@ -64,4 +64,5 @@ public abstract class NQPScope {
     public abstract void addCuid(String cuid, NQPCodeRef codeRef);
 
     public abstract GlobalContext getGlobalContext();
+    public abstract ThreadContext getThreadContext();
 }

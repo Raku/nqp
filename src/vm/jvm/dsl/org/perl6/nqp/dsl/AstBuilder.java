@@ -19,6 +19,7 @@ public @interface AstBuilder {
     Class hllClass();
     Class contextSlotClass();
     Class globalContextClass();
+    Class threadContextClass();
 
     boolean tastToByteCode();
     boolean tastToNode();

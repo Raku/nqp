@@ -47,6 +47,7 @@ import org.perl6.nqp.dsl.AstBuilder;
     hllClass = HLL.class,
     contextSlotClass = FrameSlot.class,
     globalContextClass = GlobalContext.class,
+    threadContextClass = org.perl6.nqp.truffle.ThreadContext.class,
     tastToByteCode = true,
     tastToNode = true,
     byteCodeToNode = false
@@ -54,7 +55,7 @@ import org.perl6.nqp.dsl.AstBuilder;
 abstract class TruffleCompiler {
     public void run(SixModelObject node, ThreadContext tc) {
         FrameDescriptor frameDescriptor = new FrameDescriptor();
-        RootNode rootNode = new NQPRootNode(null, frameDescriptor, tastToNode(node, new NQPScopeWithFrame(frameDescriptor,  new NQPScopeWithGlobalContext(new GlobalContext())), tc));
+        RootNode rootNode = new NQPRootNode(null, frameDescriptor, tastToNode(node, new NQPScopeWithFrame(frameDescriptor,  new NQPScopeWithGlobalContext(new GlobalContext(), new org.perl6.nqp.truffle.ThreadContext())), tc));
 
 
         CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);

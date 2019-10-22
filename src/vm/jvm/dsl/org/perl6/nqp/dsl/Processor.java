@@ -42,6 +42,7 @@ public class Processor extends AbstractProcessor {
         TypeMirror hllClass;
         TypeMirror contextSlotClass;
         TypeMirror globalContextClass;
+        TypeMirror threadContextClass;
 
         AstTypes(AstBuilder annotation) {
             try {
@@ -109,6 +110,12 @@ public class Processor extends AbstractProcessor {
             } catch (MirroredTypeException e) {
                 globalContextClass = e.getTypeMirror();
             }
+
+            try {
+                annotation.threadContextClass();
+            } catch (MirroredTypeException e) {
+                threadContextClass = e.getTypeMirror();
+            }
         }
     }
 
@@ -172,6 +179,9 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.globalContextClass)) {
                 writer.append("scope.getGlobalContext()");
+                i--;
+            } else if (paramType.equals(astTypes.threadContextClass)) {
+                writer.append("scope.getThreadContext()");
                 i--;
             } else if (global != null) {
                 writer.append("scope.getGlobalContext()." + param.getSimpleName());
@@ -296,6 +306,8 @@ public class Processor extends AbstractProcessor {
                 i--;
             } else if (paramType.equals(astTypes.globalContextClass)) {
                 i--;
+            } else if (paramType.equals(astTypes.threadContextClass)) {
+                i--;
             } else if (global != null) {
                 i--;
             } else {
@@ -342,6 +354,8 @@ public class Processor extends AbstractProcessor {
                 writer.append("scope.getContextSlot()");
             } else if (paramType.equals(astTypes.globalContextClass)) {
                 writer.append("scope.getGlobalContext()");
+            } else if (paramType.equals(astTypes.threadContextClass)) {
+                writer.append("scope.getThreadContext()");
             } else if (global != null) {
                 writer.append("scope.getGlobalContext()." + param.getSimpleName());
             } else {

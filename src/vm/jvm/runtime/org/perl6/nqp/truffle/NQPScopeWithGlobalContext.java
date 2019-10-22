@@ -3,15 +3,18 @@ package org.perl6.nqp.truffle;
 import com.oracle.truffle.api.frame.FrameSlot;
 import java.util.HashMap;
 import org.perl6.nqp.truffle.GlobalContext;
+import org.perl6.nqp.truffle.ThreadContext;
 import com.oracle.truffle.api.frame.FrameSlot;
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.runtime.HLL;
 
 public class NQPScopeWithGlobalContext extends NQPScope {
     GlobalContext globalContext;
+    ThreadContext threadContext;
 
-    public NQPScopeWithGlobalContext(GlobalContext globalContext) {
+    public NQPScopeWithGlobalContext(GlobalContext globalContext, ThreadContext threadContext) {
         this.globalContext = globalContext;
+        this.threadContext = threadContext;
     }
 
     @Override
@@ -19,6 +22,10 @@ public class NQPScopeWithGlobalContext extends NQPScope {
         return globalContext;
     }
 
+    @Override
+    public ThreadContext getThreadContext() {
+        return threadContext;
+    }
 
     @Override
     public HLL getCurrentHLL() {

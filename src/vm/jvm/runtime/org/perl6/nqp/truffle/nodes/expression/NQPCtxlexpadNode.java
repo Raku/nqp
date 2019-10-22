@@ -16,8 +16,7 @@ public final class NQPCtxlexpadNode extends NQPObjNode {
 
     @Override
     public Object execute(VirtualFrame frame) {
-        Object ctx = ctxNode.execute(frame);
-        System.out.println("ctx: " + ctx);
-        return ctx;
+        // TODO - think if we want to do a check here
+        return ctxNode.execute(frame);
     }
 }

@@ -69,6 +69,7 @@ import java.nio.ByteOrder;
     scopeClass = NQPScope.class,
     contextSlotClass = FrameSlot.class,
     globalContextClass = GlobalContext.class,
+    threadContextClass = ThreadContext.class,
     hllClass = HLL.class,
     tastToByteCode = false,
     tastToNode = false,
@@ -85,7 +86,7 @@ abstract class ByteCodeRunner {
         return nodes;
     }
 
-    public void runByteCode(GlobalContext globalContext, DynamicContext context, String input) {
+    public void runByteCode(GlobalContext globalContext, ThreadContext threadContext, DynamicContext context, String input) {
         try {
             FileInputStream stream = new FileInputStream(input);
             FileChannel channel = stream.getChannel();
@@ -104,7 +105,7 @@ abstract class ByteCodeRunner {
             long version = reader.readVersion();
 
             FrameDescriptor frameDescriptor = new FrameDescriptor();
-            RootNode rootNode = new NQPRootNode(null, frameDescriptor, byteCodeToNode(reader, new NQPScopeWithFrame(frameDescriptor, new NQPScopeWithGlobalContext(globalContext))));
+            RootNode rootNode = new NQPRootNode(null, frameDescriptor, byteCodeToNode(reader, new NQPScopeWithFrame(frameDescriptor, new NQPScopeWithGlobalContext(globalContext, threadContext))));
 
             CallTarget callTarget = Truffle.getRuntime().createCallTarget(rootNode);
             callTarget.call(context);

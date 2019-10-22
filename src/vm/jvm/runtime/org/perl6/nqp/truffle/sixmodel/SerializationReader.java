@@ -293,8 +293,6 @@ public class SerializationReader {
                 System.out.println("Missing or wrong version of dependency '" + desc + "' with handle " + handle);
                 //throw new RuntimeException(
                 //    "Missing or wrong version of dependency '" + desc + "'");
-            } else {
-                System.out.println("Found " + desc + ": " +  handle);
             }
             dependentSCs[i] = sc;
         }
