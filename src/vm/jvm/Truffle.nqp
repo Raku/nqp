@@ -145,6 +145,9 @@ class QAST::OperationsTruffle {
 
     add_simple_op('deserialize', $STR, [$STR, $OBJ, $OBJ, $OBJ, $OBJ]);
 
+    add_simple_op('scwbenable', $INT, [], :side_effects);
+    add_simple_op('scwbdisable', $INT, [], :side_effects);
+
     add_op('list_b', sub ($comp, $node, :$want) {
         my @cuids;
         for $node.list -> $block {
