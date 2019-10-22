@@ -943,7 +943,7 @@ while $iter {
 
 Returns the value associated with the given key-value pair.
 
-# <a id="coercion"</a> Coercion opcodes
+# <a id="coercion"></a> Coercion opcodes
 
 coerce_* opcodes do lower level conversion between int, num and str.
 smrt_intify, smrt_numify, smrt_strify respectively try to use the .Int, .Num or .Str method.
