@@ -29,7 +29,8 @@ public final class NQPHash {
     }
 
     public Object bindkey(String key, Object value) {
-        return contents.put(key, value);
+        contents.put(key, value);
+        return value;
     }
 
     public int existskey(String key) {
