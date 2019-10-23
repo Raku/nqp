@@ -1,7 +1,5 @@
 package org.perl6.nqp.truffle.io;
 
-import org.perl6.nqp.runtime.ThreadContext;
-
 public interface IIOSyncReadable {
     public String slurp();
     public String readline();
