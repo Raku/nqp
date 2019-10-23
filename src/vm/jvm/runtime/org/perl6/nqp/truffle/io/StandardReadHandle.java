@@ -10,9 +10,8 @@ import java.nio.charset.Charset;
 import jline.ConsoleReader;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
-import org.perl6.nqp.runtime.ThreadContext;
 
-public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncReadable, IIOInteractive, IIOPossiblyTTY {
+public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncReadable, IIOPossiblyTTY {
     private InputStream is;
     private BufferedReader br;
     private ConsoleReader cr;
@@ -102,21 +101,6 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
             else {
                 return new String(chars, 0, actuallyRead);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public synchronized String readlineInteractive(ThreadContext tc, String prompt) {
-        try {
-            if (cr == null)
-                cr = new ConsoleReader(is, new OutputStreamWriter(tc.gc.out));
-            String line = cr.readLine(prompt);
-            if (line == null) {
-                eof = true;
-                line = "";
-            }
-            return line;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
