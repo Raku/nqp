@@ -172,6 +172,7 @@ class QAST::OperationsTruffle {
 
     add_simple_op('getstdout', $OBJ, [], :side_effects);
     add_simple_op('getstderr', $OBJ, [], :side_effects);
+    add_simple_op('getstdin', $OBJ, [], :side_effects);
 
     add_simple_op('say', $STR, [$STR], :side_effects);
     add_simple_op('print', $STR, [$STR], :side_effects);
