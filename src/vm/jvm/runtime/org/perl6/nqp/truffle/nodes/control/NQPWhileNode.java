@@ -2,7 +2,9 @@ package org.perl6.nqp.truffle.nodes.control;
 
 import org.perl6.nqp.dsl.Deserializer;
 import org.perl6.nqp.truffle.nodes.NQPNode;
-import org.perl6.nqp.truffle.nodes.NQPNodeWithBoolification;
+import org.perl6.nqp.truffle.nodes.NQPBaseNode;
+import org.perl6.nqp.truffle.nodes.NQPToBooleanNode;
+import org.perl6.nqp.truffle.nodes.NQPToBooleanNodeGen;
 
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
@@ -40,20 +42,22 @@ public final class NQPWhileNode extends NQPNode {
         whileNode.executeLoop(frame);
     }
 
-    private static class WhileRepeatingNode extends NQPNodeWithBoolification implements RepeatingNode {
+    private static class WhileRepeatingNode extends NQPBaseNode implements RepeatingNode {
         private boolean isUntil;
         @Child private NQPNode condNode;
         @Child private NQPNode bodyNode;
+        @Child private NQPToBooleanNode toBooleanCast;
 
         public WhileRepeatingNode(boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
             this.isUntil = isUntil;
             this.condNode = condNode;
             this.bodyNode = bodyNode;
+            this.toBooleanCast = NQPToBooleanNodeGen.create();
         }
 
         @Override
         public boolean executeRepeating(VirtualFrame frame) {
-            boolean condResult = toBoolean(condNode.execute(frame));
+            boolean condResult = toBooleanCast.executeBoolean(condNode.execute(frame));
             condResult = isUntil ? !condResult : condResult;
             if (condResult) {
                 bodyNode.executeVoid(frame);
@@ -62,8 +66,5 @@ public final class NQPWhileNode extends NQPNode {
                 return false;
             }
         }
-
-        @Override
-        public void executeVoid(VirtualFrame frame) {}
     }
 }
