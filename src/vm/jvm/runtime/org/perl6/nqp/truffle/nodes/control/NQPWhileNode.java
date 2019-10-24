@@ -56,16 +56,7 @@ public final class NQPWhileNode extends NQPNode {
             boolean condResult = toBoolean(condNode.execute(frame));
             condResult = isUntil ? !condResult : condResult;
             if (condResult) {
-                try {
-                    bodyNode.executeVoid(frame);
-                } catch (ContinueException ex) {
-                    // the body might throw a continue control-flow exception
-                    // continue loop invocation
-                } catch (BreakException ex) {
-                    // the body might throw a break control-flow exception
-                    // break loop invocation by returning false
-                    return false;
-                }
+                bodyNode.executeVoid(frame);
                 return true;
             } else {
                 return false;
@@ -75,9 +66,4 @@ public final class NQPWhileNode extends NQPNode {
         @Override
         public void executeVoid(VirtualFrame frame) {}
     }
-
-    // thrown by guest language continue statements
-    public final class ContinueException extends ControlFlowException {}
-    // thrown by guest language break statements
-    public final class BreakException extends ControlFlowException {}
 }
