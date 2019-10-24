@@ -17,18 +17,31 @@ import com.oracle.truffle.api.nodes.RepeatingNode;
 public final class NQPWhileNode extends NQPNode {
     @Child private LoopNode whileNode;
 
-    public NQPWhileNode(boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
-        whileNode = Truffle.getRuntime().createLoopNode(new WhileRepeatingNode(isUntil, condNode, bodyNode));
+    public NQPWhileNode(boolean doWhile, boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
+        whileNode = Truffle.getRuntime().createLoopNode(
+            doWhile
+            ? new RepeatWhileRepeatingNode(isUntil, condNode, bodyNode)
+            : new WhileRepeatingNode(isUntil, condNode, bodyNode));
     }
 
     @Deserializer("while")
     public static NQPWhileNode createWhile(NQPNode condNode, NQPNode bodyNode) {
-        return new NQPWhileNode(false, condNode, bodyNode);
+        return new NQPWhileNode(false, false, condNode, bodyNode);
     }
 
     @Deserializer("until")
     public static NQPWhileNode createUntil(NQPNode condNode, NQPNode bodyNode) {
-        return new NQPWhileNode(true, condNode, bodyNode);
+        return new NQPWhileNode(false, true, condNode, bodyNode);
+    }
+
+    @Deserializer("repeat_while")
+    public static NQPWhileNode createRepeatWhile(NQPNode condNode, NQPNode bodyNode) {
+        return new NQPWhileNode(true, false, condNode, bodyNode);
+    }
+
+    @Deserializer("repeat_until")
+    public static NQPWhileNode createRepeatUntil(NQPNode condNode, NQPNode bodyNode) {
+        return new NQPWhileNode(true, true, condNode, bodyNode);
     }
 
     @Override
@@ -65,6 +78,27 @@ public final class NQPWhileNode extends NQPNode {
             } else {
                 return false;
             }
+        }
+    }
+
+  private static class RepeatWhileRepeatingNode extends NQPBaseNode implements RepeatingNode {
+        private boolean isUntil;
+        @Child private NQPNode condNode;
+        @Child private NQPNode bodyNode;
+        @Child private NQPToBooleanNode toBooleanCast;
+
+        public RepeatWhileRepeatingNode(boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
+            this.isUntil = isUntil;
+            this.condNode = condNode;
+            this.bodyNode = bodyNode;
+            this.toBooleanCast = NQPToBooleanNodeGen.create();
+        }
+
+        @Override
+        public boolean executeRepeating(VirtualFrame frame) {
+            bodyNode.executeVoid(frame);
+            boolean condResult = toBooleanCast.executeBoolean(condNode.execute(frame));
+            return isUntil ? !condResult : condResult;
         }
     }
 }
