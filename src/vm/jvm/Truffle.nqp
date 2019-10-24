@@ -128,7 +128,7 @@ class QAST::OperationsTruffle {
             return $comp.NYI("3 argument $op") if +@operands == 3 && $op ne 'while';
 
             TAST.new($VOID, [
-                'while',
+                $op,
                 $comp.as_truffle(@operands[0], :want($OBJ)).tree,
                 $comp.as_truffle(@operands[1], :want($VOID)).tree
             ]);

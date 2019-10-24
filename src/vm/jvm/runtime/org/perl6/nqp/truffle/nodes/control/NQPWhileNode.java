@@ -15,9 +15,18 @@ import com.oracle.truffle.api.nodes.RepeatingNode;
 public final class NQPWhileNode extends NQPNode {
     @Child private LoopNode whileNode;
 
+    public NQPWhileNode(boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
+        whileNode = Truffle.getRuntime().createLoopNode(new WhileRepeatingNode(isUntil, condNode, bodyNode));
+    }
+
     @Deserializer("while")
-    public NQPWhileNode(NQPNode condNode, NQPNode bodyNode) {
-        whileNode = Truffle.getRuntime().createLoopNode(new WhileRepeatingNode(condNode, bodyNode));
+    public static NQPWhileNode createWhile(NQPNode condNode, NQPNode bodyNode) {
+        return new NQPWhileNode(false, condNode, bodyNode);
+    }
+
+    @Deserializer("until")
+    public static NQPWhileNode createUntil(NQPNode condNode, NQPNode bodyNode) {
+        return new NQPWhileNode(true, condNode, bodyNode);
     }
 
     @Override
@@ -32,17 +41,21 @@ public final class NQPWhileNode extends NQPNode {
     }
 
     private static class WhileRepeatingNode extends NQPNodeWithBoolification implements RepeatingNode {
+        private boolean isUntil;
         @Child private NQPNode condNode;
         @Child private NQPNode bodyNode;
 
-        public WhileRepeatingNode(NQPNode condNode, NQPNode bodyNode) {
+        public WhileRepeatingNode(boolean isUntil, NQPNode condNode, NQPNode bodyNode) {
+            this.isUntil = isUntil;
             this.condNode = condNode;
             this.bodyNode = bodyNode;
         }
 
         @Override
         public boolean executeRepeating(VirtualFrame frame) {
-            if (toBoolean(condNode.execute(frame))) {
+            boolean condResult = toBoolean(condNode.execute(frame));
+            condResult = isUntil ? !condResult : condResult;
+            if (condResult) {
                 try {
                     bodyNode.executeVoid(frame);
                 } catch (ContinueException ex) {
