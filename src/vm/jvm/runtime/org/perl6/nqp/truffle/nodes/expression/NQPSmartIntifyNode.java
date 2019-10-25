@@ -48,6 +48,7 @@ import org.perl6.nqp.truffle.nodes.NQPNode;
 import org.perl6.nqp.truffle.nodes.NQPIntNode;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
 
 import com.oracle.truffle.api.dsl.Specialization;
 
@@ -62,6 +63,11 @@ public class NQPSmartIntifyNode extends NQPIntNode {
     @Specialization
     protected long doLong(Long value) {
         return (long) value;
+    }
+
+    @Specialization
+    protected long doTypeObject(TypeObject value) {
+        return 0;
     }
 
     @Deserializer("smart-intify")
