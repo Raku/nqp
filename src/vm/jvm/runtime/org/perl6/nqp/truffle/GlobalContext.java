@@ -56,6 +56,7 @@ public class GlobalContext {
     public HashMap<String, HLL> hlls;
     public HashMap<String, SerializationContext> scs;
     public ArrayList<SerializationContext> compilingSCs;
+    public HashMap<String, Object> compilerRegistry;
 
     public TypeObject knowhow;
     public TypeObject knowhowAttribute;
@@ -75,6 +76,7 @@ public class GlobalContext {
         hlls = new HashMap<>();
         scs = new HashMap<>();
         compilingSCs = new ArrayList<>();
+        compilerRegistry = new HashMap<String, Object>();
         Bootstrapper.bootstrap(this);
 
         try {

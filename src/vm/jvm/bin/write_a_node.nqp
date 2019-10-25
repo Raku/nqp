@@ -106,3 +106,6 @@ sub add_simple_op($name, $return_type, $args) {
 
 # Example:
 # add_simple_op('bindpos', $OBJ, [$OBJ, $INT, $OBJ]);
+
+add_simple_op('bindcomp', $OBJ, [$STR, $OBJ], :side_effects);
+add_simple_op('getcomp', $OBJ, [$STR]);
