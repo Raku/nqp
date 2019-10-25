@@ -718,10 +718,10 @@ public class SerializationReader {
         return orig.getLong();
     }
 
-//    public int readInt32() {
-//        return orig.getInt();
-//    }
-//
+    public int readInt32() {
+        return orig.getInt();
+    }
+
 
     public double readDouble() {
         return orig.getDouble();

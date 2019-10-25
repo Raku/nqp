@@ -17,7 +17,6 @@ public class VMArray extends FixedSizeObjectREPR {
 
     @Override
     public Object allocate() {
-        //return new VMArrayInstanceUInt8(stable);
         if (storageSpec == null) {
             return new VMArrayInstance(stable);
         }
@@ -61,13 +60,24 @@ public class VMArray extends FixedSizeObjectREPR {
 
     @Override
     public Object deserializeStub() {
-        System.out.println("NYI deserializing a VMArray");
-        return null;
-        //return new VMArrayInstance(stable);
+        return allocate();
     }
 
     @Override
     public void deserializeFinish(SerializationReader reader, Object obj) {
+        if (storageSpec == null) {
+            VMArrayInstance array = (VMArrayInstance) obj;
+            int elems = reader.readInt32();
+            for (int i = 0; i < elems; i++) {
+                array.bindpos(i, reader.readRef());
+            }
+        }
+        else {
+            switch (storageSpec.boxed_primitive) {
+            default:
+                throw new RuntimeException("Invalid REPR data for VMArray");
+            }
+        }
     }
 
     @Override
