@@ -54,6 +54,7 @@ import org.perl6.nqp.truffle.runtime.Coercions;
 
 import org.perl6.nqp.truffle.runtime.NQPCodeRef;
 import org.perl6.nqp.truffle.sixmodel.reprs.VMArrayInstance;
+import org.perl6.nqp.truffle.sixmodel.TypeObject;
 import org.perl6.nqp.truffle.runtime.NQPNull;
 import org.perl6.nqp.truffle.runtime.NQPHash;
 
@@ -93,6 +94,11 @@ public class NQPSmartNumifyNode extends NQPNumNode {
     @Specialization
     protected double doHash(NQPHash value) {
         return value.elems();
+    }
+
+    @Specialization
+    protected double doTypeObject(TypeObject value) {
+        return 0;
     }
 
     protected double wrongThing(Object value) {
