@@ -52,6 +52,7 @@ public final class NQPCodeRef  {
 
     private MaterializedFrame outer;
 
+    public String name;
 
     public NQPCodeRef(RootNode root, MaterializedFrame outer) {
         this.callTarget = Truffle.getRuntime().createCallTarget(root);

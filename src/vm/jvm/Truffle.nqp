@@ -170,6 +170,9 @@ class QAST::OperationsTruffle {
     add_simple_op('bindcomp', $OBJ, [$STR, $OBJ], :side_effects);
     add_simple_op('getcomp', $OBJ, [$STR]);
 
+    add_simple_op('getcodename', $STR, [$OBJ]);
+    add_simple_op('setcodename', $OBJ, [$OBJ, $STR]);
+
     add_simple_op('loadbytecode', $STR, [$STR]);
     add_simple_op('forceouterctx', $OBJ, [$OBJ, $OBJ]);
 
