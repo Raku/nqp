@@ -14,7 +14,7 @@ import org.perl6.nqp.dsl.Global;
 @NodeInfo(shortName = "bindhllsym")
 public final class NQPBindhllsymNode extends NQPObjNode {
     private final GlobalContext globalContext;
-    public final HashMap<String, HLL> hlls;
+    private final HashMap<String, HLL> hlls;
     @Child private NQPNode hllNameNode;
     @Child private NQPNode symbolNode;
     @Child private NQPNode valueNode;

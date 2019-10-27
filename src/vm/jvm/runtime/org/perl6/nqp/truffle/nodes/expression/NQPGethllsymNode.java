@@ -12,7 +12,7 @@ import org.perl6.nqp.dsl.Global;
 
 @NodeInfo(shortName = "gethllsym")
 public final class NQPGethllsymNode extends NQPObjNode {
-    public final HashMap<String, HLL> hlls;
+    private final HashMap<String, HLL> hlls;
     @Child private NQPNode hllNameNode;
     @Child private NQPNode symbolNode;
 
