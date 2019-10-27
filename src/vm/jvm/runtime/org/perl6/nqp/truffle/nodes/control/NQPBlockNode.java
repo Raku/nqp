@@ -8,7 +8,7 @@ import com.oracle.truffle.api.nodes.RootNode;
 public class NQPBlockNode extends NQPNode {
     private RootNode rootNode;
 
-    public String name = "";
+    public String name;
 
     public NQPBlockNode(RootNode rootNode, String name) {
         this.rootNode = rootNode;
