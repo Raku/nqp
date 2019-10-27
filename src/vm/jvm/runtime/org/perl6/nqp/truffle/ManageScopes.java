@@ -72,32 +72,32 @@ public class ManageScopes {
     }
 
     @Deserializer("block")
-    public static NQPNode createBlock(NQPScope scope, String cuid, NQPNode[] children) {
+    public static NQPNode createBlock(NQPScope scope, String cuid, String name, NQPNode[] children) {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
 
         RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
-        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        NQPCodeRef code = new NQPCodeRef(rootNode, null, name);
         scope.addCuid(cuid, code);
 
         return new NQPBlockNode(
-            new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children))
+            new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children)), name
         );
     }
 
     @Deserializer("block-static")
-    public static NQPNode createStaticBlock(NQPScope scope, String cuid, NQPNode[] children) {
+    public static NQPNode createStaticBlock(NQPScope scope, String cuid, String name, NQPNode[] children) {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
         RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
-        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        NQPCodeRef code = new NQPCodeRef(rootNode, null, name);
         scope.addCuid(cuid, code);
         return new NQPStaticBlockNode(code);
     }
 
     @Deserializer("block-forced-outer")
-    public static NQPNode createForcedOuterBlock(NQPScope scope, String cuid, NQPNode[] children) {
+    public static NQPNode createForcedOuterBlock(NQPScope scope, String cuid, String name, NQPNode[] children) {
         FrameDescriptor frameDescriptor = ((NQPScopeWithFrame) scope).getFrameDescriptor();
         RootNode rootNode = new NQPRootNode(null, frameDescriptor, new NQPBlockBodyNode(children));
-        NQPCodeRef code = new NQPCodeRef(rootNode, null);
+        NQPCodeRef code = new NQPCodeRef(rootNode, null, name);
         scope.addCuid(cuid, code);
         return new NQPForcedOuterBlockNode(code);
     }

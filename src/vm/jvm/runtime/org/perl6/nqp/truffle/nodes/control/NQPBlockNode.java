@@ -8,13 +8,16 @@ import com.oracle.truffle.api.nodes.RootNode;
 public class NQPBlockNode extends NQPNode {
     private RootNode rootNode;
 
-    public NQPBlockNode(RootNode rootNode) {
+    public String name = "";
+
+    public NQPBlockNode(RootNode rootNode, String name) {
         this.rootNode = rootNode;
+        this.name = name;
     }
 
     @Override
     public Object execute(VirtualFrame frame) {
-        return new NQPCodeRef(rootNode, frame.materialize());
+        return new NQPCodeRef(rootNode, frame.materialize(), name);
     }
 
     @Override

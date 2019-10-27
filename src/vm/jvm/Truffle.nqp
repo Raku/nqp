@@ -1129,6 +1129,7 @@ class QAST::TruffleCompiler does SerializeOnce {
             }
 
             @body.push($node.cuid);
+            @body.push($node.name);
 
             my $setup_context := [];
 
