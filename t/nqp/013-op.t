@@ -1,6 +1,6 @@
 # checking basic operands and circumfix:( )
 
-plan(33);
+plan(37);
 
 ##Additive operators
 ok(      1+2  == 3, 'Checking addition 1+2');
@@ -33,6 +33,13 @@ ok( $x++ == 0 );
 ok( $x   == 1 );
 ok( $x-- == 1 );
 ok( $x   == 0 );
+
+##Prefix operators
+my $y := 0;
+ok( ++$y == 1, 'prefix ++ returns right value');
+ok( $y   == 1, 'prefix ++ increments variable');
+ok( --$y == 0, 'prefix -- returns right value');
+ok( $y   == 0, 'prefix -- decrements variable');
 
 ##Relational operators
 ok( ?(1 <  2) );
