@@ -9,8 +9,6 @@ import java.nio.charset.Charset;
 
 import jline.ConsoleReader;
 
-import org.perl6.nqp.runtime.ExceptionHandling;
-
 public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncReadable, IIOPossiblyTTY {
     private InputStream is;
     private BufferedReader br;
