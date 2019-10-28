@@ -570,6 +570,8 @@ class QAST::OperationsTruffle {
     add_simple_op('create', $OBJ, [$OBJ], :side_effects);
     add_simple_op('newtype', $OBJ, [$OBJ, $STR], :side_effects, :decont(0));
 
+    add_simple_op('bindattr', $OBJ, [$OBJ, $OBJ, $STR, $OBJ], :side_effects);
+
     add_simple_op('composetype', $OBJ, [$OBJ, $OBJ], :side_effects);
     add_simple_op('sethllconfig', $OBJ, [$STR, $OBJ], :side_effects);
 
