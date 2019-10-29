@@ -9,6 +9,8 @@ import com.oracle.truffle.api.frame.MaterializedFrame;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.CompilerAsserts;
 
+import com.oracle.truffle.api.CompilerDirectives.TruffleBoundary;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +32,7 @@ public final class NQPArguments {
         arguments[index + RUNTIME_ARGUMENT_COUNT] = value;
     }
 
+    @TruffleBoundary
     public static void setNamedArgument(Object[] arguments, String key, Object value) {
         if (arguments[NAMED_ARGUMENTS_INDEX] == null) {
             arguments[NAMED_ARGUMENTS_INDEX] = new HashMap<String, Object>();
@@ -40,6 +43,8 @@ public final class NQPArguments {
         }
     }
 
+    /* TODO - benchmark if TruffleBoundary should be more precise here */
+    @TruffleBoundary
     public static Object getNamedArgument(Object[] arguments, String key) {
         if (arguments[NAMED_ARGUMENTS_INDEX] == null) {
             return null;
