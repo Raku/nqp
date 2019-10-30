@@ -25,8 +25,6 @@ import com.oracle.truffle.api.dsl.NodeField;
 
 // TODO: take classHandle into account
 public abstract class NQPAttributeGetNode extends NQPObjNode {
-    @Child private NQPNode classHandleNode;
-
     protected abstract String getName();
 
     @Deserializer("attribute-get")
