@@ -23,12 +23,10 @@ public final class NQPWValNode extends NQPObjNode {
         this.index = (int) index;
     }
 
+    /* TODO - throw an exception when we can't find the object */
     /* TODO - do the lookup only once*/
     @Override
     public Object execute(VirtualFrame frame) {
-        if (scs.get(handle) == null) {
-          System.out.println("no sc:" + handle);
-        }
         return scs.get(handle).getObject(index);
     }
 }
