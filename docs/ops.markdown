@@ -362,7 +362,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [atomicstore `moar`](#atomicstore-moar)
   * [atomicstore_i `moar`](#atomicstore_i-moar)
   * [barrierfull `moar`](#barrierfull-moar)
-- [Serialization context]
+- [Serialization context](#-serialization-context)
   * [createsc](#createsc)
   * [scsetdesc](#scsetdesc)
   * [scgetdesc](#scgetdesc)
@@ -3100,7 +3100,7 @@ is, with appropriate barriering to ensure the changed value is "published").
 
 Performs a full memory barrier.
 
-# Serialization context
+# <a id="serialization-context"></a> Serialization context
 Abbreviated as SC.
 You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
 For test examples, see [t/serialization/](https://github.com/perl6/nqp/tree/master/t/serialization)
