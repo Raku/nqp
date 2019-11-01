@@ -15,6 +15,119 @@ my %type_names;
 %type_names{$CALL_ARG} := 'CALL_ARG';
 %type_names{$RETVAL} := 'RETVAL';
 
+# Constant mapping.
+my %const_map;
+%const_map{'CCLASS_ANY'}          := 65535;
+%const_map{'CCLASS_UPPERCASE'}    := 1;
+%const_map{'CCLASS_LOWERCASE'}    := 2;
+%const_map{'CCLASS_ALPHABETIC'}   := 4;
+%const_map{'CCLASS_NUMERIC'}      := 8;
+%const_map{'CCLASS_HEXADECIMAL'}  := 16;
+%const_map{'CCLASS_WHITESPACE'}   := 32;
+%const_map{'CCLASS_PRINTING'}     := 64;
+%const_map{'CCLASS_BLANK'}        := 256;
+%const_map{'CCLASS_CONTROL'}      := 512;
+%const_map{'CCLASS_PUNCTUATION'}  := 1024;
+%const_map{'CCLASS_ALPHANUMERIC'} := 2048;
+%const_map{'CCLASS_NEWLINE'}      := 4096;
+%const_map{'CCLASS_WORD'}         := 8192;
+
+%const_map{'HLL_ROLE_NONE'}       := 0;
+%const_map{'HLL_ROLE_INT'}        := 1;
+%const_map{'HLL_ROLE_NUM'}        := 2;
+%const_map{'HLL_ROLE_STR'}        := 3;
+%const_map{'HLL_ROLE_ARRAY'}      := 4;
+%const_map{'HLL_ROLE_HASH'}       := 5;
+%const_map{'HLL_ROLE_CODE'}       := 6;
+%const_map{'CONTROL_NEXT'}        := 4;
+%const_map{'CONTROL_REDO'}        := 8;
+%const_map{'CONTROL_LAST'}        := 16;
+%const_map{'CONTROL_RETURN'}      := 32;
+%const_map{'CONTROL_TAKE'}        := 128;
+%const_map{'CONTROL_WARN'}        := 256;
+%const_map{'CONTROL_SUCCEED'}     := 512;
+%const_map{'CONTROL_PROCEED'}     := 1024;
+%const_map{'CONTROL_LABELED'}     := 4096;
+%const_map{'CONTROL_AWAIT'}       := 8192;
+%const_map{'CONTROL_EMIT'}        := 16384;
+%const_map{'CONTROL_DONE'}        := 32768;
+
+%const_map{'STAT_EXISTS'}             := 0;
+%const_map{'STAT_FILESIZE'}           := 1;
+%const_map{'STAT_ISDIR'}              := 2;
+%const_map{'STAT_ISREG'}              := 3;
+%const_map{'STAT_ISDEV'}              := 4;
+%const_map{'STAT_CREATETIME'}         := 5;
+%const_map{'STAT_ACCESSTIME'}         := 6;
+%const_map{'STAT_MODIFYTIME'}         := 7;
+%const_map{'STAT_CHANGETIME'}         := 8;
+%const_map{'STAT_BACKUPTIME'}         := 9;
+%const_map{'STAT_UID'}                := 10;
+%const_map{'STAT_GID'}                := 11;
+%const_map{'STAT_ISLNK'}              := 12;
+%const_map{'STAT_PLATFORM_DEV'}       := -1;
+%const_map{'STAT_PLATFORM_INODE'}     := -2;
+%const_map{'STAT_PLATFORM_MODE'}      := -3;
+%const_map{'STAT_PLATFORM_NLINKS'}    := -4;
+%const_map{'STAT_PLATFORM_DEVTYPE'}   := -5;
+%const_map{'STAT_PLATFORM_BLOCKSIZE'} := -6;
+%const_map{'STAT_PLATFORM_BLOCKS'}    := -7;
+
+%const_map{'PIPE_INHERIT_IN'}         := 1;
+%const_map{'PIPE_IGNORE_IN'}          := 2;
+%const_map{'PIPE_CAPTURE_IN'}         := 4;
+%const_map{'PIPE_INHERIT_OUT'}        := 8,
+%const_map{'PIPE_IGNORE_OUT'}         := 16;
+%const_map{'PIPE_CAPTURE_OUT'}        := 32;
+%const_map{'PIPE_INHERIT_ERR'}        := 64;
+%const_map{'PIPE_IGNORE_ERR'}         := 128;
+%const_map{'PIPE_CAPTURE_ERR'}        := 256;
+%const_map{'PIPE_MERGED_OUT_ERR'}     := 512;
+
+    # could probably support a few more...
+%const_map{'SIG_INT'}                 := 2;
+%const_map{'SIG_KILL'}                := 9;
+
+%const_map{'TYPE_CHECK_CACHE_DEFINITIVE'}  := 0;
+%const_map{'TYPE_CHECK_CACHE_THEN_METHOD'} := 1;
+%const_map{'TYPE_CHECK_NEEDS_ACCEPTS'}     := 2;
+
+%const_map{'C_TYPE_CHAR'}             := -1;
+%const_map{'C_TYPE_SHORT'}            := -2;
+%const_map{'C_TYPE_INT'}              := -3;
+%const_map{'C_TYPE_LONG'}             := -4;
+%const_map{'C_TYPE_LONGLONG'}         := -5;
+%const_map{'C_TYPE_SIZE_T'}           := -6;
+%const_map{'C_TYPE_BOOL'}             := -7;
+%const_map{'C_TYPE_ATOMIC_INT'}       := -8;
+%const_map{'C_TYPE_FLOAT'}            := -1;
+%const_map{'C_TYPE_DOUBLE'}           := -2;
+%const_map{'C_TYPE_LONGDOUBLE'}       := -3;
+
+%const_map{'NORMALIZE_NONE'}          := 0;
+%const_map{'NORMALIZE_NFC'}           := 1;
+%const_map{'NORMALIZE_NFD'}           := 2;
+%const_map{'NORMALIZE_NFKC'}          := 3;
+%const_map{'NORMALIZE_NFKD'}          := 4;
+
+%const_map{'RUSAGE_UTIME_SEC'}        := 0;
+%const_map{'RUSAGE_UTIME_MSEC'}       := 1;
+%const_map{'RUSAGE_STIME_SEC'}        := 2;
+%const_map{'RUSAGE_STIME_MSEC'}       := 3;
+%const_map{'RUSAGE_MAXRSS'}           := 4;
+%const_map{'RUSAGE_IXRSS'}            := 5;
+%const_map{'RUSAGE_IDRSS'}            := 6;
+%const_map{'RUSAGE_ISRSS'}            := 7;
+%const_map{'RUSAGE_MINFLT'}           := 8;
+%const_map{'RUSAGE_MAJFLT'}           := 9;
+%const_map{'RUSAGE_NSWAP'}            := 10;
+%const_map{'RUSAGE_INBLOCK'}          := 11;
+%const_map{'RUSAGE_OUBLOCK'}          := 12;
+%const_map{'RUSAGE_MSGSND'}           := 13;
+%const_map{'RUSAGE_MSGRCV'}           := 14;
+%const_map{'RUSAGE_NSIGNALS'}         := 15;
+%const_map{'RUSAGE_NVCSW'}            := 16;
+%const_map{'RUSAGE_NIVCSW'}           := 17;
 
 class TAST {
     has int $!type;
@@ -113,6 +226,14 @@ class QAST::OperationsTruffle {
         }, :$inlinable, :$hll);
     }
 
+    add_op('const', sub ($comp, $node, :$want) {
+        if nqp::existskey(%const_map, $node.name) {
+            $comp.as_truffle(QAST::IVal.new( :value(%const_map{$node.name}) ), :$want)
+        }
+        else {
+            nqp::die("Unknown constant '" ~ $node.name ~ "'");
+        }
+    });
 
     for <while until repeat_while repeat_until> -> $op {
         add_op($op, sub ($comp, $node, :$want) {
