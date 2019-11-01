@@ -6,14 +6,15 @@ my $VOID := -1; # Value of this type shouldn't exist
 my $CALL_ARG := 5; # Something that will be passed to a sub/method call
 my $RETVAL := 8; # Something that will be returned from a sub/method call
 
-my %type_names;
-%type_names{$OBJ} := 'OBJ';
-%type_names{$INT} := 'INT';
-%type_names{$NUM} := 'NUM';
-%type_names{$STR} := 'STR';
-%type_names{$VOID} := 'VOID';
-%type_names{$CALL_ARG} := 'CALL_ARG';
-%type_names{$RETVAL} := 'RETVAL';
+my %type_names := nqp::hash(
+    $OBJ,      'OBJ',
+    $INT,      'INT',
+    $NUM,      'NUM',
+    $STR,     'STR',
+    $VOID,     'VOID',
+    $CALL_ARG, 'CALL_ARG',
+    $RETVAL,   'RETVAL',
+);
 
 # Constant mapping.
 my %const_map := nqp::hash(
