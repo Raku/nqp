@@ -308,6 +308,7 @@ class QAST::OperationsTruffle {
     add_simple_op('print', $STR, [$STR], :side_effects);
 
     add_simple_op('writefh', $INT, [$OBJ, $OBJ]);
+    add_simple_op('open', $OBJ, [$STR, $STR]);
 
     add_simple_op('encode', $OBJ, [$STR, $STR, $OBJ], :side_effects);
 
