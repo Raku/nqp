@@ -199,7 +199,7 @@ class QAST::OperationsTruffle {
         %inlinable{$op} := $inlinable;
     }
 
-    sub add_simple_op($op, $return_type, @argument_types, :$side_effects, :$inlinable = 1, :$decont, :$hll) {
+    sub add_simple_op($op, $return_type, @argument_types, :$inlinable = 1, :$decont, :$hll) {
         my @decont;
         if nqp::islist($decont) {
             for $decont -> $index {
@@ -269,8 +269,8 @@ class QAST::OperationsTruffle {
 
     add_simple_op('deserialize', $STR, [$STR, $OBJ, $OBJ, $OBJ, $OBJ]);
 
-    add_simple_op('scwbenable', $INT, [], :side_effects);
-    add_simple_op('scwbdisable', $INT, [], :side_effects);
+    add_simple_op('scwbenable', $INT, []);
+    add_simple_op('scwbdisable', $INT, []);
 
     add_op('list_b', sub ($comp, $node, :$want) {
         my @cuids;
@@ -291,7 +291,7 @@ class QAST::OperationsTruffle {
     add_simple_op('gethllsym', $OBJ, [$STR, $STR]);
     add_simple_op('bindhllsym', $OBJ, [$STR, $STR, $OBJ]);
 
-    add_simple_op('bindcomp', $OBJ, [$STR, $OBJ], :side_effects);
+    add_simple_op('bindcomp', $OBJ, [$STR, $OBJ]);
     add_simple_op('getcomp', $OBJ, [$STR]);
 
     add_simple_op('getcodename', $STR, [$OBJ]);
@@ -300,17 +300,17 @@ class QAST::OperationsTruffle {
     add_simple_op('loadbytecode', $STR, [$STR]);
     add_simple_op('forceouterctx', $OBJ, [$OBJ, $OBJ]);
 
-    add_simple_op('getstdout', $OBJ, [], :side_effects);
-    add_simple_op('getstderr', $OBJ, [], :side_effects);
-    add_simple_op('getstdin', $OBJ, [], :side_effects);
+    add_simple_op('getstdout', $OBJ, []);
+    add_simple_op('getstderr', $OBJ, []);
+    add_simple_op('getstdin', $OBJ, []);
 
-    add_simple_op('say', $STR, [$STR], :side_effects);
-    add_simple_op('print', $STR, [$STR], :side_effects);
+    add_simple_op('say', $STR, [$STR]);
+    add_simple_op('print', $STR, [$STR]);
 
     add_simple_op('writefh', $INT, [$OBJ, $OBJ]);
     add_simple_op('open', $OBJ, [$STR, $STR]);
 
-    add_simple_op('encode', $OBJ, [$STR, $STR, $OBJ], :side_effects);
+    add_simple_op('encode', $OBJ, [$STR, $STR, $OBJ]);
 
     add_simple_op('null', $OBJ, []);
 
@@ -400,7 +400,7 @@ class QAST::OperationsTruffle {
         add_simple_op('bindpos' ~ $suffix, $type, [$OBJ, $INT, $type]);
 
         add_simple_op('atkey' ~ $suffix, $type, [$OBJ, $STR]);
-        add_simple_op('bindkey' ~ $suffix, $type, [$OBJ, $STR, $type], :side_effects);
+        add_simple_op('bindkey' ~ $suffix, $type, [$OBJ, $STR, $type]);
         add_simple_op('shift' ~ $suffix, $type, [$OBJ]);
         add_simple_op('pop' ~ $suffix, $type, [$OBJ]);
         add_simple_op('unshift' ~ $suffix, $type, [$OBJ, $type]);
@@ -415,11 +415,11 @@ class QAST::OperationsTruffle {
 
     add_simple_op('iterator', $OBJ, [$OBJ]);
 
-    add_simple_op('setinvokespec', $OBJ, [$OBJ, $OBJ, $STR, $OBJ], :side_effects, :decont(0));
-    add_simple_op('setdebugtypename', $OBJ, [$OBJ, $STR], :side_effects);
-    add_simple_op('decoderconfigure', $OBJ, [$OBJ, $STR, $OBJ], :side_effects);
-    add_simple_op('decodersetlineseps', $OBJ, [$OBJ, $OBJ], :side_effects);
-    add_simple_op('settypehllrole', $OBJ, [$OBJ, $INT], :side_effects);
+    add_simple_op('setinvokespec', $OBJ, [$OBJ, $OBJ, $STR, $OBJ], :decont(0));
+    add_simple_op('setdebugtypename', $OBJ, [$OBJ, $STR]);
+    add_simple_op('decoderconfigure', $OBJ, [$OBJ, $STR, $OBJ]);
+    add_simple_op('decodersetlineseps', $OBJ, [$OBJ, $OBJ]);
+    add_simple_op('settypehllrole', $OBJ, [$OBJ, $INT]);
 
     add_op('hash', sub ($comp, $node, :$want) {
         my @tree := ['hash'];
@@ -692,15 +692,15 @@ class QAST::OperationsTruffle {
     add_simple_op('who', $OBJ, [$OBJ], :decont(0));
     add_simple_op('how', $OBJ, [$OBJ], :decont(0));
     add_simple_op('what', $OBJ, [$OBJ], :decont(0));
-    add_simple_op('create', $OBJ, [$OBJ], :side_effects);
-    add_simple_op('newtype', $OBJ, [$OBJ, $STR], :side_effects, :decont(0));
+    add_simple_op('create', $OBJ, [$OBJ]);
+    add_simple_op('newtype', $OBJ, [$OBJ, $STR], :decont(0));
 
-    add_simple_op('bindattr', $OBJ, [$OBJ, $OBJ, $STR, $OBJ], :side_effects);
+    add_simple_op('bindattr', $OBJ, [$OBJ, $OBJ, $STR, $OBJ]);
 
-    add_simple_op('composetype', $OBJ, [$OBJ, $OBJ], :side_effects);
-    add_simple_op('sethllconfig', $OBJ, [$STR, $OBJ], :side_effects);
+    add_simple_op('composetype', $OBJ, [$OBJ, $OBJ]);
+    add_simple_op('sethllconfig', $OBJ, [$STR, $OBJ]);
 
-    add_simple_op('setboolspec', $OBJ, [$OBJ, $INT, $OBJ], :side_effects, :decont(0));
+    add_simple_op('setboolspec', $OBJ, [$OBJ, $INT, $OBJ], :decont(0));
 
     add_simple_op('knowhow', $OBJ, []);
     add_simple_op('knowhowattr', $OBJ, []);
