@@ -272,6 +272,8 @@ class QAST::OperationsTruffle {
     add_simple_op('scwbenable', $INT, []);
     add_simple_op('scwbdisable', $INT, []);
 
+    add_simple_op('setmethcache', $OBJ, [$OBJ, $OBJ], :decont(0));
+
     add_op('list_b', sub ($comp, $node, :$want) {
         my @cuids;
         for $node.list -> $block {
