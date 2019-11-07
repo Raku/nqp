@@ -1,11 +1,11 @@
-## Please see file perltidy.ERR
 package NQP::Config::NQP;
 use v5.10.1;
 use strict;
 use warnings;
 use Cwd;
 use IPC::Cmd qw<run>;
-use NQP::Config qw<slurp read_config_from_command cmp_rev system_or_die run_or_die>;
+use NQP::Config qw<slurp read_config_from_command cmp_rev system_or_die
+  run_or_die>;
 
 use base qw<NQP::Config>;
 
@@ -48,7 +48,7 @@ sub configure_backends {
 }
 
 sub configure_refine_vars {
-    my $self = shift;
+    my $self   = shift;
     my $config = $self->{config};
 
     unless ( $self->cfg('prefix') ) {
@@ -70,8 +70,8 @@ sub configure_refine_vars {
 
     $config->{nqp_home} = $self->nfp(
         File::Spec->rel2abs(
-          $config->{nqp_home} ||
-          File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
+            $config->{nqp_home}
+              || File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
         )
     );
 }
@@ -95,8 +95,8 @@ sub configure_misc {
 }
 
 sub configure_moar_backend {
-    my $self  = shift;
-    my $imoar = $self->{impls}{moar};
+    my $self   = shift;
+    my $imoar  = $self->{impls}{moar};
     my $config = $self->{config};
 
     $self->gen_moar;
@@ -116,14 +116,17 @@ sub configure_moar_backend {
         my $qchar = $config->{quote};
         $imoar->{config}{static_nqp_home} = $config->{nqp_home};
         $imoar->{config}{static_nqp_home_define} =
-          '-DSTATIC_NQP_HOME='
-          . $qchar . $self->c_escape_string( $imoar->{config}{static_nqp_home} ) . $qchar;
+            '-DSTATIC_NQP_HOME='
+          . $qchar
+          . $self->c_escape_string( $imoar->{config}{static_nqp_home} )
+          . $qchar;
     }
 
     # Strip rpath from ldflags so we can set it differently ourself.
     $imoar->{config}{ldflags} = $moar_config->{'moar::ldflags'};
     $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath'}\E ?//;
-    $imoar->{config}{ldflags} =~ s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
+    $imoar->{config}{ldflags} =~
+      s/\Q$moar_config->{'moar::ldrpath_relocatable'}\E ?//;
     if ( $self->cfg('prefix') ne '/usr' ) {
         $imoar->{config}{ldflags} .= ' '
           . (
@@ -146,7 +149,8 @@ sub configure_moar_backend {
         if ( $moar_config->{'moar::os'} eq 'mingw32' ) {
             $imoar->{config}{mingw_unicode} = '-municode';
         }
-        push @c_runner_libs, sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
+        push @c_runner_libs,
+          sprintf( $moar_config->{'moar::ldusr'}, 'Shlwapi' );
     }
     $imoar->{config}{c_runner_libs} = join( " ", @c_runner_libs );
     $imoar->{config}{moar_lib}      = sprintf(
@@ -249,12 +253,12 @@ sub moar_config {
 
     return $moar_config if $moar_config && keys %{$moar_config} > 2;
 
-    my $prefix   = $self->cfg('prefix');
+    my $prefix = $self->cfg('prefix');
     my $moar_prefix;
     my $moar_exe;
 
     if ( $self->opt('with-moar') ) {
-        $moar_exe = File::Spec->rel2abs($self->opt('with-moar'));
+        $moar_exe = File::Spec->rel2abs( $self->opt('with-moar') );
     }
     else {
         if ($prefix) {
@@ -277,13 +281,16 @@ sub moar_config {
     }
 
     my %c;
-    if ( $self->is_executable($self->nfp($moar_exe)) ) {
-        %c = read_config_from_command(
-            '"' . $self->nfp( $moar_exe ) . '"'
-            . ' --libpath=' . $self->nfp( 'src/vm/moar/stage0' ) . ' '
-            . $self->nfp( 'src/vm/moar/stage0/nqp.moarvm' )
-            . ' --bootstrap --show-config' );
-        %c = map { rindex($_, 'moar::', 0) == 0 ? ($_ => $c{$_}) : () } keys %c;
+    if ( $self->is_executable( $self->nfp($moar_exe) ) ) {
+        %c =
+          read_config_from_command( '"'
+              . $self->nfp($moar_exe) . '"'
+              . ' --libpath='
+              . $self->nfp('src/vm/moar/stage0') . ' '
+              . $self->nfp('src/vm/moar/stage0/nqp.moarvm')
+              . ' --bootstrap --show-config' );
+        %c = map { rindex( $_, 'moar::', 0 ) == 0 ? ( $_ => $c{$_} ) : () }
+          keys %c;
     }
 
     return $self->backend_config( 'moar',
@@ -302,10 +309,11 @@ sub gen_moar {
     my $moar_have;
     my @errors;
 
-    my $prefix   = $config->{prefix};
-    my $gen_moar = $options->{'gen-moar'};
-    my $has_gen_moar = defined $gen_moar;
-    my @opts     = @{ $options->{'moar-option'} || [] };
+    my $prefix        = $config->{prefix};
+    my $gen_moar      = $options->{'gen-moar'};
+    my $force_rebuild = $options->{'force-rebuild'};
+    my $has_gen_moar  = defined $gen_moar;
+    my @opts          = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
     push @opts, '--relocatable' if $options->{relocatable};
     my $startdir     = $config->{base_dir};
@@ -313,6 +321,12 @@ sub gen_moar {
     my $try_generate;
     my $moar_exe            = $self->moar_config->{moar};
     my $moar_version_output = "";
+
+    if ( $force_rebuild && !$has_gen_moar ) {
+        $self->note( "WARNING",
+"Command line option --force-rebuild is ineffective without --gen-moar"
+        );
+    }
 
     if ( $self->is_executable($moar_exe) ) {
         $moar_version_output = run_or_die( [ $moar_exe, '--version' ] );
@@ -325,37 +339,42 @@ sub gen_moar {
         $try_generate = $has_gen_moar;
     }
 
-    my $moar_ok =
-      $moar_have && cmp_rev( $moar_have, $moar_want, "MoarVM" ) >= 0;
-    if ($moar_ok) {
-        $self->msg(
-            "Found $moar_exe version $moar_have, which is new enough.\n");
-    }
-    elsif ($moar_have) {
-        push @errors,
-"Found $moar_exe version $moar_have, which is too old. Wanted at least $moar_want\n";
-        $try_generate = $has_gen_moar unless $options->{'ignore-errors'};
-    }
-    elsif ($moar_version_output
-        && $moar_version_output =~ /This is MoarVM version/i )
-    {
-        push @errors,
-          "Found a MoarVM binary but was not able to get its version number.\n"
-          . "If running `git describe` inside the MoarVM repository does not work,\n"
-          . "you need to make sure to checkout tags of the repository and run \nConfigure.pl and make install again\n";
-        $try_generate = $has_gen_moar;
+    unless ($force_rebuild) {
+        my $moar_ok =
+          $moar_have && cmp_rev( $moar_have, $moar_want, "MoarVM" ) >= 0;
+        if ($moar_ok) {
+            $self->msg(
+                "Found $moar_exe version $moar_have, which is new enough.\n");
+        }
+        elsif ($moar_have) {
+            push @errors,
+              "Found $moar_exe version $moar_have, which is too old. "
+              . "Wanted at least $moar_want\n";
+            $try_generate = $has_gen_moar unless $options->{'ignore-errors'};
+        }
+        elsif ($moar_version_output
+            && $moar_version_output =~ /This is MoarVM version/i )
+        {
+            push @errors,
+                "Found a MoarVM binary "
+              . " but was not able to get its version number.\n"
+              . "If running `git describe` inside the MoarVM repository does not work,\n"
+              . "you need to make sure to checkout tags of the repository and run \n"
+              . "Configure.pl and make install again\n";
+            $try_generate = $has_gen_moar;
+        }
     }
 
     if (@errors) {
         if ($try_generate) {
-            $self->note("ATTENTION!", $_) foreach @errors;
+            $self->note( "ATTENTION!", $_ ) foreach @errors;
         }
         else {
             $self->sorry(@errors);
         }
     }
 
-    if ( $try_generate ) {
+    if ( $try_generate || ( $has_gen_moar && $force_rebuild ) ) {
 
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );
