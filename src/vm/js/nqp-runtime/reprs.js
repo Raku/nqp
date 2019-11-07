@@ -699,32 +699,48 @@ class Uninstantiable extends REPR {
 reprs.Uninstantiable = Uninstantiable;
 
 
-const C_TYPE_CHAR = -1;
-const C_TYPE_SHORT = -2;
-const C_TYPE_INT = -3;
-const C_TYPE_LONG = -4;
-const C_TYPE_LONGLONG = -5;
-const C_TYPE_SIZE_T = -6;
-const C_TYPE_BOOL = -7;
-const C_TYPE_ATOMIC_INT = -8;
+const P6INT_C_TYPE_CHAR       = -1;
+const P6INT_C_TYPE_SHORT      = -2;
+const P6INT_C_TYPE_INT        = -3;
+const P6INT_C_TYPE_LONG       = -4;
+const P6INT_C_TYPE_LONGLONG   = -5;
+const P6INT_C_TYPE_SIZE_T     = -6;
+const P6INT_C_TYPE_BOOL       = -7;
+const P6INT_C_TYPE_ATOMIC_INT = -8;
+const P6INT_C_TYPE_WCHAR_T    = -9;
+const P6INT_C_TYPE_WINT_T     = -10;
+const P6INT_C_TYPE_CHAR16_T   = -11;
+const P6INT_C_TYPE_CHAR32_T   = -12;
 
 function cType(ctype) {
   switch (ctype) {
-    case C_TYPE_CHAR:
+    case P6INT_C_TYPE_CHAR:
       return ref.types.char;
-    case C_TYPE_SHORT:
+    case P6INT_C_TYPE_SHORT:
       return ref.types.short;
-    case C_TYPE_ATOMIC_INT:
-    case C_TYPE_INT:
+    case P6INT_C_TYPE_ATOMIC_INT:
+    case P6INT_C_TYPE_INT:
       return ref.types.int;
-    case C_TYPE_LONG:
+    case P6INT_C_TYPE_LONG:
       return ref.types.long;
-    case C_TYPE_LONGLONG:
+    case P6INT_C_TYPE_LONGLONG:
       return ref.types.longlong;
-    case C_TYPE_SIZE_T:
+    case P6INT_C_TYPE_SIZE_T:
       return ref.types.size_t;
-    case C_TYPE_BOOL:
+    case P6INT_C_TYPE_BOOL:
       return ref.types.bool;
+    case P6INT_C_TYPE_WCHAR_T:
+      // XXX: we have no way of telling what type wchar_t actually is without
+      // making changes to ref-napi.
+      return ref.types.int;
+    case P6INT_C_TYPE_WINT_T:
+      // XXX: we have no way of telling what type wint_t actually is without
+      // making changes to ref-napi.
+      return ref.types.int;
+    case P6INT_C_TYPE_CHAR16_T:
+      return ref.types.uint16;
+    case P6INT_C_TYPE_CHAR32_T:
+      return ref.types.uint32;
   }
 }
 
@@ -732,12 +748,13 @@ function cType(ctype) {
 class P6int extends REPR {
   constructor() {
     super();
-    this.bits = 32;
+    this.type       = P6INT_C_TYPE_INT;
+    this.bits       = 32;
     this.isUnsigned = 0;
   }
 
   nativeCallSize() {
-    return this.bits/8;
+    return this.bits / 8;
   }
 
   asRefType() {
@@ -748,7 +765,7 @@ class P6int extends REPR {
     } else if (this.bits === 32) {
       return this.isUnsigned ? ref.types.uint32 : ref.types.int32;
     } else {
-      throw new NQPException(`Unsupported use in lowlevel contex, bits: ${this.bits}`);
+      throw new NQPException(`Unsupported use in lowlevel context, bits: ${this.bits}`);
     }
   }
 
@@ -771,24 +788,40 @@ class P6int extends REPR {
   compose(STable, reprInfoHash) {
     const integer = reprInfoHash.content.get('integer');
     if (integer) {
+      const type = integer.content.get('nativetype');
       const bits = integer.content.get('bits');
-      if (bits === undefined) {
-      } else if (bits instanceof NQPInt) {
-        this.bits = bits.value < 0 ? cType(bits.value).size * 8 : bits.value;
+      if (type === undefined) {
+        if (bits === undefined) {
+          // ...
+        } else if (bits instanceof NQPInt) {
+          this.bits = bits.value;
+          switch (this.bits) {
+            case 8:  this.type = P6INT_C_TYPE_CHAR;     break;
+            case 16: this.type = P6INT_C_TYPE_SHORT;    break;
+            case 32: this.type = P6INT_C_TYPE_INT;      break;
+            case 64: this.type = P6INT_C_TYPE_LONGLONG; break;
+          }
+        } else {
+          throw 'bits to P6int.compose must be a native int';
+        }
+      } else if (type instanceof NQPInt) {
+        this.type = type.value;
+        this.bits = cType(this.type).size * 8;
       } else {
-        throw 'bits to P6int.compose must be a native int';
+        throw 'nativetype to P6int.compose must be a native int';
       }
 
       const unsigned = integer.content.get('unsigned');
-      if (unsigned) {
-        if (unsigned instanceof NQPInt) {
-          this.isUnsigned = unsigned.value;
-        } else {
-          throw 'unsigned to P6int.compose must be a native int';
-        }
+      if (unsigned === undefined) {
+        // ...
+      } else if (unsigned instanceof NQPInt) {
+        this.isUnsigned = unsigned.value;
+      } else {
+        throw 'unsigned to P6int.compose must be a native int';
       }
     }
   }
+}
 
   deserializeFinish(obj, data) {
     // TODO integers bigger than 32bit
@@ -864,12 +897,14 @@ class P6int extends REPR {
   }
 
   serializeReprData(st, cursor) {
+    cursor.varint(this.type);
     cursor.varint(this.bits);
     cursor.varint(this.isUnsigned);
   }
 
   deserializeReprData(cursor, STable) {
-    this.bits = cursor.varint();
+    this.type       = cursor.varint();
+    this.bits       = cursor.varint();
     this.isUnsigned = cursor.varint();
   }
 

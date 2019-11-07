@@ -13,63 +13,86 @@ import org.perl6.nqp.sixmodel.StorageSpec;
 import org.perl6.nqp.sixmodel.TypeObject;
 
 public class P6num extends REPR {
-    /**
-     * Possible C types we can handle.
-     */
-    public final static byte P6NUM_C_TYPE_FLOAT      =  -1;
-    public final static byte P6NUM_C_TYPE_DOUBLE     =  -2;
-    public final static byte P6NUM_C_TYPE_LONGDOUBLE =  -3;
-
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
+
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
 
         StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
+        ss.inlineable      = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_NUM;
-        ss.bits = 64;
-        ss.can_box = StorageSpec.CAN_BOX_NUM;
-        st.REPRData = ss;
+        ss.bits            = Double.SIZE;
+        ss.is_unsigned     = 0;
+        ss.can_box         = StorageSpec.CAN_BOX_NUM;
+
+        P6numREPRData rd = new P6numREPRData();
+        rd.type = REPR.P6NUM_C_TYPE_DOUBLE;
+        rd.bits = Double.SIZE;
+        rd.ss   = ss;
+        st.REPRData = rd;
 
         return st.WHAT;
     }
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        P6numREPRData  rd        = (P6numREPRData) st.REPRData;
         SixModelObject floatInfo = repr_info.at_key_boxed(tc, "float");
+
         if (floatInfo != null) {
-            SixModelObject bits = floatInfo.at_key_boxed(tc, "bits");
-            if (bits != null) {
-                short bitwidth = (short)bits.get_int(tc);
-                switch (bitwidth) {
-                    case P6NUM_C_TYPE_FLOAT:
-                        ((StorageSpec)st.REPRData).bits = Float.SIZE;
+            SixModelObject nativetype = floatInfo.at_key_boxed(tc, "nativetype");
+            SixModelObject bits       = floatInfo.at_key_boxed(tc, "bits");
+            if (nativetype != null) {
+                rd.type = (byte) nativetype.get_int(tc);
+                if (bits != null) {
+                    rd.bits = (short) nativetype.get_int(tc);
+                }
+                else {
+                    switch (rd.type) {
+                        case REPR.P6NUM_C_TYPE_FLOAT:
+                            rd.bits = Float.SIZE;
+                            break;
+                        case REPR.P6NUM_C_TYPE_DOUBLE:
+                            rd.bits = Double.SIZE;
+                            break;
+                        case REPR.P6NUM_C_TYPE_LONGDOUBLE:
+                            /* Java has no LongDouble type. */
+                            rd.bits = Double.SIZE;
+                            break;
+                    }
+                }
+            }
+            else if (bits != null) {
+                rd.bits = (short) bits.get_int(tc);
+                switch (rd.bits) {
+                    case 32:
+                        rd.type = REPR.P6NUM_C_TYPE_FLOAT;
                         break;
-                    case P6NUM_C_TYPE_DOUBLE:
-                        ((StorageSpec)st.REPRData).bits = Double.SIZE;
-                        break;
-                    case P6NUM_C_TYPE_LONGDOUBLE:
-                        /* There is no LongDouble in Java */
-                        ((StorageSpec)st.REPRData).bits = Double.SIZE;
-                        break;
-                    default:
-                        ((StorageSpec)st.REPRData).bits = bitwidth;
+                    case 64:
+                        rd.type = REPR.P6NUM_C_TYPE_DOUBLE;
                         break;
                 }
             }
+            else {
+                rd.type = REPR.P6NUM_C_TYPE_DOUBLE;
+                rd.bits = Double.SIZE;
+            }
+
+            rd.ss.bits = rd.bits;
         }
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
         P6numInstance obj = new P6numInstance();
-        obj.st = st;
+        obj.st    = st;
         obj.value = Double.NaN;
         return obj;
     }
 
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
-        return (StorageSpec)st.REPRData;
+        P6numREPRData rd = (P6numREPRData) st.REPRData;
+        return rd.ss;
     }
 
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
@@ -160,7 +183,9 @@ public class P6num extends REPR {
      */
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
-        writer.writeInt(((StorageSpec)st.REPRData).bits);
+        P6numREPRData rd = (P6numREPRData) st.REPRData;
+        writer.writeInt(rd.type);
+        writer.writeInt(rd.bits);
     }
 
     /**
@@ -169,14 +194,35 @@ public class P6num extends REPR {
      */
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
+        P6numREPRData rd = new P6numREPRData();
+
+        if (reader.version >= 12) {
+            rd.type = (byte)  reader.readLong();
+            rd.bits = (short) reader.readLong();
+        }
+        else if (reader.version >= 7) {
+            rd.bits = (short) reader.readLong();
+            switch (rd.bits) {
+                case 32:
+                    rd.type = REPR.P6NUM_C_TYPE_FLOAT;
+                    break;
+                case 64:
+                    rd.type = REPR.P6NUM_C_TYPE_DOUBLE;
+                    break;
+            }
+        }
+        else {
+            rd.type = REPR.P6NUM_C_TYPE_DOUBLE;
+            rd.bits = Double.SIZE;
+        }
+
         StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
+        ss.inlineable      = StorageSpec.INLINED;
         ss.boxed_primitive = StorageSpec.BP_NUM;
-        if (reader.version >= 7)
-            ss.bits = (short)reader.readLong();
-        else
-            ss.bits = 64;
-        ss.can_box = StorageSpec.CAN_BOX_NUM;
-        st.REPRData = ss;
+        ss.bits            = rd.bits;
+        ss.can_box         = StorageSpec.CAN_BOX_NUM;
+        rd.ss = ss;
+
+        st.REPRData = rd;
     }
 }

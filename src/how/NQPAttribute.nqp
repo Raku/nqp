@@ -2,6 +2,7 @@ knowhow NQPAttribute {
     has $!name;
     has $!type;
     has $!has_type;
+    has $!char_type;
     has $!box_target;
     has $!default;
     has $!has_default;
@@ -16,12 +17,13 @@ knowhow NQPAttribute {
         $attr
     }
 
-    method BUILD(:$name, :$type, :$has_type, :$box_target, :$default, :$has_default) {
-        $!name := $name;
-        $!type := $type;
-        $!has_type := $has_type;
-        $!box_target := $box_target;
-        $!default := $default;
+    method BUILD(:$name, :$type, :$has_type, :$char_type, :$box_target, :$default, :$has_default) {
+        $!name        := $name;
+        $!type        := $type;
+        $!has_type    := $has_type;
+        $!char_type   := $char_type;
+        $!box_target  := $box_target;
+        $!default     := $default;
         $!has_default := $has_default;
     }
 
@@ -31,6 +33,14 @@ knowhow NQPAttribute {
 
     method type() {
         $!has_type ?? $!type !! nqp::null()
+    }
+
+    method set_char_type($char_type) {
+        $!char_type := $char_type;
+    }
+
+    method char_type() {
+        $!char_type
     }
 
     method has_accessor() {

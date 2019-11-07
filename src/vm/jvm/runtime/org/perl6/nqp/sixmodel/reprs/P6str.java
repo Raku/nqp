@@ -1,6 +1,5 @@
 package org.perl6.nqp.sixmodel.reprs;
 
-
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -19,12 +18,30 @@ public class P6str extends REPR {
         SixModelObject obj = new TypeObject();
         obj.st = st;
         st.WHAT = obj;
+
+        P6strREPRData rd = new P6strREPRData();
+        rd.type = REPR.P6STR_C_TYPE_CHAR;
+        st.REPRData = rd;
+
         return st.WHAT;
+    }
+
+    public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
+        P6strREPRData  rd         = (P6strREPRData) st.REPRData;
+        SixModelObject stringInfo = repr_info.at_key_boxed(tc, "string");
+
+        if (stringInfo != null) {
+            SixModelObject nativetype = stringInfo.at_key_boxed(tc, "nativetype");
+            if (nativetype != null)
+                rd.type = (byte) nativetype.get_int(tc);
+            else
+                rd.type = REPR.P6STR_C_TYPE_CHAR;
+        }
     }
 
     public SixModelObject allocate(ThreadContext tc, STable st) {
         P6strInstance obj = new P6strInstance();
-        obj.st = st;
+        obj.st    = st;
         obj.value = "";
         return obj;
     }
@@ -117,5 +134,29 @@ public class P6str extends REPR {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * REPR data serialization. Serializes the per-type representation data that
+     * is attached to the supplied STable.
+     */
+    public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
+        P6strREPRData rd = (P6strREPRData) st.REPRData;
+        writer.writeInt(rd.type);
+    }
+
+    /**
+     * REPR data deserialization. Deserializes the per-type representation data and
+     * attaches it to the supplied STable.
+     */
+    public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader) {
+        P6strREPRData rd = new P6strREPRData();
+
+        if (reader.version >= 12)
+            rd.type = (byte) reader.readLong();
+        else
+            rd.type = REPR.P6STR_C_TYPE_CHAR;
+
+        st.REPRData = rd;
     }
 }

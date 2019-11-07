@@ -14,7 +14,7 @@ import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 
 public class SerializationReader {
     /* The current version of the serialization format. */
-    private final int CURRENT_VERSION = 11;
+    private final int CURRENT_VERSION = 12;
 
     /* The minimum version of the serialization format. */
     private final int MIN_VERSION = 4;

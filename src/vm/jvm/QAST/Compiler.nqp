@@ -2093,17 +2093,27 @@ my %const_map := nqp::hash(
     'TYPE_CHECK_CACHE_THEN_METHOD', 1,
     'TYPE_CHECK_NEEDS_ACCEPTS',     2,
 
-    'C_TYPE_CHAR',              -1,
-    'C_TYPE_SHORT',             -2,
-    'C_TYPE_INT',               -3,
-    'C_TYPE_LONG',              -4,
-    'C_TYPE_LONGLONG',          -5,
-    'C_TYPE_SIZE_T',            -6,
-    'C_TYPE_BOOL',              -7,
-    'C_TYPE_ATOMIC_INT',        -8,
-    'C_TYPE_FLOAT',             -1,
-    'C_TYPE_DOUBLE',            -2,
-    'C_TYPE_LONGDOUBLE',        -3,
+    'P6INT_C_TYPE_CHAR',        -1,
+    'P6INT_C_TYPE_SHORT',       -2,
+    'P6INT_C_TYPE_INT',         -3,
+    'P6INT_C_TYPE_LONG',        -4,
+    'P6INT_C_TYPE_LONGLONG',    -5,
+    'P6INT_C_TYPE_BOOL',        -6,
+    'P6INT_C_TYPE_SIZE_T',      -7,
+    'P6INT_C_TYPE_ATOMIC_INT',  -8,
+    'P6INT_C_TYPE_WCHAR_T',     -9,
+    'P6INT_C_TYPE_WINT_T',      -10,
+    'P6INT_C_TYPE_CHAR16_T',    -11,
+    'P6INT_C_TYPE_CHAR32_T',    -12,
+
+    'P6NUM_C_TYPE_FLOAT',       -32,
+    'P6NUM_C_TYPE_DOUBLE',      -33,
+    'P6NUM_C_TYPE_LONGDOUBLE',  -34,
+
+    'P6STR_C_TYPE_CHAR',        -64,
+    'P6STR_C_TYPE_WCHAR_T',     -65,
+    'P6STR_C_TYPE_CHAR16_T',    -66,
+    'P6STR_C_TYPE_CHAR32_T',    -67,
 
     'NORMALIZE_NONE',            0,
     'NORMALIZE_NFC',             1,
@@ -2930,6 +2940,8 @@ QAST::OperationsJAST.map_classlib_core_op('nativecallrefresh', $TYPE_NATIVE_OPS,
 QAST::OperationsJAST.map_classlib_core_op('nativecallsizeof', $TYPE_NATIVE_OPS, 'nativecallsizeof', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallcast', $TYPE_NATIVE_OPS, 'nativecallcast', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nativecallglobal', $TYPE_NATIVE_OPS, 'nativecallglobal', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('iswcharunsigned', $TYPE_NATIVE_OPS, 'iswcharunsigned', [], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iswintunsigned', $TYPE_NATIVE_OPS, 'iswintunsigned', [], $RT_INT);
 
 QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
     $qastcomp.as_jast(QAST::Op.new(

@@ -2885,6 +2885,14 @@ following structure (times are in microseconds, sizes are in bytes):
 ## nativecallrefresh
 Refresh the C-based data backing the Perl 6 object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Perl 6 object.
 
+## iswcharunsigned
+
+Returns 1 if wchar_t is unsigned, otherwise returns 0.
+
+## iswintunsigned
+
+Returns 1 if wint_t is unsigned, otherwise returns 0.
+
 # <a id="async"></a> Asynchronous Operations
 
 The various asynchronous operations, such as timers and asynchronous I/O, take
