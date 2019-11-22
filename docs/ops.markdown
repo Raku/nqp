@@ -2247,6 +2247,16 @@ will be achieved via:
 
     $lang.language('My::Lang');
 
+## call
+* `call()`
+
+This method is not documented yet.
+
+Example:
+
+    nqp::call(nqp::getlexcaller('&say'), 'foo')
+
+
 ## callmethod
 * `callmethod(Mu $obj, str $methodname, *@pos, *%named --> Mu)`
 
