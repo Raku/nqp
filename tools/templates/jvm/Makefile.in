@@ -54,49 +54,49 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
 @bpm(STAGE0_DIR)@: @bsm(RUNTIME)@
 
 @backend_prefix@-dirs::
-	@noecho@$(MKPATH) @q(@bpm(RUNNER_JAR_DIR)@)@ @q(@bpm(RUNNER_LIB_DIR)@)@
+	$(NOECHO)$(MKPATH) @q(@bpm(RUNNER_JAR_DIR)@)@ @q(@bpm(RUNNER_LIB_DIR)@)@
 
 @backend_prefix@-install::
 	@echo(+++ Installing @uc(@backend@)@ specifics)@
-	@noecho@$(CP) @q($(ASM))@ @q($(ASMTREE))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
-	@noecho@$(CP) @q($(JLINE))@ @q($(JNA))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
-	@noecho@$(CP) @q(@bsm(RUNTIME)@)@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
-	@noecho@$(CP) @q(@bpm(EVAL_CLIENT)@)@ @q($(DESTDIR)$(BIN_DIR))@
-	@noecho@$(CHMOD) 0755 @nfpq($(DESTDIR)$(BIN_DIR)/eval-client.pl)@
-	@noecho@$(CONFIGURE) --expand=nqp-j --out=@nfpq($(DESTIR)$(PREFIX)/bin/@bpm(BUILD_RUNNER)@)@ \
+	$(NOECHO)$(CP) @q($(ASM))@ @q($(ASMTREE))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+	$(NOECHO)$(CP) @q($(JLINE))@ @q($(JNA))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+	$(NOECHO)$(CP) @q(@bsm(RUNTIME)@)@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+	$(NOECHO)$(CP) @q(@bpm(EVAL_CLIENT)@)@ @q($(DESTDIR)$(BIN_DIR))@
+	$(NOECHO)$(CHMOD) 0755 @nfpq($(DESTDIR)$(BIN_DIR)/eval-client.pl)@
+	$(NOECHO)$(CONFIGURE) --expand=nqp-j --out=@nfpq($(DESTIR)$(PREFIX)/bin/@bpm(BUILD_RUNNER)@)@ \
 				 --set-var=ctx_subdir=@shquot(@backend_subdir@)@ \
 				 --set-var=jar_dir=@q($(DESTIR@nop())@@bsm(NQP_LIB_DIR)@)@ \
 				 --set-var=lib_dir=@q($(DESTIR)$(NQP_LIB_DIR))@ \
 				 --set-var=cur_dir=@q()@
-	@noecho@$(CHMOD) 755 @nfpq($(DESTIR)$(PREFIX)/bin/@bpm(BUILD_RUNNER)@)@
+	$(NOECHO)$(CHMOD) 755 @nfpq($(DESTIR)$(PREFIX)/bin/@bpm(BUILD_RUNNER)@)@
 
 @bsm(RUNTIME)@: $(RUNTIME_JAVAS) @mkquot(@script(gen-jvm-properties.pl)@)@
 	@echo(+++ Preparing Java runtime)@
-	@noecho@$(MKPATH) bin
-	@noecho@$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
-	@noecho@$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
-	@noecho@$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
-	@noecho@$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
+	$(NOECHO)$(MKPATH) bin
+	$(NOECHO)$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
+	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
+	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
+	$(NOECHO)$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
 
 @bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @@template(runner-prelude)@@
 	@echo(+++ Setting up	$@)@
-	@noecho@$(CP) @bpm(RUNNER_JARS)@ @q(@bpm(RUNNER_JAR_DIR)@)@
-	@noecho@$(CP) @bpm(RUNNER_LIBS)@ @q(@bpm(RUNNER_LIB_DIR)@)@
-	@noecho@$(CONFIGURE) --expand=nqp-j --out=@nfpq($(BASE_DIR)/@bpm(BUILD_RUNNER)@)@ \
+	$(NOECHO)$(CP) @bpm(RUNNER_JARS)@ @q(@bpm(RUNNER_JAR_DIR)@)@
+	$(NOECHO)$(CP) @bpm(RUNNER_LIBS)@ @q(@bpm(RUNNER_LIB_DIR)@)@
+	$(NOECHO)$(CONFIGURE) --expand=nqp-j --out=@nfpq($(BASE_DIR)/@bpm(BUILD_RUNNER)@)@ \
 				 --set-var=ctx_subdir=@q(@backend_subdir@)@ \
 				 --set-var=jar_dir=@q(@bpm(RUNNER_JAR_DIR)@)@ \
 				 --set-var=lib_dir=@q(@bpm(RUNNER_LIB_DIR)@)@ \
 				 --set-var=cur_dir=@q(.:)@
-	@noecho@$(CHMOD) 755 @q(@bpm(BUILD_RUNNER)@)@
+	$(NOECHO)$(CHMOD) 755 @q(@bpm(BUILD_RUNNER)@)@
 
 @backend_prefix@-runner-default: @backend_prefix@-all
 	@echo(+++ Setting up default runner)@
-	@noecho@$(CP) @q(@bpm(BUILD_RUNNER)@)@ @bpm(NQP)@
-	@noecho@$(CHMOD) 755 @bpm(NQP)@
+	$(NOECHO)$(CP) @q(@bpm(BUILD_RUNNER)@)@ @bpm(NQP)@
+	$(NOECHO)$(CHMOD) 755 @bpm(NQP)@
 
 @backend_prefix@-runner-default-install: @backend_prefix@-runner-default @backend_prefix@-install
 	@echo(+++ Installing default runner)@
-	@noecho@$(CP) @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(BUILD_RUNNER)@)@ @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP)@)@
-	@noecho@$(CHMOD) 755 @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP)@)@
+	$(NOECHO)$(CP) @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(BUILD_RUNNER)@)@ @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP)@)@
+	$(NOECHO)$(CHMOD) 755 @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP)@)@
 
 # vim: ft=make noexpandtab ts=4 sw=4
