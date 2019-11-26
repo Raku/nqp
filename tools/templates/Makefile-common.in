@@ -1,5 +1,6 @@
 # common definitions used by all backends
 
+@NOECHO_declaration@
 COMMON_HLL_SOURCES = \
   @nfp(src/HLL/Grammar.nqp)@ \
   @nfp(src/HLL/Actions.nqp)@ \

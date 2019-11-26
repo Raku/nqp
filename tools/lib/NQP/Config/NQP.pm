@@ -78,6 +78,7 @@ sub configure_refine_vars {
 
 sub configure_misc {
     my $self   = shift;
+    $self->SUPER::configure_misc(@_);
     my $config = $self->{config};
 
     if ( $self->active_backend('moar') ) {
@@ -376,6 +377,13 @@ sub gen_moar {
 
     if ( $try_generate || ( $has_gen_moar && $force_rebuild ) ) {
 
+        # Don't expect any particular commit in MoarVM/ if the repo is already
+        # checked out.
+        my $expected_spec =
+          -d File::Spec->catdir( $self->cfg('base_dir'), 'MoarVM', '.git' )
+          ? undef
+          : $moar_want;
+
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );
 
@@ -470,7 +478,7 @@ sub _m_stage_gencat {
     return $self->expand(<<TPL);
 $text
 \t\@echo(+++ Generating\t\$\@)@
-\t\@noecho\@\@bpm(\@ucstage\@_GEN_CAT)\@ \@prereqs\@ > \$\@
+\t\$(NOECHO)\@bpm(\@ucstage\@_GEN_CAT)\@ \@prereqs\@ > \$\@
 TPL
 }
 
@@ -484,7 +492,7 @@ sub _m_stage_precomp {
     return $self->expand(<<TPL);
 $text
 \t\@echo(+++ Compiling\t\$\@)@
-\t\@noecho\@\@bpm(STAGE\@prev_stage\@_NQP)\@\@expand(\@setting_path_param\@\@module_path_param\@)\@ --no-regex-lib --target=\@btarget\@ --setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
+\t\$(NOECHO)\@bpm(STAGE\@prev_stage\@_NQP)\@\@expand(\@setting_path_param\@\@module_path_param\@)\@ --no-regex-lib --target=\@btarget\@ --setting=\@nqp_setting\@ \@bpm(PRECOMP_\@ucstage\@_FLAGS)\@ --output=\$\@ \@prereqs\@
 TPL
 }
 

@@ -55,7 +55,7 @@
 
 @backend_prefix@-dirs::
 	@echo(+++ Preparing @uc(@backend@)@ build directories)@
-	@noecho@$(MKPATH)@for_stages( @stage_dir@)@
+	$(NOECHO)$(MKPATH)@for_stages( @stage_dir@)@
 
 @backend_prefix@-stage0::
 	@echo(++++++ BUILDING @uc(@backend@)@ BACKEND)@
@@ -120,21 +120,21 @@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @prev_stage_dir@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
-	@noecho@$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
-	@noecho@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
-	@noecho@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
+	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
+	$(NOECHO@nop())@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
+	$(NOECHO@nop())@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
 	    --setting=NQPCORE --target=@btarget@ --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ @bpm(NQP_@ucstage@_FLAGS)@ \
 	    --output=@nfpq(@stage_dir@/@bsm(NQP)@)@ @nfpq(@stage_dir@/$(NQP_COMBINED))@
 )@
 
 @bsm(NQP)@: @backend_prefix@-stage2 #@bpm(STAGE2_OUTPUT)@
 	@echo(+++ Installing @uc(@backend@)@ stage 2 files locally)@
-	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ .
+	$(NOECHO)$(CP) @bpm(STAGE2_OUTPUT)@ .
 
 @bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bsm(NQP)@ @bpm(BUILD_RUNNER)@
 	@echo(+++ Compiling	$@)@
-	@noecho@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
-	@noecho@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
+	$(NOECHO@nop())@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
+	$(NOECHO@nop())@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
 	    @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
 
 @bpv(CLEANUPS)@ = \
@@ -148,22 +148,22 @@
 
 @backend_prefix@-clean::
 	@echo(+++ Cleaning @uc(@backend@)@ backend)@
-	@noecho@$(RM_RF) @bpm(CLEANUPS)@ @bpm(CLEANUPS_EXTRA)@
+	$(NOECHO)$(RM_RF) @bpm(CLEANUPS)@ @bpm(CLEANUPS_EXTRA)@
 
 @backend_prefix@-install-dirs::
 	@echo(+++ Creating @uc(@backend@)@ installation directories)@
-	@noecho@$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
-	@noecho@$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
-	@noecho@$(MKPATH) @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+	$(NOECHO)$(MKPATH) @q($(DESTDIR)$(BIN_DIR))@
+	$(NOECHO)$(MKPATH) @q($(DESTDIR)$(NQP_LIB_DIR))@
+	$(NOECHO)$(MKPATH) @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
 
 @backend_prefix@-install:: @backend_prefix@-all @backend_prefix@-install-dirs @@configure_script@@
 	@echo(+++ Installing into $(DESTDIR)$(PREFIX))@
-	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
-	@noecho@$(CP) @bsm(P5QREGEX)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
+	$(NOECHO)$(CP) @bpm(STAGE2_OUTPUT)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
+	$(NOECHO)$(CP) @bsm(P5QREGEX)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
 
 @backend_prefix@-bootstrap-files: @bpm(STAGE2_OUTPUT)@
 	@echo(+++ BOOTSTRAPPING into @bpm(STAGE0_DIR)@)@
-	@noecho@$(CP) @bpm(STAGE2_OUTPUT)@ @bpm(STAGE0_DIR)@
+	$(NOECHO)$(CP) @bpm(STAGE2_OUTPUT)@ @bpm(STAGE0_DIR)@
 
 ## testing
 
