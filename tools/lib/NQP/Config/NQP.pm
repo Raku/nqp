@@ -377,6 +377,13 @@ sub gen_moar {
 
     if ( $try_generate || ( $has_gen_moar && $force_rebuild ) ) {
 
+        # Don't expect any particular commit in MoarVM/ if the repo is already
+        # checked out.
+        my $expected_spec =
+          -d File::Spec->catdir( $self->cfg('base_dir'), 'MoarVM', '.git' )
+          ? undef
+          : $moar_want;
+
         my $moar_repo =
           $self->git_checkout( 'moar', 'MoarVM', $gen_moar || $moar_want );
 
