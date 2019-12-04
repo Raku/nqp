@@ -4096,8 +4096,8 @@ public final class Ops {
         }
 
         ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
-        if ((flags & 0x02) != 0 && (ch == '+' || ch == '-')) {
-            neg = (ch == '-');
+        if ((flags & 0x02) != 0 && (ch == '+' || ch == '-' || ch == '−')) {
+            neg = (ch == '-' || ch == '−');
             zpos++;
             ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
         }
@@ -7281,8 +7281,8 @@ public final class Ops {
         }
 
         ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
-        if ((flags & 0x02) != 0 && (ch == '+' || ch == '-')) {
-            neg = (ch == '-');
+        if ((flags & 0x02) != 0 && (ch == '+' || ch == '-' || ch == '−')) {
+            neg = (ch == '-' || ch == '−');
             zpos++;
             ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
         }
