@@ -1,4 +1,4 @@
-plan(33*(6 + 3) + 3 + 7);
+plan(36*(6 + 3) + 3 + 7);
 
 sub test_radix($radix,$str,$pos,$flags,$value,$mult,$offset,$desc) {
     my $result := nqp::radix($radix,$str,$pos,$flags);
@@ -30,6 +30,7 @@ sub test_radix_both(*@args) {
 test_radix_both(10,"123",0,2,  123,1000,3, "base-10 radix call with no flags" );
 test_radix_both(10,"+123",0,2,  123,1000,4, "base-10 radix call with flag 2 and +" );
 test_radix_both(10,"-123",0,2,  -123,1000,4, "base-10 radix call with flag 2 and -" );
+test_radix_both(10,"−123",0,2,  -123,1000,4, "base-10 radix call with flag 2 and −" );
 test_radix_both(10,"-10",0,0,  0,1,-1,  "no digits consumed when we get - without flag");
 test_radix_both(10,"+10",0,0,  0,1,-1,  "no digits consumed when we get + without flag");
 
@@ -37,7 +38,8 @@ test_radix_both(10, "123", 0, 1, -123, 1000, 3, "base-10 radix with flag 1");
 
 test_radix_both(10, "12000", 0, 4, 12, 100, 5, "base-10 radix with flags 4");
 test_radix_both(10, "12000", 0, 5, -12, 100, 5, "base-10 radix with flags 4 and 1");
-test_radix_both(10, "-12000", 0, 6, -12, 100, 6, "base-10 radix with flags 4 and 2");
+test_radix_both(10, "-12000", 0, 6, -12, 100, 6, "base-10 radix with flags 4 and 2 with -");
+test_radix_both(10, "−12000", 0, 6, -12, 100, 6, "base-10 radix with flags 4 and 2 with −");
 
 test_radix_both(10,"123",0,2,  123,1000,3,  "basic base-10 radix call");
 test_radix_both(10,"123",1,2,  23,100,3, "basic base-10 radix call with pos" );
@@ -46,7 +48,8 @@ test_radix_both(15,"1a",0,2,  25,225,2, "base 15 call with lower case" );
 test_radix_both(15,"1B",0,2,  26,225,2, "base 15 call with upper case" );
 test_radix_both(16,"1a",0,2,  26,256,2, "base 16 call with lower case" );
 test_radix_both(16,"1B",0,2,  27,256,2, "base 16 call with upper case" );
-test_radix_both(15,"-1B",0,2,  -26,225,3, "base 15 call with upper case and negation" );
+test_radix_both(15,"-1B",0,2,  -26,225,3, "base 15 call with upper case and negation with -" );
+test_radix_both(15,"−1B",0,2,  -26,225,3, "base 15 call with upper case and negation with −" );
 test_radix_both(10,"000123",0,2,  123,1000000,6,  "base-10 with zeros at the front");
 test_radix_both(10,"1_2_3",0,2,  123,1000,5,  "base-10 with underscores");
 test_radix_both(10,"not_a_number",0,2,  0,1,-1,  "no digits consumed");
