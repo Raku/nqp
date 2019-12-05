@@ -109,7 +109,7 @@ function radixHelper(radix, str, zpos, flags) {
   const letters = radix >= 11 ? lowercase + uppercase + uppercaseTitle + lowercaseTitle : '';
 
   const digitClass = '[\\pN' + letters + ']';
-  const minus = flags & 0x02 ? '(?:-?|\\+?)' : '';
+  const minus = flags & 0x02 ? '(?:-|\\+|−)?' : '';
   const regex = xregexp(
       '^' + minus + digitClass + '(?:_' + digitClass + '|' + digitClass + ')*');
 
@@ -125,6 +125,7 @@ function radixHelper(radix, str, zpos, flags) {
 
   let error;
   number = number.replace(notSimpleDigit, function(match, offset, string) {
+    if (match == '−') return '-';
     const code = match.codePointAt(0);
     const propValueId = numericTypeData.get(code);
 
