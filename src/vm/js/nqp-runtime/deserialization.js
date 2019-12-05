@@ -540,7 +540,7 @@ class BinaryCursor {
 
     this.sc = sc;
 
-    if (version != 21) {
+    if (version != 22) {
       throw 'Unsupported serialization format version: ' + version;
     }
 
