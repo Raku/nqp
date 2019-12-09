@@ -237,6 +237,19 @@ sub configure_jvm_backend {
     $j_config->{'runner'} = $self->batch_file('nqp');
 }
 
+sub configure_jars {
+    my $self    = shift;
+
+    $self->SUPER::configure_jars(
+        {
+            asm => [qw<3rdparty asm asm-4.1.jar>],
+            'asm-tree' => [qw<3rdparty asm asm-tree-4.1.jar>],
+            jline => [qw<3rdparty jline jline-1.0.jar>],
+            jna => [qw<3rdparty jna jna-4.0.0.jar>],
+        }
+    );
+}
+
 sub post_active_backends {
     my $self = shift;
 
