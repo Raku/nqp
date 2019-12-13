@@ -25,7 +25,7 @@ RUNTIME_JAVAS = \
 
 @bsv(RUNTIME)@ = nqp-runtime.@bext@
 THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
-@bpv(RUNNER_JARS)@ = @nfplq(nqp-runtime.@bext@ $(ASM) $(ASMTREE) $(JLINE) $(JNA))@
+@bpv(RUNNER_JARS)@ = @nfplq($(ASM) $(ASMTREE) $(JLINE) $(JNA))@
 @bpv(RUNNER_LIBS)@ = @nfplq(nqp.@bext@)@
 @bpv(EVAL_CLIENT)@ = @nfp(tools/jvm/eval-client.pl)@
 
