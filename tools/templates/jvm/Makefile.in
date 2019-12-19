@@ -23,14 +23,14 @@ RUNTIME_JAVAS = \
   @nfp(src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java)@ \
   @nfp(src/vm/jvm/runtime/org/perl6/nqp/tools/*.java)@ \
 
-@bsv(RUNTIME)@ = nqp-runtime.@bext@
+@bsv(RUNTIME)@ = @nfp(@bpm(RUNNER_JAR_DIR)@/nqp-runtime.@bext@)@
 THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
 @bpv(RUNNER_JARS)@ = @nfplq($(ASM) $(ASMTREE) $(JLINE) $(JNA))@
 @bpv(RUNNER_LIBS)@ = @nfplq(nqp.@bext@)@
 @bpv(EVAL_CLIENT)@ = @nfp(tools/jvm/eval-client.pl)@
 
-@bpv(STAGE0_NQP)@ = $(JAVA) -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@nqp-runtime.jar@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
-@bpv(STAGE1_NQP)@ = $(JAVA) -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@nqp-runtime.jar@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE0_NQP)@ = $(JAVA) -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE1_NQP)@ = $(JAVA) -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
 
 @for_stages(@bpv(@ucstage@_GEN_CAT)@ = @bpm(GEN_CAT)@ @lcstage@
 @bpv(NQP_@ucstage@_FLAGS)@ = --javaclass=nqp
@@ -76,7 +76,7 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
 	$(NOECHO)$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
 	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
 	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
-	$(NOECHO)$(JAR) cf0 nqp-runtime.jar -C @nfp(bin/)@ .
+	$(NOECHO)$(JAR) cf0 @bsm(RUNTIME)@ -C @nfp(bin/)@ .
 
 @bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @@template(runner-prelude)@@
 	@echo(+++ Setting up	$@)@
