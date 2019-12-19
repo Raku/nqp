@@ -2,4 +2,4 @@
 
 @insert(runner-prelude)@
 
-@exec(java)@ -Xss1m -Xmx1324m -Xbootclasspath/a:"@cur_dir@@envvar(LIB_DIR)@@cpsep@@nfp(./nqp-runtime.jar)@@cpsep@@nfp(@envvar(JAR_DIR)@/@asmfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jlinefile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnafile@)@@cpsep@@nfp(@envvar(LIB_DIR)@/nqp.jar)@" -cp "@cur_dir@@envvar(LIB_DIR)@" nqp "@sh_allparams@"
+@exec(java)@ -Xss1m -Xmx1324m -Xbootclasspath/a:"@cur_dir@@envvar(LIB_DIR)@@cpsep@@nfp(@envvar(JAR_DIR)@/nqp-runtime.jar)@@cpsep@@nfp(@envvar(JAR_DIR)@/@asmfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jlinefile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnafile@)@@cpsep@@nfp(@envvar(LIB_DIR)@/nqp.jar)@" -cp "@cur_dir@@envvar(LIB_DIR)@" nqp "@sh_allparams@"
