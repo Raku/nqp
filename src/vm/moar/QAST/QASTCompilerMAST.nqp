@@ -2145,11 +2145,13 @@ class MoarVM::Callsites {
     has %!callsites;
     has $!string-heap;
     has $!done;
+    has $!latin1decoder;
     method BUILD(:$string-heap) {
-        $!string-heap := $string-heap;
-        $!callsites   := MAST::Bytecode.new;
-        %!callsites   := nqp::hash;
-        $!done        := 0;
+        $!string-heap   := $string-heap;
+        $!callsites     := MAST::Bytecode.new;
+        %!callsites     := nqp::hash;
+        $!done          := 0;
+        $!latin1decoder := NQPDecoder.new('iso-8859-1');
     }
 
     my $callsite_arg_named := 32;
@@ -2205,7 +2207,6 @@ class MoarVM::Callsites {
     my int $flatnamed := $Arg::flatnamed;
     my int $flat      := $Arg::flat;
     my int $named     := $Arg::named;
-    my $latin1decoder := NQPDecoder.new('iso-8859-1');
     method get_callsite_id_from_args(@args, @arg_mast) {
         nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@args);
@@ -2236,8 +2237,8 @@ class MoarVM::Callsites {
             $i++;
         }
 
-        $latin1decoder.add-bytes($identifier); # just turn the buf into a str without real interpretation
-        my str $identifier_s := $latin1decoder.consume-all-chars;
+        $!latin1decoder.add-bytes($identifier); # just turn the buf into a str without real interpretation
+        my str $identifier_s := $!latin1decoder.consume-all-chars;
         if nqp::existskey(%!callsites, $identifier_s) {
             return %!callsites{$identifier_s};
         }
