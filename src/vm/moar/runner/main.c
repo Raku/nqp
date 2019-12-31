@@ -158,10 +158,12 @@ int wmain(int argc, wchar_t *wargv[])
 
           char   *nqp_home;
           size_t  nqp_home_size;
+#ifndef STATIC_NQP_HOME
     const char    nqp_rel_path[14]    = "/../share/nqp";
     const size_t  nqp_rel_path_size   = 13;
     const char    nqp_check_path[28]  = "/lib/NQPCORE.setting.moarvm";
     const size_t  nqp_check_path_size = 27;
+#endif
 
     char *lib_path[1];
     char *nqp_file;
