@@ -152,9 +152,11 @@ int wmain(int argc, wchar_t *wargv[])
     int     res;
 #endif
 
-    char   *exec_dir_path;
     char   *exec_dir_path_temp;
+#ifndef STATIC_NQP_HOME
+    char   *exec_dir_path;
     size_t  exec_dir_path_size;
+#endif
 
           char   *nqp_home;
           size_t  nqp_home_size;
@@ -273,6 +275,12 @@ int wmain(int argc, wchar_t *wargv[])
     /* The +1 is the trailing \0 terminating the string. */
     exec_dir_path_temp = (char*)malloc(exec_path_size + 1);
     memcpy(exec_dir_path_temp, exec_path, exec_path_size + 1);
+
+    /* Retrieve NQP_HOME. */
+
+#ifdef STATIC_NQP_HOME
+    nqp_home = STRINGIFY(STATIC_NQP_HOME);
+#else
 #ifdef _WIN32
     PathRemoveFileSpecA(exec_dir_path_temp);
     exec_dir_path_size = strlen(exec_dir_path_temp);
@@ -282,12 +290,6 @@ int wmain(int argc, wchar_t *wargv[])
     exec_dir_path      = dirname(exec_dir_path_temp);
     exec_dir_path_size = strlen(exec_dir_path);
 #endif
-
-    /* Retrieve NQP_HOME. */
-
-#ifdef STATIC_NQP_HOME
-    nqp_home = STRINGIFY(STATIC_NQP_HOME);
-#else
     if (!retrieve_home(&nqp_home, nqp_rel_path, nqp_rel_path_size, "NQP_HOME",
             exec_dir_path, exec_dir_path_size, nqp_check_path, nqp_check_path_size)) {
         fprintf(stderr, "ERROR: NQP_HOME is invalid: %s\n", nqp_home);
