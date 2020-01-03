@@ -46,7 +46,8 @@ grammar HLL::Grammar {
 #?endif
     ;
 
-    method perl() { self.HOW.name(self) ~ '.new() #`[' ~ nqp::where(self) ~ ']' }
+    method perl() { self.raku }
+    method raku() { self.HOW.name(self) ~ '.new() #`[' ~ nqp::where(self) ~ ']' }
 
     method throw_unrecog_backslash_seq ($sequence) {
         self.panic("Unrecognized backslash sequence: '\\" ~ $sequence ~ "'");
