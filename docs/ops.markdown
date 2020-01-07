@@ -2570,19 +2570,19 @@ Not actually an opcode, but a collection of several constants. Each of the
 constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
 
     * CCLASS_ANY
-    * CCLASS_UPPERCASE
-    * CCLASS_LOWERCASE
-    * CCLASS_ALPHABETIC
-    * CCLASS_NUMERIC
+    * CCLASS_UPPERCASE Lu
+    * CCLASS_LOWERCASE Ll
+    * CCLASS_ALPHABETIC Lo | Ll | Lu | Lt | Lm
+    * CCLASS_NUMERIC Nd
     * CCLASS_HEXADECIMAL
-    * CCLASS_WHITESPACE
-    * CCLASS_PRINTING
-    * CCLASS_BLANK
-    * CCLASS_CONTROL
+    * CCLASS_WHITESPACE (9..13,32,133,160,5760,8192..8202,8232,8233,8239,8287,12228)
+    * CCLASS_PRINTING !(0..31, 127..159)
+    * CCLASS_BLANK Zs
+    * CCLASS_CONTROL (0..31, 127..159)
     * CCLASS_PUNCTUATION
-    * CCLASS_ALPHANUMERIC
-    * CCLASS_NEWLINE
-    * CCLASS_WORD
+    * CCLASS_ALPHANUMERIC Lo | Ll | Lu | Lt | Lm | Nd
+    * CCLASS_NEWLINE Zl Zp
+    * CCLASS_WORD Lo | Ll | Lu | Lt | Lm | Nd + "_"
 
     * HLL_ROLE_NONE
     * HLL_ROLE_INT
