@@ -203,8 +203,8 @@ is(nqp::base_I(box(-25), 15), '-1A', 'base_I with base 15 for -25');
 
 is(nqp::base_I(nqp::fromstr_I('3126485650003097871900151124153820550731463512387701580', $bi_type), 36), '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0', 'base_I with base 36 using all possible digits');
 
-is(str(nqp::expmod_I(box(42), box(-42), box(42), $bi_type)), '0', 'nqp::expmod with negative exponent');
-is(str(nqp::expmod_I(box(-42), box(-42), box(42), $bi_type)), '0', 'nqp::expmod with negative exponent');
+is(str(nqp::expmod_I(box(3), box(-4), box(4), $bi_type)), '1', 'nqp::expmod with negative exponent');
+is(str(nqp::expmod_I(box(-3), box(-4), box(4), $bi_type)), '1', 'nqp::expmod with negative exponent');
 
 ok(str(nqp::expmod_I(
     nqp::fromstr_I('2988348162058574136915891421498819466320163312926952423791023078876139', $bi_type),
