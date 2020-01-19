@@ -7177,9 +7177,7 @@ public final class Ops {
         BigInteger base = getBI(tc, a, type);
         BigInteger exponent = getBI(tc, b, type);
         BigInteger modulus = getBI(tc, c, type);
-        BigInteger result = exponent.compareTo(BigInteger.ZERO) == -1 && !base.equals(BigInteger.ONE)
-            ? BigInteger.ZERO
-            : base.modPow(exponent, modulus);
+        BigInteger result = base.modPow(exponent, modulus);
         return makeBI(tc, type, result);
     }
 
