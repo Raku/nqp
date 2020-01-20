@@ -37,6 +37,10 @@ knowhow NQPAttribute {
         0
     }
 
+    method is_bound() {
+        0
+    }
+
     method has_accessor() {
         0
     }
