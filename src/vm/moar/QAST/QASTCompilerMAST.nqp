@@ -2409,7 +2409,7 @@ class MoarVM::BytecodeWriter {
 
         my uint32 $offset := $header_size;
         $!mbc.write_s("MOARVM\r\n");
-        $!mbc.write_uint32(6); # Version
+        $!mbc.write_uint32(7); # Version
 
         $!mbc.write_uint32($offset); # Offset of SC dependencies table
         $!mbc.write_uint32(nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
@@ -2505,13 +2505,64 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32(0); # No SC object index
         }
         $!mbc.write_uint32(nqp::elems($f.debug_map));
-        for @local_types {
-            $!mbc.write_uint16(type_to_local_type($_));
+
+        if nqp::elems(@local_types) > 0 {
+            # "compression" for local types: since object registers (8) are so
+            # common, drop as many as possible from start and end, then record
+            # how many entries are left. They may contain more 8s in the middle,
+            # but this is an effective compromise compared to a full RLE
+            my @other := nqp::clone(@local_types);
+
+            my $offset := 0;
+            my $actualcount := nqp::elems(@other);
+
+            while nqp::elems(@other) > 0 && type_to_local_type(@other[0]) == 8 {
+                nqp::shift(@other);
+                $offset := $offset + 1;
+                $actualcount--;
+            }
+            while nqp::elems(@other) > 0 && type_to_local_type(@other[nqp::elems(@other) - 1]) == 8 {
+                nqp::pop(@other);
+                $actualcount--;
+            }
+
+            $!mbc.write_uint16($offset);
+            $!mbc.write_uint16($actualcount);
+
+            for @other {
+                my int $type := type_to_local_type($_);
+                $!mbc.write_uint16($type);
+            }
         }
+
         my int $i := 0;
-        for @lexical_types {
-            $!mbc.write_uint16(type_to_local_type($_));
-            $!mbc.write_uint32(nqp::atpos_i(@lexical_names, $i++));
+
+        if nqp::elems(@lexical_types) > 0 {
+            my @other := nqp::clone(@lexical_types);
+
+            my $offset := 0;
+            my $actualcount := nqp::elems(@other);
+
+            while nqp::elems(@other) > 0 && type_to_local_type(@other[0]) == 8 {
+                nqp::shift(@other);
+                $offset := $offset + 1;
+                $actualcount--;
+            }
+            while nqp::elems(@other) > 0 && type_to_local_type(@other[nqp::elems(@other) - 1]) == 8 {
+                nqp::pop(@other);
+                $actualcount--;
+            }
+
+            $!mbc.write_uint16($offset);
+            $!mbc.write_uint16($actualcount);
+
+            for @lexical_types -> $t {
+                $!mbc.write_uint32(nqp::atpos_i(@lexical_names, $i++));
+            }
+            for @other {
+                my $localtype := type_to_local_type($_);
+                $!mbc.write_uint16($localtype);
+            }
         }
         for @handlers {
             $!mbc.write_uint32($_.start_offset);
