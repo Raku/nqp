@@ -11,6 +11,8 @@ class QAST::Block is QAST::Node does QAST::Children {
     has %!symbol;
     has %!local_debug_map;
 
+    my $knowhow := nqp::knowhow().new_type(:repr("P6bigint"));
+
     method new(str :$name, str :$blocktype, *@children, *%options) {
         my $node := nqp::create(self);
         nqp::bindattr_i($node, QAST::Node, '$!flags', 0);
@@ -44,7 +46,12 @@ class QAST::Block is QAST::Node does QAST::Children {
     method cuid($value = NO_VALUE) {
         if !($value =:= NO_VALUE) {
             # Set ID if we are provided one.
-            $!cuid := $value;
+            if nqp::isint($value) {
+                $!cuid := nqp::base_I(nqp::box_i($value, $knowhow), 36);
+            }
+            else {
+                $!cuid := $value;
+            }
         }
         elsif $!cuid {
             # If we already have an ID, return it.
@@ -53,7 +60,7 @@ class QAST::Block is QAST::Node does QAST::Children {
         else {
             # Otherwise, generate one.
             $cur_cuid := $cur_cuid + 1;
-            $!cuid := ~$cur_cuid;
+            $!cuid := nqp::base_I(nqp::box_i($cur_cuid, $knowhow), 36);
         }
     }
 
