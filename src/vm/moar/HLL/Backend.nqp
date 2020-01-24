@@ -162,7 +162,7 @@ class HLL::Backend::MoarVM {
             $conf-hash := nqp::hash('kind', $kind);
         }
 
-        my @END := nqp::gethllsym('perl6', '@END_PHASERS');
+        my @END := nqp::gethllsym('Raku', '@END_PHASERS');
         @END.push(-> { self.dump_profile_data($prof_end_sub(), $kind, $filename) })
             if nqp::defined(@END);
 

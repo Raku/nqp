@@ -481,7 +481,7 @@ exports.createIntArray = require('./BOOT.js').createIntArray;
 
 const containerSpecs = require('./container-specs.js');
 exports.extraRuntime = function(lang, path) {
-  if (lang != 'perl6') throw 'only loading extra runtime for perl 6 is supported';
+  if (lang != 'Raku') throw 'only loading extra runtime for Raku is supported';
   const runtime = typeof path === 'string' ? require(path) : path.require(lang + '-runtime');
   if (!runtime.loaded) {
     runtime.loaded = true;

@@ -291,7 +291,7 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
         return 0 if $var.scope eq 'local';
 
-        if $*HLL eq 'perl6' { # To make binding of signatures work
+        if $*HLL eq 'Raku' { # To make binding of signatures work
             return 1;
         }
 

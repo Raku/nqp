@@ -629,11 +629,11 @@ function fromJSToReturnValue(ctx, obj) {
 exports.fromJSToReturnValue = fromJSToReturnValue;
 
 function fromJSToArgument(obj) {
-  return fromJS(hll.getHLL('perl6'), obj, false, true);
+  return fromJS(hll.getHLL('Raku'), obj, false, true);
 }
 
 function fromJSToObject(ctx, obj) {
-  return fromJS(hll.getHLL('perl6'), obj, false, false);
+  return fromJS(hll.getHLL('Raku'), obj, false, false);
 }
 
 function fromJS(HLL, obj, isReturnValue, isArgument) {
@@ -1016,7 +1016,7 @@ const fakePerl6 = new FakePerl6();
 op.getcomp = function(language) {
   const compilerRegistry = globalContext.context.compilerRegistry;
 
-  if (language === 'perl6' && !compilerRegistry.has(language)) {
+  if (language === 'Raku' && !compilerRegistry.has(language)) {
     return fakePerl6;
   }
 
