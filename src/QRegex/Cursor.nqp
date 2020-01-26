@@ -33,7 +33,7 @@ my class Braid is export {
 
     method !braid_init(:$grammar, :$actions, :$package, *%ignore) {
         my $new := nqp::create(self);
-        nqp::bindattr($new, Braid, '$!actions', $grammar);
+        nqp::bindattr($new, Braid, '$!grammar', $grammar);
         nqp::bindattr($new, Braid, '$!actions', $actions);
         nqp::bindattr($new, Braid, '$!package', $package);
         nqp::bindattr($new, Braid, '$!slangs', nqp::hash());
