@@ -197,7 +197,8 @@ public final class IOOps {
         AsyncServerSocketHandle handle = new AsyncServerSocketHandle(tc);
         task.handle = handle;
 
-        handle.bind(tc, host, (int) port, (int) backlog);
+        handle.bind(tc, host, (int) port);
+        handle.listen(tc, (int) backlog);
         handle.accept(tc, task);
 
         return task;

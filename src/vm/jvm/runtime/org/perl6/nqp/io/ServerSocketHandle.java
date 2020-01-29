@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.UnresolvedAddressException;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.ThreadContext;
 
-public class ServerSocketHandle implements IIOBindable, IIOClosable {
+public class ServerSocketHandle implements IIOBindable, IIOListenable, IIOClosable {
 
+    InetSocketAddress addr;
     ServerSocketChannel listenChan;
     public int listenPort;
 
@@ -17,13 +19,24 @@ public class ServerSocketHandle implements IIOBindable, IIOClosable {
         try {
             listenChan = ServerSocketChannel.open();
         } catch (IOException e) {
-            ExceptionHandling.dieInternal(tc, e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
     }
 
-    public void bind(ThreadContext tc, String host, int port, int backlog) {
+    @Override
+    public void bind(ThreadContext tc, String host, int port) {
+        // XXX FIXME: This isn't handling DNS properly now that address
+        // families are given to the bindsock op.
+        addr = new InetSocketAddress(host, port);
+        if (addr.isUnresolved())
+            throw ExceptionHandling.dieInternal(tc, "Failed to resolve hostname");
+    }
+
+    @Override
+    public void listen(ThreadContext tc, int backlog) {
+        if (addr == null)
+            throw ExceptionHandling.dieInternal(tc, "Socket must be bound before it can be listened on");
         try {
-            InetSocketAddress addr = new InetSocketAddress(host, port);
             listenChan.bind(addr, backlog);
             listenPort = listenChan.socket().getLocalPort();
         } catch (IOException e) {
@@ -40,6 +53,7 @@ public class ServerSocketHandle implements IIOBindable, IIOClosable {
         }
     }
 
+    @Override
     public void close(ThreadContext tc) {
         try {
             listenChan.close();

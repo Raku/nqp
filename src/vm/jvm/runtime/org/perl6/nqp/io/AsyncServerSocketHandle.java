@@ -17,25 +17,32 @@ import org.perl6.nqp.sixmodel.reprs.AsyncTaskInstance;
 import org.perl6.nqp.sixmodel.reprs.ConcBlockingQueueInstance;
 import org.perl6.nqp.sixmodel.reprs.IOHandleInstance;
 
-public class AsyncServerSocketHandle implements IIOBindable, IIOCancelable {
+public class AsyncServerSocketHandle implements IIOBindable, IIOListenable, IIOCancelable {
 
     AsynchronousServerSocketChannel listenChan;
+    InetSocketAddress addr;
 
     public AsyncServerSocketHandle(ThreadContext tc) {
         try {
             listenChan = AsynchronousServerSocketChannel.open();
         } catch (IOException e) {
-            ExceptionHandling.dieInternal(tc, e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
     }
 
     @Override
-    public void bind(ThreadContext tc, String host, int port, int backlog) {
+    public void bind(ThreadContext tc, String host, int port) {
+        addr = new InetSocketAddress(host, port);
+        if (addr.isUnresolved())
+            throw ExceptionHandling.dieInternal(tc, "Failed to resolve host name");
+    }
+
+    @Override
+    public void listen(ThreadContext tc, int backlog) {
+        if (addr == null)
+            throw ExceptionHandling.dieInternal(tc, "Socket must be bound before it can be listened on");
         try {
-            InetSocketAddress addr = new InetSocketAddress(host, port);
             listenChan.bind(addr, backlog);
-        } catch (UnresolvedAddressException uae) {
-            ExceptionHandling.dieInternal(tc, "Failed to resolve host name");
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }

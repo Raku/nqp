@@ -66,6 +66,7 @@ import org.perl6.nqp.io.IIOEncodable;
 import org.perl6.nqp.io.IIOExitable;
 import org.perl6.nqp.io.IIOInteractive;
 import org.perl6.nqp.io.IIOLineSeparable;
+import org.perl6.nqp.io.IIOListenable;
 import org.perl6.nqp.io.IIOLockable;
 import org.perl6.nqp.io.IIOSeekable;
 import org.perl6.nqp.io.IIOSyncReadable;
@@ -469,7 +470,7 @@ public final class Ops {
         return obj;
     }
 
-    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long family, long backlog, ThreadContext tc) {
+    public static SixModelObject bindsock(SixModelObject obj, String host, long port, long family, ThreadContext tc) {
         IOHandleInstance h = (IOHandleInstance)obj;
 
 		switch ((int) family) {
@@ -477,7 +478,7 @@ public final class Ops {
 			case SOCKET_FAMILY_INET:
 			case SOCKET_FAMILY_INET6:
 				if (h.handle instanceof IIOBindable) {
-					((IIOBindable)h.handle).bind(tc, host, (int) port, (int) backlog);
+					((IIOBindable)h.handle).bind(tc, host, (int) port);
 				} else {
 					ExceptionHandling.dieInternal(tc,
 						"This handle does not support bind");
@@ -493,6 +494,17 @@ public final class Ops {
 				break;
 		}
 
+        return obj;
+    }
+
+    public static SixModelObject listen(SixModelObject obj, long backlog, ThreadContext tc) {
+        IOHandleInstance h = (IOHandleInstance)obj;
+        if (h.handle instanceof IIOListenable) {
+            ((IIOListenable)h.handle).listen(tc, (int) backlog);
+        } else {
+            ExceptionHandling.dieInternal(tc,
+                "This handle does not support listen");
+        }
         return obj;
     }
 
