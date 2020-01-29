@@ -675,11 +675,7 @@ role NQPMatchRole is export {
         # Evaluate the alternation.
         nqp::ifnull(
           self.HOW.cache_get(self, $name),
-          nqp::stmts(
-            (my $nfa := self.'!alt_nfa'($!regexsub, $name)),
-            self.HOW.cache_add(self, $name, $nfa),
-            $nfa
-          )
+          self.HOW.cache_add(self, $name, self.'!alt_nfa'($!regexsub, $name))
         ).run_alt(nqp::getattr_s($shared, ParseShared, '$!target'), $pos, $!bstack, $!cstack, @labels);
     }
 
