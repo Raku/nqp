@@ -580,7 +580,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             else {
                 $loc := nqp::index(%*RX<name>, ':');
                 my $angleloc := nqp::index(%*RX<name>, '<', $loc);
-		$angleloc := nqp::index(%*RX<name>, '«', $loc) if $angleloc < 0;
+                $angleloc := nqp::index(%*RX<name>, '«', $loc) if $angleloc < 0;
                 $rxname := nqp::substr(%*RX<name>, $loc + 1, $angleloc - $loc - 1) unless $loc < 0;
             }
             if $loc >= 0 {
