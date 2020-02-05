@@ -453,7 +453,7 @@ class QAST::MASTRegexCompiler {
     method cclass($node) {
         my $subtype := $node.name;
         my $cclass := %cclass_code{ $subtype };
-        self.panic("Unrecognized subtype '$subtype' in QAST::Regex cclass")
+        nqp::die("Unrecognized subtype '$subtype' in QAST::Regex cclass")
             unless $cclass;
 
         my $itmp := $!regalloc.fresh_i();
