@@ -552,8 +552,10 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method assertion:sym<method>($/) {
         my $qast := $<assertion>.ast;
-        $qast.subtype('method');
-        $qast.name('');
+        if $qast.rxtype eq 'subrule' {
+            $qast.subtype('method');
+            $qast.name('');
+        }
         make $qast;
     }
 
