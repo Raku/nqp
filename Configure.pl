@@ -55,7 +55,7 @@ MAIN: {
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
         'relocatable!',     'silent-build!',
-        'force-rebuild!'
+        'force-rebuild!',   'git-reference=s'
       )
       or do {
         print_help();
@@ -70,6 +70,12 @@ MAIN: {
     if ( $cfg->opt('ignore-errors') ) {
         print
 "===WARNING!===\nErrors are being ignored.\nIn the case of any errors the script may behave unexpectedly.\n";
+    }
+
+    if ( $cfg->opt('git-reference') ) {
+        print "==WARNING!===\n";
+        print "The --git-reference option does not exist anymore.\n";
+        print "Consider using --git-cache-dir instead.\n";
     }
 
     $cfg->configure_paths;
