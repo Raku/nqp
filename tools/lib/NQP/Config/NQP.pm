@@ -330,6 +330,9 @@ sub gen_moar {
     my @opts          = @{ $options->{'moar-option'} || [] };
     push @opts, "--optimize";
     push @opts, '--relocatable' if $options->{relocatable};
+    push @opts,
+        '--git-cache-dir=' . File::Spec->rel2abs($options->{'git-cache-dir'})
+        if $options->{'git-cache-dir'};
     my $startdir     = $config->{base_dir};
     my $git_protocol = $options->{'git-protocol'} || 'https';
     my $try_generate;

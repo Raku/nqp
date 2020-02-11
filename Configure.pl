@@ -6,43 +6,22 @@ use strict;
 use warnings;
 use Text::ParseWords;
 use Getopt::Long;
-use Cwd qw/abs_path cwd/;
+use Cwd;
 use File::Spec;
 use File::Path;
 use FindBin;
 
 BEGIN {
-    if ( -d '.git' ) {
-        my $set_config = !qx{git config nqp.initialized};
-        if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
-            print "Updating nqp-configure submodule...\n";
-            my $msg =
-qx{git submodule sync --quiet 3rdparty/nqp-configure && git submodule --quiet update --init 3rdparty/nqp-configure 2>&1};
-            if ( $? >> 8 == 0 ) {
-                say "OK";
-                $set_config = 1;
-            }
-            else {
-                if ( $msg =~
-                    /[']([^']+)[']\s+already exists and is not an empty/ )
-                {
-                    print "\n===SORRY=== ERROR: "
-                      . "Cannot update submodule because directory exists and is not empty.\n"
-                      . ">>> Please delete the following folder and try again:\n$1\n\n";
-                    exit 1;
-                }
-                else {
-                    print "\n===SORRY=== ERROR: "
-                      . "Updating the submodule failed for an unknown reason. The error message was:\n"
-                      . $msg;
-                    exit 1;
-                }
-            }
-        }
-        if ($set_config) {
-            system("git config submodule.recurse true");
-            system("git config nqp.initialized 1");
-        }
+    # Download / Update submodules
+    my $set_config = !qx{git config nqp.initialized};
+    if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
+        my $code = system($^X, 'tools/build/update-submodules.pl', Cwd::cwd(), @ARGV);
+        exit 1 if $code >> 8 != 0;
+        $set_config = 1;
+    }
+    if ($set_config) {
+        system("git config submodule.recurse true");
+        system("git config nqp.initialized 1");
     }
 }
 
@@ -71,7 +50,7 @@ MAIN: {
         'with-jna=s',       'make-install!',
         'makefile-timing!', 'git-protocol=s',
         'ignore-errors!',   'link',
-        'git-depth=s',      'git-reference=s',
+        'git-depth=s',      'git-cache-dir=s',
         'github-user=s',    'nqp-repo=s',
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
@@ -155,7 +134,8 @@ General Options:
     --sysroot=dir      When given, use for searching runtime components here
     --nqp-home=dir     Directory to install NQP files to
     --backends=list    Backends to use: $backends
-    --gen-moar         Download, build, and install a copy of MoarVM to use before writing the Makefile
+    --gen-moar         Download, build, and install a copy of MoarVM to use
+                       before writing the Makefile
     --force-rebuild    Forces rebuild of moar if used with --gen-moar
     --moar-option='--option=value'
                        Options to pass to MoarVM configuration for --gen-moar
@@ -171,21 +151,23 @@ General Options:
                        this github user. Note that the user must have all
                        required repos forked from the originals.
     --nqp-repo=<url>
-    --moar-repo=<url>
-                       User-defined URL to fetch corresponding components
+    --moar-repo=<url>  User-defined URL to fetch corresponding components
                        from. The URL will also be used to setup git push.
     --git-protocol={ssh,https,git}
                        Protocol to use for git clone. Default: https
     --make-install     Immediately run `MAKE install` after configuring
     --git-depth=<number>
-                       Use the --git-depth option for git clone with parameter number
-    --git-reference=<path>
-                       Use --git-reference option to identify local path where git repositories are stored
-                       For example: --git-reference=/home/user/repo/for_perl6
-                       Folders 'nqp', 'MoarVM' with corresponding git repos should be in for_perl6 folder
-    --ignore-errors
-                       Can ignore errors such as what version MoarVM or the JVM is. May not work for other
-                       errors currently.
+                       Use the --git-depth option for git clone with parameter
+                       number
+    --git-cache-dir=<path>
+                       Use the given path as a git repository cache.
+                       For example: --git-cache-dir=/home/user/git_cache_dir
+                       Each repository ('nqp' and its submodules) will use a
+                       separate subfolder.
+                       If the subfolder does not exist, it will be cloned. If
+                       it exists the contained repository will be updated.
+    --ignore-errors    Can ignore errors such as what version MoarVM or the JVM
+                       is. May not work for other errors currently.
     --expand=<template>
                        Expand template file. With this option Makefile is not
                        generated. The result is send to stdout unless --out
