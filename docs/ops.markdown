@@ -103,6 +103,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [codes](#codes)
   * [concat](#concat)
   * [decode](#decode)
+  * [decodelocaltime](#decodelocaltime)
   * [decodetocodes `moar`](#decodetocodes-moar)
   * [encode](#encode)
   * [encodefromcodes `moar`](#encodefromcodes-moar)
@@ -1010,6 +1011,12 @@ Return a string that is the concatenation of the two passed in strings.
 
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
+
+## decodelocaltime
+* `decodelocaltime(int $epoch --> int @tm)`
+
+Returns an integer array with localtime information, formatted like the
+`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
 
 ## decodetocodes `moar`
 * `decodetocodes($buffer, str $encoding, int $normalization, $codes)`
