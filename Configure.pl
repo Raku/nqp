@@ -55,7 +55,7 @@ MAIN: {
         'moar-repo=s',      'expand=s',
         'out=s',            'set-var=s@',
         'relocatable!',     'silent-build!',
-        'force-rebuild!'
+        'force-rebuild!',   'git-reference=s'
       )
       or do {
         print_help();
