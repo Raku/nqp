@@ -510,7 +510,7 @@ An operator precedence parser.
                         @opstack[nqp::elems(@opstack)-1]<OPER>.Str,
                         $infix.Str());
                 }
-                elsif $inassoc eq 'left' {
+                elsif $inassoc eq 'left' || $inassoc eq 'chain' {
                     # left associative, reduce immediately
                     self.EXPR_reduce(@termstack, @opstack);
                 }
