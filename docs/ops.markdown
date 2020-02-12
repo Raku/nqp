@@ -103,7 +103,6 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [codes](#codes)
   * [concat](#concat)
   * [decode](#decode)
-  * [decodelocaltime](#decodelocaltime)
   * [decodetocodes `moar`](#decodetocodes-moar)
   * [encode](#encode)
   * [encodefromcodes `moar`](#encodefromcodes-moar)
@@ -320,6 +319,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [locallifetime](#locallifetime)
   * [const](#const)
   * [cpucores](#cpucores)
+  * [decodelocaltime](#decodelocaltime)
   * [getrusage](#getrusage)
   * [uname](#uname)
   * [debugnoop `jvm`](#debugnoop-jvm)
@@ -1011,12 +1011,6 @@ Return a string that is the concatenation of the two passed in strings.
 
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
-
-## decodelocaltime
-* `decodelocaltime(int $epoch --> int @tm)`
-
-Returns an integer array with localtime information, formatted like the
-`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
 
 ## decodetocodes `moar`
 * `decodetocodes($buffer, str $encoding, int $normalization, $codes)`
@@ -2655,6 +2649,14 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
 
 Returns a native integer for the number of CPU cores that are reported to be
 available.
+
+## decodelocaltime
+* `decodelocaltime(int $epoch --> int @tm)`
+
+Returns an integer array with localtime information, formatted like the
+`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
+Note that contrary to C's localtime() function, the $year contains the
+actual year (A.D), and the $month has been normalized to 1..12.
 
 ## getrusage
 * `getrusage(int @rusage)`
