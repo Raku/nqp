@@ -70,6 +70,19 @@ class HLL::Compiler does HLL::Backend::Default {
         $!save_ctx # XXX starting value?
     }
 
+    method get_target(*%adverbs) {
+        # Retrieve the --target argument && Check
+        my $target := "";
+        try {
+            $target := nqp::lc(%adverbs<target>);
+            CATCH {
+                nqp::die("Error: Command line parsing: " ~
+                    "received more than one --target argument\n");
+            }
+        }
+        return $target;
+    }
+
     method interactive(*%adverbs) {
         stderr().print(self.interactive_banner);
 
@@ -80,7 +93,7 @@ class HLL::Compiler does HLL::Backend::Default {
             $stdin.set-encoding($encoding);
         }
 
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := self.get_target(|%adverbs);
         my $prompt := self.interactive_prompt // '> ';
         my $code;
         while 1 {
@@ -267,7 +280,7 @@ class HLL::Compiler does HLL::Backend::Default {
         }
         self.usage($program-name) if %adverbs<help> || %adverbs<h>;
 
-        if $!backend.is_precomp_stage(%adverbs<target>) {
+        if $!backend.is_precomp_stage(self.get_target(|%adverbs)) {
             %adverbs<precomp> := 1;
         }
 
@@ -306,7 +319,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $result;
         my $error;
         my $has_error := 0;
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := self.get_target(|%adverbs);
         try {
             {
                 if nqp::defined(%adverbs<e>) {
@@ -405,7 +418,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method evalfiles($files, *@args, *%adverbs) {
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := self.get_target(|%adverbs);
         my $encoding := %adverbs<encoding>;
         my @files := nqp::islist($files) ?? $files !! [$files];
         $!user_progname := join(',', @files);
@@ -478,7 +491,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my %*COMPILING<%?OPTIONS> := %adverbs;
         my $*LINEPOSCACHE := $lineposcache;
 
-        my $target := nqp::lc(%adverbs<target>);
+        my $target := self.get_target(|%adverbs);
         my $result := $source;
         my $stderr := stderr();
         my $stdin  := stdin();
