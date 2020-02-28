@@ -723,6 +723,7 @@ class NQP::Actions is HLL::Actions {
     method scope_declarator:sym<my>($/)  { make $<scoped>.ast; $/.prune }
     method scope_declarator:sym<our>($/) { make $<scoped>.ast; $/.prune }
     method scope_declarator:sym<has>($/) { make $<scoped>.ast; $/.prune }
+    method scope_declarator:sym<anon>($/) { make $<scoped>.ast; $/.prune }
 
     method scoped($/) {
         make $<declarator>         ?? $<declarator>.ast !!
@@ -987,6 +988,11 @@ class NQP::Actions is HLL::Actions {
                     }
                 }
                 $ast := QAST::Var.new( :name('&' ~ $name), :scope('lexical') );
+            }
+            elsif $*SCOPE eq 'anon' {
+                if $*W.is_precompilation_mode() {
+                    $*W.create_code($ast, $name, 0);
+                }
             }
             else {
                 $/.panic("$*SCOPE scoped routines are not supported yet");
