@@ -5679,6 +5679,32 @@ public final class Ops {
             }
         }
     }
+    public static SixModelObject nextdispatcherfor(SixModelObject disp, SixModelObject dispFor, ThreadContext tc) {
+        tc.nextDispatcher = disp;
+        if (dispFor instanceof CodeRef) {
+            tc.nextDispatcherFor = dispFor;
+        }
+        else {
+            InvocationSpec is = dispFor.st.InvocationSpec;
+            if (is == null)
+                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
+                if (is.ClassHandle != null)
+                    tc.nextDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
+                            is.ClassHandle, is.AttrName, is.Hint);
+                else
+                    throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
+        }
+        return disp;
+    }
+    public static void takenextdispatcher(int lexIdx, ThreadContext tc) {
+        if (tc.nextDispatcher != null) {
+            if (tc.nextDispatcherFor == null ||
+                    tc.nextDispatcherFor == tc.curFrame.codeRef) {
+                tc.curFrame.oLex[lexIdx] = tc.nextDispatcher;
+                tc.nextDispatcher = null;
+            }
+        }
+    }
 
     /* process related opcodes */
     public static long exit(final long status, ThreadContext tc) {

@@ -2704,7 +2704,7 @@ QAST::OperationsJAST.map_classlib_core_op('iscont_s', $TYPE_OPS, 'iscont_s', [$R
 QAST::OperationsJAST.map_classlib_core_op('isrwcont', $TYPE_OPS, 'isrwcont', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont', $TYPE_OPS, 'decont', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.add_core_op('wantdecont', -> $qastcomp, $op {
-    # Currently, no optimization for this on JVM backend. 
+    # Currently, no optimization for this on JVM backend.
     $qastcomp.as_jast($op[0])
 });
 QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
@@ -2794,6 +2794,40 @@ QAST::OperationsJAST.add_core_op('cleardispatcher', -> $qastcomp, $op {
     $il.append($ALOAD_1);
     $il.append($ACONST_NULL);
     $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'currentDispatcher', $TYPE_SMO ));
+    $il.append($ACONST_NULL);
+    result($il, $RT_OBJ);
+});
+QAST::OperationsJAST.map_classlib_core_op('nextdispatcherfor', $TYPE_OPS, 'nextdispatcherfor', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.add_core_op('takenextdispatcher', -> $qastcomp, $op {
+    if nqp::elems(@($op)) != 1 || !nqp::istype($op[0], QAST::SVal) {
+        nqp::die('takenextdispatcher requires one string literal operand');
+    }
+    my $name := $op[0].value;
+    my $idx := $*BLOCK.lexical_type($name);
+    unless nqp::defined($idx) {
+        nqp::die('takenextdispatcher used with non-existing lexical ');
+    }
+    my $il := JAST::InstructionList.new();
+    $il.append(JAST::PushIndex.new( :value($*BLOCK.lexical_idx($name)) ));
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_OPS, 'takenextdispatcher', 'V', 'I', $TYPE_TC ));
+    if $*WANT != $RT_VOID {
+        $il.append($ACONST_NULL);
+        result($il, $RT_OBJ)
+    }
+    else {
+        result($il, $RT_VOID)
+    }
+});
+QAST::OperationsJAST.add_core_op('clearnextdispatcher', -> $qastcomp, $op {
+    if nqp::elems(@($op)) != 0 {
+        nqp::die('clearnextdispatcher accepts no operands');
+    }
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append($ACONST_NULL);
+    $il.append(JAST::Instruction.new( :op('putfield'), $TYPE_TC, 'nextDispatcher', $TYPE_SMO ));
     $il.append($ACONST_NULL);
     result($il, $RT_OBJ);
 });
