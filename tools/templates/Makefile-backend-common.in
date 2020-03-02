@@ -63,10 +63,7 @@
 @for_stages(
 # --- @uc(@backend@)@ @ucstage@ RULES ---
 
-@backend_prefix@-@lcstage@-print::
-	@echo(++++++ @ucstage@ ++++++)@
-
-@backend_prefix@-@lcstage@:: @backend_prefix@-@lcprev_stage@ @backend_prefix@-@lcstage@-print @bpm(@ucstage@_OUTPUT)@
+@backend_prefix@-@lcstage@:: @backend_prefix@-@lcprev_stage@ @bpm(@ucstage@_OUTPUT)@
 
 # Combined sources
 @bpv(NQP_MO_COMBINED_@ucstage@)@		= @nfp(@stage_dir@/$(NQP_MO_COMBINED))@
@@ -86,7 +83,7 @@
 @make_pp_pfx@ifdef @bsv(ASTOPS)@
 @bsv(ASTOPS_@ucstage@)@						= @nfp(@stage_dir@/@bsm(ASTOPS)@)@
 @make_pp_pfx@else
-@bsv(ASTOPS_@ucstage@)@						= 
+@bsv(ASTOPS_@ucstage@)@						=
 @make_pp_pfx@endif
 @bsv(ASTNODES_@ucstage@)@					= @nfp(@stage_dir@/@bsm(ASTNODES)@)@
 @bsv(QREGEX_@ucstage@)@						= @nfp(@stage_dir@/@bsm(QREGEX)@)@
@@ -116,7 +113,7 @@
 @stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(QASTNODE_@ucstage@)@)@
 @stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(QREGEX_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@)@
 @stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
-@stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QAST_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @prev_stage_dir@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
