@@ -1,6 +1,6 @@
 # Template Makefile
 
-.NOTPARALLEL:
+# .NOTPARALLEL:
 
 LAUNCHER = @default_prefix@-runner-default
 
