@@ -170,7 +170,8 @@ class NQP::Optimizer {
     my %opt_n_i := nqp::hash('add', 1, 'sub', 1, 'mul', 1, 'mod', 1, 'neg', 1, 'abs', 1, 'iseq', 1, 'isne', 1,
                              'islt', 1, 'isle', 1, 'isgt', 1, 'isge', 1, 'cmp', 1);
 
-    my %op_poisons_lowering := nqp::hash('ctx', 1, 'curlexpad', 1, 'takedispatcher', 1, 'getlexouter', 1);
+    my %op_poisons_lowering := nqp::hash('ctx', 1, 'curlexpad', 1, 'takedispatcher', 1, 'takenextdispatcher', 1,
+                                         'getlexouter', 1);
 
     method visit_op($op) {
         # Handle op needs special handling.

@@ -81,6 +81,12 @@ public class ThreadContext {
     public SixModelObject currentDispatcherFor;
 
     /**
+     * Dispatcher to return control to when current dispatcher exhausts.
+     */
+    public SixModelObject nextDispatcher;
+    public SixModelObject nextDispatcherFor;
+
+    /**
      * Serialization context write barrier disabled depth (anything non-zero
      * means disabled).
      */
