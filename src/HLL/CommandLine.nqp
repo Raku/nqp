@@ -231,6 +231,9 @@ class HLL::CommandLine::Parser {
                     if $opt eq 'profile-filename' {
                         note("--profile-filename is deprecated and will be removed in a future Rakudo release. Please use --profile=<filename> instead.");
                     }
+                    if $opt eq 'target' && nqp::existskey($result.options, 'target') {
+                        nqp::die("Multiple --target argument not allowed. Please give only one --target option");
+                    }
                     nqp::die("Illegal option --$opt") unless nqp::existskey(%!options, $opt);
                     nqp::die("Option --$opt does not allow a value") if !self.wants-value($opt) && $has-value;
                     if !$has-value && self.wants-value($opt) {
