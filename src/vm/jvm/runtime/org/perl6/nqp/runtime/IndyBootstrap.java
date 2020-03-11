@@ -70,7 +70,7 @@ public class IndyBootstrap {
     public static void subcallResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
-        if (invokee == null)
+        if (Ops.isnull(invokee) == 1)
             throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
 
         /* Don't update callsite in cases where it's not safe. */
@@ -95,7 +95,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -139,7 +139,7 @@ public class IndyBootstrap {
 
     public static void subInvoker(MethodHandle mh, String name, CallSiteDescriptor csd, ThreadContext tc, Object[] args) throws Throwable {
         SixModelObject invokee = Ops.getlex(name, tc);
-        if (invokee == null)
+        if (Ops.isnull(invokee) == 1)
             throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
 
         CodeRef cr;
@@ -150,7 +150,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -189,7 +189,7 @@ public class IndyBootstrap {
     public static void subcallstaticResolve_noa(Lookup caller, MutableCallSite cs, String name, int csIdx, ThreadContext tc, Object... args) {
         /* Locate the thing to call. */
         SixModelObject invokee = Ops.getlex(name, tc);
-        if (invokee == null)
+        if (Ops.isnull(invokee) == 1)
             throw ExceptionHandling.dieInternal(tc, "Can not invoke object '" + name + "'");
 
         /* Don't update callsite in cases where it's not safe. */
@@ -214,7 +214,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -338,7 +338,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -405,7 +405,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -467,7 +467,7 @@ public class IndyBootstrap {
                 InvocationSpec is = invokee.st.InvocationSpec;
                 if (is == null)
                     throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-                if (is.ClassHandle != null)
+                if (Ops.isnull(is.ClassHandle) == 0)
                     cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
                 else {
                     cr = (CodeRef)is.InvocationHandler;
@@ -531,7 +531,7 @@ public class IndyBootstrap {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;

@@ -3,6 +3,7 @@ package org.perl6.nqp.sixmodel.reprs;
 import java.lang.System;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
 
@@ -34,7 +35,7 @@ public class VMArrayInstance extends VMArrayInstanceBase {
             key += this.elems;
         }
         if (key >= 0 && key < this.elems) {
-            return (this.slots[start + (int)key] != null) ? 1 : 0;
+            return (Ops.isnull(this.slots[start + (int)key]) == 0) ? 1 : 0;
         }
         return 0;
     }

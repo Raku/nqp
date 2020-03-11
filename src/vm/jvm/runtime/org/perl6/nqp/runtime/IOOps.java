@@ -130,7 +130,7 @@ public final class IOOps {
 
     private static SixModelObject sigCache = null;
     public static SixModelObject getsignals(ThreadContext tc) {
-        if (sigCache != null) return sigCache;
+        if (Ops.isnull(sigCache) == 0) return sigCache;
 
         SixModelObject listType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
         SixModelObject strType  = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType;

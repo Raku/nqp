@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -61,12 +62,12 @@ public class NativeRef extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject info = repr_info.at_key_boxed(tc, "nativeref");
-        if (info != null) {
+        if (Ops.isnull(info) == 0) {
             SixModelObject type = info.at_key_boxed(tc, "type");
             short prim = type.st.REPR.get_storage_spec(tc, type.st).boxed_primitive;
             if (prim != StorageSpec.BP_NONE) {
                 SixModelObject refkind = info.at_key_boxed(tc, "refkind");
-                if (refkind != null) {
+                if (Ops.isnull(refkind) == 0) {
                     String refkind_s = refkind.get_str(tc);
                     NativeRefREPRData rd = new NativeRefREPRData();
                     if (refkind_s.equals("lexical")) {

@@ -83,7 +83,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         else if (index >= allocated)
             expand(tc, index+1);
 
-        if (child_objs[intidx] != null) {
+        if (Ops.isnull(child_objs[intidx]) == 0) {
             return child_objs[intidx];
         }
         else {
@@ -262,7 +262,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
             SixModelObject child = child_objs[i];
 
             // No cache for this element? Go to next.
-            if (child == null) continue;
+            if (Ops.isnull(child) == 1) continue;
 
             /* Invalidate cache and recursively refresh child too. Future
              * versions here should only invalidate the cache if C memory has
@@ -281,7 +281,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
             SixModelObject child = child_objs[i];
 
             // No cache for this element? Go to next.
-            if (child == null) continue;
+            if (Ops.isnull(child) == 1) continue;
 
             /* Invalidate cache. Future versions here should only invalidate
              * the cache if C memory has a different pointer than the cached

@@ -9,6 +9,7 @@ import com.sun.jna.Pointer;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
 import org.perl6.nqp.runtime.NativeCallOps;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -83,7 +84,7 @@ public class CPPStructInstance extends SixModelObject implements Refreshable {
 
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         SixModelObject member = memberCache.get(name);
-        if (member != null) return member;
+        if (Ops.isnull(member) == 0) return member;
 
         CPPStructREPRData data = (CPPStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);

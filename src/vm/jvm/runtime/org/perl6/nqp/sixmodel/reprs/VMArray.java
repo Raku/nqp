@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -61,7 +62,7 @@ public class VMArray extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject arrayInfo = repr_info.at_key_boxed(tc, "array");
-        if (arrayInfo != null) {
+        if (Ops.isnull(arrayInfo) == 0) {
             SixModelObject type = arrayInfo.at_key_boxed(tc, "type");
             StorageSpec ss = type.st.REPR.get_storage_spec(tc, type.st);
             switch (ss.boxed_primitive) {
@@ -198,7 +199,7 @@ public class VMArray extends REPR {
     {
         if (reader.version >= 7) {
             SixModelObject type = reader.readRef();
-            if (type != null) {
+            if (Ops.isnull(type) == 0) {
                 VMArrayREPRData reprData = new VMArrayREPRData();
                 reprData.type = type;
                 reprData.ss = type.st.REPR.get_storage_spec(tc, type.st);

@@ -1517,7 +1517,7 @@ public final class Ops {
     public static SixModelObject getlexref_i(ThreadContext tc, int idx) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
@@ -1528,7 +1528,7 @@ public final class Ops {
     public static SixModelObject getlexref_n(ThreadContext tc, int idx) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num lexical reference type registered for current HLL");
         NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
@@ -1539,7 +1539,7 @@ public final class Ops {
     public static SixModelObject getlexref_s(ThreadContext tc, int idx) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No str lexical reference type registered for current HLL");
         NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
@@ -1550,7 +1550,7 @@ public final class Ops {
     public static SixModelObject getlexref_i_si(ThreadContext tc, int idx, int si) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (si-- > 0)
@@ -1563,7 +1563,7 @@ public final class Ops {
     public static SixModelObject getlexref_n_si(ThreadContext tc, int idx, int si) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num lexical reference type registered for current HLL");
         while (si-- > 0)
@@ -1576,7 +1576,7 @@ public final class Ops {
     public static SixModelObject getlexref_s_si(ThreadContext tc, int idx, int si) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No str lexical reference type registered for current HLL");
         while (si-- > 0)
@@ -1589,7 +1589,7 @@ public final class Ops {
     public static SixModelObject getlexref_i(String name, ThreadContext tc) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (cf != null) {
@@ -1607,7 +1607,7 @@ public final class Ops {
     public static SixModelObject getlexref_n(String name, ThreadContext tc) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num lexical reference type registered for current HLL");
         while (cf != null) {
@@ -1625,7 +1625,7 @@ public final class Ops {
     public static SixModelObject getlexref_s(String name, ThreadContext tc) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.strLexRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No str lexical reference type registered for current HLL");
         while (cf != null) {
@@ -2485,7 +2485,7 @@ public final class Ops {
             InvocationSpec is = invokee.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Cannot invoke this object");
-            if (is.ClassHandle != null)
+            if (isnull(is.ClassHandle) == 0)
                 cr = (CodeRef)invokee.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else {
                 cr = (CodeRef)is.InvocationHandler;
@@ -2572,10 +2572,10 @@ public final class Ops {
         return obj.clone(tc);
     }
     public static long isconcrete(SixModelObject obj, ThreadContext tc) {
-        return obj == null || decont(obj, tc) instanceof TypeObject ? 0 : 1;
+        return isnull(obj) == 1 || decont(obj, tc) instanceof TypeObject ? 0 : 1;
     }
     public static long isconcrete_nd(SixModelObject obj, ThreadContext tc) {
-        return obj == null || obj instanceof TypeObject ? 0 : 1;
+        return isnull(obj) == 1 || obj instanceof TypeObject ? 0 : 1;
     }
     public static SixModelObject knowhow(ThreadContext tc) {
         return tc.gc.KnowHOW;
@@ -2614,25 +2614,25 @@ public final class Ops {
         return tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
     }
     public static SixModelObject findmethodInCache(ThreadContext tc, SixModelObject invocant, String name) {
-        if (invocant == null)
+        if (isnull(invocant) == 1)
             throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
         SixModelObject meth = invocant.st.MethodCache.get(name);
-        if (meth == null)
+        if (isnull(meth) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "Method '" + name + "' not found for invocant of class '" + typeName(invocant, tc) + "'");
         return meth;
     }
     public static SixModelObject findmethod(SixModelObject invocant, String name, ThreadContext tc) {
         SixModelObject method = findmethodNonFatal(invocant, name, tc);
-        if (method == null)
+        if (isnull(method) == 1)
                 throw ExceptionHandling.dieInternal(tc,
                     "Method '" + name + "' not found for invocant of class '" + typeName(invocant, tc) + "'");
         return method;
     }
     public static SixModelObject findmethodNonFatal(SixModelObject invocant, String name, ThreadContext tc) {
-        if (invocant == null)
+        if (isnull(invocant) == 1)
             throw ExceptionHandling.dieInternal(tc, "Cannot call method '" + name + "' on a null object");
         invocant = decont(invocant, tc);
 
@@ -2641,7 +2641,7 @@ public final class Ops {
         /* Try the by-name method cache, if the HOW published one. */
         if (cache != null) {
             SixModelObject found = cache.get(name);
-            if (found != null)
+            if (isnull(found) == 0)
                 return found;
             if ((invocant.st.ModeFlags & STable.METHOD_CACHE_AUTHORITATIVE) != 0)
                 return null;
@@ -2662,7 +2662,7 @@ public final class Ops {
         return result_s(tc.curFrame);
     }
     public static long can(SixModelObject invocant, String name, ThreadContext tc) {
-        return findmethodNonFatal(invocant, name, tc) == null ? 0 : 1;
+        return isnull(findmethodNonFatal(invocant, name, tc)) == 1 ? 0 : 1;
     }
     public static long eqaddr(SixModelObject a, SixModelObject b) {
         return a == b ? 1 : 0;
@@ -2673,8 +2673,7 @@ public final class Ops {
         return null;
     }
     public static long isnull(SixModelObject obj) {
-        return obj == null ? 1 : 0;
-        //return obj == null || (obj.st != null && obj.st.REPR instanceof VMNull) ? 1 : 0;
+        return obj == null || (obj.st != null && obj.st.REPR instanceof VMNull) ? 1 : 0;
     }
     public static long isnull_s(String str) {
         return str == null ? 1 : 0;
@@ -2728,7 +2727,7 @@ public final class Ops {
         return obj;
     }
     public static long objprimspec(SixModelObject obj, ThreadContext tc) {
-        return obj == null ? 0 : obj.st.REPR.get_storage_spec(tc, obj.st).boxed_primitive;
+        return isnull(obj) == 1 ? 0 : obj.st.REPR.get_storage_spec(tc, obj.st).boxed_primitive;
     }
     public static SixModelObject setinvokespec(SixModelObject obj, SixModelObject ch,
             String name, SixModelObject invocationHandler, ThreadContext tc) {
@@ -2748,7 +2747,7 @@ public final class Ops {
     }
     public static long istype_nd(SixModelObject obj, SixModelObject type, ThreadContext tc) {
         /* Null always type checks false. */
-        if (obj == null)
+        if (isnull(obj) == 1)
             return 0;
 
         /* Start by considering cache. */
@@ -2771,7 +2770,7 @@ public final class Ops {
          * checking. */
         if (cache == null || (typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
             SixModelObject tcMeth = findmethodNonFatal(obj.st.HOW, "type_check", tc);
-            if (tcMeth == null)
+            if (isnull(tcMeth) == 1)
                 return 0;
                 /* TODO: Review why the following busts stuff. */
                 /*throw ExceptionHandling.dieInternal(tc,
@@ -2790,7 +2789,7 @@ public final class Ops {
         /* If the flag to call .accepts_type on the target value is set, do so. */
         if ((typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0) {
             SixModelObject atMeth = findmethodNonFatal(type.st.HOW, "accepts_type", tc);
-            if (atMeth == null)
+            if (isnull(atMeth) == 1)
                 throw ExceptionHandling.dieInternal(tc,
                     "Expected accepts_type method, but none found in meta-object");
             invokeDirect(tc, atMeth, typeCheckCallSite, new Object[] { type.st.HOW, type, obj });
@@ -3072,7 +3071,7 @@ public final class Ops {
     /* Attribute reference operations. */
     public static SixModelObject getattrref_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intAttrRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int attribute reference type registered for current HLL");
         NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
@@ -3084,7 +3083,7 @@ public final class Ops {
     }
     public static SixModelObject getattrref_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numAttrRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num attribute reference type registered for current HLL");
         NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
@@ -3096,7 +3095,7 @@ public final class Ops {
     }
     public static SixModelObject getattrref_s(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strAttrRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No string attribute reference type registered for current HLL");
         NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
@@ -3426,7 +3425,7 @@ public final class Ops {
     /* Positional reference operations. */
     public static SixModelObject atposref_i(SixModelObject obj, long idx, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intPosRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int positional reference type registered for current HLL");
         NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
@@ -3436,7 +3435,7 @@ public final class Ops {
     }
     public static SixModelObject atposref_n(SixModelObject obj, long idx, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numPosRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num positional reference type registered for current HLL");
         NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
@@ -3446,7 +3445,7 @@ public final class Ops {
     }
     public static SixModelObject atposref_s(SixModelObject obj, long idx, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strPosRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No string positional reference type registered for current HLL");
         NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
@@ -3458,7 +3457,7 @@ public final class Ops {
     /* Positional multidim reference operations. */
     public static SixModelObject multidimref_i(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intMultidimRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int multidim positional reference type registered for current HLL");
         NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
@@ -3469,7 +3468,7 @@ public final class Ops {
 
     public static SixModelObject multidimref_n(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numMultidimRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No num multidim positional reference type registered for current HLL");
         NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
@@ -3480,7 +3479,7 @@ public final class Ops {
 
     public static SixModelObject multidimref_s(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strMultidimRef;
-        if (refType == null)
+        if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No str multidim positional reference type registered for current HLL");
         NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
@@ -3592,10 +3591,10 @@ public final class Ops {
         return agg.exists_pos(tc, key);
     }
     public static long islist(SixModelObject obj, ThreadContext tc) {
-        return obj != null && obj.st.REPR instanceof VMArray ? 1 : 0;
+        return isnull(obj) == 0 && obj.st.REPR instanceof VMArray ? 1 : 0;
     }
     public static long ishash(SixModelObject obj, ThreadContext tc) {
-        return obj != null && obj.st.REPR instanceof VMHash ? 1 : 0;
+        return isnull(obj) == 0 && obj.st.REPR instanceof VMHash ? 1 : 0;
     }
 
     /* Parametricity operations. */
@@ -3702,10 +3701,10 @@ public final class Ops {
         return obj;
     }
     public static long iscont(SixModelObject obj) {
-        return obj == null || obj.st.ContainerSpec == null ? 0 : 1;
+        return isnull(obj) == 1 || obj.st.ContainerSpec == null ? 0 : 1;
     }
     public static long isrwcont(SixModelObject obj, ThreadContext tc) {
-        if (obj != null) {
+        if (isnull(obj) == 0) {
             ContainerSpec cs = obj.st.ContainerSpec;
             if (cs != null && cs.canStore(tc, obj))
                 return 1;
@@ -3713,7 +3712,7 @@ public final class Ops {
         return 0;
     }
     private static short getContainerPrimitive(SixModelObject obj) {
-        if (obj != null && !(obj instanceof TypeObject)) {
+        if (isnull(obj) == 0 && !(obj instanceof TypeObject)) {
             ContainerSpec cs = obj.st.ContainerSpec;
             if (cs instanceof NativeRefContainerSpec)
                 return ((NativeRefREPRData)(obj.st.REPRData)).primitive_type;
@@ -3730,7 +3729,7 @@ public final class Ops {
         return getContainerPrimitive(obj) == StorageSpec.BP_STR ? 1 : 0;
     }
     public static SixModelObject decont(SixModelObject obj, ThreadContext tc) {
-        if (obj == null)
+        if (isnull(obj) == 1)
             return null;
         ContainerSpec cs = obj.st.ContainerSpec;
         return cs == null || obj instanceof TypeObject ? obj : cs.fetch(tc, obj);
@@ -3887,7 +3886,7 @@ public final class Ops {
     }
     public static long istrue(SixModelObject obj, ThreadContext tc) {
         obj = decont(obj, tc);
-        if (obj == null) return 0;
+        if (isnull(obj) == 1) return 0;
         BoolificationSpec bs = obj.st.BoolificationSpec;
         switch (bs == null ? BoolificationSpec.MODE_NOT_TYPE_OBJECT : bs.Mode) {
         case BoolificationSpec.MODE_CALL_METHOD:
@@ -3934,7 +3933,7 @@ public final class Ops {
         obj = decont(obj, tc);
 
         // If it's null, it's "", 'cause that way we at least don't NPE.
-        if (obj == null)
+        if (isnull(obj) == 1)
             return "";
 
         // If it can unbox to a string, that wins right off.
@@ -3946,7 +3945,7 @@ public final class Ops {
         // We could put this in the generated code, but it's here to avoid the
         // bulk.
         SixModelObject numMeth = obj.st.MethodCache == null ? null : obj.st.MethodCache.get("Str");
-        if (numMeth != null) {
+        if (isnull(numMeth) == 0) {
             invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
             return result_s(tc.curFrame);
         }
@@ -3974,7 +3973,7 @@ public final class Ops {
         obj = decont(obj, tc);
 
         // If it's null, it's 0.0
-        if (obj == null)
+        if (isnull(obj) == 1)
             return 0.0;
 
         // If it can unbox as an int or a num, that wins right off.
@@ -3986,7 +3985,7 @@ public final class Ops {
 
         // Otherwise, look for a Num method.
         SixModelObject numMeth = obj.st.MethodCache.get("Num");
-        if (numMeth != null) {
+        if (isnull(numMeth) == 0) {
             invokeDirect(tc, numMeth, invocantCallSite, new Object[] { obj });
             return result_n(tc.curFrame);
         }
@@ -4008,7 +4007,7 @@ public final class Ops {
         obj = decont(obj, tc);
 
         // If it's null, it's 0
-        if (obj == null)
+        if (isnull(obj) == 1)
             return 0;
 
         // If it can unbox as an int or a num, that wins right off.
@@ -4020,7 +4019,7 @@ public final class Ops {
 
         // Otherwise, look for an Int method.
         SixModelObject intMeth = obj.st.MethodCache.get("Int");
-        if (intMeth != null) {
+        if (isnull(intMeth) == 0) {
             invokeDirect(tc, intMeth, invocantCallSite, new Object[] { obj });
             return result_i(tc.curFrame);
         }
@@ -5288,7 +5287,7 @@ public final class Ops {
         }
     }
     public static SixModelObject getobjsc(SixModelObject obj, ThreadContext tc) {
-        if (obj == null)
+        if (isnull(obj) == 1)
             return null;
         SerializationContext sc = obj.sc;
         if (sc == null)
@@ -5361,7 +5360,7 @@ public final class Ops {
             int crCount;
 
             CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
-            if (cr == null) {
+            if (isnull(cr) == 1) {
                 crArray = cu.qbidToCodeRef;
                 crCount = cu.serializedCodeRefCount();
             } else {
@@ -5447,7 +5446,7 @@ public final class Ops {
         /* See if the object is actually owned by another, and it's the
          * owner we need to repossess. */
         SixModelObject owner = obj.sc.owned_objects.get(obj);
-        if (owner != null)
+        if (isnull(owner) == 0)
             obj = owner;
 
         SerializationContext compSC = tc.compilingSCs.get(cscSize - 1).referencedSC;
@@ -5669,7 +5668,7 @@ public final class Ops {
             InvocationSpec is = dispFor.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
-                if (is.ClassHandle != null)
+                if (isnull(is.ClassHandle) == 0)
                     tc.currentDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
                             is.ClassHandle, is.AttrName, is.Hint);
                 else
@@ -5678,8 +5677,8 @@ public final class Ops {
         return disp;
     }
     public static void takedispatcher(int lexIdx, ThreadContext tc) {
-        if (tc.currentDispatcher != null) {
-            if (tc.currentDispatcherFor == null ||
+        if (isnull(tc.currentDispatcher) == 0) {
+            if (isnull(tc.currentDispatcherFor) == 1 ||
                     tc.currentDispatcherFor == tc.curFrame.codeRef) {
                 tc.curFrame.oLex[lexIdx] = tc.currentDispatcher;
                 tc.currentDispatcher = null;
@@ -5695,7 +5694,7 @@ public final class Ops {
             InvocationSpec is = dispFor.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
-                if (is.ClassHandle != null)
+                if (isnull(is.ClassHandle) == 0)
                     tc.nextDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
                             is.ClassHandle, is.AttrName, is.Hint);
                 else
@@ -5704,8 +5703,8 @@ public final class Ops {
         return disp;
     }
     public static void takenextdispatcher(int lexIdx, ThreadContext tc) {
-        if (tc.nextDispatcher != null) {
-            if (tc.nextDispatcherFor == null ||
+        if (isnull(tc.nextDispatcher) == 0) {
+            if (isnull(tc.nextDispatcherFor) == 1 ||
                     tc.nextDispatcherFor == tc.curFrame.codeRef) {
                 tc.curFrame.oLex[lexIdx] = tc.nextDispatcher;
                 tc.nextDispatcher = null;
@@ -5898,7 +5897,7 @@ public final class Ops {
 
     public static SixModelObject currentthread(ThreadContext tc) {
         SixModelObject thread = tc.VMThread;
-        if (thread == null) {
+        if (isnull(thread) == 1) {
             thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
             ((VMThreadInstance)thread).thread = Thread.currentThread();
             tc.VMThread = thread;
@@ -6487,14 +6486,14 @@ public final class Ops {
     }
     public static SixModelObject hllize(SixModelObject obj, ThreadContext tc) {
         HLLConfig wanted = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
-        if (obj != null && obj.st.hllOwner == wanted)
+        if (isnull(obj) == 0 && obj.st.hllOwner == wanted)
             return obj;
         else
             return hllizeInternal(obj, wanted, tc);
     }
     public static SixModelObject hllizefor(SixModelObject obj, String language, ThreadContext tc) {
         HLLConfig wanted = tc.gc.getHLLConfigFor(language);
-        if (obj != null && obj.st.hllOwner == wanted)
+        if (isnull(obj) == 0 && obj.st.hllOwner == wanted)
             return obj;
         else
             return hllizeInternal(obj, wanted, tc);
@@ -6509,43 +6508,43 @@ public final class Ops {
     }
     private static SixModelObject hllizeInternal(SixModelObject obj, HLLConfig wanted, ThreadContext tc) {
         /* Map nulls to the language's designated null value. */
-        if (obj == null)
+        if (isnull(obj) == 1)
             return wanted.nullValue;
 
         /* Go by what role the object plays. */
         switch ((int)obj.st.hllRole) {
             case HLLConfig.ROLE_INT:
-                if (wanted.foreignTypeInt != null) {
+                if (isnull(wanted.foreignTypeInt) == 0) {
                     return box_i(obj.get_int(tc), wanted.foreignTypeInt, tc);
                 }
-                else if (wanted.foreignTransformInt != null) {
+                else if (isnull(wanted.foreignTransformInt) == 0) {
                     throw new RuntimeException("foreign_transform_int NYI");
                 }
                 else {
                     return obj;
                 }
             case HLLConfig.ROLE_NUM:
-                if (wanted.foreignTypeNum != null) {
+                if (isnull(wanted.foreignTypeNum) == 0) {
                     return box_n(obj.get_num(tc), wanted.foreignTypeNum, tc);
                 }
-                else if (wanted.foreignTransformNum != null) {
+                else if (isnull(wanted.foreignTransformNum) == 0) {
                     throw new RuntimeException("foreign_transform_num NYI");
                 }
                 else {
                     return obj;
                 }
             case HLLConfig.ROLE_STR:
-                if (wanted.foreignTypeStr != null) {
+                if (isnull(wanted.foreignTypeStr) == 0) {
                     return box_s(obj.get_str(tc), wanted.foreignTypeStr, tc);
                 }
-                else if (wanted.foreignTransformStr != null) {
+                else if (isnull(wanted.foreignTransformStr) == 0) {
                     throw new RuntimeException("foreign_transform_str NYI");
                 }
                 else {
                     return obj;
                 }
             case HLLConfig.ROLE_ARRAY:
-                if (wanted.foreignTransformArray != null) {
+                if (isnull(wanted.foreignTransformArray) == 0) {
                     invokeDirect(tc, wanted.foreignTransformArray,
                         invocantCallSite, new Object[] { obj });
                     return result_o(tc.curFrame);
@@ -6554,7 +6553,7 @@ public final class Ops {
                     return obj;
                 }
             case HLLConfig.ROLE_HASH:
-                if (wanted.foreignTransformHash != null) {
+                if (isnull(wanted.foreignTransformHash) == 0) {
                     invokeDirect(tc, wanted.foreignTransformHash,
                         invocantCallSite, new Object[] { obj });
                     return result_o(tc.curFrame);
@@ -6563,7 +6562,7 @@ public final class Ops {
                     return obj;
                 }
             case HLLConfig.ROLE_CODE:
-                if (wanted.foreignTransformCode != null) {
+                if (isnull(wanted.foreignTransformCode) == 0) {
                     invokeDirect(tc, wanted.foreignTransformCode,
                         invocantCallSite, new Object[] { obj });
                     return result_o(tc.curFrame);
@@ -6572,7 +6571,7 @@ public final class Ops {
                     return obj;
                 }
             default:
-                if (wanted.foreignTransformAny != null) {
+                if (isnull(wanted.foreignTransformAny) == 0) {
                     invokeDirect(tc, wanted.foreignTransformAny,
                         invocantCallSite, new Object[] { obj });
                     return result_o(tc.curFrame);
@@ -6663,7 +6662,7 @@ public final class Ops {
         int[] fates = runNFA(tc, (NFAInstance)nfa, target, pos);
 
         /* Push the results onto the bstack. */
-        long caps = cstack == null || cstack instanceof TypeObject ? 0 : cstack.elems(tc);
+        long caps = isnull(cstack) == 1 || cstack instanceof TypeObject ? 0 : cstack.elems(tc);
         for (int i = 0; i < fates.length; i++) {
             marks.at_pos_native(tc, fates[i]);
             bstack.push_native(tc);
@@ -7470,7 +7469,7 @@ public final class Ops {
             try {
                 if (resume != null) {
                     resume.resumeNext();
-                } else if (cont != null) {
+                } else if (isnull(cont) == 0) {
                     invokeDirect(tc, run, invocantCallSite, false, new Object[] { cont });
                 } else {
                     if (run instanceof ResumeStatus) {
@@ -7489,7 +7488,7 @@ public final class Ops {
                 // so we should just return.
                 return;
             } catch (SaveStackException sse) {
-                if (sse.key != null && sse.key != key) {
+                if (isnull(sse.key) == 0 && sse.key != key) {
                     // This is intended for an outer scope, so just append ourself
                     throw sse.pushFrame(0, reset_reenter, new Object[] { key }, null);
                 }

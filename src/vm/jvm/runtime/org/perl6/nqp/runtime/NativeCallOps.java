@@ -383,7 +383,7 @@ public final class NativeCallOps {
         else {
             /* Handle mixins by following delegates. */
             if (target instanceof P6OpaqueBaseInstance
-            && ((P6OpaqueBaseInstance)target).delegate != null)
+            && (Ops.isnull(((P6OpaqueBaseInstance)target).delegate) == 0))
                 target = ((P6OpaqueBaseInstance)target).delegate;
             call = (NativeCallBody)target.get_boxing_of(tc, ncrepr.ID);
             if (call == null) {

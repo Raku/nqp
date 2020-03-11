@@ -181,7 +181,7 @@ public class CallFrame implements Cloneable {
             InvocationSpec is = sci.staticCode.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "Can not invoke this object");
-            if (is.ClassHandle != null)
+            if (Ops.isnull(is.ClassHandle) == 0)
                 this.codeRef = (CodeRef)sci.staticCode.get_attribute_boxed(tc, is.ClassHandle, is.AttrName, is.Hint);
             else
                 this.codeRef = (CodeRef)is.InvocationHandler;

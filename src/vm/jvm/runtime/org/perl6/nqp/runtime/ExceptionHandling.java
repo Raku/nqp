@@ -207,7 +207,7 @@ all:
             tc.unwinder.unwindTarget = handlerInfo[0];
             tc.unwinder.unwindCompUnit = handlerFrame.codeRef.staticInfo.compUnit;
             tc.unwinder.category = category;
-            if (exObj != null)
+            if (Ops.isnull(exObj) == 0)
                 tc.unwinder.payload = (SixModelObject)exObj.payload;
             else
                 tc.unwinder.payload = null;
@@ -244,7 +244,7 @@ all:
             tc.unwinder.unwindTarget = handlerInfo[0];
             tc.unwinder.unwindCompUnit = handlerFrame.codeRef.staticInfo.compUnit;
             tc.unwinder.result = Ops.result_o(tc.curFrame);
-            if (exObj != null)
+            if (Ops.isnull(exObj) == 0)
                 tc.unwinder.payload = (SixModelObject)exObj.payload;
             throw tc.unwinder;
         default:
@@ -256,7 +256,7 @@ all:
     private static SixModelObject panic(ThreadContext tc, long category,
             VMExceptionInstance exObj) {
         StringBuilder message = new StringBuilder();
-        if (exObj != null && exObj.message != null)
+        if (Ops.isnull(exObj) == 0 && exObj.message != null)
             message.append("Unhandled exception: " + exObj.message + "\n");
         else
             message.append("Unhandled exception; category = " + category + "\n");

@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.perl6.nqp.runtime.Ops;
+
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.TypeObject;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -260,7 +262,7 @@ public class BootJavaInterop {
 
         for (Iterator<Map.Entry<String, SixModelObject>> it = names.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, SixModelObject> ent = it.next();
-            if (ent.getValue() != null)
+            if (Ops.isnull(ent.getValue()) == 0)
                 hash.bind_key_boxed(tc, ent.getKey(), ent.getValue());
             else
                 it.remove();
@@ -905,7 +907,7 @@ public class BootJavaInterop {
 
         MethodVisitor mv = mc.mv;
         mv.visitVarInsn(Opcodes.ALOAD, mc.tcLoc);
-        if (invokee != null) {
+        if (Ops.isnull(invokee) == 0) {
             emitConst(mc, invokee, SixModelObject.class);
         } else {
             mv.visitVarInsn(Opcodes.ALOAD, 0);

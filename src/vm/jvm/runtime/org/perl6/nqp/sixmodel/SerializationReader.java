@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.perl6.nqp.runtime.CallFrame;
 import org.perl6.nqp.runtime.CodeRef;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.StaticCodeInfo;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
@@ -413,7 +414,7 @@ public class SerializationReader {
 
             /* Method cache and v-table. */
             SixModelObject methodCache = readRef();
-            if (methodCache != null)
+            if (Ops.isnull(methodCache) == 0)
                 st.MethodCache = ((VMHashInstance)methodCache).storage;
             st.VTable = new SixModelObject[(int)orig.getLong()];
             for (int j = 0; j < st.VTable.length; j++)
@@ -622,7 +623,7 @@ public class SerializationReader {
             elems = orig.getInt();
             for (int i = 0; i < elems; i++)
                 resArray.bind_pos_boxed(tc, i, readRef());
-            if (this.curObject != null) {
+            if (Ops.isnull(this.curObject) == 0) {
                 resArray.sc = sc;
                 sc.owned_objects.put(resArray, this.curObject);
             }
@@ -656,7 +657,7 @@ public class SerializationReader {
                 String key = lookupString(orig.getInt());
                 resHash.bind_key_boxed(tc, key, readRef());
             }
-            if (this.curObject != null) {
+            if (Ops.isnull(this.curObject) == 0) {
                 resHash.sc = sc;
                 sc.owned_objects.put(resHash, this.curObject);
             }

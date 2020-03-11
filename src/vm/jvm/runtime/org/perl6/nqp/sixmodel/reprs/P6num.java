@@ -3,6 +3,7 @@ package org.perl6.nqp.sixmodel.reprs;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -38,9 +39,9 @@ public class P6num extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject floatInfo = repr_info.at_key_boxed(tc, "float");
-        if (floatInfo != null) {
+        if (Ops.isnull(floatInfo) == 0) {
             SixModelObject bits = floatInfo.at_key_boxed(tc, "bits");
-            if (bits != null) {
+            if (Ops.isnull(bits) == 0) {
                 short bitwidth = (short)bits.get_int(tc);
                 switch (bitwidth) {
                     case P6NUM_C_TYPE_FLOAT:
