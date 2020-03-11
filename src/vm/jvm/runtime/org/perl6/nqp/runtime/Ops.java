@@ -139,6 +139,7 @@ import org.perl6.nqp.sixmodel.reprs.VMExceptionInstance;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMHashInstance;
 import org.perl6.nqp.sixmodel.reprs.VMIterInstance;
+import org.perl6.nqp.sixmodel.reprs.VMNull;
 import org.perl6.nqp.sixmodel.reprs.VMThreadInstance;
 
 import sun.misc.Unsafe;
@@ -2666,8 +2667,13 @@ public final class Ops {
     public static long eqaddr(SixModelObject a, SixModelObject b) {
         return a == b ? 1 : 0;
     }
+    public static SixModelObject createNull(ThreadContext tc) {
+        SixModelObject vmnull = tc.gc.VMNull.st.REPR.allocate(tc, tc.gc.VMNull.st);
+        return vmnull;
+    }
     public static long isnull(SixModelObject obj) {
         return obj == null ? 1 : 0;
+        //return obj == null || (obj.st != null && obj.st.REPR instanceof VMNull) ? 1 : 0;
     }
     public static long isnull_s(String str) {
         return str == null ? 1 : 0;

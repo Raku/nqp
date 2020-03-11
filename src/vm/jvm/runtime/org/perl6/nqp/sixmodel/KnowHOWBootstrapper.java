@@ -28,6 +28,7 @@ public class KnowHOWBootstrapper {
         tc.gc.CallCapture = bootType(tc, "CallCapture", "CallCapture");
         tc.gc.BOOTException = bootType(tc, "BOOTException", "VMException");
         tc.gc.BOOTIO = bootType(tc, "BOOTIO", "IOHandle");
+        tc.gc.VMNull = bootType(tc, "VMNull", "VMNull");
         tc.gc.Thread = bootType(tc, "Thread", "VMThread");
 
         tc.gc.BOOTArray.st.hllRole = HLLConfig.ROLE_ARRAY;

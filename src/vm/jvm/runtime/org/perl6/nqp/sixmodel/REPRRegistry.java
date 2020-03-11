@@ -31,6 +31,7 @@ import org.perl6.nqp.sixmodel.reprs.VMArray;
 import org.perl6.nqp.sixmodel.reprs.VMException;
 import org.perl6.nqp.sixmodel.reprs.VMHash;
 import org.perl6.nqp.sixmodel.reprs.VMIter;
+import org.perl6.nqp.sixmodel.reprs.VMNull;
 import org.perl6.nqp.sixmodel.reprs.VMThread;
 import org.perl6.nqp.sixmodel.reprs.ReentrantMutex;
 import org.perl6.nqp.sixmodel.reprs.Semaphore;
@@ -95,6 +96,7 @@ public class REPRRegistry {
         addREPR("CStruct", new CStruct());
         addREPR("CPPStruct", new CPPStruct());
         addREPR("CUnion", new CUnion());
+        addREPR("VMNull", new VMNull());
         addREPR("VMThread", new VMThread());
         addREPR("ReentrantMutex", new ReentrantMutex());
         addREPR("Semaphore", new Semaphore());
