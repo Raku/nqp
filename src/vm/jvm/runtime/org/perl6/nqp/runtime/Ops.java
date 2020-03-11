@@ -2669,7 +2669,8 @@ public final class Ops {
     }
     public static SixModelObject createNull(ThreadContext tc) {
         SixModelObject vmnull = tc.gc.VMNull.st.REPR.allocate(tc, tc.gc.VMNull.st);
-        return vmnull;
+        //return vmnull;
+        return null;
     }
     public static long isnull(SixModelObject obj) {
         return obj == null ? 1 : 0;
