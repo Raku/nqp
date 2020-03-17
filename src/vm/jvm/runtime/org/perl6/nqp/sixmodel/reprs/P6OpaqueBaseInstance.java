@@ -1,4 +1,5 @@
 package org.perl6.nqp.sixmodel.reprs;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.STable;
 import org.perl6.nqp.sixmodel.SerializationReader;
@@ -39,7 +40,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     public SixModelObject clone(ThreadContext tc) {
         try {
             SixModelObject cloned;
-            if (this.delegate != null)
+            if (Ops.isnull(this.delegate) == 0)
                 cloned = this.delegate.clone(tc);
             else
                 cloned = (SixModelObject)this.clone();
@@ -77,33 +78,33 @@ public class P6OpaqueBaseInstance extends SixModelObject {
 
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, long hint) {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             return this.delegate.get_attribute_boxed(tc, class_handle, name, hint);
         else
             return super.get_attribute_boxed(tc, class_handle, name, hint);
     }
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             this.delegate.get_attribute_native(tc, class_handle, name, hint);
         else
             super.get_attribute_native(tc, class_handle, name, hint);
     }
     public void bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
             String name, long hint, SixModelObject value) {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             this.delegate.bind_attribute_boxed(tc, class_handle, name, hint, value);
         else
             super.bind_attribute_boxed(tc, class_handle, name, hint, value);
     }
     public void bind_attribute_native(ThreadContext tc,SixModelObject class_handle, String name, long hint) {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             this.delegate.bind_attribute_native(tc, class_handle, name, hint);
         else
             super.bind_attribute_native(tc, class_handle, name, hint);
     }
     public long is_attribute_initialized(ThreadContext tc, SixModelObject class_handle,
             String name, long hint) {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             return this.delegate.is_attribute_initialized(tc, class_handle, name, hint);
         else
             return super.is_attribute_initialized(tc, class_handle, name, hint);
@@ -155,13 +156,13 @@ public class P6OpaqueBaseInstance extends SixModelObject {
     }
 
     public SixModelObject posDelegate() {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             return ((P6OpaqueBaseInstance)this.delegate).posDelegate();
         throw new RuntimeException("This type does not support positional operations");
     }
 
     public SixModelObject assDelegate() {
-        if (this.delegate != null)
+        if (Ops.isnull(this.delegate) == 0)
             return ((P6OpaqueBaseInstance)this.delegate).assDelegate();
         throw new RuntimeException("This type does not support associative operations");
     }

@@ -32,7 +32,7 @@ public class KnowHOWMethods extends CompilationUnit {
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
             String repr_arg = Ops.namedparam_opt_s(cf, csd, args, "repr");
             String name_arg = Ops.namedparam_opt_s(cf, csd, args, "name");
-            if (self == null || !(self.st.REPR instanceof KnowHOWREPR))
+            if (Ops.isnull(self) == 1 || !(self.st.REPR instanceof KnowHOWREPR))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object with REPR KnowHOWREPR");
 
             /* We first create a new HOW instance. */
@@ -72,7 +72,7 @@ public class KnowHOWMethods extends CompilationUnit {
             String name = Ops.posparam_s(cf, csd, args, 2);
             SixModelObject method = Ops.posparam_o(cf, csd, args, 3);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
 
             ((KnowHOWREPRInstance)self).methods.put(name, method);
@@ -92,9 +92,9 @@ public class KnowHOWMethods extends CompilationUnit {
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
             SixModelObject attribute = Ops.posparam_o(cf, csd, args, 2);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
-            if (attribute == null || !(attribute instanceof KnowHOWAttributeInstance))
+            if (Ops.isnull(attribute) == 1 || !(attribute instanceof KnowHOWAttributeInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW attributes must use KnowHOWAttributeREPR");
 
             ((KnowHOWREPRInstance)self).attributes.add(attribute);
@@ -114,7 +114,7 @@ public class KnowHOWMethods extends CompilationUnit {
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
             SixModelObject type_obj = Ops.posparam_o(cf, csd, args, 1);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
 
             /* Set method cache. */
@@ -178,7 +178,7 @@ public class KnowHOWMethods extends CompilationUnit {
             args = tc.flatArgs;
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
 
             SixModelObject BOOTArray = tc.gc.BOOTArray;
@@ -202,7 +202,7 @@ public class KnowHOWMethods extends CompilationUnit {
             args = tc.flatArgs;
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
 
             SixModelObject BOOTHash = tc.gc.BOOTHash;
@@ -226,7 +226,7 @@ public class KnowHOWMethods extends CompilationUnit {
             args = tc.flatArgs;
             SixModelObject self = Ops.posparam_o(cf, csd, args, 0);
 
-            if (self == null || !(self instanceof KnowHOWREPRInstance))
+            if (Ops.isnull(self) == 1 || !(self instanceof KnowHOWREPRInstance))
                 throw ExceptionHandling.dieInternal(tc, "KnowHOW methods must be called on object instance with REPR KnowHOWREPR");
 
             Ops.return_s(((KnowHOWREPRInstance)self).name, cf);
@@ -253,7 +253,7 @@ public class KnowHOWMethods extends CompilationUnit {
 
             /* Populate it. */
             obj.name = name_arg;
-            obj.type = type_arg != null ? type_arg : tc.gc.KnowHOW;
+            obj.type = Ops.isnull(type_arg) == 0 ? type_arg : tc.gc.KnowHOW;
             obj.box_target = bt_arg == 0 ? 0 : 1;
 
             /* Return produced object. */

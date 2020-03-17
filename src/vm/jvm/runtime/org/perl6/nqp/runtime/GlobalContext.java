@@ -84,6 +84,11 @@ public class GlobalContext {
     public SixModelObject CallCapture;
 
      /**
+     * VMNull type; a basic, method-less type with the VMNull REPR.
+     */
+    public SixModelObject VMNull;
+
+     /**
      * Thread type; a basic, method-less type with the Thread REPR.
      */
     public SixModelObject Thread;

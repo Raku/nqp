@@ -5,6 +5,7 @@ import com.sun.jna.Native;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -45,9 +46,9 @@ public class P6int extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
-        if (integerInfo != null) {
+        if (Ops.isnull(integerInfo) == 0) {
             SixModelObject bits = integerInfo.at_key_boxed(tc, "bits");
-            if (bits != null) {
+            if (Ops.isnull(bits) == 0) {
                 short bitwidth = (short)bits.get_int(tc);
                 switch (bitwidth) {
                     case P6INT_C_TYPE_CHAR:
@@ -81,7 +82,7 @@ public class P6int extends REPR {
             }
 
             SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
-            if (unsigned != null)
+            if (Ops.isnull(unsigned) == 0)
                 ((StorageSpec)st.REPRData).is_unsigned = (short)unsigned.get_int(tc);
         }
     }

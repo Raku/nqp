@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel.reprs;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -69,11 +70,11 @@ public class MultiDimArray extends REPR {
 
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject arrayInfo = repr_info.at_key_boxed(tc, "array");
-        if (arrayInfo != null) {
+        if (Ops.isnull(arrayInfo) == 0) {
             MultiDimArrayREPRData reprData = new MultiDimArrayREPRData();
 
             SixModelObject dims = arrayInfo.at_key_boxed(tc, "dimensions");
-            if (dims == null)
+            if (Ops.isnull(dims) == 1)
                  throw ExceptionHandling.dieInternal(tc,
                     "MultiDimArray REPR must be composed with a number of dimensions");
             int dimensions = (int)dims.get_int(tc);
@@ -83,7 +84,7 @@ public class MultiDimArray extends REPR {
             reprData.numDimensions = dimensions;
 
             SixModelObject type = arrayInfo.at_key_boxed(tc, "type");
-            StorageSpec ss = type != null ? type.st.REPR.get_storage_spec(tc, type.st) : null;
+            StorageSpec ss = Ops.isnull(type) == 0 ? type.st.REPR.get_storage_spec(tc, type.st) : null;
             switch (ss != null ? ss.boxed_primitive : StorageSpec.REFERENCE) {
             case StorageSpec.BP_INT:
             case StorageSpec.BP_NUM:
@@ -139,7 +140,7 @@ public class MultiDimArray extends REPR {
                 break;
             }
         }
-        if (obj == null)
+        if (Ops.isnull(obj) == 1)
             obj = new MultiDimArrayInstance();
         obj.st = st;
         return obj;
@@ -189,7 +190,7 @@ public class MultiDimArray extends REPR {
             MultiDimArrayREPRData reprData = new MultiDimArrayREPRData();
             reprData.numDimensions = dims;
             SixModelObject type = reader.readRef();
-            if (type != null) {
+            if (Ops.isnull(type) == 0) {
                 reprData.type = type;
                 reprData.ss = type.st.REPR.get_storage_spec(tc, type.st);
             }

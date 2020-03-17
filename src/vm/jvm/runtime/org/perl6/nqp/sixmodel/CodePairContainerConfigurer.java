@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 
 /**
@@ -17,11 +18,11 @@ public class CodePairContainerConfigurer extends ContainerConfigurer {
     public void configureContainerSpec(ThreadContext tc, STable st, SixModelObject config) {
         CodePairContainerSpec cs = (CodePairContainerSpec)st.ContainerSpec;
         SixModelObject fetch = config.at_key_boxed(tc, "fetch");
-        if (fetch == null)
+        if (Ops.isnull(fetch) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "Container spec 'code_pair' must be configured with a fetch");
         SixModelObject store = config.at_key_boxed(tc, "store");
-        if (store == null)
+        if (Ops.isnull(store) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "Container spec 'code_pair' must be configured with a store");
         cs.fetchCode = fetch;

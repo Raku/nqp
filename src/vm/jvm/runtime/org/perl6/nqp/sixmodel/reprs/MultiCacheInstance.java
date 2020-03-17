@@ -169,7 +169,7 @@ public class MultiCacheInstance extends SixModelObject {
         case CallSiteDescriptor.ARG_STR:
             return MD_CACHE_STR;
         case CallSiteDescriptor.ARG_OBJ:
-            if (arg == null)
+            if (Ops.isnull((SixModelObject)arg) == 1)
                 return MD_CACHE_NULL;
             SixModelObject cont = (SixModelObject)arg;
             SixModelObject decont = Ops.decont(cont, tc);

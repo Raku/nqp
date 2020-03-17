@@ -42,12 +42,12 @@ public class CArray extends REPR {
         CArrayREPRData data = new CArrayREPRData();
 
         SixModelObject meth = Ops.findmethodNonFatal(st.WHAT, "of", tc);
-        if (meth == null)
+        if (Ops.isnull(meth) == 1)
             ExceptionHandling.dieInternal(tc, "CArray representation expects an 'of' method, specifying the element type");
 
         Ops.invokeDirect(tc, meth, new CallSiteDescriptor(new byte[] { ARG_OBJ }, null), new Object[] { st.WHAT });
         data.elem_type = Ops.decont(Ops.result_o(tc.resultFrame()), tc);
-        if (data.elem_type == null)
+        if (Ops.isnull(data.elem_type) == 1)
             ExceptionHandling.dieInternal(tc, "CArray representation expects a non-null return value from the 'of' method, specifying the element type");
 
         StorageSpec ss = data.elem_type.st.REPR.get_storage_spec(tc, data.elem_type.st);

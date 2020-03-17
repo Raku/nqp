@@ -1073,7 +1073,11 @@ QAST::OperationsJAST.add_core_op('ifnull', -> $qastcomp, $op {
     my $lbl := JAST::Label.new( :name($qastcomp.unique('ifnull_')) );
     $*STACK.obtain($il, $expr);
     $il.append($DUP);
-    $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
+    $il.append(JAST::Instruction.new( :op('invokestatic'),
+        $TYPE_OPS, 'isnull', 'Long', $TYPE_SMO));
+    $il.append($IVAL_ZERO);
+    $il.append($LCMP);
+    $il.append(JAST::Instruction.new( :op('ifeq'), $lbl ));
 
     # Emit "then" part.
     $il.append($POP);
@@ -2605,7 +2609,6 @@ QAST::OperationsJAST.map_classlib_core_op('iterval', $TYPE_OPS, 'iterval', [$RT_
 
 (-> {
 # object opcodes
-QAST::OperationsJAST.map_jvm_core_op('null', 'aconst_null', [], $RT_OBJ);
 QAST::OperationsJAST.map_jvm_core_op('null_s', 'aconst_null', [], $RT_STR);
 QAST::OperationsJAST.map_classlib_core_op('what', $TYPE_OPS, 'what', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('how', $TYPE_OPS, 'how', [$RT_OBJ], $RT_OBJ, :tc);
@@ -2631,6 +2634,7 @@ QAST::OperationsJAST.map_classlib_core_op('hllhash', $TYPE_OPS, 'hllhash', [], $
 QAST::OperationsJAST.map_classlib_core_op('create', $TYPE_OPS, 'create', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('clone', $TYPE_OPS, 'clone', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('isconcrete', $TYPE_OPS, 'isconcrete', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('null', $TYPE_OPS, 'createNull', [], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('isnull', $TYPE_OPS, 'isnull', [$RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('isnull_s', $TYPE_OPS, 'isnull_s', [$RT_STR], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('istrue', $TYPE_OPS, 'istrue', [$RT_OBJ], $RT_INT, :tc);
@@ -4394,7 +4398,11 @@ class QAST::CompilerJAST {
 
             my $lbl := JAST::Label.new(:name($node.unique('fallback')));
             $il.append($DUP);
-            $il.append(JAST::Instruction.new( :op('ifnonnull'), $lbl ));
+            $il.append(JAST::Instruction.new( :op('invokestatic'),
+                $TYPE_OPS, 'isnull', 'Long', $TYPE_SMO));
+            $il.append($IVAL_ZERO);
+            $il.append($LCMP);
+            $il.append(JAST::Instruction.new( :op('ifeq'), $lbl ));
 
             my $fallback_res := self.as_jast($node.fallback, :want($RT_OBJ));
             $il.append($POP);
@@ -5286,7 +5294,11 @@ class QAST::CompilerJAST {
 
         # Backtrack the cursor stack.
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
-        $il.append(JAST::Instruction.new( :op('ifnull'), $jumplabel ));
+        $il.append(JAST::Instruction.new( :op('invokestatic'),
+            $TYPE_OPS, 'isnull', 'Long', $TYPE_SMO));
+        $il.append($IVAL_ONE);
+        $il.append($LCMP);
+        $il.append(JAST::Instruction.new( :op('ifeq'), $jumplabel ));
         $il.append(JAST::Instruction.new( :op('aload'), %*REG<cstack> ));
         $il.append($ALOAD_1);
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,

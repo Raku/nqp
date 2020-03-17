@@ -11,6 +11,7 @@ import java.util.Map;
 import org.perl6.nqp.runtime.CallFrame;
 import org.perl6.nqp.runtime.CodeRef;
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.reprs.CallCapture;
 import org.perl6.nqp.sixmodel.reprs.IOHandle;
@@ -295,7 +296,7 @@ public class SerializationWriter {
     public void writeRef(SixModelObject ref) {
         /* Work out what kind of thing we have and determine the discriminator. */
         short discrim = 0;
-        if (ref == null) {
+        if (Ops.isnull(ref) == 1) {
             discrim = REFVAR_VM_NULL;
         }
         else if (ref.st.REPR instanceof IOHandle) {
@@ -638,7 +639,7 @@ public class SerializationWriter {
 
     private SixModelObject closureToStaticCodeRef(CodeRef closure, boolean fatal) {
         SixModelObject staticCode = ((CodeRef)closure).staticInfo.staticCode;
-        if (staticCode == null)
+        if (Ops.isnull(staticCode) == 1)
         {
             if (fatal)
                 throw ExceptionHandling.dieInternal(tc,
@@ -711,7 +712,7 @@ public class SerializationWriter {
     private int getSerializedContextIdx(CallFrame cf) {
         if (cf.sc == null) {
             /* Make sure we should chase a level down. */
-            if (closureToStaticCodeRef(cf.codeRef, false) == null) {
+            if (Ops.isnull((SixModelObject)closureToStaticCodeRef(cf.codeRef, false)) == 1) {
                 return 0;
             }
             else {

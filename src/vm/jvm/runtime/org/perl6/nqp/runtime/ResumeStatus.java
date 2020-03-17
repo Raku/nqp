@@ -58,7 +58,7 @@ public class ResumeStatus extends SixModelObject {
             if (next != null) {
                 next.resume();
             } else {
-                if (thunk != null)
+                if (Ops.isnull(thunk) == 0)
                     Ops.invokeDirect(tc, thunk, Ops.emptyCallSite, false, Ops.emptyArgList);
             }
         }

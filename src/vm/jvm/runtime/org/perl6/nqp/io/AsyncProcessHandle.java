@@ -59,40 +59,40 @@ public class AsyncProcessHandle implements IIOClosable {
                     int pid = (int)getPID(AsyncProcessHandle.this.proc);
 
                     SixModelObject ready = config.get("ready");
-                    if (ready != null) {
+                    if (Ops.isnull(ready) == 0) {
                         send(ready, null, boxInt(pid));
                     }
 
                     SixModelObject outputCallback = config.get("merge_bytes");
-                    if (outputCallback == null)
+                    if (Ops.isnull(outputCallback) == 1)
                         outputCallback = config.get("stdout_bytes");
-                    if (outputCallback != null)
+                    if (Ops.isnull(outputCallback) == 0)
                         launchReader(outputCallback, false);
 
                     SixModelObject errorCallback = config.get("stderr_bytes");
-                    if (errorCallback != null)
+                    if (Ops.isnull(errorCallback) == 0)
                         launchReader(errorCallback, true);
 
                     int outcome = AsyncProcessHandle.this.proc.waitFor();
                     SixModelObject done = config.get("done");
                     /* Return exit code left shifted by 8 for POSIX emulation. */
-                    if (done != null)
+                    if (Ops.isnull(done) == 0)
                         send(done, boxInt(outcome << 8));
                 }
                 catch (Throwable t) {
                     SixModelObject message = boxError(t.toString());
 
                     SixModelObject error = config.get("error");
-                    if (error != null)
+                    if (Ops.isnull(error) == 0)
                         send(error, message);
 
                     SixModelObject stdoutBytes = config.get("stdout_bytes");
-                    if (stdoutBytes != null)
+                    if (Ops.isnull(stdoutBytes) == 0)
                         send(stdoutBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
                                 AsyncProcessHandle.this.hllConfig.strBoxType, message);
 
                     SixModelObject stderrBytes = config.get("stderr_bytes");
-                    if (stderrBytes != null)
+                    if (Ops.isnull(stderrBytes) == 0)
                         send(stderrBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
                                 AsyncProcessHandle.this.hllConfig.strBoxType, message);
                 }
@@ -139,32 +139,32 @@ public class AsyncProcessHandle implements IIOClosable {
             Map<String, SixModelObject> config) {
         SixModelObject desc;
 
-        if (config.get("write") != null) {
+        if (Ops.isnull(config.get("write")) == 0) {
             pb.redirectInput(Redirect.PIPE);
         }
-        else if ((desc = config.get("stdin_fd")) != null) {
+        else if (Ops.isnull(desc = config.get("stdin_fd")) == 0) {
         }
         else {
             pb.redirectInput(Redirect.INHERIT);
         }
 
-        if (config.get("merge_bytes") != null) {
+        if (Ops.isnull(config.get("merge_bytes")) == 0) {
             pb.redirectOutput(Redirect.PIPE);
             pb.redirectErrorStream(true);
         }
         else {
-            if (config.get("stdout_bytes") != null) {
+            if (Ops.isnull(config.get("stdout_bytes")) == 0) {
                 pb.redirectOutput(Redirect.PIPE);
             }
-            else if ((desc = config.get("stdout_fd")) != null) {
+            else if (Ops.isnull(desc = config.get("stdout_fd")) == 0) {
             }
             else {
                 pb.redirectOutput(Redirect.INHERIT);
             }
-            if (config.get("stderr_bytes") != null) {
+            if (Ops.isnull(config.get("stderr_bytes")) == 0) {
                 pb.redirectError(Redirect.PIPE);
             }
-            else if ((desc = config.get("stderr_fd")) != null) {
+            else if (Ops.isnull(desc = config.get("stderr_fd")) == 0) {
             }
             else {
                 pb.redirectError(Redirect.INHERIT);

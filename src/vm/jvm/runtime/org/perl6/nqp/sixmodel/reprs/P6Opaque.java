@@ -17,6 +17,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.REPR;
 import org.perl6.nqp.sixmodel.STable;
@@ -104,7 +105,7 @@ public class P6Opaque extends REPR {
                     SixModelObject attrHash = attrs.at_pos_boxed(tc, j);
                     String attrName = attrHash.at_key_boxed(tc, "name").get_str(tc);
                     SixModelObject attrType = attrHash.at_key_boxed(tc, "type");
-                    if (attrType == null)
+                    if (Ops.isnull(attrType) == 1)
                         attrType = tc.gc.KnowHOW;
                     indexes.put(attrName, curAttr);
                     AttrInfo info = new AttrInfo();
@@ -116,7 +117,7 @@ public class P6Opaque extends REPR {
                     info.boxTarget = attrHash.exists_key(tc, "box_target") != 0;
                     SixModelObject autoViv = attrHash.at_key_boxed(tc, "auto_viv_container");
                     autoVivs.add(autoViv);
-                    if (autoViv != null)
+                    if (Ops.isnull(autoViv) == 0)
                         info.hasAutoVivContainer = true;
                     info.posDelegate = attrHash.exists_key(tc, "positional_delegate") != 0;
                     info.assDelegate = attrHash.exists_key(tc, "associative_delegate") != 0;
@@ -183,7 +184,10 @@ public class P6Opaque extends REPR {
         mv.visitInsn(Opcodes.DUP);
 
         Label label = new Label();
-        mv.visitJumpInsn(Opcodes.IFNULL, label);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "isnull", "(Lorg/perl6/nqp/sixmodel/SixModelObject;)J");
+        mv.visitInsn(Opcodes.LCONST_1);
+        mv.visitInsn(Opcodes.LCMP);
+        mv.visitJumpInsn(Opcodes.IFEQ, label);
 
         mv.visitVarInsn(Opcodes.ALOAD, 1); // tc
         mv.visitVarInsn(Opcodes.ALOAD, 2); // class_handle
@@ -464,7 +468,10 @@ public class P6Opaque extends REPR {
                 isInitVisitor.visitLabel(isInitLabels[i]);
                 isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 isInitVisitor.visitFieldInsn(Opcodes.GETFIELD, className, field, desc);
-                isInitVisitor.visitJumpInsn(Opcodes.IFNULL, isInitNull);
+                isInitVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "org/perl6/nqp/runtime/Ops", "isnull", "(Lorg/perl6/nqp/sixmodel/SixModelObject;)J");
+                isInitVisitor.visitInsn(Opcodes.LCONST_1);
+                isInitVisitor.visitInsn(Opcodes.LCMP);
+                isInitVisitor.visitJumpInsn(Opcodes.IFEQ, isInitNull);
                 isInitVisitor.visitInsn(Opcodes.ICONST_1);
                 isInitVisitor.visitInsn(Opcodes.I2L);
                 isInitVisitor.visitInsn(Opcodes.LRETURN);
@@ -674,7 +681,7 @@ public class P6Opaque extends REPR {
 
             // Find original object.
             SixModelObject orig;
-            if (instance.delegate != null)
+            if (Ops.isnull(instance.delegate) == 0)
                 orig = instance.delegate;
             else
                 orig = obj;
@@ -694,7 +701,7 @@ public class P6Opaque extends REPR {
         // If we don't have to create a new delegate, but there's a delegate
         // in place already, the delegate needs a new STable as well.
         // Otherwise, methods introduced in the new type won't be available.
-        else if(instance.delegate != null) {
+        else if(Ops.isnull(instance.delegate) == 0) {
             instance.delegate.st = newType.st;
         }
 
@@ -771,7 +778,7 @@ public class P6Opaque extends REPR {
         for (int i = 0; i < numClasses; i++) {
             SixModelObject classHandle = reader.readRef();
             SixModelObject nameToHintObject = reader.readRef();
-            if (nameToHintObject == null) {
+            if (Ops.isnull(nameToHintObject) == 1) {
                 /* Nothing to do. */
             }
             else if (nameToHintObject instanceof VMHashInstance) {
@@ -892,7 +899,7 @@ public class P6Opaque extends REPR {
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject origObj) {
         try {
             P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)origObj;
-            if (obj.delegate != null)
+            if (Ops.isnull(obj.delegate) == 0)
                 obj = (P6OpaqueBaseInstance)obj.delegate;
             STable[] flattenedSTables = ((P6OpaqueREPRData)obj.st.REPRData).flattenedSTables;
             if (flattenedSTables == null)
