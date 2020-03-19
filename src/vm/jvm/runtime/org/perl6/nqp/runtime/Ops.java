@@ -1428,7 +1428,7 @@ public final class Ops {
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
-        return null;
+        return createNull(tc);
     }
     public static long getlex_i(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
@@ -1662,7 +1662,7 @@ public final class Ops {
                 return curFrame.oLex[idx];
             curFrame = curFrame.caller;
         }
-        return null;
+        return createNull(tc);
     }
     public static SixModelObject getlexcaller(String name, ThreadContext tc) {
         CallFrame curCallerFrame = tc.curFrame.caller;
@@ -1676,7 +1676,7 @@ public final class Ops {
             }
             curCallerFrame = curCallerFrame.caller;
         }
-        return null;
+        return createNull(tc);
     }
 
     /* Relative lexical lookups. */
@@ -1689,7 +1689,7 @@ public final class Ops {
                     return curFrame.oLex[found];
                 curFrame = curFrame.outer;
             }
-            return null;
+            return createNull(tc);
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "getlexrel requires an operand with REPR ContextRef");
@@ -1704,7 +1704,7 @@ public final class Ops {
                     return curFrame.oLex[idx];
                 curFrame = curFrame.caller;
             }
-            return null;
+            return createNull(tc);
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "getlexreldyn requires an operand with REPR ContextRef");
@@ -1723,7 +1723,7 @@ public final class Ops {
                 }
                 curCallerFrame = curCallerFrame.caller;
             }
-            return null;
+            return createNull(tc);
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "getlexrelcaller requires an operand with REPR ContextRef");
@@ -1741,7 +1741,7 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame outer = ((ContextRefInstance)ctx).context.outer;
             if (outer == null)
-                return null;
+                return createNull(tc);
 
             SixModelObject ContextRef = tc.gc.ContextRef;
             SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
@@ -1756,7 +1756,7 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame caller = ((ContextRefInstance)ctx).context.caller;
             if (caller == null)
-                return null;
+                return createNull(tc);
 
             SixModelObject ContextRef = tc.gc.ContextRef;
             SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
@@ -1779,7 +1779,7 @@ public final class Ops {
             while (outer != null && outer.codeRef.staticInfo.isThunk)
                 outer = outer.outer;
             if (outer == null)
-                return null;
+                return createNull(tc);
 
             SixModelObject ContextRef = tc.gc.ContextRef;
             SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
@@ -1796,7 +1796,7 @@ public final class Ops {
             while (caller != null && caller.codeRef.staticInfo.isThunk)
                 caller = caller.caller;
             if (caller == null)
-                return null;
+                return createNull(tc);
 
             SixModelObject ContextRef = tc.gc.ContextRef;
             SixModelObject wrap = ContextRef.st.REPR.allocate(tc, ContextRef.st);
