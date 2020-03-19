@@ -5667,11 +5667,11 @@ public final class Ops {
             InvocationSpec is = dispFor.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
-                if (isnull(is.ClassHandle) == 0)
-                    tc.currentDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
-                            is.ClassHandle, is.AttrName, is.Hint);
-                else
-                    throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
+            if (isnull(is.ClassHandle) == 0)
+                tc.currentDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
+                        is.ClassHandle, is.AttrName, is.Hint);
+            else
+                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
         }
         return disp;
     }
@@ -5693,11 +5693,11 @@ public final class Ops {
             InvocationSpec is = dispFor.st.InvocationSpec;
             if (is == null)
                 throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
-                if (isnull(is.ClassHandle) == 0)
-                    tc.nextDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
-                            is.ClassHandle, is.AttrName, is.Hint);
-                else
-                    throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
+            if (isnull(is.ClassHandle) == 0)
+                tc.nextDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
+                        is.ClassHandle, is.AttrName, is.Hint);
+            else
+                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
         }
         return disp;
     }
