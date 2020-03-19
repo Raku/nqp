@@ -261,8 +261,19 @@ class NQP::Optimizer {
             !! "";
         my int $und := nqp::index($opname, '_');
         my str $asm := $und > 0 ?? nqp::substr($opname, 0, $und) !! '';
-        if $typeinfo eq '_n' && nqp::existskey(%opt_n_i, $asm) {
-            self.num_to_int($op, $asm);
+        # Enrich various ops with int/num/str annotations.
+        if $typeinfo eq '_n' {
+            if nqp::existskey(%opt_n_i, $asm) {
+                self.num_to_int($op, $asm);
+            }
+            else {
+                $op.returns(num);
+            }
+        }
+        elsif $typeinfo eq '_i' {
+            $op.returns(int);
+        } elsif $typeinfo eq '_s' {
+            $op.returns(str);
         }
 
         # Calls to fixed names that are compile-time known can be simplified.
@@ -281,22 +292,19 @@ class NQP::Optimizer {
             }
         }
 
-        # Enrich various ops with int/num/str annotations.
-        elsif $typeinfo eq '_i' {
-            $op.returns(int);
-        } elsif $typeinfo eq '_s' {
-            $op.returns(str);
-        }
-        if $opname eq 'intify' || $opname eq 'numify' {
-            # if we can establish that the argument is a list, we are good
-            # to claim it returns an int.
+        elsif $opname eq 'intify' {
+            # if we can establish that the argument is a list or hash, re-write
+            # to nqp::elems()
             if nqp::istype($op[0], QAST::Var) {
                 my $sigil := nqp::substr($op[0].name, 0, 1);
                 if $sigil eq '@' || $sigil eq '%' {
                     $op.op('elems');
-                    $op.returns(int)
                 }
             }
+            $op.returns(int)
+        }
+        elsif $opname eq 'numify' {
+            $op.returns(num)
         }
 
         $op;
