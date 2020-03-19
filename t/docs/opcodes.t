@@ -23,6 +23,7 @@ my %ops := hash_of_vms();
 %ops<moar> := find_opcodes(
     :files([
         "src/vm/moar/QAST/QASTOperationsMAST.nqp",
+        "src/vm/moar/QAST/QASTCompilerMAST.nqp",
         "src/vm/moar/NQP/Ops.nqp"
     ]),
     :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op>)
@@ -65,7 +66,11 @@ sub find_opcodes(:@files, :@keywords) {
     for @files -> $file {
         my @lines := nqp::split("\n", slurp($file));
         for @lines -> $line {
-            if $line ~~ / @keywords / {
+            if $line ~~ / "%core_op_generators{'" (<[a..zA..Z0..9_]>+) "'}" / -> $match {
+                if ?$match {
+                    %ops{$match[0]} := 1;
+                }
+            } elsif $line ~~ / @keywords / {
                 my @pieces := nqp::split("'", $line);
                 $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
 
