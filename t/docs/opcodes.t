@@ -123,7 +123,7 @@ sub find_documented_opcodes() {
                 }
             }
         }
-        next unless $line ~~ / ^ '* ' .* '(' /;
+        next unless $line ~~ / ^ '* `' .* '(' .* '`' $ /;
         $line := nqp::substr($line, 3);
         $line := nqp::split("(", $line)[0];
         for @opcode_vms -> $vm {
