@@ -18,7 +18,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
     method termaltseq($/) {
         my $qast := $<termconjseq>[0].ast;
-        if +$<termconjseq> > 1 {
+        if nqp::elems($<termconjseq>) > 1 {
             $qast := QAST::Regex.new( :rxtype<altseq>, :node($/) );
             for $<termconjseq> { $qast.push($_.ast) }
         }
@@ -27,7 +27,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method termconjseq($/) {
         my $qast := $<termalt>[0].ast;
-        if +$<termalt> > 1 {
+        if nqp::elems($<termalt>) > 1 {
             $qast := QAST::Regex.new( :rxtype<conjseq>, :node($/) );
             for $<termalt> { $qast.push($_.ast); }
         }
@@ -36,7 +36,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method termalt($/) {
         my $qast := $<termconj>[0].ast;
-        if +$<termconj> > 1 {
+        if nqp::elems($<termconj>) > 1 {
             $qast := QAST::Regex.new( :rxtype<alt>, :node($/) );
             for $<termconj> { $qast.push($_.ast) }
         }
@@ -45,7 +45,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
 
     method termconj($/) {
         my $qast := $<termish>[0].ast;
-        if +$<termish> > 1 {
+        if nqp::elems($<termish>) > 1 {
             $qast := QAST::Regex.new( :rxtype<conj>, :node($/) );
             for $<termish> { $qast.push($_.ast); }
         }
@@ -633,11 +633,11 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my int $i := 1;
         my int $n := nqp::elems($clist);
         while $i < $n {
-	    unless ~$clist[$i]<sign> {
-		my $curse := $clist[$i]<sign>;
-		$curse."!clear_highwater"();
-		$curse.panic('Missing + or - between character class elements')
-	    }
+            unless ~$clist[$i]<sign> {
+            my $curse := $clist[$i]<sign>;
+            $curse."!clear_highwater"();
+            $curse.panic('Missing + or - between character class elements')
+        }
             my $ast := $clist[$i].ast;
             if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
                 $ast.subtype('zerowidth');
@@ -785,7 +785,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
                                         :subtype($RXm ?? 'ignoremark' !! '') ))
                 if nqp::chars($str);
-            $qast := ( my $num := +@alts ) == 1 ?? @alts[0] !!
+            $qast := ( my $num := nqp::elems(@alts) ) == 1 ?? @alts[0] !!
                 0 < $num && $<sign> eq '-' ??
                     QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),

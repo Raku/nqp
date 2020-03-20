@@ -501,9 +501,9 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('hlllist') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
-        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
+        pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_obj));
@@ -524,9 +524,9 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('bootintarray') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
-        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
+        pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_int64));
@@ -547,9 +547,9 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('bootnumarray') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
-        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
+        pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_num64));
@@ -570,9 +570,9 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('bootstrarray') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
-        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
+        pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_str));
@@ -593,9 +593,9 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('bootarray') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
-        pre-size-array($qastcomp, $arr, $arr_reg, +$op.list);
+        pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         # Push things to the list.
         my $item_reg := $regalloc.fresh_register($MVM_reg_obj);
         for $op.list {
@@ -628,7 +628,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
         :op('create'),
         QAST::Op.new( :op('hllhash') )
     ));
-    if +$op.list {
+    if nqp::elems($op.list) {
         my $hash_reg := $hash.result_reg;
         for $op.list -> $key, $val {
             my $key_mast := $qastcomp.as_mast($key, :want($MVM_reg_str));
@@ -724,7 +724,7 @@ sub needs_cond_passed($n) {
 for <if unless with without> -> $op_name {
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         # Check operand count.
-        my $operands := +$op.list;
+        my $operands := nqp::elems($op.list);
         nqp::die("The '$op_name' op needs 2 or 3 operands, got $operands")
             if $operands < 2 || $operands > 3;
 
@@ -938,8 +938,8 @@ for <if unless with without> -> $op_name {
 }
 
 QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
-    if +$op.list != 2 {
-        nqp::die("The 'defor' op needs 2 operands, got " ~ +$op.list);
+    if nqp::elems($op.list) != 2 {
+        nqp::die("The 'defor' op needs 2 operands, got " ~ nqp::elems($op.list));
     }
 
     # Compile the expression.
@@ -1046,8 +1046,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
 });
 
 QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
-    if +$op.list != 2 {
-        nqp::die("The 'ifnull' op needs 2 operands, got " ~ +$op.list);
+    if nqp::elems($op.list) != 2 {
+        nqp::die("The 'ifnull' op needs 2 operands, got " ~ nqp::elems($op.list));
     }
 
     # Compile the expression.
@@ -2776,8 +2776,8 @@ QAST::MASTOperations.add_core_moarop_mapping('iscont_n', 'iscont_n');
 QAST::MASTOperations.add_core_moarop_mapping('iscont_s', 'iscont_s');
 QAST::MASTOperations.add_core_moarop_mapping('isrwcont', 'isrwcont');
 QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
-    if +$op.list != 1 {
-        nqp::die("The 'decont' op needs 1 operand, got " ~ +$op.list);
+    if nqp::elems($op.list) != 1 {
+        nqp::die("The 'decont' op needs 1 operand, got " ~ nqp::elems($op.list));
     }
     my $regalloc := $*REGALLOC;
     my $res_reg := $regalloc.fresh_o();

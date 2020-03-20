@@ -278,7 +278,7 @@ class NQP::Actions is HLL::Actions {
     }
 
     method statement_control:sym<if>($/) {
-        my $count := +$<xblock> - 1;
+        my $count := nqp::elems($<xblock>) - 1;
         my $ast := xblock_immediate( $<xblock>[$count].ast );
         if $<else> {
             $ast.push( block_immediate( $<else>.ast ) );
@@ -1497,7 +1497,7 @@ class NQP::Actions is HLL::Actions {
             else { $ast.push($expr); }
         }
         my $i := 0;
-        my $n := +$ast.list;
+        my $n := nqp::elems($ast.list);
         while $i < $n {
             if nqp::istype($ast[$i], QAST::Op) && $ast[$i].name eq '&prefix:<|>' {
                 $ast[$i] := $ast[$i][0];
