@@ -969,13 +969,13 @@ If absent rely on lower level conversions.
 ## coerce_si
 * `coerce_si(str --> int)`
 
-## smrt_intify
+## smrt_intify `moar`
 * `smrt_intify($o --> int)`
 
-## smrt_numify
+## smrt_numify `moar`
 * `smrt_numify($o --> num)`
 
-## smrt_strify
+## smrt_strify `moar`
 * `smrt_strify($o --> str)`
 
 # <a id="string"></a> String Opcodes
@@ -1013,7 +1013,7 @@ Return a string that is the concatenation of the two passed in strings.
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
 
-## decodetocodes `moar`
+## decodetocodes `oar`
 * `decodetocodes($buffer, str $encoding, int $normalization, $codes)`
 
 Decodes the bytes in the specified buffer using the provided encoding. Applies
@@ -2193,7 +2193,7 @@ carry no transformation overhead.
 Writes the signed integer `$value` at `$offset` into the buffer `$target`,
 with the size and endianness specified by `$flags`.
 
-## writeuint
+## writeuint `moar` `js`
 * `writeuint(buffer $target, int $offset, uint $value, int $flags)`
 
 Writes the unsigned integer `$value` at `$offset` into the buffer `$target`,
@@ -2217,7 +2217,7 @@ endianness specified by `$flags`. Returns that value, widened to a 64-bit int.
 Reads an unsigned integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit uint.
 
-## readnum
+## readnum `moar` `js`
 * `readnum(buffer $source, int $offset, int $flags --> num)`
 
 Reads a floating point number at offset `$offset` from `$source` with the
@@ -2696,7 +2696,7 @@ rather than **Kbytes** on MacOS.
 Elements may be 0 if it is impossible to determine that value in the current
 system.
 
-## uname
+## uname `moar` `js`
 * `uname(--> Mu)`
 
 Returns a string array and fills it with uname data, of which the following
@@ -2820,7 +2820,7 @@ Creates a lexical closure from the block's outer scope.
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
 
-## mvmstartprofile
+## mvmstartprofile `moar`
 * `mvmstartprofile(hash $config)`
 
 Turns on one of MoarVM's profilers. The configuration must have a `kind` key that specifies which profiler will be turned on:
@@ -2835,7 +2835,7 @@ Turns on one of MoarVM's profilers. The configuration must have a `kind` key tha
 
 If a profiler is already active, an exception will be thrown; only one profiler can run at a time.
 
-## mvmendprofile
+## mvmendprofile `moar`
 * `mvmendprofile(--> Object)`
 
 Turns off the profiler and returns data gathered.
@@ -3023,7 +3023,7 @@ number that starts at 0, the string if anything was decoded (type object on
 error) and an error string (some type object if no error). If EOF is
 reached, a sequence number of -1 is sent. Cancel to stop reading.
 
-## asyncreadbytes
+## asyncreadbytes `moar` `jvm`
 * `asyncreadbytes($handle, $queue, $schedulee, $buf_type, $handle_type)`
 
 Starts reading bytes from the handle. When a packet is received, a $buf_type
