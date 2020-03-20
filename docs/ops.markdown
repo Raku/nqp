@@ -369,7 +369,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [scsetdesc](#scsetdesc)
   * [scgetdesc](#scgetdesc)
   * [scgethandle](#scgethandle)
-  * [pushcompc](#pushcompsc)
+  * [pushcompsc](#pushcompsc)
   * [popcompsc](#popcompsc)
   * [scsetobj](#scsetobj)
   * [setobjsc](#seetobjsc)
@@ -3150,7 +3150,7 @@ Get the descriptor set by `scsetdec`
 Get the handle string used by `createsc` to create the SC `$sc`
 
 ## pushcompsc
-* `pushcompc($sc)`
+* `pushcompsc($sc)`
 
 ## popcompsc
 * `popcompsc($sc)`
