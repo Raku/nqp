@@ -6221,8 +6221,8 @@ public final class Ops {
                 if (te.frame.codeRef.staticInfo.isThunk)
                     continue;
                 SixModelObject annots = Hash.st.REPR.allocate(tc, Hash.st);
-                if (te.file != null) annots.bind_key_boxed(tc, "file", box_s(te.file, Str, tc));
-                if (te.line >= 0) annots.bind_key_boxed(tc, "line", box_i(te.line, Int, tc));
+                annots.bind_key_boxed(tc, "file", box_s(te.file == null ? "" : te.file, Str, tc));
+                annots.bind_key_boxed(tc, "line", box_i(te.line < 0 ? 1 : te.line, Int, tc));
                 SixModelObject row = Hash.st.REPR.allocate(tc, Hash.st);
                 row.bind_key_boxed(tc, "sub", te.frame.codeRef);
                 row.bind_key_boxed(tc, "annotations", annots);
