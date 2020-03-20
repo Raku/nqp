@@ -135,6 +135,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [strtocodes](#strtocodes)
   * [substr](#substr)
   * [tc](#tc)
+  * [tclc](#tclc)
   * [uc](#uc)
   * [unicmp_s `js` `moar`](#unicmp_s)
   * [x](#x)
@@ -1291,6 +1292,12 @@ JVM specific internal opcodes for `substr`.
 * `tc(str $str --> str)`
 
 Return titlecase copy of string.
+
+## tclc
+* `tclc(str $str --> str)`
+
+Return copy of string with first character titlecased, and remaining
+characters lowercased.
 
 ## uc
 * `uc(str $str --> str)`
