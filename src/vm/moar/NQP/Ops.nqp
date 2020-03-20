@@ -102,7 +102,7 @@ $ops.add_hll_op('nqp', 'stringify', -> $qastcomp, $op {
 });
 
 $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
-    unless $op.list == 1 {
+    unless nqp::elems($op.list) == 1 {
         nqp::die('falsey op requires one child');
     }
     my $val      := $qastcomp.as_mast($op[0]);
