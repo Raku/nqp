@@ -2181,37 +2181,37 @@ Reading or writing little endian on a little endian machine will, of course,
 carry no transformation overhead.
 
 ## writeint
-* `nqp::writeint(buffer $target, int $offset, int $value, int $flags)`
+* `writeint(buffer $target, int $offset, int $value, int $flags)`
 
 Writes the signed integer `$value` at `$offset` into the buffer `$target`,
 with the size and endianness specified by `$flags`.
 
 ## writeuint
-* `nqp::writeuint(buffer $target, int $offset, uint $value, int $flags)`
+* `writeuint(buffer $target, int $offset, uint $value, int $flags)`
 
 Writes the unsigned integer `$value` at `$offset` into the buffer `$target`,
 with the size and endianness specified by `$flags`.
 
 ## writenum
-* `nqp::writenum(buffer $target, int $offset, num $value, int $flags)`
+* `writenum(buffer $target, int $offset, num $value, int $flags)`
 
 Writes the floating point `$value` at `$offset` into the buffer `$target`.
 Only 32-bit and 64-bit sizes are supported.
 
 ## readint
-* `nqp::readint(buffer $source, int $offset, int $flags --> int)`
+* `readint(buffer $source, int $offset, int $flags --> int)`
 
 Reads a signed integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit int.
 
 ## readuint
-* `nqp::readuint(buffer $source, int $offset, int $flags --> uint)`
+* `readuint(buffer $source, int $offset, int $flags --> uint)`
 
 Reads an unsigned integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit uint.
 
 ## readnum
-* `nqp::readnum(buffer $source, int $offset, int $flags --> num)`
+* `readnum(buffer $source, int $offset, int $flags --> num)`
 
 Reads a floating point number at offset `$offset` from `$source` with the
 size specified by `$flags`. Returns that value, widened to a 64-bit num.
