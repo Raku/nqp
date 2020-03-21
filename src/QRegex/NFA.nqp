@@ -662,7 +662,7 @@ class QRegex::NFA {
 #        my $indent := dentin();
 #        note("$indent mergesubstates start $start to $to fate $fate") if $nfadeb;
         @!states[0][$fate] := $fate;  # overridden by !protoregex_nfa
-        if @substates {
+        if nqp::istype(@substates, NQPArray) && nqp::elems(@substates) {
             # create an empty end state for the subrule's NFA
             my int $substart := self.addstate();
             # Copy (yes, clone) @substates[1..*] into our states.
@@ -671,7 +671,7 @@ class QRegex::NFA {
             @substates := nqp::clone(@substates);
             nqp::shift(@substates);
             nqp::push(@!states, nqp::clone(nqp::shift(@substates)))
-              while @substates;
+              while nqp::elems(@substates);
             # Go through all of the newly added states, and
             #    apply $substart offset to target states
             #    adjust fate edges to be $fate

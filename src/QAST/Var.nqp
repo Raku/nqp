@@ -12,7 +12,7 @@ class QAST::Var is QAST::Node does QAST::Children {
         nqp::bindattr_s($node, QAST::Var, '$!name', $name);
         nqp::bindattr_s($node, QAST::Var, '$!scope', $scope);
         nqp::bindattr_s($node, QAST::Var, '$!decl', $decl);
-        $node.set(%options) if %options;
+        $node.set(%options) if nqp::isconcrete(%options) && nqp::elems(%options);
         $node
     }
 

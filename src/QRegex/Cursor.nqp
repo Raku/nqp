@@ -625,7 +625,7 @@ role NQPMatchRole is export {
         my @rxfate := $nfa.states[0];
         my $cur;
         my $rxname;
-        while @fates {
+        while nqp::elems(@fates) {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
             # note("invoking $rxname");
             $cur    := self."$rxname"();
@@ -1113,7 +1113,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
 
             # Walk the Cursor stack and populate the Cursor.
             my $cs := nqp::getattr(self, NQPMatch, '$!cstack');
-            if nqp::isnull($cs) || !nqp::istrue($cs) {}
+            if nqp::isnull($cs) || !nqp::isconcrete($cs) || !nqp::elems($cs) {}
             elsif $onlyname ne '' {
                 # If there's only one destination, avoid repeated hash lookups
                 my int $cselems := nqp::elems($cs);

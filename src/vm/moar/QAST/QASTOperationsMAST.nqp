@@ -92,7 +92,7 @@ class QAST::MASTOperations {
         my $mapper;
         if $hll {
             my %ops := %hll_ops{$hll};
-            $mapper := %ops{$name} if %ops;
+            $mapper := %ops{$name} if nqp::isconcrete(%ops) && nqp::elems(%ops);
         }
         $mapper := %core_ops{$name} unless $mapper;
         $mapper
