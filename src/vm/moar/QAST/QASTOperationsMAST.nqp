@@ -969,7 +969,6 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
 });
 
 QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
-    my @ops;
     my int $res_kind   := $MVM_reg_obj;
     my $res_reg    := $*REGALLOC.fresh_o();
     my $t          := $*REGALLOC.fresh_i();
@@ -3024,7 +3023,6 @@ QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
     unless nqp::istype($op[0], QAST::SVal) {
         nqp::die("The 'takedispatcher' op must have a single QAST::SVal child, got " ~ $op[0].HOW.name($op[0]));
     }
-    my @ops;
     my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
     my $isnull_reg := $regalloc.fresh_register($MVM_reg_int64);
     my $done_lbl   := MAST::Label.new();
@@ -3044,7 +3042,6 @@ QAST::MASTOperations.add_core_op('takenextdispatcher', -> $qastcomp, $op {
     unless nqp::istype($op[0], QAST::SVal) {
         nqp::die("The 'takenextdispatcher' op must have a single QAST::SVal child, got " ~ $op[0].HOW.name($op[0]));
     }
-    my @ops;
     my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
     my $isnull_reg := $regalloc.fresh_register($MVM_reg_int64);
     my $done_lbl   := MAST::Label.new();
