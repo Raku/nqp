@@ -7,6 +7,18 @@
 @bsv(NQP_LIB_DIR)@		= $(NQP_LIB_DIR)
 # It's ok to shell quote this one as it only used in a command line
 
+# FIXME:
+@bpv(CLEANUPS_EXTRA)@ = \
+  nqpmc \
+  nqp-m.c \
+  nqp-m@moar::obj@ \
+  nqp.c \
+  nqp@moar::obj@ \
+  inst-nqp-m@moar::obj@ \
+  @bpm(INST_NQP_M)@ \
+  inst-nqp@moar::obj@ \
+  @bpm(INST_NQP)@
+
 @bpv(MOAR_INC_PATHS)@ = \
   @moar::cincludes@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include)@ \
@@ -46,18 +58,6 @@
 	$(NOECHO)$(CP) @nfp(src/vm/moar/profiler/template.html)@ @nfpq($(DESTDIR)$(NQP_LIB_DIR)/profiler/template.html)@
 	$(NOECHO)$(CP) @bpm(INST_NQP_M)@ @nfpq($(DESTDIR)$(BIN_DIR)/@bpm(NQP_M)@)@
 @expand(@m_install@)@
-
-# FIXME:
-@bpv(CLEANUPS_EXTRA)@ = \
-  nqpmc \
-  nqp-m.c \
-  nqp-m@moar::obj@ \
-  nqp.c \
-  nqp@moar::obj@ \
-  inst-nqp-m@moar::obj@ \
-  @bpm(INST_NQP_M)@ \
-  inst-nqp@moar::obj@ \
-  @bpm(INST_NQP)@
 
 @bpv(CC_INST_NQP)@=@moar::cc@ @moar::ccswitch@ @moar::cflags@ @static_nqp_home_define@ @bpm(MOAR_INC_PATHS)@
 @bpv(LD_INST_NQP)@=@moar::ld@ @ldflags@ @mingw_unicode@
