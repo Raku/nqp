@@ -2313,7 +2313,7 @@ class MoarVM::StringHeap {
             nqp::setelems($str, $encoded_size + 4 + $pad);
             nqp::setelems($str, 0);
 
-            $str.write_uint32(nqp::elems($encoded) * 2 + $utf8); # LSB is UTF-8 flag
+            $str.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
             $str.write_buf($encoded);
             $str.write_uint8(0) while $pad--;
 
