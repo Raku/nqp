@@ -2293,32 +2293,30 @@ class MoarVM::StringHeap {
             }
         }
     }
+    method add-internal(str $s) {
+        my int $utf8 := 0;
+        my int $i := 0;
+        my int $chars := nqp::chars($s);
+        while $i < $chars && !$utf8 {
+            my int $g := nqp::getcp_s($s, $i++);
+            $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
+        }
+
+        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
+        my int $encoded_size := nqp::elems($encoded);
+        my int $pad := 4 - $encoded_size % 4;
+        $pad := 0 if $pad == 4;
+
+        $!strings.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
+        $!strings.write_buf($encoded);
+        $!strings.write_uint8(0) while $pad--;
+
+        nqp::push_s(@!orig-strings, $s);
+
+        %!strings{$s} := $!strings-count++;
+    }
     method add(str $s) {
-        if nqp::existskey(%!strings, $s) {
-            %!strings{$s};
-        }
-        else {
-            my int $utf8 := 0;
-            my int $i := 0;
-            my int $chars := nqp::chars($s);
-            while $i < $chars && !$utf8 {
-                my int $g := nqp::getcp_s($s, $i++);
-                $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
-            }
-
-            my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
-            my int $encoded_size := nqp::elems($encoded);
-            my int $pad := 4 - $encoded_size % 4;
-            $pad := 0 if $pad == 4;
-
-            $!strings.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
-            $!strings.write_buf($encoded);
-            $!strings.write_uint8(0) while $pad--;
-
-            nqp::push_s(@!orig-strings, $s);
-
-            %!strings{$s} := $!strings-count++;
-        }
+        nqp::existskey(%!strings, $s) ?? %!strings{$s} !! self.add-internal($s)
     }
     method size() {
         my uint32 $size := nqp::elems($!strings);
