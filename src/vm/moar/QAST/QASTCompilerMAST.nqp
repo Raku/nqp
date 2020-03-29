@@ -2278,11 +2278,13 @@ class MoarVM::Callsites {
 }
 
 class MoarVM::StringHeap {
-    has @!strings;
+    has $!strings;
+    has uint $!strings-count;
     has @!orig-strings;
     has %!strings;
     method BUILD(:@strings) {
-        @!strings := nqp::list();
+        $!strings := nqp::create(MAST::Bytecode);
+        $!strings-count := 0;
         @!orig-strings := nqp::list_s();
         %!strings := nqp::hash();
         if nqp::islist(@strings) {
@@ -2309,32 +2311,24 @@ class MoarVM::StringHeap {
             my int $pad := 4 - $encoded_size % 4;
             $pad := 0 if $pad == 4;
 
-            my $str := MAST::Bytecode.new;
-            nqp::setelems($str, $encoded_size + 4 + $pad);
-            nqp::setelems($str, 0);
+            $!strings.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
+            $!strings.write_buf($encoded);
+            $!strings.write_uint8(0) while $pad--;
 
-            $str.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
-            $str.write_buf($encoded);
-            $str.write_uint8(0) while $pad--;
-
-            nqp::push(@!strings, $str);
             nqp::push_s(@!orig-strings, $s);
 
-            %!strings{$s} := nqp::elems(@!strings) - 1
+            %!strings{$s} := $!strings-count++;
         }
     }
     method size() {
-        my uint32 $size := 0;
-        for @!strings {
-            $size := $size + nqp::elems($_);
-        }
+        my uint32 $size := nqp::elems($!strings);
         $size
     }
     method elems() {
-        nqp::elems(@!strings)
+        $!strings-count
     }
     method strings() {
-        @!strings
+        $!strings
     }
     method orig-strings() {
         @!orig-strings
@@ -2548,9 +2542,7 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_buf($!callsites.bytecode);
     }
     method write_string_heap() {
-        for $!string-heap.strings {
-            $!mbc.write_buf($_);
-        }
+        $!mbc.write_buf($!string-heap.strings);
     }
     method write_serialized_data() {
         $!mbc.write_buf($!compunit.serialized) if nqp::defined($!compunit.serialized);
