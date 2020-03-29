@@ -303,6 +303,39 @@ my class MASTCompilerInstance {
                 $out++;
                 $block := $block.outer;
             }
+            my $buf8 := create_buf(uint8);
+            my sub convert-two($str) {
+                my $str2 := nqp::encode($str, 'iso-8859-1', $buf8.new);
+                return nqp::decode($str2, 'utf8');
+            }
+            my sub convert($str) {
+                my $str2 := nqp::encode($str, 'iso-8859-1', $buf8.new);
+                return nqp::decode($str2, 'utf8');
+            }
+            my sub create_buf($type) {
+                my $buf := nqp::newtype(nqp::null(), 'VMArray');
+                nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+                nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+                $buf;
+            }
+            my $mangled_name_two := convert-two($name);
+            $block := self;
+            $out := 0;
+            while $block {
+                my $lex := ($block.lexicals()){$mangled_name_two};
+                return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                $out++;
+                $block := $block.outer;
+            }
+            my $mangled_name := convert($name);
+            $block := self;
+            $out := 0;
+            while $block {
+                my $lex := ($block.lexicals()){$mangled_name};
+                return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                $out++;
+                $block := $block.outer;
+            }
             nqp::die("Could not resolve lexical $name");
         }
 
