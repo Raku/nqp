@@ -2645,9 +2645,6 @@ class MASTBytecodeAssembler {
     method assemble($mast) {
         my $writer := $mast.writer;
         my @cu_frames := nqp::getattr($mast, MAST::CompUnit, '@!frames');
-        my $string-heap := $writer.string-heap;
-        my $callsites := $writer.callsites;
-        my $annotations := $writer.annotations;
         for @cu_frames {
             $writer.add-frame($_);
         }
