@@ -2329,15 +2329,8 @@ class MoarVM::StringHeap {
             %!strings{$s};
         }
         else {
-            my int $utf8 := 0;
-            my int $i := 0;
-            my int $chars := nqp::chars($s);
-            while $i < $chars && !$utf8 {
-                my int $g := nqp::getcp_s($s, $i++);
-                $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
-            }
-
-            my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
+            my int $utf8 := 1;
+            my $encoded := nqp::encode($s, "utf8", nqp::create(MAST::Bytecode));
             my int $encoded_size := nqp::elems($encoded);
             my int $pad := 4 - $encoded_size % 4;
             $pad := 0 if $pad == 4;
