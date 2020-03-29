@@ -318,23 +318,26 @@ my class MASTCompilerInstance {
                 nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
                 $buf;
             }
-            my $mangled_name_two := convert-two($name);
-            $block := self;
-            $out := 0;
-            while $block {
-                my $lex := ($block.lexicals()){$mangled_name_two};
-                return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
-                $out++;
-                $block := $block.outer;
-            }
-            my $mangled_name := convert($name);
-            $block := self;
-            $out := 0;
-            while $block {
-                my $lex := ($block.lexicals()){$mangled_name};
-                return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
-                $out++;
-                $block := $block.outer;
+            my $handle-mangled-strings := 0;
+            if $handle-mangled-strings {
+                my $mangled_name_two := convert-two($name);
+                $block := self;
+                $out := 0;
+                while $block {
+                    my $lex := ($block.lexicals()){$mangled_name_two};
+                    return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                    $out++;
+                    $block := $block.outer;
+                }
+                my $mangled_name := convert($name);
+                $block := self;
+                $out := 0;
+                while $block {
+                    my $lex := ($block.lexicals()){$mangled_name};
+                    return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                    $out++;
+                    $block := $block.outer;
+                }
             }
             nqp::die("Could not resolve lexical $name");
         }
