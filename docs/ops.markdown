@@ -1013,7 +1013,7 @@ Return a string that is the concatenation of the two passed in strings.
 Returns an (NFG) string resulting from decoding the specified buffer assuming
 the specified encoding.
 
-## decodetocodes `oar`
+## decodetocodes `moar`
 * `decodetocodes($buffer, str $encoding, int $normalization, $codes)`
 
 Decodes the bytes in the specified buffer using the provided encoding. Applies
