@@ -303,6 +303,42 @@ my class MASTCompilerInstance {
                 $out++;
                 $block := $block.outer;
             }
+            my $buf8 := create_buf(uint8);
+            my sub convert-two($str) {
+                my $str2 := nqp::encode($str, 'iso-8859-1', $buf8.new);
+                return nqp::decode($str2, 'utf8');
+            }
+            my sub convert($str) {
+                my $str2 := nqp::encode($str, 'iso-8859-1', $buf8.new);
+                return nqp::decode($str2, 'utf8');
+            }
+            my sub create_buf($type) {
+                my $buf := nqp::newtype(nqp::null(), 'VMArray');
+                nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+                nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+                $buf;
+            }
+            my $handle-mangled-strings := 0;
+            if $handle-mangled-strings {
+                my $mangled_name_two := convert-two($name);
+                $block := self;
+                $out := 0;
+                while $block {
+                    my $lex := ($block.lexicals()){$mangled_name_two};
+                    return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                    $out++;
+                    $block := $block.outer;
+                }
+                my $mangled_name := convert($name);
+                $block := self;
+                $out := 0;
+                while $block {
+                    my $lex := ($block.lexicals()){$mangled_name};
+                    return MAST::Lexical.new( :index($lex.index), :frames_out($out) ) if $lex;
+                    $out++;
+                    $block := $block.outer;
+                }
+            }
             nqp::die("Could not resolve lexical $name");
         }
 
@@ -2298,15 +2334,8 @@ class MoarVM::StringHeap {
             %!strings{$s};
         }
         else {
-            my int $utf8 := 0;
-            my int $i := 0;
-            my int $chars := nqp::chars($s);
-            while $i < $chars && !$utf8 {
-                my int $g := nqp::getcp_s($s, $i++);
-                $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
-            }
-
-            my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
+            my int $utf8 := 1;
+            my $encoded := nqp::encode($s, "utf8", nqp::create(MAST::Bytecode));
             my int $encoded_size := nqp::elems($encoded);
             my int $pad := 4 - $encoded_size % 4;
             $pad := 0 if $pad == 4;
