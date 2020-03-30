@@ -2299,13 +2299,14 @@ class MoarVM::StringHeap {
             $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
         }
 
-        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
-        my int $encoded_size := nqp::elems($encoded);
+        my int $prev_total_size := nqp::elems($!strings);
+        nqp::setelems($!strings, $prev_total_size + 4);
+        nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), $!strings);
+        my int $encoded_size := nqp::elems($!strings) - 4 - $prev_total_size;
         my int $pad := 4 - $encoded_size % 4;
         $pad := 0 if $pad == 4;
 
-        $!strings.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
-        $!strings.write_buf($encoded);
+        $!strings.write_uint32_at($encoded_size * 2 + $utf8, $prev_total_size); # LSB is UTF-8 flag
         $!strings.write_uint8(0) while $pad--;
 
         nqp::push_s(@!orig-strings, $s);
