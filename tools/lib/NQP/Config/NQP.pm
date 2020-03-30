@@ -93,6 +93,14 @@ sub configure_misc {
 
     $config->{moar_stage0} = $self->nfp( "src/vm/moar/stage0", no_quote => 1 );
     $config->{jvm_stage0}  = $self->nfp( "src/vm/jvm/stage0",  no_quote => 1 );
+
+    # TODO: Use the template infrastructure from nqp-configure?
+    open my $configfile, '>', 'src/core/Config.nqp';
+    print $configfile "# This file is generated automatically by $0\n";
+    print $configfile "sub nqpconfig() {\n";
+    print $configfile "    nqp::hash('prefix', '$config->{prefix}');\n";
+    print $configfile "}\n";
+    close $configfile;
 }
 
 sub configure_moar_backend {
