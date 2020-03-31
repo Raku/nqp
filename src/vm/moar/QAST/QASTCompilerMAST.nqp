@@ -841,10 +841,7 @@ my class MASTCompilerInstance {
 
     # This method is a hook point so that we can override serialization when cross-compiling
     method serialize_sc($sc) {
-        my $sh := nqp::list_s();
-        for $!mast_compunit.writer.string-heap.orig-strings {
-            nqp::push_s($sh, $_);
-        }
+        my $sh := $!mast_compunit.writer.string-heap.orig-strings;
         my $serialized := nqp::serializetobuf($sc, $sh, MAST::Bytecode);
         [$serialized, $sh, 0]; # change to 1 when you need string heap deserialization
     }
