@@ -507,7 +507,7 @@ my class MASTCompilerInstance {
                 if $got == $MVM_reg_int64 {
                     %core_op_generators{'coerce_is'}($res_reg, $reg);
                 }
-                elsif $got == $MVM_reg_int32 {
+                elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
                     $reg := $int64.result_reg;
                     $release_type := nqp::unbox_i($int64.result_kind);
