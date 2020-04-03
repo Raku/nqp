@@ -780,11 +780,15 @@ Return 1 if anything is bound to `@arr` at position `$i`,
 * `list_i(... --> Mu)`
 * `list_n(... --> Mu)`
 * `list_s(... --> Mu)`
-* `list_b(... --> Mu)`
 
 Create a list of the given parameters. If no arguments are passed,
 an empty list is created. If a typed variant is used, the parameters
 are coerced to the appropriate type.
+
+## list_b `moar`
+* `list_b(... --> Mu)`
+
+_Same as previous entry_
 
 ## push
 * `push(@arr, Mu $v --> Mu)`
@@ -884,13 +888,15 @@ You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 ## atkey
 * `atkey(%hash, str $key --> Mu)`
 * `atkey_i(%hash, str $key --> int)`
-* `atkey_u(%hash, str $key --> uint)`
-  * Note, there's no bindkey_u yet since at the moment atkey_u is only used
-    for getting values from the lexpad
 * `atkey_n(%hash, str $key --> num)`
 * `atkey_s(%hash, str $key --> str)`
 
 Return the value of %hash at key $key.
+
+## atkey `moar`
+* `atkey_u(%hash, str $key --> uint)`
+
+_As above. Note, there's no bindkey_u yet since at the moment atkey_u is only used for getting values from the lexpad_
 
 ## bindkey
 * `bindkey(%hash, str $key, Mu $v --> $v)`
