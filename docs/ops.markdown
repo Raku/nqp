@@ -958,8 +958,8 @@ If absent rely on lower level conversions.
 ## coerce_in `moar`
 * `coerce_in(int --> num)`
 
-## coerce_ni
-* `coerce_in(num --> int)`
+## coerce_ni `moar`
+* `coerce_ni(num --> int)`
 
 ## coerce_is
 * `coerce_is(int --> str)`
