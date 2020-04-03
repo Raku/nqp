@@ -347,9 +347,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [watchfile](#watchfile)
   * [asyncconnect](#asyncconnect)
   * [asynclisten](#asynclisten)
-  * [asyncwritestr](#asyncwritestr)
   * [asyncwritebytes](#asyncwritebytes)
-  * [asyncreadchars](#asyncreadchars)
   * [asyncreadbytes](#asyncreadbytes)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
@@ -2997,14 +2995,6 @@ the schedulee and the newly created asynchronous socket, for communicating with
 the connecting client. Returns an AsyncTask that can be cancelled to stop
 listening, or throws an exception if there is an error starting to listen.
 
-## asyncwritestr
-* `asyncwritestr($handle, $queue, $schedulee, str $to_write, $handle_type)`
-
-Writes a string to some handle capable of asynchronous operations. Once the write
-is complete, the queue will be passed an array consisting of the schedulee, an
-integer containing the number of bytes written or a type object if there was an
-error, and a string containing an error or some type object if none.
-
 ## asyncwritebytes
 * `asyncwritebytes($handle, $queue, $schedulee, $to_write, $handle_type)`
 
@@ -3013,15 +3003,6 @@ the write is complete, the queue will be passed an array consisting of the
 schedulee, an integer containing the number of bytes written or a type
 object if there was an error, and a string containing an error or some type
 object if none.
-
-## asyncreadchars
-* `asyncreadchars($handle, $queue, $schedulee, $handle_type)`
-
-Starts reading chars from the handle. When a packet is received and decoded,
-an array will be pushed to the queue containing the schedulee, a squence
-number that starts at 0, the string if anything was decoded (type object on
-error) and an error string (some type object if no error). If EOF is
-reached, a sequence number of -1 is sent. Cancel to stop reading.
 
 ## asyncreadbytes `moar` `jvm`
 * `asyncreadbytes($handle, $queue, $schedulee, $buf_type, $handle_type)`
