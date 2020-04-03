@@ -951,7 +951,7 @@ coerce_* opcodes do lower level conversion between int, num and str.
 smrt_intify, smrt_numify, smrt_strify respectively try to use the .Int, .Num or .Str method.
 If absent rely on lower level conversions.
 
-## coerce_in
+## coerce_in `moar`
 * `coerce_in(int --> num)`
 
 ## coerce_ni
@@ -960,10 +960,10 @@ If absent rely on lower level conversions.
 ## coerce_is
 * `coerce_is(int --> str)`
 
-## coerce_ns
+## coerce_ns `moar`
 * `coerce_ns(num --> str)`
 
-## coerce_sn
+## coerce_sn `moar`
 * `coerce_sn(str --> num)`
 
 ## coerce_si
@@ -1089,7 +1089,7 @@ or at 0, otherwise.
 
 `index` is converted to this internal opcode by the compiler.
 
-## indexic
+## indexic `moar`
 * `indexic(str $haystack, str $needle, int $pos --> int)`
 
 This op has the same arguments and functionality as nqp::index,
@@ -1752,7 +1752,7 @@ Return current access position for an open filehandle.
 Output the given object to the filehandle. Returns the number of bytes written.
 
 # <a id="extern"></a> External command Opcodes
-## execname
+## execname `moar` `js`
 * `execname(--> str)`
 
 It's used to implement `$*EXECUTABLE` in Perl 6, and is the name of the
@@ -2187,7 +2187,7 @@ Operations not configured with one of these options will assume native endian.
 Reading or writing little endian on a little endian machine will, of course,
 carry no transformation overhead.
 
-## writeint
+## writeint `moar` `js`
 * `writeint(buffer $target, int $offset, int $value, int $flags)`
 
 Writes the signed integer `$value` at `$offset` into the buffer `$target`,
@@ -2199,19 +2199,19 @@ with the size and endianness specified by `$flags`.
 Writes the unsigned integer `$value` at `$offset` into the buffer `$target`,
 with the size and endianness specified by `$flags`.
 
-## writenum
+## writenum `moar` `js`
 * `writenum(buffer $target, int $offset, num $value, int $flags)`
 
 Writes the floating point `$value` at `$offset` into the buffer `$target`.
 Only 32-bit and 64-bit sizes are supported.
 
-## readint
+## readint `moar` `js`
 * `readint(buffer $source, int $offset, int $flags --> int)`
 
 Reads a signed integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit int.
 
-## readuint
+## readuint `moar` `js`
 * `readuint(buffer $source, int $offset, int $flags --> uint)`
 
 Reads an unsigned integer at offset `$offset` from `$source` with size and
@@ -2477,7 +2477,7 @@ It's valid to implement this exactly the same way as savecapture if there's
 no performance benefit to be had in a split.
 Used by the multi-dispatcher.
 
-## getlex
+## getlex `moar` `jvm`
 * `getlex(str $name)`
 * `getlex_i(str $name)`
 * `getlex_n(str $name)`
@@ -2487,7 +2487,7 @@ Looks up the lexical with the specified name and the specified type.
 Searching in the outer frames, starting at the current.
 An error is thrown if it does not exist or if the type is incorrect.
 
-## getlexref
+## getlexref `moar` `jvm`
 * `getlexref_i(str $name)`
 * `getlexref_n(str $name)`
 * `getlexref_s(str $name)`
@@ -2501,7 +2501,7 @@ a lexpad as if it were a read-writable container we can pass around. the
 lexicalref that gets created holds a reference to the frame in question and
 any access to it acts like `getlex` from the frame it originated in
 
-## bindlex
+## bindlex `moar` `jvm`
 * `bindlex(str $name, Mu $value)`
 * `bindlex_i(str $name, int $value)`
 * `bindlex_n(str $name, num $value)`
@@ -2947,7 +2947,7 @@ If `$permits` is set to any value greater than or equal to zero, then:
   If the resulting number of permits allowed is greater than zero and the
   reader is not running, it will be started.
 
-## cancel
+## cancel `moar` `jvm`
 * `cancel(AsyncTask $handle)`
 
 Takes something with the AsyncTask REPR and tries to cancel it, if it
@@ -2955,7 +2955,7 @@ is possible to do so. If it is somehow not possible (for example, the
 operation already completed anyway), then nothing will happen. This is to
 avoid race conditions.
 
-## timer
+## timer `moar` `jvm`
 * `timer($queue, $schedulee, int $timeout, int $repeat, $handle_type)`
 
 Starts a timer. If timeout is zero, the $schedulee is immediately pushed to
@@ -2964,14 +2964,14 @@ non-zero, after the initial timeout period it will then be pushed again at
 the repeat interval. Returns an object of type $handle_type, which has a
 AsyncTask REPR. Cancellation stops the timer ever repeating again.
 
-## signal
+## signal `moar` `jvm`
 * `signal($queue, $schedulee, int [nqp::cosnt::SIG_], $handle_type)`
 
 Sets up a signal handler for the given signal. Whenever it occurs, an
 array is pushed to the queue containing the schedulee and the signal number.
 Cancel to stop handling it.
 
-## watchfile
+## watchfile `moar` `jvm`
 * `watchfile($queue, $schedulee, str $filename, $handle_type)`
 
 Watches an individual file for changes. Pushes an array to the queue
