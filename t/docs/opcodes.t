@@ -129,8 +129,15 @@ sub find_documented_opcodes() {
             }
         }
         next unless $line ~~ / ^ '* `' .* '(' .* '`' $ /;
-        $line := nqp::substr($line, 3);
-        $line := nqp::split("(", $line)[0];
+        $match := $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
+        if ?$match {
+            # Opcode only usable via QAST
+            $line := ~$match[0];
+        } else {
+            # Regular opcode
+            $line := nqp::substr($line, 3);
+            $line := nqp::split("(", $line)[0];
+        }
         for @opcode_vms -> $vm {
             %documented_ops{$vm}{$line} := 1 ;
         }
