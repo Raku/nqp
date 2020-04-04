@@ -1745,6 +1745,10 @@ Output the given string to stdout, followed by a newline.
 
 Seek in the filehandle to the location specified by the offset and whence.
 
+    * `0` - from beginning of file
+    * `1` - from current position
+    * `2` - from end of file
+
 ## tellfh
 * `tellfh(Handle $fh --> int)`
 
