@@ -70,14 +70,14 @@
 	@echo(+++ Compiling	$@)@
 	$(NOECHO)$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
-	$(NOECHO)@bpm(CC_INST_NQP)@ @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP)@)@)@)@)@ @moar::ccout@inst-nqp@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
+	$(NOECHO)@bpm(CC_INST_NQP)@ @if(relocatable==nonreloc -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP)@)@)@)@)@ @moar::ccout@inst-nqp@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
 	$(NOECHO)@bpm(LD_INST_NQP)@ @moar::ldout@$@ inst-nqp@moar::obj@ @bpm(LD_INST_NQP_POST)@
 
 @bpm(INST_NQP_M)@: @nfp(src/vm/moar/runner/main.c)@
 	@echo(+++ Compiling	$@)@
 	$(NOECHO)$(RM_F) $@
 # Using only the pkgconfig moar includes does not work, because moar.h assumes all the specific includes below.
-	$(NOECHO)@bpm(CC_INST_NQP)@ @if(relocatable -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP_M)@)@)@)@)@ @moar::ccout@inst-nqp-m@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
+	$(NOECHO)@bpm(CC_INST_NQP)@ @if(relocatable==nonreloc -DSTATIC_EXEC_PATH=@q(@c_escape(@nfp(@prefix@/bin/@bpm(NQP_M)@)@)@)@)@ @moar::ccout@inst-nqp-m@moar::obj@ @nfp(src/vm/moar/runner/main.c)@
 	$(NOECHO)@bpm(LD_INST_NQP)@ @moar::ldout@$@ inst-nqp-m@moar::obj@ @bpm(LD_INST_NQP_POST)@
 
 @bpm(BUILD_RUNNER)@: @@configure_script@@ @@template(@platform@/nqp-m-build.c)@@
