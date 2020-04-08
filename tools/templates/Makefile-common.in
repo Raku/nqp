@@ -123,10 +123,9 @@ SYSROOT         = @nfp(@sysroot@)@
 PREFIX          = @nfp(@prefix@)@
 BIN_DIR         = @nfp(@prefix@/bin)@
 NQP_HOME        = @nfp(@nqp_home@)@
-STATIC_NQP_HOME = @nfp(@static_nqp_home@)@
 NQP_LIB_DIR     = @nfp($(NQP_HOME)/lib)@
 PROVE_OPTIONS   = -j0$(TEST_JOBS)
 PROVE           = prove $(PROVE_OPTIONS)
-BASE_DIR        = @nfp(@base_dir@)@
+BASE_DIR		= @nfp(@base_dir@)@
 
 # vim: ft=make noexpandtab ts=4 sw=4

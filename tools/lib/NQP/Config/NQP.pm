@@ -74,8 +74,6 @@ sub configure_refine_vars {
               || File::Spec->catdir( $config->{'prefix'}, 'share', 'nqp' )
         )
     );
-
-    $config->{static_nqp_home} = $config->{relocatable} eq 'reloc' ? '' : $config->{nqp_home};
 }
 
 sub configure_misc {
@@ -117,7 +115,7 @@ sub configure_moar_backend {
     }
     else {
         my $qchar = $config->{quote};
-        $imoar->{config}{static_nqp_home} = $config->{static_nqp_home};
+        $imoar->{config}{static_nqp_home} = $config->{nqp_home};
         $imoar->{config}{static_nqp_home_define} =
             '-DSTATIC_NQP_HOME='
           . $qchar
