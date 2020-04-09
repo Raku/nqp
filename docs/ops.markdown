@@ -57,11 +57,13 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [eqatim `moar`](#eqatim-moar)
   * [eqaticim `moar`](#eqaticim-moar)
   * [iseq](#iseq)
+  * [iseq)snfg](#iseq_snfg)
   * [isgt](#isgt)
   * [isge](#isge)
   * [islt](#islt)
   * [isle](#isle)
   * [isne](#isne)
+  * [isne_snfg](#isne_snfg)
   * [not_i](#not_i)
 - [Array Opcodes](#-array-opcodes)
   * [atpos](#atpos)
@@ -98,6 +100,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [smrt_strify](#smrt_strify)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
+  * [charsnfg](#chars)
   * [chr](#chr)
   * [codepointfromname](#codepointfromname)
   * [codes](#codes)
@@ -117,6 +120,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [indexim `moar`](#indexim-moar)
   * [indexicim `moar`](#indexicim-moar)
   * [iscclass](#iscclass)
+  * [iscclassnfg](#iscclassnfg)
   * [join](#join)
   * [lc](#lc)
   * [normalizecodes](#normalizecodes)
@@ -696,6 +700,12 @@ Case-insensitive and ignore-mark `eqat`
 
 Return 1 if the two parameters are equal, 0 otherwise.
 
+## iseq_snfg `js`
+* `iseq_snfg(str $l, str $r --> int)`
+
+Return 1 if the two parameters are equal, 0 otherwise.
+A JS specific opcode that first normalizes string arguments to NFC.
+
 ## isgt
 * `isgt_i(int $l, int $r --> int)`
 * `isgt_n(num $l, num $r --> int)`
@@ -735,6 +745,12 @@ Return 1 if $l is less than or equal to $r, otherwise 0.
 * `isne_I(Int $l, Int $r --> int)`
 
 Return 1 if the two parameters are not equal, otherwise 0.
+
+## isne_snfg `js`
+* `isne_snfg(str $l, str $r --> int)`
+
+Return 1 if the two parameters are not equal, otherwise 0.
+A JS specific opcode that first normalizes string arguments to NFC.
 
 ## not_i
 * `not_i(int $val --> int)`
@@ -992,6 +1008,13 @@ If absent rely on lower level conversions.
 
 Return the number of characters in the string.
 
+## charsnfg
+* `chars(str $str --> int)`
+
+Return the number of characters in the string.
+
+A JS specific variant.
+
 ## chr
 * `chr(int $codepoint --> str)`
 
@@ -1122,6 +1145,14 @@ Ignorecase and ignoremark `index`
 
 Return 1 if the `$i`th character of $str is of the specified class,
 (`nqp::const::CCLASS_*`), 0 otherwise.
+
+## iscclassnfg `js`
+* `iscclassnfg(int $class, str $str, int $i --> int)`
+
+Return 1 if the `$i`th character of $str is of the specified class,
+(`nqp::const::CCLASS_*`), 0 otherwise.
+
+A JS specific variant.
 
 ## join
 * `join(str $delim, @arr --> str)`
