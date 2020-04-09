@@ -244,6 +244,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [fromnum](#fromnum)
   * [fromstr](#fromstr)
   * [isbig](#isbig)
+  * [iscoderef](#iscoderef)
   * [isconcrete](#isconcrete)
   * [iscont](#iscont)
   * [isfalse](#isfalse)
@@ -321,6 +322,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [const](#const)
   * [cpucores](#cpucores)
   * [decodelocaltime](#decodelocaltime)
+  * [getcodename](#getcodename)
   * [getrusage](#getrusage)
   * [uname](#uname)
   * [debugnoop `jvm`](#debugnoop-jvm)
@@ -331,6 +333,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [getpid](#getpid)
   * [getppid](#getppid)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
+  * [setcodename](#setcodename)
   * [sha1](#sha1)
   * [sleep](#sleep)
   * [takeclosure](#takeclosure)
@@ -2063,6 +2066,11 @@ Convert string value to a Big Integer of the given type.
 
 Returns a 1 if the object's numerical representation requires a big int, 0 otherwise.
 
+## iscoderef `moar`
+* `iscoderef($obj --> int)`
+
+Returns a 1 if the object contains a code reference, 0 otherwise.
+
 ## isconcrete
 * `isconcrete(Mu $obj --> int)`
 
@@ -2671,6 +2679,12 @@ Returns an integer array with localtime information, formatted like the
 Note that contrary to C's localtime() function, the $year contains the
 actual year (A.D), and the $month has been normalized to 1..12.
 
+## getcodename
+* `getcodename($obj --> str)`
+
+Returns the name of the given concrete code object.
+Throws an exception if an object of the wrong type is passed.
+
 ## getrusage
 * `getrusage(int @rusage)`
 
@@ -2800,6 +2814,13 @@ Return the process id of the parent process, an int.
 * `jvmclasspaths(--> Mu)`
 
 Converts the JVM property `java.class.path` into a list of paths, returns it.
+
+## setcodename
+* `setcodename($obj, str)`
+
+Sets the name of the given code object.
+Throws an exception if an object of the wrong type is passed.
+
 
 ## sha1
 * `sha1(str $str -> str)`
