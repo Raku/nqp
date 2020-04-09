@@ -1,8 +1,10 @@
 my @*vms := nqp::list('jvm', 'moar', 'js');
+my @*variants := nqp::list("_i", "_n", "_s", "_I");
 
 my %documented_ops := find_documented_opcodes();
 
 my %ops := hash_of_vms();
+
 
 %ops<jvm> := find_opcodes(
     :files([
@@ -51,7 +53,15 @@ for @*vms -> $vm {
 
 for %combined_ops -> $opcode {
     my $vms := nqp::join(";", %combined_ops{$opcode});
-    ok(%documented_ops<any>{$opcode}, "Opcode '$opcode' ($vms) is documented");
+    my $found := %documented_ops<any>{$opcode};
+    if (!$found) && !($opcode ~~ / '_' /) {
+        for @*variants -> $type {
+            if %documented_ops<any>{$opcode ~ $type} {
+                $found := 1;
+            }
+        }
+    }
+    ok($found, "Opcode '$opcode' ($vms) is documented");
 }
 
 # Do documented opcodes actually exist? Fail once per vm if not.
