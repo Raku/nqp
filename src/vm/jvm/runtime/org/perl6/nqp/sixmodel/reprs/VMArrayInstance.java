@@ -25,7 +25,7 @@ public class VMArrayInstance extends VMArrayInstanceBase {
                 throw ExceptionHandling.dieInternal(tc, "VMArray: Index out of bounds");
         }
         else if (index >= elems)
-            return null;
+            return Ops.createNull(tc);
 
         return slots[start + (int)index];
     }

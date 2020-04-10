@@ -2,6 +2,7 @@ package org.perl6.nqp.sixmodel.reprs;
 
 import org.perl6.nqp.runtime.CallFrame;
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.StaticCodeInfo;
 import org.perl6.nqp.runtime.ThreadContext;
 import org.perl6.nqp.sixmodel.SixModelObject;
@@ -11,7 +12,7 @@ public class ContextRefInstance extends SixModelObject {
 
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
-        return idx == null ? null : context.oLex[idx];
+        return idx == null ? Ops.createNull(tc) : context.oLex[idx];
     }
 
     public void at_key_native(ThreadContext tc, String key) {

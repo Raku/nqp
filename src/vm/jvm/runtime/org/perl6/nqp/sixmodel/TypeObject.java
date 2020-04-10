@@ -1,6 +1,7 @@
 package org.perl6.nqp.sixmodel;
 
 import org.perl6.nqp.runtime.ExceptionHandling;
+import org.perl6.nqp.runtime.Ops;
 import org.perl6.nqp.runtime.ThreadContext;
 
 public class TypeObject extends SixModelObject {
@@ -34,7 +35,7 @@ public class TypeObject extends SixModelObject {
     }
 
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
-        return null;
+        return Ops.createNull(tc);
     }
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
@@ -61,7 +62,7 @@ public class TypeObject extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
     }
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
-        return null;
+        return Ops.createNull(tc);
     }
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
