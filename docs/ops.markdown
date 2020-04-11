@@ -56,6 +56,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [eqatic `moar`](#eqatic-moar)
   * [eqatim `moar`](#eqatim-moar)
   * [eqaticim `moar`](#eqaticim-moar)
+  * [falsey](#falsey)
   * [iseq](#iseq)
   * [isgt](#isgt)
   * [isge](#isge)
@@ -687,6 +688,11 @@ Example: `eqat("á", "a", 0) → 1`
 ## eqaticim `moar` `js`
 * `eqaticim(str haystack, str $needle, int $pos --> int)`
 Case-insensitive and ignore-mark `eqat`
+
+## falsey
+* `falsey($a --> int)`
+
+Return 0 if the parameter has a truthy value, 1 otherwise.
 
 ## iseq
 * `iseq_i(int $l, int $r --> int)`
