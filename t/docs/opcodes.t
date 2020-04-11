@@ -100,6 +100,10 @@ sub find_opcodes(:@files, :@keywords) {
                 if ?$match {
                     %ops{$match[0]} := 1;
                 }
+            } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$op' / -> $match {
+                for nqp::split(' ', $match[0]) -> $func {
+                    %ops{$func} := 1;
+                }
             }
         }
     }
