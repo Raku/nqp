@@ -598,6 +598,7 @@ and of type `$type_bigint` for positive exponents.
 
 ## rand
 * `rand_n(num $n --> num)`
+* `rand_i(int $i, Mu:T $type --> int)` `moar`
 * `rand_I(Int $i, Mu:T $type --> Int)`
 
 Returns a psuedo-random bigint up to the value of the
@@ -2091,6 +2092,9 @@ Returns a 1 if the object is not a type object, 0 otherwise.
 
 ## iscont
 * `iscont(Mu $obj --> int)`
+* `iscont_i(int $int --> int)`
+* `iscont_n(num $int --> int)`
+* `iscont_s(str $int --> int)`
 
 Returns a 1 if the object is a container type, 0 otherwise.
 
