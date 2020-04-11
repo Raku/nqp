@@ -114,31 +114,46 @@ sub hash_of_vms() {
     return %hash;
 }
 
+# Given a string of quoted VMs, return a list.
+# Deal only with hardcoded vms
+
+sub match_vms($input) {
+    my @vms := nqp::list();
+    if $input ~~ / '`jvm`' / {
+        nqp::push(@vms,"jvm");
+    }
+    if $input ~~ / '`js`' / {
+        nqp::push(@vms,"js");
+    }
+    if $input ~~ / '`moar`' / {
+        nqp::push(@vms,"moar");
+    }
+    return @vms;
+}
+
 sub find_documented_opcodes() {
     my %documented_ops := hash_of_vms();
     %documented_ops<any> := nqp::hash();
 
     my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
     my @opcode_vms := nqp::list();
+
     for @doc_lines -> $line {
         my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
         if ?$match {
-            if !?$match[0] {
-                @opcode_vms := nqp::clone(@*vms);
-            } else {
-                @opcode_vms := nqp::list();
-                if $match[0] ~~ /jvm/ {
-                    nqp::push(@opcode_vms,"jvm");
-                }
-                if $match[0] ~~ /moar/ {
-                    nqp::push(@opcode_vms,"moar");
-                }
-                if $match[0] ~~ /js/ {
-                    nqp::push(@opcode_vms,"js");
-                }
-            }
+            @opcode_vms := match_vms($line);
+            @opcode_vms := @*vms unless @opcode_vms;
         }
-        next unless $line ~~ / ^ '* `' .* '(' .* '`' $ /;
+
+        next unless $line ~~ / ^ '* `' .* '(' .* '`' .* ' _Internal_'? $ /;
+
+        # Individual opcode lines may override the VMs set in the heading.
+        my @line_vms := @opcode_vms;
+        if $line ~~ / '`'/ {
+            @line_vms := match_vms($line);
+            @line_vms := @opcode_vms unless @line_vms;
+        }
+
         $match := $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
         if ?$match {
             # Opcode only usable via QAST
@@ -148,7 +163,7 @@ sub find_documented_opcodes() {
             $line := nqp::substr($line, 3);
             $line := nqp::split("(", $line)[0];
         }
-        for @opcode_vms -> $vm {
+        for @line_vms -> $vm {
             %documented_ops{$vm}{$line} := 1 ;
         }
         %documented_ops<any>{$line} := 1 ;
