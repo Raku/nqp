@@ -1290,8 +1290,12 @@ not allowed.
 ## substr
 * `substr(str $str, int $position --> str)`
 * `substr(str $str, int $position, int $length --> str)`
+* `substr_s(str $str, int $position --> str)` `moar`
+* `substr_s(str $str, int $position, int $length --> str)` `moar`
 * `substr2(str $str, int $position)` `jvm` _Internal_
 * `substr3(str $str, int $position, int $length)` `jvm` _Internal_
+* `substrnfg(str $str, int $position --> str)` `js`
+* `substrnfg(str $str, int $position, int $length --> str)` `js`
 
 Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
