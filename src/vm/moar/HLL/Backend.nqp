@@ -598,8 +598,6 @@ class HLL::Backend::MoarVM {
                         my $allocation_pieces := nqp::list_s;
                         nqp::push_s($allocation_pieces, 'INSERT INTO allocations VALUES (');
 
-                        nqp::push_s($pieces, 'INSERT INTO calls VALUES ');
-
                         sub collect_calls(str $parent_id, %call_graph) {
                             my str $call_id := ~$node_id;
                             $node_id++;
@@ -609,6 +607,7 @@ class HLL::Backend::MoarVM {
                             }
                             if $is_first {
                                 $is_first := 0;
+                                nqp::push_s($pieces, 'INSERT INTO calls VALUES ');
                             }
                             else {
                                 nqp::push_s($pieces, "), ");
@@ -641,10 +640,14 @@ class HLL::Backend::MoarVM {
                             if nqp::elems($pieces) > 500 {
                                 $profile_fh.print(nqp::join("", $pieces));
                                 nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
+                                nqp::push_s($pieces, ");\n");
+                                $is_first := 1;
                             }
                         }
                         collect_calls(~$node_id, $v);
-                        nqp::push_s($pieces, ");\n");
+                        if $is_first == 0 { # there are actual records we have to close
+                            nqp::push_s($pieces, ");\n");
+                        }
                         if nqp::elems($allocation_pieces) > 1 {
                             nqp::push_s($pieces, nqp::join('', $allocation_pieces) ~ ";\n");
                         }
