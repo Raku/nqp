@@ -682,13 +682,13 @@ otherwise return 0.
 * `eqatic(str haystack, str $needle, int $pos --> int)`
 Case-insensitive `eqat`
 
-## eqatim `js moar`
+## eqatim `moar` `js`
 * `eqatim(str haystack, str $needle, int $pos --> int)`
 Ignore-mark `eqat`, NFD decomposes and matches the base codepoint
 
 Example: `eqat("á", "a", 0) → 1`
 
-## eqaticim `js moar`
+## eqaticim `moar` `js`
 * `eqaticim(str haystack, str $needle, int $pos --> int)`
 Case-insensitive and ignore-mark `eqat`
 
@@ -909,13 +909,11 @@ You can also use `nqp::iterator()` to iterate over a hash's key-value pairs.
 * `atkey_i(%hash, str $key --> int)`
 * `atkey_n(%hash, str $key --> num)`
 * `atkey_s(%hash, str $key --> str)`
+* `atkey_u(%hash, str $key --> uint)` `moar`
 
 Return the value of %hash at key $key.
 
-## atkey `moar`
-* `atkey_u(%hash, str $key --> uint)`
-
-_As above. Note, there's no bindkey_u yet since at the moment atkey_u is only used for getting values from the lexpad_
+_Note, there's no bindkey_u yet since at the moment atkey_u is only used for getting values from the lexpad_
 
 ## bindkey
 * `bindkey(%hash, str $key, Mu $v --> $v)`
@@ -1115,7 +1113,7 @@ Return the position in `$haystack` at which `$needle` appears, or -1
 if `$needle` does not appear. Begin searching at position `$pos` if specified,
 or at 0, otherwise.
 
-* `indexfrom(str $haystack, str $needle, int $pos)` _Internal_
+* `indexfrom(str $haystack, str $needle, int $pos)` `moar` `jvm` _Internal_
 
 `index` is converted to this internal opcode by the compiler.
 
@@ -1190,7 +1188,7 @@ Return the unicode codepoint of the first character in `$str`, or
 at the `$i`th character, if it's specified.
 
 * `ordat(str $str, int $i --> int)` _Internal_
-* `ordfirst(str $str --> int)` _Internal_
+* `ordfirst(str $str --> int)` `moar` `jvm` _Internal_
 
 `ord` is converted to these internal opcodes by the compiler.
 
@@ -1236,7 +1234,7 @@ Searching backwards through the `$haystack`, return the position at which
 `$needle` appears, or -1 if it does not. Begin searching at `$pos` if
 specified, otherwise start from the last position.
 
-* `rindexfrom(str $haystack, str $needle, int $pos)` _Internal_
+* `rindexfrom(str $haystack, str $needle, int $pos)` `moar` `jvm` _Internal_
 * `rindexfromend(str $haystack, str $needle)` `jvm` _Internal_
 
 `rindex` is converted to this internal opcode by the compiler.
