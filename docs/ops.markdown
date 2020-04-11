@@ -1321,6 +1321,11 @@ If `$length` is specified, only return that many characters. The
 numbered variants required the args specified - the unnumbered
 version may use either signature.
 
+## substr3 `jvm`
+* `substr3(str $str, int $position, int $length --> str)`
+
+A jvm specific variant of substr which implements only the 3-arg version.
+
 * `substr2(str $str, int $position)` `jvm` _Internal_
 * `substr3(str $str, int $position, int $length)` `jvm` _Internal_
 
