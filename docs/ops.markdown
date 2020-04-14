@@ -1177,7 +1177,7 @@ at the `$i`th character, if it's specified.
 `ord` is converted to these internal opcodes by the compiler.
 
 ## ordbaseat
-`ordbaseat(str $str, int $pos --> int)`
+* `ordbaseat(str $str, int $pos --> int)`
 
 Returns the Unicode codepoint which is the base (non extend/prepend character
 at that position). If it is a degenerate, and contains no base character,
