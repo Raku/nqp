@@ -7,7 +7,7 @@ see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.ma
 repository. They are of the form `nqp::p6*` (following the historical naming of Perl 6).
 
 The tool [tools/find-undocumented-ops.raku](https://github.com/Raku/nqp/blob/master/tools/find-undocumented-ops.raku) can be used to find undocumented opcodes.
-For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/perl6/nqp/blob/master/docs/qast.markdown).
+For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/Raku/nqp/blob/master/docs/qast.markdown).
 
 ## Table of Contents
 
@@ -854,7 +854,7 @@ Copy the elements in `@arr` starting at `$start_pos` and ending at `$end_pos`
 and return the resulting list. If `$start_pos` or `$end_pos` is ```-n``` it will
 translate into the ```n```th position relative to the end of the list.
 
-```perl6
+```raku
 
 my @a := 'a', 'b', 'c';
 print($_ ~ ', ') for nqp::slice(@a, 0, -2);
@@ -887,7 +887,7 @@ Return the $v on JVM.
 
 Returns an iterator object to iterate over a list's items.  For example:
 
-```perl6
+```raku
 
 my $list := nqp::list('a', 'b', 'c');
 my $iter := nqp::iterator($list);
@@ -944,13 +944,13 @@ otherwise.
 Returns the key associated with the given key-value pair.
 For example:
 
-```perl6
+```raku
 for %hash {
     say(nqp::iterkey_s($_), ' => ', nqp::iterval($_));
 }
 ```
 Or alternately:
-```perl6
+```raku
 my $iter := nqp::iterator(%hash);
 while $iter {
     my $pair := nqp::shift($iter);
@@ -1157,7 +1157,7 @@ be 32-bit integer arrays.
 
 ## numify
 
-```perl6
+```raku
 use nqp; say nqp::numify(nqp::unbox_s("42e0"));
 ```
 
@@ -1255,7 +1255,7 @@ and `int`. `mine` gets the the value in question and returns true if this
 handler is in charge for this type, false otherwise.
 The method `int` does the conversion for patterns like %d.
 
-```perl6
+```raku
 my class MyHandler {
     method mine($x) { $x ~~ MyType }
     method int($x) { $x.Int }
@@ -1594,7 +1594,7 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 
 Executes the given statements sequentially. For example:
 
-```perl6
+```raku
 
 nqp::stmts((my $a := nqp::chars("foo")), say($a), say("bar"));
 # 3
@@ -1782,10 +1782,10 @@ Output the given object to the filehandle. Returns the number of bytes written.
 * `execname(--> str)`
 
 It's used to implement `$*EXECUTABLE` in Perl 6, and is the name of the
-current "executable". So if you run `./perl6-m ....` then it'll be the
-`./perl6-m`. It's actually set at present by passing a `--execname=` argument
-to MoarVM, since `perl6` is actually a shell script. But when we do get to
-providing a fake executable for `perl6` instead, then it'd just initialize it
+current "executable". So if you run `./raku-m ....` then it'll be the
+`./raku-m`. It's actually set at present by passing a `--execname=` argument
+to MoarVM, since `raku` is actually a shell script. But when we do get to
+providing a fake executable for `raku` instead, then it'd just initialize it
 to `argv[0]`.
 
 # <a id="filedirnet"></a> File / Directory / Network Opcodes
@@ -3162,7 +3162,7 @@ Performs a full memory barrier.
 # <a id="serialization-context"></a> Serialization context
 Abbreviated as SC.
 You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
-For test examples, see [t/serialization/](https://github.com/perl6/nqp/tree/master/t/serialization)
+For test examples, see [t/serialization/](https://github.com/Raku/nqp/tree/master/t/serialization)
 ## createsc
 * `createsc($handle-string)`
 creates a serialization context and returns it.
