@@ -323,6 +323,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [const](#const)
   * [cpucores](#cpucores)
   * [decodelocaltime](#decodelocaltime)
+  * [forcegc](#forcegc)
   * [getcodename](#getcodename)
   * [getrusage](#getrusage)
   * [uname](#uname)
@@ -2695,6 +2696,11 @@ Returns an integer array with localtime information, formatted like the
 `C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
 Note that contrary to C's localtime() function, the $year contains the
 actual year (A.D), and the $month has been normalized to 1..12.
+
+## force_gc `moar` `jvm`
+* `force_gc()`
+
+Force the garbage collector to run.
 
 ## getcodename
 * `getcodename($obj --> str)`
