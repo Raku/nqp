@@ -2224,7 +2224,6 @@ QAST::OperationsJAST.map_classlib_core_op('closedir', $TYPE_OPS, 'closedir', [$R
 
 QAST::OperationsJAST.map_classlib_core_op('openasync', $TYPE_OPS, 'openasync', [$RT_STR, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('slurpasync', $TYPE_OPS, 'slurpasync', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('linesasync', $TYPE_OPS, 'linesasync', [$RT_OBJ, $RT_OBJ, $RT_INT, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('spurtasync', $TYPE_OPS, 'spurtasync', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('socket', $TYPE_OPS, 'socket', [$RT_INT], $RT_OBJ, :tc);

@@ -918,26 +918,6 @@ public final class Ops {
         return obj;
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
-            long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
-            ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).lines(tc, resultType, chomp != 0,
-                    (LinkedBlockingQueue)((JavaObjectWrapper)queue).theObject,
-                    done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async lines");
-        }
-        else {
-            die_s("linesasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
     public static SixModelObject closefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
