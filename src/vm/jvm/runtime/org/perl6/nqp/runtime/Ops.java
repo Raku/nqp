@@ -594,40 +594,6 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject setencoding(SixModelObject obj, String encoding, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-
-            Charset cs;
-            if (encoding.equals("ascii"))
-                cs = Charset.forName("US-ASCII");
-            else if (encoding.equals("iso-8859-1"))
-                cs = Charset.forName("ISO-8859-1");
-            else if (encoding.equals("utf8"))
-                cs = Charset.forName("UTF-8");
-            else if (encoding.equals("utf16"))
-                cs = Charset.forName("UTF-16");
-            else if (encoding.equals("windows-1252"))
-                cs = Charset.forName("windows-1252");
-            else if (encoding.equals("windows-1251"))
-                cs = Charset.forName("windows-1251");
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "Unsupported encoding " + encoding);
-
-            if (h.handle instanceof IIOEncodable)
-                ((IIOEncodable)h.handle).setEncoding(tc, cs);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support textual I/O");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "setencoding requires an object with the IOHandle REPR");
-        }
-        return obj;
-    }
-
     public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
