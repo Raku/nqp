@@ -831,16 +831,6 @@ public final class Ops {
         }
     }
 
-    public static String readlinechompfh(SixModelObject obj, ThreadContext tc) {
-        String line = readlinefh(obj, tc);
-        if (line.endsWith("\r\n"))
-            return line.substring(0, line.length() - 2);
-        else if (line.endsWith("\n"))
-            return line.substring(0, line.length() - 1);
-        else
-            return line;
-    }
-
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
