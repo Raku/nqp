@@ -6568,9 +6568,7 @@ public final class Ops {
 
         return nfa;
     }
-    public static SixModelObject nfatostatelist(SixModelObject nfa, ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "nfatostatelist NYI");
-    }
+
     public static SixModelObject nfarunproto(SixModelObject nfa, String target, long pos, ThreadContext tc) {
         /* Run the NFA. */
         int[] fates = runNFA(tc, (NFAInstance)nfa, target, pos);

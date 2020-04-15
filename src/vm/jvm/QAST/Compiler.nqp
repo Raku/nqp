@@ -2880,7 +2880,6 @@ QAST::OperationsJAST.map_classlib_core_op('hllboolfor', $TYPE_OPS, 'hllboolfor',
 
 # regex engine related opcodes
 QAST::OperationsJAST.map_classlib_core_op('nfafromstatelist', $TYPE_OPS, 'nfafromstatelist', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('nfatostatelist', $TYPE_OPS, 'nfatostatelist', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nfarunproto', $TYPE_OPS, 'nfarunproto', [$RT_OBJ, $RT_STR, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('nfarunalt', $TYPE_OPS, 'nfarunalt', [$RT_OBJ, $RT_STR, $RT_INT, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 
