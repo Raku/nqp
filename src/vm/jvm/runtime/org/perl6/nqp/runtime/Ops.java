@@ -856,21 +856,6 @@ public final class Ops {
             return line;
     }
 
-    public static String readallfh(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).slurp(tc);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support slurp");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readallfh requires an object with the IOHandle REPR");
-        }
-    }
-
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
