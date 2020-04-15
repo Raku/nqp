@@ -816,21 +816,6 @@ public final class Ops {
         }
     }
 
-    public static String readlinefh(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).readline(tc);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support readline");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readlinefh requires an object with the IOHandle REPR");
-        }
-    }
-
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
