@@ -137,11 +137,11 @@ class HLL::Backend::MoarVM {
     }
     method run_profiled($what, $filename, $kind) {
         unless $kind {
-            if $filename ~~ / '.html' | '.json' | '.sql' $ / {
+            if $filename ~~ / \. [ 'html' | 'json' | 'sql' ] $ / {
                 $kind := 'instrumented';
-	    } elsif $filename ~~ / '.mvmheap' $ / {
+            } elsif $filename ~~ / '.mvmheap' $ / {
                 $kind := 'heap';
-	    } else {
+            } else {
                 $kind := 'instrumented';
             }
         }
