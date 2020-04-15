@@ -2213,7 +2213,6 @@ QAST::OperationsJAST.map_classlib_core_op('gethostname', $TYPE_OPS, 'gethostname
 
 QAST::OperationsJAST.map_classlib_core_op('shell', $TYPE_OPS, 'shell', [$RT_STR, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('syncpipe', $TYPE_OPS, 'syncpipe', [], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT, :tc);
 

@@ -1079,13 +1079,6 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject syncpipe(ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new SyncProcessHandle(tc);
-        return h;
-    }
-
     public static long shell(String cmd, String dir, SixModelObject envObj,
             SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
