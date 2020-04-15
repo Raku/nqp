@@ -1079,24 +1079,6 @@ public final class Ops {
         }
     }
 
-    public static long shell(String cmd, String dir, SixModelObject envObj,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
-        List<String> args = new ArrayList<String>();
-
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("win") >= 0) {
-            args.add("cmd");
-            args.add("/c");
-            args.add(cmd);
-        } else {
-            args.add("sh");
-            args.add("-c");
-            args.add(cmd);
-        }
-
-        return spawn(tc, args, envObj, dir, in, out, err, flags);
-    }
-
     public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj,
             SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
         List<String> args = new ArrayList<String>();
