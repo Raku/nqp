@@ -824,22 +824,6 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncWritable)
-                ((IIOAsyncWritable)h.handle).spurt(tc, resultType, data, done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async spurt");
-        }
-        else {
-            die_s("spurtasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
     public static SixModelObject closefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
