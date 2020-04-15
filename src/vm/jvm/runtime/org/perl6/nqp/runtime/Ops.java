@@ -416,13 +416,6 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject openasync(String path, String mode, ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new AsyncFileHandle(tc, path, mode);
-        return h;
-    }
-
     public static SixModelObject socket(long listener, ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
