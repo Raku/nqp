@@ -953,24 +953,6 @@ public final class Ops {
         return obj;
     }
 
-    public static long closefhi(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOClosable
-             && h.handle instanceof IIOExitable) {
-                ((IIOClosable)h.handle).close(tc);
-                return (long)((IIOExitable)h.handle).exitValue(tc) << 8;
-            }
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support close or exitValue");
-        }
-        else {
-            die_s("closefhi requires an object with the IOHandle REPR", tc);
-        }
-        return -1;
-    }
-
     public static SixModelObject setbuffersizefh(SixModelObject obj, long size, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
