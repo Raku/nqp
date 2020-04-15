@@ -92,9 +92,9 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [coerce_ns](#coerce_ns)
   * [coerce_sn](#coerce_sb)
   * [coerce_si](#coerce_si)
-  * [smrt_intify](#smrt_intify)
-  * [smrt_numify](#smrt_numify)
-  * [smrt_strify](#smrt_strify)
+  * [intify](#intify)
+  * [numify](#numify)
+  * [strify](#strify)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
   * [chr](#chr)
@@ -965,7 +965,7 @@ Returns the value associated with the given key-value pair.
 # <a id="coercion"></a> Coercion opcodes
 
 coerce_* opcodes do lower level conversion between int, num and str.
-smrt_intify, smrt_numify, smrt_strify respectively try to use the .Int, .Num or .Str method.
+intify, numify, strify respectively try to use the .Int, .Num or .Str method.
 If absent rely on lower level conversions.
 
 ## coerce_in `moar`
@@ -986,14 +986,14 @@ If absent rely on lower level conversions.
 ## coerce_si
 * `coerce_si(str --> int)`
 
-## smrt_intify `moar`
-* `smrt_intify($o --> int)`
+## intify `moar`
+* `intify($o --> int)`
 
-## smrt_numify `moar`
-* `smrt_numify($o --> num)`
+## numify `moar`
+* `numify($o --> num)`
 
-## smrt_strify `moar`
-* `smrt_strify($o --> str)`
+## strify `moar`
+* `strify($o --> str)`
 
 # <a id="string"></a> String Opcodes
 
