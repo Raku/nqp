@@ -831,22 +831,6 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject slurpasync(SixModelObject obj, SixModelObject resultType,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).slurp(tc, resultType, done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async slurp");
-        }
-        else {
-            die_s("slurpasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
     public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
             SixModelObject done, SixModelObject error, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
