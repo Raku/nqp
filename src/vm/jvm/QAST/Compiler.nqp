@@ -2211,8 +2211,6 @@ QAST::OperationsJAST.map_classlib_core_op('link', $TYPE_OPS, 'link', [$RT_STR, $
 
 QAST::OperationsJAST.map_classlib_core_op('gethostname', $TYPE_OPS, 'gethostname', [], $RT_STR);
 
-QAST::OperationsJAST.map_classlib_core_op('spawn', $TYPE_OPS, 'spawn', [$RT_OBJ, $RT_STR, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_INT], $RT_INT, :tc);
-
 QAST::OperationsJAST.map_classlib_core_op('symlink', $TYPE_OPS, 'symlink', [$RT_STR, $RT_STR], $RT_INT, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('opendir', $TYPE_OPS, 'opendir', [$RT_STR], $RT_OBJ, :tc);

@@ -1079,19 +1079,6 @@ public final class Ops {
         }
     }
 
-    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
-        List<String> args = new ArrayList<String>();
-        SixModelObject argIter = iter(argsObj, tc);
-        while (istrue(argIter, tc) != 0) {
-            SixModelObject v = argIter.shift_boxed(tc);
-            String arg = v.get_str(tc);
-            args.add(arg);
-        }
-
-        return spawn(tc, args, envObj, dir, in, out, err, flags);
-    }
-
     public static final int PIPE_INHERIT        = 1;
     public static final int PIPE_IGNORE         = 2;
     public static final int PIPE_CAPTURE        = 4;
@@ -1143,58 +1130,6 @@ public final class Ops {
         if ((flags & PIPE_CAPTURE_ERR) != 0 && err instanceof IOHandleInstance)
             /* getErrorStream() returns the input stream connected to the error output of the subprocess. */
             ((SyncProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
-    }
-
-    private static long spawn(ThreadContext tc, List<String> args, SixModelObject envObj, String dir,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
-        long       retval = 255;
-        ProcessBuilder pb = new ProcessBuilder(args);
-        pb.directory(new File(dir));
-
-        // Clear the JVM inherited environment and use provided only
-        Map<String, String> pbEnv = pb.environment();
-        pbEnv.clear();
-        pbEnv.putAll(env);
-
-        setup_process_builder(tc, pb, in, out, err, flags);
-
-        if ((flags & (PIPE_CAPTURE_IN | PIPE_CAPTURE_OUT | PIPE_CAPTURE_ERR)) != 0) {
-            try {
-                Process process = pb.start();
-                setup_process_streams(tc, process, in, out, err, flags);
-            }
-            catch (IOException e) {
-                throw ExceptionHandling.dieInternal(tc, e);
-            }
-        }
-        /* run immediately */
-        else {
-            try {
-                boolean finished = false;
-                Process process  = pb.start();
-                setup_process_streams(tc, process, in, out, err, flags);
-                do {
-                    try {
-                        retval   = process.waitFor();
-                        finished = true;
-                    } catch (InterruptedException e) {
-                    }
-                } while (!finished);
-            } catch (IOException e) {
-            }
-        }
-
-        /* Return exit code left shifted by 8 for POSIX emulation. */
-        return retval << 8;
     }
 
     public static long symlink(String before, String after, ThreadContext tc) {
