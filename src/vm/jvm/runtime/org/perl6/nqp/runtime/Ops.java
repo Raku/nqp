@@ -716,23 +716,6 @@ public final class Ops {
         return written;
     }
 
-    public static long printfh(SixModelObject obj, String data, ThreadContext tc) {
-        long written;
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).print(tc, data);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support print");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "printfh requires an object with the IOHandle REPR");
-        }
-        return written;
-    }
-
     public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;

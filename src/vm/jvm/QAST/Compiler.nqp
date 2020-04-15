@@ -2185,7 +2185,6 @@ QAST::OperationsJAST.map_classlib_core_op('lockfh', $TYPE_OPS, 'lockfh', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('unlockfh', $TYPE_OPS, 'unlockfh', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('readfh', $TYPE_OPS, 'readfh', [$RT_OBJ, $RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('writefh', $TYPE_OPS, 'writefh', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('printfh', $TYPE_OPS, 'printfh', [$RT_OBJ, $RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('flushfh', $TYPE_OPS, 'flushfh', [$RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('eoffh', $TYPE_OPS, 'eoffh', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('closefh', $TYPE_OPS, 'closefh', [$RT_OBJ], $RT_OBJ, :tc);
