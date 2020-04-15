@@ -791,23 +791,6 @@ public final class Ops {
         return written;
     }
 
-    public static long sayfh(SixModelObject obj, String data, ThreadContext tc) {
-        long written;
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).say(tc, data);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support say");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "sayfh requires an object with the IOHandle REPR");
-        }
-        return written;
-    }
-
     public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
