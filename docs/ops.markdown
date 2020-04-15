@@ -1,8 +1,6 @@
 # Introduction
 
-The opcode set is dynamic.
-This document is about core nqp opcodes.
-For Raku opcodes added by the rakudo compiler
+The opcode set is dynamic. This document is about core NQP opcodes. For Raku opcodes added by the rakudo compiler
 see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the rakudo
 repository. They are of the form `nqp::p6*` (following the historical naming of Perl 6).
 
@@ -1195,7 +1193,7 @@ The result of the conversion returns an array with
     out[1] = $radix ** $number-of-digits-converted
     out[2] = offset after consuming digits, -1 if no digits consumed
 
-The opcode skips single underscores between pairs of digits, per the Perl 6
+The opcode skips single underscores between pairs of digits, per the Raku
 specification.
 
 The $flags is a bitmask that modifies the parse and/or result:
@@ -1781,7 +1779,7 @@ Output the given object to the filehandle. Returns the number of bytes written.
 ## execname `moar` `js`
 * `execname(--> str)`
 
-It's used to implement `$*EXECUTABLE` in Perl 6, and is the name of the
+It's used to implement `$*EXECUTABLE` in Raku, and is the name of the
 current "executable". So if you run `./raku-m ....` then it'll be the
 `./raku-m`. It's actually set at present by passing a `--execname=` argument
 to MoarVM, since `raku` is actually a shell script. But when we do get to
@@ -2045,7 +2043,7 @@ Returns a VM specific type object for a native array of str.
 * `box_n(num $val, Mu:T $type)`
 * `box_s(str $val, Mu:T $type)`
 
-Given a native value, return a perl 6 object of the given type
+Given a native value, return a Raku object of the given type
 with the same value.
 
 ## decont
@@ -2188,7 +2186,7 @@ Convert Big Integer value to a native number.
 * `unbox_n(Mu $val --> num)`
 * `unbox_s(Mu $val --> str)`
 
-Given a Perl 6 object, return a native with the same value,
+Given a Raku object, return a native with the same value,
 of the type indicated by the opcode suffix.
 
 # <a id="binarydata"></a> Binary Data Opcodes
@@ -2197,7 +2195,7 @@ For these definitions, `buffer` refers to a concrete object with a REPR of
 either `VMArray` or `MultiDimArray`, the latter being constrained to a single
 dimension. (Note: dimensionality is a property of the type, meaning that type
 specialization is already sufficient to optimize out both the REPR and shape
-checks.) In either case, the array must be an 8-bit integer array (as a Perl 6
+checks.) In either case, the array must be an 8-bit integer array (as a Raku
 `Blob` or `Buf` will be).
 
 ### Constants
@@ -2381,7 +2379,7 @@ See `bindcomp` for more information.
 ## how
 * `how(Mu $obj --> Mu)`
 
-NQP equivalent for Perl 6's `$obj.HOW`.
+NQP equivalent for Raku's `$obj.HOW`.
 
 ## rebless
 * `rebless(Mu $obj, Mu:T $type --> Mu)`
@@ -2401,12 +2399,12 @@ Replace `$obj`'s WHO. Return `$obj`.
 ## who
 * `who(Mu $obj --> Mu)`
 
-NQP equivalent for Perl 6's `$obj.WHO`.
+NQP equivalent for Raku's `$obj.WHO`.
 
 ## what
 * `what(Mu $obj --> Mu)`
 
-NQP equivalent for Perl 6's `$obj.WHAT`.
+NQP equivalent for Raku's `$obj.WHAT`.
 
 ## where
 * `where(Mu $obj --> int)`
