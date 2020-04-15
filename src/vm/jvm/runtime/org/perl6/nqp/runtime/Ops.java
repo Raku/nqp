@@ -594,23 +594,6 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-
-            if (h.handle instanceof IIOLineSeparable)
-                ((IIOLineSeparable)h.handle).setInputLineSeparator(tc, sep);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support setting input line separator");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "setinputlinesep requires an object with the IOHandle REPR");
-        }
-        return obj;
-    }
-
     public static SixModelObject seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
