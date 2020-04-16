@@ -416,13 +416,6 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject openasync(String path, String mode, ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new AsyncFileHandle(tc, path, mode);
-        return h;
-    }
-
     public static SixModelObject socket(long listener, ThreadContext tc) {
         SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
         IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
@@ -601,57 +594,6 @@ public final class Ops {
         return h;
     }
 
-    public static SixModelObject setencoding(SixModelObject obj, String encoding, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-
-            Charset cs;
-            if (encoding.equals("ascii"))
-                cs = Charset.forName("US-ASCII");
-            else if (encoding.equals("iso-8859-1"))
-                cs = Charset.forName("ISO-8859-1");
-            else if (encoding.equals("utf8"))
-                cs = Charset.forName("UTF-8");
-            else if (encoding.equals("utf16"))
-                cs = Charset.forName("UTF-16");
-            else if (encoding.equals("windows-1252"))
-                cs = Charset.forName("windows-1252");
-            else if (encoding.equals("windows-1251"))
-                cs = Charset.forName("windows-1251");
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "Unsupported encoding " + encoding);
-
-            if (h.handle instanceof IIOEncodable)
-                ((IIOEncodable)h.handle).setEncoding(tc, cs);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support textual I/O");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "setencoding requires an object with the IOHandle REPR");
-        }
-        return obj;
-    }
-
-    public static SixModelObject setinputlinesep(SixModelObject obj, String sep, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-
-            if (h.handle instanceof IIOLineSeparable)
-                ((IIOLineSeparable)h.handle).setInputLineSeparator(tc, sep);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support setting input line separator");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "setinputlinesep requires an object with the IOHandle REPR");
-        }
-        return obj;
-    }
-
     public static SixModelObject seekfh(SixModelObject obj, long offset, long whence, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -774,23 +716,6 @@ public final class Ops {
         return written;
     }
 
-    public static long printfh(SixModelObject obj, String data, ThreadContext tc) {
-        long written;
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncWritable)
-                written = ((IIOSyncWritable)h.handle).print(tc, data);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support print");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "printfh requires an object with the IOHandle REPR");
-        }
-        return written;
-    }
-
     public static SixModelObject flushfh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -816,61 +741,6 @@ public final class Ops {
         }
     }
 
-    public static String readcharsfh(SixModelObject obj, long chars, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).readchars(tc, (int)chars);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support readchars");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readcharsfh requires an object with the IOHandle REPR");
-        }
-    }
-
-    public static String readlinefh(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).readline(tc);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support readline");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readlinefh requires an object with the IOHandle REPR");
-        }
-    }
-
-    public static String readlinechompfh(SixModelObject obj, ThreadContext tc) {
-        String line = readlinefh(obj, tc);
-        if (line.endsWith("\r\n"))
-            return line.substring(0, line.length() - 2);
-        else if (line.endsWith("\n"))
-            return line.substring(0, line.length() - 1);
-        else
-            return line;
-    }
-
-    public static String readallfh(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOSyncReadable)
-                return ((IIOSyncReadable)h.handle).slurp(tc);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support slurp");
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc,
-                "readallfh requires an object with the IOHandle REPR");
-        }
-    }
-
     public static long eoffh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -886,58 +756,6 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject slurpasync(SixModelObject obj, SixModelObject resultType,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).slurp(tc, resultType, done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async slurp");
-        }
-        else {
-            die_s("slurpasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
-    public static SixModelObject spurtasync(SixModelObject obj, SixModelObject resultType, SixModelObject data,
-            SixModelObject done, SixModelObject error, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncWritable)
-                ((IIOAsyncWritable)h.handle).spurt(tc, resultType, data, done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async spurt");
-        }
-        else {
-            die_s("spurtasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static SixModelObject linesasync(SixModelObject obj, SixModelObject resultType,
-            long chomp, SixModelObject queue, SixModelObject done, SixModelObject error,
-            ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOAsyncReadable)
-                ((IIOAsyncReadable)h.handle).lines(tc, resultType, chomp != 0,
-                    (LinkedBlockingQueue)((JavaObjectWrapper)queue).theObject,
-                    done, error);
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support async lines");
-        }
-        else {
-            die_s("linesasync requires an object with the IOHandle REPR", tc);
-        }
-        return obj;
-    }
-
     public static SixModelObject closefh(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof IOHandleInstance) {
             IOHandleInstance h = (IOHandleInstance)obj;
@@ -951,24 +769,6 @@ public final class Ops {
             die_s("closefh requires an object with the IOHandle REPR", tc);
         }
         return obj;
-    }
-
-    public static long closefhi(SixModelObject obj, ThreadContext tc) {
-        if (obj instanceof IOHandleInstance) {
-            IOHandleInstance h = (IOHandleInstance)obj;
-            if (h.handle instanceof IIOClosable
-             && h.handle instanceof IIOExitable) {
-                ((IIOClosable)h.handle).close(tc);
-                return (long)((IIOExitable)h.handle).exitValue(tc) << 8;
-            }
-            else
-                throw ExceptionHandling.dieInternal(tc,
-                    "This handle does not support close or exitValue");
-        }
-        else {
-            die_s("closefhi requires an object with the IOHandle REPR", tc);
-        }
-        return -1;
     }
 
     public static SixModelObject setbuffersizefh(SixModelObject obj, long size, ThreadContext tc) {
@@ -1132,44 +932,6 @@ public final class Ops {
         }
     }
 
-    public static SixModelObject syncpipe(ThreadContext tc) {
-        SixModelObject IOType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.ioType;
-        IOHandleInstance h = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        h.handle = new SyncProcessHandle(tc);
-        return h;
-    }
-
-    public static long shell(String cmd, String dir, SixModelObject envObj,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
-        List<String> args = new ArrayList<String>();
-
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.indexOf("win") >= 0) {
-            args.add("cmd");
-            args.add("/c");
-            args.add(cmd);
-        } else {
-            args.add("sh");
-            args.add("-c");
-            args.add(cmd);
-        }
-
-        return spawn(tc, args, envObj, dir, in, out, err, flags);
-    }
-
-    public static long spawn(SixModelObject argsObj, String dir, SixModelObject envObj,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags, ThreadContext tc) {
-        List<String> args = new ArrayList<String>();
-        SixModelObject argIter = iter(argsObj, tc);
-        while (istrue(argIter, tc) != 0) {
-            SixModelObject v = argIter.shift_boxed(tc);
-            String arg = v.get_str(tc);
-            args.add(arg);
-        }
-
-        return spawn(tc, args, envObj, dir, in, out, err, flags);
-    }
-
     public static final int PIPE_INHERIT        = 1;
     public static final int PIPE_IGNORE         = 2;
     public static final int PIPE_CAPTURE        = 4;
@@ -1221,58 +983,6 @@ public final class Ops {
         if ((flags & PIPE_CAPTURE_ERR) != 0 && err instanceof IOHandleInstance)
             /* getErrorStream() returns the input stream connected to the error output of the subprocess. */
             ((SyncProcessHandle)((IOHandleInstance)err).handle).bindChannel(tc, process, process.getErrorStream());
-    }
-
-    private static long spawn(ThreadContext tc, List<String> args, SixModelObject envObj, String dir,
-            SixModelObject in, SixModelObject out, SixModelObject err, long flags) {
-        Map<String, String> env = new HashMap<String, String>();
-        SixModelObject iter = iter(envObj, tc);
-        while (istrue(iter, tc) != 0) {
-            SixModelObject kv = iter.shift_boxed(tc);
-            String key = iterkey_s(kv, tc);
-            String value = unbox_s(iterval(kv, tc), tc);
-            env.put(key, value);
-        }
-
-        long       retval = 255;
-        ProcessBuilder pb = new ProcessBuilder(args);
-        pb.directory(new File(dir));
-
-        // Clear the JVM inherited environment and use provided only
-        Map<String, String> pbEnv = pb.environment();
-        pbEnv.clear();
-        pbEnv.putAll(env);
-
-        setup_process_builder(tc, pb, in, out, err, flags);
-
-        if ((flags & (PIPE_CAPTURE_IN | PIPE_CAPTURE_OUT | PIPE_CAPTURE_ERR)) != 0) {
-            try {
-                Process process = pb.start();
-                setup_process_streams(tc, process, in, out, err, flags);
-            }
-            catch (IOException e) {
-                throw ExceptionHandling.dieInternal(tc, e);
-            }
-        }
-        /* run immediately */
-        else {
-            try {
-                boolean finished = false;
-                Process process  = pb.start();
-                setup_process_streams(tc, process, in, out, err, flags);
-                do {
-                    try {
-                        retval   = process.waitFor();
-                        finished = true;
-                    } catch (InterruptedException e) {
-                    }
-                } while (!finished);
-            } catch (IOException e) {
-            }
-        }
-
-        /* Return exit code left shifted by 8 for POSIX emulation. */
-        return retval << 8;
     }
 
     public static long symlink(String before, String after, ThreadContext tc) {
@@ -6621,9 +6331,7 @@ public final class Ops {
 
         return nfa;
     }
-    public static SixModelObject nfatostatelist(SixModelObject nfa, ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "nfatostatelist NYI");
-    }
+
     public static SixModelObject nfarunproto(SixModelObject nfa, String target, long pos, ThreadContext tc) {
         /* Run the NFA. */
         int[] fates = runNFA(tc, (NFAInstance)nfa, target, pos);

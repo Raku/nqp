@@ -195,7 +195,6 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [getstdin](#getstdin)
   * [getstdout](#getstdout)
   * [open](#open)
-  * [openasync `jvm`](#openasync-jvm)
   * [print](#print)
   * [readfh](#readfh)
   * [say](#say)
@@ -1732,13 +1731,6 @@ Return the filehandle for standard output.
 
 Open the specified file in the given mode. Valid modes include `r` for read,
 `w` for write, and `wa` for write with append. Returns a filehandle.
-
-## openasync `jvm`
-_Experimental_
-* `openasync(str $filename, str $mode)`
-
-Open the specified file in the given mode for async IO.
-See `open` for valid modes.
 
 ## print
 * `print(str $str)`
