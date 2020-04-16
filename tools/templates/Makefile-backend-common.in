@@ -117,7 +117,7 @@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @prev_stage_dir@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
-	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
+	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
 	$(NOECHO@nop())@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
 	$(NOECHO@nop())@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
 	    --setting=NQPCORE --target=@btarget@ --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ @bpm(NQP_@ucstage@_FLAGS)@ \

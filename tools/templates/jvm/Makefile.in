@@ -74,11 +74,11 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
 	@echo(+++ Preparing Java runtime)@
 	$(NOECHO)$(MKPATH) bin
 	$(NOECHO)$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
-	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
-	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
+	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(STATIC_NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
+	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(STATIC_NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
 	$(NOECHO)$(JAR) cf0 @bsm(RUNTIME)@ -C @nfp(bin/)@ .
 
-@bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @@template(runner-prelude)@@
+@bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @@template(runner-prelude)@@ @bsm(NQP)@
 	@echo(+++ Setting up	$@)@
 	$(NOECHO)$(CP) @bpm(RUNNER_JARS)@ @q(@bpm(RUNNER_JAR_DIR)@)@
 	$(NOECHO)$(CP) @bpm(RUNNER_LIBS)@ @q(@bpm(RUNNER_LIB_DIR)@)@
