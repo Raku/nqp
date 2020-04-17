@@ -2185,6 +2185,7 @@ Convert Big Integer value to a native number.
 * `unbox_i(Mu $val --> int)`
 * `unbox_n(Mu $val --> num)`
 * `unbox_s(Mu $val --> str)`
+* `unbox_u(Mu $val --> str)` `moar`
 
 Given a Raku object, return a native with the same value,
 of the type indicated by the opcode suffix.
