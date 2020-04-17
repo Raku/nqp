@@ -332,6 +332,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [getpid](#getpid)
   * [getppid](#getppid)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
+  * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
   * [setcodename](#setcodename)
   * [sha1](#sha1)
   * [sleep](#sleep)
@@ -2827,6 +2828,12 @@ Return the process id of the parent process, an int.
 * `jvmclasspaths(--> Mu)`
 
 Converts the JVM property `java.class.path` into a list of paths, returns it.
+
+## jvmgetproperties `jvm`
+* `jvmgetproperties(--> Hash)`
+
+Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS names
+(key: 'os.name'), returns all other data as is.
 
 ## setcodename
 * `setcodename($obj, str)`
