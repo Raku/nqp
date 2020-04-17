@@ -257,6 +257,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [isstr](#isstr)
   * [istrue](#istrue)
   * [istype](#istype)
+  * [isttyfh](#isttyfh)
   * [null](#null)
   * [tostr](#tostr)
   * [tonum](#tonum)
@@ -2153,6 +2154,11 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 * `istype(Mu $obj, Mu:T $obj --> int)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+## istttyfh
+* `isttyfh(Mu $obj --> int)`
+
+Returns a 1 if the object is an IO::Handle object that is a tty, 0 otherwise.
 
 ## null
 * `null(--> Mu)`
