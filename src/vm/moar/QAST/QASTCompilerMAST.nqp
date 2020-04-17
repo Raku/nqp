@@ -507,7 +507,7 @@ my class MASTCompilerInstance {
                 if $got == $MVM_reg_int64 {
                     %core_op_generators{'coerce_is'}($res_reg, $reg);
                 }
-                elsif $got == $MVM_reg_int32 {
+                elsif $got == $MVM_reg_int32 || $got == $MVM_reg_int16 || $got == $MVM_reg_int8 || $got == $MVM_reg_uint32 || $got == $MVM_reg_uint16 || $got == $MVM_reg_uint8 {
                     my $int64 := self.coercion($res, $MVM_reg_int64);
                     $reg := $int64.result_reg;
                     $release_type := nqp::unbox_i($int64.result_kind);
@@ -2299,13 +2299,14 @@ class MoarVM::StringHeap {
             $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
         }
 
-        my $encoded := nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), nqp::create(MAST::Bytecode));
-        my int $encoded_size := nqp::elems($encoded);
+        my int $prev_total_size := nqp::elems($!strings);
+        nqp::setelems($!strings, $prev_total_size + 4);
+        nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), $!strings);
+        my int $encoded_size := nqp::elems($!strings) - 4 - $prev_total_size;
         my int $pad := 4 - $encoded_size % 4;
         $pad := 0 if $pad == 4;
 
-        $!strings.write_uint32($encoded_size * 2 + $utf8); # LSB is UTF-8 flag
-        $!strings.write_buf($encoded);
+        $!strings.write_uint32_at($encoded_size * 2 + $utf8, $prev_total_size); # LSB is UTF-8 flag
         $!strings.write_uint8(0) while $pad--;
 
         nqp::push_s(@!orig-strings, $s);
@@ -2342,8 +2343,10 @@ class MoarVM::BytecodeWriter {
     has $!compunit;
     has @!frames;
     has $!bytecode;
+    has uint32 $!bytecode_size;
     has @!sc_handle_idxs;
     has @!extop_name_idxs;
+    has uint32 $!hll;
     method BUILD(:$string-heap, :$callsites, :$annotations) {
         $!mbc             := MAST::Bytecode.new;
         $!bytecode        := MAST::Bytecode.new;
@@ -2375,10 +2378,8 @@ class MoarVM::BytecodeWriter {
     }
     method write_header() {
         # 92 bytes
-        my $hll := self.add-string($!compunit.hll || '');
 
         my uint32 $header_size := +align_section(8 + 21 * 4);
-        my uint32 $frames := nqp::elems(@!frames);
         my uint32 $frames_size := 0;
         for @!frames {
             my uint32 $size := +$_.size;
@@ -2391,8 +2392,8 @@ class MoarVM::BytecodeWriter {
         my uint32 $sc_deps_size := +align_section(nqp::elems(@sc_handles) * 4);
         my $num_extops := nqp::elems(nqp::getattr($!compunit, MAST::CompUnit, '@!extop_names'));
         my uint32 $extops_size := +align_section($num_extops * (4 + 8));
-        my uint32 $bytecode_size := +align_section(nqp::elems($!bytecode));
-        my uint32 $annotations_size := nqp::elems($!annotations);
+        my uint32 $bytecode_size := +align_section($!bytecode_size || nqp::elems($!bytecode));
+        my uint32 $annotations_size := nqp::elems($!annotations); # doesn't need to be aligned because annotations are written last
         my $serialized := $!compunit.serialized;
         my uint32 $serialized_size := +align_section(nqp::defined($serialized) ?? nqp::elems($serialized) !! 0);
 
@@ -2409,7 +2410,7 @@ class MoarVM::BytecodeWriter {
         $offset := $offset + $extops_size;
 
         $!mbc.write_uint32($offset); # Offset of frames segment
-        $!mbc.write_uint32($frames); # Number of frames
+        $!mbc.write_uint32(nqp::elems(@!frames)); # Number of frames
         $offset := $offset + $frames_size;
 
         $!mbc.write_uint32($offset); # Offset of callsites segment
@@ -2425,13 +2426,13 @@ class MoarVM::BytecodeWriter {
         $offset := $offset + $serialized_size;
 
         $!mbc.write_uint32($offset); # Offset of bytecode segment
-        $!mbc.write_uint32(nqp::elems($!bytecode)); # Length of bytecode segment
+        $!mbc.write_uint32($!bytecode_size || nqp::elems($!bytecode)); # Length of bytecode segment
         $offset := $offset + $bytecode_size;
 
         $!mbc.write_uint32($offset); # Offset of annotation segment
         $!mbc.write_uint32($annotations_size); # Length of annotation segment
 
-        $!mbc.write_uint32($hll); # HLL Name
+        $!mbc.write_uint32($!hll); # HLL Name
         my $main_frame := $!compunit.main_frame;
         if $main_frame {
             my uint32 $main_frame_idx := self.get_frame_index($main_frame) + 1;
@@ -2588,7 +2589,25 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint8(0);
         }
     }
+    method align_and_write($file) {
+        self.align;
+        nqp::writefh($file, $!mbc);
+        nqp::setelems($!mbc, 0);
+    }
+    method align_file($size, $file) {
+        my $off := $size % 8;
+        if $off != 0 {
+            my $tmp := MAST::Bytecode.new;
+            $off := 8 - $off;
+            while $off-- > 0 {
+                $tmp.write_uint8(0);
+            }
+            nqp::writefh($file, $tmp);
+        }
+    }
+
     method assemble() {
+        $!hll := self.add-string($!compunit.hll || '');
         self.collect_bytecode;
 
         self.write_header;
@@ -2613,6 +2632,52 @@ class MoarVM::BytecodeWriter {
         self.write_annotations;
         self.align;
     }
+    method assemble_to_file($filename) {
+        $!hll := self.add-string($!compunit.hll || '');
+        my $file := nqp::open($filename, 'w');
+
+        # skip the header since we don't have all the info yet, we'll go back and write it later
+        nqp::seekfh($file, 96, 0);
+
+        self.write_sc_deps_table;
+        self.align_and_write($file);
+        self.write_extops;
+        self.align_and_write($file);
+        my int $idx := 0;
+        for @!frames {
+            # need to set the bycode offset here since we don't call self.collect_bytecode()
+            $_.set-bytecode-offset($!bytecode_size);
+            self.write_frame($_, $idx++);
+            $!bytecode_size := $!bytecode_size + nqp::elems($_.bytecode);
+        }
+        self.align_and_write($file);
+        self.write_callsites;
+        self.align_and_write($file);
+        self.write_string_heap;
+        self.align_and_write($file);
+
+        # write the compunit serialized data directly to the file since it's large
+        if nqp::defined($!compunit.serialized) {
+            my int $compunit_size := nqp::writefh($file, $!compunit.serialized);
+            self.align_file($compunit_size, $file);
+        }
+
+        # write the bytecode directly to the file since it's large
+        for @!frames {
+            nqp::writefh($file, $_.bytecode);
+        }
+        self.align_file($!bytecode_size, $file);
+
+        self.write_annotations;
+        self.align_and_write($file);
+
+        # go back to the front of the file and write the header
+        nqp::seekfh($file, 0, 0);
+        self.write_header;
+        self.align_and_write($file);
+
+        nqp::closefh($file);
+    }
     method get_frame_index(MAST::Frame $f) {
         my $idx := 0;
         if nqp::getattr($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
@@ -2635,8 +2700,14 @@ class MoarVM::BytecodeWriter {
 }
 
 class MASTBytecodeAssembler {
-    method assemble_to_file($mast, $file) {
-        self.assemble($mast).save($file);
+    method assemble_to_file($mast, $filename) {
+        my $writer := $mast.writer;
+        my @cu_frames := nqp::getattr($mast, MAST::CompUnit, '@!frames');
+        for @cu_frames {
+            $writer.add-frame($_);
+        }
+        $writer.prepare;
+        $writer.assemble_to_file($filename);
     }
 
     method assemble($mast) {
