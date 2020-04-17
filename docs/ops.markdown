@@ -338,6 +338,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [sleep](#sleep)
   * [takeclosure](#takeclosure)
   * [time](#time)
+  * [totalmem](#totalmem)
   * [mvmstartprofile](#mvmstartprofile)
   * [mvmendprofile](#mvmendprofile)
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
@@ -2866,6 +2867,11 @@ Creates a lexical closure from the block's outer scope.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
+
+## totalmem
+* `totalmem(--> int)`
+
+Returns the number of bytes of memory in use by the VM.
 
 ## mvmstartprofile `moar`
 * `mvmstartprofile(hash $config)`
