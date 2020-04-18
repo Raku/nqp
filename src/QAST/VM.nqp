@@ -20,7 +20,7 @@ class QAST::VM is QAST::Node does QAST::Children {
     method dump_children(int $indent, @onto) {
         for sorted_keys(%!alternatives) -> $k {
             my $v := %!alternatives{$k};
-            nqp::push(@onto, nqp::x(' ', $indent));
+            nqp::push(@onto, self.dump_indent_string($indent));
             nqp::push(@onto, '[');
             nqp::push(@onto, $k);
             nqp::push(@onto, "]\n");
@@ -29,7 +29,7 @@ class QAST::VM is QAST::Node does QAST::Children {
                 nqp::push(@onto, $v.dump($indent+2));
             }
             else {
-                nqp::push(@onto, nqp::x(' ', $indent+2));
+                nqp::push(@onto, self.dump_indent_string($indent+2));
                 nqp::push(@onto, '- ');
                 if $k eq 'loadlibs' {
                     nqp::push(@onto, nqp::join(' ',$v));

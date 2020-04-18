@@ -18,12 +18,16 @@ role QAST::Children {
     }
 
     method dump_node_list(int $indent, @onto, @node_list) {
+        # Guide lines are triggered from here - if this is a Block
+        # node, then we request a guide line next to its children
+        my $guide-requested := nqp::istype(self, QAST::Block) ;
+
         for @node_list {
             if nqp::istype($_, QAST::Node) {
-                nqp::push(@onto, $_.dump($indent));
+                nqp::push(@onto, $_.dump($indent, :guide-line($guide-requested) ));
             }
             else {
-                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, self.dump_indent_string($indent, :guide-line($guide-requested) )) ;
                 nqp::push(@onto, '- ');
                 nqp::istype($_, NQPMu)
                     ?? nqp::push(@onto, '(NQPMu)')
@@ -44,7 +48,7 @@ role QAST::Children {
         my $extra := 0;
         for self.extra_children -> $tag, $nodes {
             if $nodes {
-                nqp::push(@onto, nqp::x(' ', $indent));
+                nqp::push(@onto, self.dump_indent_string($indent));
                 nqp::push(@onto, "[" ~ $tag ~ "]");
                 nqp::push(@onto, "\n");
                 self.dump_node_list($indent+2, @onto, nqp::islist($nodes) ?? $nodes !! [$nodes]);
@@ -53,7 +57,7 @@ role QAST::Children {
         }
 
         if $extra && @!children {
-            nqp::push(@onto, nqp::x(' ', $indent) ~ "[children]\n");
+            nqp::push(@onto, self.dump_indent_string($indent) ~ "[children]\n");
             self.dump_node_list($indent+2, @onto, @!children);
         } else {
             self.dump_node_list($indent, @onto, @!children);
