@@ -214,6 +214,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [filereadable](#filereadable)
   * [filewritable](#filewritable)
   * [gethostname](#gethostname)
+  * [getport](#getport)
   * [link](#link)
   * [mkdir](#mkdir)
   * [nextfiledir](#nextfiledir)
@@ -1839,6 +1840,12 @@ If not, returns 0. If an error occurs, return -1.
 * `gethostname(str $str --> str)`
 
 Returns the hostname of the system where it is run.
+
+## getport `moar` `jvm`
+* `getport($obj --> int)`
+
+If the specified object is an IO::Handle, return the integer port
+number the object is listening on. If an error occurs, return -1.
 
 ## link
 * `link(str $before, str $after --> int)`
