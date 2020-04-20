@@ -332,6 +332,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
   * [getppid](#getppid)
+  * [js](#js)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
   * [setcodename](#setcodename)
@@ -2831,6 +2832,13 @@ Return the current process id, an int.
 * `getppid(--> int)`
 
 Return the process id of the parent process, an int.
+
+## js  `moar` `js`
+* `js(str)`
+
+Execute the string of JavaScript code passed in.
+
+While this opcode exists in moar, it throws an exception declaring it is not implemented.
 
 ## jvmclasspaths `jvm`
 * `jvmclasspaths(--> Mu)`
