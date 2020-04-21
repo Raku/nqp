@@ -680,7 +680,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $idx   := nqp::index('$@%&', $sigil);
         if $idx >= 0 {
             @ns[0]  := nqp::substr(@ns[0], 1);
-            @ns[-1] := $sigil ~ @ns[-1];
+            @ns[nqp::elems(@ns) - 1] := $sigil ~ @ns[nqp::elems(@ns) - 1];
         }
 
         # remove any empty items from the list

@@ -503,7 +503,7 @@ role NQPMatchRole is export {
         }
         elsif !nqp::isnull($capture) {
             if nqp::isnull_s(nqp::getattr_s($capture, $?CLASS, '$!name')) {
-                if nqp::isnull_s(nqp::getattr_s(nqp::atpos($!cstack,-1), $?CLASS, '$!name')) {
+                if nqp::isnull_s(nqp::getattr_s(nqp::atpos($!cstack, nqp::elems($!cstack) - 1), $?CLASS, '$!name')) {
                     # $top anon capture just used for pos advancement, so update
                     # it in place.  We replace the whole capture because jvm
                     # can't seem to copy only the pos, and because the chances

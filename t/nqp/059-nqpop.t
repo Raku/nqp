@@ -1,6 +1,6 @@
 # Test nqp::op pseudo-functions.
 
-plan(373);
+plan(368);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -197,8 +197,6 @@ ok( nqp::elems($list) == 4, 'nqp::elems');
 ok( nqp::atpos($list, 0) == 0, 'nqp::atpos');
 is( nqp::atpos($list, 2), 'b', 'nqp::atpos');
 nqp::push($list, 'four');
-is( nqp::atpos($list, -1), 'four', 'nqp::atpos with -1 index');
-ok( nqp::atpos($list, -2) == 3.0, 'nqp::atpos with -2 index');
 ok( nqp::elems($list) == 5, 'nqp::push');
 ok( nqp::shift($list) == 0, 'nqp::shift');
 is( nqp::pop($list), 'four', 'nqp::pop');
@@ -405,8 +403,6 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     my $b := nqp::list_i(1,2,30.4);
     ok(nqp::atpos_i($b,2) == 30, 'atpos_i');
 
-    ok(nqp::atpos_i($b, -2) == 2, 'atpos_i with negative index');
-
     ok(nqp::atpos_i($b, 100) == 0, 'nqp::atpos_i ouside of array');
 
 
@@ -438,7 +434,6 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     my $b := nqp::list_s("A","B","C");
     ok(nqp::bindpos_s($b, 2, "D"), 'nqp::bindpos_s');
     is(nqp::atpos_s($b,2), "D", 'nqp::atpos_s');
-    is(nqp::atpos_s($b, -2), "B", 'nqp::atpos_s with negative index');
     ok(nqp::isnull_s(nqp::atpos_s($a, 10)), 'nqp::atpos_s with element outside of array');
 }
 
@@ -461,7 +456,6 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
     nqp::bindpos_n($c, 1, 103.5);
     nqp::bindpos_n($c, 0, 101.0);
     ok(nqp::iseq_n(nqp::atpos_n($c, 1), 103.5), 'bindpos_n works');
-    ok(nqp::iseq_n(nqp::atpos_n($c, -1), 103.5), 'nqp::atpos_n with negative index');
     ok(nqp::iseq_n(nqp::atpos_n($c, 10), 0.0), 'atpos_n with element outside of the array');
 
 }

@@ -219,11 +219,18 @@ class QAST::MASTRegexCompiler {
         op('pop_i', $itmp, $bstack);
         if $!cstack_used {
             my $cstacklabel := label();
+            my $positivelabel := label();
             op('islist', $i0, $cstack);
             op('unless_i', $i0, $cstacklabel);
             op('elems', $i0, $cstack);
             op('gt_i', $i0, $i0, $zero);
             op('unless_i', $i0, $cstacklabel);
+
+            op('gt_i', $i0, $itmp, $zero);
+            op('if_i', $i0, $positivelabel);
+            op('elems', $i0, $cstack);
+            op('add_i', $itmp, $itmp, $i0);
+            $*MAST_FRAME.add-label($positivelabel);
             op('dec_i', $itmp);
             op('atpos_o', $back_cur, $cstack, $itmp);
             $*MAST_FRAME.add-label($cstacklabel);
