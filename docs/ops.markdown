@@ -359,6 +359,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [asyncreadbytes](#asyncreadbytes-moar-jvm)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
+- [HLL-Specific Operations](#-hll-specific)
+  * [hllbool](#hllbool)
 - [Atomic Operations](#-atomic-operations)
   * [cas `moar`](#cas-moar)
   * [cas_i `moar`](#cas_i-moar)
@@ -3095,6 +3097,15 @@ Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of u
 
 ## killprocasync
 * `killprocasync($handle, $signal)`
+
+# <a id="hll-specific"></a> HLL-Specific Operations
+
+## hllbool
+* `hllbool(int -> obj)`
+
+If passed 0, return a HLL specific Boolean true value,
+otherwise, a false one. For Raku, this maps to ```Bool::True```
+and ```Bool::False```
 
 # <a id="atomic"></a> Atomic Operations
 
