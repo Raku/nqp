@@ -51,9 +51,9 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
 - [Relational / Logic Opcodes](#-relational--logic-opcodes)
   * [cmp](#cmp)
   * [eqat](#eqat)
-  * [eqatic `moar`](#eqatic-moar)
-  * [eqatim `moar`](#eqatim-moar)
-  * [eqaticim `moar`](#eqaticim-moar)
+  * [eqatic](#eqatic)
+  * [eqatim](#eqatim-moar-js)
+  * [eqaticim](#eqaticim-moar-js)
   * [falsey](#falsey)
   * [iseq](#iseq)
   * [isgt](#isgt)
@@ -86,15 +86,15 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [iterkey](#iterkey)
   * [iterval](#iterval)
 - [Coercion Opcodes](#-coercion-opcodes)
-  * [coerce_in](#coerce_in)
-  * [coerce_ni](#coerce_ni)
+  * [coerce_in](#coerce_in-moar)
+  * [coerce_ni](#coerce_ni-moar)
   * [coerce_is](#coerce_is)
-  * [coerce_ns](#coerce_ns)
-  * [coerce_sn](#coerce_sb)
+  * [coerce_ns](#coerce_ns-moar)
+  * [coerce_sn](#coerce_sn-moar)
   * [coerce_si](#coerce_si)
-  * [intify](#intify)
-  * [numify](#numify)
-  * [strify](#strify)
+  * [intify](#intify-moar)
+  * [numify](#numify-moar)
+  * [strify](#strify-moar)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
   * [chr](#chr)
@@ -102,9 +102,9 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [codes](#codes)
   * [concat](#concat)
   * [decode](#decode)
-  * [decodetocodes `moar`](#decodetocodes-moar)
+  * [decodetocodes](#decodetocodes-moar)
   * [encode](#encode)
-  * [encodefromcodes `moar`](#encodefromcodes-moar)
+  * [encodefromcodes](#encodefromcodes-moar)
   * [encodenorm](#encodenorm)
   * [escape](#escape)
   * [fc](#fc)
@@ -112,14 +112,14 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [findnotcclass](#findnotcclass)
   * [flip](#flip)
   * [index](#index)
-  * [indexic](#indexic)
-  * [indexim `moar`](#indexim-moar)
-  * [indexicim `moar`](#indexicim-moar)
+  * [indexic](#indexic-moar)
+  * [indexim](#indexim-moar)
+  * [indexicim](#indexicim-moar)
   * [iscclass](#iscclass)
   * [join](#join)
   * [lc](#lc)
   * [normalizecodes](#normalizecodes)
-  * [numify](#numify)
+  * [numify](#numify-moar)
   * [ord](#ord)
   * [ordbaseat](#ordbaseat)
   * [radix](#radix)
@@ -136,17 +136,17 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [tc](#tc)
   * [tclc](#tclc)
   * [uc](#uc)
-  * [unicmp_s `js` `moar`](#unicmp_s)
+  * [unicmp_s](#unicmp_s-moar-js)
   * [x](#x)
 - [Unicode Property Opcodes](#-unicode-property-opcodes)
   * [getuniname](#getuniname)
-  * [getuniprop_int `moar`](#getuniprop_int-moar)
+  * [getuniprop_int](#getuniprop_int-moar)
   * [getuniprop_str](#getuniprop_str)
-  * [getuniprop_bool `moar`](#getuniprop_bool-moar)
-  * [matchuniprop `moar`](#matchuniprop-moar)
+  * [getuniprop_bool](#getuniprop_bool-moar)
+  * [matchuniprop](#matchuniprop-moar)
   * [unipropcode](#unipropcode)
-  * [unipvalcode `moar`](#unipvalcode-moar)
-  * [hasuniprop `moar`](#hasuniprop-moar)
+  * [unipvalcode](#unipvalcode-moar)
+  * [hasuniprop](#hasuniprop-moar)
 - [VM-Provided Streaming Decoder Opcodes](#-vm-provided-streaming-decoder-opcodes)
   * [decoderconfigure](#decoderconfigure)
   * [decodersetlineseps](#decodersetlineseps)
@@ -202,7 +202,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [tellfh](#tellfh)
   * [writefh](#writefh)
 - [External command Opcodes](#extern)
-  * [execname](#execname)
+  * [execname](#execname-moar-js)
 - [File / Directory / Network Opcodes](#-file--directory--network-opcodes)
   * [chdir](#chdir)
   * [chmod](#chmod)
@@ -214,7 +214,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [filereadable](#filereadable)
   * [filewritable](#filewritable)
   * [gethostname](#gethostname)
-  * [getport](#getport)
+  * [getport](#getport-moar-jvm)
   * [link](#link)
   * [mkdir](#mkdir)
   * [nextfiledir](#nextfiledir)
@@ -229,21 +229,21 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [unlink](#unlink)
 - [Type/Conversion Opcodes](#-typeconversion-opcodes)
   * [bool](#bool)
-  * [bootarray `jvm` `moar`](#bootarray-jvm-moar)
-  * [boothash `jvm` `moar`](#boothash-jvm-moar)
-  * [bootint `jvm` `moar`](#bootint-jvm-moar)
-  * [bootintarray `jvm` `moar`](#bootintarray-jvm-moar)
-  * [bootnum `jvm` `moar`](#bootnum-jvm-moar)
-  * [bootnumarray `jvm` `moar`](#bootnumarray-jvm-moar)
-  * [bootstr `jvm` `moar`](#bootstr-jvm-moar)
-  * [bootstrarray `jvm` `moar`](#bootstrarray-jvm-moar)
+  * [bootarray](#bootarray-moar-jvm)
+  * [boothash](#boothash-moar-jvm)
+  * [bootint](#bootint-moar-jvm)
+  * [bootintarray](#bootintarray-moar-jvm)
+  * [bootnum](#bootnum-moar-jvm)
+  * [bootnumarray](#bootnumarray-moar-jvm)
+  * [bootstr](#bootstr-moar-jvm)
+  * [bootstrarray](#bootstrarray-moar-jvm)
   * [box](#box)
   * [decont](#decont)
   * [defined](#defined)
   * [fromnum](#fromnum)
   * [fromstr](#fromstr)
   * [isbig](#isbig)
-  * [iscoderef](#iscoderef)
+  * [iscoderef](#iscoderef-moar)
   * [isconcrete](#isconcrete)
   * [iscont](#iscont)
   * [isfalse](#isfalse)
@@ -264,16 +264,17 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [tonum](#tonum)
   * [unbox](#unbox)
 - [Binary Data Opcodes](#-binary-data-opcodes)
-  * [writeint](#writeint)
-  * [writeuint](#writeuint)
-  * [writenum](#writenum)
-  * [readint](#readint)
-  * [readuint](#readuint)
-  * [readnum](#readnum)
+  * [writeint](#writeint-moar-js)
+  * [writeuint](#writeuint-moar-js)
+  * [writenum](#writenum-moar-js)
+  * [readint](#readint-moar-js)
+  * [readuint](#readuint-moar-js)
+  * [readnum](#readnum-moar-js)
 - [OO/SixModel Opcodes](#-oosixmodel-opcodes)
   * [attrinited](#attrinited)
   * [bindattr](#bindattr)
   * [bindcomp](#bindcomp)
+  * [call](#call)
   * [callmethod](#callmethod)
   * [can](#can)
   * [clone](#clone)
@@ -305,9 +306,9 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [lexprimspec](#lexprimspec)
   * [savecapture](#savecapture)
   * [usecapture](#usecapture)
-  * [getlex](#getlex)
-  * [getlexref](#getlexref)
-  * [bindlex](#bindlex)
+  * [getlex](#getlex-moar-jvm)
+  * [getlexref](#getlexref-moar-jvm)
+  * [bindlex](#bindlex-moar-jvm)
   * [getlexdyn](#getlexdyn)
   * [bindlexdyn](#bindlexdyn)
   * [getlexouter](#getlexouter)
@@ -322,18 +323,18 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [const](#const)
   * [cpucores](#cpucores)
   * [decodelocaltime](#decodelocaltime)
-  * [forcegc](#forcegc)
+  * [force_gc](#force_gc-moar-jvm)
   * [getcodename](#getcodename)
   * [getrusage](#getrusage)
-  * [uname](#uname)
+  * [uname](#uname-moar-js)
   * [debugnoop `jvm`](#debugnoop-jvm)
   * [exit](#exit)
   * [getenvhash](#getenvhash)
   * [getsignals](#getsignals)
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
-  * [getppid](#getppid)
-  * [js](#js)
+  * [getppid](#getppid-moar)
+  * [js](#js-moar=js)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
   * [setcodename](#setcodename)
@@ -342,20 +343,20 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [takeclosure](#takeclosure)
   * [time](#time)
   * [totalmem](#totalmem)
-  * [mvmstartprofile](#mvmstartprofile)
-  * [mvmendprofile](#mvmendprofile)
+  * [mvmstartprofile](#mvmstartprofile-moar)
+  * [mvmendprofile](#mvmendprofile-moar)
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
   * [nativecallrefresh](#nativecallrefresh)
 - [Asynchronous Operations](#-asynchronous-operations)
   * [permit](#permit)
-  * [cancel](#cancel)
-  * [timer](#timer)
-  * [signal](#signal)
-  * [watchfile](#watchfile)
+  * [cancel](#cancel-moar-jvm)
+  * [timer](#timer-moar-jvm)
+  * [signal](#signal-moar-jvm)
+  * [watchfile](#watchfile-moar-jvm)
   * [asyncconnect](#asyncconnect)
   * [asynclisten](#asynclisten)
   * [asyncwritebytes](#asyncwritebytes)
-  * [asyncreadbytes](#asyncreadbytes)
+  * [asyncreadbytes](#asyncreadbytes-moar-jvm)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
 - [Atomic Operations](#-atomic-operations)
@@ -376,8 +377,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [scgethandle](#scgethandle)
   * [pushcompsc](#pushcompsc)
   * [popcompsc](#popcompsc)
-  * [scsetobj](#scsetobj)
-  * [setobjsc](#seetobjsc)
+  * [scsetobj](#scsetobjc)
+  * [setobjsc](#setobjsc)
   * [getobjsc](#getobjsc)
   * [scgetobjidx](#scgetobjidx)
   * [serialize](#serialize)
@@ -799,15 +800,11 @@ Return 1 if anything is bound to `@arr` at position `$i`,
 * `list_i(... --> Mu)`
 * `list_n(... --> Mu)`
 * `list_s(... --> Mu)`
+* `list_b(... --> Mu)` `moar`
 
 Create a list of the given parameters. If no arguments are passed,
 an empty list is created. If a typed variant is used, the parameters
 are coerced to the appropriate type.
-
-## list_b `moar`
-* `list_b(... --> Mu)`
-
-_Same as previous entry_
 
 ## push
 * `push(@arr, Mu $v --> Mu)`
@@ -1328,7 +1325,7 @@ characters lowercased.
 
 Return uppercase copy of string.
 
-## unicmp_s `js` `moar`
+## unicmp_s `moar` `js`
 * `unicmp_s(str $str1, str Str2, int $mode, int $iso639, int $iso3166 --> int)`
 
 Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
@@ -2001,42 +1998,42 @@ didn't exist. May throw an exception.
 
 Returns 0 if `$val` is 0, otherwise 1.
 
-## bootarray `jvm` `moar`
+## bootarray `moar` `jvm`
 * `bootarray()`
 
 Returns a VM specific type object for a native array.
 
-## boothash `jvm` `moar`
+## boothash `moar` `jvm`
 * `boothash()`
 
 Returns a VM specific type object for a native hash.
 
-## bootint `jvm` `moar`
+## bootint `moar` `jvm`
 * `bootint()`
 
 Returns a VM specific type object that can box a native int.
 
-## bootintarray `jvm` `moar`
+## bootintarray `moar` `jvm`
 * `bootintarray()`
 
 Returns a VM specific type object for a native array of int.
 
-## bootnum `jvm` `moar`
+## bootnum `moar` `jvm`
 * `bootnum()`
 
 Returns a VM specific type object that can box a native num.
 
-## bootnumarray `jvm` `moar`
+## bootnumarray `moar` `jvm`
 * `bootnumarray()`
 
 Returns a VM specific type object for a native array of num.
 
-## bootstr `jvm` `moar`
+## bootstr `moar` `jvm`
 * `bootstr()`
 
 Returns a VM specific type object that can box a native str.
 
-## bootstrarray `jvm` `moar`
+## bootstrarray `moar` `jvm`
 * `bootstrarray()`
 
 Returns a VM specific type object for a native array of str.
@@ -2163,7 +2160,7 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 
 Returns a 1 if the object is of the given type, 0 otherwise.
 
-## istttyfh
+## isttyfh
 * `isttyfh(Mu $obj --> int)`
 
 Returns a 1 if the object is an IO::Handle object that is a tty, 0 otherwise.
@@ -2840,7 +2837,7 @@ Return the current process id, an int.
 
 Return the process id of the parent process, an int.
 
-## js  `moar` `js`
+## js `moar` `js`
 * `js(str)`
 
 Execute the string of JavaScript code passed in.
@@ -3222,7 +3219,7 @@ Get the handle string used by `createsc` to create the SC `$sc`
 ## getobjsc
 * `getobjsc($obj)`
 
-## scgetojidx
+## scgetobjidx
 * `scgetobjidx()`
 
 ## serialize
@@ -3231,7 +3228,7 @@ Get the handle string used by `createsc` to create the SC `$sc`
 ## deserialize
 * `deserialize()`
 
-## scojcount
+## scobjcount
 * `scobjcount()`
 
 ## 
