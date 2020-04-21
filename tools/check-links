@@ -1,0 +1,32 @@
+#!/usr/bin/env raku
+
+# check the header links in docs/ops.markdown
+
+# could be converted to a doc test, but needs some work
+
+my %heads;
+my %links;
+
+for "docs/ops.markdown".IO.slurp.lines -> $line {
+
+    if $line ~~ /^ '  * [' (.+) '](#' (.+) ')'/ { 
+        %heads{~$/[0]} = ~$/[1];
+    } elsif $line ~~ /^ '## ' (.*) / {
+        my $a = ~$/[0].trim;
+        next unless $a;
+        $a = $a.subst(/ (' '|'`')+ /, '-', :global);
+        $a ~~ s/ '-' $//;
+        %links{$a}=1;
+    }
+}
+
+for %heads.kv -> $k, $v {
+    next if %links{$v};
+    say "HEADER NO LINK: $k, $v"
+}
+my %tags = %heads.invert;
+
+for %links.kv -> $k, $v {
+    next if %tags{$k};
+    say "LINK NO HEADER: $k, $v";
+}
