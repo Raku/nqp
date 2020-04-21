@@ -3103,9 +3103,9 @@ Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of u
 ## hllbool
 * `hllbool(int -> obj)`
 
-If passed 0, return a HLL specific Boolean true value,
-otherwise, a false one. For Raku, this maps to ```Bool::True```
-and ```Bool::False```
+If passed 0, return a HLL specific Boolean false value,
+otherwise, a true one. For Raku, this maps to ```Bool::False```
+and ```Bool::True```, respectively.
 
 # <a id="atomic"></a> Atomic Operations
 
