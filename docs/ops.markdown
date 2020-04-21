@@ -359,7 +359,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [asyncreadbytes](#asyncreadbytes-moar-jvm)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
-- [HLL-Specific Operations](#-hll-specific)
+- [HLL-Specific Operations](#-hll-specific-operations)
   * [hllbool](#hllbool)
 - [Atomic Operations](#-atomic-operations)
   * [cas `moar`](#cas-moar)
