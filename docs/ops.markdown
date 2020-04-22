@@ -2903,7 +2903,7 @@ Returns the number of bytes of memory in use by the VM.
 Turns on one of MoarVM's profilers. The configuration must have a `kind` key that specifies which profiler will be turned on:
 
 * `instrumented`
-  
+
   takes no further configuration options. records call graph, garbage collection, and object allocation information.
 
 * `heap`
@@ -2939,7 +2939,7 @@ allocation information.  It has the following structure:
 The second element of the list returned by nqp::mvmendprofile, is a list of
 hashes, one for each thread on which data has been collected.  It has the
 following structure (times are in microseconds, sizes are in bytes):
- 
+
     0                                 - hash with info of thread
     ├ thread => 1                       - OS thread ID
     ├ parent => 0                       - OS thread ID of parent thread
@@ -3265,5 +3265,3 @@ Get the handle string used by `createsc` to create the SC `$sc`
 
 ## scobjcount
 * `scobjcount()`
-
-## 
