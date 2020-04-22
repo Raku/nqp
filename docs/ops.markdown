@@ -68,6 +68,9 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [atpos2d](#atpos2d)
   * [atpos3d](#atpos3d)
   * [bindpos](#bindpos)
+  * [bindposnd](#bindposnd)
+  * [bindpos2d](#bindpos2d)
+  * [bindpos3d](#bindpos3d)
   * [atposref](#atposref)
   * [elems](#elems)
   * [existspos](#existspos)
@@ -808,6 +811,31 @@ Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 * `bindpos_s(@arr, int $i, str $v --> str)`
 
 Bind $v to @arr at position $i and return $v.
+
+## bindposnd
+* `bindposnd(@arr, @indices, Mu $v --> Mu)`
+* `bindposnd_i(@arr, @indices, int $v --> int)`
+* `bindposnd_n(@arr, @indices, num $v --> num)`
+* `bindposnd_s(@arr, @indices, str $v --> str)`
+
+Bind $v to @arr at the position specified by @indices and return $v.
+@indices is a 1-dimensional array of index values.
+
+## bindpos2d
+* `bindpos2d(@arr, int $i, int $j, Mu $v --> Mu)`
+* `bindpos2d_i(@arr, int $i, int $j, int $v --> int)`
+* `bindpos2d_n(@arr, int $i, int $j, num $v --> num)`
+* `bindpos2d_s(@arr, int $i, int $j, str $v --> str)`
+
+Bind $v to the 2-dimensional arrray @arr at position $i, $j and return $v.
+
+## bindpos3d
+* `bindpos3d(@arr, int $i, int $j, int $k, Mu $v --> Mu)`
+* `bindpos3d_i(@arr, int $i, int $j, int $k, int $v --> int)`
+* `bindpos3d_n(@arr, int $i, int $j, int $k, num $v --> num)`
+* `bindpos3d_s(@arr, int $i, int $j, int $k, str $v --> str)`
+
+Bind $v to the 3-dimensional arrray @arr at position $i, $j, $k and return $v.
 
 ## atposref
 * `atposref(@arr, int $idx --> Mu)` `js`
