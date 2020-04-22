@@ -362,6 +362,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
 - [HLL-Specific Operations](#-hll-specific-operations)
   * [hllbool](#hllbool)
   * [hllboxtype](#hllboxtype)
+  * [hllhash](#hllhash-moar-jvm)
+  * [hlllist](#hlllist-moar-jvm)
 - [Atomic Operations](#-atomic-operations)
   * [cas `moar`](#cas-moar)
   * [cas_i `moar`](#cas_i-moar)
@@ -3116,6 +3118,18 @@ and ```Bool::True```, respectively.
 Ignores any args passed and returns the HLL specific type
 objects for each basic type. For Raku, this maps to ```Int```,
 ```Num```, and ```Str```.
+
+## hllhash `moar` `jvm`
+* `hllhash(Mu)`
+
+Returns an empty instance of the HLL's hash type.
+Ignores optional argument.
+
+## hlllist `moar` `jvm`
+* `hlllist(Mu)`
+
+Returns an empty instance of the HLL's list type.
+Ignores optional argument.
 
 # <a id="atomic"></a> Atomic Operations
 
