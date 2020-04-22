@@ -800,7 +800,7 @@ Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 Bind $v to @arr at position $i and return $v.
 
 ## atposref
-* `atposref(@arr, int $idx --> Mu)`
+* `atposref(@arr, int $idx --> Mu)` `js`
 * `atposref_i(@arr, int $idx --> int)`
 * `atposref_n(@arr, int $idx --> num)`
 * `atposref_s(@arr, int $idx --> str)`
