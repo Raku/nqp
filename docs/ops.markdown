@@ -64,6 +64,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [not_i](#not_i)
 - [Array Opcodes](#-array-opcodes)
   * [atpos](#atpos)
+  * [atpos2d](#atpos2d)
+  * [atpos3d](#atpos3d)
   * [bindpos](#bindpos)
   * [atposref](#atposref)
   * [elems](#elems)
@@ -772,6 +774,22 @@ Return 1 if `$val` is 0, 0 otherwise.
 * `atpos_s(@arr, int $i --> str)`
 
 Return whatever is bound to @arr at position $i.
+
+## atpos2d
+* `atpos2d(@arr, int $i, int $j --> Mu)`
+* `atpos2d_i(@arr, int $i, int $j --> int)`
+* `atpos2d_n(@arr, int $i, int $j --> num)`
+* `atpos2d_s(@arr, int $i, int $j --> str)`
+
+Return whatever is bound to the 2-dimensional array @arr at position $i, $j.
+
+## atpos3d
+* `atpos3d(@arr, int $i, int $j, int $k --> Mu)`
+* `atpos3d_i(@arr, int $i, int $j, int $k --> int)`
+* `atpos3d_n(@arr, int $i, int $j, int $k --> num)`
+* `atpos3d_s(@arr, int $i, int $j, int $k --> str)`
+
+Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 
 ## bindpos
 * `bindpos(@arr, int $i, Mu $v --> Mu)`
