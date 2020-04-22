@@ -3122,13 +3122,13 @@ objects for each basic type. For Raku, this maps to ```Int```,
 ## hllhash `moar` `jvm`
 * `hllhash(Mu)`
 
-Returns an empty instance of the HLL's hash type.
+Returns HLL specific type object for a hash.
 Ignores optional argument.
 
 ## hlllist `moar` `jvm`
 * `hlllist(Mu)`
 
-Returns an empty instance of the HLL's list type.
+Returns HLL specific type object for a list.
 Ignores optional argument.
 
 # <a id="atomic"></a> Atomic Operations
