@@ -800,9 +800,10 @@ Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 Bind $v to @arr at position $i and return $v.
 
 ## atposref
-* atposref_i(@arr, int $idx --> int)
-* atposref_n(@arr, int $idx --> num)
-* atposref_s(@arr, int $idx --> str)
+* `atposref(@arr, int $idx --> Mu)`
+* `atposref_i(@arr, int $idx --> int)`
+* `atposref_n(@arr, int $idx --> num)`
+* `atposref_s(@arr, int $idx --> str)`
 
 Returns a container (of type `IntPosRef`, `NumPosRef`, or `StrPosRef`) that you can assign to or read from which will directly access `@arr` at index `$idx`.
 
