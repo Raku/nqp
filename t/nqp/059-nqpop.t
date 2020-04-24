@@ -407,7 +407,7 @@ ok(nqp::isnull(nqp::getcomp("no_SuchLanguageNo_or_ever")), "nqp::getcomp for a m
 
     ok(nqp::atpos_i($b, -2) == 2, 'atpos_i with negative index');
 
-    ok(nqp::atpos_i($b, 100) == 0, 'nqp::atpos_i ouside of array');
+    ok(nqp::atpos_i($b, 100) == 0, 'nqp::atpos_i outside of array');
 
 
     my $c := nqp::list_i();

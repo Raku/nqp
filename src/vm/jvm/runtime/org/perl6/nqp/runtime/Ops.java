@@ -5101,7 +5101,7 @@ public final class Ops {
     }
     public static SixModelObject popcompsc(ThreadContext tc) {
         if (tc.compilingSCs == null)
-            throw ExceptionHandling.dieInternal(tc, "No current compiling SC.");
+            throw ExceptionHandling.dieInternal(tc, "No current compiling SC");
         int idx = tc.compilingSCs.size() - 1;
         SixModelObject result = tc.compilingSCs.get(idx);
         tc.compilingSCs.remove(idx);
@@ -5385,12 +5385,12 @@ public final class Ops {
         else {
             InvocationSpec is = dispFor.st.InvocationSpec;
             if (is == null)
-                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs invokable target");
+                throw ExceptionHandling.dieInternal(tc, "nextdispatcherfor needs invokable target");
             if (isnull(is.ClassHandle) == 0)
                 tc.nextDispatcherFor = (CodeRef)dispFor.get_attribute_boxed(tc,
                         is.ClassHandle, is.AttrName, is.Hint);
             else
-                throw ExceptionHandling.dieInternal(tc, "setdispatcherfor needs simple invokable target");
+                throw ExceptionHandling.dieInternal(tc, "nextdispatcherfor needs simple invokable target");
         }
         return disp;
     }
@@ -5802,7 +5802,7 @@ public final class Ops {
             SixModelObject schedulee, ThreadContext tc) {
         AsyncTaskInstance task = (AsyncTaskInstance) handle;
         if (!(queue instanceof ConcBlockingQueueInstance))
-            throw ExceptionHandling.dieInternal(tc, "notifycancel's second argument should have REPR ConcBlockingQueue");
+            throw ExceptionHandling.dieInternal(tc, "cancelnotify's second argument should have REPR ConcBlockingQueue");
         if (task.handle instanceof IIOCancelable) {
             ((IIOCancelable)task.handle).cancel(tc);
             ((ConcBlockingQueueInstance)queue).queue.add(schedulee);
@@ -5835,7 +5835,7 @@ public final class Ops {
         if (numHandlers > 0)
             return tc.handlers.get(numHandlers - 1).exObj;
         else
-            throw ExceptionHandling.dieInternal(tc, "Cannot get exception object ouside of exception handler");
+            throw ExceptionHandling.dieInternal(tc, "Cannot get exception object outside of exception handler");
     }
     public static long getextype(SixModelObject obj, ThreadContext tc) {
         if (obj instanceof VMExceptionInstance)
@@ -5970,7 +5970,7 @@ public final class Ops {
             ExceptionHandling.handlerDynamic(tc, vmex.category, false, vmex);
         }
         else {
-            throw ExceptionHandling.dieInternal(tc, "_is_same_label needs an object with UnwindException representation");
+            throw ExceptionHandling.dieInternal(tc, "_rethrow_label needs an object with UnwindException representation");
         }
     }
     public static void rethrow_c(SixModelObject obj, ThreadContext tc) {
@@ -7199,7 +7199,7 @@ public final class Ops {
 
     public static SixModelObject continuationclone(SixModelObject in, ThreadContext tc) {
         if (!(in instanceof ResumeStatus))
-            ExceptionHandling.dieInternal(tc, "applied continuationinvoke to non-continuation");
+            ExceptionHandling.dieInternal(tc, "applied continuationclone to non-continuation");
 
         ResumeStatus.Frame read = ((ResumeStatus)in).top;
         ResumeStatus.Frame nroot = null, ntail = null, nnew;
