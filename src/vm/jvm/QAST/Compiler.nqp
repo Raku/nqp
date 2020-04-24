@@ -695,9 +695,6 @@ QAST::OperationsJAST.add_core_op('intify', -> $qastcomp, $op {
 QAST::OperationsJAST.add_core_op('numify', -> $qastcomp, $op {
     $qastcomp.as_jast($op[0], :want($RT_NUM))
 });
-QAST::OperationsJAST.add_core_op('qlist', -> $qastcomp, $op {
-    $qastcomp.as_jast(QAST::Op.new( :op('list'), |@($op) ))
-});
 QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
     # Just desugar to create the empty hash.
     my $hash := $qastcomp.as_jast(QAST::Op.new(

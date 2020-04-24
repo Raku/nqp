@@ -618,9 +618,6 @@ QAST::MASTOperations.add_core_op('numify', -> $qastcomp, $op {
 QAST::MASTOperations.add_core_op('intify', -> $qastcomp, $op {
     $qastcomp.as_mast($op[0], :want($MVM_reg_int64))
 });
-QAST::MASTOperations.add_core_op('qlist', -> $qastcomp, $op {
-    $qastcomp.as_mast(QAST::Op.new( :op('list'), |@($op) ))
-});
 QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
     # Just desugar to create the empty hash.
     my $regalloc := $*REGALLOC;
