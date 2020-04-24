@@ -411,8 +411,8 @@ class HLL::Compiler does HLL::Backend::Default {
         $!user_progname := join(',', @files);
         my @codes;
         for @files -> $filename {
-        my $err := 0;
-        my $in-handle;
+            my $err := 0;
+            my $in-handle;
             try {
                 if $filename eq '-' {
                     $in-handle := stdin();
