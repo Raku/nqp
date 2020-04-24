@@ -78,7 +78,7 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
 	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(STATIC_NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
 	$(NOECHO)$(JAR) cf0 @bsm(RUNTIME)@ -C @nfp(bin/)@ .
 
-@bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @@template(runner-prelude)@@ @bsm(NQP)@
+@bpm(BUILD_RUNNER)@: @mkquot(@configure_script@)@ @@template(nqp-j)@@ @bsm(NQP)@
 	@echo(+++ Setting up	$@)@
 	$(NOECHO)$(CP) @bpm(RUNNER_JARS)@ @q(@bpm(RUNNER_JAR_DIR)@)@
 	$(NOECHO)$(CP) @bpm(RUNNER_LIBS)@ @q(@bpm(RUNNER_LIB_DIR)@)@
