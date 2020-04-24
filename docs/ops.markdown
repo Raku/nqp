@@ -421,7 +421,8 @@ Opcode variants may contain a type suffix, which usually indicates:
 * `_I` argument is a Big Integer
 
 They may also have a numeric suffix, which typically indicates the number
-of arguments required.
+of arguments required. (_Note that some opcodes contain an underscore
+not being used to indicate a type suffix_.)
 
 In opcode signatures below, we use the following types, which may not
 correspond directly to NQP types.
