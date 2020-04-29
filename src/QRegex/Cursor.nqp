@@ -978,9 +978,7 @@ role NQPMatchRole is export {
         my $cur        := self."!cursor_start_cur"();
         my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
         $cur."!cursor_pass"($!pos+1, 'alnum')
-          if $!pos < nqp::chars($target)
-             && (nqp::iscclass(nqp::const::CCLASS_ALPHANUMERIC, $target, $!pos)
-                 || nqp::ord($target, $!pos) == 95);
+          if $!pos < nqp::chars($target) && nqp::iscclass(nqp::const::CCLASS_WORD, $target, $!pos);
         $cur;
     }
 
@@ -1141,7 +1139,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     my str $name := nqp::getattr_s($subcur, $?CLASS, '$!name');
                     if !nqp::isnull_s($name) && $name ne '' {
                         my $submatch := $subcur.MATCH();
-                        if nqp::ord($name) == 36 && ($name eq '$!from' || $name eq '$!to') {
+                        if $name eq '$!from' || $name eq '$!to' {
                             nqp::bindattr_i(self, NQPMatch, $name, $submatch.from);
                         }
                         elsif nqp::index($name, '=') < 0 {
