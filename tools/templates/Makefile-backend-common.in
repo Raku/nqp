@@ -63,7 +63,7 @@
 @for_stages(
 # --- @uc(@backend@)@ @ucstage@ RULES ---
 
-@bsv(NQP_@ucprev_stage@)@ = @nfp(@prev_stage_dir@/@bsm(NQP)@)@
+@bsv(@ucstage@_DEPS)@ = @prev_stage_dir@ @nfp(@prev_stage_dir@/@bsm(NQP)@)@
 
 @backend_prefix@-@lcstage@:: @backend_prefix@-@lcprev_stage@ @bpm(@ucstage@_OUTPUT)@
 
@@ -97,25 +97,25 @@
 # Building rules
 @stage_dir@: @bpm(@ucstage@_OUTPUT)@
 
-@stage_gencat(@bpm(NQP_MO_COMBINED_@ucstage@)@:						@bsm(NQP_@ucprev_stage@)@ @use_prereqs($(NQP_MO_SOURCES))@)@
-@stage_gencat(@bpm(CORE_SETTING_COMBINED_@ucstage@)@:				@bsm(NQP_@ucprev_stage@)@ @use_prereqs($(CORE_SETTING_SOURCES))@)@
-@stage_gencat(@bpm(QASTNODE_COMBINED_@ucstage@)@:					@bsm(NQP_@ucprev_stage@)@ @use_prereqs($(QASTNODE_SOURCES))@)@
-@stage_gencat(@bpm(ASTNODES_COMBINED_@ucstage@)@:					@bsm(NQP_@ucprev_stage@)@ @use_prereqs(@bpm(ASTNODES_SOURCES)@)@)@
-@stage_gencat(@bpm(QREGEX_COMBINED_@ucstage@)@:						@bsm(NQP_@ucprev_stage@)@ @use_prereqs($(QREGEX_SOURCES))@)@
-@stage_gencat(@bpm(HLL_COMBINED_@ucstage@)@:						@bsm(NQP_@ucprev_stage@)@ @use_prereqs(@bpm(HLL_SOURCES)@)@)@
-@stage_gencat(@bpm(QAST_COMBINED_@ucstage@)@:						@bsm(NQP_@ucprev_stage@)@ @use_prereqs(@bpm(QAST_SOURCES)@)@)@
-@stage_gencat(@bpm(P6QREGEX_COMBINED_@ucstage@)@:					@bsm(NQP_@ucprev_stage@)@ @use_prereqs($(P6QREGEX_SOURCES))@)@
+@stage_gencat(@bpm(NQP_MO_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs($(NQP_MO_SOURCES))@)@
+@stage_gencat(@bpm(CORE_SETTING_COMBINED_@ucstage@)@:				@bsm(@ucstage@_DEPS)@ @use_prereqs($(CORE_SETTING_SOURCES))@)@
+@stage_gencat(@bpm(QASTNODE_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs($(QASTNODE_SOURCES))@)@
+@stage_gencat(@bpm(ASTNODES_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(ASTNODES_SOURCES)@)@)@
+@stage_gencat(@bpm(QREGEX_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs($(QREGEX_SOURCES))@)@
+@stage_gencat(@bpm(HLL_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(HLL_SOURCES)@)@)@
+@stage_gencat(@bpm(QAST_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(QAST_SOURCES)@)@)@
+@stage_gencat(@bpm(P6QREGEX_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs($(P6QREGEX_SOURCES))@)@
 
-@stage_precomp(@bsm(NQP_MO_@ucstage@)@:						@use_prereqs(@bpm(NQP_MO_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@@setting(NULL)@@no_module_path()@)@
-@stage_precomp(@bsm(MODULE_LOADER_@ucstage@)@:				@use_prereqs(@bpm(MODULE_LOADER_SOURCES)@)@ @bsm(NQP_@ucprev_stage@)@@setting(NULL)@@no_module_path()@)@
-@stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@@setting(NULL)@)@
-@stage_precomp(@bsm(QASTNODE_@ucstage@)@:					@use_prereqs(@bpm(QASTNODE_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(CORE_SETTING_@ucstage@)@)@
-@if(backend==moar @stage_precomp(@bsm(ASTOPS_@ucstage@)@:	@use_prereqs(@bpm(ASTOPS_SOURCES)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(CORE_SETTING_@ucstage@)@)@
-)@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(ASTOPS_@ucstage@)@)@
-@stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(QASTNODE_@ucstage@)@)@
-@stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@)@
-@stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
-@stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(NQP_@ucprev_stage@)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QAST_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(NQP_MO_@ucstage@)@:						@use_prereqs(@bpm(NQP_MO_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@@setting(NULL)@@no_module_path()@)@
+@stage_precomp(@bsm(MODULE_LOADER_@ucstage@)@:				@use_prereqs(@bpm(MODULE_LOADER_SOURCES)@)@ @bsm(@ucstage@_DEPS)@@setting(NULL)@@no_module_path()@)@
+@stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@@setting(NULL)@)@
+@stage_precomp(@bsm(QASTNODE_@ucstage@)@:					@use_prereqs(@bpm(QASTNODE_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(CORE_SETTING_@ucstage@)@)@
+@if(backend==moar @stage_precomp(@bsm(ASTOPS_@ucstage@)@:	@use_prereqs(@bpm(ASTOPS_SOURCES)@)@ @bsm(@ucstage@_DEPS)@ @bsm(CORE_SETTING_@ucstage@)@)@
+)@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(ASTOPS_@ucstage@)@)@
+@stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(QREGEX_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@)@
+@stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
+@stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QAST_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @bsm(NQP_@ucprev_stage@)@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
@@ -161,7 +161,7 @@
 	$(NOECHO)$(CP) @bsm(P5QREGEX)@ @q($(DESTDIR)$(NQP_LIB_DIR))@
 
 @backend_prefix@-bootstrap-files: @bpm(STAGE2_OUTPUT)@
-	@echo(+++ BOOTSTRAPPING into @bpm(STAGE0_DIR)@)@
+	@echo(+++ Bootstrapping into @bpm(STAGE0_DIR)@)@
 	$(NOECHO)$(CP) @bpm(STAGE2_OUTPUT)@ @bpm(STAGE0_DIR)@
 
 ## testing
