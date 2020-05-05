@@ -395,6 +395,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [serialize](#serialize)
   * [deserialize](#deserialize)
   * [scobjcount](#scobjcount)
+- [Compilation Operations](#-compilation-operations)
+  * [buffertocu](#buffertocu-moar)
 
 # NQP Opcodes
 
@@ -3323,3 +3325,11 @@ Get the handle string used by `createsc` to create the SC `$sc`
 
 ## scobjcount
 * `scobjcount()`
+
+# <a id="compilation-opcodes"></a> Compilation Opcodes
+
+## buffertocu `moar`
+* `buffertocu($bytecode)`
+
+Given bytecode, add it to the compilation unit, without executing it.
+(With the exception of the deserialization frame, which is executed.)
