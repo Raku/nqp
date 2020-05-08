@@ -133,6 +133,10 @@ General Options:
                        nqp, java etc.
     --sysroot=dir      When given, use for searching runtime components here
     --nqp-home=dir     Directory to install NQP files to
+    --relocatable      Dynamically locate NQP home dir instead of
+                       statically compiling it in. (On AIX and OpenBSD NQP
+                       is always built non-relocatable, since both OSes miss a
+                       necessary mechanism.)
     --backends=list    Backends to use: $backends
     --gen-moar         Download, build, and install a copy of MoarVM to use
                        before writing the Makefile
