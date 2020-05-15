@@ -58,7 +58,7 @@ Example:
 
     add_simple_op('lc', $T_STR, [$T_STR], sub ($string) {"$string.toLowerCase()"});
 
-Looking at src/vm/jvm/runtime/org/perl6/nqp/runtime/Ops.java and src/vm/jvm/QAST/Compiler.nqp can provide insight on how the various ops should work.
+Looking at src/vm/jvm/runtime/org/raku/nqp/runtime/Ops.java and src/vm/jvm/QAST/Compiler.nqp can provide insight on how the various ops should work.
 
 # Reading generated code
 
