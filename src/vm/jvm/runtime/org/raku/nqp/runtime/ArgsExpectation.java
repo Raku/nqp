@@ -1,4 +1,4 @@
-packag org.perl6.nqp.runtime;
+package org.perl6.nqp.runtime;
 
 import org.perl6.nqp.sixmodel.*;
 
