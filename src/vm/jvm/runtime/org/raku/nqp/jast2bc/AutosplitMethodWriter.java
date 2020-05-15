@@ -852,8 +852,8 @@ class AutosplitMethodWriter extends MethodNode {
                 // at this point in a real verifier we would load the named classes and use their common superclass
                 // lub(P6OpaqueInstance, CodeRef) = SixModelObject
                 // punt.
-                if (a == "Lorg/perl6/nqp/runtime/CodeRef;" && b == "Lorg/perl6/nqp/sixmodel/SixModelObject;") return b;
-                if (b == "Lorg/perl6/nqp/runtime/CodeRef;" && a == "Lorg/perl6/nqp/sixmodel/SixModelObject;") return a;
+                if (a == "Lorg/raku/nqp/runtime/CodeRef;" && b == "Lorg/raku/nqp/sixmodel/SixModelObject;") return b;
+                if (b == "Lorg/raku/nqp/runtime/CodeRef;" && a == "Lorg/raku/nqp/sixmodel/SixModelObject;") return a;
 
                 return "Ljava/lang/Object;";
             }

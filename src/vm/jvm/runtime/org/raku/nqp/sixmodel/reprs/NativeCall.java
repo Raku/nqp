@@ -121,14 +121,14 @@ public class NativeCall extends REPR {
         String nativeCallType = Type.getType(NativeCallBody.class).getDescriptor();
         String nativeCallIN = Type.getType(NativeCallBody.class).getInternalName();
 
-        String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;J)Ljava/lang/Object;";
+        String getDesc = "(Lorg/raku/nqp/runtime/ThreadContext;J)Ljava/lang/Object;";
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_boxing_of", getDesc, null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, nativeCallType);
         getMeth.visitInsn(Opcodes.ARETURN);
         getMeth.visitMaxs(0, 0);
 
-        String setDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;JLjava/lang/Object;)V";
+        String setDesc = "(Lorg/raku/nqp/runtime/ThreadContext;JLjava/lang/Object;)V";
         MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_boxing_of", setDesc, null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.ALOAD, 4);

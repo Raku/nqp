@@ -86,7 +86,7 @@ public class P6bigint extends REPR {
         String bigIntegerType = Type.getType(BigInteger.class).getDescriptor();
         String bigIntegerIN = Type.getType(BigInteger.class).getInternalName();
 
-        String getDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;)J";
+        String getDesc = "(Lorg/raku/nqp/runtime/ThreadContext;)J";
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, bigIntegerType);
@@ -94,7 +94,7 @@ public class P6bigint extends REPR {
         getMeth.visitInsn(Opcodes.LRETURN);
         getMeth.visitMaxs(0, 0);
 
-        String setDesc = "(Lorg/perl6/nqp/runtime/ThreadContext;J)V";
+        String setDesc = "(Lorg/raku/nqp/runtime/ThreadContext;J)V";
         MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_int", setDesc, null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.LLOAD, 2);

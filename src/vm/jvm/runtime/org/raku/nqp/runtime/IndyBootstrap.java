@@ -3,7 +3,7 @@ package org.raku.nqp.runtime;
 import java.lang.invoke.*;
 import java.lang.invoke.MethodHandles.Lookup;
 
-import org.perl6.nqp.sixmodel.*;
+import org.raku.nqp.sixmodel.*;
 import org.raku.nqp.sixmodel.InvocationSpec;
 import org.raku.nqp.sixmodel.STable;
 import org.raku.nqp.sixmodel.SixModelObject;

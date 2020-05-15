@@ -72,14 +72,14 @@ public class P6str extends REPR {
 
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_str",
-                "(Lorg/perl6/nqp/runtime/ThreadContext;)Ljava/lang/String;", null, null);
+                "(Lorg/raku/nqp/runtime/ThreadContext;)Ljava/lang/String;", null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "Ljava/lang/String;");
         getMeth.visitInsn(Opcodes.ARETURN);
         getMeth.visitMaxs(0, 0);
 
         MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_str",
-                "(Lorg/perl6/nqp/runtime/ThreadContext;Ljava/lang/String;)V", null, null);
+                "(Lorg/raku/nqp/runtime/ThreadContext;Ljava/lang/String;)V", null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.ALOAD, 2);
         setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/lang/String;");

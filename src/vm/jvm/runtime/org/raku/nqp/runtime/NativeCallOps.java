@@ -879,7 +879,7 @@ public final class NativeCallOps {
                     handlerName, new String[] { Type.getInternalName(iface) });
 
             // public $className(GlobalContext gc, SixModelObject function) { super(gc, function); }
-            //String ctorSig = "(Lorg/perl6/nqp/runtime/GlobalContext;Lorg/perl6/nqp/sixmodel/SixModelObject;)V";
+            //String ctorSig = "(Lorg/raku/nqp/runtime/GlobalContext;Lorg/raku/nqp/sixmodel/SixModelObject;)V";
             String ctorSig = String.format("(%s%s%s%s%s)V",
                     Type.getDescriptor(GlobalContext.class), Type.getDescriptor(SixModelObject.class),
                     Type.getDescriptor(ArgType.class),

@@ -304,7 +304,7 @@ public class BootJavaInterop {
     protected void compunitMethods(ClassContext c) {
         ClassVisitor cw = c.cv;
         MethodVisitor mv;
-        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "getCallSites", "()[Lorg/perl6/nqp/runtime/CallSiteDescriptor;", null, null);
+        mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "getCallSites", "()[Lorg/raku/nqp/runtime/CallSiteDescriptor;", null, null);
         mv.visitCode();
         mv.visitInsn(Opcodes.ACONST_NULL);
         mv.visitInsn(Opcodes.ARETURN);
@@ -519,7 +519,7 @@ public class BootJavaInterop {
                 emitConst(c, commonSTable, STable.class);
             } else {
                 emitConst(c, new STableCache(what), STableCache.class);
-                c.mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(STableCache.class), "getSTable", "()Lorg/perl6/nqp/sixmodel/STable;");
+                c.mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(STableCache.class), "getSTable", "()Lorg/raku/nqp/sixmodel/STable;");
             }
             c.mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/BootJavaInterop$RuntimeSupport", "boxJava", Type.getMethodDescriptor(TYPE_SMO, TYPE_OBJ, TYPE_ST));
         }
@@ -695,7 +695,7 @@ public class BootJavaInterop {
             mv.visitJumpInsn(Opcodes.IFNONNULL, provided);
             mv.visitInsn(Opcodes.POP);
             mv.visitVarInsn(Opcodes.ALOAD, c.tcLoc);
-            mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_TC.getInternalName(), "gc", "Lorg/perl6/nqp/runtime/GlobalContext;");
+            mv.visitFieldInsn(Opcodes.GETFIELD, TYPE_TC.getInternalName(), "gc", "Lorg/raku/nqp/runtime/GlobalContext;");
             mv.visitJumpInsn(Opcodes.GOTO, done);
             mv.visitLabel(provided);
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/BootJavaInterop$RuntimeSupport", "unboxJava", Type.getMethodDescriptor(TYPE_OBJ, TYPE_SMO));
@@ -790,7 +790,7 @@ public class BootJavaInterop {
         MethodVisitor mv = mc.mv = cc.cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "qb_"+(cc.nextCallout++),
                 Type.getMethodDescriptor(Type.VOID_TYPE, TYPE_CU, TYPE_TC, TYPE_CR, TYPE_CSD, TYPE_AOBJ),
                 null, null);
-        AnnotationVisitor av = mv.visitAnnotation("Lorg/perl6/nqp/runtime/CodeRefAnnotation;", true);
+        AnnotationVisitor av = mv.visitAnnotation("Lorg/raku/nqp/runtime/CodeRefAnnotation;", true);
         av.visit("name", "callout "+cc.target.getName()+" "+desc);
         av.visitEnd();
         mv.visitCode();
@@ -865,7 +865,7 @@ public class BootJavaInterop {
 
         mv.visitCode();
         emitConst(mc, gc, GlobalContext.class);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/raku/nqp/runtime/GlobalContext", "getCurrentThreadContext", "()Lorg/perl6/nqp/runtime/ThreadContext;");
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/raku/nqp/runtime/GlobalContext", "getCurrentThreadContext", "()Lorg/raku/nqp/runtime/ThreadContext;");
         mc.tcLoc = desc.getArgumentsAndReturnSizes() >> 2;
         if ((modifiers & Opcodes.ACC_STATIC) != 0) mc.tcLoc--;
         mc.argsLoc = mc.tcLoc + 1;

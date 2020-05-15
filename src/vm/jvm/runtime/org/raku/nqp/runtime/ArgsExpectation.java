@@ -1,6 +1,6 @@
-package org.perl6.nqp.runtime;
+package org.raku.nqp.runtime;
 
-import org.perl6.nqp.sixmodel.*;
+import org.raku.nqp.sixmodel.*;
 
 /* Argument expectations are used to indicate what, exactly, a block we are
  * invoking expects. The default is that it wants the args in an Object[] and

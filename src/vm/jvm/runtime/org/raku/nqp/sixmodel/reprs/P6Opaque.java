@@ -180,11 +180,11 @@ public class P6Opaque extends REPR {
 
         mv.visitVarInsn(Opcodes.ALOAD, 0); // this
         mv.visitFieldInsn(Opcodes.GETFIELD, "org/raku/nqp/sixmodel/reprs/P6OpaqueBaseInstance", "delegate",
-                "Lorg/perl6/nqp/sixmodel/SixModelObject;");
+                "Lorg/raku/nqp/sixmodel/SixModelObject;");
         mv.visitInsn(Opcodes.DUP);
 
         Label label = new Label();
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/Ops", "isnull", "(Lorg/perl6/nqp/sixmodel/SixModelObject;)J");
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/Ops", "isnull", "(Lorg/raku/nqp/sixmodel/SixModelObject;)J");
         mv.visitInsn(Opcodes.LCONST_1);
         mv.visitInsn(Opcodes.LCMP);
         mv.visitJumpInsn(Opcodes.IFEQ, label);
@@ -269,10 +269,10 @@ public class P6Opaque extends REPR {
         cw.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, className, null,
                 "org/raku/nqp/sixmodel/reprs/P6OpaqueBaseInstance", null);
 
-        Type tcType = Type.getType("Lorg/perl6/nqp/runtime/ThreadContext;");
-        Type smoType = Type.getType("Lorg/perl6/nqp/sixmodel/SixModelObject;");
-        Type srType = Type.getType("Lorg/perl6/nqp/sixmodel/SerializationReader;");
-        Type stType = Type.getType("Lorg/perl6/nqp/sixmodel/STable;");
+        Type tcType = Type.getType("Lorg/raku/nqp/runtime/ThreadContext;");
+        Type smoType = Type.getType("Lorg/raku/nqp/sixmodel/SixModelObject;");
+        Type srType = Type.getType("Lorg/raku/nqp/sixmodel/SerializationReader;");
+        Type stType = Type.getType("Lorg/raku/nqp/sixmodel/STable;");
 
         /* bind_attribute_boxed */
         MethodVisitor bindBoxedVisitor;
@@ -428,7 +428,7 @@ public class P6Opaque extends REPR {
             if (ss.inlineable == StorageSpec.REFERENCE) {
                 /* Add field. */
                 String field = "field_" + i;
-                String desc = "Lorg/perl6/nqp/sixmodel/SixModelObject;";
+                String desc = "Lorg/raku/nqp/sixmodel/SixModelObject;";
                 cw.visitField(Opcodes.ACC_PUBLIC, field, desc, null, null);
 
                 /* Add bind code. */
@@ -451,7 +451,7 @@ public class P6Opaque extends REPR {
                     getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                     getBoxedVisitor.visitIntInsn(Opcodes.BIPUSH, i);
                     getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-                    String methodDesc = "(ILorg/perl6/nqp/runtime/ThreadContext;)Lorg/perl6/nqp/sixmodel/SixModelObject;";
+                    String methodDesc = "(ILorg/raku/nqp/runtime/ThreadContext;)Lorg/raku/nqp/sixmodel/SixModelObject;";
                     getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "autoViv", methodDesc);
                     getBoxedVisitor.visitInsn(Opcodes.DUP);
                     getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -468,7 +468,7 @@ public class P6Opaque extends REPR {
                 isInitVisitor.visitLabel(isInitLabels[i]);
                 isInitVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 isInitVisitor.visitFieldInsn(Opcodes.GETFIELD, className, field, desc);
-                isInitVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/Ops", "isnull", "(Lorg/perl6/nqp/sixmodel/SixModelObject;)J");
+                isInitVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "org/raku/nqp/runtime/Ops", "isnull", "(Lorg/raku/nqp/sixmodel/SixModelObject;)J");
                 isInitVisitor.visitInsn(Opcodes.LCONST_1);
                 isInitVisitor.visitInsn(Opcodes.LCMP);
                 isInitVisitor.visitJumpInsn(Opcodes.IFEQ, isInitNull);
@@ -488,7 +488,7 @@ public class P6Opaque extends REPR {
                 /* We deserialize these ourselves */
                 deserVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                 deserVisitor.visitVarInsn(Opcodes.ALOAD, 3);
-                deserVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/raku/nqp/sixmodel/SerializationReader", "readRef", "()Lorg/perl6/nqp/sixmodel/SixModelObject;");
+                deserVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "org/raku/nqp/sixmodel/SerializationReader", "readRef", "()Lorg/raku/nqp/sixmodel/SixModelObject;");
                 deserVisitor.visitFieldInsn(Opcodes.PUTFIELD, className, field, desc);
             }
             else {
@@ -545,7 +545,7 @@ public class P6Opaque extends REPR {
         bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         bindBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 3);
         bindBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
-                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+                "(Lorg/raku/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             bindBoxedVisitor.visitJumpInsn(Opcodes.GOTO, bindBoxedSwitch);
         else
@@ -559,7 +559,7 @@ public class P6Opaque extends REPR {
         bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         bindNativeVisitor.visitVarInsn(Opcodes.ALOAD, 3);
         bindNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
-                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+                "(Lorg/raku/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             bindNativeVisitor.visitJumpInsn(Opcodes.GOTO, bindNativeSwitch);
         else
@@ -573,7 +573,7 @@ public class P6Opaque extends REPR {
         getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         getBoxedVisitor.visitVarInsn(Opcodes.ALOAD, 3);
         getBoxedVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
-                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+                "(Lorg/raku/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             getBoxedVisitor.visitJumpInsn(Opcodes.GOTO, getBoxedSwitch);
         else
@@ -588,7 +588,7 @@ public class P6Opaque extends REPR {
         getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         getNativeVisitor.visitVarInsn(Opcodes.ALOAD, 3);
         getNativeVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
-                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+                "(Lorg/raku/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             getNativeVisitor.visitJumpInsn(Opcodes.GOTO, getNativeSwitch);
         else
@@ -602,7 +602,7 @@ public class P6Opaque extends REPR {
         isInitVisitor.visitVarInsn(Opcodes.ALOAD, 2);
         isInitVisitor.visitVarInsn(Opcodes.ALOAD, 3);
         isInitVisitor.visitMethodInsn(Opcodes.INVOKEVIRTUAL, className, "resolveAttribute",
-                "(Lorg/perl6/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
+                "(Lorg/raku/nqp/sixmodel/SixModelObject;Ljava/lang/String;)I");
         if (attrInfoList.size() > 0)
             isInitVisitor.visitJumpInsn(Opcodes.GOTO, isInitSwitch);
         isInitVisitor.visitLabel(isInitNull);
@@ -643,7 +643,7 @@ public class P6Opaque extends REPR {
     }
 
     private void generateDelegateMethod(ThreadContext tc, ClassWriter cw, String className, String field, String methodName) {
-        String desc = "Lorg/perl6/nqp/sixmodel/SixModelObject;";
+        String desc = "Lorg/raku/nqp/sixmodel/SixModelObject;";
 
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC, methodName, "()"+desc, null, null);
         mv.visitVarInsn(Opcodes.ALOAD, 0);

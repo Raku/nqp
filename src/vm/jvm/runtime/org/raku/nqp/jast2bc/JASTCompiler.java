@@ -150,7 +150,7 @@ public class JASTCompiler {
         if (method.name.equals("main")) jcout.hasMain = true;
 
         if ((method.crCuid != null && !method.crCuid.equals("")) || method.crOuter >= -1) {
-            Type crAnnType = Type.getType("Lorg/perl6/nqp/runtime/CodeRefAnnotation;");
+            Type crAnnType = Type.getType("Lorg/raku/nqp/runtime/CodeRefAnnotation;");
             AnnotationVisitor av = m.visitAnnotation(crAnnType.getDescriptor(), true);
             av.visit("name", method.crName);
             if (method.crCuid != null && !method.crCuid.isEmpty()) av.visit("cuid", method.crCuid);

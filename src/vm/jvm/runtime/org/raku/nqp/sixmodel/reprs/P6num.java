@@ -108,14 +108,14 @@ public class P6num extends REPR {
 
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_num",
-                "(Lorg/perl6/nqp/runtime/ThreadContext;)D", null, null);
+                "(Lorg/raku/nqp/runtime/ThreadContext;)D", null, null);
         getMeth.visitVarInsn(Opcodes.ALOAD, 0);
         getMeth.visitFieldInsn(Opcodes.GETFIELD, className, prefix, "D");
         getMeth.visitInsn(Opcodes.DRETURN);
         getMeth.visitMaxs(0, 0);
 
         MethodVisitor setMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "set_num",
-                "(Lorg/perl6/nqp/runtime/ThreadContext;D)V", null, null);
+                "(Lorg/raku/nqp/runtime/ThreadContext;D)V", null, null);
         setMeth.visitVarInsn(Opcodes.ALOAD, 0);
         setMeth.visitVarInsn(Opcodes.DLOAD, 2);
         setMeth.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "D");
