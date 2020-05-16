@@ -87,7 +87,7 @@ and L<https://rakudo.perl6.org/downloads/nqp/>:
 
 If you do not have permissions for that, ask one of (pmichaud, jnthn, FROGGS,
 masak, tadzik, moritz, PerlJam/perlpilot, [Coke], lizmat, timotimo, fsergot,
-hoelzro, Zoffix) on #perl6 or #perl6-dev to do it for you.
+hoelzro, Zoffix) on #raku or #raku-dev to do it for you.
 
 =item 9.
 
