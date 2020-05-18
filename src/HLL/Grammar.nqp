@@ -167,7 +167,7 @@ grammar HLL::Grammar {
         | '[' <charnames> ']'
         | \d+ [ _ \d+]*
         | <control=[ ?..Z ]>
-        | <.panic: 'Unrecognized \\c character'>
+        | <.panic: 'Unrecognized \\c character' >
         ]
     }
 
@@ -224,13 +224,20 @@ of the match.
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
         @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
-        @args.push('"');
         nqp::die(join('', @args))
     }
 
-    method FAILGOAL($goal, $dba?) {
+    method FAILGOAL($Goal, $dba?) {
         unless $dba {
             $dba := nqp::getcodename(nqp::callercode());
+        }
+        # TODO: make this amenable to handling various specific failure messages
+        #   the immediate problem is panics with space before closing '>'
+        # one thing to try is to test $goal for key words
+        my $goal := $Goal;
+        my $rx := /'>'/;
+        if $goal ~~ $rx {
+            $goal := nqp::concat($goal, "\n'<.panic()>' cannot have whitespace outside '()'");
         }
         self.panic("Unable to parse expression in $dba; couldn't find final $goal");
     }
