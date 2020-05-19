@@ -1,6 +1,8 @@
 package org.perl6.nqp.runtime;
 import java.lang.invoke.MethodHandle;
 
+import java.util.BitSet;
+
 import org.perl6.nqp.sixmodel.SixModelObject;
 
 /**
@@ -37,6 +39,11 @@ public class CodeRef extends SixModelObject {
      * State variable storage, if needed.
      */
     public SixModelObject[] oLexState;
+
+    /**
+     * Has the given statevar been assigned a value by the HLL?
+     */
+    public BitSet oLexStateIsHllInit;
 
     /**
      * The (human-readable) name of the code-ref (not in staticInfo as a
