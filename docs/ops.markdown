@@ -200,6 +200,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [getstderr](#getstderr)
   * [getstdin](#getstdin)
   * [getstdout](#getstdout)
+  * [fdopen](#fdopen)
   * [open](#open)
   * [print](#print)
   * [readfh](#readfh)
@@ -233,6 +234,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [lstat_time](#lstat_time)
   * [symlink](#symlink)
   * [unlink](#unlink)
+  * [fstat](#fstat)
+  * [fstat_time](#fstat_time)
 - [Type/Conversion Opcodes](#-typeconversion-opcodes)
   * [bool](#bool)
   * [bootarray](#bootarray-moar-jvm)
@@ -1791,6 +1794,11 @@ Return the filehandle for standard input.
 
 Return the filehandle for standard output.
 
+## fdopen
+*  fdopen(int $fd)
+
+Return the filehandle for the given file descriptor.
+
 ## open
 * `open(str $filename, str $mode)`
 
@@ -2034,13 +2042,13 @@ a num, using the OS's stat() function.
 ## lstat
 * `lstat(str $path, int $code --> int)`
 
-Same as stat, but internally uses the OS's lstat() function, which does *not*
+Same as stat, but internally uses the OS' lstat() function, which does *not*
 follow symlinks.
 
 ## lstat_time
-* `stat_time(str $path, int $code --> num)`
+* `lstat_time(str $path, int $code --> num)`
 
-Same as stat_time, but internally uses the OS's lstat() function, which does
+Same as stat_time, but internally uses the OS' lstat() function, which does
 *not* follow symlinks.
 
 ## symlink
@@ -2053,6 +2061,18 @@ Create a symbolic link from `$after` to `$before`
 
 Delete the given file $path. Returns 0 on success, -2 if the file
 didn't exist. May throw an exception.
+
+## fstat
+*  fstat(int $fd, int $code --> int)
+
+Same as stat, but internally uses the OS' fstat() function, which takes a file
+descriptor instead of a path.
+
+## fstat_time
+*  fstat_time(int $fd, int $code --> int)
+
+Same as stat_time, but internally uses the OS' fstat() function, which takes a
+file descriptor instead of a path.
 
 # <a id="type"></a> Type/Conversion Opcodes
 

@@ -170,6 +170,39 @@ op.stat = function(file, code) {
   }
 };
 
+op.stat_time = function(file, code) {
+  throw new NQPException('nqp::stat_time is not supported in the browser');
+};
+
+op.lstat = function(file, code) {
+  const EXISTS = 0;
+  if (code == EXISTS && (file === '/etc/os-release' || file === '/bin/uname' || file === '/usr/bin/uname')) {
+    return 0;
+  } else {
+    throw new NQPException('nqp::lstat is not supported in the browser');
+  }
+};
+
+op.lstat_time = function(file, code) {
+  throw new NQPException('nqp::lstat_time is not supported in the browser');
+};
+
+op.fstat = function(fd, code) {
+  throw new NQPException('nqp::fstat is not supported in the browser');
+};
+
+op.fstat_time = function(fd, code) {
+  throw new NQPException('nqp::fstat_time is not supported in the browser');
+};
+
+op.fdopen = function(fd) {
+  throw new NQPException('nqp::fdopen is not supported in the browser');
+};
+
+op.open = function(file, mode) {
+  throw new NQPException('nqp::open is not supported in the browser');
+};
+
 class Exit {
   constructor(code) {
     this.code = code;

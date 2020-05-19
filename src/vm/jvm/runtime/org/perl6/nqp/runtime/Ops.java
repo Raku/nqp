@@ -213,6 +213,10 @@ public final class Ops {
         return stat_internal(filename, status, LinkOption.NOFOLLOW_LINKS);
     }
 
+    public static long fstat(long fd, long status) {
+        throw new UnsupportedOperationException("nqp::fstat is not supported on the JVM");
+    }
+
     public static long stat_internal(String filename, long status, LinkOption ... linkOption) {
         long rval = -1;
 
@@ -382,6 +386,10 @@ public final class Ops {
         return stat_time_internal(filename, status, LinkOption.NOFOLLOW_LINKS);
     }
 
+    public static double fstat_time(long fd, long status) {
+        throw new UnsupportedOperationException("nqp::fstat_time is not supported on the JVM");
+    }
+
     protected static double stat_time_internal(String filename, long status, LinkOption... linkOption) {
         String attrName;
         switch ((int) status) {
@@ -407,6 +415,10 @@ public final class Ops {
         } catch (Exception e) {
             return -1;
         }
+    }
+
+    public static SixModelObject fdopen(long fd, ThreadContext tc) {
+        throw new UnsupportedOperationException("nqp::fdopen is not supported on the JVM");
     }
 
     public static SixModelObject open(String path, String mode, ThreadContext tc) {
