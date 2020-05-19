@@ -5537,9 +5537,9 @@ public final class Ops {
             invokeArgless(tc, code);
         }
     }
-    public static SixModelObject newthread(SixModelObject code, long appLifetime, ThreadContext tc) {
+    public static SixModelObject newthread(SixModelObject code, long appLifetime, long stackSize, ThreadContext tc) {
         SixModelObject thread = tc.gc.Thread.st.REPR.allocate(tc, tc.gc.Thread.st);
-        ((VMThreadInstance)thread).thread = new Thread(new CodeRunnable(tc.gc, thread, code));
+        ((VMThreadInstance)thread).thread = new Thread(new CodeRunnable(tc.gc, thread, code, stackSize));
         ((VMThreadInstance)thread).thread.setDaemon(appLifetime != 0);
         return thread;
     }

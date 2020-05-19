@@ -9,7 +9,7 @@ my $t := nqp::newthread({
         ok(1, "in thread");
         dec()
     }
-}, 1);
+}, 1, 0);
 nqp::threadrun($t);
 nqp::threadjoin($t);
 ok(1, "Thread with top level loop survived");
