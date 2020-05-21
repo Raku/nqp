@@ -41,15 +41,15 @@ my $IVAL_MINUSONE := JAST::PushIVal.new( :value(-1) );
 my $NVAL_ZERO     := JAST::PushNVal.new( :value(0.0) );
 
 # Some common types we'll need.
-my $TYPE_TC         := 'Lorg/perl6/nqp/runtime/ThreadContext;';
-my $TYPE_CU         := 'Lorg/perl6/nqp/runtime/CompilationUnit;';
-my $TYPE_CR         := 'Lorg/perl6/nqp/runtime/CodeRef;';
-my $TYPE_CF         := 'Lorg/perl6/nqp/runtime/CallFrame;';
-my $TYPE_OPS        := 'Lorg/perl6/nqp/runtime/Ops;';
-my $TYPE_NATIVE_OPS := 'Lorg/perl6/nqp/runtime/NativeCallOps;';
-my $TYPE_IO_OPS     := 'Lorg/perl6/nqp/runtime/IOOps;';
-my $TYPE_CSD        := 'Lorg/perl6/nqp/runtime/CallSiteDescriptor;';
-my $TYPE_SMO        := 'Lorg/perl6/nqp/sixmodel/SixModelObject;';
+my $TYPE_TC         := 'Lorg/raku/nqp/runtime/ThreadContext;';
+my $TYPE_CU         := 'Lorg/raku/nqp/runtime/CompilationUnit;';
+my $TYPE_CR         := 'Lorg/raku/nqp/runtime/CodeRef;';
+my $TYPE_CF         := 'Lorg/raku/nqp/runtime/CallFrame;';
+my $TYPE_OPS        := 'Lorg/raku/nqp/runtime/Ops;';
+my $TYPE_NATIVE_OPS := 'Lorg/raku/nqp/runtime/NativeCallOps;';
+my $TYPE_IO_OPS     := 'Lorg/raku/nqp/runtime/IOOps;';
+my $TYPE_CSD        := 'Lorg/raku/nqp/runtime/CallSiteDescriptor;';
+my $TYPE_SMO        := 'Lorg/raku/nqp/sixmodel/SixModelObject;';
 my $TYPE_STR        := 'Ljava/lang/String;';
 my $TYPE_OBJ        := 'Ljava/lang/Object;';
 my $TYPE_MATH       := 'Ljava/lang/Math;';
@@ -60,13 +60,13 @@ my $TYPE_MHL        := 'Ljava/lang/invoke/MethodHandles$Lookup;';
 my $TYPE_CLASS      := 'Ljava/lang/Class;';
 my $TYPE_LONG       := 'Ljava/lang/Long;';
 my $TYPE_DOUBLE     := 'Ljava/lang/Double;';
-my $TYPE_EH         := 'Lorg/perl6/nqp/runtime/ExceptionHandling;';
-my $TYPE_EX_UNWIND  := 'Lorg/perl6/nqp/runtime/UnwindException;';
-my $TYPE_EX_CONT    := 'Lorg/perl6/nqp/runtime/ControlException;';
+my $TYPE_EH         := 'Lorg/raku/nqp/runtime/ExceptionHandling;';
+my $TYPE_EX_UNWIND  := 'Lorg/raku/nqp/runtime/UnwindException;';
+my $TYPE_EX_CONT    := 'Lorg/raku/nqp/runtime/ControlException;';
 my $TYPE_EX_RT      := 'Ljava/lang/RuntimeException;';
-my $TYPE_EX_SAVE    := 'Lorg/perl6/nqp/runtime/SaveStackException;';
+my $TYPE_EX_SAVE    := 'Lorg/raku/nqp/runtime/SaveStackException;';
 my $TYPE_THROWABLE  := 'Ljava/lang/Throwable;';
-my $TYPE_RESUME     := 'Lorg/perl6/nqp/runtime/ResumeStatus$Frame;';
+my $TYPE_RESUME     := 'Lorg/raku/nqp/runtime/ResumeStatus$Frame;';
 
 # Exception handler categories.
 my $EX_CAT_CATCH   := 1;
@@ -514,7 +514,7 @@ my $chain_codegen := sub ($qastcomp, $op) {
         $il.append(JAST::Instruction.new( :op('aload'), $atmp ));
         $il.append(JAST::Instruction.new( :op('aload'), $btmp ));
         $il.append(savesite(JAST::InvokeDynamic.new(
-            $indy_meth, 'V', @argTypes, 'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth,
+            $indy_meth, 'V', @argTypes, 'org/raku/nqp/runtime/IndyBootstrap', $indy_meth,
         )));
         $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
         $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -1476,7 +1476,7 @@ my $call_codegen := sub ($qastcomp, $node) {
         my $indy_meth := $node.op eq 'callstatic' ?? 'subcallstatic_noa' !! 'subcall_noa';
         $il.append(savesite(JAST::InvokeDynamic.new(
             $indy_meth, 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', $indy_meth
+            'org/raku/nqp/runtime/IndyBootstrap', $indy_meth
         )));
     }
 
@@ -1499,7 +1499,7 @@ my $call_codegen := sub ($qastcomp, $node) {
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(savesite(JAST::InvokeDynamic.new(
             'indcall_noa', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'indcall_noa'
+            'org/raku/nqp/runtime/IndyBootstrap', 'indcall_noa'
         )));
     }
 
@@ -1535,7 +1535,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(savesite(JAST::InvokeDynamic.new(
             'methcall_noa', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'methcall_noa',
+            'org/raku/nqp/runtime/IndyBootstrap', 'methcall_noa',
         )));
     }
 
@@ -1564,7 +1564,7 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
         $*STACK.obtain($il, |@argstuff[1]) if @argstuff[1];
         $il.append(savesite(JAST::InvokeDynamic.new(
             'indmethcall_noa', 'V', @argstuff[2],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'indmethcall_noa'
+            'org/raku/nqp/runtime/IndyBootstrap', 'indmethcall_noa'
         )));
     }
 
@@ -3328,7 +3328,7 @@ class QAST::CompilerJAST {
         my $file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "");
         my $*JCLASS := JAST::Class.new(
             :name($classname),
-            :super('org.perl6.nqp.runtime.CompilationUnit'),
+            :super('org.raku.nqp.runtime.CompilationUnit'),
             :filename($file)
         );
 
@@ -4917,7 +4917,7 @@ class QAST::CompilerJAST {
         $il.append($ALOAD_1);
         $il.append(JAST::InvokeDynamic.new(
             'wval_noa', $TYPE_SMO, [$TYPE_STR, 'I', $TYPE_TC],
-            'org/perl6/nqp/runtime/IndyBootstrap', 'wval_noa'
+            'org/raku/nqp/runtime/IndyBootstrap', 'wval_noa'
         ));
         result($il, $RT_OBJ);
     }

@@ -8,9 +8,9 @@
 // Note: currently nqp only functions properly in the application class path.
 
 package examples;
-import org.perl6.nqp.runtime.*;
-import static org.perl6.nqp.runtime.CallSiteDescriptor.*;
-import org.perl6.nqp.sixmodel.*;
+import org.raku.nqp.runtime.*;
+import static org.raku.nqp.runtime.CallSiteDescriptor.*;
+import org.raku.nqp.sixmodel.*;
 
 public class CallFromJava {
     private GlobalContext g;

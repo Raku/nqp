@@ -4,9 +4,9 @@ my $RT_OBJ    := 0;
 my $RT_INT    := 1;
 my $RT_NUM    := 2;
 my $RT_STR    := 3;
-my $TYPE_TC   := 'Lorg/perl6/nqp/runtime/ThreadContext;';
-my $TYPE_OPS  := 'Lorg/perl6/nqp/runtime/Ops;';
-my $TYPE_SMO  := 'Lorg/perl6/nqp/sixmodel/SixModelObject;';
+my $TYPE_TC   := 'Lorg/raku/nqp/runtime/ThreadContext;';
+my $TYPE_OPS  := 'Lorg/raku/nqp/runtime/Ops;';
+my $TYPE_SMO  := 'Lorg/raku/nqp/sixmodel/SixModelObject;';
 my $TYPE_STR  := 'Ljava/lang/String;';
 
 $ops.add_hll_op('nqp', 'preinc', -> $qastcomp, $op {

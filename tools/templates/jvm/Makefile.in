@@ -16,12 +16,12 @@ JLINE = @jline@
 JNA = @jna@
 
 RUNTIME_JAVAS = \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/io/*.java)@ \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/jast2bc/*.java)@ \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/runtime/*.java)@ \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/sixmodel/*.java)@ \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/sixmodel/reprs/*.java)@ \
-  @nfp(src/vm/jvm/runtime/org/perl6/nqp/tools/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/io/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/jast2bc/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/runtime/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/sixmodel/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/sixmodel/reprs/*.java)@ \
+  @nfp(src/vm/jvm/runtime/org/raku/nqp/tools/*.java)@ \
 
 @bsv(RUNTIME)@ = @nfp(@bpm(RUNNER_JAR_DIR)@/nqp-runtime.@bext@)@
 THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)
