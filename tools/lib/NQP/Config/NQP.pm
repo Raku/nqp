@@ -218,7 +218,7 @@ sub configure_jvm_backend {
         print "got: $_";
         if (/(?:java|jdk) version "(\d+)(?:\.(\d+))?/) {
             $jvm_found = 1;
-            if ( $1 > 1 || $1 == 1 && $2 >= 8 ) {
+            if ( $1 > 1 || $1 == 1 && $2 >= 9 ) {
                 $ijvm->{ok} = $jvm_ok = 1;
             }
             $got = $_;
@@ -230,7 +230,7 @@ sub configure_jvm_backend {
         push @errors, "No JVM (java executable) in path; cannot continue";
     }
     elsif ( !$jvm_ok ) {
-        push @errors, "Need at least JVM 1.8 (got $got)";
+        push @errors, "Need at least JVM 1.9 (got $got)";
     }
     $self->sorry(@errors) if @errors;
 

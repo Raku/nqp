@@ -39,10 +39,10 @@ Resolve any problems that may still exist. Issues that impact backends
 other than MoarVM may potentially be ignored for a release for now.
 Check on the IRC channel if you have any questions.
 
-You will need JVM installed for the jvm tests to run. On Debian, you
-can install it with:
+You will need a JDK (Java Development Kit) installed for building and
+running tests for the jvm backend. On Debian, you can install it with:
 
-    sudo apt-get install openjdk-7-jdk openjdk-7-jre
+    sudo apt-get install openjdk-11-jdk
 
 =item 4.
 
