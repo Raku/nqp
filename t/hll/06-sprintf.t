@@ -20,7 +20,7 @@ sub is($actual, $expected, $description) {
     }
 }
 
-plan(287);
+plan(294);
 
 is(nqp::sprintf('Walter Bishop', []), 'Walter Bishop', 'no directives' );
 
@@ -63,6 +63,14 @@ is(nqp::sprintf('<%*s>', [6, 12]), '<    12>', 'right-justified %s with space pa
 is(nqp::sprintf('<%0*s>', [6, 'a']), '<00000a>', 'right-justified %s with 0-padding, star-specified');
 is(nqp::sprintf('<%*%>', [6]), '<     %>', 'right-justified %% with space padding, star-specified');
 is(nqp::sprintf('<%0*%>', [5]), '<0000%>', 'right-justified %% with 0-padding, star-specified');
+
+is(nqp::sprintf('<%-*s>', [6, 'hi']), '<hi    >', 'left-justified %s with space padding, mix-specified');
+is(nqp::sprintf('<%*s>', [-6, 'hi']), '<hi    >', 'left-justified %s with space padding, star-specified');
+is(nqp::sprintf('<%-*s>', [-6, 'hi']), '<hi    >', 'left-justified %s with space padding, double-specified');
+is(nqp::sprintf('<%-0*d>', [6, 12]), '<12    >', 'left-justified %d with zero padding, mix-specified');
+is(nqp::sprintf('<%0*d>', [-6, 12]), '<12    >', 'left-justified %d with zero padding, star-specified');
+is(nqp::sprintf('<%-0*s>', [6, 'hi']), '<hi    >', 'left-justified %s with zero padding, mix-specified');
+is(nqp::sprintf('<%0*s>', [-6, 'hi']), '<hi    >', 'left-justified %s with zero padding, star-specified');
 
 is(nqp::sprintf('<%2s>', ['long']), '<long>', '%s string longer than specified size');
 
