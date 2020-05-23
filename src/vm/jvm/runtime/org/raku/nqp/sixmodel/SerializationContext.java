@@ -40,12 +40,12 @@ public class SerializationContext {
 
     public SerializationContext(String handle) {
         this.handle = handle;
-        this.root_objects = new ArrayList<SixModelObject>();
-        this.root_stables = new ArrayList<STable>();
-        this.root_codes = new ArrayList<CodeRef>();
-        this.rep_indexes = new ArrayList<Integer>();
-        this.rep_scs = new ArrayList<SerializationContext>();
-        this.owned_objects = new HashMap<SixModelObject, SixModelObject>();
+        this.root_objects = new ArrayList<>();
+        this.root_stables = new ArrayList<>();
+        this.root_codes = new ArrayList<>();
+        this.rep_indexes = new ArrayList<>();
+        this.rep_scs = new ArrayList<>();
+        this.owned_objects = new HashMap<>();
     }
 
     /* Takes an object and adds it to this SC's root set, and installs a
@@ -76,11 +76,11 @@ public class SerializationContext {
         rep_scs.add(origSC);
     }
 
-    private HashMap<SixModelObject, Integer> objectIndexCache = new HashMap<SixModelObject, Integer>();
+    private HashMap<SixModelObject, Integer> objectIndexCache = new HashMap<>();
     public void addObject(SixModelObject obj) {
         int newIndex = root_objects.size();
         root_objects.add(obj);
-        objectIndexCache.put(obj, new Integer(newIndex));
+        objectIndexCache.put(obj, newIndex);
     }
     public void addObject(SixModelObject obj, int index) {
         if (index == root_objects.size()) {
@@ -88,12 +88,12 @@ public class SerializationContext {
         } else {
             root_objects.set(index,  obj);
         }
-        objectIndexCache.put(obj, new Integer(index));
+        objectIndexCache.put(obj, index);
     }
     public int getObjectIndex(SixModelObject obj) {
         Integer cachedIndex = objectIndexCache.get(obj);
         if (cachedIndex != null) {
-            return cachedIndex.intValue();
+            return cachedIndex;
         } else {
             return -1;
         }
@@ -110,20 +110,20 @@ public class SerializationContext {
             root_objects.add(null);
     }
 
-    private HashMap<STable, Integer> stableIndexCache = new HashMap<STable, Integer>();
+    private HashMap<STable, Integer> stableIndexCache = new HashMap<>();
     public void addSTable(STable stable) {
         int newIndex = root_stables.size();
         root_stables.add(stable);
-        stableIndexCache.put(stable, new Integer(newIndex));
+        stableIndexCache.put(stable, newIndex);
     }
     public void setSTable(int index, STable stable) {
         root_stables.set(index, stable);
-        stableIndexCache.put(stable,  new Integer(index));
+        stableIndexCache.put(stable, index);
     }
     public int getSTableIndex(STable stable) {
         Integer cachedIndex = stableIndexCache.get(stable);
         if (cachedIndex != null) {
-            return cachedIndex.intValue();
+            return cachedIndex;
         } else {
             return -1;
         }
@@ -140,11 +140,11 @@ public class SerializationContext {
             root_stables.add(null);
     }
 
-    private HashMap<SixModelObject, Integer> codeIndexCache = new HashMap<SixModelObject, Integer>();
+    private HashMap<SixModelObject, Integer> codeIndexCache = new HashMap<>();
     public void addCodeRef(CodeRef coderef) {
         int newIndex = root_codes.size();
         root_codes.add(coderef);
-        codeIndexCache.put(coderef, new Integer(newIndex));
+        codeIndexCache.put(coderef, newIndex);
     }
     public void addCodeRef(CodeRef obj, int index) {
         if (index == root_codes.size()) {
@@ -152,12 +152,12 @@ public class SerializationContext {
         } else {
             root_codes.set(index,  obj);
         }
-        codeIndexCache.put(obj, new Integer(index));
+        codeIndexCache.put(obj, index);
     }
     public int getCodeIndex(SixModelObject coderef) {
         Integer cachedIndex = codeIndexCache.get(coderef);
         if (cachedIndex != null) {
-            return cachedIndex.intValue();
+            return cachedIndex;
         } else {
             return -1;
         }
@@ -173,18 +173,18 @@ public class SerializationContext {
         for (SixModelObject obj : this.root_objects) {
             obj.sc = null;
         }
-        this.root_objects = new ArrayList<SixModelObject>();
+        this.root_objects = new ArrayList<>();
     }
     public void disclaimSTables() {
         for (STable stable : this.root_stables) {
             stable.sc = null;
         }
-        this.root_stables = new ArrayList<STable>();
+        this.root_stables = new ArrayList<>();
     }
     public void disclaimCodes() {
         for (CodeRef obj : this.root_codes) {
             obj.sc = null;
         }
-        this.root_codes = new ArrayList<CodeRef>();
+        this.root_codes = new ArrayList<>();
     }
 }

@@ -26,7 +26,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
             return null;
 
         int pos = 0;
-        List<OpenOption> opts = new ArrayList<OpenOption>();
+        List<OpenOption> opts = new ArrayList<>();
 
         switch (mode.charAt(pos++)) {
             case 'r': opts.add(StandardOpenOption.READ); break;
@@ -53,7 +53,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
 
         /* work around differences between Perl 6 and FileChannel.open */
-        List<OpenOption> optsToRemove = new ArrayList<OpenOption>();
+        List<OpenOption> optsToRemove = new ArrayList<>();
         if (opts.contains(StandardOpenOption.READ)) {
             /* APPEND may not be used in conjunction with READ. */
             if (opts.contains(StandardOpenOption.APPEND)) {
@@ -81,15 +81,14 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         } catch (IOException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
-        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-            public void run() {
-                if (chan.isOpen()) {
-                    close(tc);
-                }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (chan.isOpen()) {
+                close(tc);
             }
         }));
     }
 
+    @Override
     public long write(ThreadContext tc, byte[] array) {
         if (append) {
             try {
@@ -104,6 +103,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         return super.write(tc, array);
     }
 
+    @Override
     public long print(ThreadContext tc, String s) {
         if (append) {
             try {
@@ -118,6 +118,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         return super.print(tc, s);
     }
 
+    @Override
     public void seek(ThreadContext tc, long offset, long whence) {
         try {
             flushWriteBuffer(tc);
@@ -145,6 +146,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         eof = false;
     }
 
+    @Override
     public long tell(ThreadContext tc) {
         try {
             flushWriteBuffer(tc);
@@ -155,6 +157,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
     }
 
+    @Override
     public void lock(ThreadContext tc, long flag) {
         if (lock != null && lock.acquiredBy() == fc) {
             /* XXX: *might* not be quite the exact condition we want,
@@ -176,6 +179,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
     }
 
+    @Override
     public void unlock(ThreadContext tc) {
         try {
             if (lock != null) {
@@ -189,6 +193,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
     }
 
+    @Override
     public void flush(ThreadContext tc) {
         try {
             flushWriteBuffer(tc);
@@ -198,6 +203,7 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
         }
     }
 
+    @Override
     public boolean eof(ThreadContext tc) {
         if (eof)
             return true;

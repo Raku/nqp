@@ -46,52 +46,50 @@ public class AsyncProcessHandle implements IIOClosable {
         this.tc = tc;
         this.hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         this.bufType = config.get("buf_type");
-        Thread thread = new Thread(new Runnable() {
-            public void run() {
-                try {
-                    AsyncProcessHandle.this.proc = pb.start();
-                    procStarted = true;
+        Thread thread = new Thread(() -> {
+            try {
+                AsyncProcessHandle.this.proc = pb.start();
+                procStarted = true;
 
-                    int pid = (int)getPID(AsyncProcessHandle.this.proc);
+                int pid = (int)getPID(AsyncProcessHandle.this.proc);
 
-                    SixModelObject ready = config.get("ready");
-                    if (Ops.isnull(ready) == 0) {
-                        send(ready, null, boxInt(pid));
-                    }
-
-                    SixModelObject outputCallback = config.get("merge_bytes");
-                    if (Ops.isnull(outputCallback) == 1)
-                        outputCallback = config.get("stdout_bytes");
-                    if (Ops.isnull(outputCallback) == 0)
-                        launchReader(outputCallback, false);
-
-                    SixModelObject errorCallback = config.get("stderr_bytes");
-                    if (Ops.isnull(errorCallback) == 0)
-                        launchReader(errorCallback, true);
-
-                    int outcome = AsyncProcessHandle.this.proc.waitFor();
-                    SixModelObject done = config.get("done");
-                    /* Return exit code left shifted by 8 for POSIX emulation. */
-                    if (Ops.isnull(done) == 0)
-                        send(done, boxInt(outcome << 8));
+                SixModelObject ready = config.get("ready");
+                if (Ops.isnull(ready) == 0) {
+                    send(ready, null, boxInt(pid));
                 }
-                catch (Throwable t) {
-                    SixModelObject message = boxError(t.toString());
 
-                    SixModelObject error = config.get("error");
-                    if (Ops.isnull(error) == 0)
-                        send(error, message);
+                SixModelObject outputCallback = config.get("merge_bytes");
+                if (Ops.isnull(outputCallback) == 1)
+                    outputCallback = config.get("stdout_bytes");
+                if (Ops.isnull(outputCallback) == 0)
+                    launchReader(outputCallback, false);
 
-                    SixModelObject stdoutBytes = config.get("stdout_bytes");
-                    if (Ops.isnull(stdoutBytes) == 0)
-                        send(stdoutBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
-                                AsyncProcessHandle.this.hllConfig.strBoxType, message);
+                SixModelObject errorCallback = config.get("stderr_bytes");
+                if (Ops.isnull(errorCallback) == 0)
+                    launchReader(errorCallback, true);
 
-                    SixModelObject stderrBytes = config.get("stderr_bytes");
-                    if (Ops.isnull(stderrBytes) == 0)
-                        send(stderrBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
-                                AsyncProcessHandle.this.hllConfig.strBoxType, message);
-                }
+                int outcome = AsyncProcessHandle.this.proc.waitFor();
+                SixModelObject done = config.get("done");
+                /* Return exit code left shifted by 8 for POSIX emulation. */
+                if (Ops.isnull(done) == 0)
+                    send(done, boxInt(outcome << 8));
+            }
+            catch (Throwable t) {
+                SixModelObject message = boxError(t.toString());
+
+                SixModelObject error = config.get("error");
+                if (Ops.isnull(error) == 0)
+                    send(error, message);
+
+                SixModelObject stdoutBytes = config.get("stdout_bytes");
+                if (Ops.isnull(stdoutBytes) == 0)
+                    send(stdoutBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
+                            AsyncProcessHandle.this.hllConfig.strBoxType, message);
+
+                SixModelObject stderrBytes = config.get("stderr_bytes");
+                if (Ops.isnull(stderrBytes) == 0)
+                    send(stderrBytes, AsyncProcessHandle.this.hllConfig.intBoxType,
+                            AsyncProcessHandle.this.hllConfig.strBoxType, message);
             }
         });
         thread.setDaemon(true);
@@ -122,7 +120,7 @@ public class AsyncProcessHandle implements IIOClosable {
     }
 
     private Map<String, SixModelObject> getConfig(ThreadContext tc, SixModelObject configObj) {
-        Map<String, SixModelObject> env = new HashMap<String, SixModelObject>();
+        Map<String, SixModelObject> env = new HashMap<>();
         SixModelObject iter = Ops.iter(configObj, tc);
         while (Ops.istrue(iter, tc) != 0) {
             SixModelObject kv = iter.shift_boxed(tc);
@@ -172,32 +170,30 @@ public class AsyncProcessHandle implements IIOClosable {
         final InputStream stream = stderr
             ? this.proc.getErrorStream()
             : this.proc.getInputStream();
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    byte[] buffer;
-                    int read;
-                    while ((read = stream.read(buffer = new byte[32768])) != -1) {
-                        SixModelObject result = Ops.create(AsyncProcessHandle.this.bufType, tc);
-                        Buffers.stashBytes(tc, result, buffer, read);
-                        send(callback,
-                                boxInt(stderr
-                                    ? AsyncProcessHandle.this.errSeq++
-                                    : AsyncProcessHandle.this.outSeq++),
-                                result,
-                                AsyncProcessHandle.this.hllConfig.strBoxType);
-                    }
+        new Thread(() -> {
+            try {
+                byte[] buffer;
+                int read;
+                while ((read = stream.read(buffer = new byte[32768])) != -1) {
+                    SixModelObject result = Ops.create(AsyncProcessHandle.this.bufType, tc);
+                    Buffers.stashBytes(tc, result, buffer, read);
                     send(callback,
                             boxInt(stderr
                                 ? AsyncProcessHandle.this.errSeq++
                                 : AsyncProcessHandle.this.outSeq++),
-                            AsyncProcessHandle.this.hllConfig.strBoxType,
+                            result,
                             AsyncProcessHandle.this.hllConfig.strBoxType);
                 }
-                catch (Throwable t) {
-                    send(callback, boxInt(-1), AsyncProcessHandle.this.hllConfig.strBoxType,
-                            boxError(t.toString()));
-                }
+                send(callback,
+                        boxInt(stderr
+                            ? AsyncProcessHandle.this.errSeq++
+                            : AsyncProcessHandle.this.outSeq++),
+                        AsyncProcessHandle.this.hllConfig.strBoxType,
+                        AsyncProcessHandle.this.hllConfig.strBoxType);
+            }
+            catch (Throwable t) {
+                send(callback, boxInt(-1), AsyncProcessHandle.this.hllConfig.strBoxType,
+                        boxError(t.toString()));
             }
         }).start();
     }
@@ -243,9 +239,9 @@ public class AsyncProcessHandle implements IIOClosable {
         ((ConcBlockingQueueInstance)task.queue).push_boxed(tc, result);
     }
 
-    static interface Kernel32 extends Library {
-        public static Kernel32 INSTANCE = (Kernel32)Native.loadLibrary("kernel32", Kernel32.class);
-        public int GetProcessId(Long hProcess);
+    interface Kernel32 extends Library {
+        Kernel32 INSTANCE = (Kernel32)Native.loadLibrary("kernel32", Kernel32.class);
+        int GetProcessId(Long hProcess);
     }
 
     private long getPID(Process proc) {
