@@ -148,7 +148,7 @@ my module sprintf {
 
         sub padding_char($st) {
             my $padding_char := ' ';
-            if (!$st<precision> && !has_flag($st, 'minus'))
+            if !$st<precision> && !is_minus($st)
             || $st<sym> ~~ /<[eEfFgG]>/ {
                 $padding_char := '0' if $_<zero> for $st<flags>;
             }
@@ -163,6 +163,10 @@ my module sprintf {
             $ok
         }
 
+        sub is_minus($st) {
+            has_flag($st, 'minus') || $st<size> && $st<size>.made < 0
+        }
+
         method statement($/){
             my $st;
             if $<directive> { $st := $<directive> }
@@ -170,8 +174,9 @@ my module sprintf {
             else { $st := $<literal> }
             my @pieces;
             # Adds padding chars on in certain cases
-            @pieces.push: infix_x(padding_char($st), $st<size>.made - nqp::chars($st.made)) if $st<size>;
-            has_flag($st, 'minus')
+            @pieces.push: infix_x(padding_char($st), nqp::abs_i($st<size>.made) - nqp::chars($st.made))
+                if $st<size>;
+            is_minus($st)
                 ?? @pieces.unshift: $st.made
                 !! @pieces.push:    $st.made;
             make join('', @pieces)
