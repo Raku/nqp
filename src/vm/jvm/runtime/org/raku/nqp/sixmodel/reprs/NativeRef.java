@@ -12,6 +12,7 @@ import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class NativeRef extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -20,6 +21,7 @@ public class NativeRef extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         NativeRefREPRData rd = (NativeRefREPRData)st.REPRData;
         if (rd == null)
@@ -60,6 +62,7 @@ public class NativeRef extends REPR {
         return obj;
     }
 
+    @Override
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject info = repr_info.at_key_boxed(tc, "nativeref");
         if (Ops.isnull(info) == 0) {
@@ -105,15 +108,18 @@ public class NativeRef extends REPR {
         }
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a native reference");
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a native reference");
     }
 
+    @Override
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
         NativeRefREPRData rd = (NativeRefREPRData)st.REPRData;
@@ -127,6 +133,7 @@ public class NativeRef extends REPR {
         }
     }
 
+    @Override
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
         NativeRefREPRData rd = new NativeRefREPRData();

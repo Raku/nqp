@@ -22,6 +22,7 @@ import org.raku.nqp.runtime.ExceptionHandling;
 import org.raku.nqp.runtime.ThreadContext;
 
 public class CUnion extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -30,6 +31,7 @@ public class CUnion extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info_hash) {
         SixModelObject repr_info = repr_info_hash.at_key_boxed(tc, "attribute");
         CUnionREPRData repr_data = new CUnionREPRData();
@@ -72,6 +74,7 @@ public class CUnion extends REPR {
         generateStructClass(tc, st, attrInfos);
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         /* TODO: Die if someone tries to allocate a CUnion before it's been
          * composed. */
@@ -88,6 +91,7 @@ public class CUnion extends REPR {
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
         ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CUnion object.");
@@ -95,6 +99,7 @@ public class CUnion extends REPR {
         return null;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
         ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CUnion object.");
     }

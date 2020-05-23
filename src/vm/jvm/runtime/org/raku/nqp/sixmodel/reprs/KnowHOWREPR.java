@@ -12,6 +12,7 @@ import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class KnowHOWREPR extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -20,6 +21,7 @@ public class KnowHOWREPR extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         KnowHOWREPRInstance obj = new KnowHOWREPRInstance();
         obj.st = st;
@@ -29,12 +31,14 @@ public class KnowHOWREPR extends REPR {
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         KnowHOWREPRInstance obj = new KnowHOWREPRInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
                                    SerializationReader reader, SixModelObject obj) {
         KnowHOWREPRInstance body = (KnowHOWREPRInstance)obj;
@@ -49,6 +53,7 @@ public class KnowHOWREPR extends REPR {
         body.methods = ((VMHashInstance)reader.readRef()).storage;
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         KnowHOWREPRInstance kh = (KnowHOWREPRInstance)obj;
         writer.writeStr(kh.name);

@@ -9,6 +9,7 @@ import org.raku.nqp.runtime.ThreadContext;
 public class SemaphoreInstance extends SixModelObject {
     public java.util.concurrent.Semaphore sem;
 
+    @Override
     public void set_int(ThreadContext tc, long value) {
         if (sem != null) {
             throw ExceptionHandling.dieInternal(tc, "cannot change the value of a semaphore");

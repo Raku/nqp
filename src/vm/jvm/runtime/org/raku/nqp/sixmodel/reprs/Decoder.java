@@ -9,6 +9,7 @@ import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class Decoder extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -17,18 +18,21 @@ public class Decoder extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         DecoderInstance obj = new DecoderInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a Decoder");
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "Cannot deserialize a Decoder");
     }
 }

@@ -15,6 +15,7 @@ public class ProcessChannel implements ByteChannel, java.lang.Runnable {
     public ReadableByteChannel in;
     public Process process;
 
+    @Override
     public void run() {
         try {
             ByteBuffer bb = ByteBuffer.allocate(32768);
@@ -56,14 +57,17 @@ public class ProcessChannel implements ByteChannel, java.lang.Runnable {
         this.process = process;
     }
 
+    @Override
     public int read(ByteBuffer dst) throws IOException {
         return in.read(dst);
     }
 
+    @Override
     public boolean isOpen() {
         return in.isOpen();
     }
 
+    @Override
     public void close() throws IOException {
         if (in instanceof ReadableByteChannel)
             in.close();
@@ -75,6 +79,7 @@ public class ProcessChannel implements ByteChannel, java.lang.Runnable {
         return process.waitFor();
     }
 
+    @Override
     public int write(ByteBuffer src) throws IOException {
         return out.write(src);
     }

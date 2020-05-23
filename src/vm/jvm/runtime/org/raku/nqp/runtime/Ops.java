@@ -4649,8 +4649,8 @@ public final class Ops {
         return end;
     }
 
-    private static HashMap<String,String> canonNames = new HashMap<String, String>();
-    private static HashMap<String,int[]> derivedProps = new HashMap<String, int[]>();
+    private static HashMap<String,String> canonNames = new HashMap<>();
+    private static HashMap<String,int[]> derivedProps = new HashMap<>();
     static {
         canonNames.put("inlatin1supplement", "InLatin-1Supplement");
         canonNames.put("inlatinextendeda", "InLatinExtended-A");
@@ -5750,10 +5750,12 @@ public final class Ops {
             this.schedulee = schedulee;
         }
 
+        @Override
         public void run() {
             queue.add(schedulee);
         }
 
+        @Override
         public void cancel(ThreadContext tc) {
             cancel();
         }

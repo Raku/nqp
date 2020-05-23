@@ -9,6 +9,7 @@ import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class Uninstantiable extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -17,14 +18,17 @@ public class Uninstantiable extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "You cannot create an instance of this type");
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         throw ExceptionHandling.dieInternal(tc, "Cannot stub an Uninstantiable instance");
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
                                    SerializationReader reader, SixModelObject obj) {
         throw ExceptionHandling.dieInternal(tc, "Cannot stub an Uninstantiable instance");

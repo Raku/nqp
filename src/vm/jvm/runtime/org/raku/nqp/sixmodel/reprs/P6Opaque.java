@@ -65,6 +65,7 @@ public class P6Opaque extends REPR {
 
     private static ObjectCache<String, Class<?>> classCache = new ObjectCache< >();
 
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = new P6OpaqueREPRData();
@@ -74,6 +75,7 @@ public class P6Opaque extends REPR {
         return st.WHAT;
     }
 
+    @Override
     @SuppressWarnings("unchecked") // Because Java implemented generics stupidly
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info_hash) {
         /* Get attribute part of the protocol from the hash. */
@@ -652,10 +654,12 @@ public class P6Opaque extends REPR {
         mv.visitMaxs(0, 0);
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         return ((P6OpaqueREPRData)st.REPRData).instance.instClone();
     }
 
+    @Override
     public void change_type(ThreadContext tc, SixModelObject obj, SixModelObject newType) {
         // Ensure target type is also P6opaque-based.
         if (!(newType.st.REPR instanceof P6Opaque))
@@ -709,6 +713,7 @@ public class P6Opaque extends REPR {
         obj.st = newType.st;
     }
 
+    @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
         StorageSpec ss = new StorageSpec();
@@ -721,6 +726,7 @@ public class P6Opaque extends REPR {
         return ss;
     }
 
+    @Override
     public long hint_for(ThreadContext tc, STable st, SixModelObject classHandle, String name) {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
         for (int i = 0; i < rd.classHandles.length; i++) {
@@ -735,6 +741,7 @@ public class P6Opaque extends REPR {
         return STable.NO_HINT;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader) {
         // Instantiate REPR data.
@@ -827,6 +834,7 @@ public class P6Opaque extends REPR {
         }
     }
 
+    @Override
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer) {
         P6OpaqueREPRData REPRData = (P6OpaqueREPRData)st.REPRData;
 
@@ -878,14 +886,16 @@ public class P6Opaque extends REPR {
         writer.writeInt(REPRData.assDelSlot);
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         P6OpaqueDelegateInstance stub = new P6OpaqueDelegateInstance();
         stub.st = st;
         return stub;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject stub) {
+                                   SerializationReader reader, SixModelObject stub) {
         // Create instance that we'll deserialize into.
         P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).instance.instClone();
 
@@ -896,6 +906,7 @@ public class P6Opaque extends REPR {
         obj.deserializeFields(tc, st, reader);
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject origObj) {
         try {
             P6OpaqueBaseInstance obj = (P6OpaqueBaseInstance)origObj;

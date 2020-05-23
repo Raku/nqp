@@ -18,6 +18,7 @@ import org.raku.nqp.sixmodel.TypeObject;
 import org.raku.nqp.sixmodel.reprs.CArrayREPRData.ElemKind;
 
 public class CArray extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data yet. */
@@ -27,6 +28,7 @@ public class CArray extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         CArrayInstance obj = new CArrayInstance();
         obj.managed = true;
@@ -114,6 +116,7 @@ public class CArray extends REPR {
         st.REPRData = data;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
         ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CArray object.");
@@ -121,6 +124,7 @@ public class CArray extends REPR {
         return null;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
         ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CArray object.");
     }

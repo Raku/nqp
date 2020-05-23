@@ -24,6 +24,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
      * such is probably better, but that's harder to implement. */
     public HashMap<String, SixModelObject> memberCache = new HashMap<String, SixModelObject>();
 
+    @Override
     public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint, SixModelObject value) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -46,6 +47,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         memberCache.put(name, value);
     }
 
+    @Override
     public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -82,6 +84,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         storage.writeField(name, value);
     }
 
+    @Override
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         SixModelObject member = memberCache.get(name);
         if (Ops.isnull(member) == 0) return member;
@@ -110,6 +113,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         return member;
     }
 
+    @Override
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -145,6 +149,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         }
     }
 
+    @Override
     public void refresh(ThreadContext tc) {
         CStructREPRData repr_data = (CStructREPRData) st.REPRData;
 

@@ -11,6 +11,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
     public int start;
     public byte[] slots;
 
+    @Override
     public void at_pos_native(ThreadContext tc, long index) {
         if (index < 0) {
             index += elems;
@@ -27,6 +28,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         tc.native_i = slots[start + (int)index];
     }
 
+    @Override
     public long exists_pos(ThreadContext tc, long key) {
         if (key < 0) {
             key += this.elems;
@@ -101,6 +103,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         this.slots = slots;
     }
 
+    @Override
     public void bind_pos_native(ThreadContext tc, long index) {
         if (index < 0) {
             index += elems;
@@ -114,20 +117,24 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         slots[start + (int)index] = (byte)tc.native_i;
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         return elems;
     }
 
+    @Override
     public void set_elems(ThreadContext tc, long count) {
         set_size_internal(tc, count);
     }
 
+    @Override
     public void push_native(ThreadContext tc) {
         set_size_internal(tc, elems + 1);
         tc.native_type = ThreadContext.NATIVE_INT;
         slots[start + elems - 1] = (byte)tc.native_i;
     }
 
+    @Override
     public void pop_native(ThreadContext tc) {
         if (elems < 1)
             throw ExceptionHandling.dieInternal(tc, "VMArray: Can't pop from an empty array");
@@ -136,6 +143,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         tc.native_i = slots[start + elems];
     }
 
+    @Override
     public void unshift_native(ThreadContext tc) {
         /* If we don't have room at the beginning of the slots,
          * make some room (8 slots) for unshifting */
@@ -164,6 +172,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         elems++;
     }
 
+    @Override
     public void shift_native(ThreadContext tc) {
         if (elems < 1)
             throw ExceptionHandling.dieInternal(tc, "VMArray: Can't shift from an empty array");
@@ -174,6 +183,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
         elems--;
     }
 
+    @Override
     public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
         beginning = beginning < 0 ? this.elems + beginning : beginning;
         end       = end       < 0 ? this.elems + end       : end;
@@ -194,6 +204,7 @@ public class VMArrayInstance_i8 extends VMArrayInstanceBase {
     }
 
     /* This can be optimized for the case we have two VMArray representation objects. */
+    @Override
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         long elems0 = elems;
         long elems1 = from.elems(tc);

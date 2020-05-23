@@ -10,11 +10,13 @@ import org.raku.nqp.sixmodel.SixModelObject;
 public class ContextRefInstance extends SixModelObject {
     public CallFrame context;
 
+    @Override
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
         return idx == null ? Ops.createNull(tc) : context.oLex[idx];
     }
 
+    @Override
     public void at_key_native(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
@@ -37,6 +39,7 @@ public class ContextRefInstance extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
 
+    @Override
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         Integer idx = context.codeRef.staticInfo.oTryGetLexicalIdx(key);
         if (idx == null)
@@ -44,6 +47,7 @@ public class ContextRefInstance extends SixModelObject {
         context.oLex[idx] = value;
     }
 
+    @Override
     public void bind_key_native(ThreadContext tc, String key) {
         Integer idx = context.codeRef.staticInfo.iTryGetLexicalIdx(key);
         if (idx != null) {
@@ -66,6 +70,7 @@ public class ContextRefInstance extends SixModelObject {
         throw ExceptionHandling.dieInternal(tc, "No lexical " + key + " in this lexpad");
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         StaticCodeInfo info = context.codeRef.staticInfo;
         return (info.oLexicalNames != null ? info.oLexicalNames.length : 0) +
@@ -74,6 +79,7 @@ public class ContextRefInstance extends SixModelObject {
                (info.sLexicalNames != null ? info.sLexicalNames.length : 0);
     }
 
+    @Override
     public long exists_key(ThreadContext tc, String key) {
         StaticCodeInfo sci = context.codeRef.staticInfo;
         return sci.oTryGetLexicalIdx(key) != null ||

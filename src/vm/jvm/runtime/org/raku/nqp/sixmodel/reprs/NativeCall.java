@@ -55,6 +55,7 @@ public class NativeCall extends REPR {
         CPOINTER_RW;
     }
 
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data needed. */
@@ -64,6 +65,7 @@ public class NativeCall extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         NativeCallInstance obj = new NativeCallInstance();
         obj.st = st;
@@ -71,6 +73,7 @@ public class NativeCall extends REPR {
         return obj;
     }
 
+    @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
@@ -78,10 +81,12 @@ public class NativeCall extends REPR {
         return ss;
     }
 
+    @Override
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, Type.getType(NativeCallBody.class).getDescriptor(), null, null);
     }
 
+    @Override
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         String nativeCallType = Type.getType(NativeCallBody.class).getDescriptor();
         String nativeCallIN = Type.getType(NativeCallBody.class).getInternalName();
@@ -98,6 +103,7 @@ public class NativeCall extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -111,12 +117,14 @@ public class NativeCall extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         /* Assume it'll be re-configured each time, so just allow it. */
     }
 
     // XXX This is a hack as it fails to check the REPR ID, but the JVM will
     // catch any screw-ups and keep us safe.
+    @Override
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String nativeCallType = Type.getType(NativeCallBody.class).getDescriptor();
         String nativeCallIN = Type.getType(NativeCallBody.class).getInternalName();
@@ -146,6 +154,7 @@ public class NativeCall extends REPR {
         return true;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* Assume it'll be re-configured each time, so just allow it. */
         NativeCallInstance stub = new NativeCallInstance();
@@ -153,12 +162,14 @@ public class NativeCall extends REPR {
         return stub;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
         /* Assume it'll be re-configured each time, so just allow it. */
     }
 
+    @Override
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
-            String prefix, SixModelObject obj) {
+                                  String prefix, SixModelObject obj) {
         /* Assume it'll be re-configured each time, so just allow it. */
     }
 }

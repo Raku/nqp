@@ -13,6 +13,7 @@ import org.raku.nqp.runtime.ThreadContext;
 
 
 public class CPointer extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data needed. */
@@ -22,12 +23,14 @@ public class CPointer extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         SixModelObject obj = new CPointerInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String getDesc = "(Lorg/raku/nqp/runtime/ThreadContext;)J";
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
@@ -45,6 +48,7 @@ public class CPointer extends REPR {
         setMeth.visitMaxs(0, 0);
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
         ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CPointer object.");
@@ -52,6 +56,7 @@ public class CPointer extends REPR {
         return null;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
         ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CPointer object.");
     }

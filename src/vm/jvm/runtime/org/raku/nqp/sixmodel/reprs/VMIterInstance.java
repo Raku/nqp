@@ -45,6 +45,7 @@ public class VMIterInstance extends SixModelObject {
      * Parrot did it that way, and we have a load of code that expect them to
      * work in this kind of way.
      */
+    @Override
     public SixModelObject shift_boxed(ThreadContext tc) {
         switch (iterMode) {
         case MODE_ARRAY:

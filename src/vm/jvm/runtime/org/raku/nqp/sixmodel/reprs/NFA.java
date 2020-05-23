@@ -32,6 +32,7 @@ public class NFA extends REPR {
     public static final int EDGE_CODEPOINT_IM_NEG = 20;
     public static final int EDGE_CODEPOINT_IM_LL  = 21;
 
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -40,20 +41,23 @@ public class NFA extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         NFAInstance obj = new NFAInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         NFAInstance stub = new NFAInstance();
         stub.st = st;
         return stub;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         NFAInstance body = (NFAInstance)obj;
 
         /* Read fates. */
@@ -105,6 +109,7 @@ public class NFA extends REPR {
         }
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         NFAInstance body = (NFAInstance)obj;
 

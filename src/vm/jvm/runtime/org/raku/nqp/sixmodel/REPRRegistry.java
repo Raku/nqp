@@ -43,8 +43,8 @@ import org.raku.nqp.sixmodel.reprs.MultiDimArray;
 import org.raku.nqp.sixmodel.reprs.Decoder;
 
 public class REPRRegistry {
-    private static HashMap<String, Integer> reprIdMap = new HashMap<String, Integer>();
-    private static ArrayList<REPR> reprs = new ArrayList<REPR>();
+    private static HashMap<String, Integer> reprIdMap = new HashMap<>();
+    private static ArrayList<REPR> reprs = new ArrayList<>();
 
     public static REPR getByName(String name) {
         Integer idx = reprIdMap.get(name);
@@ -57,7 +57,7 @@ public class REPRRegistry {
         if (id < reprs.size())
             return reprs.get(id);
         else
-            throw new RuntimeException("No REPR " + new Integer(id).toString());
+            throw new RuntimeException("No REPR " + id);
     }
 
     private static void addREPR(String name, REPR REPR) {
