@@ -445,15 +445,15 @@ public final class NativeCallOps {
         case CHAR:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Byte((byte) o.get_int(tc));
+            return (byte) o.get_int(tc);
         case SHORT:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Short((short) o.get_int(tc));
+            return (short) o.get_int(tc);
         case INT:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Integer((int) o.get_int(tc));
+            return (int) o.get_int(tc);
         case LONG:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
@@ -461,19 +461,19 @@ public final class NativeCallOps {
         case LONGLONG:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Long((long) o.get_int(tc));
+            return (long) o.get_int(tc);
         case UCHAR:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Byte((byte) o.get_int(tc));
+            return (byte) o.get_int(tc);
         case USHORT:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Short((short) o.get_int(tc));
+            return (short) o.get_int(tc);
         case UINT:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Integer((int) o.get_int(tc));
+            return (int) o.get_int(tc);
         case ULONG:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
@@ -481,15 +481,15 @@ public final class NativeCallOps {
         case ULONGLONG:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Long((long) o.get_int(tc));
+            return (long) o.get_int(tc);
         case FLOAT:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Float((float) o.get_num(tc));
+            return (float) o.get_num(tc);
         case DOUBLE:
             o = Ops.decont(o, tc);
             if (Ops.isconcrete(o, tc) == 0) return null;
-            return new Double((double) o.get_num(tc));
+            return (double) o.get_num(tc);
         case ASCIISTR:
         case UTF8STR:
         case UTF16STR: {

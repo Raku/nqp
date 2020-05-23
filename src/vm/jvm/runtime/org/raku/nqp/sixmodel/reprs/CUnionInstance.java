@@ -54,27 +54,27 @@ public class CUnionInstance extends SixModelObject implements Refreshable {
         switch (info.argType) {
         case CHAR:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Byte((byte) tc.native_i);
+            value = (byte) tc.native_i;
             break;
         case SHORT:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Short((short) tc.native_i);
+            value = (short) tc.native_i;
             break;
         case INT:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Integer((int) tc.native_i);
+            value = (int) tc.native_i;
             break;
         case LONG:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Long((long) tc.native_i);
+            value = (long) tc.native_i;
             break;
         case FLOAT:
             tc.native_type = ThreadContext.NATIVE_NUM;
-            value = new Float((float) tc.native_n);
+            value = (float) tc.native_n;
             break;
         case DOUBLE:
             tc.native_type = ThreadContext.NATIVE_NUM;
-            value = new Double((double) tc.native_n);
+            value = (double) tc.native_n;
             break;
         default:
             ExceptionHandling.dieInternal(tc, String.format("CUnion.bind_attribute_native: Can't handle %s", info.argType));

@@ -534,28 +534,28 @@ public class BootJavaInterop {
             retVal = obj;
         }
         else if( klass.equals(Boolean.class) && obj.getClass().equals(Long.class) ){
-            retVal = new Boolean( ((Long)obj) == 0 ? false : true);
+            retVal = ((Long) obj) == 0 ? false : true;
         }
         else if( klass.equals(Byte.class) && obj.getClass().equals(Long.class) ){
-            retVal = new Byte( ((Long)obj).byteValue() );
+            retVal = ((Long) obj).byteValue();
         }
         else if( klass.equals(Short.class) && obj.getClass().equals(Long.class) ){
-            retVal = new Short( ((Long)obj).shortValue() );
+            retVal = ((Long) obj).shortValue();
         }
         else if( klass.equals(Integer.class) && obj.getClass().equals(Long.class) ){
-            retVal = new Integer( ((Long)obj).intValue() );
+            retVal = ((Long) obj).intValue();
         }
         else if( klass.equals(Long.class) && obj.getClass().equals(Long.class) ){
             retVal = (Long) obj;
         }
         else if( klass.equals(Float.class) && obj.getClass().equals(Double.class) ){
-            retVal = new Float( ((Double)obj).floatValue() );
+            retVal = ((Double) obj).floatValue();
         }
         else if( klass.equals(Double.class) && obj.getClass().equals(Double.class) ){
             retVal = (Double) obj;
         }
         else if( klass.equals(Character.class) && obj.getClass().equals(String.class) ){
-            retVal = new Character( ((String)obj).charAt(0));
+            retVal = ((String) obj).charAt(0);
         }
         else if( klass.equals(String.class) && obj.getClass().equals(String.class) ){
             retVal = (String) obj;
@@ -563,8 +563,8 @@ public class BootJavaInterop {
         else if( klass.equals(boolean.class) && obj.getClass().equals(Long.class) ) {
             retVal = obj != null
                 ? ((Long) obj) == 0
-                    ? new Boolean(false)
-                    : new Boolean(true)
+                    ? Boolean.FALSE
+                    : Boolean.TRUE
                 : null;
         }
         else if( klass.equals(byte.class) && obj.getClass().equals(Long.class) ) {
@@ -601,13 +601,13 @@ public class BootJavaInterop {
                 in.at_pos_native(tc, i);
                 Object value = null;
                 if( tc.native_type == ThreadContext.NATIVE_NUM ) {
-                    value = new Double(tc.native_n);
+                    value = tc.native_n;
                 }
                 else if( tc.native_type == ThreadContext.NATIVE_STR ) {
                     value = tc.native_s;
                 }
                 else if( tc.native_type == ThreadContext.NATIVE_INT ) {
-                    value = new Long(tc.native_i);
+                    value = tc.native_i;
                 }
                 else {
                     SixModelObject cur = Ops.atpos(in, i, tc);
@@ -630,7 +630,7 @@ public class BootJavaInterop {
                 if( tc.native_type == ThreadContext.NATIVE_NUM ) {
                     if( out == null )
                         out = new Double[size];
-                    ((Double[]) out)[i] = new Double(tc.native_n);
+                    ((Double[]) out)[i] = tc.native_n;
                 }
                 else if( tc.native_type == ThreadContext.NATIVE_STR ) {
                     if( out == null )
@@ -640,7 +640,7 @@ public class BootJavaInterop {
                 else if( tc.native_type == ThreadContext.NATIVE_INT ) {
                     if( out == null )
                         out = new Long[size];
-                    ((Long[]) out)[i] = new Long(tc.native_i);
+                    ((Long[]) out)[i] = tc.native_i;
                 }
                 else {
                     SixModelObject cur = Ops.atpos(in, i, tc);
