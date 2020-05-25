@@ -50,7 +50,7 @@ To run tests:
     % prove -v -e'nqp-m rubyish.nqp' t
 ```
 
-Strings and truth values are Perlish rather than Rubyish:
+Strings and truth values are Rakuish rather than Rubyish:
 - `+` always does addition (doesn't concatenate strings)
 - `~` has been introduced as the concatenation operator
 - `>`, `==`, `<=` ... only do arithmetic comparisons
