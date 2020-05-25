@@ -3323,3 +3323,26 @@ Get the handle string used by `createsc` to create the SC `$sc`
 
 ## scobjcount
 * `scobjcount()`
+
+## freshcoderef
+* `freshcoderef($code-object)`
+Creates a clone of the given code object and a clone of its static frame and
+connects the two. Returns the clone of the code object. Used for creating a
+fresh copy of a statically compiled piece of code so each of some high level
+code object can gets its own low level executable.
+
+## markcodestatic
+* `markcodestatic($code-object)
+Marks the code as "static" meaning it's not a closure and thus no closure will
+be serialized.
+
+## scsetcode
+* `scsetcode($sc, $index, $code-object)
+Adds $code-object to the serialization context at block index $index
+
+## forceouterctx
+* `forceouterctx($code-object, $context)
+Sets the code object's outer to the context's frame and also the code object's
+static frame's outer to the context's static frame.
+Used to embed a separately compiled code object in a given context, e.g. to
+give an EVALed code a surrounding lexical scope.
