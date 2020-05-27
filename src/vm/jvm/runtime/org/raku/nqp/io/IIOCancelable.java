@@ -4,5 +4,5 @@ import org.raku.nqp.runtime.ThreadContext;
 
 public interface IIOCancelable {
 
-    public void cancel(ThreadContext tc);
+    void cancel(ThreadContext tc);
 }

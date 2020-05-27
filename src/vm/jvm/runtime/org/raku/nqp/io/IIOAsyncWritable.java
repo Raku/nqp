@@ -4,6 +4,6 @@ import org.raku.nqp.runtime.ThreadContext;
 import org.raku.nqp.sixmodel.SixModelObject;
 
 public interface IIOAsyncWritable {
-    public void spurt(ThreadContext tc, SixModelObject Str, SixModelObject data, SixModelObject done,
+    void spurt(ThreadContext tc, SixModelObject Str, SixModelObject data, SixModelObject done,
                       SixModelObject error);
 }

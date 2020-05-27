@@ -24,6 +24,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         setEncoding(tc, Charset.forName("UTF-8"));
     }
 
+    @Override
     public void close(ThreadContext tc) {
         try {
             is.close();
@@ -32,10 +33,12 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
 
+    @Override
     public void setEncoding(ThreadContext tc, Charset cs) {
         this.cs = cs;
     }
 
+    @Override
     public byte[] read(ThreadContext tc, int bytes) {
         try {
             byte[] array = new byte[bytes];
@@ -75,6 +78,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
 
+    @Override
     public synchronized String slurp(ThreadContext tc) {
         try {
             if (br == null)
@@ -91,6 +95,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
 
+    @Override
     public synchronized String readline(ThreadContext tc) {
         try {
             if (br == null)
@@ -107,6 +112,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
     }
 
     /* TODO - think about unicode in readchars and getc */
+    @Override
     public synchronized String readchars(ThreadContext tc, int count) {
         try {
             if (br == null)
@@ -126,6 +132,7 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
 
+    @Override
     public synchronized String readlineInteractive(ThreadContext tc, String prompt) {
         try {
             if (cr == null)
@@ -141,10 +148,12 @@ public class StandardReadHandle implements IIOClosable, IIOEncodable, IIOSyncRea
         }
     }
 
+    @Override
     public boolean eof(ThreadContext tc) {
         return eof;
     }
 
+    @Override
     public boolean isTTY(ThreadContext tc) {
         return System.console() != null;
     }

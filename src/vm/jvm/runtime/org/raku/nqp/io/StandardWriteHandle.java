@@ -23,29 +23,35 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         setEncoding(tc, Charset.forName("UTF-8"));
     }
 
+    @Override
     public void close(ThreadContext tc) {
         ps.close();
     }
 
+    @Override
     public void seek(ThreadContext tc, long offset, long whence) {
         throw ExceptionHandling.dieInternal(tc, "Cannot seek stdout or stderr");
     }
 
+    @Override
     public long tell(ThreadContext tc) {
         return pos;
     }
 
+    @Override
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
     }
 
+    @Override
     public long write(ThreadContext tc, byte[] bytes) {
         ps.write(bytes, 0, bytes.length);
         pos += bytes.length;
         return bytes.length;
     }
 
+    @Override
     public long print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
@@ -57,20 +63,24 @@ public class StandardWriteHandle implements IIOClosable, IIOSeekable, IIOEncodab
         }
     }
 
+    @Override
     public long say(ThreadContext tc, String s) {
         long bytes = print(tc, s);
         bytes += print(tc, System.lineSeparator());
         return bytes;
     }
 
+    @Override
     public void flush(ThreadContext tc) {
         ps.flush();
     }
 
+    @Override
     public boolean isTTY(ThreadContext tc) {
         return System.console() != null;
     }
 
+    @Override
     public void setBufferSize(ThreadContext tc, long size) {
         // TODO: does it make sense to have setBufferSize here?
         // currently required as IIOSyncWritable has this method

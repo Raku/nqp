@@ -14,6 +14,7 @@ import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class P6str extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -22,6 +23,7 @@ public class P6str extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         P6strInstance obj = new P6strInstance();
         obj.st = st;
@@ -29,6 +31,7 @@ public class P6str extends REPR {
         return obj;
     }
 
+    @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
@@ -37,10 +40,12 @@ public class P6str extends REPR {
         return ss;
     }
 
+    @Override
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, "Ljava/lang/String;", null, null);
     }
 
+    @Override
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_STR);
@@ -52,6 +57,7 @@ public class P6str extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -63,6 +69,7 @@ public class P6str extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 3);
@@ -70,6 +77,7 @@ public class P6str extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/lang/String;");
     }
 
+    @Override
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_str",
                 "(Lorg/raku/nqp/runtime/ThreadContext;)Ljava/lang/String;", null, null);
@@ -95,23 +103,27 @@ public class P6str extends REPR {
         return true;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         P6strInstance obj = new P6strInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         ((P6strInstance)obj).value = reader.readStr();
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         writer.writeStr(((P6strInstance)obj).value);
     }
 
+    @Override
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
-            String prefix, SixModelObject obj) {
+                                  String prefix, SixModelObject obj) {
         try {
             writer.writeStr((String)obj.getClass().getField(prefix).get(obj));
         } catch (Exception e) {

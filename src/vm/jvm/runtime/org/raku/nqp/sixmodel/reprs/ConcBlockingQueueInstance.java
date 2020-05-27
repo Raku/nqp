@@ -10,6 +10,7 @@ public class ConcBlockingQueueInstance extends SixModelObject {
 	public LinkedBlockingQueue<SixModelObject> queue;
 
     /* Looking at the first element counts as a peek. */
+    @Override
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         if (index == 0)
             return queue.peek();
@@ -18,10 +19,12 @@ public class ConcBlockingQueueInstance extends SixModelObject {
                 "Can only request (peek) head of a concurrent blocking queue");
     }
 
+    @Override
     public void push_boxed(ThreadContext tc, SixModelObject value) {
         queue.add(value);
     }
 
+    @Override
     public SixModelObject shift_boxed(ThreadContext tc) {
         try {
             return queue.take();
@@ -31,6 +34,7 @@ public class ConcBlockingQueueInstance extends SixModelObject {
         }
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         return queue.size();
     }

@@ -53,6 +53,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         }
     }
 
+    @Override
     public void close(ThreadContext tc) {
         try {
             chan.close();
@@ -61,6 +62,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         }
     }
 
+    @Override
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
@@ -72,6 +74,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
     }
     private static final CallSiteDescriptor slurpResultCSD = new CallSiteDescriptor(
         new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    @Override
     public void slurp(final ThreadContext tc, final SixModelObject Str,
                       final SixModelObject done, final SixModelObject error) {
         try {
@@ -125,6 +128,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         new byte[] { }, null);
     private static final CallSiteDescriptor spurtErrorCSD = new CallSiteDescriptor(
         new byte[] { CallSiteDescriptor.ARG_OBJ }, null);
+    @Override
     public void spurt(final ThreadContext tc, final SixModelObject Str, final SixModelObject data,
                       final SixModelObject done, final SixModelObject error) {
         try {
@@ -177,6 +181,7 @@ public class AsyncFileHandle implements IIOClosable, IIOEncodable, IIOAsyncReada
         public int total;
         public int position;
     }
+    @Override
     public void lines(final ThreadContext tc, final SixModelObject Str,
                       final boolean chomp, final LinkedBlockingQueue<SixModelObject> queue,
                       final SixModelObject done, final SixModelObject error) {

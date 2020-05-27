@@ -10,11 +10,13 @@ import org.raku.nqp.runtime.ThreadContext;
  */
 public class CodePairContainerConfigurer extends ContainerConfigurer {
     /* Sets this container spec in place for the specified STable. */
+    @Override
     public void setContainerSpec(ThreadContext tc, STable st) {
         st.ContainerSpec = new CodePairContainerSpec();
     }
 
     /* Configures the container spec with the specified info. */
+    @Override
     public void configureContainerSpec(ThreadContext tc, STable st, SixModelObject config) {
         CodePairContainerSpec cs = (CodePairContainerSpec)st.ContainerSpec;
         SixModelObject fetch = config.at_key_boxed(tc, "fetch");

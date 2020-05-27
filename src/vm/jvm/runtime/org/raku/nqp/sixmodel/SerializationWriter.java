@@ -281,15 +281,13 @@ public class SerializationWriter {
     }
 
     {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-                public void run() {
-                        for (Map.Entry<String, Accumulator> e : Accumulator.all.entrySet()) {
-                                String name = e.getKey();
-                                Accumulator a = e.getValue();
-                                System.err.println(name + ": " + a.totalTime + " ms (" + a.count + " calls)");
-                        }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                for (Map.Entry<String, Accumulator> e : Accumulator.all.entrySet()) {
+                        String name = e.getKey();
+                        Accumulator a = e.getValue();
+                        System.err.println(name + ": " + a.totalTime + " ms (" + a.count + " calls)");
                 }
-        });
+        }));
     }
 
     /* Writing function for references to things. */

@@ -12,6 +12,7 @@ public class MultiDimArrayInstance_u32 extends MultiDimArrayInstanceBase {
         return i < 0 ? i + (1 << 32) : i;
     }
 
+    @Override
     public void set_dimensions(ThreadContext tc, long[] dims) {
         super.set_dimensions(tc, dims);
         if (slots == null)
@@ -20,16 +21,19 @@ public class MultiDimArrayInstance_u32 extends MultiDimArrayInstanceBase {
             duplicateSetDimensions(tc);
     }
 
+    @Override
     public void at_pos_multidim_native(ThreadContext tc, long[] indices) {
         tc.native_type = ThreadContext.NATIVE_INT;
         tc.native_i = widen(slots[indicesToFlatIndex(tc, indices)]);
     }
 
+    @Override
     public void bind_pos_multidim_native(ThreadContext tc, long[] indices) {
         tc.native_type = ThreadContext.NATIVE_INT;
         slots[indicesToFlatIndex(tc, indices)] = (int)tc.native_i;
     }
 
+    @Override
     public SixModelObject clone(ThreadContext tc) {
         try {
             MultiDimArrayInstance_u32 clone = (MultiDimArrayInstance_u32)this.clone();
@@ -43,11 +47,13 @@ public class MultiDimArrayInstance_u32 extends MultiDimArrayInstanceBase {
         }
     }
 
+    @Override
     public void serializeValues(ThreadContext tc, SerializationWriter writer) {
         for (int i = 0; i < slots.length; i++)
             writer.writeInt(widen(slots[i]));
     }
 
+    @Override
     public void deserializeValues(ThreadContext tc, SerializationReader reader) {
         slots = new int[numSlots()];
         for (int i = 0; i < slots.length; i++)

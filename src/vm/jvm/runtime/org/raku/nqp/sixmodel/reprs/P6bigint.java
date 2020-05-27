@@ -16,6 +16,7 @@ import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class P6bigint extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -24,12 +25,14 @@ public class P6bigint extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         P6bigintInstance obj = new P6bigintInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
@@ -39,10 +42,12 @@ public class P6bigint extends REPR {
         return ss;
     }
 
+    @Override
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, Type.getType(BigInteger.class).getDescriptor(), null, null);
     }
 
+    @Override
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         String bigIntegerType = Type.getType(BigInteger.class).getDescriptor();
         String bigIntegerIN = Type.getType(BigInteger.class).getInternalName();
@@ -59,6 +64,7 @@ public class P6bigint extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -72,6 +78,7 @@ public class P6bigint extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitTypeInsn(Opcodes.NEW, "java/math/BigInteger");
@@ -82,6 +89,7 @@ public class P6bigint extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "Ljava/math/BigInteger;");
     }
 
+    @Override
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String bigIntegerType = Type.getType(BigInteger.class).getDescriptor();
         String bigIntegerIN = Type.getType(BigInteger.class).getInternalName();
@@ -113,6 +121,7 @@ public class P6bigint extends REPR {
         return true;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         P6bigintInstance obj = new P6bigintInstance();
         // "error: BigInteger(long) has private access in BigInteger"
@@ -121,18 +130,21 @@ public class P6bigint extends REPR {
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         ((P6bigintInstance)obj).value = new BigInteger(reader.readStr());
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         /* Write out as String. */
         writer.writeStr(((P6bigintInstance)obj).value.toString());
     }
 
+    @Override
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
-            String prefix, SixModelObject obj) {
+                                  String prefix, SixModelObject obj) {
         try {
             writer.writeStr(obj.getClass().getField(prefix).get(obj).toString());
         } catch (Exception e) {

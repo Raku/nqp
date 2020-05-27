@@ -37,6 +37,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             return av.clone(tc);
     }
 
+    @Override
     public SixModelObject clone(ThreadContext tc) {
         try {
             SixModelObject cloned;
@@ -76,34 +77,39 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         throw new BadReferenceRuntimeException("Cannot access a native attribute as a reference attribute");
     }
 
+    @Override
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
-            String name, long hint) {
+                                              String name, long hint) {
         if (Ops.isnull(this.delegate) == 0)
             return this.delegate.get_attribute_boxed(tc, class_handle, name, hint);
         else
             return super.get_attribute_boxed(tc, class_handle, name, hint);
     }
+    @Override
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         if (Ops.isnull(this.delegate) == 0)
             this.delegate.get_attribute_native(tc, class_handle, name, hint);
         else
             super.get_attribute_native(tc, class_handle, name, hint);
     }
-    public void bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
-            String name, long hint, SixModelObject value) {
+    @Override
+    public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
+                                     String name, long hint, SixModelObject value) {
         if (Ops.isnull(this.delegate) == 0)
             this.delegate.bind_attribute_boxed(tc, class_handle, name, hint, value);
         else
             super.bind_attribute_boxed(tc, class_handle, name, hint, value);
     }
-    public void bind_attribute_native(ThreadContext tc,SixModelObject class_handle, String name, long hint) {
+    @Override
+    public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         if (Ops.isnull(this.delegate) == 0)
             this.delegate.bind_attribute_native(tc, class_handle, name, hint);
         else
             super.bind_attribute_native(tc, class_handle, name, hint);
     }
+    @Override
     public long is_attribute_initialized(ThreadContext tc, SixModelObject class_handle,
-            String name, long hint) {
+                                         String name, long hint) {
         if (Ops.isnull(this.delegate) == 0)
             return this.delegate.is_attribute_initialized(tc, class_handle, name, hint);
         else
@@ -127,8 +133,9 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         }
     }
 
-    public SixModelObject cas_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
-            String name, SixModelObject expected, SixModelObject value) {
+    @Override
+    public SixModelObject cas_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
+                                              String name, SixModelObject expected, SixModelObject value) {
         ensureAtomicsReady();
         try {
             long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
@@ -142,8 +149,9 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         }
     }
 
-    public void atomic_bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
-            String name, SixModelObject value) {
+    @Override
+    public void atomic_bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
+                                            String name, SixModelObject value) {
         ensureAtomicsReady();
         try {
             long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
@@ -167,64 +175,84 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         throw new RuntimeException("This type does not support associative operations");
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         return posDelegate().elems(tc);
     }
+    @Override
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         return posDelegate().at_pos_boxed(tc, index);
     }
+    @Override
     public void at_pos_native(ThreadContext tc, long index) {
         posDelegate().at_pos_native(tc, index);
     }
+    @Override
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         posDelegate().bind_pos_boxed(tc, index, value);
     }
+    @Override
     public void bind_pos_native(ThreadContext tc, long index) {
         posDelegate().bind_pos_native(tc, index);
     }
+    @Override
     public void set_elems(ThreadContext tc, long count) {
         posDelegate().set_elems(tc, count);
     }
+    @Override
     public void push_boxed(ThreadContext tc, SixModelObject value) {
         posDelegate().push_boxed(tc, value);
     }
+    @Override
     public void push_native(ThreadContext tc) {
         posDelegate().push_native(tc);
     }
+    @Override
     public SixModelObject pop_boxed(ThreadContext tc) {
         return posDelegate().pop_boxed(tc);
     }
+    @Override
     public void pop_native(ThreadContext tc) {
         posDelegate().pop_native(tc);
     }
+    @Override
     public void unshift_boxed(ThreadContext tc, SixModelObject value) {
         posDelegate().unshift_boxed(tc, value);
     }
+    @Override
     public void unshift_native(ThreadContext tc) {
         posDelegate().unshift_native(tc);
     }
+    @Override
     public SixModelObject shift_boxed(ThreadContext tc) {
         return posDelegate().shift_boxed(tc);
     }
+    @Override
     public void shift_native(ThreadContext tc) {
         posDelegate().shift_native(tc);
     }
+    @Override
     public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
         return posDelegate().slice(tc, dest, beginning, end);
     }
+    @Override
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         posDelegate().splice(tc, from, offset, count);
     }
 
+    @Override
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         return assDelegate().at_key_boxed(tc, key);
     }
+    @Override
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         assDelegate().bind_key_boxed(tc, key, value);
     }
+    @Override
     public long exists_key(ThreadContext tc, String key) {
         return assDelegate().exists_key(tc, key);
     }
+    @Override
     public void delete_key(ThreadContext tc, String key) {
         assDelegate().delete_key(tc, key);
     }

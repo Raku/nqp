@@ -10,6 +10,7 @@ import org.raku.nqp.runtime.ThreadContext;
 
 
 public class CStr extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         st.REPRData = null; /* No REPR data needed. */
@@ -19,12 +20,14 @@ public class CStr extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         SixModelObject obj = new CStrInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         /* This REPR can't be serialized. */
         ExceptionHandling.dieInternal(tc, "Can't deserialize_stub a CStr object.");
@@ -32,6 +35,7 @@ public class CStr extends REPR {
         return null;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st, SerializationReader reader, SixModelObject obj) {
         ExceptionHandling.dieInternal(tc, "Can't deserialize_finish a CStr object.");
     }

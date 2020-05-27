@@ -24,6 +24,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
      * such is probably better, but that's harder to implement. */
     public HashMap<String, SixModelObject> memberCache = new HashMap<String, SixModelObject>();
 
+    @Override
     public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint, SixModelObject value) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -46,6 +47,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         memberCache.put(name, value);
     }
 
+    @Override
     public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -53,27 +55,27 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         switch (info.argType) {
         case CHAR:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Byte((byte) tc.native_i);
+            value = (byte) tc.native_i;
             break;
         case SHORT:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Short((short) tc.native_i);
+            value = (short) tc.native_i;
             break;
         case INT:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Integer((int) tc.native_i);
+            value = (int) tc.native_i;
             break;
         case LONG:
             tc.native_type = ThreadContext.NATIVE_INT;
-            value = new Long((long) tc.native_i);
+            value = (long) tc.native_i;
             break;
         case FLOAT:
             tc.native_type = ThreadContext.NATIVE_NUM;
-            value = new Float((float) tc.native_n);
+            value = (float) tc.native_n;
             break;
         case DOUBLE:
             tc.native_type = ThreadContext.NATIVE_NUM;
-            value = new Double((double) tc.native_n);
+            value = (double) tc.native_n;
             break;
         default:
             ExceptionHandling.dieInternal(tc, String.format("CStruct.bind_attribute_native: Can't handle %s", info.argType));
@@ -82,6 +84,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         storage.writeField(name, value);
     }
 
+    @Override
     public SixModelObject get_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         SixModelObject member = memberCache.get(name);
         if (Ops.isnull(member) == 0) return member;
@@ -110,6 +113,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         return member;
     }
 
+    @Override
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         CStructREPRData data = (CStructREPRData) class_handle.st.REPRData;
         AttrInfo info = data.fieldTypes.get(name);
@@ -145,6 +149,7 @@ public class CStructInstance extends SixModelObject implements Refreshable {
         }
     }
 
+    @Override
     public void refresh(ThreadContext tc) {
         CStructREPRData repr_data = (CStructREPRData) st.REPRData;
 

@@ -12,6 +12,7 @@ import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class MultiDimArray extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -20,6 +21,7 @@ public class MultiDimArray extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
         if (rd != null) {
@@ -68,6 +70,7 @@ public class MultiDimArray extends REPR {
         }
     }
 
+    @Override
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject arrayInfo = repr_info.at_key_boxed(tc, "array");
         if (Ops.isnull(arrayInfo) == 0) {
@@ -104,10 +107,12 @@ public class MultiDimArray extends REPR {
         }
     }
 
+    @Override
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         return st.REPRData == null ? StorageSpec.BOXED : ((MultiDimArrayREPRData)st.REPRData).ss;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
         MultiDimArrayInstanceBase obj = null;
@@ -146,8 +151,9 @@ public class MultiDimArray extends REPR {
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
         mda.dimensions = new long[rd.numDimensions];
@@ -156,6 +162,7 @@ public class MultiDimArray extends REPR {
         mda.deserializeValues(tc, reader);
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         MultiDimArrayInstanceBase mda = (MultiDimArrayInstanceBase)obj;
         for (int i = 0; i < mda.dimensions.length; i++)
@@ -167,6 +174,7 @@ public class MultiDimArray extends REPR {
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
      */
+    @Override
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)st.REPRData;
@@ -183,6 +191,7 @@ public class MultiDimArray extends REPR {
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
      */
+    @Override
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
         int dims = (int)reader.readLong();

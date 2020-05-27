@@ -26,6 +26,7 @@ public class SyncProcessHandle extends SyncHandle {
         setEncoding(tc, Charset.forName("UTF-8"));
     }
 
+    @Override
     public void flush(ThreadContext tc) {
         // Not provided.
     }

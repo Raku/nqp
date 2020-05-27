@@ -12,6 +12,7 @@ import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class VMHash extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -20,6 +21,7 @@ public class VMHash extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         VMHashInstance obj = new VMHashInstance();
         obj.st = st;
@@ -27,10 +29,12 @@ public class VMHash extends REPR {
         return obj;
     }
 
+    @Override
     public StorageSpec get_value_storage_spec(ThreadContext tc, STable st) {
         return new StorageSpec();
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         VMHashInstance obj = new VMHashInstance();
         obj.st = st;
@@ -38,8 +42,9 @@ public class VMHash extends REPR {
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
         int elems = reader.readInt32();
         for (int i = 0; i < elems; i++) {
@@ -49,6 +54,7 @@ public class VMHash extends REPR {
         }
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         HashMap<String, SixModelObject> storage = ((VMHashInstance)obj).storage;
 

@@ -242,7 +242,7 @@ public class EvalServer {
                 runner.join();
             }
             else if (cmdStrings[1].equals("run_limited")) {
-                Integer timeout = new Integer(cmdStrings[2]);
+                Integer timeout = Integer.valueOf(cmdStrings[2]);
                 ExecutorService ste = Executors.newSingleThreadExecutor();
                 argv = new String[cmdStrings.length - 4];
                 System.arraycopy(cmdStrings, 3, argv, 0, argv.length);

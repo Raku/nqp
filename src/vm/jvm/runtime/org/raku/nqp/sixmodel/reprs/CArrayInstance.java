@@ -24,6 +24,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
     public long allocated;
     public long elems;
 
+    @Override
     public void at_pos_native(ThreadContext tc, long index) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
@@ -71,6 +72,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         }
     }
 
+    @Override
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
         int intidx = (int) index;
@@ -92,6 +94,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         }
     }
 
+    @Override
     public void bind_pos_native(ThreadContext tc, long index) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 
@@ -128,6 +131,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         }
     }
 
+    @Override
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
         int intidx = (int) index;
@@ -199,6 +203,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         allocated = new_size;
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         return elems;
     }
@@ -236,6 +241,7 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         return null;
     }
 
+    @Override
     public void refresh(ThreadContext tc) {
         CArrayREPRData repr_data = (CArrayREPRData) st.REPRData;
 

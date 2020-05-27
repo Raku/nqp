@@ -28,6 +28,7 @@ public class P6int extends REPR {
     public final static byte P6INT_C_TYPE_SIZE_T   =  -6;
     public final static byte P6INT_C_TYPE_BOOL     =  -7;
 
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -44,6 +45,7 @@ public class P6int extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public void compose(ThreadContext tc, STable st, SixModelObject repr_info) {
         SixModelObject integerInfo = repr_info.at_key_boxed(tc, "integer");
         if (Ops.isnull(integerInfo) == 0) {
@@ -87,20 +89,24 @@ public class P6int extends REPR {
         }
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         P6intInstance obj = new P6intInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         return (StorageSpec)st.REPRData;
     }
 
+    @Override
     public void inlineStorage(ThreadContext tc, STable st, ClassWriter cw, String prefix) {
         cw.visitField(Opcodes.ACC_PUBLIC, prefix, "J", null, null);
     }
 
+    @Override
     public void inlineBind(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.ICONST_0 + ThreadContext.NATIVE_INT);
@@ -112,6 +118,7 @@ public class P6int extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineGet(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 1);
         mv.visitInsn(Opcodes.DUP);
@@ -123,6 +130,7 @@ public class P6int extends REPR {
         mv.visitInsn(Opcodes.RETURN);
     }
 
+    @Override
     public void inlineDeserialize(ThreadContext tc, STable st, MethodVisitor mv, String className, String prefix) {
         mv.visitVarInsn(Opcodes.ALOAD, 0);
         mv.visitVarInsn(Opcodes.ALOAD, 3);
@@ -130,6 +138,7 @@ public class P6int extends REPR {
         mv.visitFieldInsn(Opcodes.PUTFIELD, className, prefix, "J");
     }
 
+    @Override
     public void generateBoxingMethods(ThreadContext tc, STable st, ClassWriter cw, String className, String prefix) {
         String getDesc = "(Lorg/raku/nqp/runtime/ThreadContext;)J";
         MethodVisitor getMeth = cw.visitMethod(Opcodes.ACC_PUBLIC, "get_int", getDesc, null, null);
@@ -155,23 +164,27 @@ public class P6int extends REPR {
         return true;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         P6intInstance obj = new P6intInstance();
         obj.st = st;
         return obj;
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         ((P6intInstance)obj).value = reader.readLong();
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         writer.writeInt(((P6intInstance)obj).value);
     }
 
+    @Override
     public void serialize_inlined(ThreadContext tc, STable st, SerializationWriter writer,
-            String prefix, SixModelObject obj) {
+                                  String prefix, SixModelObject obj) {
         try {
             writer.writeInt((long)obj.getClass().getField(prefix).get(obj));
         } catch (Exception e) {
@@ -183,6 +196,7 @@ public class P6int extends REPR {
      * REPR data serialization. Serializes the per-type representation data that
      * is attached to the supplied STable.
      */
+    @Override
     public void serialize_repr_data(ThreadContext tc, STable st, SerializationWriter writer)
     {
         writer.writeInt(((StorageSpec)st.REPRData).bits);
@@ -193,6 +207,7 @@ public class P6int extends REPR {
      * REPR data deserialization. Deserializes the per-type representation data and
      * attaches it to the supplied STable.
      */
+    @Override
     public void deserialize_repr_data(ThreadContext tc, STable st, SerializationReader reader)
     {
         StorageSpec ss = new StorageSpec();

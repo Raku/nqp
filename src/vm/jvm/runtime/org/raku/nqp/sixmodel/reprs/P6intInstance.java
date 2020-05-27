@@ -6,10 +6,12 @@ import org.raku.nqp.sixmodel.SixModelObject;
 public class P6intInstance extends SixModelObject {
     public long value;
 
+    @Override
     public void set_int(ThreadContext tc, long value) {
         this.value = value;
     }
 
+    @Override
     public long get_int(ThreadContext tc) {
         return value;
     }

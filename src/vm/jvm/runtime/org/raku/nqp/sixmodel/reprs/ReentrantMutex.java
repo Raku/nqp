@@ -11,6 +11,7 @@ import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class ReentrantMutex extends REPR {
+    @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
         SixModelObject obj = new TypeObject();
@@ -19,6 +20,7 @@ public class ReentrantMutex extends REPR {
         return st.WHAT;
     }
 
+    @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
         ReentrantMutexInstance obj = new ReentrantMutexInstance();
         obj.st = st;
@@ -26,15 +28,18 @@ public class ReentrantMutex extends REPR {
         return obj;
     }
 
+    @Override
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         return allocate(tc, st);
     }
 
+    @Override
     public void deserialize_finish(ThreadContext tc, STable st,
-            SerializationReader reader, SixModelObject obj) {
+                                   SerializationReader reader, SixModelObject obj) {
         /* Already did it all in deserialize_stub. */
     }
 
+    @Override
     public void serialize(ThreadContext tc, SerializationWriter writer, SixModelObject obj) {
         /* Nothing to do, we just re-create the lock on deserialization. */
     }

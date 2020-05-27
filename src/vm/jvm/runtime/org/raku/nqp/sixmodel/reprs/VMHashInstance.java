@@ -11,10 +11,12 @@ public class VMHashInstance extends SixModelObject {
 
     public HashMap<String, SixModelObject> storage;
 
+    @Override
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
         return storage.get(key);
     }
 
+    @Override
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
         if (storage == VMHashInstance.EMPTY_MAP) {
             storage = new HashMap<String, SixModelObject>();
@@ -22,14 +24,17 @@ public class VMHashInstance extends SixModelObject {
         storage.put(key, value);
     }
 
+    @Override
     public long exists_key(ThreadContext tc, String key) {
         return storage.containsKey(key) ? 1 : 0;
     }
 
+    @Override
     public void delete_key(ThreadContext tc, String key) {
         storage.remove(key);
     }
 
+    @Override
     public long elems(ThreadContext tc) {
         return storage.size();
     }

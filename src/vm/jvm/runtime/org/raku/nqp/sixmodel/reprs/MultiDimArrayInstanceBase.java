@@ -11,10 +11,12 @@ import org.raku.nqp.sixmodel.SixModelObject;
 public abstract class MultiDimArrayInstanceBase extends SixModelObject {
     public long[] dimensions;
 
+    @Override
     public long[] dimensions(ThreadContext tc) {
         return dimensions;
     }
 
+    @Override
     public void set_dimensions(ThreadContext tc, long[] dims) {
         MultiDimArrayREPRData rd = (MultiDimArrayREPRData)this.st.REPRData;
         if (rd.numDimensions == dims.length) {
@@ -65,56 +67,73 @@ public abstract class MultiDimArrayInstanceBase extends SixModelObject {
         }
     }
 
+    @Override
     public void push_boxed(ThreadContext tc, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot push onto a fixed dimension array");
     }
+    @Override
     public void push_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot push onto a fixed dimension array");
     }
+    @Override
     public SixModelObject pop_boxed(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot pop a fixed dimension array");
     }
+    @Override
     public void pop_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot pop a fixed dimension array");
     }
+    @Override
     public void unshift_boxed(ThreadContext tc, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, "Cannot unshift onto a fixed dimension array");
     }
+    @Override
     public void unshift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot unshift onto a fixed dimension array");
     }
+    @Override
     public SixModelObject shift_boxed(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
     }
+    @Override
     public void shift_native(ThreadContext tc) {
         throw ExceptionHandling.dieInternal(tc, "Cannot shift a fixed dimension array");
     }
+    @Override
     public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
         throw ExceptionHandling.dieInternal(tc, "Cannot slice a multidim array");
     }
+    @Override
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
         throw ExceptionHandling.dieInternal(tc, "Cannot splice a fixed dimension array");
     }
 
+    @Override
     public SixModelObject at_pos_boxed(ThreadContext tc, long index) {
         return this.at_pos_multidim_boxed(tc, new long[] { index });
     }
+    @Override
     public void at_pos_native(ThreadContext tc, long index) {
         this.at_pos_multidim_native(tc, new long[] { index });
     }
+    @Override
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
         this.bind_pos_multidim_boxed(tc, new long[] { index }, value);
     }
+    @Override
     public void bind_pos_native(ThreadContext tc, long index) {
         this.bind_pos_multidim_native(tc, new long[] { index });
     }
+    @Override
     public void set_elems(ThreadContext tc, long count) {
         this.set_dimensions(tc, new long[] { count });
     }
+    @Override
     public long elems(ThreadContext tc) {
         return this.dimensions(tc)[0];
     }
 
+    @Override
     public abstract SixModelObject clone(ThreadContext tc);
     public abstract void serializeValues(ThreadContext tc, SerializationWriter writer);
     public abstract void deserializeValues(ThreadContext tc, SerializationReader reader);

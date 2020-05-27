@@ -26,6 +26,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
     protected boolean useWriteBuffer = false;
     protected byte[] linesep = null;
 
+    @Override
     public void close(ThreadContext tc) {
         try {
             if (useWriteBuffer)
@@ -36,6 +37,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public int exitValue(ThreadContext tc) {
         try {
             if (chan instanceof ProcessChannel) {
@@ -49,11 +51,13 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public void setEncoding(ThreadContext tc, Charset cs) {
         enc = cs.newEncoder();
         dec = cs.newDecoder();
     }
 
+    @Override
     public synchronized String slurp(ThreadContext tc) {
         try {
             // Read in file.
@@ -82,6 +86,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public synchronized String readline(ThreadContext tc) {
         try {
             boolean foundLine = false;
@@ -173,6 +178,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         return dec.decode(allBytes).toString();
     }
 
+    @Override
     public synchronized String readchars(ThreadContext tc, int chars) {
         try {
             dec.reset();
@@ -229,10 +235,12 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public boolean eof(ThreadContext tc) {
         return eof;
     }
 
+    @Override
     public byte[] read(ThreadContext tc, int bytes) {
         try {
             // look in readBuffer for data from previous read, e.g. via readline
@@ -255,6 +263,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public long write(ThreadContext tc, byte[] array) {
         ByteBuffer buffer = ByteBuffer.wrap(array);
         return write(tc, buffer);
@@ -288,6 +297,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public long print(ThreadContext tc, String s) {
         try {
             ByteBuffer buffer = enc.encode(CharBuffer.wrap(s));
@@ -297,6 +307,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public long say(ThreadContext tc, String s) {
         long bytes = print(tc, s);
         bytes += print(tc, System.lineSeparator());
@@ -316,6 +327,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public void setInputLineSeparator(ThreadContext tc, String sep) {
         try {
             linesep = enc.charset().newEncoder().encode(
@@ -325,6 +337,7 @@ public abstract class SyncHandle implements IIOClosable, IIOEncodable,
         }
     }
 
+    @Override
     public void setBufferSize(ThreadContext tc, long size) {
         if (useWriteBuffer) {
             if (writeBuffer != null)
