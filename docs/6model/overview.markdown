@@ -19,7 +19,7 @@ workflow.
 
 1. Identify the kinds of object oriented types your language
    has and that you will need to implement. For example, in
-   Perl 6 we have - amongst other things - classes, roles and
+   Raku we have - amongst other things - classes, roles and
    enumerations. In Java, you'd have classes and interfaces.
    In JavaScript, you have prototype objects.
 
@@ -95,7 +95,7 @@ however. The following operations are available on representations.
   attributes are not keyed just one name) and an index for when it's
   possible to access an attribute by an offset rather than just by name.
   What's needed varies by representation.
-  
+
 * **bind_attribute** and its native friends are basically what you'd
   expect, and look largely like get_attribute apart from they take
   something to store in the attribute rather than doing a lookup.
@@ -128,21 +128,21 @@ following.
 
     class SimpleMetaObject {
         has %!methods;
-        
+
         method new_type() {
             my $meta-object := self.new();
             return nqp::newtype($meta-object, 'HashAttrStore');
         }
-        
+
         method add_method($type, $name, $code) {
             %!methods{$name} := $code;
         }
-        
+
         method find_method($type, $name) {
             %!methods{$name}
         }
     }
-    
+
 Notice how this meta-object is just written as a normal class. Of
 course, the class itself has a meta-object saying how it works - it's
 meta-objects all the way down. The next thing to note is that we just
@@ -164,7 +164,7 @@ The .HOW macro in NQP maps to the gethow opcode and it is used to
 get hold of the meta-object. We just pass a simple lambda expression in
 to add_method in order to specify what happens when the method is called.
 Finally, we can make an instance and call the method.
-    
+
     # Make an instance.
     my $obj := nqp::create($type);
 

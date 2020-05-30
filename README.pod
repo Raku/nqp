@@ -7,7 +7,7 @@ for licensing details.
 
 This is "Not Quite Perl" -- a lightweight Raku-like environment for
 virtual machines.  The key feature of NQP is that it's designed to be a very
-small environment (as compared with, say, perl6 or Rakudo) and is focused on
+small environment (as compared with, say, raku or Rakudo) and is focused on
 being a high-level way to create compilers and libraries for virtual
 machines like MoarVM [1], the JVM, and others.
 
@@ -19,23 +19,23 @@ and regular expression engine for the virtual machine.
 
 =head2 Building from source
 
-=for HTML <a href="https://travis-ci.org/perl6/nqp"><img src="https://travis-ci.org/perl6/nqp.svg?branch=master"></a>
+=for HTML <a href="https://travis-ci.org/raku/nqp"><img src="https://travis-ci.org/raku/nqp.svg?branch=master"></a>
 
-To build NQP from source, you'll just need a C<make> utility and Perl 5.8 or
+To build NQP from source, you'll just need a C<make> utility and C<Perl> 5.8 or
 newer.  To automatically obtain and build MoarVM you may also need
-a git client.
+a C<git> client.
 
-To obtain NQP directly from its repository:
+To obtain C<NQP> directly from its repository:
 
-    $ git clone git://github.com/perl6/nqp.git
+    $ git clone git://github.com/Raku/nqp.git
 
 If you don't have git installed, you can get a tarball or zip of NQP from
-github by visiting http://github.com/perl6/nqp/tree/master and clicking
+github by visiting http://github.com/Raku/nqp/tree/master and clicking
 "Download".  Then unpack the tarball or zip.
 
-NQP can run on three different backends: MoarVM, the JVM, and JavaScript.
-The JVM and JavaScript backends are currently experimental.  The JVM backend
-requires JDK 1.9 (also known as JDK 9) or higher.
+C<NQP> can run on three different backends: C<MoarVM>, the C<JVM>, and C<JavaScript>.
+The C<JVM> and C<JavaScript> backends are currently experimental.  The JVM backend
+requires C<JDK 1.9> (also known as C<JDK 9>) or higher.
 
 Decide on which backends you want it to run, and configure and build it as
 follows:
@@ -47,9 +47,9 @@ Once you have a copy of NQP, build it as follows:
     $ make
 
 If you don't have an installed MoarVM, you can have
-Configure.pl build one for you by passing the C<--gen-moar> option to it as well.
+C<Configure.pl> build one for you by passing the C<--gen-moar> option to it as well.
 
-The C<make> step will create a "nqp" or "nqp.exe" executable in the current
+The C<make> step will create a C<nqp> or C<nqp.exe> executable in the current
 directory.  Programs can then be run from the build directory using a
 command like:
 
@@ -62,11 +62,11 @@ Configure.pl.
 Once built, NQP's C<make install> target will install NQP and its libraries
 into the same location as the MoarVM installation
 that was used to create it.  Until this step is
-performed, the "nqp" executable created by C<make> above can only be
+performed, the C<nqp> executable created by C<make> above can only be
 reliably run from the root of NQP's build directory.  After C<make install>
 is performed the executable can be run from any directory.
 
-If the NQP compiler is invoked without an explicit script to run, it enters
+If the C<NQP> compiler is invoked without an explicit script to run, it enters
 a small interactive mode that allows statements to be executed from the
 command line.  Each line entered is treated as a separate compilation unit,
 however (which means that subroutines are preserved after they are defined,
@@ -105,8 +105,8 @@ scratch.
 
 =head2 JavaScript backend
 
-The best thing before playing with it/hacking on it is to contact pmurias via IRC at #perl6 on irc.freenode.org.
-We depend on node.js at least 10.10.0
+The best thing before playing with it/hacking on it is to contact pmurias via IRC at #raku on irc.freenode.org.
+We depend on C<node.js> at least 10.10.0
 
 Building the JavaScript backend currently requires building the moar backend:
 
@@ -117,7 +117,7 @@ Currently it needs to be run like:
 
     $ ./nqp-js file.nqp
 
-If you are developing nqp-js, you may want to pass the --link option to configure to have the nqp-runtime linked instead of installed
+If you are developing C<nqp-js>, you may want to pass the --link option to configure to have the nqp-runtime linked instead of installed
 
     $ cd src/vm/js/nqp-runtime; npm link .
     $ perl Configure --backends=moar,js

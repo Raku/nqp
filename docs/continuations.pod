@@ -111,7 +111,7 @@ Complete examples may be found in t/jvm/01-continuations.t in the source distrib
 
 =head2 Lazy recursive reinstate optimization
 
-Consider the following (Perl 6):
+Consider the following (Raku):
 
     my $N = 10000;
 
