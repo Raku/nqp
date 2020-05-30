@@ -1,5 +1,5 @@
 # This is a first cut at a ClassHOW for NQP. It doesn't support all the stuff
-# that Perl 6 needs, but it's sufficient for NQP. Supports methods, attributes,
+# that Raku needs, but it's sufficient for NQP. Supports methods, attributes,
 # role composition, inheritance (single and multiple) and introspection.
 
 knowhow NQPClassHOW {
