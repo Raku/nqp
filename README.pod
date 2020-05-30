@@ -105,7 +105,7 @@ scratch.
 
 =head2 JavaScript backend
 
-The best thing before playing with it/hacking on it is to contact pmurias via IRC at C<#raku> on *irc.freenode.org*.
+The best thing before playing with it/hacking on it is to contact pmurias via IRC at C<#raku> on L<irc.freenode.org|https://webchat.freenode.net/?channels=#raku>.
 We depend on C<node.js> at least 10.10.0
 
 Building the JavaScript backend currently requires building the moar backend:
