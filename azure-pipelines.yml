@@ -214,7 +214,7 @@ stages:
             ${{ variables.PWSH_DEV }}
             prove -j0 -r -e ..\install\bin\nqp t\nqp t\hll t\qregex t\p5regex t\qast t\jvm t\serialization t\nativecall
           workingDirectory: '$(Pipeline.Workspace)/nqp'
-          condition: and( ne( variables['TRIGGERING_REPO'], 'rakudo'), ne( variables['RELOCATABLE'], 'yes' ), eq( variables['BACKEND'], 'JVM'), eq( variables['Agent.OS'], 'Windows_NT' ) )
+          condition: and( False, ne( variables['TRIGGERING_REPO'], 'rakudo'), ne( variables['RELOCATABLE'], 'yes' ), eq( variables['BACKEND'], 'JVM'), eq( variables['Agent.OS'], 'Windows_NT' ) )
           displayName: Test NQP (Windows, JVM)
         - script: prove -j0 -r -e ../install-moved/bin/nqp t/nqp t/hll t/qregex t/p5regex t/qast t/moar t/serialization t/nativecall t/concurrency
           workingDirectory: '$(Pipeline.Workspace)/nqp'
