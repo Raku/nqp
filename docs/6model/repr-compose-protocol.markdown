@@ -44,10 +44,10 @@ It may optionally have these keys:
   key since it just gets a reference to another object. It's native types or
   other compact things that can be flattened into the object body that are
   interesting.
-  
+
 * box_target - if this key is present, then this type is a target for boxing
   or unboxing.
-  
+
 * auto_viv_container - if this key is present then an access to an attribute
   that is uninitialized will cause that attribute to be set to a clone of the
   value under this key. If the value is a type object, the clone will not take
@@ -58,7 +58,7 @@ It may optionally have these keys:
   used with the object. This is primarily to support languages that need to
   reasonably efficiently provide positional things that can also be mixed
   in to in arbitrary ways.
-  
+
 * associative_delegate - the same as positional_delegate, for the associative
   part of the REPR API.
 
@@ -100,7 +100,7 @@ A hash that may have the following keys:
 * keytype - the type of the hash key. REPRs are likely to be restrictive here,
   since they need to understand the representation of the provided key well
   enough to hash it. This will probably mean strings and whatever REPR ObjAt
-  in Perl 6 (or some other language's variant) has.
+  in Raku (or some other language's variant) has.
 
 ## nativeref
 

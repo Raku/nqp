@@ -16,7 +16,7 @@ you've still yet to "waste" a kilobyte.
 When you pair a meta-class and a representation together, an s-table
 is created along with a type object. The type-object becomes your
 "handle" to that pairing, and can be used to create instances of
-the object. In some languages (Perl 6), you would also install the
+the object. In some languages (Raku), you would also install the
 type object into the namespace (package or lexpad), as the user's
 view of the type. However, that is not at all needed.
 

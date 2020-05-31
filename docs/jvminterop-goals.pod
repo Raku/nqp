@@ -4,7 +4,7 @@
 
 This infodump describes aspects of the most desirable interface for Java
 interop functionality in Rakudo, based on experience with CLR interop
-functionality in Niecza.  No aspects of implementation I<per se> are discussed. 
+functionality in Niecza.  No aspects of implementation I<per se> are discussed.
 
 =head1 Unsolved questions
 
@@ -26,10 +26,10 @@ objects that handle get and set.  (This works well in Niecza).
 Methods, including C<new> aka C<< <init> >>, should be bundled by short name
 and then turned into overload-resolving sets.  This can be done either by
 creating a composite method that implements Java overload rules, or by building
-a Perl 6 multi-dispatcher that wraps a set of methods.  Using a
+a Raku multi-dispatcher that wraps a set of methods.  Using a
 multi-dispatcher would probably require covariant wrappers.
 
-Java objects should be made to implement core Perl 6 roles whenever reasonable.
+Java objects should be made to implement core Raku roles whenever reasonable.
 C<MethodHandle>s and single-method interfaces (including the new single-method
 interfaces being added to Java 1.8 for use with lambdas) should function as
 Callable with a C<< postcircumfix:<( )> >>.  Arrays and objects assignable to
@@ -40,10 +40,10 @@ C<java.util.Iterable> things should probably be iterable, somehow.
 It may additionally be useful to provide semantics for C<java.util.Collection>
 and C<java.util.Set>, but that's I<probably> overkill.
 
-It shall be possible to throw and catch Java exceptions as Perl 6 exceptions.
+It shall be possible to throw and catch Java exceptions as Raku exceptions.
 (The current implementation is limited such that you can throw OR catch Java
 exceptions - a thrown Java exception is treated as a direct control operator to
-the innermost callback, and cannot be caught by Perl 6 exception handlers until
+the innermost callback, and cannot be caught by Raku exception handlers until
 it propagates to a callout point.)
 
 Since a C<java.lang.ClassLoader> is effectively the root of a class namespace,
@@ -58,14 +58,14 @@ some kind of C<Uninstantiatable> thing.
 Most objects should box as C<JavaObject>s.  In order for the interface to be
 most generally usable, it must be possible to get the exact same Java object
 out of the box - boxings that lose object identity are probably unacceptable.
-Primitive types have no such restriction and should be translated into Perl 6
+Primitive types have no such restriction and should be translated into Raku
 types freely.  C<BootJavaObject> already translates all primitives that
 correspond to 6model types in the obvious way, additionally C<char> is returned
 as a one-character C<str> and C<boolean> is mapped to an C<int> of 0 or 1.  The
-former is probably correct for Perl 6, but the latter should be overridden to
+former is probably correct for Raku, but the latter should be overridden to
 be C<True> or C<False>.
 
-It is acceptable to map reference types in cases where the Perl 6 object wraps
+It is acceptable to map reference types in cases where the Raku object wraps
 the corresponding type, so it can be recovered identically from the box.  This
 is the case for C<java.lang.String> / C<Str> and C<java.math.BigInteger> /
 C<Int>, and of course C<SixModelObject>.
@@ -84,15 +84,15 @@ an interpretation of "current".  Alternatively mechanisms can be provided in
 the library for retrieving the current context objects.
 
 Wherever an Iterator or Iterable is needed, it shall be acceptable to pass an
-iterable Perl 6 object; a wrapper Iterable shall be constructed which iterates
-the underlying Perl 6 object.
+iterable Raku object; a wrapper Iterable shall be constructed which iterates
+the underlying Raku object.
 
-Wherever a List is needed, it shall be acceptable to pass any Perl 6 object
+Wherever a List is needed, it shall be acceptable to pass any Raku object
 that does Positional.  Note that implementing the List interface faithfully
 requires C<splice> and C<elems> in addition to C<at_pos>, while C<exists> and
 C<delete> are not used.
 
-Wherever a Map is needed, it shall be acceptable to pass any Perl 6 object that
+Wherever a Map is needed, it shall be acceptable to pass any Raku object that
 does Associative.
 
 Wherever any non-collection interface type is needed, it shall be acceptable to

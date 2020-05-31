@@ -1,12 +1,12 @@
 {
   "name": "nqp-js-cross-compiling",
   "bugs": {
-    "url:": "https://github.com/perl6/nqp/issues",
+    "url:": "https://github.com/Raku/nqp/issues",
     "email": "pawelmurias@gmail.com"
   },
   "license": "Artistic-2.0",
   "private": true,
-  "repository": "http://github.com/perl6/nqp/",
+  "repository": "http://github.com/Raku/nqp/",
   "devDependencies": {
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.8.0"
