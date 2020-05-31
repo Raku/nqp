@@ -19,6 +19,7 @@ and regular expression engine for the virtual machine.
 
 =head2 Building from source
 
+=for HTML <a href="https://dev.azure.com/Raku/nqp/_build/latest?definitionId=1&branchName=master"><img src="https://dev.azure.com/Raku/nqp/_apis/build/status/Raku.nqp?branchName=master"></a>
 =for HTML <a href="https://travis-ci.org/raku/nqp"><img src="https://travis-ci.org/raku/nqp.svg?branch=master"></a>
 
 To build NQP from source, you'll just need a C<make> utility and C<Perl> 5.8 or
