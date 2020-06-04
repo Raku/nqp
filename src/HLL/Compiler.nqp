@@ -317,7 +317,7 @@ class HLL::Compiler does HLL::Backend::Default {
                         self.dumper($result, $target, |%adverbs);
                     }
                 }
-                elsif !@a {
+                elsif !@a || (@a == 1 && @a[0] eq '-')  {
                     # Is STDIN a TTY display? If so, start the REPL, otherwise, simply
                     # assume the program to eval is given on STDIN.
                     my $force := %adverbs<repl-mode>//'';
