@@ -529,6 +529,7 @@ function wrapBuffer(buffer, type) {
 op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
   const options = {
     shell: false,
+    windowsVerbatimArguments: true,
     cwd: cwd,
     env: /*await*/ stringifyEnv(ctx, env),
     stdio: [
