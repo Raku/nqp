@@ -602,6 +602,10 @@ knowhow NQPClassHOW {
         }
     }
 
+    method submethod_table($obj) {
+        nqp::hash()
+    }
+
     method method_table($obj) {
         %!methods
     }
