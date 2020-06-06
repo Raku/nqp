@@ -2141,19 +2141,16 @@ class MoarVM::Callsites {
     has $!callsites;
     has %!callsites;
     has $!string-heap;
-    has $!done;
     has $!latin1decoder;
     method BUILD(:$string-heap) {
         $!string-heap   := $string-heap;
         $!callsites     := MAST::Bytecode.new;
         %!callsites     := nqp::hash;
-        $!done          := 0;
         $!latin1decoder := NQPDecoder.new('iso-8859-1');
     }
 
     my $callsite_arg_named := 32;
     method get_callsite_id(@flags, @args) {
-        nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@flags);
         my uint16 $align := $elems % 2;
         my @named_idxs := nqp::list;
@@ -2205,7 +2202,6 @@ class MoarVM::Callsites {
     my int $flat      := $Arg::flat;
     my int $named     := $Arg::named;
     method get_callsite_id_from_args(@args, @arg_mast) {
-        nqp::die('get_callsite_id after serialization!') if $!done;
         my uint16 $elems := nqp::elems(@args);
         my @named_idxs := nqp::list_i;
         my int $i := 0;
@@ -2265,7 +2261,6 @@ class MoarVM::Callsites {
     }
 
     method size() {
-        $!done := 1;
         nqp::elems($!callsites)
     }
 
