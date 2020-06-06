@@ -99,6 +99,7 @@ class QAST::Block is QAST::Node does QAST::Children {
 
     method dump_extra_node_info() {
         my @extra;
+        @extra.push(":name($!name)") unless nqp::isnull_s($!name);
         @extra.push(":cuid($!cuid)") unless nqp::isnull_s($!cuid);
         @extra.push(":blocktype($!blocktype)") if nqp::chars(self.blocktype);
         nqp::join(' ', @extra);
