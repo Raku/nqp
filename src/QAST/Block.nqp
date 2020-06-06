@@ -40,12 +40,8 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     my $cur_cuid := 0;
-    method cuid($value = NO_VALUE) {
-        if !($value =:= NO_VALUE) {
-            # Set ID if we are provided one.
-            $!cuid := $value;
-        }
-        elsif $!cuid {
+    method cuid() {
+        if $!cuid {
             # If we already have an ID, return it.
             $!cuid
         }
