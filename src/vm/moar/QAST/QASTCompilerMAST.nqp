@@ -837,6 +837,8 @@ my class MASTCompilerInstance {
             self.as_mast($main_block);
             $!mast_compunit.main_frame(%!mast_frames{$main_block.cuid});
         }
+
+        $!mast_compunit.mainline_frame(%!mast_frames{$cu[0].cuid});
     }
 
     # This method is a hook point so that we can override serialization when cross-compiling
@@ -2394,7 +2396,7 @@ class MoarVM::BytecodeWriter {
 
         my uint32 $offset := $header_size;
         $!mbc.write_s("MOARVM\r\n");
-        $!mbc.write_uint32(6); # Version
+        $!mbc.write_uint32(7); # Version
 
         $!mbc.write_uint32($offset); # Offset of SC dependencies table
         $!mbc.write_uint32(nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
@@ -2428,6 +2430,14 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_uint32($annotations_size); # Length of annotation segment
 
         $!mbc.write_uint32($!hll); # HLL Name
+        my $mainline_frame := $!compunit.mainline_frame;
+        if $mainline_frame {
+            my uint32 $mainline_frame_idx := self.get_frame_index($mainline_frame) + 1;
+            $!mbc.write_uint32($mainline_frame_idx); # Main entry point frame index + 1
+        }
+        else {
+            $!mbc.write_uint32(0); # No mainline frame
+        }
         my $main_frame := $!compunit.main_frame;
         if $main_frame {
             my uint32 $main_frame_idx := self.get_frame_index($main_frame) + 1;
