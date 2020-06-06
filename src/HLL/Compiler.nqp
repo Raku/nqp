@@ -463,6 +463,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method execute_stage($stage, $result, %adverbs) {
+        %adverbs := %adverbs.FLATTENABLE_HASH unless nqp::ishash(%adverbs);
         if nqp::can($!backend, $stage) {
             $!backend."$stage"($result, |%adverbs);
         }
