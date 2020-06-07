@@ -505,6 +505,8 @@ class NQP::World is HLL::World {
     # Does cleanups.
     method cleanup() {
         for @!clearup_tasks { $_() }
+
+        self.finish;
     }
 
     # Makes a list safe to cross the compilation boundary.

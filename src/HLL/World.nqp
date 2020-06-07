@@ -78,14 +78,15 @@ class HLL::World {
     # are done before the deserialization of the current context, or if in
     # immediate run mode before any of the other fixup tasks.
     # DON'T SHARE because we'd run the outer worlds tasks which include loading a setting!
+    # Instead add the inner world's tasks to the outer's after we're done if precompiling.
     has @!load_dependency_tasks;
 
     has $!is_nested;
 
-    method BUILD(:$handle!, :$description = '<unknown>', :$context) {
+    method BUILD(:$handle!, :$description = '<unknown>', :$context, :$outer-world) {
         if $context {
             $!context   := $context;
-            $!is_nested := 1;
+            $!is_nested := $outer-world;
         }
         else {
             $!context   := self.context_class().new(:$handle, :$description);
@@ -95,6 +96,10 @@ class HLL::World {
         $!handle          := $handle;
         @!load_dependency_tasks := nqp::list();
         $!precomp_mode    := %*COMPILING<%?OPTIONS><precomp>;
+    }
+
+    method create_nested() {
+        self.new(:handle(self.handle), :context(self.context()), :outer-world(self))
     }
 
     method context_class() {
@@ -140,10 +145,10 @@ class HLL::World {
     # other fixup.
     method add_load_dependency_task(:$deserialize_ast, :$fixup_ast) {
         if $!precomp_mode {
-            @!load_dependency_tasks.push($deserialize_ast) if $deserialize_ast;
+            self.load_dependency_tasks.push($deserialize_ast) if $deserialize_ast;
         }
         else {
-            @!load_dependency_tasks.push($fixup_ast) if $fixup_ast;
+            self.load_dependency_tasks.push($fixup_ast) if $fixup_ast;
         }
     }
 
@@ -187,6 +192,15 @@ class HLL::World {
         my int $elems := nqp::elems(@clds);
         if $elems == 0 || !(@clds[$elems - 1][0] eq @directive[0]) {
             nqp::push(@clds, @directive);
+        }
+    }
+
+    method finish() {
+        if $!is_nested {
+            my @outer_tasks := $!is_nested.load_dependency_tasks;
+            for @!load_dependency_tasks {
+                nqp::push(@outer_tasks, $_);
+            }
         }
     }
 }
