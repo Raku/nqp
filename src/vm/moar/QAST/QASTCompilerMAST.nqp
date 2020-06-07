@@ -348,21 +348,50 @@ my class MASTCompilerInstance {
     method mast_frames() { %!mast_frames }
     method sc() { $!sc }
 
-    method to_mast($qast, %mast_frames = nqp::hash()) {
+    method to_mast($qast) {
         # Set up compilation state.
         $!hll := '';
-        my $string-heap := MoarVM::StringHeap.new();
-        my $callsites := MoarVM::Callsites.new(:$string-heap);
-        my $annotations := MAST::Bytecode.new;
+        my %moar := %*COMPILING<moar>;
+        my $string-heap := %moar<string-heap>;
+        nqp::die("Didn't find a string heap, compiler backend not properly initialized by running stage start?")
+            unless $string-heap;
+        my $callsites := %moar<callsites>;
+        my $annotations;
+        if nqp::existskey(%moar, 'annotations') {
+            $annotations := %moar<annotations>;
+        }
+        else {
+            $annotations := %moar<annotations> := MAST::Bytecode.new;
+        }
+
+        my @frames := nqp::pop(%moar<frames>);
         $!writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations);
-        $!mast_compunit := MAST::CompUnit.new(:$!writer);
+        $!mast_compunit := MAST::CompUnit.new(
+            :$!writer,
+            :frames(@frames),
+            :sc_handles(%moar<sc_handles>),
+            :sc_lookup(%moar<sc_lookup>),
+            :extop_sigs(%moar<extop_sigs>),
+            :extop_names(%moar<extop_names>),
+            :extop_idx(%moar<extop_idx>),
+        );
         $!writer.set-compunit($!mast_compunit);
-        %!mast_frames := %mast_frames;
+        %!mast_frames := %moar<mast_frames>;
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
+
+        # write back our frames to the outer compiler
+        if nqp::elems(%moar<frames>) {
+            my @outer_frames := %moar<frames>[nqp::elems(%moar<frames>) - 1];
+            for @frames {
+                $_.clear_index;
+                nqp::push(@outer_frames, $_);
+            }
+        }
+
         #CATCH {
         #    my $err    := $!;
         #    my $source := self.source_for_node($!last_op);
@@ -2089,8 +2118,8 @@ my class MASTCompilerInstance {
 
 # Shim that makes a compiler instance and uses it to drive compilation.
 class QAST::MASTCompiler {
-    method to_mast($qast, %mast_frames = nqp::hash()) {
-        MASTCompilerInstance.new.to_mast($qast, %mast_frames)
+    method to_mast($qast) {
+        MASTCompilerInstance.new.to_mast($qast)
     }
 
     method operations() {
@@ -2270,6 +2299,7 @@ class MoarVM::Callsites {
         $!callsites
     }
 }
+$HLL::Backend::MoarVM::Callsites := MoarVM::Callsites; # circularity saw
 
 class MoarVM::StringHeap {
     has $!strings;
@@ -2327,6 +2357,7 @@ class MoarVM::StringHeap {
         @!orig-strings
     }
 }
+$HLL::Backend::MoarVM::StringHeap := MoarVM::StringHeap; # circularity saw
 
 sub align_section($size) {
     my uint32 $aligned := nqp::mul_n(nqp::ceil_n(nqp::div_n($size, 8.0)), 8.0);

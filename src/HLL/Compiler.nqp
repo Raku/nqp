@@ -476,7 +476,8 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method compile($source, :$from, :$lineposcache, *%adverbs) {
-        my %*COMPILING<%?OPTIONS> := %adverbs;
+        my %*COMPILING := nqp::clone(nqp::ifnull(nqp::getlexdyn('%*COMPILING'), nqp::hash()));
+        %*COMPILING<%?OPTIONS> := %adverbs;
         my $*LINEPOSCACHE := $lineposcache;
 
         my $target := nqp::lc(%adverbs<target>);
@@ -490,13 +491,14 @@ class HLL::Compiler does HLL::Backend::Default {
         unless $target eq '' || self.exists_stage($target) {
             nqp::die("Unknown compilation target '$target'");
         }
-        for self.stages() {
-            if $from ne '' {
-                if $_ eq $from {
-                    $from := '';
-                }
-                next;
-            }
+
+        my @stages := nqp::clone(self.stages());
+        if $from ne '' {
+            while nqp::shift(@stages) ne $from { }
+            nqp::unshift(@stages, 'start');
+        }
+
+        for @stages {
             $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats) && $_ ne "parse";
             my num $timestamp := nqp::time_n();
 

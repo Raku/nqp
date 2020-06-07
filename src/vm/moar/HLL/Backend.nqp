@@ -10,8 +10,10 @@ my sub literal_subst(str $source, str $pattern, $replacement) {
     $result;
 }
 
-
 class HLL::Backend::MoarVM {
+    our $StringHeap;
+    our $Callsites;
+
     our %moar_config := nqp::backendconfig();
     
     my sub read_ui32($fh, $buf?) {
@@ -124,11 +126,14 @@ class HLL::Backend::MoarVM {
     my $prof_end_sub;
     method ensure_prof_routines() {
         unless $prof_start_sub {
+            my %*COMPILING;
+            self.start('');
             $prof_start_sub := self.compunit_mainline(self.mbc(self.mast(QAST::CompUnit.new(
                 QAST::Block.new(
                     QAST::Op.new( :op('mvmstartprofile'),
                         QAST::Var.new( :name('config'), :scope('local'), :decl('param') ) )
                 )))));
+            self.start('');
             $prof_end_sub := self.compunit_mainline(self.mbc(self.mast(QAST::CompUnit.new(
                 QAST::Block.new(
                     QAST::Op.new( :op('mvmendprofile') )
@@ -766,8 +771,27 @@ class HLL::Backend::MoarVM {
         0
     }
 
+    method start($source, *%adverbs) {
+        if nqp::existskey(%*COMPILING, 'moar') {
+            nqp::push(%*COMPILING<moar><frames>, nqp::list);
+        }
+        else {
+            %*COMPILING<moar> := my %moar := nqp::hash;
+            %moar<mast_frames> := nqp::hash;
+            %moar<sc_handles>  := nqp::list;
+            %moar<sc_lookup>   := nqp::hash;
+            %moar<string-heap> := $StringHeap.new;
+            %moar<callsites>   := $Callsites.new(:string-heap(%moar<string-heap>));
+            %moar<extop_sigs>  := nqp::list;
+            %moar<extop_names> := nqp::list;
+            %moar<extop_idx>   := nqp::hash;
+            %moar<frames>      := [ nqp::list ];
+        }
+        $source
+    }
+
     method mast($qast, *%adverbs) {
-        nqp::getcomp('QAST').to_mast($qast, %adverbs<mast_frames> // nqp::hash());
+        nqp::getcomp('QAST').to_mast($qast);
     }
 
     method mbc($mast, *%adverbs) {
