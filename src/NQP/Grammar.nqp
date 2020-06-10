@@ -524,8 +524,8 @@ grammar NQP::Grammar is HLL::Grammar {
     token constant_declarator {
         'constant' <.ws> <identifier> <.ws> ':=' <.ws>
         [
-        || <typename>
-        || <.panic: 'Only typename on RHS of constant implemented so far'>
+        || <typename> <?before <.ws> ';'>
+        || <EXPR>
         ]
     }
 

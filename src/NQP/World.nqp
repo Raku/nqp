@@ -238,6 +238,7 @@ class NQP::World is HLL::World {
                     }
                     nqp::markcodestatic(@allcodes[$i]);
                     self.update_root_code_ref(%!code_stub_sc_idx{$subid}, @allcodes[$i]);
+                    nqp::deletekey(%!code_objects_to_fix_up, $subid);
 
                     # Clear up the fixup statements.
                     my $fixup_stmts := %!code_object_fixup_list{$subid};
@@ -428,9 +429,8 @@ class NQP::World is HLL::World {
         $obj.HOW.compose($obj);
     }
 
-    # Runs a block at BEGIN time.
-    method run_begin_block($ast) {
-        # Create a wrapper that makes all outer symbols visible.
+    # Create a wrapper that makes all outer symbols visible.
+    method create_begin_wrapper($ast) {
         my $wrapper := QAST::Block.new(
             QAST::Stmts.new(),
             $ast
@@ -454,8 +454,13 @@ class NQP::World is HLL::World {
                 }
             }
         }
+        return $wrapper;
+    }
 
-        # Compile and run it.
+    # Runs a block at BEGIN time.
+    method run_begin_block($ast) {
+        # Compile and run the code.
+        my $wrapper := self.create_begin_wrapper($ast);
         my $code := self.create_code($wrapper, 'BEGIN block', 0);
         my $old_global := nqp::getcurhllsym('GLOBAL');
         nqp::bindcurhllsym('GLOBAL', $*GLOBALish);
@@ -466,6 +471,20 @@ class NQP::World is HLL::World {
         # output code.
         $wrapper.shift();
         return $wrapper;
+    }
+
+    # Evaluates a constant and adds its result to the SC, returning it afterwards.
+    method evaluate_constant($ast) {
+        my $wrapper := self.create_begin_wrapper($ast);
+        my $code := self.create_code($wrapper, 'BEGIN block', 0);
+        my $old_global := nqp::getcurhllsym('GLOBAL');
+        nqp::bindcurhllsym('GLOBAL', $*GLOBALish);
+        my $result := $code();
+        nqp::bindcurhllsym('GLOBAL', $old_global);
+        self.add_object($result);
+        $wrapper.shift;
+        self.cur_lexpad[0].push($wrapper);
+        return $result;
     }
 
     # Adds libraries that NQP code depends on.

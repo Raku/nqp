@@ -847,17 +847,19 @@ class NQP::Actions is HLL::Actions {
 
     method constant_declarator($/) {
         my $sym := ~$<identifier>;
-        my $type := $<typename>.ast.value;
+        my $value := $<typename>
+            ?? $<typename>.ast.value
+            !! $*W.evaluate_constant($<EXPR>.ast);
         if $*SCOPE eq 'my' || $*SCOPE eq 'our' {
-            $*W.install_lexical_symbol($*W.cur_lexpad(), $sym, $type);
+            $*W.install_lexical_symbol($*W.cur_lexpad(), $sym, $value);
             if $*SCOPE eq 'our' {
-                $*W.install_package_symbol($*PACKAGE, [$sym], $type);
+                $*W.install_package_symbol($*PACKAGE, [$sym], $value);
             }
         }
         else {
             $/.panic("Cannot have a $*SCOPE scoped constant");
         }
-        make QAST::WVal.new( :value($type) );
+        make QAST::WVal.new( :$value );
     }
 
     method routine_declarator:sym<sub>($/) { make $<routine_def>.ast; $/.prune }
