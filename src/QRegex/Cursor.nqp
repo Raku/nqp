@@ -1,13 +1,13 @@
 # Some things that all cursors involved in a given parse share.
 my class ParseShared is export {
-    has $!CUR_CLASS;
-    has $!orig;
-    has str $!target;
-    has int $!highwater;
-    has @!highexpect;
-    has %!marks;
-    has $!fail_cursor;
-    has str $!target_flipped;
+    has $!CUR_CLASS;           # the class of the cursor object
+    has $!orig;                # the string being parsed
+    has str $!target;          # optimised version of string
+    has int $!highwater;       # current high water mark
+    has @!highexpect;          # strings
+    has %!marks;               # hash
+    has $!fail_cursor;         # cursor to be used when parse failed
+    has str $!target_flipped;  # nqp::flipped version of $!target (if any)
 
     # Follow is a little simple usage tracing infrastructure, used by the
     # !cursor_start_* methods when uncommented.
@@ -67,18 +67,18 @@ my class Braid is export {
 my class NQPdidMATCH is export { method Bool() { 1 } }
 
 role NQPMatchRole is export {
-    has int $!from;
-    has int $!pos;
-    has int $!to;  # (if negative, use $!pos)
-    has $!shared;
-    has $!braid;
-    has $!bstack;
-    has $!cstack;
-    has $!regexsub;
-    has $!restart;
-    has $!made;
-    has $!match;
-    has str $!name;
+    has int $!from;  # start position of match
+    has int $!pos;   # current cursor position
+    has int $!to;    # (if negative, use $!pos)
+    has $!shared;    # shared parse attributes, see ParseShared
+    has $!braid;     # current braid
+    has $!bstack;    # backtracking stack
+    has $!cstack;    # captures stack
+    has $!regexsub;  # actual sub for running the regex
+    has $!restart;   # sub for restarting a search
+    has $!made;      # value set by "make"
+    has $!match;     # flag indicating Match object set up (NQPdidMATCH)
+    has str $!name;  # name if named capture
 
     method orig()   { nqp::getattr($!shared, ParseShared, '$!orig') }
     method target() { nqp::getattr_s($!shared, ParseShared, '$!target') }
