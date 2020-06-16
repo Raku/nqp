@@ -302,7 +302,7 @@ class QAST::OperationsJAST {
         self.set_core_op_result_type($op, $stack_out);
     }
 
-    # Adds a core nqp:: op provided by a static method in the
+    # Adds a HLL nqp:: op provided by a static method in the
     # class library.
     method map_classlib_hll_op($hll, $op, $class, $method, @stack_in, $stack_out, :$tc, :$cont, :$inlinable = 1) {
         my @jtypes_in;
@@ -1730,7 +1730,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
 
     # Handle any runtime exceptions (Throwable) that are not ControlException.
     my $erril := JAST::InstructionList.new();
-    my $nclab   := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
+    my $nclab := JAST::Label.new( :name( $qastcomp.unique('non_cont_ex') ) );
     $erril.append($DUP);
     $erril.append(JAST::Instruction.new( :op('instanceof'), $TYPE_EX_CONT ));
     $erril.append(JAST::Instruction.new( :op('ifeq'), $nclab ));
@@ -1742,7 +1742,7 @@ QAST::OperationsJAST.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
         $TYPE_EH, 'dieInternal', $TYPE_EX_RT, $TYPE_TC, $TYPE_THROWABLE ));
     $erril.append($ATHROW);
 
-    # Inner try/catch block to catch runtime exceptions (Throwable)
+    # Inner try/catch block to catch runtime exceptions (Throwable).
     my $inner := JAST::InstructionList.new();
     $inner.append(JAST::TryCatch.new( :try($tryil), :catch($erril), :type($TYPE_THROWABLE) ));
 
