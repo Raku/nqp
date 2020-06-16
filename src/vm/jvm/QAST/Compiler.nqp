@@ -4081,6 +4081,10 @@ class QAST::CompilerJAST {
                 'Void', $TYPE_TC, $TYPE_CR ));
             $*JMETH.append(JAST::Instruction.new( :op('astore'), 'cf' ));
 
+            # Add redo label. We might need to handle a control exception.
+            my $meth_redo_lab := JAST::Label.new( :name(self.unique('meth_redo_lab_')) );
+            $*JMETH.append($meth_redo_lab);
+
             # Emit the postlude. We catch any exceptions. Control ones are
             # rethrown, after calling CallFrame.leave. Others are passed on to
             # dieInternal. Finally, if there's no exception, we also need to
@@ -4181,9 +4185,49 @@ class QAST::CompilerJAST {
                     $TYPE_EX_SAVE, 'pushFrame', $TYPE_EX_SAVE, "Integer", $TYPE_MH, '['~$TYPE_OBJ, $TYPE_CF ));
                 $saver.append($ATHROW);
 
-                $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
-                $resume.append(JAST::Instruction.new( :op('invokevirtual'),
-                    $TYPE_RESUME, 'resumeNextSave', 'Void' ));
+                # Wrap call to resumeNextSave in try/catch to catch UnwindExceptions.
+                my $tryil := JAST::InstructionList.new();
+                $tryil.append(JAST::Instruction.new( :op('aload'), 'resume' ));
+                $tryil.append(JAST::Instruction.new( :op('invokevirtual'), $TYPE_RESUME, 'resumeNextSave', 'Void' ));
+
+                my $last_lab := JAST::Label.new( :name(self.unique('last_lab_')) );
+                my $next_lab := JAST::Label.new( :name(self.unique('next_lab_')) );
+                my $redo_lab := JAST::Label.new( :name(self.unique('redo_lab_')) );
+                my $catchil := JAST::InstructionList.new();
+                $catchil.append($DUP);
+                $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'category', 'Long' ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_LAST) ));
+                $catchil.append(JAST::Instruction.new( :op('land') ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_LAST) ));
+                $catchil.append($LCMP);
+                $catchil.append(JAST::Instruction.new( :op('ifeq'), $last_lab ));
+                $catchil.append($DUP);
+                $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'category', 'Long' ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_REDO) ));
+                $catchil.append(JAST::Instruction.new( :op('land') ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_REDO) ));
+                $catchil.append($LCMP);
+                $catchil.append(JAST::Instruction.new( :op('ifeq'), $redo_lab ));
+                $catchil.append($DUP);
+                $catchil.append(JAST::Instruction.new( :op('getfield'), $TYPE_EX_UNWIND, 'category', 'Long' ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_NEXT) ));
+                $catchil.append(JAST::Instruction.new( :op('land') ));
+                $catchil.append(JAST::PushIVal.new( :value($EX_CAT_NEXT) ));
+                $catchil.append($LCMP);
+                $catchil.append(JAST::Instruction.new( :op('ifeq'), $next_lab ));
+                # Throw if not branched before.
+                $catchil.append($ATHROW);
+                # Handle last, redo and next; TODO: support labels
+                $catchil.append($last_lab);
+                $catchil.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+                $catchil.append(JAST::Instruction.new( :op('invokevirtual'), $TYPE_CF, 'leave', 'Void' ));
+                $catchil.append($RETURN);
+                $catchil.append($redo_lab);
+                $catchil.append($POP);
+                $catchil.append(JAST::Instruction.new( :op('goto'), $meth_redo_lab ));
+                $catchil.append($next_lab);
+                $catchil.append($POP);
+                $resume.append(JAST::TryCatch.new( :try($tryil), :catch($catchil), :type($TYPE_EX_UNWIND) ));
 
                 $resume.append(JAST::Instruction.new( :op('aload'), 'resume' ));
                 $resume.append(JAST::Instruction.new( :op('getfield'), $TYPE_RESUME, 'resumePoint', 'Integer' ));
