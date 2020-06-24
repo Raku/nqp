@@ -538,9 +538,9 @@ role NQPMatchRole is export {
     }
 
     method !cursor_fail() {
-        $!match    := nqp::null();
-        $!bstack   := nqp::null();
-        $!cstack   := nqp::null();
+        $!match    :=
+        $!bstack   :=
+        $!cstack   :=
         $!regexsub := nqp::null();
         $!pos      := -3;
     }
