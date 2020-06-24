@@ -529,10 +529,12 @@ role NQPMatchRole is export {
     method !cursor_pass(int $pos, str $name = '', :$backtrack) {
         $!match   := $pass_mark;
         $!pos     := $pos;
-        $!restart := $!regexsub  if $backtrack;
-        $!bstack  := nqp::null() unless $backtrack;
-        self.'!reduce'($name)    if $name;
-        self
+        $backtrack
+          ?? ($!restart := $!regexsub)
+          !! ($!bstack   := nqp::null);
+        $name
+          ?? self.'!reduce'($name)
+          !! self;
     }
 
     method !cursor_fail() {
