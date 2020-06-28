@@ -3332,17 +3332,30 @@ fresh copy of a statically compiled piece of code so each of some high level
 code object can gets its own low level executable.
 
 ## markcodestatic
-* `markcodestatic($code-object)
+* `markcodestatic($code-object)`
 Marks the code as "static" meaning it's not a closure and thus no closure will
 be serialized.
 
 ## scsetcode
-* `scsetcode($sc, $index, $code-object)
+* `scsetcode($sc, $index, $code-object)`
 Adds $code-object to the serialization context at block index $index
 
 ## forceouterctx
-* `forceouterctx($code-object, $context)
+* `forceouterctx($code-object, $context)`
 Sets the code object's outer to the context's frame and also the code object's
 static frame's outer to the context's static frame.
 Used to embed a separately compiled code object in a given context, e.g. to
 give an EVALed code a surrounding lexical scope.
+
+## neverrepossess
+* `neverrepossess($obj)`
+Prevents the object from ever getting repossessed. Repossession means that an
+object from a different serialization context, i.e. something we got from
+loading a module, gets added to our own serialization context as well. This is
+done to keep modifications to the object. Of course if different versions of
+the same object are loaded from different serialization contexts, there's a
+conflict that requires resolution -> resolve_reposession_conflicts. In the
+common case of the object being a Stash, we can just merge the different
+versions unless the keys overlap. For some objects we do not want repossession
+even if they were modified, i.e. they were only needed for compilation and/or
+there wouldn't be a way to resolve conflicts.
