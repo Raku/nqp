@@ -356,16 +356,13 @@ role NQPMatchRole is export {
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash());
         }
         nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        unless $braid {
-            if nqp::isconcrete(self) && $!braid {
-                $braid := $!braid."!clone"();  # usually called when switching into a slang
-            }
-            else {
-                $braid := Braid."!braid_init"(:grammar(self));
-            }
-        }
-        nqp::die("No braid in cursor_init!") unless $braid;
-        nqp::bindattr($new, $?CLASS, '$!braid', $braid );
+        nqp::bindattr($new, $?CLASS, '$!braid',
+          $braid
+            ?? $braid
+            !! nqp::isconcrete(self) && $!braid
+              ?? $!braid."!clone"()   # usually called when switching into a slang
+              !! Braid."!braid_init"(:grammar(self))
+        );
         if nqp::isconcrete($c) {
             nqp::bindattr_i($new, $?CLASS, '$!from', -1);
             nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($c));
