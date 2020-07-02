@@ -535,8 +535,9 @@ role NQPMatchRole is export {
     }
     # Reduced functionality version of !cursor_pass
     method !cursor_pass_quick(int $pos) {
-        $!match := $pass_mark;
-        $!pos   := $pos;
+        $!match  := $pass_mark;
+        $!pos    := $pos;
+        $!bstack := nqp::null;
         self;
     }
 
