@@ -533,6 +533,12 @@ role NQPMatchRole is export {
           ?? self.'!reduce'($name)
           !! self;
     }
+    # Reduced functionality version of !cursor_pass
+    method !cursor_pass_quick(int $pos) {
+        $!match := $pass_mark;
+        $!pos   := $pos;
+        self;
+    }
 
     method !cursor_fail() {
         $!match    :=
@@ -571,7 +577,7 @@ role NQPMatchRole is export {
 
     method !clone_match_at($term, int $pos) {
         my $new := self.'!cursor_start_cur'();
-        $new.'!cursor_pass'($pos);
+        $new.'!cursor_pass_quick'($pos);
         nqp::bindattr_i($new, NQPMatch,   '$!pos',   $pos);
         nqp::bindattr_i($new, NQPMatch,   '$!from',  nqp::getattr($term, NQPMatch,   '$!from' ));
         nqp::bindattr_i($new, NQPMatch,   '$!to',    nqp::getattr($term, NQPMatch,   '$!to' ));
@@ -777,7 +783,7 @@ role NQPMatchRole is export {
             my int $from   := $first.from;
             my int $litlen := $last.pos - $from;
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-            $cur."!cursor_pass"($!pos + $litlen, '')
+            $cur."!cursor_pass_quick"($!pos + $litlen)
               if nqp::substr($target, $!pos, $litlen)
                    eq nqp::substr($target, $from, $litlen);
         }
@@ -793,7 +799,7 @@ role NQPMatchRole is export {
             my $subcur     := $!cstack[$n];
             my int $litlen := $subcur.pos - $subcur.from;
             my str $target := nqp::getattr_s($!shared, ParseShared, '$!target');
-            $cur."!cursor_pass"($!pos + $litlen, '')
+            $cur."!cursor_pass_quick"($!pos + $litlen)
               if nqp::substr($target, $!pos, $litlen)
                    eq nqp::substr($target, $subcur.from, $litlen);
         }
@@ -817,7 +823,7 @@ role NQPMatchRole is export {
 #?endif
                     !! nqp::eqat($target, $str, $!pos)) {
                 my $cur := self."!cursor_start_cur"();
-                $cur."!cursor_pass"($!pos + $litlen);
+                $cur."!cursor_pass_quick"($!pos + $litlen);
                 $cur
             }
             else {
@@ -844,7 +850,7 @@ role NQPMatchRole is export {
 
     method at(int $pos) {
         my $cur := self."!cursor_start_cur"();
-        $cur."!cursor_pass"($!pos) if $pos == $!pos;
+        $cur."!cursor_pass_quick"($!pos) if $pos == $!pos;
         $cur;
     }
 
@@ -952,7 +958,7 @@ role NQPMatchRole is export {
                 (nqp::ord($target, $!pos) == 95
                  || nqp::iscclass(nqp::const::CCLASS_ALPHABETIC, $target, $!pos)) {
             $cur := self."!cursor_start_cur"();
-            $cur."!cursor_pass"(
+            $cur."!cursor_pass_quick"(
                 nqp::findnotcclass(
                     nqp::const::CCLASS_WORD,
                     $target, $!pos, nqp::chars($target)));
@@ -1228,7 +1234,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                 }
                 last if $s && $maxlen > -1;
             }
-            $cur.'!cursor_pass'($pos + $maxlen, '') if $maxlen >= 0;
+            $cur.'!cursor_pass_quick'($pos + $maxlen) if $maxlen >= 0;
             $cur;
         }
         else {
@@ -1240,7 +1246,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
             my int $adv := $pos + $len;
             return $cur if $adv > nqp::chars($tgt)
                 || nqp::substr($tgt, $pos, $len) ne $var;
-            $cur.'!cursor_pass'($adv, '');
+            $cur.'!cursor_pass_quick'($adv);
             $cur;
         }
     }
