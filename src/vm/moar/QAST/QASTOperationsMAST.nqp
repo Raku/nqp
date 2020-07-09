@@ -70,6 +70,7 @@ class QAST::MASTOperations {
     # Maps operations to code that will handle them. Hash of code.
     my %core_ops;
 
+
     # Maps HLL-specific operations to code that will handle them.
     # Hash of hash of code.
     my %hll_ops;
@@ -103,6 +104,9 @@ class QAST::MASTOperations {
     my @kind_names := ['VOID','int8','int16','int32','int','num32','num','str','obj'];
     my @kind_types := [0,1,1,1,1,2,2,3,4];
 
+    my %ops-seen-counts;
+    my $should-output;
+
     my @core_operands_offsets := MAST::Ops.WHO<@offsets>;
     my @core_operands_counts  := MAST::Ops.WHO<@counts>;
     my @core_operands_values  := MAST::Ops.WHO<@values>;
@@ -113,6 +117,18 @@ class QAST::MASTOperations {
         my int $operands_offset;
         my int $is_extop;
         my @operands_values;
+
+        #%ops-seen-counts{$op} := %ops-seen-counts{$op} + 1;
+
+        #if $should-output++ > 100 {
+            #note("----");
+            #for %ops-seen-counts {
+                #note("seen " ~ $_.key() ~ " " ~ $_.value() ~ "x");
+            #}
+            #note("----");
+            #$should-output := 0;
+        #}
+
         if nqp::existskey(%core_op_codes, $op) {
             my int $op_num   := %core_op_codes{$op};
             $num_operands    := nqp::atpos_i(@core_operands_counts, $op_num);
@@ -140,7 +156,9 @@ class QAST::MASTOperations {
 
         my @arg_regs;
         my @release_regs;
-        my @release_kinds;
+        my @release_kinds := nqp::list_i();
+
+        my int $is-a-return := nqp::eqat($op, 'return_', 0);
 
         # if the op has operands, and the first operand is a write register,
         # and the number of args provided is one less than the number of operands needed,
@@ -174,7 +192,7 @@ class QAST::MASTOperations {
                 !! $qastcomp.as_mast($_, :want(nqp::bitshiftr_i($operand_kind, 3)), :$want-decont);
             my int $arg_kind := nqp::unbox_i($arg.result_kind);
 
-            if $arg_num == 0 && nqp::eqat($op, 'return_', 0) {
+            if $is-a-return && $arg_num == 0 {
                 $*BLOCK.return_kind(nqp::unbox_i($arg.result_kind));
             }
 
@@ -216,7 +234,7 @@ class QAST::MASTOperations {
             else {
                 # if it's not a write register, queue it to be released it to the allocator
                 nqp::push(@release_regs, $arg.result_reg);
-                nqp::push(@release_kinds, $arg_kind);
+                nqp::push_i(@release_kinds, $arg_kind);
             }
 
             # put the arg expression's generation code in the instruction list
@@ -226,7 +244,7 @@ class QAST::MASTOperations {
                 MAST::Op.new( :op('decont'), $dc_reg, $arg.result_reg );
                 nqp::push(@arg_regs, $dc_reg);
                 nqp::push(@release_regs, $dc_reg);
-                nqp::push(@release_kinds, $MVM_reg_obj);
+                nqp::push_i(@release_kinds, $MVM_reg_obj);
             }
             else {
                 nqp::push(@arg_regs, $constant_operand
@@ -239,7 +257,7 @@ class QAST::MASTOperations {
 
         # release the registers to the allocator. See comment there.
         my int $release_i := 0;
-        $regalloc.release_register($_, @release_kinds[$release_i++]) for @release_regs;
+        $regalloc.release_register($_, nqp::atpos_i(@release_kinds, $release_i++)) for @release_regs;
 
         # unshift in a generated write register arg if it needs one
         if ($needs_write) {
@@ -307,9 +325,18 @@ class QAST::MASTOperations {
         return %core_inlinability{$op} // 0;
     }
 
+    my $simple-cnt;
     # Adds a core op that maps to a Moar op.
     method add_core_moarop_mapping(str $op, str $moarop, $ret = -1, :$decont, :$inlinable = 1) {
-        %core_ops{$op} := self.moarop_mapper($moarop, $ret, $decont);
+        #if $op eq $moarop && ($ret >= -1 && $ret <= 2)  && !$decont {
+            #%core_ops{$op} := self.get-mapper-instance($ret);
+            #$simple-cnt := $simple-cnt + 1;
+            ##note("$simple-cnt / " ~ nqp::elems(%core_ops));
+        #}
+        #else {
+            %core_ops{$op} := self.moarop_mapper($moarop, $ret, $decont);
+            #note("$simple-cnt / " ~ nqp::elems(%core_ops) ~ " NO! $op $moarop");
+        #}
         self.set_core_op_inlinability($op, $inlinable);
         self.set_core_op_result_type($op, moarop_return_type($moarop));
     }
@@ -345,6 +372,37 @@ class QAST::MASTOperations {
         nqp::die("moarop $moarop is not void")
             if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) ==
                 $MVM_operand_write_reg;
+    }
+
+    my $simple-mapper-instance;
+    my $simple-mapper-instance-ret0;
+    my $simple-mapper-instance-ret1;
+    my $simple-mapper-instance-ret2;
+
+    method get-mapper-instance(int $ret = -1) {
+        unless $simple-mapper-instance {
+            my $self := self;
+            $simple-mapper-instance := -> $qastcomp, $op {
+                my @deconts;
+                $self.compile_mastop($qastcomp, $op.op, $op.list, @deconts);
+            }
+            $simple-mapper-instance-ret0 := -> $qastcomp, $op {
+                my @deconts;
+                $self.compile_mastop($qastcomp, $op.op, $op.list, @deconts, :returnarg(0));
+            }
+            $simple-mapper-instance-ret1 := -> $qastcomp, $op {
+                my @deconts;
+                $self.compile_mastop($qastcomp, $op.op, $op.list, @deconts, :returnarg(1));
+            }
+            $simple-mapper-instance-ret2 := -> $qastcomp, $op {
+                my @deconts;
+                $self.compile_mastop($qastcomp, $op.op, $op.list, @deconts, :returnarg(2));
+            }
+        }
+        $ret == -1 ?? $simple-mapper-instance !!
+        $ret == 0  ?? $simple-mapper-instance-ret0 !!
+        $ret == 1  ?? $simple-mapper-instance-ret1 !!
+                      $simple-mapper-instance-ret2;
     }
 
     # Returns a mapper closure for turning an operation into a Moar op.
@@ -2263,10 +2321,10 @@ QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
 });
 
 # Default way to do positional and associative lookups.
-QAST::MASTOperations.add_core_moarop_mapping('positional_get', 'atpos_o');
-QAST::MASTOperations.add_core_moarop_mapping('positional_bind', 'bindpos_o', 2);
-QAST::MASTOperations.add_core_moarop_mapping('associative_get', 'atkey_o');
-QAST::MASTOperations.add_core_moarop_mapping('associative_bind', 'bindkey_o', 2);
+#QAST::MASTOperations.add_core_moarop_mapping('positional_get', 'atpos_o');
+#QAST::MASTOperations.add_core_moarop_mapping('positional_bind', 'bindpos_o', 2);
+#QAST::MASTOperations.add_core_moarop_mapping('associative_get', 'atkey_o');
+#QAST::MASTOperations.add_core_moarop_mapping('associative_bind', 'bindkey_o', 2);
 
 # I/O opcodes
 QAST::MASTOperations.add_core_moarop_mapping('say', 'say', 0);

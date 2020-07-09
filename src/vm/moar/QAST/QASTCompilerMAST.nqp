@@ -1914,13 +1914,13 @@ my class MASTCompilerInstance {
         }
         elsif $scope eq 'positional' {
             return self.as_mast_clear_bindval($*BINDVAL
-                ?? QAST::Op.new( :op('positional_bind'), |$node.list, $*BINDVAL)
-                !! QAST::Op.new( :op('positional_get'), |$node.list));
+                ?? QAST::Op.new( :op('bindpos'), |$node.list, $*BINDVAL)
+                !! QAST::Op.new( :op('atpos'), |$node.list));
         }
         elsif $scope eq 'associative' {
             return self.as_mast_clear_bindval($*BINDVAL
-                ?? QAST::Op.new( :op('associative_bind'), |$node.list, $*BINDVAL)
-                !! QAST::Op.new( :op('associative_get'), |$node.list));
+                ?? QAST::Op.new( :op('bindkey'), |$node.list, $*BINDVAL)
+                !! QAST::Op.new( :op('atkey'), |$node.list));
         }
         else {
             nqp::die("QAST::Var with scope '$scope' NYI");
