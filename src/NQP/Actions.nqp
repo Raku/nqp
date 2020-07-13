@@ -1939,14 +1939,6 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
         $code_obj.SET_CAPS(%caps);
     }
 
-    method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
-        my @saved;
-        for @alternatives {
-            @saved.push($_.save(:non_empty));
-        }
-        $code_obj.SET_ALT_NFA($key, @saved);
-    }
-
     method set_cursor_type($qast) {
         my $cursor_type := nqp::null();
         try {
