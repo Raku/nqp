@@ -960,22 +960,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         %capnames;
     }
 
-    method alt_nfas($code_obj, $ast) {
+    method alt_nfas($code_obj, $ast, $suffix = $*W.handle()) {
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'alt' {
             my @alternatives;
             for $ast.list {
-                self.alt_nfas($code_obj, $_);
+                self.alt_nfas($code_obj, $_, $suffix);
                 nqp::push(@alternatives, QRegex::NFA.new.addnode($_));
             }
-            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ $*W.handle());
+            $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ $suffix);
             self.store_regex_alt_nfa($code_obj, $ast.name, @alternatives);
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            self.alt_nfas($code_obj, $ast[0])
+            self.alt_nfas($code_obj, $ast[0], $suffix)
         }
         elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { self.alt_nfas($code_obj, $_) }
+            for $ast.list { self.alt_nfas($code_obj, $_, $suffix) }
         }
     }
 
