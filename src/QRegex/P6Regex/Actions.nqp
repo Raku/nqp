@@ -845,9 +845,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $block.symbol('$¢', :scope<lexical>);
         }
 
-        self.store_regex_caps($code_obj, $block, capnames($qast, 0));
+        self.store_regex_caps($code_obj, $block, self.capnames($qast, 0));
         self.store_regex_nfa($code_obj, $block, QRegex::NFA.new.addnode($qast));
-        self.alt_nfas($code_obj, $block, $qast);
+        self.alt_nfas($code_obj, $qast);
 
         my $scan := QAST::Regex.new( :rxtype<scan> );
         {
@@ -890,12 +890,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     method set_cursor_type($qast) {
     }
 
-    sub capnames($ast, int $count) {
+    method capnames($ast, int $count) {
         my %capnames;
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'concat' || $rxtype eq 'goal' || $rxtype eq 'conjseq' || $rxtype eq 'conj' {
             for $ast.list {
-                my %x := capnames($_, $count);
+                my %x := self.capnames($_, $count);
                 for %x {
                     %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), $_.value);
                 }
@@ -905,7 +905,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $rxtype eq 'altseq' || $rxtype eq 'alt' {
             my int $max := $count;
             for $ast.list {
-                my %x := capnames($_, $count);
+                my %x := self.capnames($_, $count);
                 for %x {
                     %capnames{$_.key} := (%capnames{$_.key} // 0) < 2 && %x{$_.key} == 1 ?? 1 !! 2;
                 }
@@ -939,19 +939,19 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     %capnames{$_} := 1;
                 }
             }
-            my %x := capnames($ast[0], $count);
+            my %x := self.capnames($ast[0], $count);
             for %x { %capnames{$_.key} := nqp::add_i((%capnames{$_.key} // 0), %x{$_.key}) }
             $count := %x{''};
         }
         elsif $rxtype eq 'quant' || $rxtype eq 'dynquant' {
             my $ilist := ($ast.subtype eq 'item');
-            my %astcap := capnames($ast[0], $count);
+            my %astcap := self.capnames($ast[0], $count);
             for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
             $count := %astcap{''};
             my $sep_ast := $ast[$rxtype eq 'quant' ?? 1 !! 2];
             if $sep_ast {
                 # handle any separator quantification
-                my %astcap := capnames($sep_ast, $count);
+                my %astcap := self.capnames($sep_ast, $count);
                 for %astcap { %capnames{$_.key} := $ilist ?? $_.value !! 2 }
                 $count := %astcap{''};
             }
@@ -960,22 +960,22 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         %capnames;
     }
 
-    method alt_nfas($code_obj, $block, $ast) {
+    method alt_nfas($code_obj, $ast) {
         my $rxtype := $ast.rxtype;
         if $rxtype eq 'alt' {
             my @alternatives;
             for $ast.list {
-                self.alt_nfas($code_obj, $block, $_);
+                self.alt_nfas($code_obj, $_);
                 nqp::push(@alternatives, QRegex::NFA.new.addnode($_));
             }
             $ast.name(QAST::Node.unique('alt_nfa_') ~ '_' ~ $*W.handle());
-            self.store_regex_alt_nfa($code_obj, $block, $ast.name, @alternatives);
+            self.store_regex_alt_nfa($code_obj, $ast.name, @alternatives);
         }
         elsif $rxtype eq 'subcapture' || $rxtype eq 'quant' {
-            self.alt_nfas($code_obj, $block, $ast[0])
+            self.alt_nfas($code_obj, $ast[0])
         }
         elsif $rxtype eq 'concat' || $rxtype eq 'altseq' || $rxtype eq 'conj' || $rxtype eq 'conjseq' {
-            for $ast.list { self.alt_nfas($code_obj, $block, $_) }
+            for $ast.list { self.alt_nfas($code_obj, $_) }
         }
     }
 
@@ -1061,7 +1061,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     # Stores the NFA for a regex alternation.
-    method store_regex_alt_nfa($code_obj, $block, $key, @alternatives) {
+    method store_regex_alt_nfa($code_obj, $key, @alternatives) {
         my @saved;
         for @alternatives {
             @saved.push($_.save(:non_empty));
