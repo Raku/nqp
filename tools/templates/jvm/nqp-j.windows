@@ -1,0 +1,4 @@
+@setenv(JAR_DIR)@@jar_dir@
+@setenv(LIB_DIR)@@lib_dir@
+
+@exec(java)@ -Dnqp.execname="%~dpf0" -Xss1m -Xmx1324m -Xbootclasspath/a:"@cur_dir@@envvar(LIB_DIR)@@cpsep@@nfp(@envvar(JAR_DIR)@/nqp-runtime.jar)@@cpsep@@nfp(@envvar(JAR_DIR)@/@asmfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jlinefile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnafile@)@@cpsep@@nfp(@envvar(LIB_DIR)@/nqp.jar)@" -cp "@cur_dir@@envvar(LIB_DIR)@" nqp @sh_allparams@

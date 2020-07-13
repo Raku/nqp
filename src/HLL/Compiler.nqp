@@ -14,6 +14,7 @@ class HLL::Compiler does HLL::Backend::Default {
     has %!cli-options;
     has $!backend;
     has $!save_ctx;
+    has $!nqp-home;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -811,6 +812,33 @@ class HLL::Compiler does HLL::Backend::Default {
         else {
             nqp::die("The backend { $backend.HOW.name($backend) } doesn't support profiler-snapshot");
         }
+    }
+
+    method nqp-home() {
+        if !$!nqp-home {
+            # Determine NQP dir.
+#?if jvm
+            my $sep := nqp::atkey(nqp::jvmgetproperties,'os.name') eq 'MSWin32' ?? '\\' !! '/';
+            my $execname := nqp::atkey(nqp::jvmgetproperties,'nqp.execname') // '';
+#?endif
+#?if !jvm
+            my $config := nqp::backendconfig();
+            my $sep := $config<osname> eq 'MSWin32' ?? '\\' !! '/';
+            my $execname := nqp::execname();
+#?endif
+            my $install-dir := $execname eq ''
+                ?? self.config<prefix>
+                !! nqp::substr($execname, 0, nqp::rindex($execname, $sep, nqp::rindex($execname, $sep) - 1));
+
+            $!nqp-home := self.config<static-nqp-home>
+                || nqp::getenvhash()<NQP_HOME>
+                // $install-dir ~ '/share/nqp';
+            if nqp::substr($!nqp-home, nqp::chars($!nqp-home) - 1) eq $sep {
+                $!nqp-home := nqp::substr($!nqp-home, 0, nqp::chars($!nqp-home) - 1);
+            }
+        }
+
+        $!nqp-home;
     }
 }
 
