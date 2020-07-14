@@ -12,6 +12,7 @@ COMMON_HLL_SOURCES = \
 HLL_COMBINED = NQPHLL.nqp
 
 CORE_SETTING_SOURCES = \
+  @nfp(src/core/Config.nqp)@ \
   @nfp(src/core/NativeTypes.nqp)@ \
   @nfp(src/core/NQPRoutine.nqp)@ \
   @nfp(src/core/NQPMu.nqp)@ \

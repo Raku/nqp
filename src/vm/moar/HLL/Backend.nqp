@@ -15,7 +15,7 @@ class HLL::Backend::MoarVM {
     our $Callsites;
 
     our %moar_config := nqp::backendconfig();
-    
+
     my sub read_ui32($fh, $buf?) {
         unless $buf { $buf := nqp::create($NQPBuf) }
         nqp::readfh($fh, $buf, 4);
@@ -699,7 +699,7 @@ class HLL::Backend::MoarVM {
         my str $template;
 
         if !$want_json && !$want_sql {
-            my $temppath := nqp::backendconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html';
+            my $temppath := nqpconfig()<prefix> ~ '/share/nqp/lib/profiler/template.html';
             $template := try slurp('src/vm/moar/profiler/template.html');
             unless $template {
                 $template := try slurp($temppath);
