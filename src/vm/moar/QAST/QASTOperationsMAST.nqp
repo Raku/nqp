@@ -3160,6 +3160,7 @@ QAST::MASTOperations.add_core_moarop_mapping('cpucores', 'cpucores');
 QAST::MASTOperations.add_core_moarop_mapping('freemem', 'freemem');
 QAST::MASTOperations.add_core_moarop_mapping('totalmem', 'totalmem');
 QAST::MASTOperations.add_core_moarop_mapping('threadlockcount', 'threadlockcount');
+QAST::MASTOperations.add_core_moarop_mapping('setthreadname', 'setthreadname');
 
 # asynchrony related ops
 QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
