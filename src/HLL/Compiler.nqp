@@ -830,9 +830,9 @@ class HLL::Compiler does HLL::Backend::Default {
                 ?? self.config<prefix>
                 !! nqp::substr($execname, 0, nqp::rindex($execname, $sep, nqp::rindex($execname, $sep) - 1));
 
-            $!nqp-home := self.config<static-nqp-home>
-                || nqp::getenvhash()<NQP_HOME>
-                // $install-dir ~ '/share/nqp';
+            $!nqp-home := nqp::getenvhash()<NQP_HOME>
+                // self.config<static-nqp-home>
+                || $install-dir ~ '/share/nqp';
             if nqp::substr($!nqp-home, nqp::chars($!nqp-home) - 1) eq $sep {
                 $!nqp-home := nqp::substr($!nqp-home, 0, nqp::chars($!nqp-home) - 1);
             }
