@@ -816,7 +816,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method nqp-home() {
         if !$!nqp-home {
-            # Determine NQP dir.
+            # Determine NQP directory
 #?if jvm
             my $sep := nqp::atkey(nqp::jvmgetproperties,'os.name') eq 'MSWin32' ?? '\\' !! '/';
             my $execname := nqp::atkey(nqp::jvmgetproperties,'nqp.execname') // '';
