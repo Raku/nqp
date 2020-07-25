@@ -820,6 +820,7 @@ class HLL::Compiler does HLL::Backend::Default {
             my $config := nqp::backendconfig();
             my $sep := $config<osname> eq 'MSWin32' ?? '\\' !! '/';
 #?if jvm
+            # TODO could be replaced by nqp::execname() after the next bootstrap for JVM
             my $execname := nqp::atkey(nqp::jvmgetproperties,'nqp.execname') // '';
 #?endif
 #?if !jvm

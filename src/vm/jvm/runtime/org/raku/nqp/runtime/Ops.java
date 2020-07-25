@@ -5507,6 +5507,18 @@ public final class Ops {
         return res;
     }
 
+    public static String execname(ThreadContext tc) {
+        Properties env = System.getProperties();
+        if (env.containsKey("raku.execname"))
+            return env.getProperty("raku.execname");
+        else if (env.containsKey("perl6.execname"))
+            return env.getProperty("perl6.execname");
+        else if (env.containsKey("nqp.execname"))
+            return env.getProperty("nqp.execname");
+
+        return null;
+    }
+
     /* Thread related. */
     static class CodeRunnable implements Runnable {
         private GlobalContext gc;
