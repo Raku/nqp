@@ -817,13 +817,12 @@ class HLL::Compiler does HLL::Backend::Default {
     method nqp-home() {
         if !$!nqp-home {
             # Determine NQP directory
+            my $config := nqp::backendconfig();
+            my $sep := $config<osname> eq 'MSWin32' ?? '\\' !! '/';
 #?if jvm
-            my $sep := nqp::atkey(nqp::jvmgetproperties,'os.name') eq 'MSWin32' ?? '\\' !! '/';
             my $execname := nqp::atkey(nqp::jvmgetproperties,'nqp.execname') // '';
 #?endif
 #?if !jvm
-            my $config := nqp::backendconfig();
-            my $sep := $config<osname> eq 'MSWin32' ?? '\\' !! '/';
             my $execname := nqp::execname();
 #?endif
             my $install-dir := $execname eq ''
