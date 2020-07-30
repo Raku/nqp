@@ -454,8 +454,13 @@ knowhow NQPClassHOW {
         for self.mro($obj) {
             nqp::push(@tc, $_);
             if nqp::can($_.HOW, 'role_typecheck_list') {
-                for $_.HOW.role_typecheck_list($_) {
-                    nqp::push(@tc, $_);
+                for $_.HOW.role_typecheck_list($_) -> $role {
+                    nqp::push(@tc, $role);
+                    if nqp::can($role.HOW, 'role_typecheck_list') {
+                        for $role.HOW.role_typecheck_list($role) {
+                            nqp::push(@tc, $_);
+                        }
+                    }
                 }
             }
         }
