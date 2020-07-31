@@ -102,7 +102,7 @@
 @stage_gencat(@bpm(QASTNODE_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs($(QASTNODE_SOURCES))@)@
 @stage_gencat(@bpm(ASTNODES_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(ASTNODES_SOURCES)@)@)@
 @stage_gencat(@bpm(QREGEX_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs($(QREGEX_SOURCES))@)@
-@stage_gencat(@bpm(HLL_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(HLL_SOURCES)@)@)@
+@stage_gencat(@bpm(HLL_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(HLL_SOURCES)@ @nfp(@stage_dir@/nqp-config.nqp)@)@)@
 @stage_gencat(@bpm(QAST_COMBINED_@ucstage@)@:						@bsm(@ucstage@_DEPS)@ @use_prereqs(@bpm(QAST_SOURCES)@)@)@
 @stage_gencat(@bpm(P6QREGEX_COMBINED_@ucstage@)@:					@bsm(@ucstage@_DEPS)@ @use_prereqs($(P6QREGEX_SOURCES))@)@
 
@@ -117,10 +117,14 @@
 @stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 @stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QAST_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 
+
+@nfp(@stage_dir@/nqp-config.nqp)@:
+	@echo(+++ Generating 	stage @stage@ nqp-config.nqp)@
+	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
+
 @nfp(@stage_dir@/@bsm(NQP)@)@: @bsm(NQP_@ucprev_stage@)@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
-	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
-	$(NOECHO@nop())@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ @nfpq(@stage_dir@/nqp-config.nqp)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
+	$(NOECHO@nop())@@bpm(@ucstage@_GEN_CAT)@ @bpm(NQP_SOURCES)@ > @nfpq(@stage_dir@/$(NQP_COMBINED))@
 	$(NOECHO@nop())@@bpm(@ucprev_stage@_NQP)@ --module-path=@shquot(@stage_dir@)@ --setting-path=@shquot(@stage_dir@)@ \
 	    --setting=NQPCORE --target=@btarget@ --no-regex-lib @bpm(PRECOMP_@ucstage@_FLAGS)@ @bpm(NQP_@ucstage@_FLAGS)@ \
 	    --output=@nfpq(@stage_dir@/@bsm(NQP)@)@ @nfpq(@stage_dir@/$(NQP_COMBINED))@

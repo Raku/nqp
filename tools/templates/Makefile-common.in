@@ -5,6 +5,7 @@ COMMON_HLL_SOURCES = \
   @nfp(src/HLL/Grammar.nqp)@ \
   @nfp(src/HLL/Actions.nqp)@ \
   @nfp(src/HLL/Compiler.nqp)@ \
+  @nfp(src/HLL/SysConfig.nqp)@ \
   @nfp(src/HLL/CommandLine.nqp)@ \
   @nfp(src/HLL/World.nqp)@ \
   @nfp(src/HLL/sprintf.nqp)@ \

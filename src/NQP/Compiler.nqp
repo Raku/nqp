@@ -13,7 +13,6 @@ my $nqpcomp := NQP::Compiler.new();
 $nqpcomp.language('nqp');
 $nqpcomp.parsegrammar(NQP::Grammar);
 $nqpcomp.parseactions(NQP::Actions);
-hll-config($nqpcomp.config);
 
 $nqpcomp.addstage('optimize', :after<ast>);
 
