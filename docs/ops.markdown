@@ -3189,6 +3189,31 @@ Ignores optional argument.
 Returns HLL specific type object for a list.
 Ignores optional argument.
 
+## bindhllsym / bindcurhllsym
+* `bindhllsym(str $hllname, str $symname, $value)`
+* `bindcurhllsym(str $symname, $value)`
+
+Store a value in a specified HLL's symbol hash at a given key; the `cur`
+variant uses the hll the code that has the op in it was compiled for.
+
+## gethllsym / getcurhllsym
+* `gethllsym(str $hllname, str $symname --> Mu)`
+* `getcurhllsym(str $symname --> Mu)`
+
+Retrieve a value from a specified HLL's symbol hash at a given key; The `cur`
+variant uses the hll the code that has the op in it was compiled for.
+
+## usecompilerhll / usecompileehll
+* `usecompilerhllconfig`
+* `usecompileehllconfig`
+
+Increases or decreases the "compilee depth" value. When the compilee depth is
+greater than one, every hll access will hit the "compilee's HLL config",
+otherwise every access will hit the "compiler's HLL config".
+
+This serves, for example, to seperate a running NQP compiler from an NQP
+compiler it's compiling, when compile-time evaluation happens.
+
 # <a id="atomic"></a> Atomic Operations
 
 ## cas `moar`
