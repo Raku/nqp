@@ -699,7 +699,7 @@ class HLL::Backend::MoarVM {
         my str $template;
 
         if !$want_json && !$want_sql {
-            my $temppath := nqp::getcomp('default').nqp-home() ~ '/lib/profiler/template.html';
+            my $temppath := nqp::gethllsym('default', 'SysConfig').nqp-home() ~ '/lib/profiler/template.html';
             $template := try slurp('src/vm/moar/profiler/template.html');
             unless $template {
                 $template := try slurp($temppath);

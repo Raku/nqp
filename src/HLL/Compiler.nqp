@@ -8,13 +8,11 @@ class HLL::Compiler does HLL::Backend::Default {
     has @!cmdoptions;
     has $!compiler_progname;
     has $!language;
-    has %!config;
     has $!user_progname;
     has @!cli-arguments;
     has %!cli-options;
     has $!backend;
     has $!save_ctx;
-    has $!nqp-home;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -32,7 +30,6 @@ class HLL::Compiler does HLL::Backend::Default {
         ~ ' confprog=s'
 #?endif
         );
-        %!config     := nqp::hash();
     }
 
     method backend(*@value) {
@@ -55,7 +52,7 @@ class HLL::Compiler does HLL::Backend::Default {
         nqp::getcomp($name);
     }
 
-    method config() { %!config };
+    method sysconfig() { nqp::gethllsym('default', 'SysConfig').nqp-build-config }
 
     method autoprint($value) {
         self.interactive_result($value)
@@ -600,7 +597,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method version() {
-        my $version        := %!config<version>;
+        my $version        := self.sysconfig()<version>;
         my $backver        := $!backend.version_string();
         my $implementation := self.implementation();
         my $language_name  := self.language_name();
@@ -624,8 +621,9 @@ class HLL::Compiler does HLL::Backend::Default {
         for sorted_keys($!backend.config) -> $key {
             nqp::say($bname ~ '::' ~ $key ~ '=' ~ $!backend.config{$key});
         }
-        for sorted_keys(%!config) -> $key {
-            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %!config{$key});
+        my %sysconfig := self.sysconfig();
+        for sorted_keys(%sysconfig) -> $key {
+            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %sysconfig{$key});
         }
         nqp::exit(0);
     }
@@ -813,35 +811,9 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::die("The backend { $backend.HOW.name($backend) } doesn't support profiler-snapshot");
         }
     }
-
-    method nqp-home() {
-        if !$!nqp-home {
-            # Determine NQP directory
-            my $config := nqp::backendconfig();
-            my $sep := $config<osname> eq 'MSWin32' ?? '\\' !! '/';
-#?if jvm
-            # TODO could be replaced by nqp::execname() after the next bootstrap for JVM
-            my $execname := nqp::atkey(nqp::jvmgetproperties,'nqp.execname') // '';
-#?endif
-#?if !jvm
-            my $execname := nqp::execname();
-#?endif
-            my $install-dir := $execname eq ''
-                ?? self.config<prefix>
-                !! nqp::substr($execname, 0, nqp::rindex($execname, $sep, nqp::rindex($execname, $sep) - 1));
-
-            $!nqp-home := nqp::getenvhash()<NQP_HOME>
-                // self.config<static-nqp-home>
-                || $install-dir ~ '/share/nqp';
-            if nqp::substr($!nqp-home, nqp::chars($!nqp-home) - 1) eq $sep {
-                $!nqp-home := nqp::substr($!nqp-home, 0, nqp::chars($!nqp-home) - 1);
-            }
-        }
-
-        $!nqp-home;
-    }
 }
 
 my $compiler := HLL::Compiler.new();
 $compiler.language($compiler.backend.name);
 nqp::bindcomp('default', $compiler);
+nqp::bindhllsym('default', 'SysConfig', HLL::SysConfig.new());
