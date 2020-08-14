@@ -5516,7 +5516,7 @@ public final class Ops {
         else if (env.containsKey("nqp.execname"))
             return env.getProperty("nqp.execname");
 
-        return null;
+        return "";
     }
 
     /* Thread related. */
