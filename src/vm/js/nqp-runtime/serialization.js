@@ -25,7 +25,7 @@ const globalContext = require('./global-context.js');
 const op = {};
 exports.op = op;
 
-const CURRENT_VERSION = 22;
+const CURRENT_VERSION = 23;
 const OBJECTS_TABLE_ENTRY_SC_IDX_MAX = 0x000FFFFF;
 const OBJECTS_TABLE_ENTRY_SC_MAX = 0x7FE;
 const OBJECTS_TABLE_ENTRY_SC_SHIFT = 20;
@@ -758,6 +758,7 @@ class SerializationWriter {
       this.closures.int32(0);
       this.closures.int32(0);
     }
+    this.closures.str32(this.name);
 
     /* Increment count of closures in the table. */
     this.numClosures++;

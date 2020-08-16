@@ -480,10 +480,11 @@ class BinaryCursor {
       const objectIndex = this.int32();
       entry.codeObj = this.sc.deps[objectScId].rootObjects[objectIndex];
     } else {
-      // we're packed along a 24-byte alignment
+      // we're packed along a 28-byte alignment
       this.int32();
       this.int32();
     }
+    entry.name = this.str32();
     return entry;
   }
 
@@ -540,7 +541,7 @@ class BinaryCursor {
 
     this.sc = sc;
 
-    if (version != 22) {
+    if (version != 23) {
       throw 'Unsupported serialization format version: ' + version;
     }
 
