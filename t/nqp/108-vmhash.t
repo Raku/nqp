@@ -73,10 +73,11 @@ try {
 todo('Exceptions for iterators NYI on js', 2)
     if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
-# Is it "useful" that these two are different?
-is($msg, $backend eq 'jvm' ?? 'java.util.NoSuchElementException'
-       !! 'Iteration past end of iterator',
-       'iterator throws correct exception after end');
+# As per comments on https://github.com/Raku/nqp/pull/657
+# the JVM backend should be changed to throw the same error text
+todo('Error message not yet consistent on the JVM', 1)
+    if $backend eq 'jvm';
+is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
 
 $hash<a> := 1;
 is(nqp::elems($hash), 2, 'hash has 2 elements once more');
