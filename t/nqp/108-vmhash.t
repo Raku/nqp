@@ -1,4 +1,4 @@
-plan(28);
+plan(41);
 
 my $backend := nqp::getcomp('nqp').backend.name;
 
@@ -100,3 +100,20 @@ $key := nqp::iterkey_s($iter);
 ok(nqp::existskey($hash, $key), 'second key from iterator exists');
 nqp::deletekey($hash, $key);
 ok(!nqp::existskey($hash, $key), 'second key from iterator no longer exists');
+is(nqp::elems($hash), 0, 'hash has no elements');
+
+$hash<a> := 1;
+$hash<b> := 2;
+is(nqp::elems($hash), 2, 'hash has 2 elements once more');
+ok(!nqp::defined(nqp::fetch_delete_key($hash, 'c')), 'key not found');
+is(nqp::elems($hash), 2, 'hash still has 2 elements');
+is(nqp::fetch_delete_key($hash, 'a'), 1, 'key is found');
+is(nqp::elems($hash), 1, 'key was deleted');
+ok(!nqp::existskey($hash, 'a'), 'key no longer exists');
+ok(nqp::existskey($hash, 'b'), 'second key still exists');
+ok(!nqp::defined(nqp::fetch_delete_key($hash, 'a')), 'key is gone');
+
+is(nqp::fetch_delete_key($hash, 'b'), 2, 'second key is found');
+is(nqp::elems($hash), 0, 'second key was deleted');
+ok(!nqp::existskey($hash, 'b'), 'second key no longer exists');
+ok(!nqp::defined(nqp::fetch_delete_key($hash, 'b')), 'second key is gone');
