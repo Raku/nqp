@@ -52,7 +52,7 @@ class HLL::Compiler does HLL::Backend::Default {
         nqp::getcomp($name);
     }
 
-    method sysconfig() { nqp::gethllsym('default', 'SysConfig').nqp-build-config }
+    method config() { nqp::gethllsym('default', 'SysConfig').nqp-build-config }
 
     method autoprint($value) {
         self.interactive_result($value)
@@ -597,7 +597,7 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method version() {
-        my $version        := self.sysconfig()<version>;
+        my $version        := self.config()<version>;
         my $backver        := $!backend.version_string();
         my $implementation := self.implementation();
         my $language_name  := self.language_name();
@@ -621,9 +621,9 @@ class HLL::Compiler does HLL::Backend::Default {
         for sorted_keys($!backend.config) -> $key {
             nqp::say($bname ~ '::' ~ $key ~ '=' ~ $!backend.config{$key});
         }
-        my %sysconfig := self.sysconfig();
-        for sorted_keys(%sysconfig) -> $key {
-            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %sysconfig{$key});
+        my %config := self.config();
+        for sorted_keys(%config) -> $key {
+            nqp::say($!language ~ '::' ~ $key ~ '=' ~ %config{$key});
         }
         nqp::exit(0);
     }
