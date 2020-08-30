@@ -1,4 +1,4 @@
-plan(28);
+plan(54);
 
 my $backend := nqp::getcomp('nqp').backend.name;
 
@@ -11,7 +11,7 @@ $hash<a> := 1;
 $hash<b> := 2;
 
 ok(nqp::existskey($hash, 'a'), 'nqp::existskey - key exists');
-ok(!nqp::existskey($hash, 'no_such'), 'nqp::existskey - key does not exists');
+ok(!nqp::existskey($hash, 'no_such'), 'nqp::existskey - key does not exist');
 
 my $clone := nqp::clone($hash);
 $clone<b> := 3;
@@ -38,6 +38,9 @@ is(nqp::elems(@kv), 1, 'just one kv when iteratring');
 
 my $iter := nqp::iterator($clone);
 
+todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
+    unless $backend eq 'moar';
+
 my $msg;
 try {
     my $key := nqp::iterkey_s($iter);
@@ -46,10 +49,100 @@ try {
     }
 }
 
-todo('Exceptions for iterators before start NYI on ' ~ $backend, 2)
+ok($msg ne "", 'iterkey throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception before start');
+
+$msg := "";
+try {
+    my $val := nqp::iterval($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterval throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterval throws correct exception before start');
+
+while ($iter) {
+    nqp::shift($iter);
+    my $key := nqp::iterkey_s($iter);
+    ok(nqp::existskey($clone, $key), 'key from iterator exists');
+    is(nqp::iterval($iter), $clone{$key}, 'value from iterator is consistent');
+};
+is(nqp::elems($clone), 2, 'hash still has 2 keys');
+
+$msg := "";
+try {
+    nqp::shift($iter);
+    CATCH {
+      $msg := nqp::getmessage($_);
+    }
+}
+
+todo('Exceptions for iterators NYI on js', 2)
+    if $backend eq 'js';
+ok($msg ne "", 'iterator throws after end');
+# As per comments on https://github.com/Raku/nqp/pull/657
+# the JVM backend should be changed to throw the same error text
+todo('Error message not yet consistent on the JVM', 1)
+    if $backend eq 'jvm';
+is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
+
+todo('Exceptions for iterators after end NYI on ' ~ $backend, 4)
     unless $backend eq 'moar';
-ok($msg ne "", 'iterator throws before start');
-is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterator throws correct execption before start');
+
+$msg := "";
+try {
+    my $key := nqp::iterkey_s($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterkey throws after end');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception after end');
+
+$msg := "";
+try {
+    my $val := nqp::iterval($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterval throws after end');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterval throws correct exception after end');
+
+
+
+# And now delete while iterating:
+
+$iter := nqp::iterator($clone);
+
+todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
+    unless $backend eq 'moar';
+
+$msg := "";
+try {
+    my $key := nqp::iterkey_s($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterkey throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception before start');
+
+$msg := "";
+try {
+    my $val := nqp::iterval($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterval throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterval throws correct exception before start');
 
 while ($iter) {
     nqp::shift($iter);
@@ -79,6 +172,9 @@ todo('Error message not yet consistent on the JVM', 1)
     if $backend eq 'jvm';
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
 
+
+
+
 $hash<a> := 1;
 is(nqp::elems($hash), 2, 'hash has 2 elements once more');
 
@@ -100,3 +196,53 @@ $key := nqp::iterkey_s($iter);
 ok(nqp::existskey($hash, $key), 'second key from iterator exists');
 nqp::deletekey($hash, $key);
 ok(!nqp::existskey($hash, $key), 'second key from iterator no longer exists');
+is(nqp::elems($hash), 0, 'hash has no elements');
+
+my %empty;
+is(nqp::elems(%empty), 0, 'empty hash has no elements');
+
+$iter := nqp::iterator(%empty);
+
+$msg := "";
+try {
+    my $key := nqp::iterkey_s($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
+    unless $backend eq 'moar';
+ok($msg ne "", 'iterkey on empty hash throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception before start');
+
+
+$msg := "";
+try {
+    my $key := nqp::iterval($iter);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg ne "", 'iterval on empty hash throws before start');
+is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterval throws correct exception before start');
+
+ok(!$iter, "iterator on empty hash is false on creation");
+
+$msg := "";
+try {
+    nqp::shift($iter);
+    CATCH {
+      $msg := nqp::getmessage($_);
+    }
+}
+
+todo('Exceptions for iterators NYI on js', 2)
+    if $backend eq 'js';
+ok($msg ne "", 'iterator throws after end');
+# As per comments on https://github.com/Raku/nqp/pull/657
+# the JVM backend should be changed to throw the same error text
+todo('Error message not yet consistent on the JVM', 1)
+    if $backend eq 'jvm';
+is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
