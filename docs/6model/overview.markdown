@@ -100,7 +100,7 @@ however. The following operations are available on representations.
   expect, and look largely like get_attribute apart from they take
   something to store in the attribute rather than doing a lookup.
 
-* **hint_for** takes an attribute name and optional a class handle
+* **hint_for** takes an attribute name and optionally a class handle
   and will hand back - if available - an offset that can also be used
   to look up the attribute. Interesting in gradual or static typing
   scenarios.
