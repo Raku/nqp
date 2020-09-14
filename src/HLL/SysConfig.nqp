@@ -4,6 +4,10 @@ class HLL::SysConfig {
     has $!path-sep;
 
     method BUILD() {
+        self.build-hll-sysconfig()
+    }
+
+    method build-hll-sysconfig() {
         %!build-config := nqp::hash();
         hll-config(%!build-config);
 
