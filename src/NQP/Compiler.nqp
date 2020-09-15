@@ -8,6 +8,8 @@ class NQP::Compiler is HLL::Compiler {
     }
 }
 
+nqp::bindhllsym('default', 'SysConfig', HLL::SysConfig.new());
+
 # Create and configure compiler object.
 my $nqpcomp := NQP::Compiler.new();
 $nqpcomp.language('nqp');

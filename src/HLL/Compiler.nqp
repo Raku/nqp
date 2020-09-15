@@ -816,4 +816,3 @@ class HLL::Compiler does HLL::Backend::Default {
 my $compiler := HLL::Compiler.new();
 $compiler.language($compiler.backend.name);
 nqp::bindcomp('default', $compiler);
-nqp::bindhllsym('default', 'SysConfig', HLL::SysConfig.new());
