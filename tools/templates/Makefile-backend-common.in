@@ -118,7 +118,7 @@
 @stage_precomp(@bsm(P6QREGEX_@ucstage@)@:					@use_prereqs(@bpm(P6QREGEX_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QAST_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
 
 
-@nfp(@stage_dir@/nqp-config.nqp)@:
+@nfp(@stage_dir@/nqp-config.nqp)@: @bpm(SOURCES)@
 	@echo(+++ Generating 	stage @stage@ nqp-config.nqp)@
 	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
 
