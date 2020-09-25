@@ -1,4 +1,4 @@
-plan(49);
+plan(54);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -77,6 +77,20 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
 }
 
 {
+    my $testbuf1 := nqp::encode('подводка', 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $testbuf1);
+    ok(nqp::decodertakechars($dec, 3) eq 'под', 'Can read first 3 chars of 8');
+    ok(nqp::decodertakechars($dec, 3) eq 'вод', 'Can read another 3 chars of 8 (4-6)');
+    ok(nqp::decodertakechars($dec, 1) eq 'к', 'Can read one more char of 8 (7)');
+    ok(nqp::isnull_s(nqp::decodertakechars($dec, 1)),
+        'Cannot take last char this way as there may be another after it that combines');
+    ok(nqp::decodertakeallchars($dec) eq 'а',
+        'Taking all chars indicates EOF, so we get the final char');
+}
+
+{
     my $testbuf1 := nqp::encode("line 1\nli", 'utf8', nqp::create($buf_type));
     my $testbuf2 := nqp::encode("ne 2\nline 3", 'utf8', nqp::create($buf_type));
     my $dec := nqp::create(VMDecoder);
@@ -136,7 +150,12 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderconfigure($dec, 'utf8', nqp::hash('translate_newlines', 1));
     nqp::decoderaddbytes($dec, $testbuf1);
     my $got := nqp::decodertakeallchars($dec);
-    is($got, "one\ntwo\nthree\n", 'Newlines get translated if the options is passed');
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('translate_newline option does not work on the jvm', 1);
+    }
+    else {
+        is($got, "one\ntwo\nthree\n", 'Newlines get translated if the options is passed');
+    }
 }
 
 {
