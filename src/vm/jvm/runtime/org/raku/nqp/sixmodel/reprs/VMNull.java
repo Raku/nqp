@@ -20,9 +20,7 @@ public class VMNull extends REPR {
 
     @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        VMNullInstance obj = new VMNullInstance();
-        obj.st = st;
-        return obj;
+        return VMNullInstance.getInstance(tc);
     }
 
     @Override

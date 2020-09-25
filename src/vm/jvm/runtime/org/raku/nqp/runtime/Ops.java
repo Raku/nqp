@@ -128,6 +128,7 @@ import org.raku.nqp.sixmodel.reprs.VMHash;
 import org.raku.nqp.sixmodel.reprs.VMHashInstance;
 import org.raku.nqp.sixmodel.reprs.VMIterInstance;
 import org.raku.nqp.sixmodel.reprs.VMNull;
+import org.raku.nqp.sixmodel.reprs.VMNullInstance;
 import org.raku.nqp.sixmodel.reprs.VMThreadInstance;
 
 import sun.misc.Unsafe;
@@ -158,6 +159,8 @@ public final class Ops {
             // ignore (that's the raison d'être for this method)
         }
     }
+
+    private static SixModelObject theVMNull = null;
 
     /* I/O opcodes */
     public static String print(String v, ThreadContext tc) {
@@ -2349,11 +2352,12 @@ public final class Ops {
         return a == b ? 1 : 0;
     }
     public static SixModelObject createNull(ThreadContext tc) {
-        SixModelObject vmnull = tc.gc.VMNull.st.REPR.allocate(tc, tc.gc.VMNull.st);
-        return vmnull;
+        if (theVMNull == null)
+            theVMNull = VMNullInstance.getInstance(tc);
+        return theVMNull;
     }
     public static long isnull(SixModelObject obj) {
-        return obj == null || (obj.st != null && obj.st.REPR instanceof VMNull) ? 1 : 0;
+        return obj == null || obj == theVMNull ? 1 : 0;
     }
     public static long isnull_s(String str) {
         return str == null ? 1 : 0;
