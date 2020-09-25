@@ -1,4 +1,4 @@
-plan(52);
+plan(54);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -142,6 +142,29 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(nqp::atpos_i($bytes, 5) == 0xb4, 'Byte 6 correct');
     ok(nqp::decoderbytesavailable($dec) == 0, 'Now no bytes available');
     ok(nqp::decoderempty($dec), 'And so the decoder is empty');
+}
+
+{
+    my $testbuf1 := nqp::encode("one\ntwo\r\nthree\r\n", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash('translate_newlines', 1));
+    nqp::decoderaddbytes($dec, $testbuf1);
+    my $got := nqp::decodertakeallchars($dec);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('translate_newline option does not work on the jvm', 1);
+    }
+    else {
+        is($got, "one\ntwo\nthree\n", 'Newlines get translated if the options is passed');
+    }
+}
+
+{
+    my $testbuf1 := nqp::encode("one\ntwo\r\n", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, $testbuf1);
+    my $got := nqp::decodertakeallchars($dec);
+    is($got, "one\ntwo\r\n", "Newlines don't get translated if the options is not passed");
 }
 
 {
