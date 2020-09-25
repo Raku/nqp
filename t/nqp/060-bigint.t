@@ -244,12 +244,12 @@ sub test_rand_I($times, $max) {
 test_rand_I(10, 1);
 test_rand_I(10, 2);
 
-ok(nqp::isprime_I(box(-4), 1) == 0, 'is -4 prime');
-ok(nqp::isprime_I(box(0), 1) == 0, 'is 0 prime');
-ok(nqp::isprime_I(box(1), 1) == 0, 'is 1 prime');
-ok(nqp::isprime_I(box(2), 1) == 1, 'is 2 prime');
-ok(nqp::isprime_I(box(4), 1) == 0, 'is 4 prime');
-ok(nqp::isprime_I(box(17), 1) == 1, 'is 17 prime');
+ok(nqp::isprime_I(box(-4)) == 0, 'is -4 prime');
+ok(nqp::isprime_I(box(0))  == 0, 'is 0 prime');
+ok(nqp::isprime_I(box(1))  == 0, 'is 1 prime');
+ok(nqp::isprime_I(box(2))  == 1, 'is 2 prime');
+ok(nqp::isprime_I(box(4))  == 0, 'is 4 prime');
+ok(nqp::isprime_I(box(17)) == 1, 'is 17 prime');
 
 ok(nqp::iseq_I(nqp::gcd_I(box(18), box(12), $bi_type), box(6)), 'nqp::gcd_I');
 ok(nqp::iseq_I(nqp::lcm_I(box(18), box(12), $bi_type), box(36)), 'nqp::lcm_I');

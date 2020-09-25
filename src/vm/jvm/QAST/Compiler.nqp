@@ -2237,7 +2237,7 @@ QAST::OperationsJAST.map_jvm_core_op('div_n', 'ddiv', [$RT_NUM, $RT_NUM], $RT_NU
 QAST::OperationsJAST.map_jvm_core_op('mod_i', 'lrem', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('mod_I', $TYPE_OPS, 'mod_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('expmod_I', $TYPE_OPS, 'expmod_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('isprime_I', $TYPE_OPS, 'isprime_I', [$RT_OBJ, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('isprime_I', $TYPE_OPS, 'isprime_I', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('rand_n', $TYPE_OPS, 'rand_n', [$RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('srand', $TYPE_OPS, 'srand', [$RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('rand_I', $TYPE_OPS, 'rand_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);

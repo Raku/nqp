@@ -2203,10 +2203,9 @@ Returns a 1 if the object is a null, 0 otherwise.
 Returns a 1 if the object is a float type, 0 otherwise.
 
 ## isprime
-* `isprime_I(Int $obj, Int $rounds --> int)`
+* `isprime_I(Int $obj --> int)`
 
-Returns a 1 if the integer value of the object is prime, 0 otherwise. Performs
-up to `$rounds` of Miller-Rabin tests if necessary.
+Returns a 1 if the integer value of the object is prime, 0 otherwise.
 
 ## isstr
 * `isstr(Mu $obj --> int)`
