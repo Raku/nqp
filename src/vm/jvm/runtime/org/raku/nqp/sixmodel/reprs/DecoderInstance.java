@@ -56,8 +56,14 @@ public class DecoderInstance extends SixModelObject {
         ensureConfigured(tc);
         if (toDecode == null)
             toDecode = new ArrayList<ByteBuffer>();
-        if (bytes.remaining() > 0)
-            toDecode.add(bytes);
+        if (bytes.remaining() > 0) {
+            ByteBuffer clone = ByteBuffer.allocate(bytes.capacity());
+            bytes.rewind();
+            clone.put(bytes);
+            bytes.rewind();
+            clone.flip();
+            toDecode.add(clone);
+        }
     }
 
     public synchronized String takeChars(ThreadContext tc, long chars, boolean eof) {
