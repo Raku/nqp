@@ -193,7 +193,7 @@ op.cmp_I = function(left, right) {
   return (JSBI.equal(a, b) ? 0 : (JSBI.lessThan(a, b) ? -1 : 1));
 };
 
-op.isprime_I = function(n, attempts) {
+op.isprime_I = function(n) {
   return isPrime(getBI(n)) ? 1 : 0;
 };
 

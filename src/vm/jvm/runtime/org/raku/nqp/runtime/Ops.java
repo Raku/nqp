@@ -6909,12 +6909,12 @@ public final class Ops {
         return makeBI(tc, type, result);
     }
 
-    public static long isprime_I(SixModelObject a, long certainty, ThreadContext tc) {
+    public static long isprime_I(SixModelObject a, ThreadContext tc) {
         BigInteger bi = getBI(tc, a);
         if (bi.compareTo(BigInteger.valueOf(1)) <= 0) {
             return 0;
         }
-        return bi.isProbablePrime((int)certainty) ? 1 : 0;
+        return bi.isProbablePrime(40) ? 1 : 0;
     }
 
     public static SixModelObject rand_I(SixModelObject a, SixModelObject type, ThreadContext tc) {
