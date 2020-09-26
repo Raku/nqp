@@ -1,4 +1,4 @@
-plan(75);
+plan(76);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -56,6 +56,27 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ok(!nqp::decoderempty($dec), 'Not empty after adding a second');
     ok(nqp::decodertakeallchars($dec) eq 'omgwtfbbq', 'Can take all chars');
     ok(nqp::decoderempty($dec), 'Empty again after taking all chars');
+}
+
+{
+    my $testbuf1 := nqp::create($buf_type);
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'ascii', nqp::hash());
+    nqp::bindpos_i($testbuf1, 0, 0x6E); # 'n'
+    nqp::bindpos_i($testbuf1, 1, 0x71); # 'q'
+    nqp::bindpos_i($testbuf1, 2, 0x70); # 'p'
+    nqp::decoderaddbytes($dec, $testbuf1);
+    nqp::bindpos_i($testbuf1, 0, 0x78); # 'x'
+    nqp::bindpos_i($testbuf1, 1, 0x78); # 'x'
+    nqp::bindpos_i($testbuf1, 2, 0x78); # 'x'
+    nqp::decoderaddbytes($dec, $testbuf1);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('currently nqp-j reports "xxxxxx"', 1);
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq 'nqpxxx',
+            'internal buffer of decoder gets its own copy of the added bytes');
+    }
 }
 
 {
