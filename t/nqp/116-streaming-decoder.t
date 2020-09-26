@@ -1,4 +1,4 @@
-plan(54);
+plan(75);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -173,4 +173,190 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderconfigure($dec, 'utf8', nqp::hash());
     nqp::decoderaddbytes($dec, $emptybuf);
     ok(nqp::decoderempty($dec), 'Decoder is still empty after adding an empty buffer');
+}
+
+{
+    ## 'д' is 'CYRILLIC SMALL LETTER DE', (U+0434), UFT-8(hex) 0xD0 0xB4
+    my $testbuf1 := nqp::create($buf_type);
+    my $testbuf2 := nqp::create($buf_type);
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+
+    ## decode complete code point
+    nqp::bindpos_i($testbuf1, 0, 0xD0);
+    nqp::bindpos_i($testbuf1, 1, 0xB4);
+    nqp::decoderaddbytes($dec, $testbuf1);
+    ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed together)');
+    nqp::bindpos_i($testbuf2, 0, 0xD0);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    nqp::bindpos_i($testbuf2, 0, 0xB4);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('not able to cope with separately pushed bytes: "Will not decode invalid UTF-8"', 1);
+        ## restore old state (needed because of earlier failure)
+        ## java.lang.IllegalStateException: Current state = CODING, new state = FLUSHED
+        $dec := nqp::create(VMDecoder);
+        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed separately)');
+    }
+
+    ## try to decode incomplete code point
+    nqp::bindpos_i($testbuf2, 0, 0xD0);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+        ## restore old state (needed because of earlier failure)
+        ## java.lang.IllegalStateException: Current state = CODING, new state = FLUSHED
+        $dec := nqp::create(VMDecoder);
+        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+        nqp::bindpos_i($testbuf2, 0, 0xD0);
+        nqp::decoderaddbytes($dec, $testbuf2);
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq '', 'Got empty string from incomplete code point');
+    }
+
+    ## push second byte to complete code point
+    nqp::bindpos_i($testbuf2, 0, 0xB4);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+        ## restore old state (needed because of earlier failure)
+        ## java.lang.IllegalStateException: Current state = CODING, new state = FLUSHED
+        $dec := nqp::create(VMDecoder);
+        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back after pushing second byte');
+    }
+
+    ## push invalid code point (second byte of multibyte character must by larger than 0x7F)
+    nqp::bindpos_i($testbuf1, 0, 0xD0);
+    nqp::bindpos_i($testbuf1, 1, 0x7F);
+    nqp::decoderaddbytes($dec, $testbuf1);
+    dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed together)');
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::bindpos_i($testbuf2, 0, 0xD0);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    nqp::bindpos_i($testbuf2, 0, 0x7F);
+    nqp::decoderaddbytes($dec, $testbuf2);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('returns empty string', 1);
+    }
+    else {
+        dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed separately)');
+    }
+}
+
+{
+    my $testbuf := nqp::encode("два", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 0));
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq '',
+            'Got "" after 1st byte (no complaint about invalid UTF-8)');
+    }
+
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 1));
+    ok(nqp::decodertakeallchars($dec) eq 'д',
+        'Got "д" after 2nd byte (nothing held by normalization)');
+
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 2));
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq 'д',
+            'Got "д" after 3rd byte (no complaint about invalid UTF-8)');
+    }
+
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 3));
+    ok(nqp::decodertakeallchars($dec) eq 'дв',
+        'Got "дв" after 4th byte (nothing held by normalization)');
+
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 4));
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+    }
+    else {
+        ok(nqp::decodertakeallchars($dec) eq 'дв',
+            'Got "дв" after 5th byte (no complaint about invalid UTF-8)');
+    }
+
+    $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 5));
+    ok(nqp::decodertakeallchars($dec) eq 'два',
+        'Got "два" after 6th byte (nothing held by normalization)');
+}
+
+{
+    my $testbuf := nqp::encode("подводка\n", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    my $bufpart1 := nqp::slice($testbuf, 0, 8);
+    nqp::decoderaddbytes($dec, $bufpart1);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 1);
+    }
+    else {
+        ok(nqp::decodertakeavailablechars($dec) eq 'под',
+            'Got first three chars ("в" held by normalization, first byte of "о" not valid)');
+    }
+    my $bufpart2 := nqp::slice($testbuf, 9, 16);
+    nqp::decoderaddbytes($dec, $bufpart2);
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('wrong result caused by earlier failure', 1);
+    }
+    else {
+        ok(nqp::decodertakeavailablechars($dec) eq "водка\n",
+            'Got remaining chars, no complaint about invalid UTF-8 after more bytes are added');
+    }
+}
+
+{
+    my $testbuf := nqp::encode("два\n", 'utf8', nqp::create($buf_type));
+    my $dec := nqp::create(VMDecoder);
+    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
+    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 0));
+    if nqp::getcomp('nqp').backend.name eq 'jvm' {
+        skip('Will not decode invalid UTF-8', 7);
+    }
+    else {
+        ok(nqp::decodertakeavailablechars($dec) eq '',
+            'No valid char after 1st byte (first byte of "д" not valid)');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 1, 1));
+        ok(nqp::decodertakeavailablechars($dec) eq '',
+            'No valid char after 2nd byte ("д" held by normalization)');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 2, 2));
+        ok(nqp::decodertakeavailablechars($dec) eq '',
+            'No valid char after 3rd byte ("д" held by normalization, first byte of "в" not valid');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 3, 3));
+        ok(nqp::decodertakeavailablechars($dec) eq 'д',
+            'Got "д" after 4th byte ("в" held by normalization)');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 4, 4));
+        ok(nqp::decodertakeavailablechars($dec) eq '',
+            'No valid char after 5th byte ("в" held by normalization, first byte of "а" not valid');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 5, 5));
+        ok(nqp::decodertakeavailablechars($dec) eq 'в',
+            'Got "в" after 6th byte ("а" held by normalization)');
+        nqp::decoderaddbytes($dec, nqp::slice($testbuf, 6, 6));
+        ok(nqp::decodertakeavailablechars($dec) eq "а\n",
+            'Got "а\n" after 7th byte');
+    }
 }
