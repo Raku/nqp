@@ -70,13 +70,8 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::bindpos_i($testbuf1, 1, 0x78); # 'x'
     nqp::bindpos_i($testbuf1, 2, 0x78); # 'x'
     nqp::decoderaddbytes($dec, $testbuf1);
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('currently nqp-j reports "xxxxxx"', 1);
-    }
-    else {
-        ok(nqp::decodertakeallchars($dec) eq 'nqpxxx',
-            'internal buffer of decoder gets its own copy of the added bytes');
-    }
+    ok(nqp::decodertakeallchars($dec) eq 'nqpxxx',
+        'internal buffer of decoder gets its own copy of the added bytes');
 }
 
 {
