@@ -207,16 +207,7 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderaddbytes($dec, $testbuf2);
     nqp::bindpos_i($testbuf2, 0, 0xB4);
     nqp::decoderaddbytes($dec, $testbuf2);
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('not able to cope with separately pushed bytes: "Will not decode invalid UTF-8"', 1);
-        ## restore old state (needed because of earlier failure)
-        ## java.lang.IllegalStateException: Current state = CODING, new state = FLUSHED
-        $dec := nqp::create(VMDecoder);
-        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    }
-    else {
-        ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed separately)');
-    }
+    ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed separately)');
 
     ## try to decode incomplete code point
     nqp::bindpos_i($testbuf2, 0, 0xD0);
@@ -237,16 +228,7 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     ## push second byte to complete code point
     nqp::bindpos_i($testbuf2, 0, 0xB4);
     nqp::decoderaddbytes($dec, $testbuf2);
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('Will not decode invalid UTF-8', 1);
-        ## restore old state (needed because of earlier failure)
-        ## java.lang.IllegalStateException: Current state = CODING, new state = FLUSHED
-        $dec := nqp::create(VMDecoder);
-        nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    }
-    else {
-        ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back after pushing second byte');
-    }
+    ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back after pushing second byte');
 
     ## push invalid code point (second byte of multibyte character must by larger than 0x7F)
     nqp::bindpos_i($testbuf1, 0, 0xD0);
@@ -259,12 +241,7 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderaddbytes($dec, $testbuf2);
     nqp::bindpos_i($testbuf2, 0, 0x7F);
     nqp::decoderaddbytes($dec, $testbuf2);
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('returns empty string', 1);
-    }
-    else {
-        dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed separately)');
-    }
+    dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed separately)');
 }
 
 {

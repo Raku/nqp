@@ -307,6 +307,24 @@ public class DecoderInstance extends SixModelObject {
     private void eatUndecodedBytes(CharBuffer target, boolean eof) throws CharacterCodingException {
         if (toDecode != null) {
             while (toDecode.size() > 0) {
+                // we might have to add bytes from the next element of toDecode to get a valid char
+                while (toDecode.size() > 1) {
+                    ByteBuffer useFirst = toDecode.get(0);
+                    // FIXME use something better than magic constant 4
+                    // (chosen because Unicode chars might take up to 4 bytes)
+                    if (useFirst.remaining() < 4) {
+                        // combine current buffer with next buffer in toDecode
+                        ByteBuffer useSecond = toDecode.get(1);
+                        int size = useFirst.remaining() + useSecond.remaining();
+                        ByteBuffer useCombined = ByteBuffer.allocate(size).put(useFirst).put(useSecond);
+                        useCombined.rewind();
+                        toDecode.remove(0);
+                        toDecode.set(0, useCombined);
+                    }
+                    else
+                        break;
+                }
+
                 ByteBuffer use = toDecode.get(0);
 
                 CoderResult result = decoder.decode(use, target, eof && toDecode.size() == 1);
