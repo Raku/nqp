@@ -25,6 +25,8 @@ public class DecoderInstance extends SixModelObject {
     private List<CharBuffer> decoded;
     private List<String> lineSeps;
 
+    private static final int MAX_BYTES_PER_CHAR_UTF8 = 4;
+
     public void configure(ThreadContext tc, String encoding, SixModelObject config) {
         if (decoder == null) {
             charset = Charset.forName(encoding);
@@ -310,9 +312,8 @@ public class DecoderInstance extends SixModelObject {
                 // we might have to add bytes from the next element of toDecode to get a valid char
                 while (toDecode.size() > 1) {
                     ByteBuffer useFirst = toDecode.get(0);
-                    // FIXME use something better than magic constant 4
-                    // (chosen because Unicode chars might take up to 4 bytes)
-                    if (useFirst.remaining() < 4) {
+                    // FIXME support other encodings with multibyte characters
+                    if (useFirst.remaining() < MAX_BYTES_PER_CHAR_UTF8) {
                         // combine current buffer with next buffer in toDecode
                         ByteBuffer useSecond = toDecode.get(1);
                         int size = useFirst.remaining() + useSecond.remaining();
@@ -328,7 +329,7 @@ public class DecoderInstance extends SixModelObject {
                 ByteBuffer use = toDecode.get(0);
 
                 CoderResult result = decoder.decode(use, target, eof && toDecode.size() == 1);
-                if (result.isError())
+                if (result.isError() && !maybeEndsWithIncompleteChar(use))
                     result.throwException();
 
                 if (use.position() == use.limit())
@@ -337,6 +338,82 @@ public class DecoderInstance extends SixModelObject {
                     break;
             }
         }
+    }
+
+    private boolean maybeEndsWithIncompleteChar(ByteBuffer use) {
+        // FIXME support other charsets with multibyte characters
+        if (charset.toString().equals("UTF-8")) {
+            int remainingBytes = use.remaining();
+            if (remainingBytes < MAX_BYTES_PER_CHAR_UTF8) {
+                // Look at first byte to determine expected length.
+                // See Unicode Standard, Chapter 3, Table 3-7 Well-Formed UTF-8 Byte Sequences
+                // http://www.unicode.org/versions/Unicode13.0.0/ch03.pdf#G7404
+                int len = -1;
+                int firstByte = use.get(use.position()) & 0xFF;
+                if (firstByte < 0x80)
+                    len = 1;
+                else if (firstByte >= 0xC2 && firstByte <= 0xDF)
+                    len = 2;
+                else if (firstByte >= 0xE0 && firstByte <= 0xEF)
+                    len = 3;
+                else if (firstByte >= 0xF0 && firstByte <= 0xF4)
+                    len = 4;
+
+                // If we have enough bytes, we can't have an incomplete char.
+                if (len <= remainingBytes)
+                    return false;
+
+                // At this point we only have to think about characters with
+                // three or with four bytes.
+
+                // If we have a second byte we can see if it's invalid.
+                if (remainingBytes >= 2) {
+                    int secondByte = use.get(use.position() + 1) & 0xFF;
+                    // Validity of second bytes depends on first byte
+                    if (firstByte < 0xE1) {
+                        if (secondByte < 0xA0 || secondByte > 0xBF)
+                            return false;
+                    }
+                    else if (firstByte < 0xED) {
+                        if (secondByte < 0x80 || secondByte > 0xBF)
+                            return false;
+                    }
+                    else if (firstByte < 0xEE) {
+                        if (secondByte < 0x80 || secondByte > 0x9F)
+                            return false;
+                    }
+                    else if (firstByte < 0xF0) {
+                        if (secondByte < 0x80 || secondByte > 0xBF)
+                            return false;
+                    }
+                    else if (firstByte < 0xF1) {
+                        if (secondByte < 0x90 || secondByte > 0xBF)
+                            return false;
+                    }
+                    else if (firstByte < 0xF4) {
+                        if (secondByte < 0x80 || secondByte > 0xBF)
+                            return false;
+                    }
+                    else {
+                        if (secondByte < 0x80 || secondByte > 0x8F)
+                            return false;
+                    }
+                }
+
+                // If we have a third byte we can see if it's invalid.
+                if (remainingBytes == 3) {
+                    int thirdByte = use.get(use.position() + 2) & 0xFF;
+                    if (thirdByte < 0x80 || thirdByte > 0xBF)
+                        return false;
+                }
+
+                // If we reach this, we didn't encounter invalid bytes, but
+                // don't have enough bytes to verify the character.
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean isNormTerminated(String s) {
