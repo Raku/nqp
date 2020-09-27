@@ -116,7 +116,7 @@ public class DecoderInstance extends SixModelObject {
         CharBuffer target = CharBuffer.allocate(maxChars);
         eatAllDecodedChars(target);
         try {
-            eatUndecodedBytes(target, true);
+            eatUndecodedBytes(target, false);
         }
         catch (MalformedInputException e) {
             Ops.die_s("Will not decode invalid " + charset, tc);
