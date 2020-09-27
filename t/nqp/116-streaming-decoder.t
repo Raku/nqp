@@ -1,4 +1,4 @@
-plan(76);
+plan(68);
 
 sub dies-ok(&code, $message) {
     my int $died := 0;
@@ -209,16 +209,6 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderaddbytes($dec, $testbuf2);
     ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed separately)');
 
-    ## try to decode incomplete code point
-    nqp::bindpos_i($testbuf2, 0, 0xD0);
-    nqp::decoderaddbytes($dec, $testbuf2);
-    ok(nqp::decodertakeallchars($dec) eq '', 'Got empty string from incomplete code point');
-
-    ## push second byte to complete code point
-    nqp::bindpos_i($testbuf2, 0, 0xB4);
-    nqp::decoderaddbytes($dec, $testbuf2);
-    ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back after pushing second byte');
-
     ## push invalid code point (second byte of multibyte character must by larger than 0x7F)
     nqp::bindpos_i($testbuf1, 0, 0xD0);
     nqp::bindpos_i($testbuf1, 1, 0x7F);
@@ -231,45 +221,6 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::bindpos_i($testbuf2, 0, 0x7F);
     nqp::decoderaddbytes($dec, $testbuf2);
     dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed separately)');
-}
-
-{
-    my $testbuf := nqp::encode("два", 'utf8', nqp::create($buf_type));
-    my $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 0));
-    ok(nqp::decodertakeallchars($dec) eq '',
-        'Got "" after 1st byte (no complaint about invalid UTF-8)');
-
-    $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 1));
-    ok(nqp::decodertakeallchars($dec) eq 'д',
-        'Got "д" after 2nd byte (nothing held by normalization)');
-
-    $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 2));
-    ok(nqp::decodertakeallchars($dec) eq 'д',
-        'Got "д" after 3rd byte (no complaint about invalid UTF-8)');
-
-    $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 3));
-    ok(nqp::decodertakeallchars($dec) eq 'дв',
-        'Got "дв" after 4th byte (nothing held by normalization)');
-
-    $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 4));
-    ok(nqp::decodertakeallchars($dec) eq 'дв',
-        'Got "дв" after 5th byte (no complaint about invalid UTF-8)');
-
-    $dec := nqp::create(VMDecoder);
-    nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::decoderaddbytes($dec, nqp::slice($testbuf, 0, 5));
-    ok(nqp::decodertakeallchars($dec) eq 'два',
-        'Got "два" after 6th byte (nothing held by normalization)');
 }
 
 {
