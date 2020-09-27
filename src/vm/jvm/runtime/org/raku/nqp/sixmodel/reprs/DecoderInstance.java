@@ -329,7 +329,7 @@ public class DecoderInstance extends SixModelObject {
                 ByteBuffer use = toDecode.get(0);
 
                 CoderResult result = decoder.decode(use, target, eof && toDecode.size() == 1);
-                if (result.isError() && !maybeEndsWithIncompleteChar(use))
+                if (result.isError() && (eof || !maybeEndsWithIncompleteChar(use)))
                     result.throwException();
 
                 if (use.position() == use.limit())
