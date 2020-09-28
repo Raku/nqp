@@ -313,8 +313,20 @@ public class DecoderInstance extends SixModelObject {
                 if (result.isError())
                     result.throwException();
 
-                if (use.position() == use.limit())
+                if (use.position() == use.limit()) {
                     toDecode.remove(0);
+                }
+                else if (toDecode.size() > 1) {
+                    // We might have to merge the remaining bytes with those
+                    // in the next element of toDecode to get a valid char.
+                    ByteBuffer useFirst = toDecode.get(0);
+                    ByteBuffer useSecond = toDecode.get(1);
+                    int size = useFirst.remaining() + useSecond.remaining();
+                    ByteBuffer useCombined = ByteBuffer.allocate(size).put(useFirst).put(useSecond);
+                    useCombined.rewind();
+                    toDecode.remove(0);
+                    toDecode.set(0, useCombined);
+                }
                 else
                     break;
             }
