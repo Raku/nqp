@@ -316,17 +316,18 @@ class HLL::Compiler does HLL::Backend::Default {
                     }
                 }
                 elsif !@a || (@a == 1 && @a[0] eq '-')  {
-                    # Is STDIN a TTY display? If so, start the REPL, otherwise, simply
-                    # assume the program to eval is given on STDIN.
-                    my $force := %adverbs<repl-mode>//'';
-                    my $wants-interactive := $force
-                        ?? $force eq 'interactive'
-                          ?? 1 !! $force eq 'non-interactive'
-                            ?? 0 !! self.panic(
-                                "Unknown REPL mode '$force'. Valid values"
-                                ~ " are 'non-interactive' and 'interactive'"
-                            )
-                        !! stdin().t();
+                    # Is STDIN a TTY display? If so, start the REPL, otherwise,
+                    # simply assume the program to eval is given on STDIN.
+                    $result := stdin().t()
+                        ?? self.interactive(|%adverbs)
+                        !! self.evalfiles('-', |%adverbs);
+                }
+                elsif %adverbs<repl-mode> -> $repl-mode {
+                    my $wants-interactive := $repl-mode eq 'interactive'
+                        ?? 1
+                        !! $repl-mode eq 'non-interactive'
+                            ?? 0
+                            !! self.panic("Unknown REPL mode '$repl-mode'. Valid values are 'non-interactive' and 'interactive'");
                     $result := $wants-interactive
                         ?? self.interactive(|%adverbs)
                         !! self.evalfiles('-', |%adverbs);
