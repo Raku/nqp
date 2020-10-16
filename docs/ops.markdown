@@ -251,6 +251,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [isbig](#isbig)
   * [iscoderef](#iscoderef-moar)
   * [isconcrete](#isconcrete)
+  * [isconcrete_nd](#isconcrete_nd)
   * [iscont](#iscont)
   * [isfalse](#isfalse)
   * [ishash](#ishash)
@@ -2151,6 +2152,12 @@ Returns a 1 if the object contains a code reference, 0 otherwise.
 * `isconcrete(Mu $obj --> int)`
 
 Returns a 1 if the object is not a type object, 0 otherwise.
+
+## isconcrete_nd
+* `isconcrete_nd(Mu $obj --> int)`
+
+Returns a 1 if the object is not a type object, 0 otherwise.
+Does not decontainerize the object.
 
 ## iscont
 * `iscont(Mu $obj --> int)`
