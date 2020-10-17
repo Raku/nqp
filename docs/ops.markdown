@@ -419,6 +419,7 @@ Opcode variants may contain a type suffix, which usually indicates:
 * `_u` argument is an unsigned int
 * `_n` argument is a native float
 * `_s` argument is a native string
+* `_o` argument is an object
 * `_b` argument is a code block
 * `_I` argument is a Big Integer
 
