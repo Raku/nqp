@@ -341,6 +341,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [backendconfig](#backendconfig)
   * [getpid](#getpid)
   * [getppid](#getppid-moar)
+  * [indexingoptimized](#indexingoptimized)
   * [js](#js-moar=js)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
@@ -2905,6 +2906,14 @@ Return the current process id, an int.
 * `getppid(--> int)`
 
 Return the process id of the parent process, an int.
+
+## indexingoptimized
+* `indexingoptimized(str --> str)`
+
+If the input string is made up of strands, then returns a flattened string
+that is otherwise identical. If not, returns the input string.
+
+Intended for strings that will be indexed into often, for example, when evaluating regexes.
 
 ## js `moar` `js`
 * `js(str)`
