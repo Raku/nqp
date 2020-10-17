@@ -905,6 +905,7 @@ elements at the end are bound with potentially VM specific null entries.
 * `shift_i(@arr --> int)`
 * `shift_n(@arr --> num)`
 * `shift_s(@arr --> str)`
+* `shift_o(@arr --> obj)` `moar`
 
 "Shift the first value from the beginning of @arr."
 Return the value of @arr at index 0, unbind @arr at index 0, and move all
