@@ -111,7 +111,7 @@
 @stage_precomp(@bsm(CORE_SETTING_@ucstage@)@:				@use_prereqs(@bpm(CORE_SETTING_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(NQP_MO_@ucstage@)@ @bsm(MODULE_LOADER_@ucstage@)@@setting(NULL)@)@
 @stage_precomp(@bsm(QASTNODE_@ucstage@)@:					@use_prereqs(@bpm(QASTNODE_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(CORE_SETTING_@ucstage@)@)@
 @if(backend==moar @stage_precomp(@bsm(ASTOPS_@ucstage@)@:	@use_prereqs(@bpm(ASTOPS_SOURCES)@)@ @bsm(@ucstage@_DEPS)@ @bsm(CORE_SETTING_@ucstage@)@)@
-)@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(ASTOPS_@ucstage@)@)@
+)@@stage_precomp(@bsm(ASTNODES_@ucstage@)@:					@use_prereqs(@bpm(ASTNODES_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(CORE_SETTING_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@)@
 @stage_precomp(@bsm(QREGEX_@ucstage@)@:						@use_prereqs(@bpm(QREGEX_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(QASTNODE_@ucstage@)@)@
 @stage_precomp(@bsm(HLL_@ucstage@)@:						@use_prereqs(@bpm(HLL_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(QREGEX_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@)@
 @stage_precomp(@bsm(QAST_@ucstage@)@:						@use_prereqs(@bpm(QAST_COMBINED_@ucstage@)@)@ @bsm(@ucstage@_DEPS)@ @bsm(HLL_@ucstage@)@ @bsm(ASTNODES_@ucstage@)@ @bsm(ASTOPS_@ucstage@)@ @bsm(QREGEX_@ucstage@)@ @bsm(QASTNODE_@ucstage@)@)@
