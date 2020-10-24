@@ -135,43 +135,112 @@ sub match_vms($input) {
     return @vms;
 }
 
+# String trim (borrowed from rakudo!)
+sub trim($text) {
+    my int $left := nqp::findnotcclass(
+      nqp::const::CCLASS_WHITESPACE,
+      $text,
+      0,
+      (my int $pos := nqp::chars($text))
+    );
+    nqp::while(
+      nqp::isgt_i(--$pos,$left)
+        && nqp::iscclass(nqp::const::CCLASS_WHITESPACE,$text,$pos),
+      nqp::null
+    );
+    return nqp::substr($text,$left,$pos + 1 - $left);
+}
+
+# Is there any documentation to save for this opcode?
+sub save_documentation(%all, %docs, $text) {
+    my $copy := trim($text);
+
+    if $copy ne "" {
+        for %docs -> $code {
+            for %docs{$code} -> $vm {
+                %all{$vm}{$code} := 1;
+            }
+            %all<any>{$code} := 1 ;
+        }
+    } else {
+        # Empty description, nothing to save
+    }
+}
+
+# Go through the documentation for opcodes, find opcode
+# documentation (ignoring placeholders) and save it.
 sub find_documented_opcodes() {
     my %documented_ops := hash_of_vms();
     %documented_ops<any> := nqp::hash();
 
+    # Current set of opcodes is opcode key, list of VMs values
+    my %current-opcodes := nqp::hash(); # variants part of this opcode
+    # text of current description of opcode
+    my $description;
+
     my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
     my @opcode_vms := nqp::list();
 
+    my $state := 0; # 0 outside of an opcode
+                    # 1 seen opcode header
+                    # 2 seen opcode variant
+                    # 3 description of opcode
+
     for @doc_lines -> $line {
+        if $line ~~ /^ '# '/ {
+            # Skip headings
+            save_documentation(%documented_ops, %current-opcodes, $description);
+            %current-opcodes := nqp::hash();
+            $description := "";
+            $state := 0;
+            next;
+        }
+
+        # A heading line for an opcode
         my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
         if ?$match {
+            save_documentation(%documented_ops, %current-opcodes, $description);
+            %current-opcodes := nqp::hash();
+            $description := "";
+            $state := 1;
             @opcode_vms := match_vms($line);
             @opcode_vms := @*vms unless @opcode_vms;
         }
 
-        next unless $line ~~ / ^ '* `' .* '(' .* '`' .* ' _Internal_'? $ /;
+        # A specific variant of an opcode
+        if $line ~~ / ^ '* `' .* '(' .* '`' .* ' _Internal_'? $ / {
+            $state := 2;
 
-        # Individual opcode lines may override the VMs set in the heading.
-        my @line_vms := @opcode_vms;
-        if $line ~~ / '`'/ {
-            @line_vms := match_vms($line);
-            @line_vms := @opcode_vms unless @line_vms;
-        }
+            # Individual opcode lines may override the VMs set in the heading.
+            my @line_vms := @opcode_vms;
+            if $line ~~ / '`'/ {
+                @line_vms := match_vms($line);
+                @line_vms := @opcode_vms unless @line_vms;
+            }
 
-        $match := $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
-        if ?$match {
-            # Opcode only usable via QAST
-            $line := ~$match[0];
-        } else {
-            # Regular opcode
-            $line := nqp::substr($line, 3);
-            $line := nqp::split("(", $line)[0];
-        }
-        for @line_vms -> $vm {
-            %documented_ops{$vm}{$line} := 1 ;
-        }
-        %documented_ops<any>{$line} := 1 ;
+            $match := $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
+            if ?$match {
+                # Opcode only usable via QAST
+                $line := ~$match[0];
+            } else {
+                # Regular opcode
+                $line := nqp::substr($line, 3);
+                $line := nqp::split("(", $line)[0];
+            }
 
+            for @line_vms -> $vm {
+                if ! nqp::existskey(%current-opcodes, $line) {
+                    %current-opcodes{$line} := nqp::hash();
+                }
+                %current-opcodes{$line}{$vm} := 1;
+            }
+       } elsif $state == 2 || $state == 3 {
+           $state := 3;
+           $description := $description ~ $line;
+       } else {
+           # nothing to do
+       }
     }
+    save_documentation(%documented_ops, %current-opcodes, $description);
     return %documented_ops;
 }
