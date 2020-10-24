@@ -879,6 +879,7 @@ are coerced to the appropriate type.
 * `push_i(Array int @arr, int $v --> int)`
 * `push_n(Array num @arr, num $v --> num)`
 * `push_s(Array str @arr, str $v --> str)`
+* `push_o($obj, str $v --> str)` `moar`
 
 "Push $v onto the end of @arr."
 Bind $v to @arr at the position at the end of @arr, i.e., the position that
