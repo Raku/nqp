@@ -638,47 +638,70 @@ an integer.
 
 # <a id="trig"></a> Trigonometric Opcodes
 
-Each opcode corresponds directly to the trigonometric function of the same
-name. `h` indicates a hyperbolic variant.
-
 ## asec
 * `asec_n(num $n --> num)`
+
+Arcsecant.
 
 ## asin
 * `asin_n(num $n --> num)`
 
+Arcsine.
+
 ## acos
 * `acos_n(num $n --> num)`
+
+Arccosine.
 
 ## atan
 * `atan_n(num $n --> num)`
 
+Arctangent.
+
 ## atan2
 * `atan2_n(num $l, num $r --> num))`
+
+2-argument Arctangent.
 
 ## cos
 * `cos_n(num $n --> num))`
 
+Cosine.
+
 ## cosh
 * `cosh_n(num $n --> num))`
+
+Hyperbolic cosine.
 
 ## sin
 * `sin_n(num $n --> num))`
 
+Sine.
+
 ## sinh
 * `sinh_n(num $n --> num))`
+
+Hyperbolic sine.
 
 ## sec
 * `sec_n(num $n --> num))`
 
+Secant.
+
 ## sech
 * `sech_n(num $n --> num))`
+
+Hyperbolic secant.
 
 ## tan
 * `tan_n(num $n --> num))`
 
+Tangent.
+
 ## tanh
 * `tanh_n(num $n --> num))`
+
+Hyperbolic tangent.
 
 # <a id="logic"></a> Relational / Logic Opcodes
 
