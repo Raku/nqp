@@ -367,6 +367,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [asyncreadbytes](#asyncreadbytes-moar-jvm)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
+  * [currentthread](#currentthread-moar-jvm)
   * [threadlockcount](#threadlockcount-moar-jvm)
 - [HLL-Specific Operations](#-hll-specific-operations)
   * [hllbool](#hllbool)
@@ -3176,6 +3177,11 @@ Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of u
 
 ## killprocasync
 * `killprocasync($handle, $signal)`
+
+## currentthread `moar` `jvm`
+* `currentthread($thread)`
+
+Returns the object for the current thread.
 
 ## threadlockcount `moar` `jvm`
 * `threadlockcount($thread)`
