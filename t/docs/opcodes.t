@@ -1,3 +1,10 @@
+# Set this to 1 to print debug output
+sub debug($text) {
+    if 0 {
+        nqp::say("# $text");
+    }
+}
+
 my @*vms := nqp::list('jvm', 'moar', 'js');
 my @*variants := nqp::list("_i", "_n", "_s", "_I");
 
@@ -30,6 +37,7 @@ my %ops := hash_of_vms();
     ]),
     :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op>)
 );
+
 
 # Most backends programmatically add these ops - to keep our cheating simple,
 # add them to each of the backends manually
@@ -75,10 +83,13 @@ sub find_opcodes(:@files, :@keywords) {
     my %ops := nqp::hash();
     for @files -> $file {
         my @lines := nqp::split("\n", slurp($file));
+        my $line_no := 0;
         for @lines -> $line {
+            $line_no++;
             if $line ~~ / "%core_op_generators{'" (<[a..zA..Z0..9_]>+) "'}" / -> $match {
                 if ?$match {
                     %ops{$match[0]} := 1;
+                    debug("$file:$line_no :: core_op_generators : {$match[0]}");
                 }
             } elsif $line ~~ / @keywords / {
                 my @pieces := nqp::split("'", $line);
@@ -89,20 +100,25 @@ sub find_opcodes(:@files, :@keywords) {
                 if @pieces[1] ne 'nqp' && @pieces[2] ~~ /^ \s* '~' \s* '$suffix' /{
                     for <_s _n _i> -> $suffix {
                         %ops{$line ~ $suffix} := 1;
+                        debug("$file:$line_no :: keyword/suffix : $line$suffix");
                     }
                 }
                 %ops{$line} := 1;
+                debug("$file:$line_no :: keyword : $line");
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$func' \s* \{/ -> $match {
                 for nqp::split(' ', $match[0]) -> $func {
                     %ops{$func ~ '_n'} := 1;
+                    debug("$file:$line_no :: for block : {$func}_n");
                 }
             } elsif $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' / -> $match {
                 if ?$match {
                     %ops{$match[0]} := 1;
+                    debug("$file:$line_no :: %ops : {$match[0]}");
                 }
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$op' / -> $match {
                 for nqp::split(' ', $match[0]) -> $func {
                     %ops{$func} := 1;
+                    debug("$file:$line_no :: for single : $func");
                 }
             }
         }
