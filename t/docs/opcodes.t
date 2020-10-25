@@ -47,6 +47,10 @@ for <if unless while until repeat_while repeat_until> -> $op_name {
     }
 }
 
+# Some "opcodes" found by our hacky process are not actually opcodes.
+# Remove them. Eventually improve our checks so they are skipped.
+nqp::deletekey(%ops<moar>,'if_i');
+
 # Are ops that are implemented documented? Fail once per opcode
 my %combined_ops := nqp::hash();
 for @*vms -> $vm {
