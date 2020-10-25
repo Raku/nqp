@@ -314,6 +314,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [lexprimspec](#lexprimspec)
   * [savecapture](#savecapture)
   * [usecapture](#usecapture)
+  * [captureposelems](#captureposelems)
   * [getlex](#getlex-moar-jvm)
   * [getlexref](#getlexref-moar-jvm)
   * [bindlex](#bindlex-moar-jvm)
@@ -2630,6 +2631,12 @@ It's valid to implement this exactly the same way as savecapture if there's
 no performance benefit to be had in a split.
 Used by the multi-dispatcher.
 
+## captureposelems
+$ `captureposelems($capture --> int)`
+
+Returns the number of positional elements in a capture that was saved with
+`savecapture`
+
 ## getlex `moar` `jvm`
 * `getlex(str $name)`
 * `getlex_i(str $name)`
@@ -2979,7 +2986,7 @@ Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS
 (key: 'os.name'), returns all other data as is.
 
 ## objectid
-* `objectid($obj --> int)
+* `objectid($obj --> int)`
 
 Returns a numeric object ID unique for the given object.
 
