@@ -100,7 +100,6 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [coerce_si](#coerce_si)
   * [intify](#intify-moar)
   * [numify](#numify-moar)
-  * [strify](#strify-moar)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
   * [chr](#chr)
@@ -1065,7 +1064,7 @@ Returns the value associated with the given key-value pair.
 # <a id="coercion"></a> Coercion opcodes
 
 coerce_* opcodes do lower level conversion between int, num and str.
-intify, numify, strify respectively try to use the .Int, .Num or .Str method.
+intify, numify try to use the .Int, .Num or .Str method.
 If absent rely on lower level conversions.
 
 ## coerce_in `moar`
@@ -1107,11 +1106,6 @@ Coerce an object to int.
 * `numify($o --> num)`
 
 Coerce an object to num.
-
-## strify `moar`
-* `strify($o --> str)`
-
-Coerce an object to str.
 
 # <a id="string"></a> String Opcodes
 
