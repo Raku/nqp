@@ -358,7 +358,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [mvmendprofile](#mvmendprofile-moar)
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
   * [nativecallrefresh](#nativecallrefresh)
-- [Thread Opcodes(#-thread-opcodes)
+- [Thread Opcodes](#-thread-opcodes)
   * [newthread](#newthread)
   * [threadid](#threadid)
   * [threadrun](#threadrun)
