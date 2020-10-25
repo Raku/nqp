@@ -2153,6 +2153,7 @@ Returns a VM specific type object for a native array of str.
 * `box_i(int $val, Mu:T $type)`
 * `box_n(num $val, Mu:T $type)`
 * `box_s(str $val, Mu:T $type)`
+* `box_u(int $val, Mu:T $type)`
 
 Given a native value, return a Raku object of the given type
 with the same value.
