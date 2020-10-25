@@ -47,13 +47,35 @@ for <if unless while until repeat_while repeat_until> -> $op_name {
     }
 }
 
-# Some "opcodes" found by our hacky process are not actually opcodes.
-# Remove them. Eventually improve our checks so they are skipped.
+# Some "opcodes" found by our hacky process are MoarVM opcodes
+# that are not exposed to NQP users: Remove them.
+nqp::deletekey(%ops<moar>,'assertparamcheck');
+nqp::deletekey(%ops<moar>,'bindexcategory');
+nqp::deletekey(%ops<moar>,'bindexpayload');
+nqp::deletekey(%ops<moar>,'capturelex');
+nqp::deletekey(%ops<moar>,'const_i64');
+nqp::deletekey(%ops<moar>,'const_s');
+nqp::deletekey(%ops<moar>,'continuationclone');
+nqp::deletekey(%ops<moar>,'extend_i16');
+nqp::deletekey(%ops<moar>,'extend_i32');
+nqp::deletekey(%ops<moar>,'extend_n32');
+nqp::deletekey(%ops<moar>,'extend_u16');
+nqp::deletekey(%ops<moar>,'extend_u32');
+nqp::deletekey(%ops<moar>,'getdynlex');
+nqp::deletekey(%ops<moar>,'getlexperinvtype_o');
 nqp::deletekey(%ops<moar>,'if_i');
+nqp::deletekey(%ops<moar>,'ifnonnull');
+nqp::deletekey(%ops<moar>,'iter');
 nqp::deletekey(%ops<moar>,'smrt_intify');
 nqp::deletekey(%ops<moar>,'smrt_numify');
 nqp::deletekey(%ops<moar>,'smrt_strify');
 nqp::deletekey(%ops<moar>,'strify');
+nqp::deletekey(%ops<moar>,'trunc_i16');
+nqp::deletekey(%ops<moar>,'trunc_i32');
+nqp::deletekey(%ops<moar>,'trunc_i8');
+nqp::deletekey(%ops<moar>,'trunc_u16');
+nqp::deletekey(%ops<moar>,'trunc_u8');
+nqp::deletekey(%ops<moar>,'unless_o');
 
 # Are ops that are implemented documented? Fail once per opcode
 my %combined_ops := nqp::hash();
