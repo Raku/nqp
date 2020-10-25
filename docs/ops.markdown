@@ -346,6 +346,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [js](#js-moar=js)
   * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
   * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
+  * [objectid](#objectid)
   * [setcodename](#setcodename)
   * [sha1](#sha1)
   * [sleep](#sleep)
@@ -2977,12 +2978,16 @@ Converts the JVM property `java.class.path` into a list of paths, returns it.
 Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS names
 (key: 'os.name'), returns all other data as is.
 
+## objectid
+* `objectid($obj --> int)
+
+Returns a numeric object ID unique for the given object.
+
 ## setcodename
 * `setcodename($obj, str)`
 
 Sets the name of the given code object.
 Throws an exception if an object of the wrong type is passed.
-
 
 ## sha1
 * `sha1(str $str -> str)`
