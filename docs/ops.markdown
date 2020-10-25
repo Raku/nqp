@@ -2146,14 +2146,20 @@ with the same value.
 ## decont
 
 `decont(Mu $val --> Mu)`
+`decont_i(Int $val --> Mu)`
+`decont_n(Num $val --> Mu)`
+`decont_s(Str $val --> Mu)`
 
 Extract, or **de**-**cont**ainerize, a value from a `Scalar` container.
-If the argument is not a container, the argument is returned unchanged :
+If the argument is not a container, the argument is returned unchanged:
 
     use nqp;
     my $a = (1, 2, 3);
     .say for $a;              # OUTPUT: «(1, 2, 3)␤»
     .say for nqp::decont($a); # OUTPUT: «1␤2␤3␤»
+
+The `decont_i` decontainerizes to a native `int` value, `decont_n` to a
+native `num` value, and `decont_s` to a native `str` value.
 
 ## defined
 * `defined(Mu $obj --> int)`
