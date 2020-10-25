@@ -636,6 +636,8 @@ an integer.
 ## sqrt
 * `sqrt_n(num $n--> num)`
 
+Return the square root of the given num.
+
 # <a id="trig"></a> Trigonometric Opcodes
 
 ## asec
