@@ -1071,29 +1071,47 @@ If absent rely on lower level conversions.
 ## coerce_in `moar`
 * `coerce_in(int --> num)`
 
+Coerce from int to num.
+
 ## coerce_ni `moar`
 * `coerce_ni(num --> int)`
+
+Coerce from num to int.
 
 ## coerce_is
 * `coerce_is(int --> str)`
 
+Coerce from int to str.
+
 ## coerce_ns `moar`
 * `coerce_ns(num --> str)`
+
+Coerce from num to str.
 
 ## coerce_sn `moar`
 * `coerce_sn(str --> num)`
 
+Coerce from str to num.
+
 ## coerce_si
 * `coerce_si(str --> int)`
+
+Coerce from str to int.
 
 ## intify `moar`
 * `intify($o --> int)`
 
+Coerce an object to int.
+
 ## numify `moar`
 * `numify($o --> num)`
 
+Coerce an object to num.
+
 ## strify `moar`
 * `strify($o --> str)`
+
+Coerce an object to str.
 
 # <a id="string"></a> String Opcodes
 
