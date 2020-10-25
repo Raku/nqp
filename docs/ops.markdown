@@ -360,10 +360,10 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [nativecallrefresh](#nativecallrefresh)
 - [Thread Opcodes](#-thread-opcodes)
   * [newthread](#newthread)
-  * [threadid](#threadid)
-  * [threadrun](#threadrun)
-  * [threadyield](#threadyield)
-  * [threadjoin](#threadjoin)
+  * [threadid](#threadid-moar-jvm)
+  * [threadrun](#threadrun-moar-jvm)
+  * [threadyield](#threadyield-moar-jvm)
+  * [threadjoin](#threadjoin-moar-jvm)
   * [currentthread](#currentthread-moar-jvm)
   * [threadlockcount](#threadlockcount-moar-jvm)
 - [Asynchronous Operations](#-asynchronous-operations)
@@ -2168,7 +2168,7 @@ Returns a VM specific type object for a native array of str.
 * `box_i(int $val, Mu:T $type)`
 * `box_n(num $val, Mu:T $type)`
 * `box_s(str $val, Mu:T $type)`
-* `box_u(int $val, Mu:T $type)`
+* `box_u(int $val, Mu:T $type)` `moar`
 
 Given a native value, return a Raku object of the given type
 with the same value.
@@ -3147,7 +3147,7 @@ Refresh the C-based data backing the Perl 6 object. This op should only be used 
 
 # <a id="thread"></a> Thread opcodes
 
-## newthread
+## newthread `moar` `jvm`
 * `newthread(block, app_lifetime --> vm_thread)`
 
 Takes a block to execute in a thread, and a 1 to indicate that the thread
@@ -3155,24 +3155,24 @@ will be killed if the main thread finishes, or 0 to keep the thread running
 even after the main thread has finished.  Returns a vm_thread object that
 can be passed to the other thread related opcodes.
 
-## threadid
+## threadid `moar` `jvm`
 * `threadid(vm_thread --> int)`
 
 Returns the numeric thread ID of the given vm_thread object.
 
-## threadrun
+## threadrun `moar` `jvm`
 * `threadrun(vm_thread)`
 
 Actually start running the code specified in the creation of the vm_thread
 object.
 
-## threadyield
+## threadyield `moar` `jvm`
 * `threadyield()`
 
 Tell the scheduler to prefer another thread then the thread this is being
 executed in, for now.
 
-## threadjoin
+## threadjoin `moar` `jvm`
 * `threadjoin(vm_thread)`
 
 Wait for the thread, indicated by the vm_thread object, to be finished.
