@@ -3173,7 +3173,7 @@ Tell the scheduler to prefer another thread then the thread this is being
 executed in, for now.
 
 ## threadjoin
-# `threadjoin(vm_thread)`
+* `threadjoin(vm_thread)`
 
 Wait for the thread, indicated by the vm_thread object, to be finished.
 
