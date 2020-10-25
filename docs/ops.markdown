@@ -64,13 +64,13 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [not_i](#not_i)
 - [Array Opcodes](#-array-opcodes)
   * [atpos](#atpos)
-  * [atposnd](#atposnd)
   * [atpos2d](#atpos2d)
   * [atpos3d](#atpos3d)
+  * [atposnd](#atposnd)
   * [bindpos](#bindpos)
-  * [bindposnd](#bindposnd)
   * [bindpos2d](#bindpos2d)
   * [bindpos3d](#bindpos3d)
+  * [bindposnd](#bindposnd)
   * [atposref](#atposref)
   * [elems](#elems)
   * [existspos](#existspos)
@@ -820,15 +820,6 @@ Return 1 if `$val` is 0, 0 otherwise.
 
 Return whatever is bound to @arr at position $i.
 
-## atposnd
-* `atposnd(@arr, @indices --> Mu)`
-* `atposnd_i(@arr, @indices --> int)`
-* `atposnd_n(@arr, @indices --> num)`
-* `atposnd_s(@arr, @indices --> str)`
-
-Return whatever is bound to the n-dimensional array @arr at @indices,
-where @indices is a 1-dimensional array of index values.
-
 ## atpos2d
 * `atpos2d(@arr, int $i, int $j --> Mu)`
 * `atpos2d_i(@arr, int $i, int $j --> int)`
@@ -845,6 +836,15 @@ Return whatever is bound to the 2-dimensional array @arr at position $i, $j.
 
 Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 
+## atposnd
+* `atposnd(@arr, @indices --> Mu)`
+* `atposnd_i(@arr, @indices --> int)`
+* `atposnd_n(@arr, @indices --> num)`
+* `atposnd_s(@arr, @indices --> str)`
+
+Return whatever is bound to the n-dimensional array @arr at @indices,
+where @indices is a 1-dimensional integer array of index values.
+
 ## bindpos
 * `bindpos(@arr, int $i, Mu $v --> Mu)`
 * `bindpos_i(@arr, int $i, int $v --> int)`
@@ -852,15 +852,6 @@ Return whatever is bound to the 3-dimensional array @arr at position $i, $j, $k.
 * `bindpos_s(@arr, int $i, str $v --> str)`
 
 Bind $v to @arr at position $i and return $v.
-
-## bindposnd
-* `bindposnd(@arr, @indices, Mu $v --> Mu)`
-* `bindposnd_i(@arr, @indices, int $v --> int)`
-* `bindposnd_n(@arr, @indices, num $v --> num)`
-* `bindposnd_s(@arr, @indices, str $v --> str)`
-
-Bind $v to @arr at the position specified by @indices and return $v.
-@indices is a 1-dimensional array of index values.
 
 ## bindpos2d
 * `bindpos2d(@arr, int $i, int $j, Mu $v --> Mu)`
@@ -877,6 +868,15 @@ Bind $v to the 2-dimensional arrray @arr at position $i, $j and return $v.
 * `bindpos3d_s(@arr, int $i, int $j, int $k, str $v --> str)`
 
 Bind $v to the 3-dimensional arrray @arr at position $i, $j, $k and return $v.
+
+## bindposnd
+* `bindposnd(@arr, @indices, Mu $v --> Mu)`
+* `bindposnd_i(@arr, @indices, int $v --> int)`
+* `bindposnd_n(@arr, @indices, num $v --> num)`
+* `bindposnd_s(@arr, @indices, str $v --> str)`
+
+Bind $v to @arr at the position specified by @indices and return $v.
+@indices is a 1-dimensional integer array of index values.
 
 ## atposref
 * `atposref(@arr, int $idx --> Mu)` `js`
