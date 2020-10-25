@@ -364,6 +364,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [threadrun](#threadrun)
   * [threadyield](#threadyield)
   * [threadjoin](#threadjoin)
+  * [currentthread](#currentthread-moar-jvm)
+  * [threadlockcount](#threadlockcount-moar-jvm)
 - [Asynchronous Operations](#-asynchronous-operations)
   * [permit](#permit)
   * [cancel](#cancel-moar-jvm)
@@ -376,8 +378,6 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [asyncreadbytes](#asyncreadbytes-moar-jvm)
   * [spawnprocasync](#spawnprocasync)
   * [killprocasync](#killprocasync)
-  * [currentthread](#currentthread-moar-jvm)
-  * [threadlockcount](#threadlockcount-moar-jvm)
 - [HLL-Specific Operations](#-hll-specific-operations)
   * [hllbool](#hllbool)
   * [hllboxtype](#hllboxtype)
@@ -3177,6 +3177,16 @@ executed in, for now.
 
 Wait for the thread, indicated by the vm_thread object, to be finished.
 
+## currentthread `moar` `jvm`
+* `currentthread($thread)`
+
+Returns the object for the current thread.
+
+## threadlockcount `moar` `jvm`
+* `threadlockcount($thread)`
+
+Returns the number of locks held by the given thread.
+
 # <a id="async"></a> Asynchronous Operations
 
 The various asynchronous operations, such as timers and asynchronous I/O, take
@@ -3289,16 +3299,6 @@ Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of u
 
 ## killprocasync
 * `killprocasync($handle, $signal)`
-
-## currentthread `moar` `jvm`
-* `currentthread($thread)`
-
-Returns the object for the current thread.
-
-## threadlockcount `moar` `jvm`
-* `threadlockcount($thread)`
-
-Returns the number of locks held by the given thread.
 
 # <a id="hll-specific"></a> HLL-Specific Operations
 
