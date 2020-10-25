@@ -3148,7 +3148,7 @@ Refresh the C-based data backing the Perl 6 object. This op should only be used 
 # <a id="thread"></a> Thread opcodes
 
 ## newthread
-* `newthread(block, app_lifetime --> vm_thread)
+* `newthread(block, app_lifetime --> vm_thread)`
 
 Takes a block to execute in a thread, and a 1 to indicate that the thread
 will be killed if the main thread finishes, or 0 to keep the thread running
@@ -3156,24 +3156,24 @@ even after the main thread has finished.  Returns a vm_thread object that
 can be passed to the other thread related opcodes.
 
 ## threadid
-* `threadid(vm_thread --> int)
+* `threadid(vm_thread --> int)`
 
 Returns the numeric thread ID of the given vm_thread object.
 
 ## threadrun
-* `threadrun(vm_thread)
+* `threadrun(vm_thread)`
 
 Actually start running the code specified in the creation of the vm_thread
 object.
 
 ## threadyield
-* `threadyield()
+* `threadyield()`
 
 Tell the scheduler to prefer another thread then the thread this is being
 executed in, for now.
 
 ## threadjoin
-# `threadjoin(vm_thread)
+# `threadjoin(vm_thread)`
 
 Wait for the thread, indicated by the vm_thread object, to be finished.
 
