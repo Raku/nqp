@@ -2175,10 +2175,10 @@ with the same value.
 
 ## decont
 
-`decont(Mu $val --> Mu)`
-`decont_i(Int $val --> Mu)`
-`decont_n(Num $val --> Mu)`
-`decont_s(Str $val --> Mu)`
+* `decont(Mu $val --> Mu)`
+* `decont_i(Int $val --> Mu)`
+* `decont_n(Num $val --> Mu)`
+* `decont_s(Str $val --> Mu)`
 
 Extract, or **de**-**cont**ainerize, a value from a `Scalar` container.
 If the argument is not a container, the argument is returned unchanged:
