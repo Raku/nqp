@@ -2247,6 +2247,12 @@ Returns a 1 if the object is a float type, 0 otherwise.
 
 Returns a 1 if the integer value of the object is prime, 0 otherwise.
 
+## isrwcont
+* `isrwcont(Mu $obj --> int)`
+
+Returns a 1 if the object is a container type and can be written to, 0
+otherwise.
+
 ## isstr
 * `isstr(Mu $obj --> int)`
 
