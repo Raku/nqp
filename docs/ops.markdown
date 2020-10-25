@@ -262,6 +262,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [isnull](#isnull)
   * [isnum](#isnum)
   * [isprime](#isprime)
+  * [isrwcont](#isrwcont)
   * [isstr](#isstr)
   * [istrue](#istrue)
   * [istype](#istype)
@@ -377,6 +378,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
 - [Atomic Operations](#-atomic-operations)
   * [cas `moar`](#cas-moar)
   * [cas_i `moar`](#cas_i-moar)
+  * [atomicbindattr](#atomicbindattr)
   * [atomicinc_i `moar`](#atomicinc_i-moar)
   * [atomicdec_i `moar`](#atomicdec_i-moar)
   * [atomicadd_i `moar`](#atomicadd_i-moar)
@@ -3295,6 +3297,14 @@ at the referenced location. If they are equal, it replaces the value with
 `$new`. If they are not equal, nothing happens. The operation evaluates to the
 value originally at the location (which can be compared with `$expected` to
 see if the operation was a success).
+
+## atomicbindattr `moar`
+* `atomicbindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
+
+Atomically binds `$new_value` to the attribute of name `$attributename` of
+object `$obj`, where the attribute was declared in type `$type`. The notes
+in the `getattr` documentation also apply to `atomicbindattr`.
+
 
 ## atomicinc_i `moar`
 * `atomicinc_i(NativeIntRef $i --> int)`
