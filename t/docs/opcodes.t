@@ -1,19 +1,26 @@
-# Set this to 1 to print debug output
+#!/usr/bin/env raku
+
+
+# This test is written in Raku to take advantage of
+# features not present in NQP. Because this test is
+# for documentation only and is not run as part of
+# the standard test suite, should pose no burden.
+
+use Test;
+
+# set NQP_DOC_VERBOSE environment variable to get extra diag output
 sub debug($text) {
-    if 0 {
-        nqp::say("# $text");
-    }
+    diag $text if %*ENV<NQP_DOC_VERBOSE>;
 }
 
-my @*vms := nqp::list('jvm', 'moar', 'js');
-my @*variants := nqp::list("_i", "_n", "_s", "_I");
+my @*vms = <jvm moar js>;
+my @*variants = <_i _n _s _I>;
 
-my %documented_ops := find_documented_opcodes();
+my %documented_ops = find_documented_opcodes();
 
-my %ops := hash_of_vms();
+my %ops = hash_of_vms();
 
-
-%ops<jvm> := find_opcodes(
+%ops<jvm> = find_opcodes(
     :files([
         "src/vm/jvm/QAST/Compiler.nqp",
         "src/vm/jvm/NQP/Ops.nqp"
@@ -21,7 +28,7 @@ my %ops := hash_of_vms();
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
 );
 
-%ops<js> := find_opcodes(
+%ops<js> = find_opcodes(
     :files([
         "src/vm/js/Operations.nqp"
     ]),
@@ -29,7 +36,7 @@ my %ops := hash_of_vms();
 );
 
 
-%ops<moar> := find_opcodes(
+%ops<moar> = find_opcodes(
     :files([
         "src/vm/moar/QAST/QASTOperationsMAST.nqp",
         "src/vm/moar/QAST/QASTCompilerMAST.nqp",
@@ -38,64 +45,47 @@ my %ops := hash_of_vms();
     :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op>)
 );
 
-
 # Most backends programmatically add these ops - to keep our cheating simple,
 # add them to each of the backends manually
 for <if unless while until repeat_while repeat_until> -> $op_name {
     for @*vms -> $vm {
-        %ops{$vm}{$op_name} := 1;
+        %ops{$vm}{$op_name} = 1;
     }
 }
 
 # Some "opcodes" found by our hacky process are MoarVM opcodes
 # that are not exposed to NQP users: Remove them.
-nqp::deletekey(%ops<moar>,'assertparamcheck');
-nqp::deletekey(%ops<moar>,'bindexcategory');
-nqp::deletekey(%ops<moar>,'bindexpayload');
-nqp::deletekey(%ops<moar>,'capturelex');
-nqp::deletekey(%ops<moar>,'const_i64');
-nqp::deletekey(%ops<moar>,'const_s');
-nqp::deletekey(%ops<moar>,'continuationclone');
-nqp::deletekey(%ops<moar>,'extend_i16');
-nqp::deletekey(%ops<moar>,'extend_i32');
-nqp::deletekey(%ops<moar>,'extend_n32');
-nqp::deletekey(%ops<moar>,'extend_u16');
-nqp::deletekey(%ops<moar>,'extend_u32');
-nqp::deletekey(%ops<moar>,'getdynlex');
-nqp::deletekey(%ops<moar>,'getlexperinvtype_o');
-nqp::deletekey(%ops<moar>,'if_i');
-nqp::deletekey(%ops<moar>,'ifnonnull');
-nqp::deletekey(%ops<moar>,'iter');
-nqp::deletekey(%ops<moar>,'smrt_intify');
-nqp::deletekey(%ops<moar>,'smrt_numify');
-nqp::deletekey(%ops<moar>,'smrt_strify');
-nqp::deletekey(%ops<moar>,'strify');
-nqp::deletekey(%ops<moar>,'trunc_i16');
-nqp::deletekey(%ops<moar>,'trunc_i32');
-nqp::deletekey(%ops<moar>,'trunc_i8');
-nqp::deletekey(%ops<moar>,'trunc_u16');
-nqp::deletekey(%ops<moar>,'trunc_u8');
-nqp::deletekey(%ops<moar>,'unless_o');
+my @moar-skips = <
+    assertparamcheck bindexcategory bindexpayload capturelex
+    const_i64 const_s continuationclone extend_i16
+    extend_i32 extend_n32 extend_u16 extend_u32
+    getdynlex getlexperinvtype_o if_i ifnonnull
+    iter smrt_intify smrt_numify smrt_strify strify
+    trunc_i16 trunc_i32 trunc_i8 trunc_u16 trunc_u8 unless_o
+>;
+for @moar-skips -> $op {
+    %ops<moar>{$op}:delete;
+}
 
 # Are ops that are implemented documented? Fail once per opcode
-my %combined_ops := nqp::hash();
+my %combined_ops;
 for @*vms -> $vm {
-    for %ops{$vm} -> $op {
+    for %ops{$vm}.keys -> $op {
         if !%combined_ops{$op} {
-            %combined_ops{$op} := nqp::list($vm);
+            %combined_ops{$op} = [$vm,];
         } else {
-            nqp::push(%combined_ops{$op}, $vm);
+            %combined_ops{$op}.push: $vm;
         }
     }
 }
 
-for %combined_ops -> $opcode {
-    my $vms := nqp::join(";", %combined_ops{$opcode});
-    my $found := %documented_ops<any>{$opcode};
+for %combined_ops.keys -> $opcode {
+    my $vms = join(";", %combined_ops{$opcode});
+    my $found = %documented_ops<any>{$opcode};
     if (!$found) && !($opcode ~~ / '_' /) {
         for @*variants -> $type {
             if %documented_ops<any>{$opcode ~ $type} {
-                $found := 1;
+                $found = 1;
             }
         }
     }
@@ -104,50 +94,53 @@ for %combined_ops -> $opcode {
 
 # Do documented opcodes actually exist? Fail once per vm if not.
 for @*vms -> $vm {
-    for %documented_ops{$vm} -> $doc_op {
+    for %documented_ops{$vm}.keys -> $doc_op {
         ok(%ops{$vm}{$doc_op}, "documented op '$doc_op' exists in $vm");
     }
 }
 
+
 sub find_opcodes(:@files, :@keywords) {
-    my %ops := nqp::hash();
+    my %ops;
     for @files -> $file {
-        my @lines := nqp::split("\n", slurp($file));
-        my $line_no := 0;
-        for @lines -> $line {
+        my $line_no = 0;
+        for $file.IO.lines -> $line is copy {
             $line_no++;
-            if $line ~~ / "%core_op_generators{'" (<[a..zA..Z0..9_]>+) "'}" / -> $match {
+            if $line ~~ / '%core_op_generators{\'' (<[a..zA..Z0..9_]>+) '\'}' / -> $match {
                 if ?$match {
-                    %ops{$match[0]} := 1;
+                    %ops{$match[0]} = 1;
                     debug("$file:$line_no :: core_op_generators : {$match[0]}");
                 }
             } elsif $line ~~ / @keywords / {
-                my @pieces := nqp::split("'", $line);
-                $line := @pieces[1] eq 'nqp' ?? @pieces[3] !! @pieces[1];
+                my @pieces = split("'", $line);
+                my $piece1 = @pieces[1] // "";
+                my $piece2 = @pieces[2] // "";
+                my $piece3 = @pieces[3] // "";
+                $line = $piece1 eq 'nqp' ?? $piece3 !! $piece1;
 
-                next unless nqp::chars($line);
+                next unless $line.chars;
 
-                if @pieces[1] ne 'nqp' && @pieces[2] ~~ /^ \s* '~' \s* '$suffix' /{
+                if $piece1 ne 'nqp' && $piece2 ~~ /^ \s* '~' \s* '$suffix' / {
                     for <_s _n _i> -> $suffix {
-                        %ops{$line ~ $suffix} := 1;
+                        %ops{$line ~ $suffix} = 1;
                         debug("$file:$line_no :: keyword/suffix : $line$suffix");
                     }
                 }
-                %ops{$line} := 1;
+                %ops{$line} = 1;
                 debug("$file:$line_no :: keyword : $line");
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$func' \s* \{/ -> $match {
-                for nqp::split(' ', $match[0]) -> $func {
-                    %ops{$func ~ '_n'} := 1;
+                for split(' ', $match[0]) -> $func {
+                    %ops{$func ~ '_n'} = 1;
                     debug("$file:$line_no :: for block : {$func}_n");
                 }
             } elsif $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' / -> $match {
                 if ?$match {
-                    %ops{$match[0]} := 1;
+                    %ops{$match[0]} = 1;
                     debug("$file:$line_no :: %ops : {$match[0]}");
                 }
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$op' / -> $match {
-                for nqp::split(' ', $match[0]) -> $func {
-                    %ops{$func} := 1;
+                for split(' ', ~$match[0]) -> $func {
+                    %ops{$func} = 1;
                     debug("$file:$line_no :: for single : $func");
                 }
             }
@@ -157,9 +150,9 @@ sub find_opcodes(:@files, :@keywords) {
 }
 
 sub hash_of_vms() {
-    my %hash := nqp::hash();
+    my %hash;
     for @*vms -> $vm {
-        %hash{$vm} := nqp::hash();
+        %hash{$vm} := {};
     }
     return %hash;
 }
@@ -168,45 +161,28 @@ sub hash_of_vms() {
 # Deal only with hardcoded vms
 
 sub match_vms($input) {
-    my @vms := nqp::list();
-    if $input ~~ / '`jvm`' / {
-        nqp::push(@vms,"jvm");
+    my @vms;
+    for <jvm js moar> -> $vm {
+        if $input.contains('`' ~ $vm ~ '`') {
+            @vms.push: $vm;
+        }
     }
-    if $input ~~ / '`js`' / {
-        nqp::push(@vms,"js");
-    }
-    if $input ~~ / '`moar`' / {
-        nqp::push(@vms,"moar");
-    }
+
     return @vms;
 }
 
-# String trim (borrowed from rakudo!)
-sub trim($text) {
-    my int $left := nqp::findnotcclass(
-      nqp::const::CCLASS_WHITESPACE,
-      $text,
-      0,
-      (my int $pos := nqp::chars($text))
-    );
-    nqp::while(
-      nqp::isgt_i(--$pos,$left)
-        && nqp::iscclass(nqp::const::CCLASS_WHITESPACE,$text,$pos),
-      nqp::null
-    );
-    return nqp::substr($text,$left,$pos + 1 - $left);
-}
-
 # Is there any documentation to save for this opcode?
-sub save_documentation(%all, %docs, $text) {
-    my $copy := trim($text);
+multi save_documentation(%all, %docs, Any $text) { } 
+
+multi save_documentation(%all, %docs, Str $text) {
+    my $copy = $text.trim;
 
     if $copy ne "" {
-        for %docs -> $code {
-            for %docs{$code} -> $vm {
-                %all{$vm}{$code} := 1;
+        for %docs.keys -> $code {
+            for %docs{$code}.keys -> $vm {
+                %all{$vm}{$code} = 1;
             }
-            %all<any>{$code} := 1 ;
+            %all<any>{$code} = 1 ;
         }
     } else {
         # Empty description, nothing to save
@@ -216,73 +192,73 @@ sub save_documentation(%all, %docs, $text) {
 # Go through the documentation for opcodes, find opcode
 # documentation (ignoring placeholders) and save it.
 sub find_documented_opcodes() {
-    my %documented_ops := hash_of_vms();
-    %documented_ops<any> := nqp::hash();
+    my %documented_ops = hash_of_vms();
+    %documented_ops<any> := {};
 
     # Current set of opcodes is opcode key, list of VMs values
-    my %current-opcodes := nqp::hash(); # variants part of this opcode
+    my %current-opcodes; # variants part of this opcode
     # text of current description of opcode
     my $description;
 
-    my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
-    my @opcode_vms := nqp::list();
+    my @doc_lines = split("\n", slurp("docs/ops.markdown"));
+    my @opcode_vms;
 
-    my $state := 0; # 0 outside of an opcode
+    my $state = 0; # 0 outside of an opcode
                     # 1 seen opcode header
                     # 2 seen opcode variant
                     # 3 description of opcode
 
-    for @doc_lines -> $line {
+    for @doc_lines -> $line is copy {
         if $line ~~ /^ '# '/ {
             # Skip headings
             save_documentation(%documented_ops, %current-opcodes, $description);
-            %current-opcodes := nqp::hash();
-            $description := "";
-            $state := 0;
+            %current-opcodes := {};
+            $description = "";
+            $state = 0;
             next;
         }
 
         # A heading line for an opcode
-        my $match := $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
+        my $match = $line ~~ /^ '##' \s* <[a..zA..Z0..9_]>+ \s* ('`' .* '`')? /;
         if ?$match {
             save_documentation(%documented_ops, %current-opcodes, $description);
-            %current-opcodes := nqp::hash();
-            $description := "";
-            $state := 1;
-            @opcode_vms := match_vms($line);
-            @opcode_vms := @*vms unless @opcode_vms;
+            %current-opcodes := {};
+            $description = "";
+            $state = 1;
+            @opcode_vms = match_vms($line);
+            @opcode_vms = @*vms unless @opcode_vms;
         }
 
         # A specific variant of an opcode
         if $line ~~ / ^ '* `' .* '(' .* '`' .* ' _Internal_'? $ / {
-            $state := 2;
+            $state = 2;
 
             # Individual opcode lines may override the VMs set in the heading.
-            my @line_vms := @opcode_vms;
+            my @line_vms = @opcode_vms;
             if $line ~~ / '`'/ {
-                @line_vms := match_vms($line);
-                @line_vms := @opcode_vms unless @line_vms;
+                @line_vms = match_vms($line);
+                @line_vms = @opcode_vms unless @line_vms;
             }
 
-            $match := $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
+            $match = $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
             if ?$match {
                 # Opcode only usable via QAST
-                $line := ~$match[0];
+                $line = ~$match[0];
             } else {
                 # Regular opcode
-                $line := nqp::substr($line, 3);
-                $line := nqp::split("(", $line)[0];
+                $line = substr($line, 3);
+                $line = split("(", $line)[0];
             }
 
             for @line_vms -> $vm {
-                if ! nqp::existskey(%current-opcodes, $line) {
-                    %current-opcodes{$line} := nqp::hash();
+                if %current-opcodes{$line}:!exists {
+                    %current-opcodes{$line} := {};
                 }
-                %current-opcodes{$line}{$vm} := 1;
+                %current-opcodes{$line}{$vm} = 1;
             }
        } elsif $state == 2 || $state == 3 {
-           $state := 3;
-           $description := $description ~ $line;
+           $state = 3;
+           $description = $description ~ $line;
        } else {
            # nothing to do
        }
