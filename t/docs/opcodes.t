@@ -79,7 +79,7 @@ for @*vms -> $vm {
     }
 }
 
-for %combined_ops.keys -> $opcode {
+for %combined_ops.keys.sort -> $opcode {
     my $vms = join(";", %combined_ops{$opcode});
     my $found = %documented_ops<any>{$opcode};
     if (!$found) && !($opcode ~~ / '_' /) {
@@ -93,12 +93,11 @@ for %combined_ops.keys -> $opcode {
 }
 
 # Do documented opcodes actually exist? Fail once per vm if not.
-for @*vms -> $vm {
-    for %documented_ops{$vm}.keys -> $doc_op {
+for @*vms.sort -> $vm {
+    for %documented_ops{$vm}.keys.sort -> $doc_op {
         ok(%ops{$vm}{$doc_op}, "documented op '$doc_op' exists in $vm");
     }
 }
-
 
 sub find_opcodes(:@files, :@keywords) {
     my %ops;
