@@ -250,9 +250,6 @@ sub find_documented_opcodes() {
             }
 
             for @line_vms -> $vm {
-                if %current-opcodes{$line}:!exists {
-                    %current-opcodes{$line} := {};
-                }
                 %current-opcodes{$line}{$vm} = 1;
             }
        } elsif $state == 2 || $state == 3 {
