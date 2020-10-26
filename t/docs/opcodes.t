@@ -199,7 +199,6 @@ sub find_documented_opcodes() {
     # text of current description of opcode
     my $description;
 
-    my @doc_lines = split("\n", slurp("docs/ops.markdown"));
     my @opcode_vms;
 
     my $state = 0; # 0 outside of an opcode
@@ -207,7 +206,7 @@ sub find_documented_opcodes() {
                     # 2 seen opcode variant
                     # 3 description of opcode
 
-    for @doc_lines -> $line is copy {
+    for "docs/ops.markdown".IO.lines -> $line is copy {
         if $line ~~ /^ '# '/ {
             # Skip headings
             save_documentation(%documented_ops, %current-opcodes, $description);
