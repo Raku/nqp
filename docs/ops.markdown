@@ -3149,7 +3149,7 @@ following structure (times are in microseconds, sizes are in bytes):
 # <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
 ## nativecallrefresh
-Refresh the C-based data backing the Perl 6 object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Perl 6 object.
+Refresh the C-based data backing the Raku object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Raku object.
 
 # <a id="thread"></a> Thread opcodes
 
