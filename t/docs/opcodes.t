@@ -63,9 +63,10 @@ my @moar-skips = <
     iter smrt_intify smrt_numify smrt_strify strify
     trunc_i16 trunc_i32 trunc_i8 trunc_u16 trunc_u8 unless_o
 >;
-for @moar-skips -> $op {
-    %ops<moar>{$op}:delete;
-}
+for @moar-skips -> $op { %ops<moar>{$op}:delete; }
+my @js-skips = ['_n',];
+for @js-skips -> $op { %ops<js>{$op}:delete; }
+
 
 # Are ops that are implemented documented? Fail once per opcode
 my %combined_ops;
