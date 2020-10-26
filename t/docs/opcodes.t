@@ -158,17 +158,17 @@ sub hash_of_vms() {
 }
 
 # Given a string of quoted VMs, return a list.
-# Deal only with hardcoded vms
+# Deal only with known vms
 
 sub match_vms($input) {
-    my @vms;
-    for <jvm js moar> -> $vm {
+    my @found;
+    for @*vms -> $vm {
         if $input.contains('`' ~ $vm ~ '`') {
-            @vms.push: $vm;
+            @found.push: $vm;
         }
     }
 
-    return @vms;
+    return @found;
 }
 
 # Is there any documentation to save for this opcode?
