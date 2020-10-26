@@ -8,6 +8,8 @@
 
 use Test;
 
+my $markdown-file = "docs/ops.markdown";
+
 # set NQP_DOC_VERBOSE environment variable to get extra diag output
 sub debug($text) {
     diag $text if %*ENV<NQP_DOC_VERBOSE>;
@@ -201,7 +203,7 @@ sub find_documented_opcodes() {
                     # 2 seen opcode variant
                     # 3 description of opcode
 
-    for "docs/ops.markdown".IO.lines -> $line is copy {
+    for $markdown-file.IO.lines -> $line is copy {
         if $line ~~ /^ '# '/ {
             # Skip headings
             save_documentation(%documented_ops, %current-opcodes, $description);
