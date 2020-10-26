@@ -100,6 +100,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [coerce_si](#coerce_si)
   * [intify](#intify-moar)
   * [numify](#numify-moar)
+  * [stringify](#stringify)
 - [String Opcodes](#-string-opcodes)
   * [chars](#chars)
   * [chr](#chr)
@@ -1113,6 +1114,11 @@ Coerce an object to int.
 * `numify($o --> num)`
 
 Coerce an object to num.
+
+## stringify
+* `stringify($o --> num)`
+
+Coerce an object to str.
 
 # <a id="string"></a> String Opcodes
 
