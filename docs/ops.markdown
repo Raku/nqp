@@ -3178,12 +3178,12 @@ executed in, for now.
 Wait for the thread, indicated by the vm_thread object, to be finished.
 
 ## currentthread `moar` `jvm`
-* `currentthread($thread)`
+* `currentthread()`
 
-Returns the object for the current thread.
+Returns the vm_thread object for the current thread.
 
 ## threadlockcount `moar` `jvm`
-* `threadlockcount($thread)`
+* `threadlockcount(vm_thread)`
 
 Returns the number of locks held by the given thread.
 
