@@ -20,7 +20,7 @@ my %documented_ops = find_documented_opcodes();
 
 my %ops = hash_of_vms();
 
-%ops<jvm> = find_opcodes(
+%ops<jvm> = find-opcodes(
     :files([
         "src/vm/jvm/QAST/Compiler.nqp",
         "src/vm/jvm/NQP/Ops.nqp"
@@ -28,15 +28,14 @@ my %ops = hash_of_vms();
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
 );
 
-%ops<js> = find_opcodes(
+%ops<js> = find-opcodes(
     :files([
         "src/vm/js/Operations.nqp"
     ]),
     :keywords(<add_op add_simple_op add_hll_op add_cmp_op add_infix_op>)
 );
 
-
-%ops<moar> = find_opcodes(
+%ops<moar> = find-opcodes(
     :files([
         "src/vm/moar/QAST/QASTOperationsMAST.nqp",
         "src/vm/moar/QAST/QASTCompilerMAST.nqp",
@@ -100,44 +99,41 @@ for @*vms.sort -> $vm {
     }
 }
 
-sub find_opcodes(:@files, :@keywords) {
+sub find-opcodes(:@files, :@keywords) {
     my %ops;
     for @files -> $file {
         my $line_no = 0;
-        for $file.IO.lines -> $line is copy {
+        for $file.IO.lines -> $line {
             $line_no++;
             if $line ~~ / '%core_op_generators{\'' (<[a..zA..Z0..9_]>+) '\'}' / -> $match {
-                if ?$match {
-                    %ops{$match[0]} = 1;
-                    debug("$file:$line_no :: core_op_generators : {$match[0]}");
-                }
+                %ops{$match[0]} = 1;
+                debug("$file:$line_no :: core_op_generators : {$match[0]}");
             } elsif $line ~~ / @keywords / {
                 my @pieces = split("'", $line);
                 my $piece1 = @pieces[1] // "";
                 my $piece2 = @pieces[2] // "";
                 my $piece3 = @pieces[3] // "";
-                $line = $piece1 eq 'nqp' ?? $piece3 !! $piece1;
+                my $opcode = $piece1 eq 'nqp' ?? $piece3 !! $piece1;
 
-                next unless $line.chars;
+                next unless $opcode.chars;
 
                 if $piece1 ne 'nqp' && $piece2 ~~ /^ \s* '~' \s* '$suffix' / {
                     for <_s _n _i> -> $suffix {
-                        %ops{$line ~ $suffix} = 1;
-                        debug("$file:$line_no :: keyword/suffix : $line$suffix");
+                        my $full-opcode = $opcode ~ $suffix;
+                        %ops{$full-opcode} = 1;
+                        debug("$file:$line_no :: keyword/suffix : $full-opcode");
                     }
                 }
-                %ops{$line} = 1;
-                debug("$file:$line_no :: keyword : $line");
+                %ops{$opcode} = 1;
+                debug("$file:$line_no :: keyword : $opcode");
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$func' \s* \{/ -> $match {
                 for split(' ', $match[0]) -> $func {
                     %ops{$func ~ '_n'} = 1;
                     debug("$file:$line_no :: for block : {$func}_n");
                 }
             } elsif $line ~~ / '%ops<' (<[a..zA..Z0..9_]>+) '> :=' / -> $match {
-                if ?$match {
-                    %ops{$match[0]} = 1;
-                    debug("$file:$line_no :: %ops : {$match[0]}");
-                }
+                %ops{$match[0]} = 1;
+                debug("$file:$line_no :: %ops : {$match[0]}");
             } elsif $line ~~ /^ \s* for \s* '<' (<[\w\ ]>+) '>' \s* '->' \s* '$op' / -> $match {
                 for split(' ', ~$match[0]) -> $func {
                     %ops{$func} = 1;
@@ -184,8 +180,6 @@ multi save_documentation(%all, %docs, Str $text) {
             }
             %all<any>{$code} = 1 ;
         }
-    } else {
-        # Empty description, nothing to save
     }
 }
 
@@ -255,8 +249,6 @@ sub find_documented_opcodes() {
        } elsif $state == 2 || $state == 3 {
            $state = 3;
            $description = $description ~ $line;
-       } else {
-           # nothing to do
        }
     }
     save_documentation(%documented_ops, %current-opcodes, $description);
