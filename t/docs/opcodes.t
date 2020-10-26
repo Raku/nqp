@@ -81,7 +81,7 @@ for @*vms -> $vm {
 }
 
 for %combined_ops.keys.sort -> $opcode {
-    my $vms = join(";", %combined_ops{$opcode});
+    my $vms = join(";", @(%combined_ops{$opcode}));
     my $found = %documented_ops<any>{$opcode};
     if (!$found) && !($opcode ~~ / '_' /) {
         for @*variants -> $type {
