@@ -250,6 +250,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [defined](#defined)
   * [fromnum](#fromnum)
   * [fromstr](#fromstr)
+  * [fromI_I](#fromI_I)
   * [isbig](#isbig)
   * [iscoderef](#iscoderef-moar)
   * [isconcrete](#isconcrete)
