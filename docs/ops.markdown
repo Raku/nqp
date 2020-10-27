@@ -252,7 +252,6 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [isbig](#isbig)
   * [iscoderef](#iscoderef-moar)
   * [isconcrete](#isconcrete)
-  * [isconcrete_nd](#isconcrete_nd)
   * [iscont](#iscont)
   * [isfalse](#isfalse)
   * [ishash](#ishash)
@@ -2225,14 +2224,11 @@ Returns a 1 if the object contains a code reference, 0 otherwise.
 
 ## isconcrete
 * `isconcrete(Mu $obj --> int)`
-
-Returns a 1 if the object is not a type object, 0 otherwise.
-
-## isconcrete_nd
 * `isconcrete_nd(Mu $obj --> int)`
 
 Returns a 1 if the object is not a type object, 0 otherwise.
-Does not decontainerize the object.
+
+The `_nd` variant does not decontainerize the object.
 
 ## iscont
 * `iscont(Mu $obj --> int)`
@@ -2307,8 +2303,11 @@ Returns a 1 if the object has a truthy value, 0 otherwise.
 
 ## istype
 * `istype(Mu $obj, Mu:T $obj --> int)`
+* `istype_nd(Mu $obj, Mu:T $obj --> int)`
 
 Returns a 1 if the object is of the given type, 0 otherwise.
+
+The `_nd` variant does not decontainerize the object.
 
 ## isttyfh
 * `isttyfh(Mu $obj --> int)`
@@ -2476,8 +2475,11 @@ Returns 1 if ``$obj`` object has FALLBACK method.
 
 ## clone
 * `clone(Mu $obj --> Mu)`
+* `clone_nd(Mu $obj --> Mu)`
 
 Return a clone of the passed in object.
+
+The `_nd` variant does not decontainerize the object.
 
 ## create
 * `create(Mu:T $type --> Mu)`
@@ -2534,8 +2536,11 @@ See `bindcomp` for more information.
 
 ## how
 * `how(Mu $obj --> Mu)`
+* `how_nd(Mu $obj --> Mu)`
 
 NQP equivalent for Raku's `$obj.HOW`.
+
+The `_nd` variant does not decontainerize the object.
 
 ## rebless
 * `rebless(Mu $obj, Mu:T $type --> Mu)`
@@ -2559,8 +2564,11 @@ NQP equivalent for Raku's `$obj.WHO`.
 
 ## what
 * `what(Mu $obj --> Mu)`
+* `what_nd(Mu $obj --> Mu)`
 
 NQP equivalent for Raku's `$obj.WHAT`.
+
+The `_nd` variant does not decontainerize the object.
 
 ## where
 * `where(Mu $obj --> int)`
