@@ -1,6 +1,5 @@
 #!/usr/bin/env raku
 
-
 # This test is written in Raku to take advantage of
 # features not present in NQP. Because this test is
 # for documentation only and is not run as part of
@@ -111,7 +110,7 @@ sub find-opcodes(:@files, :@keywords) {
             if $line ~~ / '%core_op_generators{\'' (<[a..zA..Z0..9_]>+) '\'}' / -> $match {
                 %ops{$match[0]} = 1;
                 debug("$file:$line_no :: core_op_generators : {$match[0]}");
-            } elsif $line ~~ / @keywords / {
+            } elsif $line.contains(any(@keywords)) {
                 my @pieces = split("'", $line);
                 my $piece1 = @pieces[1] // "";
                 my $piece2 = @pieces[2] // "";
