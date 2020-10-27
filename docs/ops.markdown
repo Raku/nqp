@@ -2108,7 +2108,7 @@ Same as stat, but internally uses the OS's lstat() function, which does *not*
 follow symlinks.
 
 ## lstat_time
-* `stat_time(str $path, int $code --> num)`
+* `lstat_time(str $path, int $code --> num)`
 
 Same as stat_time, but internally uses the OS's lstat() function, which does
 *not* follow symlinks.
