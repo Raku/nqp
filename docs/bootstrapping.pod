@@ -37,4 +37,4 @@ Commit the bootstrap files
 
 =back
 
-Historic References: L<http://irclog.perlgeek.de/perl6/2010-04-22#i_2253227>
+Historic References: L<https://colabti.org/irclogger/irclogger_log/perl6?date=2010-04-22#l1331>
