@@ -511,9 +511,10 @@ Return the absolute value of a number.
 * `add_i(int $l, int $r --> int)`
 * `add_n(num $l, num $r --> num)`
 * `add_I(Int $l, Int $r, Mu:T $type --> Int)`
+* `add_i64(Int $l, Int $r, Mu:T $type --> Int)` `js`
 
 Add two numbers together, returning the result.
-`_I` variant returns an object of the given type.
+Typed variants return an object of the given type.
 
 ## div
 * `div_i(int $l, int $r --> int)`
