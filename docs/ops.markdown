@@ -2223,9 +2223,10 @@ discarding any decimal portion.
 
 Convert string value to a Big Integer of the given type.
 
-## fromI_I(Int $val --> Int)`
+## fromI_I
+* `fromI_I(Int $val --> Int)`
 
-Rebox Int value, removing any potential mixins.
+Rebox Big Integer value, removing any potential mixins.
 
 ## isbig
 * `isbig_I(Int $obj --> int)`
