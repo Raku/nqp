@@ -289,6 +289,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [create](#create)
   * [eqaddr](#eqaddr)
   * [findmethod](#findmethod)
+  * [tryfindmethod](#tryfindmethod)
   * [getattr](#getattr)
   * [getcomp](#getcomp)
   * [how](#how)
@@ -2498,6 +2499,12 @@ Returns 1 if the objects are the same object in the underlying VM,
 
 If the object has a method of the given name, return it. Otherwise,
 throw an exception.
+
+## tryfindmethod
+* `tryfindmethod(Mu $obj, str $method --> Mu)`
+
+If the object has a method of the given name, return it. Otherwise,
+return Mu.
 
 ## getattr
 * `getattr(Mu $obj, Mu:T $type, str $attributename --> Mu)`
