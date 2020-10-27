@@ -226,6 +226,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [mkdir](#mkdir)
   * [nextfiledir](#nextfiledir)
   * [opendir](#opendir)
+  * [readlink](#readlink)
   * [rename](#rename)
   * [rmdir](#rmdir)
   * [stat](#stat)
@@ -1999,6 +2000,12 @@ When no more items are available, return a null string. (check with `null_s`)
 
 Return a directory handle on the given directory path. Throw an exception
 if `$path` is not a directory.
+
+## readlink
+* `readlink(str $path -> str)`
+
+Given a path that is a link, return the target path.
+Throw an exception if the argument does not resolve to a link.
 
 ## rename
 * `rename(str $from, str $to --> int)`
