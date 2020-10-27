@@ -62,7 +62,8 @@ my @moar-skips = <
     extend_i32 extend_n32 extend_u16 extend_u32
     getdynlex getlexperinvtype_o if_i ifnonnull
     iter smrt_intify smrt_numify smrt_strify strify
-    trunc_i16 trunc_i32 trunc_i8 trunc_u16 trunc_u8 unless_o
+    trunc_i16 trunc_i32 trunc_i8 trunc_u16 trunc_u8
+    unless_i unless_o 
 >;
 for @moar-skips -> $op { %ops<moar>{$op}:delete; }
 my @js-skips = ['_n',];
