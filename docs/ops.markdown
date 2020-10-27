@@ -336,6 +336,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [cpucores](#cpucores)
   * [decodelocaltime](#decodelocaltime)
   * [force_gc](#force_gc-moar-jvm)
+  * [freemem](#freemem)
   * [getcodename](#getcodename)
   * [getrusage](#getrusage)
   * [uname](#uname-moar-js)
@@ -2891,6 +2892,11 @@ actual year (A.D), and the $month has been normalized to 1..12.
 * `force_gc()`
 
 Force the garbage collector to run.
+
+## freemem
+* `freemem()`
+
+Returns amount of free memory available in the system (not the NQP VM itself) (in bytes).
 
 ## getcodename
 * `getcodename($obj --> str)`
