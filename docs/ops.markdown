@@ -571,9 +571,10 @@ Return the negative of a number.
 * `sub_i(int $l, int $r --> int)`
 * `sub_n(num $l, num $r --> num)`
 * `sub_I(Int $l, Int $r, Mu:T $type --> Int)`
+* `sub_i64(Int $l, Int $r, Mu:T $type --> Int)` `js`
 
 Subtract $r from $l, returning the result.
-`_I` variant returns an object of the given type.
+Typed variants return an object of the given type.
 
 # <a id="numeric"></a> Numeric Opcodes
 
