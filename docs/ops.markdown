@@ -1022,6 +1022,7 @@ _Note, there's no bindkey_u yet since at the moment atkey_u is only used for get
 * `bindkey_i(%hash, str $key, int $v --> $v)`
 * `bindkey_n(%hash, str $key, num $v --> $v)`
 * `bindkey_s(%hash, str $key, str $v --> $v)`
+* `bindkey_o(%hash, str $key, obj $v --> $v)` `moar`
 
 Bind key $key of %hash to $v and return $v.
 
