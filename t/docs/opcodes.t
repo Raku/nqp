@@ -204,7 +204,9 @@ sub find_documented_opcodes() {
                     # 2 seen opcode variant
                     # 3 description of opcode
 
-    for $markdown-file.IO.lines -> $line is copy {
+    for $markdown-file.IO.lines -> $line {
+        my $opcode;
+
         if $line ~~ /^ '# '/ {
             # Skip headings
             save_documentation(%documented_ops, %current-opcodes, $description);
@@ -239,15 +241,15 @@ sub find_documented_opcodes() {
             $match = $line ~~ / 'QAST::Op.new' .* ':op<' (.*?) '>' /;
             if ?$match {
                 # Opcode only usable via QAST
-                $line = ~$match[0];
+                $opcode = ~$match[0];
             } else {
                 # Regular opcode
-                $line = substr($line, 3);
-                $line = split("(", $line)[0];
+                $opcode = substr($line, 3);
+                $opcode = split("(", $opcode)[0];
             }
 
             for @line_vms -> $vm {
-                %current-opcodes{$line}{$vm} = 1;
+                %current-opcodes{$opcode}{$vm} = 1;
             }
        } elsif $state == 2 || $state == 3 {
            $state = 3;
