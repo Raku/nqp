@@ -103,6 +103,8 @@ for @*vms.sort -> $vm {
 
 sub find-opcodes(:@files, :@keywords) {
     my %ops;
+    my $keywords = any(@keywords);
+
     for @files -> $file {
         my $line_no = 0;
         for $file.IO.lines -> $line {
@@ -110,7 +112,7 @@ sub find-opcodes(:@files, :@keywords) {
             if $line ~~ / '%core_op_generators{\'' (<[a..zA..Z0..9_]>+) '\'}' / -> $match {
                 %ops{$match[0]} = 1;
                 debug("$file:$line_no :: core_op_generators : {$match[0]}");
-            } elsif $line.contains(any(@keywords)) {
+            } elsif $line.contains($keywords) {
                 my @pieces = split("'", $line);
                 my $piece1 = @pieces[1] // "";
                 my $piece2 = @pieces[2] // "";
