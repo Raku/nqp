@@ -3492,9 +3492,11 @@ is, with appropriate barriering to ensure the changed value is "published").
 Performs a full memory barrier.
 
 # <a id="serialization-context"></a> Serialization context
+
 Abbreviated as SC.
-You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that use these opcodes.
+You probably don't need any of these. When creating a new language and possibly a new World class, you will inherit serialization code that uses these opcodes.
 For test examples, see [t/serialization/](https://github.com/Raku/nqp/tree/master/t/serialization)
+
 ## createsc
 * `createsc($handle-string)`
 creates a serialization context and returns it.
