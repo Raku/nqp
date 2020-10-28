@@ -57,11 +57,6 @@ command like:
 
     $ ./nqp hello.nqp
 
-If attempting to run NQP on the JVM results in NQP claiming it couldn't reserve
-enough memory, you may need to increase the memory limit of your shell like so:
-
-    $ ulimit -d 6144000
-
 By default, NQP searches for the MoarVM executable and installs to the
 directory C<./install>. You can change that with the C<--prefix> option to
 Configure.pl.
@@ -96,6 +91,13 @@ Should this happen to you, then a solution might be the following:
 
 Note that the 10.9 in the above, represents the major version of OS X being
 used.  On Mavericks use 10.9 (like above), on Yosemite use 10.10.
+
+=head3 JVM
+
+If attempting to run NQP on the JVM results in NQP claiming it couldn't reserve
+enough memory, you may need to increase the memory limit of your shell like so:
+
+    $ ulimit -d 6144000
 
 =head2 Using NQP
 
