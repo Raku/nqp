@@ -361,7 +361,13 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [mvmstartprofile](#mvmstartprofile-moar)
   * [mvmendprofile](#mvmendprofile-moar)
 - [Native Call / Interoperability Opcodes](#-native-call--interoperability-opcodes)
+  * [buildnativecall](#buildnativecall)
+  * [nativecall](#nativecall)
+  * [nativecallcast](#nativecallcast)
+  * [nativecallglobal](#nativecallglobal)
+  * [nativecallinvoke](#nativecallinvoke)
   * [nativecallrefresh](#nativecallrefresh)
+  * [nativecallsizeof](#nativecallsizeof)
 - [Thread Opcodes](#-thread-opcodes)
   * [newthread](#newthread)
   * [threadid](#threadid-moar-jvm)
@@ -3185,8 +3191,59 @@ following structure (times are in microseconds, sizes are in bytes):
 
 # <a id="nativecall"></a> Native Call / Interoperability Opcodes
 
+## buildnativecall
+* `buildnativecall(obj &routine, str $lib, $symbol, str $conv, obj $arg_info, obj $ret_info -> int jit)`
+
+This opcode connects an nqp routine to a native function.  The routine must have an attribute with
+NativeCall REPR as a box target.
+
+Arguments are the routine itself, the name of the native library, the name of the
+symbol representing the native function, the calling convention, argument information and a hash with
+type information for the return type. It returns 1 if the call can be JITed and 0 otherwise.
+The call convention will usually be an empty string. arg_info is an array containing a hash for each
+parameter. The hashes contain the typeobj, rw, type (type code) and optionally a free_str flag for Str
+parameters and a similar structure in callback_args for callback parameters for Callable parameters
+The ret_info hash has similar keys with typeobj, type and free_str.
+
+ret-info also has some additional fields not strictly related to return type: entry_point, resolve_lib_name and resolve_lib_name_arg.
+
+resolve_lib_name is optional and contains a code object. This gets called with resolve_lib_name_arg to
+resolve this name to the actual name or path of the library to be loaded. This is used for relocatability
+of repositories and native libraries they contain (it keeps the absolute paths out of precomp files)
+
+## nativecall
+* `nativecall(obj $return-type, obj $routine, @args -> obj)`
+
+Invoke native code. It takes a
+return type, the HLL sub itself and an array containing the arguments and returns the result.
+
+## nativecallcast
+* `nativecallcast(obj $type, obj $cthing -> obj)`
+
+Given a C-based object, cast it to the given type, and return the new object.
+
+## nativecallglobal
+* `nativecallglobal(str $lib, str $symbol, obj $type -> obj)`
+
+Given a C-library filename, a symbol name, and an object type, return an object that
+wraps the C variable.
+
+## nativecallinvoke
+* `nativecallinvoke(obj $return-type, obj $routine, @args -> obj)` `moar`
+
+Low level version of nativecall(). Decontainerized values are required
+in the arguments array.
+
 ## nativecallrefresh
+* `nativecallrefresh(obj $cthing)`
+
 Refresh the C-based data backing the Raku object. This op should only be used if changes have been made to the C-data, and these changes are not being reflected in the Raku object.
+
+## nativecallsizeof
+* `nativecallsizeof(obj $cthing -> int)`
+
+Return the size in bytes of the given C-based object. Works for both
+simple values like different sized integers, but also structs.
 
 # <a id="thread"></a> Thread opcodes
 
