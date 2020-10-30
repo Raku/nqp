@@ -56,13 +56,12 @@ for <if unless while until repeat_while repeat_until> -> $op_name {
 # Some "opcodes" found by our hacky process are MoarVM opcodes
 # that are not exposed to NQP users: Remove them.
 my @moar-skips = <
-    assertparamcheck bindexcategory bindexpayload capturelex
-    const_i64 const_s continuationclone extend_i16
-    extend_i32 extend_n32 extend_u16 extend_u32
-    getdynlex getlexperinvtype_o if_i ifnonnull
-    iter osrpoint smrt_intify smrt_numify smrt_strify strify
-    trunc_i16 trunc_i32 trunc_i8 trunc_u16 trunc_u8
-    unless_i unless_o 
+    assertparamcheck binddynlex bindexcategory bindexpayload capturelex checkarity
+    const_i64 const_n64 const_s continuationclone extend_i16 extend_i32 extend_i8
+    extend_n32 extend_u16 extend_u32 extend_u8 findmeth findmeth_s getcode getdynlex
+    getlexperinvtype_o goto if_i ifnonnull iter osrpoint setelemspos smrt_intify
+    smrt_numify smrt_strify strify takehandlerresult throwcatdyn throwdyn trunc_i16
+    trunc_i32 trunc_i8 trunc_n32 trunc_u16 trunc_u32 trunc_u8 unless_i unless_o
 >;
 for @moar-skips -> $op { %ops<moar>{$op}:delete; }
 my @js-skips = ['_n',];
