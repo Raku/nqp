@@ -1,11 +1,16 @@
 # Introduction
 
-The opcode set is dynamic. This document is about core NQP opcodes. For Raku opcodes added by the rakudo compiler
-see [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the rakudo
+This document is for core NQP opcodes.
+
+For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/Raku/nqp/blob/master/docs/qast.markdown).
+
+There is not a 1:1 mapping of MoarVM opcodes to the MoarVM-based NQP. Some opcodes are defined in NQP,
+some MoarVM opcodes are not exposed.
+
+For Raku opcodes added by the rakudo compiler see
+[docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the Rakudo
 repository. They are of the form `nqp::p6*` (following the historical naming of Perl 6).
 
-The tool [tools/find-undocumented-ops.raku](https://github.com/Raku/nqp/blob/master/tools/find-undocumented-ops.raku) can be used to find undocumented opcodes.
-For generating an abstract tree that includes opcodes, see [docs/qast.markdown](https://github.com/Raku/nqp/blob/master/docs/qast.markdown).
 
 ## Table of Contents
 
@@ -350,8 +355,8 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [getppid](#getppid-moar)
   * [indexingoptimized](#indexingoptimized)
   * [js](#js-moar=js)
-  * [jvmclasspaths `jvm`](#jvmclasspaths-jvm)
-  * [jvmgetproperties `jvm`](#jvmgetproperties-jvm)
+  * [jvmclasspaths](#jvmclasspaths-jvm)
+  * [jvmgetproperties](#jvmgetproperties-jvm)
   * [objectid](#objectid)
   * [setcodename](#setcodename)
   * [sha1](#sha1)
@@ -395,17 +400,17 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [hllhash](#hllhash-moar-jvm)
   * [hlllist](#hlllist-moar-jvm)
 - [Atomic Operations](#-atomic-operations)
-  * [cas `moar`](#cas-moar)
-  * [cas_i `moar`](#cas_i-moar)
+  * [cas](#cas-moar)
+  * [cas_i](#cas_i-moar)
   * [atomicbindattr](#atomicbindattr)
-  * [atomicinc_i `moar`](#atomicinc_i-moar)
-  * [atomicdec_i `moar`](#atomicdec_i-moar)
-  * [atomicadd_i `moar`](#atomicadd_i-moar)
-  * [atomicload `moar`](#atomicload-moar)
-  * [atomicload_i `moar`](#atomicload_i-moar)
-  * [atomicstore `moar`](#atomicstore-moar)
-  * [atomicstore_i `moar`](#atomicstore_i-moar)
-  * [barrierfull `moar`](#barrierfull-moar)
+  * [atomicinc_i](#atomicinc_i-moar)
+  * [atomicdec_i](#atomicdec_i-moar)
+  * [atomicadd_i](#atomicadd_i-moar)
+  * [atomicload](#atomicload-moar)
+  * [atomicload_i](#atomicload_i-moar)
+  * [atomicstore](#atomicstore-moar)
+  * [atomicstore_i](#atomicstore_i-moar)
+  * [barrierfull](#barrierfull-moar)
 - [Serialization context](#-serialization-context)
   * [createsc](#createsc)
   * [scsetdesc](#scsetdesc)
