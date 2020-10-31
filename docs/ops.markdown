@@ -1128,7 +1128,7 @@ Coerce an object to int.
 Coerce an object to num.
 
 ## stringify
-* `stringify($o --> num)`
+* `stringify($o --> str)`
 
 Coerce an object to str.
 
