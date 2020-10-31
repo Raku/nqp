@@ -168,6 +168,7 @@ For generating an abstract tree that includes opcodes, see [docs/qast.markdown](
   * [if](#if)
   * [unless](#unless)
   * [with](#with)
+  * [without](#without)
 - [Loop/Control Opcodes](#-loopcontrol-opcodes)
   * [control](#control)
   * [defor](#defor)
@@ -1683,6 +1684,14 @@ return result of `$condition`.
 * `with(Block $condition, Block $then, Block $else)`
 
 If the `$condition` evaluates to a defined value, run the `$then` block.
+If not, and an `$else` block is present, run that instead, if it's absent,
+return result of `$condition`.
+
+## without
+* `without(Block $condition, Block $then)`
+* `without(Block $condition, Block $then, Block $else)`
+
+If the `$condition` evaluates to an **undefined** value, run the `$then` block.
 If not, and an `$else` block is present, run that instead, if it's absent,
 return result of `$condition`.
 
