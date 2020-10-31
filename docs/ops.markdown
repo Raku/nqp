@@ -3417,6 +3417,8 @@ Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of u
 
 # <a id="hll-specific"></a> HLL-Specific Operations
 
+HLL, or High-Level Language, refers to the language being implemented in NQP.
+
 ## hllbool
 * `hllbool(int -> obj)`
 
