@@ -2612,7 +2612,8 @@ The `_nd` variant does not decontainerize the object.
 ## where
 * `where(Mu $obj --> int)`
 
-Return a unique ID for this `$obj`.
+Return the memory address for this `$obj`.  Please note that this is **NOT**
+a constant value for a given object.  Please use `objectid` for that.
 
 # <a id="bit"></a> Bit Opcodes
 
