@@ -1,11 +1,8 @@
 =pod
 
-=head1 NQP - Not Quite Perl
+=head1 NQP - Not Quite Paradise
 
-NQP is Copyright (C) 2009-2020 by The Perl Foundation.  See F<LICENSE>
-for licensing details.
-
-This is "Not Quite Perl" -- a lightweight Raku-like environment for
+This is "Not Quite Paradise" -- a lightweight Raku-like environment for
 virtual machines.  The key feature of NQP is that it's designed to be a very
 small environment (as compared with, say, raku or Rakudo) and is focused on
 being a high-level way to create compilers and libraries for virtual
@@ -130,5 +127,10 @@ If you are developing C<nqp-js>, you may want to pass the C<--link> option to co
 
     $ cd src/vm/js/nqp-runtime; npm link .
     $ perl Configure --backends=moar,js
+
+=head1 COPYRIGHT
+
+NQP is Copyright (C) 2009-2020 by The Perl Foundation.  See F<LICENSE>
+for licensing details.
 
 =cut
