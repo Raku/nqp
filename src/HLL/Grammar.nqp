@@ -224,6 +224,7 @@ of the match.
         @args.push(HLL::Compiler.lineof($target, $pos) + 1);
         @args.push(', near "');
         @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
+        @args.push('"');
         nqp::die(join('', @args))
     }
 
