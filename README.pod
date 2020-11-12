@@ -39,17 +39,16 @@ C<NQP> can run on three different backends: C<MoarVM>, the C<JVM>, and C<JavaScr
 The C<JVM> and C<JavaScript> backends are currently experimental.  The JVM backend
 requires C<JDK 1.9> (also known as C<JDK 9>) or higher.
 
-Decide on which backends you want it to run, and configure and build it as
-follows:
-
-Once you have a copy of NQP, build it as follows:
+Once you have a copy of NQP, decide which backends you want to run,
+and configure and build it as follows:
 
     $ cd nqp
     $ perl Configure.pl --backends=moar,jvm
     $ make
 
 If you don't have an installed MoarVM, you can have
-C<Configure.pl> build one for you by passing the C<--gen-moar> option to it as well.
+C<Configure.pl> download and build one for you by passing the C<--gen-moar>
+option to it as well.
 
 The C<make> step will create a C<nqp> or C<nqp.exe> executable in the current
 directory.  Programs can then be run from the build directory using a
