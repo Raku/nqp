@@ -42,7 +42,7 @@ my %ops = hash_of_vms();
         "src/vm/moar/QAST/QASTCompilerMAST.nqp",
         "src/vm/moar/NQP/Ops.nqp"
     ]),
-    :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op>)
+    :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op add_native_assign_op>)
 );
 
 # Most backends programmatically add these ops - to keep our cheating simple,
