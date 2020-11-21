@@ -25,6 +25,8 @@ public class VMIterInstance extends SixModelObject {
     public Iterator<String> hashKeyIter;
     public String curKey;
     public SixModelObject curValue;
+    private boolean beforeStart = true;
+    private boolean afterEnd = false;
 
     /**
      * Iteration mode.
@@ -72,8 +74,13 @@ public class VMIterInstance extends SixModelObject {
             target.at_pos_native(tc, idx);
             return Ops.box_s(tc.native_s, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
         case MODE_HASH:
+            if (!hashKeyIter.hasNext()) {
+                afterEnd = true;
+                throw ExceptionHandling.dieInternal(tc, "Iteration past end of iterator");
+            }
             curKey = hashKeyIter.next();
             curValue = target.at_key_boxed(tc, curKey);
+            beforeStart = false;
             return this;
         default:
             throw ExceptionHandling.dieInternal(tc, "Unknown iteration mode");
@@ -101,6 +108,8 @@ public class VMIterInstance extends SixModelObject {
         case MODE_ARRAY:
             return new Long(idx).toString();
         case MODE_HASH:
+            if (beforeStart || afterEnd)
+                throw ExceptionHandling.dieInternal(tc, "You have not advanced to the first item of the hash iterator, or have gone past the end");
             return curKey;
         default:
             throw ExceptionHandling.dieInternal(tc, "Unknown iteration mode");
@@ -111,6 +120,8 @@ public class VMIterInstance extends SixModelObject {
         case MODE_ARRAY:
             return target.at_pos_boxed(tc, idx);
         case MODE_HASH:
+            if (beforeStart || afterEnd)
+                throw ExceptionHandling.dieInternal(tc, "You have not advanced to the first item of the hash iterator, or have gone past the end");
             return curValue;
         default:
             throw ExceptionHandling.dieInternal(tc, "Unknown iteration mode");
