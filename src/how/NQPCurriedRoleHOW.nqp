@@ -20,7 +20,9 @@ knowhow NQPCurriedRoleHOW {
 
     method new_type($curried_role!, *@pos_args) {
         my $meta := self.new(:curried_role($curried_role), :pos_args(@pos_args));
-        nqp::newtype($meta, 'Uninstantiable');
+        my $type := nqp::newtype($meta, 'Uninstantiable');
+        nqp::setdebugtypename($type, 'Curried ' ~ $curried_role.HOW.name($curried_role));
+        $type
     }
 
     method specialize($obj, $class_arg) {
