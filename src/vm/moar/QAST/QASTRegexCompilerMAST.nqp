@@ -297,10 +297,9 @@ class QAST::MASTRegexCompiler {
         my $endlabel := @!rxjumps[$endlabel_index];
 
         # Emit all the possible alternatives
-        my $iter     := nqp::iterator($node.list);
-        my $itmp     := $!regalloc.fresh_i();
-        while $iter {
-            nqp::shift($iter);
+        my $itmp      := $!regalloc.fresh_i();
+        my int $elems := nqp::elems($node.list) + 1;
+        while --$elems {
             my $altlabel_index := self.rxjump();
             my $altlabel := @!rxjumps[$altlabel_index];
             nqp::push_i(@label_arr, $altlabel_index);
@@ -321,7 +320,7 @@ class QAST::MASTRegexCompiler {
         op('goto', %!reg<fail>);
 
         my $altcount := 0;
-        $iter := nqp::iterator($node.list);
+        my $iter := nqp::iterator($node.list);
         while $iter {
             my $altlabel_index := nqp::atpos_i(@label_arr, $altcount);
             my $altlabel := @!rxjumps[$altlabel_index];
