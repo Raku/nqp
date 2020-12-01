@@ -11,7 +11,6 @@ For Raku opcodes added by the rakudo compiler see
 [docs/ops.markdown](https://github.com/rakudo/rakudo/blob/master/docs/ops.markdown) in the Rakudo
 repository. They are of the form `nqp::p6*` (following the historical naming of Perl 6).
 
-
 ## Table of Contents
 
 - [NQP Opcodes](#nqp-opcodes)
@@ -307,6 +306,12 @@ repository. They are of the form `nqp::p6*` (following the historical naming of 
   * [who](#who)
   * [what](#what)
   * [where](#where)
+- [SixModel Parametric Extensions Opcodes](#-sixmodel-extension-opcodes)
+  * [setparameterizer](#setparameterizer)
+  * [setparameterizetype](#setparameterizetype)
+  * [typeparameterized](#typeparameterized)
+  * [typeparameters](#typeparameters)
+  * [typeparameterat](#typeparameterat)
 - [Bit Opcodes](#-bit-opcodes)
   * [bitand](#bitand)
   * [bitneg](#bitneg)
@@ -503,6 +508,7 @@ The opcodes are grouped into the following categories:
 * [Type/Conversion Opcodes](#type)
 * [Binary Data Opcodes](#binarydata)
 * [OO/SixModel Opcodes](#sixmodel)
+- [SixModel Parametric Extensions Opcodes](#sixmodel-extensions)
 * [Bit Opcodes](#bit)
 * [Context Introspection Opcodes](#context)
 * [Variable Opcodes](#variable)
@@ -2619,6 +2625,60 @@ The `_nd` variant does not decontainerize the object.
 
 Return the memory address for this `$obj`.  Please note that this is **NOT**
 a constant value for a given object.  Please use `objectid` for that.
+
+# <a id="sixmodel-extensions"></a> SixModel Parametric Extension Opcodes
+
+The sixmodel parametric extensions add parametric type support at the VM level.
+A type may configure itself as supporting parameterization. Parameterizations
+each have a unique key, which is used to intern them. This ensures each of the
+parameterizations exists only once. In the case that two modules both produce
+and serialize a parameterization, that from the second module may be freely
+disregarded, and the existing deserialization of the parameterized type may
+be used. This ensures unique type objects per parameterization are upheld even
+in the case of precompilation.
+
+Each parameterization will have a unique STable and type object. It is up to
+the meta-object whether the HOW is shared between parameterizations. For
+example, parametric roles reify the methods within them with concrete type
+parameters, so a separate HOW is required. By contrast, CoerceHOW, the
+meta-object for coercion types, can store all that is distinctive about it
+within the type's parameters. Since a given parameteriation can be queried
+for its parameters, it is possible for all Raku coercion types to share
+a single meta-object.
+
+## setparameterizer
+* `setparameterizer(type, parameterizer)`
+
+Makes a type as being parametric, and configures the code needed to
+parameterize it.
+
+## setparameterizetype
+* `parameterizetype(type, parameter_array)`
+
+Takes a parameterizable type and an array of parameters. Looks up and returns
+any existing matching parameterization. If it does not exist, invokes the
+parameterization producer for the parametric type, installs that in the lookup,
+and returns it. Note that the array is snapshotted, for the benefits of the
+type specializer.
+
+## typeparameterized
+* `typeparameterized(type)`
+
+If the type specified is a parameterization of some other type, then returns
+that type. Otherwise, returns null.
+
+## typeparameters
+* `typeparameters(type)`
+
+Gets the type parameters used to parameterize the type. Throws an exception
+if the type is not parametric.
+
+## typeparameterat
+* `typeparameterat(type, idx)`
+
+Equivalent to nqp::atpos(nqp::typeparameters(type), idx), except much easieri
+for type specialization to understand and deal with and avoids an array
+construction.
 
 # <a id="bit"></a> Bit Opcodes
 
