@@ -1,3 +1,5 @@
+#!/usr/bin/env nqp
+
 # Do all the documented opcodes have tests? ... is the question we want to
 # ask. This test asks "does the opcode appear in nqp::" form in the
 # test suite.
