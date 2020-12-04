@@ -454,6 +454,20 @@ The opcodes are grouped into the following categories:
 [unicmp_s](#unicmp_s-moar-js) |
 [x](#x)
 
+## [System Introspection](#system)
+
+[backendconfig](#backendconfig) |
+[cpucores](#cpucores) |
+[decodelocaltime](#decodelocaltime) |
+[freemem](#freemem) |
+[getenvhash](#getenvhash) |
+[getrusage](#getrusage) |
+[getsignals](#getsignals) |
+[jvmclasspaths](#jvmclasspaths-jvm) |
+[jvmgetproperties](#jvmgetproperties-jvm) |
+[totalmem](#totalmem) |
+[uname](#uname-moar-js)
+
 ## [Threads](#threads)
 
 [currentthread](#currentthread-moar-jvm) |
@@ -535,30 +549,19 @@ The opcodes are grouped into the following categories:
 
 [bind](#bind)
 
-## [Introspection](#misc)
+## [Miscellaneous](#misc)
 
-[backendconfig](#backendconfig) |
 [const](#const) |
-[cpucores](#cpucores) |
 [debugnoop](#debugnoop-jvm) |
-[decodelocaltime](#decodelocaltime) |
 [exit](#exit) |
-[freemem](#freemem) |
 [getcodename](#getcodename) |
-[getenvhash](#getenvhash) |
-[getrusage](#getrusage) |
-[getsignals](#getsignals) |
 [js](#js-moar-js) |
-[jvmclasspaths](#jvmclasspaths-jvm) |
-[jvmgetproperties](#jvmgetproperties-jvm) |
 [locallifetime](#locallifetime) |
 [objectid](#objectid) |
 [setcodename](#setcodename) |
 [sleep](#sleep) |
 [takeclosure](#takeclosure) |
-[time](#time) |
-[totalmem](#totalmem) |
-[uname](#uname-moar-js)
+[time](#time)
 
 # <a id="arithmetic"></a> Arithmetic
 
@@ -3049,6 +3052,149 @@ For more information see [Unicode TR10][UCA].
 
 Return a new string containing `$count` copies of `$str`.
 
+# <a id="system"></a> System Introspection
+
+## backendconfig
+* `backendconfig(--> Mu)`
+
+Returns a hash containing backend-specific information, like backend-version,
+configure and build flags.
+
+## cpucores
+* `cpucores()`
+
+Returns a native integer for the number of CPU cores that are reported to be
+available.
+
+## decodelocaltime
+* `decodelocaltime(int $epoch --> int @tm)`
+
+Returns an integer array with localtime information, formatted like the
+`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
+Note that contrary to C's localtime() function, the $year contains the
+actual year (A.D), and the $month has been normalized to 1..12.
+
+## freemem
+* `freemem()`
+
+Returns amount of free memory available in the system (not the NQP VM itself) (in bytes).
+
+## getenvhash
+* `getenvhash(--> Mu)`
+
+Returns a hash containing the environment variables.
+Changing the hash doesn't affect the environment variables
+
+## getrusage
+* `getrusage(int @rusage)`
+
+Accepts an integer array and fills it with usage data, of which the following
+elements are currently defined:
+
+* `RUSAGE_UTIME_SEC`   Userland CPU usage (seconds part)
+* `RUSAGE_UTIME_MSEC`  Userland CPU usage (micro-seconds part)
+* `RUSAGE_STIME_SEC`   System CPU usage (seconds part)
+* `RUSAGE_STIME_MSEC`  System CPU usage (micro-seconds part)
+* `RUSAGE_MAXRSS`      Maximum resident set size (in bytes/Kbytes)
+* `RUSAGE_IXRSS`       Integral shared text memory size (in bytes/Kbytes)
+* `RUSAGE_IDRSS`       Integral unshared data size (in bytes/Kbytes)
+* `RUSAGE_ISRSS`       Integral unshared stack size (in bytes/Kbytes)
+* `RUSAGE_MINFLT`      Number of page reclaims (lower part)
+* `RUSAGE_MAJFLT`      Number of page reclaims (upper part)
+* `RUSAGE_NSWAP`       Number of swaps
+* `RUSAGE_INBLOCK`     Number of block input operations
+* `RUSAGE_OUBLOCK`     Number of block output operations
+* `RUSAGE_MSGSND`      Number of messages sen
+* `RUSAGE_MSGRCVA`     Number of messages received
+* `RUSAGE_NSIGNALS`    Number of signals received
+* `RUSAGE_NVCSW`       Number of voluntary context switches
+* `RUSAGE_NIVCSW`      Number of involuntary context switches
+
+Currently, the elements ending in `RSS` appear to return values in **bytes**
+rather than **Kbytes** on MacOS.
+
+Elements may be 0 if it is impossible to determine that value in the current
+system.
+
+## getsignals
+* `getsignals(--> Mu)`
+
+Returns a list containing signal names interleaved with the associated signum
+integer on the host platform (MacOSX, Linux, BSD, etc).
+
+If the current backend does not support the registering of a signal handler for
+a given signal, the hash value will be a negative integer. For instance, the JVM
+only supports signal handlers for SIGINT and SIGKILL, so all the values will be
+negative except 2 (SIGINT) and 9 (SIGKILL). If a signal is not available on the
+host system, the hash value will be set to 0.
+
+The complete list of signal entries is as follows:
+
+    * SIGHUP
+    * SIGINT
+    * SIGQUIT
+    * SIGILL
+    * SIGTRAP
+    * SIGABRT
+    * SIGEMT
+    * SIGFPE
+    * SIGKILL
+    * SIGBUS
+    * SIGSEGV
+    * SIGSYS
+    * SIGPIPE
+    * SIGALRM
+    * SIGTERM
+    * SIGURG
+    * SIGSTOP
+    * SIGTSTP
+    * SIGCONT
+    * SIGCHLD
+    * SIGTTIN
+    * SIGTTOU
+    * SIGIO
+    * SIGXCPU
+    * SIGXFSZ
+    * SIGVTALRM
+    * SIGPROF
+    * SIGWINCH
+    * SIGINFO
+    * SIGUSR1
+    * SIGUSR2
+    * SIGTHR
+    * SIGSTKFLT
+    * SIGPWR
+    * SIGBREAK
+
+## jvmclasspaths `jvm`
+* `jvmclasspaths(--> Mu)`
+
+Converts the JVM property `java.class.path` into a list of paths, returns it.
+
+## jvmgetproperties `jvm`
+* `jvmgetproperties(--> Hash)`
+
+Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS names
+(key: 'os.name'), returns all other data as is.
+
+## totalmem
+* `totalmem(--> int)`
+
+Returns the number of bytes of memory in use by the VM.
+
+## uname `moar` `js`
+* `uname(--> Mu)`
+
+Returns a string array and fills it with uname data, of which the following
+elements are currently defined:
+
+* `UNAME_SYSNAME`  Name of the operating system implementation
+* `UNAME_RELEASE`  Release level of the operating system
+* `UNAME_VERSION`  Version level of the operating system
+* `UNAME_MACHINE`  Machine hardware platform
+
+
+
 # <a id="threads"></a> Threads
 
 ## currentthread `moar` `jvm`
@@ -3449,13 +3595,7 @@ table within that category to use.
 Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
 variable. Same as the `:=` operator in NQP.
 
-# <a id="misc"></a> Introspection
-
-## backendconfig
-* `backendconfig(--> Mu)`
-
-Returns a hash containing backend-specific information, like backend-version,
-configure and build flags.
+# <a id="misc"></a> Miscellaneous
 
 ## const
 * `const()`
@@ -3537,35 +3677,16 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * TYPE_CHECK_CACHE_THEN_METHOD
     * TYPE_CHECK_NEEDS_ACCEPTS
 
-## cpucores
-* `cpucores()`
-
-Returns a native integer for the number of CPU cores that are reported to be
-available.
-
 ## debugnoop `jvm`
 * `debugnoop(Mu $a)`
 
 Returns `$a`. Does nothing, exists only to provide a breakpoint location
 for debugging.
 
-## decodelocaltime
-* `decodelocaltime(int $epoch --> int @tm)`
-
-Returns an integer array with localtime information, formatted like the
-`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
-Note that contrary to C's localtime() function, the $year contains the
-actual year (A.D), and the $month has been normalized to 1..12.
-
 ## exit
 * `exit(int $status)`
 
 Exit nqp, using the given status as the compiler's exit value.
-
-## freemem
-* `freemem()`
-
-Returns amount of free memory available in the system (not the NQP VM itself) (in bytes).
 
 ## getcodename
 * `getcodename($obj --> str)`
@@ -3573,110 +3694,12 @@ Returns amount of free memory available in the system (not the NQP VM itself) (i
 Returns the name of the given concrete code object.
 Throws an exception if an object of the wrong type is passed.
 
-## getenvhash
-* `getenvhash(--> Mu)`
-
-Returns a hash containing the environment variables.
-Changing the hash doesn't affect the environment variables
-
-## getrusage
-* `getrusage(int @rusage)`
-
-Accepts an integer array and fills it with usage data, of which the following
-elements are currently defined:
-
-* `RUSAGE_UTIME_SEC`   Userland CPU usage (seconds part)
-* `RUSAGE_UTIME_MSEC`  Userland CPU usage (micro-seconds part)
-* `RUSAGE_STIME_SEC`   System CPU usage (seconds part)
-* `RUSAGE_STIME_MSEC`  System CPU usage (micro-seconds part)
-* `RUSAGE_MAXRSS`      Maximum resident set size (in bytes/Kbytes)
-* `RUSAGE_IXRSS`       Integral shared text memory size (in bytes/Kbytes)
-* `RUSAGE_IDRSS`       Integral unshared data size (in bytes/Kbytes)
-* `RUSAGE_ISRSS`       Integral unshared stack size (in bytes/Kbytes)
-* `RUSAGE_MINFLT`      Number of page reclaims (lower part)
-* `RUSAGE_MAJFLT`      Number of page reclaims (upper part)
-* `RUSAGE_NSWAP`       Number of swaps
-* `RUSAGE_INBLOCK`     Number of block input operations
-* `RUSAGE_OUBLOCK`     Number of block output operations
-* `RUSAGE_MSGSND`      Number of messages sen
-* `RUSAGE_MSGRCVA`     Number of messages received
-* `RUSAGE_NSIGNALS`    Number of signals received
-* `RUSAGE_NVCSW`       Number of voluntary context switches
-* `RUSAGE_NIVCSW`      Number of involuntary context switches
-
-Currently, the elements ending in `RSS` appear to return values in **bytes**
-rather than **Kbytes** on MacOS.
-
-Elements may be 0 if it is impossible to determine that value in the current
-system.
-
-## getsignals
-* `getsignals(--> Mu)`
-
-Returns a list containing signal names interleaved with the associated signum
-integer on the host platform (MacOSX, Linux, BSD, etc).
-
-If the current backend does not support the registering of a signal handler for
-a given signal, the hash value will be a negative integer. For instance, the JVM
-only supports signal handlers for SIGINT and SIGKILL, so all the values will be
-negative except 2 (SIGINT) and 9 (SIGKILL). If a signal is not available on the
-host system, the hash value will be set to 0.
-
-The complete list of signal entries is as follows:
-
-    * SIGHUP
-    * SIGINT
-    * SIGQUIT
-    * SIGILL
-    * SIGTRAP
-    * SIGABRT
-    * SIGEMT
-    * SIGFPE
-    * SIGKILL
-    * SIGBUS
-    * SIGSEGV
-    * SIGSYS
-    * SIGPIPE
-    * SIGALRM
-    * SIGTERM
-    * SIGURG
-    * SIGSTOP
-    * SIGTSTP
-    * SIGCONT
-    * SIGCHLD
-    * SIGTTIN
-    * SIGTTOU
-    * SIGIO
-    * SIGXCPU
-    * SIGXFSZ
-    * SIGVTALRM
-    * SIGPROF
-    * SIGWINCH
-    * SIGINFO
-    * SIGUSR1
-    * SIGUSR2
-    * SIGTHR
-    * SIGSTKFLT
-    * SIGPWR
-    * SIGBREAK
-
 ## js `moar` `js`
 * `js(str)`
 
 Execute the string of JavaScript code passed in.
 
 While this opcode exists in moar, it throws an exception declaring it is not implemented.
-
-## jvmclasspaths `jvm`
-* `jvmclasspaths(--> Mu)`
-
-Converts the JVM property `java.class.path` into a list of paths, returns it.
-
-## jvmgetproperties `jvm`
-* `jvmgetproperties(--> Hash)`
-
-Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS names
-(key: 'os.name'), returns all other data as is.
 
 ## locallifetime
 * `QAST::Op.new(:op<locallifetime>, :node($/), QAST::Stmt.new(...))`
@@ -3712,20 +3735,3 @@ Creates a lexical closure from the block's outer scope.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
-## totalmem
-* `totalmem(--> int)`
-
-Returns the number of bytes of memory in use by the VM.
-
-## uname `moar` `js`
-* `uname(--> Mu)`
-
-Returns a string array and fills it with uname data, of which the following
-elements are currently defined:
-
-* `UNAME_SYSNAME`  Name of the operating system implementation
-* `UNAME_RELEASE`  Release level of the operating system
-* `UNAME_VERSION`  Version level of the operating system
-* `UNAME_MACHINE`  Machine hardware platform
-
-
