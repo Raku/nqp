@@ -165,6 +165,7 @@ The opcodes are grouped into the following categories:
 ## [Conditional](#conditional)
 
 [if](#if) |
+[ifnull](#ifnull) |
 [unless](#unless) |
 [with](#with) |
 [without](#without)
@@ -196,7 +197,6 @@ The opcodes are grouped into the following categories:
 [control](#control) |
 [defor](#defor) |
 [for](#for) |
-[ifnull](#ifnull) |
 [repeat_until](#repeat_until) |
 [repeat_while](#repeat_while) |
 [stmts](#stmts) |
@@ -220,9 +220,11 @@ The opcodes are grouped into the following categories:
 [setpayload](#setpayload) |
 [throw](#throw)
 
-## [External Command](#extern)
+## [Processes](#extern)
 
-[execname](#execname-moar-js)
+[execname](#execname-moar-js) |
+[getpid](#getpid) |
+[getppid](#getppid-moar)
 
 ## [File / Directory / Network](#filedirnet)
 
@@ -264,13 +266,16 @@ The opcodes are grouped into the following categories:
 
 ## [HLL-Specific](#hll-specific)
 
-[bindhllsym](#bindhllsym / bindcurhllsym) |
-[gethllsym](#gethllsym / getcurhllsym) |
+[bindcurhllsym](#bindcurhllsym) |
+[bindhllsym](#bindhllsym) |
+[getcurhllsym](#getcurhllsym) |
+[gethllsym](#gethllsym) |
 [hllbool](#hllbool) |
 [hllboxtype](#hllboxtype) |
 [hllhash](#hllhash-moar-jvm) |
 [hlllist](#hlllist-moar-jvm) |
-[usecompilerhll](#usecompilerhll / usecompileehll)
+[usecompileehll](#usecompileehll) |
+[usecompilerhll](#usecompilerhll)
 
 ## [Input/Output](#io)
 
@@ -354,13 +359,19 @@ The opcodes are grouped into the following categories:
 [where](#where) |
 [who](#who)
 
-## [SixModel Parametric Extensions](#parametric-type-extensions)
+## [Parametric Extensions](#parametric-type-extensions)
 
 [setparameterizer](#setparameterizer) |
 [setparameterizetype](#setparameterizetype) |
 [typeparameterat](#typeparameterat) |
 [typeparameterized](#typeparameterized) |
 [typeparameters](#typeparameters)
+
+## [Profiling](#profiling)
+
+[force_gc](#force_gc-moar-jvm) |
+[mvmendprofile](#mvmendprofile-moar) |
+[mvmstartprofile](#mvmstartprofile-moar)
 
 ## [Serialization context](#serialization-context)
 
@@ -417,6 +428,7 @@ The opcodes are grouped into the following categories:
 [indexic](#indexic-moar) |
 [indexicim](#indexicim-moar) |
 [indexim](#indexim-moar) |
+[indexingoptimized](#indexingoptimized) |
 [iscclass](#iscclass) |
 [join](#join) |
 [lc](#lc) |
@@ -427,6 +439,7 @@ The opcodes are grouped into the following categories:
 [radix](#radix) |
 [replace](#replace) |
 [rindex](#rindex) |
+[sha1](#sha1) |
 [split](#split) |
 [sprintf](#sprintf) |
 [sprintfaddargumenthandler](#sprintfaddargumenthandler) |
@@ -522,7 +535,7 @@ The opcodes are grouped into the following categories:
 
 [bind](#bind)
 
-## [Miscellaneous](#misc)
+## [Introspection](#misc)
 
 [backendconfig](#backendconfig) |
 [const](#const) |
@@ -530,24 +543,17 @@ The opcodes are grouped into the following categories:
 [debugnoop](#debugnoop-jvm) |
 [decodelocaltime](#decodelocaltime) |
 [exit](#exit) |
-[force_gc](#force_gc-moar-jvm) |
 [freemem](#freemem) |
 [getcodename](#getcodename) |
 [getenvhash](#getenvhash) |
-[getpid](#getpid) |
-[getppid](#getppid-moar) |
 [getrusage](#getrusage) |
 [getsignals](#getsignals) |
-[indexingoptimized](#indexingoptimized) |
 [js](#js-moar-js) |
 [jvmclasspaths](#jvmclasspaths-jvm) |
 [jvmgetproperties](#jvmgetproperties-jvm) |
 [locallifetime](#locallifetime) |
-[mvmendprofile](#mvmendprofile-moar) |
-[mvmstartprofile](#mvmstartprofile-moar) |
 [objectid](#objectid) |
 [setcodename](#setcodename) |
-[sha1](#sha1) |
 [sleep](#sleep) |
 [takeclosure](#takeclosure) |
 [time](#time) |
@@ -1146,6 +1152,12 @@ If the `$condition` evaluates to a non-zero value, run the `$then` block.
 If not, and an `$else` block is present, run that instead, if it's absent,
 return result of `$condition`.
 
+## ifnull
+* `ifnull(Block $cond, Block $body)`
+
+If the `$cond` evaluates to null, evaluate the `$body`, otherwise return
+the result of `$cond`.
+
 ## unless
 * `unless(Block $condition, Block $then)`
 * `unless(Block $condition, Block $then, Block $else)`
@@ -1325,12 +1337,6 @@ the `$body`.
 
 Invoke the `$body` for every item available in `$iter`.
 
-## ifnull
-* `ifnull(Block $cond, Block $body)`
-
-If the `$cond` evaluates to null, evaluate the `$body`, otherwise return
-the result of `$cond`.
-
 ## repeat_until
 * `repeat_until(Block $condition, Block $body)`
 * `repeat_until(Block $condition, Block $body, Block $post)`
@@ -1453,7 +1459,7 @@ Sets the exception payload.
 
 Throw the exception.
 
-# <a id="extern"></a> External Command
+# <a id="extern"></a> Processes
 
 ## execname `moar` `js`
 * `execname(--> str)`
@@ -1464,6 +1470,16 @@ current "executable". So if you run `./raku-m ....` then it'll be the
 to MoarVM, since `raku` is actually a shell script. But when we do get to
 providing a fake executable for `raku` instead, then it'd just initialize it
 to `argv[0]`.
+
+## getpid
+* `getpid(--> int)`
+
+Return the current process id, an int.
+
+## getppid `moar`
+* `getppid(--> int)`
+
+Return the process id of the parent process, an int.
 
 # <a id="filedirnet"></a> File / Directory / Network
 
@@ -1784,19 +1800,25 @@ Returns the value associated with the given key-value pair.
 
 # <a id="hll-specific"></a> HLL-Specific
 
-## bindhllsym / bindcurhllsym
-* `bindhllsym(str $hllname, str $symname, $value)`
+## bindcurhllsym
 * `bindcurhllsym(str $symname, $value)`
 
-Store a value in a specified HLL's symbol hash at a given key; the `cur`
-variant uses the hll the code that has the op in it was compiled for.
+Store a value in the current HLL's symbol hash at a given key.
 
-## gethllsym / getcurhllsym
-* `gethllsym(str $hllname, str $symname --> Mu)`
+## bindhllsym
+* `bindhllsym(str $hllname, str $symname, $value)`
+
+Store a value in a specified HLL's symbol hash at a given key.
+
+## getcurhllsym
 * `getcurhllsym(str $symname --> Mu)`
 
-Retrieve a value from a specified HLL's symbol hash at a given key; The `cur`
-variant uses the hll the code that has the op in it was compiled for.
+Retrieve a value from the current HLL's symbol hash at a given key.
+
+## gethllsym
+* `gethllsym(str $hllname, str $symname --> Mu)`
+
+Retrieve a value from a specified HLL's symbol hash at a given key.
 
 ## hllbool
 * `hllbool(int -> obj)`
@@ -1826,11 +1848,17 @@ Ignores optional argument.
 Returns HLL specific type object for a list.
 Ignores optional argument.
 
-## usecompilerhll / usecompileehll
-* `usecompilerhllconfig`
+## usecompileehll
 * `usecompileehllconfig`
 
-Increases or decreases the "compilee depth" value. When the compilee depth is
+Decreases the "compilee depth" value.
+
+See also [usecompilerhll](usecomplilerhll).
+
+## usecompilerhll
+* `usecompilerhllconfig`
+
+Increases the "compilee depth" value. When the compilee depth is
 greater than one, every hll access will hit the "compilee's HLL config",
 otherwise every access will hit the "compiler's HLL config".
 
@@ -2314,7 +2342,7 @@ a constant value for a given object.  Please use `objectid` for that.
 
 NQP equivalent for Raku's `$obj.WHO`.
 
-# <a id="parametric-type-extensions"></a> SixModel Parametric Extensions
+# <a id="parametric-type-extensions"></a> Parametric Extensions
 
 ## setparameterizer
 * `setparameterizer(type, parameterizer)`
@@ -2349,6 +2377,99 @@ that type. Otherwise, returns null.
 
 Gets the type parameters used to parameterize the type. Throws an exception
 if the type is not parametric.
+
+# <a id="profiling"></a> Profiling
+
+## force_gc `moar` `jvm`
+* `force_gc()`
+
+Force the garbage collector to run.
+
+## mvmendprofile `moar`
+* `mvmendprofile(--> Object)`
+
+Turns off the profiler and returns data gathered.
+
+* `heap`
+
+  currently doesn't return anything. it does, however, cause one heap snapshot to be taken immediately.
+
+* `instrumented`
+
+The first element is an array of arrays with information about the types
+that have been allocated.  At the moment of writing, this array appears to
+have information about objects that were created, but for which there is no
+allocation information.  It has the following structure:
+
+    0                                  - array with type information
+    ├ 0 = 140415871842064               - unique ID for this type
+    └ 1                                 - hash with additional information
+      ├ repr => P6opaque                  - name of the REPR of this type
+      ├ type => Block                     - type object of type (aka, the .WHAT)
+      ├ managed_size => 72                - size in bytes of instance
+      └ has_unmanaged_data => 1           - is there additional data on heap?
+
+The second element of the list returned by nqp::mvmendprofile, is a list of
+hashes, one for each thread on which data has been collected.  It has the
+following structure (times are in microseconds, sizes are in bytes):
+
+    0                                 - hash with info of thread
+    ├ thread => 1                       - OS thread ID
+    ├ parent => 0                       - OS thread ID of parent thread
+    ├ spesh_time => 0                   - amount of time spent in spesh
+    ├ start_time => 0                   - when thread was started
+    ├ total_time => 21004               - total time spent in thread
+    ├ call_graph                        - hash with first Callee info
+    │ ├ id => 140328666076608             - unique ID of this Callee
+    │ ├ first_entry_time => 0             - when Callee was first called
+    │ ├ inclusive_time => 2               - time spent here + all sub-Callees
+    │ ├ exclusive_time => 2               - time spent in this Callee
+    │ ├ entries => 97897                  - number of times Callee was called
+    │ ├ inlined_entries => 56757          - times called when inlined
+    │ ├ jit_entries => 6566               - times called when jitted
+    │ ├ osr => 1                          - times Callee was OSR'd
+    │ ├ name => foo                       - name of Callee (if available)
+    │ ├ file => gen/moar/BOOTSTRAP.nqp    - filename of Callee
+    │ ├ line => 2070                      - line of Callee in file
+    │ ├ allocations => (2)                - array with Allocations
+    │ │ ├ 0                                 - hash with Allocation info
+    │ │ │ ├ count => 100                      - number of allocations
+    │ │ │ ├ replaced => 1                     - scalar replacements stopping alloc
+    │ │ │ └ id => 140329083232016             - type ID
+    │ └ callees => (2)                    - array with Callees called here
+    └ gcs                               - array with Garbage Collections
+      └ 0                                 - hash with GC info
+        ├ sequence => 0                     - ordinal number of GC
+        ├ start_time => 1964                - when GC was started
+        ├ time => 7222                      - time spent doing GC
+        ├ full => 0                         - whether or not a full GC
+        ├ responsible => 1                  - thread ID that triggered this GC
+        ├ promoted_bytes => 212960          - bytes promoted from the nuresery
+        ├ promoted_bytes_unmanaged => 54781 - additional bytes promoted
+        ├ retained_bytes => 76576           - bytes *not* promoted
+        ├ cleared_bytes => 3228716          - bytes cleared from the nursery
+        ├ gen2 => 18402                     -
+        ├ gen2_roots => 18402               - gen2 allocs rooted in nursery
+        ├ deallocs                          - array with Deallocations
+          ├ 0                                 - hash with deallocation info
+            ├ id => 140329080607960             - type ID being deallocated
+            ├ nursery_seen => 10                - seen before in a GC
+            └ nursery_fresh => 6                - *not* seen before in a GC
+
+## mvmstartprofile `moar`
+* `mvmstartprofile(hash $config)`
+
+Turns on one of MoarVM's profilers. The configuration must have a `kind` key that specifies which profiler will be turned on:
+
+* `instrumented`
+
+  takes no further configuration options. records call graph, garbage collection, and object allocation information.
+
+* `heap`
+
+  takes a path / filename in the `path` key. writes a snapshot of the heap's structure (objects and their connections) to the file every time the GC runs.
+
+If a profiler is already active, an exception will be thrown; only one profiler can run at a time.
 
 # <a id="serialization-context"></a> Serialization context
 
@@ -2656,6 +2777,14 @@ Like index but decomposes and matches against the base character.
 
 Example: `indexim("bcá", "a", 0) → 2`
 
+## indexingoptimized
+* `indexingoptimized(str --> str)`
+
+If the input string is made up of strands, then returns a flattened string
+that is otherwise identical. If not, returns the input string.
+
+Intended for strings that will be indexed into often, for example, when evaluating regexes.
+
 ## iscclass
 * `iscclass(int $class, str $str, int $i --> int)`
 * `iscclassnfg(int $class, str $str, int $i --> int)` `js`
@@ -2749,6 +2878,13 @@ specified, otherwise start from the last position.
 * `rindexfromend(str $haystack, str $needle)` `jvm` _Internal_
 
 `rindex` is converted to this internal opcode by the compiler.
+
+## sha1
+* `sha1(str $str -> str)`
+
+Given a UTF-8 string, return the SHA-1 digest for that string. This op is built
+for the specific purpose of hashing source code for dependency management
+purposes, and isn't intended to be used more widely.
 
 ## split
 * `split(str $delimiter, str $string --> Mu)`
@@ -3313,7 +3449,7 @@ table within that category to use.
 Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
 variable. Same as the `:=` operator in NQP.
 
-# <a id="misc"></a> Miscellaneous
+# <a id="misc"></a> Introspection
 
 ## backendconfig
 * `backendconfig(--> Mu)`
@@ -3426,11 +3562,6 @@ actual year (A.D), and the $month has been normalized to 1..12.
 
 Exit nqp, using the given status as the compiler's exit value.
 
-## force_gc `moar` `jvm`
-* `force_gc()`
-
-Force the garbage collector to run.
-
 ## freemem
 * `freemem()`
 
@@ -3447,16 +3578,6 @@ Throws an exception if an object of the wrong type is passed.
 
 Returns a hash containing the environment variables.
 Changing the hash doesn't affect the environment variables
-
-## getpid
-* `getpid(--> int)`
-
-Return the current process id, an int.
-
-## getppid `moar`
-* `getppid(--> int)`
-
-Return the process id of the parent process, an int.
 
 ## getrusage
 * `getrusage(int @rusage)`
@@ -3539,14 +3660,6 @@ The complete list of signal entries is as follows:
     * SIGPWR
     * SIGBREAK
 
-## indexingoptimized
-* `indexingoptimized(str --> str)`
-
-If the input string is made up of strands, then returns a flattened string
-that is otherwise identical. If not, returns the input string.
-
-Intended for strings that will be indexed into often, for example, when evaluating regexes.
-
 ## js `moar` `js`
 * `js(str)`
 
@@ -3571,92 +3684,6 @@ Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS
 Defines when local variables can be considered dead. E.g. the temporary setting
 of `$_` on the right side of `~~` uses that.
 
-## mvmendprofile `moar`
-* `mvmendprofile(--> Object)`
-
-Turns off the profiler and returns data gathered.
-
-* `heap`
-
-  currently doesn't return anything. it does, however, cause one heap snapshot to be taken immediately.
-
-* `instrumented`
-
-The first element is an array of arrays with information about the types
-that have been allocated.  At the moment of writing, this array appears to
-have information about objects that were created, but for which there is no
-allocation information.  It has the following structure:
-
-    0                                  - array with type information
-    ├ 0 = 140415871842064               - unique ID for this type
-    └ 1                                 - hash with additional information
-      ├ repr => P6opaque                  - name of the REPR of this type
-      ├ type => Block                     - type object of type (aka, the .WHAT)
-      ├ managed_size => 72                - size in bytes of instance
-      └ has_unmanaged_data => 1           - is there additional data on heap?
-
-The second element of the list returned by nqp::mvmendprofile, is a list of
-hashes, one for each thread on which data has been collected.  It has the
-following structure (times are in microseconds, sizes are in bytes):
-
-    0                                 - hash with info of thread
-    ├ thread => 1                       - OS thread ID
-    ├ parent => 0                       - OS thread ID of parent thread
-    ├ spesh_time => 0                   - amount of time spent in spesh
-    ├ start_time => 0                   - when thread was started
-    ├ total_time => 21004               - total time spent in thread
-    ├ call_graph                        - hash with first Callee info
-    │ ├ id => 140328666076608             - unique ID of this Callee
-    │ ├ first_entry_time => 0             - when Callee was first called
-    │ ├ inclusive_time => 2               - time spent here + all sub-Callees
-    │ ├ exclusive_time => 2               - time spent in this Callee
-    │ ├ entries => 97897                  - number of times Callee was called
-    │ ├ inlined_entries => 56757          - times called when inlined
-    │ ├ jit_entries => 6566               - times called when jitted
-    │ ├ osr => 1                          - times Callee was OSR'd
-    │ ├ name => foo                       - name of Callee (if available)
-    │ ├ file => gen/moar/BOOTSTRAP.nqp    - filename of Callee
-    │ ├ line => 2070                      - line of Callee in file
-    │ ├ allocations => (2)                - array with Allocations
-    │ │ ├ 0                                 - hash with Allocation info
-    │ │ │ ├ count => 100                      - number of allocations
-    │ │ │ ├ replaced => 1                     - scalar replacements stopping alloc
-    │ │ │ └ id => 140329083232016             - type ID
-    │ └ callees => (2)                    - array with Callees called here
-    └ gcs                               - array with Garbage Collections
-      └ 0                                 - hash with GC info
-        ├ sequence => 0                     - ordinal number of GC
-        ├ start_time => 1964                - when GC was started
-        ├ time => 7222                      - time spent doing GC
-        ├ full => 0                         - whether or not a full GC
-        ├ responsible => 1                  - thread ID that triggered this GC
-        ├ promoted_bytes => 212960          - bytes promoted from the nuresery
-        ├ promoted_bytes_unmanaged => 54781 - additional bytes promoted
-        ├ retained_bytes => 76576           - bytes *not* promoted
-        ├ cleared_bytes => 3228716          - bytes cleared from the nursery
-        ├ gen2 => 18402                     -
-        ├ gen2_roots => 18402               - gen2 allocs rooted in nursery
-        ├ deallocs                          - array with Deallocations
-          ├ 0                                 - hash with deallocation info
-            ├ id => 140329080607960             - type ID being deallocated
-            ├ nursery_seen => 10                - seen before in a GC
-            └ nursery_fresh => 6                - *not* seen before in a GC
-
-## mvmstartprofile `moar`
-* `mvmstartprofile(hash $config)`
-
-Turns on one of MoarVM's profilers. The configuration must have a `kind` key that specifies which profiler will be turned on:
-
-* `instrumented`
-
-  takes no further configuration options. records call graph, garbage collection, and object allocation information.
-
-* `heap`
-
-  takes a path / filename in the `path` key. writes a snapshot of the heap's structure (objects and their connections) to the file every time the GC runs.
-
-If a profiler is already active, an exception will be thrown; only one profiler can run at a time.
-
 ## objectid
 * `objectid($obj --> int)`
 
@@ -3667,13 +3694,6 @@ Returns a numeric object ID unique for the given object.
 
 Sets the name of the given code object.
 Throws an exception if an object of the wrong type is passed.
-
-## sha1
-* `sha1(str $str -> str)`
-
-Given a UTF-8 string, return the SHA-1 digest for that string. This op is built
-for the specific purpose of hashing source code for dependency management
-purposes, and isn't intended to be used more widely.
 
 ## sleep
 * `sleep(num $seconds --> num)`
@@ -3692,7 +3712,6 @@ Creates a lexical closure from the block's outer scope.
 
 Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
 an integral number of seconds, `_n` returns a fractional amount.
-
 ## totalmem
 * `totalmem(--> int)`
 
@@ -3708,4 +3727,5 @@ elements are currently defined:
 * `UNAME_RELEASE`  Release level of the operating system
 * `UNAME_VERSION`  Version level of the operating system
 * `UNAME_MACHINE`  Machine hardware platform
+
 
