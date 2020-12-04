@@ -223,6 +223,7 @@ The opcodes are grouped into the following categories:
 ## [Processes](#extern)
 
 [execname](#execname-moar-js) |
+[exit](#exit) |
 [getpid](#getpid) |
 [getppid](#getppid-moar)
 
@@ -339,6 +340,7 @@ The opcodes are grouped into the following categories:
 ## [Objects](#objects)
 
 [attrinited](#attrinited) |
+[bind](#bind) |
 [bindattr](#bindattr) |
 [bindcomp](#bindcomp) |
 [call](#call) |
@@ -351,6 +353,7 @@ The opcodes are grouped into the following categories:
 [getattr](#getattr) |
 [getcomp](#getcomp) |
 [how](#how) |
+[objectid](#objectid) |
 [rebless](#rebless) |
 [reprname](#reprname) |
 [setwho](#setwho) |
@@ -458,7 +461,6 @@ The opcodes are grouped into the following categories:
 
 [backendconfig](#backendconfig) |
 [cpucores](#cpucores) |
-[decodelocaltime](#decodelocaltime) |
 [freemem](#freemem) |
 [getenvhash](#getenvhash) |
 [getrusage](#getrusage) |
@@ -477,6 +479,12 @@ The opcodes are grouped into the following categories:
 [threadlockcount](#threadlockcount-moar-jvm) |
 [threadrun](#threadrun-moar-jvm) |
 [threadyield](#threadyield-moar-jvm)
+
+## [Time](#time)
+
+[decodelocaltime](#decodelocaltime) |
+[sleep](#sleep) |
+[time](#time)
 
 ## [Trigonometric](#trig)
 
@@ -545,23 +553,15 @@ The opcodes are grouped into the following categories:
 [unipropcode](#unipropcode) |
 [unipvalcode](#unipvalcode-moar)
 
-## [Variable](#variable)
-
-[bind](#bind)
-
 ## [Miscellaneous](#misc)
 
 [const](#const) |
 [debugnoop](#debugnoop-jvm) |
-[exit](#exit) |
 [getcodename](#getcodename) |
 [js](#js-moar-js) |
 [locallifetime](#locallifetime) |
-[objectid](#objectid) |
 [setcodename](#setcodename) |
-[sleep](#sleep) |
-[takeclosure](#takeclosure) |
-[time](#time)
+[takeclosure](#takeclosure)
 
 # <a id="arithmetic"></a> Arithmetic
 
@@ -1474,6 +1474,11 @@ to MoarVM, since `raku` is actually a shell script. But when we do get to
 providing a fake executable for `raku` instead, then it'd just initialize it
 to `argv[0]`.
 
+## exit
+* `exit(int $status)`
+
+Exit nqp, using the given status as the compiler's exit value.
+
 ## getpid
 * `getpid(--> int)`
 
@@ -2182,6 +2187,12 @@ Test if the attribute of name `$attributename` of object `$obj`
 has been bound, see `bindattr`. Note that any access to the atribute
 that results in a `getattr` call causes it to be inited.
 
+## bind
+* `bind(Mu $variable, Mu $value)`
+
+Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
+variable. Same as the `:=` operator in NQP.
+
 ## bindattr
 * `bindattr(Mu $obj, Mu:T $type, str $attributename, Mu $new_value)`
 * `bindattr_i(Mu $obj, Mu:T $type, str $attributename, int $new_value)`
@@ -2304,6 +2315,11 @@ See `bindcomp` for more information.
 NQP equivalent for Raku's `$obj.HOW`.
 
 The `_nd` variant does not decontainerize the object.
+
+## objectid
+* `objectid($obj --> int)`
+
+Returns a numeric object ID unique for the given object.
 
 ## rebless
 * `rebless(Mu $obj, Mu:T $type --> Mu)`
@@ -3066,14 +3082,6 @@ configure and build flags.
 Returns a native integer for the number of CPU cores that are reported to be
 available.
 
-## decodelocaltime
-* `decodelocaltime(int $epoch --> int @tm)`
-
-Returns an integer array with localtime information, formatted like the
-`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
-Note that contrary to C's localtime() function, the $year contains the
-actual year (A.D), and the $month has been normalized to 1..12.
-
 ## freemem
 * `freemem()`
 
@@ -3236,6 +3244,29 @@ object.
 
 Tell the scheduler to prefer another thread then the thread this is being
 executed in, for now.
+
+# <a id="time"></a> Time
+
+## decodelocaltime
+* `decodelocaltime(int $epoch --> int @tm)`
+
+Returns an integer array with localtime information, formatted like the
+`C struct tm`: $sec,$min,$hour,$mday,$mon,$year,$weekday,$yearday,$isdst.
+Note that contrary to C's localtime() function, the $year contains the
+actual year (A.D), and the $month has been normalized to 1..12.
+
+## sleep
+* `sleep(num $seconds --> num)`
+
+Sleep for the given number of seconds (no guarantee is made how exact the
+time sleeping is spent.) Returns the passed in number.
+
+## time
+* `time_i(--> int)`
+* `time_n(--> num)`
+
+Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
+an integral number of seconds, `_n` returns a fractional amount.
 
 # <a id="trig"></a> Trigonometric
 
@@ -3587,14 +3618,6 @@ property code.
 Looks up a property name in its property category, and returns which
 table within that category to use.
 
-# <a id="variable"></a> Variable
-
-## bind
-* `bind(Mu $variable, Mu $value)`
-
-Binds `$value` to the `$variable`. Dies if `$variable` isn't actually a
-variable. Same as the `:=` operator in NQP.
-
 # <a id="misc"></a> Miscellaneous
 
 ## const
@@ -3683,11 +3706,6 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
 Returns `$a`. Does nothing, exists only to provide a breakpoint location
 for debugging.
 
-## exit
-* `exit(int $status)`
-
-Exit nqp, using the given status as the compiler's exit value.
-
 ## getcodename
 * `getcodename($obj --> str)`
 
@@ -3707,31 +3725,13 @@ While this opcode exists in moar, it throws an exception declaring it is not imp
 Defines when local variables can be considered dead. E.g. the temporary setting
 of `$_` on the right side of `~~` uses that.
 
-## objectid
-* `objectid($obj --> int)`
-
-Returns a numeric object ID unique for the given object.
-
 ## setcodename
 * `setcodename($obj, str)`
 
 Sets the name of the given code object.
 Throws an exception if an object of the wrong type is passed.
 
-## sleep
-* `sleep(num $seconds --> num)`
-
-Sleep for the given number of seconds (no guarantee is made how exact the
-time sleeping is spent.) Returns the passed in number.
-
 ## takeclosure
 * `takeclosure(Block $innerblock)`
 
 Creates a lexical closure from the block's outer scope.
-
-## time
-* `time_i(--> int)`
-* `time_n(--> num)`
-
-Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
-an integral number of seconds, `_n` returns a fractional amount.
