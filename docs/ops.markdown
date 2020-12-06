@@ -3099,16 +3099,16 @@ Changing the hash doesn't affect the environment variables
 Accepts an integer array and fills it with usage data, of which the following
 elements are currently defined:
 
-* `RUSAGE_UTIME_SEC`   Userland CPU usage (seconds part)
-* `RUSAGE_UTIME_MSEC`  Userland CPU usage (micro-seconds part)
-* `RUSAGE_STIME_SEC`   System CPU usage (seconds part)
-* `RUSAGE_STIME_MSEC`  System CPU usage (micro-seconds part)
-* `RUSAGE_MAXRSS`      Maximum resident set size (in bytes/Kbytes)
-* `RUSAGE_IXRSS`       Integral shared text memory size (in bytes/Kbytes)
-* `RUSAGE_IDRSS`       Integral unshared data size (in bytes/Kbytes)
-* `RUSAGE_ISRSS`       Integral unshared stack size (in bytes/Kbytes)
-* `RUSAGE_MINFLT`      Number of page reclaims (lower part)
-* `RUSAGE_MAJFLT`      Number of page reclaims (upper part)
+* `RUSAGE_UTIME_SEC`   Userland CPU usage: seconds part
+* `RUSAGE_UTIME_MSEC`  Userland CPU usage: micro-seconds part
+* `RUSAGE_STIME_SEC`   System CPU usage: seconds part
+* `RUSAGE_STIME_MSEC`  System CPU usage: micro-seconds part
+* `RUSAGE_MAXRSS`      Maximum resident set size: in bytes/Kbytes
+* `RUSAGE_IXRSS`       Integral shared text memory size:  in bytes/Kbytes
+* `RUSAGE_IDRSS`       Integral unshared data size: in bytes/Kbytes
+* `RUSAGE_ISRSS`       Integral unshared stack size: in bytes/Kbytes
+* `RUSAGE_MINFLT`      Number of page reclaims: lower part
+* `RUSAGE_MAJFLT`      Number of page reclaims: upper part
 * `RUSAGE_NSWAP`       Number of swaps
 * `RUSAGE_INBLOCK`     Number of block input operations
 * `RUSAGE_OUBLOCK`     Number of block output operations
