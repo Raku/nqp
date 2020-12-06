@@ -2,6 +2,24 @@
 # that Raku needs, but it's sufficient for NQP. Supports methods, attributes,
 # role composition, inheritance (single and multiple) and introspection.
 
+knowhow NQPMixinCacheHOW {
+    method new(:$name = '<anon>') {
+        nqp::create(self)
+    }
+    method new_type($class_type) {
+        my $mo := self.new();
+        my $type := nqp::newtype($mo, 'Uninstantiable');
+        nqp::setparameterizer($type, sub ($type, @roles) {
+            $class_type.HOW.generate_mixin($class_type, @roles)
+        });
+        nqp::setdebugtypename($type, $class_type.HOW.name($class_type) ~ ' mixin cache');
+        $type
+    }
+    method name($obj) {
+        'mixin cache';
+    }
+}
+
 knowhow NQPClassHOW {
     ##
     ## Attributes
@@ -93,6 +111,7 @@ knowhow NQPClassHOW {
         else {
             $new_type := nqp::newtype($metaclass, $repr);
         }
+        $metaclass.setup_mixin_cache($new_type);
         nqp::setdebugtypename(nqp::setwho($new_type, {}), $name)
     }
 
@@ -739,52 +758,42 @@ knowhow NQPClassHOW {
     ##
     ## Mix-ins
     ##
-    has @!mixin_cache;
+    has $!mixin_cache;
     method set_is_mixin($obj) { $!is_mixin := 1 }
     method is_mixin($obj) { $!is_mixin }
+    method setup_mixin_cache($obj) {
+        $!mixin_cache := NQPMixinCacheHOW.new_type($obj.WHAT);
+    }
 
     method mixin($obj, $role) {
-        # See if we mixed in before.
-        my $found := 0;
-        my $new_type;
-        unless nqp::isnull(@!mixin_cache) {
-            for @!mixin_cache -> $c_role, $c_type {
-                if $c_role =:= $role {
-                    $new_type := $c_type;
-                    $found := 1;
-                    last;
-                }
-            }
-        }
+        my @roles;
+        nqp::push(@roles, $role);
 
-        # Create and cache mixin-type if needed.
-        unless $found {
-            # Flush its cache as promised, otherwise outdated NFAs will stick around.
-            self.flush_cache($obj) if !nqp::isnull($obj) || self.is_mixin($obj);
-            # Work out a type name for the post-mixed-in role.
-            my $new_name := self.name($obj) ~ '+{' ~ $role.HOW.name($role) ~ '}';
-
-            # Create new type, derive it from ourself and then add
-            # all the roles we're mixing it.
-            $new_type := self.new_type(:name($new_name), :repr($obj.REPR), :is_mixin);
-            $new_type.HOW.add_parent($new_type, $obj.WHAT);
-            $new_type.HOW.add_role($new_type, $role);
-            $new_type.HOW.compose($new_type);
-
-            # Store the type.
-            nqp::scwbdisable();
-            @!mixin_cache := [] if nqp::isnull(@!mixin_cache);
-            nqp::push(@!mixin_cache, $role);
-            nqp::push(@!mixin_cache, $new_type);
-            nqp::scwbenable();
-            1;
-        }
+        my $mixin_type := nqp::parameterizetype($!mixin_cache, @roles);
+        nqp::setdebugtypename($mixin_type, $mixin_type.HOW.name($mixin_type) ~ ' mixin');
 
         # If the original object was concrete, change its type by calling a
         # low level op. Otherwise, we just return the new type object
         nqp::isconcrete($obj) ??
-            nqp::rebless($obj, $new_type) !!
-            $new_type
+            nqp::rebless($obj, $mixin_type) !!
+            $mixin_type
+    }
+
+    method generate_mixin($obj, @roles) {
+        my $role := nqp::atpos(@roles, 0);
+        # Flush its cache as promised, otherwise outdated NFAs will stick around.
+        self.flush_cache($obj) if !nqp::isnull($obj) || self.is_mixin($obj);
+        # Work out a type name for the post-mixed-in role.
+        my $new_name := self.name($obj) ~ '+{' ~ $role.HOW.name($role) ~ '}';
+
+        # Create new type, derive it from ourself and then add
+        # all the roles we're mixing it.
+        my $new_type := self.new_type(:name($new_name), :repr($obj.REPR), :is_mixin);
+        $new_type.HOW.add_parent($new_type, $obj.WHAT);
+        $new_type.HOW.add_role($new_type, $role);
+        $new_type.HOW.compose($new_type);
+
+        $new_type
     }
 
     ##
