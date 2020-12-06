@@ -1,63 +1,55 @@
-#!/usr/bin/env nqp
+#!/usr/bin/env raku
 
 # Do all the documented opcodes have tests? ... is the question we want to
 # ask. This test asks "does the opcode appear in nqp::" form in the
-# test suite.
+# test suite, which is close.
 
-my %documented_ops := nqp::hash();
+use Test;
 
-my @doc_lines := nqp::split("\n", slurp("docs/ops.markdown"));
-for @doc_lines -> $line {
+my %documented-ops;
+
+for "docs/ops.markdown".IO.lines -> $line {
     next unless $line ~~ / ^ '* ' .* '(' /;
-    $line := nqp::substr($line, 3);
-    $line := nqp::split("(", $line)[0];
-    %documented_ops{$line} := 1 ;
+    my $opcode = $line.substr(3).split('(')[0];
+    %documented-ops{$opcode}  = True;
 }
 
 # Include indirect testing by presence in bootstrapped files.
-my @folders := nqp::list('t', 'src/NQP', 'src/how', 'src/core', 'src/HLL', 'src/QRegex');
+my @folders = <t src/NQP src/how src/core src/HLL src/QRegex>;
 
-my @files := nqp::list();
-while (nqp::elems(@folders)) {
-    my $folder := @folders.shift;
-    my $dh := nqp::opendir($folder);
-    my $f  := nqp::nextfiledir($dh);
-    while (! nqp::isnull_s($f) && nqp::chars($f) != 0) {
-        my $ff := $folder ~ '/' ~ $f;
-        if $f ne "." && $f ne ".." {
-            my $isdir := nqp::stat($ff, 2); # TODO, use nqp::const
-            if ($isdir == 1) {
-                nqp::push(@folders,$ff);
-            } else {
-                nqp::push(@files, $ff);
-            }
+# Recursively get files from to plevel folders specified
+my @files;
+while (@folders) {
+    my $folder = @folders.shift;
+
+    for dir($folder) -> $item {
+        if $item.d {
+            @folders.push: $item;
+        } else {
+            @files.push: $item;
         }
-        $f  := nqp::nextfiledir($dh);
     }
 }
 
-my %tested_ops := nqp::hash();
+
+my %tested-ops;
 
 for @files -> $file {
-    my @test_lines := nqp::split("\n", slurp($file));
-    for @test_lines -> $line {
-        my $match := $line ~~ / 'nqp::' (<[a..z0..9_]>+?) '(' /;
-        if (?$match) {
-            %tested_ops{$match[0]} := 1;
-        }
-        $match := $line ~~ / ':op(\'' (<[a..z0..9_]>+?) '\')' /;
-        if (?$match) {
-            %tested_ops{$match[0]} := 1;
+    for $file.lines -> $line {
+        if $line ~~ / 'nqp::' (<[a..z0..9_]>+?) '(' /    ||
+           $line ~~ / ':op(\'' (<[a..z0..9_]>+?) '\')' / {
+            %tested-ops{~$/[0]} = True;
         }
     }
 }
+
 
 # All the documented ops must be tested, vice versa
 
-for %tested_ops -> $tested_op {
-    ok(%documented_ops{$tested_op}, "tested op '$tested_op' is documented");
+for %tested-ops.keys.sort -> $op {
+    ok(%documented-ops{$op}, "tested op '$op' is documented");
 }
 
-for %documented_ops -> $doc_op {
-    ok(%tested_ops{$doc_op}, "documented op '$doc_op' is tested");
+for %documented-ops.keys.sort -> $op {
+    ok(%tested-ops{$op}, "documented op '$op' is tested");
 }
