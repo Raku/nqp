@@ -36,9 +36,11 @@ my %tested-ops;
 
 for @files -> $file {
     for $file.lines -> $line {
-        if $line ~~ / 'nqp::' (<[a..z0..9_]>+?) '(' /    ||
-           $line ~~ / ':op(\'' (<[a..z0..9_]>+?) '\')' / {
-            %tested-ops{~$/[0]} = True;
+        for $line ~~ m:g/ 'nqp::' (<[a..z0..9_]>+?) '(' /  -> $match {
+            %tested-ops{~$match[0]} = True;
+        }
+        for $line ~~ m:g/ ':op(\'' (<[a..z0..9_]>+?) '\')' / -> $match {
+            %tested-ops{~$match[0]} = True;
         }
     }
 }
