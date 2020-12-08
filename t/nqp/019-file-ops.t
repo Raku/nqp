@@ -42,7 +42,7 @@ ok( nqp::defined(close($credits)), 'close');
 # setinputlinesep tests
 
 {
-    my $data := open('t/nqp/19-setinputlinesep.txt', :r, :!chomp);
+    my $data := open('t/nqp/019-setinputlinesep.txt', :r, :!chomp);
     $data.set-nl-in(["a"]);
     my $line1 := $data.get;
     my $line2 := $data.get;
@@ -52,7 +52,7 @@ ok( nqp::defined(close($credits)), 'close');
 }
 
 {
-    my $data := open('t/nqp/19-setinputlinesep.txt', :r, :!chomp);
+    my $data := open('t/nqp/019-setinputlinesep.txt', :r, :!chomp);
     $data.set-nl-in(["ba"]);
     my $line1 := $data.get;
     my $line2 := $data.get;
