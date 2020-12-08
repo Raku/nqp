@@ -123,7 +123,6 @@ knowhow NQPClassHOW {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         nqp::setmethcacheauth($obj, 0);
-        %!caches{nqp::where(self)} := {} unless nqp::isnull(%!caches);
         nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
