@@ -39,7 +39,7 @@ is(nqp::elems(@kv), 1, 'just one kv when iteratring');
 my $iter := nqp::iterator($clone);
 
 todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    unless $backend eq 'moar';
+    if $backend eq 'js';
 
 my $msg;
 try {
@@ -82,14 +82,10 @@ try {
 todo('Exceptions for iterators NYI on js', 2)
     if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
-# As per comments on https://github.com/Raku/nqp/pull/657
-# the JVM backend should be changed to throw the same error text
-todo('Error message not yet consistent on the JVM', 1)
-    if $backend eq 'jvm';
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
 
 todo('Exceptions for iterators after end NYI on ' ~ $backend, 4)
-    unless $backend eq 'moar';
+    if $backend eq 'js';
 
 $msg := "";
 try {
@@ -120,7 +116,7 @@ is(nqp::index($msg, 'You have not advanced to the first item of the hash iterato
 $iter := nqp::iterator($clone);
 
 todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    unless $backend eq 'moar';
+    if $backend eq 'js';
 
 $msg := "";
 try {
@@ -166,10 +162,6 @@ try {
 todo('Exceptions for iterators NYI on js', 2)
     if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
-# As per comments on https://github.com/Raku/nqp/pull/657
-# the JVM backend should be changed to throw the same error text
-todo('Error message not yet consistent on the JVM', 1)
-    if $backend eq 'jvm';
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
 
 
@@ -212,7 +204,7 @@ try {
 }
 
 todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    unless $backend eq 'moar';
+    if $backend eq 'js';
 ok($msg ne "", 'iterkey on empty hash throws before start');
 is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception before start');
 
@@ -241,8 +233,4 @@ try {
 todo('Exceptions for iterators NYI on js', 2)
     if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
-# As per comments on https://github.com/Raku/nqp/pull/657
-# the JVM backend should be changed to throw the same error text
-todo('Error message not yet consistent on the JVM', 1)
-    if $backend eq 'jvm';
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
