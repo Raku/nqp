@@ -561,6 +561,7 @@ The opcodes are grouped into the following categories:
 [js](#js-moar-js) |
 [locallifetime](#locallifetime) |
 [setcodename](#setcodename) |
+[setdebugtypename](#setdebugtypename) |
 [takeclosure](#takeclosure)
 
 # <a id="arithmetic"></a> Arithmetic
@@ -3730,6 +3731,16 @@ of `$_` on the right side of `~~` uses that.
 
 Sets the name of the given code object.
 Throws an exception if an object of the wrong type is passed.
+
+## setdebugtypename
+* `setcdebugtypename($obj, str)`
+
+In all backends, sets an attribute field on the object's STable, an internal
+low level representation of a type.
+
+In MoarVM, uses the debug_name field. In JVM/JS, uses the debugName field.
+
+Intended as a debugging tool only.
 
 ## takeclosure
 * `takeclosure(Block $innerblock)`
