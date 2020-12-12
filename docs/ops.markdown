@@ -3733,7 +3733,7 @@ Sets the name of the given code object.
 Throws an exception if an object of the wrong type is passed.
 
 ## setdebugtypename
-* `setcdebugtypename($obj, str)`
+* `setdebugtypename($obj, str)`
 
 In all backends, sets an attribute field on the object's STable, an internal
 low level representation of a type.
