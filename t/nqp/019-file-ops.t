@@ -227,9 +227,9 @@ if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
     my $mtime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
     ok($mtime_n >= $mtime, 'float mtime >= integer');
     my $atime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_ACCESSTIME);
-    ok($atime_n >= $mtime, 'float atime >= integer');
+    ok($atime_n >= $atime, 'float atime >= integer');
     my $ctime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
-    ok($ctime_n >= $mtime, 'float ctime >= integer');
+    ok($ctime_n >= $ctime, 'float ctime >= integer');
 }
 else {
     skip("no stat_time op on $backend", 3);
