@@ -123,7 +123,6 @@ knowhow NQPClassHOW {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
         nqp::setmethcacheauth($obj, 0);
-        %!caches{nqp::where(self)} := {} unless nqp::isnull(%!caches);
         nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
@@ -770,7 +769,6 @@ knowhow NQPClassHOW {
         nqp::push(@roles, $role);
 
         my $mixin_type := nqp::parameterizetype($!mixin_cache, @roles);
-        nqp::setdebugtypename($mixin_type, $mixin_type.HOW.name($mixin_type) ~ ' mixin');
 
         # If the original object was concrete, change its type by calling a
         # low level op. Otherwise, we just return the new type object

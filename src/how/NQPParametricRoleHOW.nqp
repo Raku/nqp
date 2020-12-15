@@ -2,6 +2,7 @@
 # parameterized to get a concrete role that we can actually compose
 # into a class or mix into an object). It also contains the logic to
 # reify it into an actual role.
+knowhow NQPSpecializationLock is repr('ReentrantMutex') { }
 knowhow NQPParametricRoleHOW {
     ##
     ## Attributes
@@ -27,6 +28,8 @@ knowhow NQPParametricRoleHOW {
     # don't do that in NQP.)
     has $!body_block;
 
+    has $!specialize_lock;
+
     my $archetypes := Archetypes.new( :nominal(1), :composable(1), :parametric(1) );
     method archetypes() {
         $archetypes
@@ -37,13 +40,13 @@ knowhow NQPParametricRoleHOW {
     ##
 
     # Creates a new instance of this meta-class.
-    method new(:$name!) {
+    method new(:$name!, :$specialize_lock!) {
         my $obj := nqp::create(self);
-        $obj.BUILD(:name($name));
+        $obj.BUILD(:name($name), :specialize_lock($specialize_lock));
         $obj
     }
 
-    method BUILD(:$name!) {
+    method BUILD(:$name!, :$specialize_lock!) {
         $!name := $name;
         @!attributes := nqp::list();
         %!methods := nqp::hash();
@@ -51,12 +54,13 @@ knowhow NQPParametricRoleHOW {
         @!multi_methods_to_incorporate := nqp::list();
         @!roles := nqp::list();
         $!composed := 0;
+        $!specialize_lock := $specialize_lock;
     }
 
     # Create a new meta-class instance, and then a new type object
     # to go with it, and return that.
     method new_type(:$name = '<anon>') {
-        my $metarole := self.new(:name($name));
+        my $metarole := self.new(:name($name), :specialize_lock(nqp::create(NQPSpecializationLock)));
         nqp::setdebugtypename(
             nqp::setwho(nqp::newtype($metarole, 'Uninstantiable'), {}),
             $name);
@@ -126,6 +130,12 @@ knowhow NQPParametricRoleHOW {
     # This specializes the role for the given class and builds a concrete
     # role.
     method specialize($obj, $class_arg, *@args) {
+        # We only allow one specialization of a role to take place at a time,
+        # since the body block captures the methods into its lexical scope,
+        # but we don't do the appropriate cloning until a bit later. These
+        # must happen before another specialize happens and re-captures the
+        # things we are composing.
+        nqp::lock($!specialize_lock);
         # Run the body block to capture the arguments into the correct
         # type argument context.
         my $pad := $!body_block($class_arg, |@args);
@@ -163,6 +173,8 @@ knowhow NQPParametricRoleHOW {
 
         # Compose and return produced role.
         $irole.HOW.compose($irole);
+
+        nqp::unlock($!specialize_lock);
         return $irole;
     }
 
