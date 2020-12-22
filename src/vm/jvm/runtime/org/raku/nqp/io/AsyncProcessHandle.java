@@ -99,10 +99,14 @@ public class AsyncProcessHandle implements IIOClosable {
     private List<String> getArgs(ThreadContext tc, SixModelObject argsObj) {
         List<String> args = new ArrayList<String>();
         SixModelObject argIter = Ops.iter(argsObj, tc);
+        boolean first = true;
         while (Ops.istrue(argIter, tc) != 0) {
             SixModelObject v = argIter.shift_boxed(tc);
             String arg = v.get_str(tc);
-            args.add(arg);
+            // Args contain the program to start, then the args (Containing the program again).
+            // So skip the first parameter.
+            if (first) first = false;
+            else       args.add(arg);
         }
         return args;
     }
