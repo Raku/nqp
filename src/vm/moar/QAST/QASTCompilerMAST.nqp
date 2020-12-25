@@ -63,6 +63,16 @@ my class MASTCompilerInstance {
 
     has $!writer;
 
+    has $!use_lexical_fallback;
+
+    method BUILD(:$use_lexical_fallback) {
+        $!use_lexical_fallback := $use_lexical_fallback;
+    }
+
+    method use_lexical_fallback() {
+        $!use_lexical_fallback
+    }
+
     # This uses a very simple scheme. Write registers are assumed
     # to be write-once, read-once.  Therefore, if a QAST control
     # structure wants to reuse the intermediate result of an
@@ -1487,6 +1497,13 @@ my class MASTCompilerInstance {
         'lex_no',
         'lex_nu'
     ];
+    my @lex_nfb_opnames := [
+        'lex_nfbi',
+        'lex_nfbn',
+        'lex_nfbs',
+        'lex_nfbo',
+        'lex_nfbu'
+    ];
 
     my @lexref_opnames := [
         '',
@@ -1719,12 +1736,12 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     $res_reg := $valmast.result_reg;
-                    %core_op_generators{"bind"~@lex_n_opnames[@kind_to_op_slot[$res_kind]]}($name, $res_reg);
+                    %core_op_generators{"bind"~($!use_lexical_fallback ?? @lex_nfb_opnames !! @lex_n_opnames)[@kind_to_op_slot[$res_kind]]}($name, $res_reg);
                     $res_kind := $valmast.result_kind;
                 }
                 else {
                     $res_reg := $*REGALLOC.fresh_register($res_kind);
-                    %core_op_generators{"get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]]}(
+                    %core_op_generators{"get"~($!use_lexical_fallback ?? @lex_nfb_opnames !! @lex_n_opnames)[@kind_to_op_slot[$res_kind]]}(
                         $res_reg, $name);
                 }
             }
@@ -1792,7 +1809,7 @@ my class MASTCompilerInstance {
             $res_reg     := $*REGALLOC.fresh_o();
             $res_kind    := $MVM_reg_obj;
             %core_op_generators{'const_s'}($name_reg, $name);
-            %core_op_generators{'getlexperinvtype_o'}($res_reg, $name_reg);
+            %core_op_generators{$!use_lexical_fallback ?? 'getlexperinvtypefb_o' !! 'getlexperinvtype_o'}($res_reg, $name_reg);
             $*REGALLOC.release_register($name_reg, $MVM_reg_str);
         }
         elsif $scope eq 'contextual' {
@@ -2119,7 +2136,13 @@ my class MASTCompilerInstance {
 # Shim that makes a compiler instance and uses it to drive compilation.
 class QAST::MASTCompiler {
     method to_mast($qast) {
-        MASTCompilerInstance.new.to_mast($qast)
+        #note(nqp::defined(nqp::getlexicalresolver));
+        my $use_lexical_fallback := nqp::isnull(nqp::getlexicalresolver)
+            ?? $*USE_LEXICAL_FALLBACK
+                ?? 1
+                !! 0
+            !! 1;
+        MASTCompilerInstance.new(:$use_lexical_fallback).to_mast($qast)
     }
 
     method operations() {

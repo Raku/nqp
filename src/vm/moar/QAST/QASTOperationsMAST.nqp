@@ -673,6 +673,7 @@ my $chain_gen := sub ($qastcomp, $op) {
     my $acomp := $qastcomp.as_mast($aqast, :want($MVM_reg_obj));
 
     my $more := 1;
+    my $use_lexical_fallback := $qastcomp.use_lexical_fallback;
     while $more {
         my $bqast := $cqast[$arg_idx + 1];
         my $bcomp := $qastcomp.as_mast($bqast, :want($MVM_reg_obj));
@@ -681,7 +682,7 @@ my $chain_gen := sub ($qastcomp, $op) {
             !$cqast.name
                 ?? $cqast[0]
                 !! $cqast.op eq 'chainstatic'
-                    ?? QAST::VM.new:   :moarop<getlexstatic_o>,
+                    ?? QAST::VM.new:   :moarop($use_lexical_fallback ?? 'getlexstaticfb_o' !! 'getlexstatic_o'), #FIXME
                        QAST::SVal.new: :value($cqast.name)
                     !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
 
@@ -1486,7 +1487,7 @@ my $call_gen := sub ($qastcomp, $op) {
         $callee := $qastcomp.as_mast(QAST::Op.new(
             :op('decont'),
             $op.op eq 'callstatic'
-                ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
+                ?? QAST::VM.new( :moarop($qastcomp.use_lexical_fallback ?? 'getlexstaticfb_o' !! 'getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
                 !! QAST::Var.new( :name($op.name), :scope('lexical') )));
     }
     elsif nqp::elems(@args) {
@@ -2975,20 +2976,57 @@ QAST::MASTOperations.add_core_moarop_mapping('istype_nd', 'istype');
 QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete', :decont(0));
 
 # lexical related opcodes
-QAST::MASTOperations.add_core_moarop_mapping('getlex', 'getlex_no');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_i', 'getlex_ni');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_n', 'getlex_nn');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_s', 'getlex_ns');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_nofb', 'getlex_no');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_nofbi', 'getlex_ni');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_nofbn', 'getlex_nn');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_nofbs', 'getlex_ns');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_fb', 'getlex_nfbo');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_fbi', 'getlex_nfbi');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_fbn', 'getlex_nfbn');
+QAST::MASTOperations.add_core_moarop_mapping('getlex_fbs', 'getlex_nfbs');
+QAST::MASTOperations.add_core_op('getlex', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'getlex_fb' !! 'getlex_nofb'), $op[0]) )
+});
+QAST::MASTOperations.add_core_op('getlex_i', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'getlex_fbi' !! 'getlex_nofbi'), $op[0]) )
+});
+QAST::MASTOperations.add_core_op('getlex_n', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'getlex_fbn' !! 'getlex_nofbn'), $op[0]) )
+});
+QAST::MASTOperations.add_core_op('getlex_s', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'getlex_fbs' !! 'getlex_nofbs'), $op[0]) )
+});
+
 QAST::MASTOperations.add_core_moarop_mapping('getlexref_i', 'getlexref_ni');
 QAST::MASTOperations.add_core_moarop_mapping('getlexref_n', 'getlexref_nn');
 QAST::MASTOperations.add_core_moarop_mapping('getlexref_s', 'getlexref_ns');
-QAST::MASTOperations.add_core_moarop_mapping('bindlex', 'bindlex_no', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_i', 'bindlex_ni', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_n', 'bindlex_nn', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_s', 'bindlex_ns', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_nofb', 'bindlex_no', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_nofbi', 'bindlex_ni', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_nofbn', 'bindlex_nn', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_nofbs', 'bindlex_ns', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_fb', 'bindlex_nfbo', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_fbi', 'bindlex_nfbi', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_fbn', 'bindlex_nfbn', 1);
+QAST::MASTOperations.add_core_moarop_mapping('bindlex_fbs', 'bindlex_nfbs', 1);
+QAST::MASTOperations.add_core_op('bindlex', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'bindlex_fb' !! 'bindlex_nofb'), $op[0], $op[1]) )
+});
+QAST::MASTOperations.add_core_op('bindlex_i', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'bindlex_fbi' !! 'bindlex_nofbi'), $op[0], $op[1]) )
+});
+QAST::MASTOperations.add_core_op('bindlex_n', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'bindlex_fbn' !! 'bindlex_nofbn'), $op[0], $op[1]) )
+});
+QAST::MASTOperations.add_core_op('bindlex_s', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'bindlex_fbs' !! 'bindlex_nofbs'), $op[0], $op[1]) )
+});
 QAST::MASTOperations.add_core_moarop_mapping('getlexdyn', 'getdynlex');
 QAST::MASTOperations.add_core_moarop_mapping('bindlexdyn', 'binddynlex');
-QAST::MASTOperations.add_core_moarop_mapping('getlexouter', 'getlexouter');
+QAST::MASTOperations.add_core_moarop_mapping('getlexouter_nofb', 'getlexouter');
+QAST::MASTOperations.add_core_moarop_mapping('getlexouter_fb', 'getlexouterfb');
+QAST::MASTOperations.add_core_op('getlexouter', -> $qastcomp, $op {
+    $qastcomp.as_mast( QAST::Op.new( :op($qastcomp.use_lexical_fallback ?? 'getlexouter_fb' !! 'getlexouter_nofb'), $op[0]) )
+});
 QAST::MASTOperations.add_core_moarop_mapping('getlexrel', 'getlexrel');
 QAST::MASTOperations.add_core_moarop_mapping('getlexreldyn', 'getlexreldyn');
 QAST::MASTOperations.add_core_moarop_mapping('getlexrelcaller', 'getlexrelcaller');
@@ -2997,6 +3035,7 @@ QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
     # TODO: take advantage of this info for code-gen, if possible.
     $qastcomp.as_mast($op[0], :want($*WANT))
 });
+QAST::MASTOperations.add_core_moarop_mapping('getlexicalresolver', 'getlexicalresolver');
 
 # code object related opcodes
 # XXX explicit takeclosure will go away under new model; for now, no-op it.
