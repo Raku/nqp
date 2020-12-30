@@ -527,9 +527,12 @@ function wrapBuffer(buffer, type) {
 }
 
 op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
+  const stringified = /*await*/ stringifyArray(ctx, args);
+  const prog = stringified.shift();
   const options = {
     shell: false,
     windowsVerbatimArguments: true,
+    argv0: stringified.shift(),
     cwd: cwd,
     env: /*await*/ stringifyEnv(ctx, env),
     stdio: [
@@ -539,9 +542,7 @@ op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
     ],
   };
 
-  const stringified = /*await*/ stringifyArray(ctx, args);
-
-  const result = child_process.spawnSync(stringified.shift(), stringified, options);
+  const result = child_process.spawnSync(prog, stringified, options);
 
   if (config.content.get('ready')) {
     /*await*/ config.content.get('ready').$$call(ctx, null);
