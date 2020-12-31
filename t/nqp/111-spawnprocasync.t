@@ -57,8 +57,8 @@ my $config := nqp::hash(
 # define a task
 $string  := "expected output from stdout";
 $command := "echo $string";
-$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
-                     !! nqp::list('/bin/sh', '-c', $command);
+$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, nqp::getenvhash()<ComSpec>, '/c', $command)
+                     !! nqp::list('/bin/sh', '/bin/sh', '-c', $command);
 my $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
 nqp::permit($task, 1, -1);
 nqp::permit($task, 2, -1);
@@ -94,8 +94,8 @@ $called_ready := 0;
 # define the task
 $string  := "expected output from stderr";
 $command := "echo $string >&2";
-$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, '/c', $command)
-                     !! nqp::list('/bin/sh', '-c', $command);
+$args := $is-windows ?? nqp::list(nqp::getenvhash()<ComSpec>, nqp::getenvhash()<ComSpec>, '/c', $command)
+                     !! nqp::list('/bin/sh', '/bin/sh', '-c', $command);
 $task := nqp::spawnprocasync($queue, $args, nqp::cwd(), nqp::getenvhash(), $config);
 nqp::permit($task, 1, -1);
 nqp::permit($task, 2, -1);
