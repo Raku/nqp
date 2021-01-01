@@ -900,7 +900,7 @@ array is pushed to the queue containing the schedulee and the signal number.
 Cancel to stop handling it.
 
 ## spawnprocasync
-* `spawnprocasync($queue, $args, $cwd, %env, $callbacks)`
+* `spawnprocasync($queue, $prog, @args, $cwd, %env, $callbacks)`
 
 Replaced *shell* and *spawn*. See t/nqp/111-spawnprocasync.t for an example of use.
 

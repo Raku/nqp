@@ -37,7 +37,7 @@ my sub run_command($command, :$stdout) {
       $read_all := 1;
   }
 
-  my $task := nqp::spawnprocasync($queue, $command, nqp::cwd(), nqp::getenvhash(), $config);
+  my $task := nqp::spawnprocasync($queue, $command[0], $command, nqp::cwd(), nqp::getenvhash(), $config);
 
   if $stdout {
       nqp::permit($task, 1, -1);

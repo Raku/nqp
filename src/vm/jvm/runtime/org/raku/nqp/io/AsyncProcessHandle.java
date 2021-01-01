@@ -30,9 +30,13 @@ public class AsyncProcessHandle implements IIOClosable {
     private int errSeq = 0;
     private boolean procStarted = false;
 
-    public AsyncProcessHandle(ThreadContext tc, SixModelObject queue, SixModelObject argsObj,
-            String cwd, SixModelObject envObj, SixModelObject configObj) {
+    public AsyncProcessHandle(ThreadContext tc, SixModelObject queue, String prog,
+            SixModelObject argsObj, String cwd, SixModelObject envObj,
+            SixModelObject configObj) {
         final List<String> args = getArgs(tc, argsObj);
+        // Impossible in Java to specify arg0, so overwrite with the program to
+        // execute.
+        args.set(0, prog);
         final Map<String, String> env = getEnv(tc, envObj);
         final Map<String, SixModelObject> config = getConfig(tc, configObj);
 
@@ -99,14 +103,10 @@ public class AsyncProcessHandle implements IIOClosable {
     private List<String> getArgs(ThreadContext tc, SixModelObject argsObj) {
         List<String> args = new ArrayList<String>();
         SixModelObject argIter = Ops.iter(argsObj, tc);
-        boolean first = true;
         while (Ops.istrue(argIter, tc) != 0) {
             SixModelObject v = argIter.shift_boxed(tc);
             String arg = v.get_str(tc);
-            // Args contain the program to start, then the args (Containing the program again).
-            // So skip the first parameter.
-            if (first) first = false;
-            else       args.add(arg);
+            args.add(arg);
         }
         return args;
     }

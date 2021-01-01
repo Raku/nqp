@@ -526,9 +526,8 @@ function wrapBuffer(buffer, type) {
   return stringified;
 }
 
-op.spawnprocasync = /*async*/ function(ctx, queue, args, cwd, env, config) {
+op.spawnprocasync = /*async*/ function(ctx, queue, prog, args, cwd, env, config) {
   const stringified = /*await*/ stringifyArray(ctx, args);
-  const prog = stringified.shift();
   const options = {
     shell: false,
     windowsVerbatimArguments: true,
