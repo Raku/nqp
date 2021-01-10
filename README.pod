@@ -58,7 +58,7 @@ command like:
 
 By default, NQP searches for the MoarVM executable and installs to the
 directory C<./install>. You can change that with the C<--prefix> option to
-Configure.pl; this will point to the directory prefix where `moar` is installed, such as `/usr`; it needs to be the same one used when configuring MoarVM.
+Configure.pl; this will point to the directory prefix where `moar` is installed, such as `/usr`; it needs to be the same one used when configuring MoarVM unless you use the `--with-moar`. This optional argument should point to the directory prefix where `moar` is installed, in that case; for instance, `--with-moar=/usr/local`.
 
 Once built, NQP's C<make install> target will install NQP and its libraries
 into the same location as the MoarVM installation
