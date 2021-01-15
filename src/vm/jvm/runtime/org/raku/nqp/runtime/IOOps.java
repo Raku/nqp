@@ -234,12 +234,13 @@ public final class IOOps {
         return task;
     }
 
-    public static SixModelObject spawnprocasync(SixModelObject queue, SixModelObject args,
-            String cwd, SixModelObject env, SixModelObject config, ThreadContext tc) {
+    public static SixModelObject spawnprocasync(SixModelObject queue, String prog,
+            SixModelObject args, String cwd, SixModelObject env, SixModelObject config,
+            ThreadContext tc) {
         HLLConfig hllConfig = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         final SixModelObject IOType = hllConfig.ioType;
         IOHandleInstance ioHandle = (IOHandleInstance)IOType.st.REPR.allocate(tc, IOType.st);
-        ioHandle.handle = new AsyncProcessHandle(tc, queue, args, cwd, env, config);
+        ioHandle.handle = new AsyncProcessHandle(tc, queue, prog, args, cwd, env, config);
         return ioHandle;
     }
 

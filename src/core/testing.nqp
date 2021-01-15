@@ -90,10 +90,6 @@ sub run-command($command, :$stdout, :$stderr) {
     my $read-all2    := 0;
     my $called-ready := 0;
 
-    # Add the program to call to the start of the command.
-    my @spawn-args := nqp::clone($command);
-    nqp::unshift(@spawn-args, $command[0]);
-
     my $config := nqp::hash();
     $config<done> := -> $status {
         ++$done;
@@ -126,7 +122,7 @@ sub run-command($command, :$stdout, :$stderr) {
     }
 
     # define the task
-    my $task := nqp::spawnprocasync($queue, @spawn-args, nqp::cwd(),
+    my $task := nqp::spawnprocasync($queue, $command[0], $command, nqp::cwd(),
         nqp::getenvhash(), $config);
     nqp::permit($task, 1, -1);
     nqp::permit($task, 2, -1);
