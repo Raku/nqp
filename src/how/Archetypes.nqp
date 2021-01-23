@@ -21,7 +21,7 @@ my knowhow Archetypes {
     # Can this be composed (either with flattening composition, or used
     # as a mixin)?
     has $!composable;
-    
+
     # If it's not composable, does it know how to produce something
     # that is?
     has $!composalizable;
