@@ -62,4 +62,7 @@ my knowhow Archetypes {
     method composalizable() { nqp::ifnull($!composalizable, 0) }
     method generic() { nqp::ifnull($!generic, 0) }
     method parametric() { nqp::ifnull($!parametric, 0) }
+    method coercive() { 0 }
+    method definite() { 0 }
+    method augmentable() { 0 }
 }
