@@ -222,7 +222,7 @@ The opcodes are grouped into the following categories:
 
 ## [Processes](#extern)
 
-[execname](#execname-moar-js) |
+[execname](#execname) |
 [exit](#exit) |
 [getpid](#getpid) |
 [getppid](#getppid-moar)
@@ -1465,7 +1465,7 @@ Throw the exception.
 
 # <a id="extern"></a> Processes
 
-## execname `moar` `js`
+## execname
 * `execname(--> str)`
 
 It's used to implement `$*EXECUTABLE` in Raku, and is the name of the
