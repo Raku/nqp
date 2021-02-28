@@ -66,16 +66,15 @@ sub deps($target, *@deps) {
     out("$target : {nfp(nqp::join(' ',@deps))}");
 }
 
+my $nqp-config := nfp('$(JS_STAGE2)/nqp-config.nqp');
+
 # TODO is the version regenerated as often as it should
 sub combine(:$sources, :$stage, :$file, :$gen-version = 0) {
-
     my $target := stage_path($stage) ~ $file;
-    my $version := stage_path($stage) ~ 'nqp-config.nqp';
-
+    $sources := "$sources $nqp-config" if $gen-version;
     rule($target, $sources,
         make_parents($target),
-        $gen-version ?? "\$(PERL5) \@script(gen-version.pl)@ \$(PREFIX) \$(NQP_HOME) \$(NQP_LIB_DIR) > $version" !! '',
-        "\$(PERL5) \@script(gen-cat.pl)@ js \@nfp($sources)@ {$gen-version ?? $version !! ''} > \@nfp($target)@"
+        "\$(PERL5) \@script(gen-cat.pl)@ js $sources > \@nfp($target)@"
     ); 
 }
 
@@ -191,15 +190,18 @@ rule('js-install', 'js-all',
   '$(PERL5) @script(install-js-runner.pl)@ "$(DESTDIR)" $(PREFIX) $(NQP_LIB_DIR)',
 );
 
+
+rule($nqp-config, '',
+  '$(MKPATH) $(JS_STAGE2)',
+  "\$(PERL5) \@script(gen-version.pl)@ \$(PREFIX) \$(NQP_HOME) \$(NQP_LIB_DIR) > $nqp-config");
+
 constant('JS_NQP_SOURCES', '$(COMMON_NQP_SOURCES)');
-
-
 
 my $nqp-combined := combine(:stage(2), :sources('$(JS_NQP_SOURCES)'), :file('$(NQP_COMBINED)'), :gen-version(1));
 
 constant('JS_HLL_SOURCES', nfp('src/vm/js/HLL/Backend.nqp') ~ ' $(COMMON_HLL_SOURCES)');
 
-my $hll-combined := combine(:stage(2), :sources('$(JS_HLL_SOURCES)'), :file('$(HLL_COMBINED)'));
+my $hll-combined := combine(:stage(2), :sources('$(JS_HLL_SOURCES)'), :file('$(HLL_COMBINED)'), :gen-version(1));
 
 
 
