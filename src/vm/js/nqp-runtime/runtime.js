@@ -494,7 +494,7 @@ exports.paramcheckfailed = function(currentHLL, ctx, args) {
   return currentHLL.get('bind_error').$$call(ctx, null, capture);
 };
 
-let execname;
+let execname = '';
 exports.execname = function(path) {
   execname = path;
 };
