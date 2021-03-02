@@ -870,7 +870,7 @@ class QRegex::NFA {
                     my int $e := 2;
                     while $e < $eend {
                         my int $to := @edges[$e];
-                        my int $was := $to;
+#                        my int $was := $to;
                         if $to && nqp::atpos_i(@remap,$to) {
                             while nqp::atpos_i(@remap,$to) {
                                 $to := nqp::atpos_i(@remap,$to);
@@ -963,7 +963,7 @@ class QRegex::NFA {
                             my int $e := 2;
                             while $e < $eend {
                                 my int $to := @edges[$e];
-                                my int $act := nqp::bitand_i(@edges[$e-2], 0xff);
+#                                 my int $act := nqp::bitand_i(@edges[$e-2], 0xff);
                                 if $to {
                                     my int $to2 := nqp::atpos_i(@remap,$to);
 #                                    note("In $s -> $newpos remapping " ~ $ACTIONS[$act] ~ " $to -> $to2") if $nfadeb;
