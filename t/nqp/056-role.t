@@ -1,4 +1,4 @@
-plan(16);
+plan(18);
 
 role R1 {
     has $!a;
@@ -56,3 +56,10 @@ role PackageUsingRole {
 class X does PackageUsingRole {
 }
 is(X.name(), 'PackageUsingRole', 'using $?PACKAGE from a role');
+
+role Bar does Foo { }
+role Baz does Bar { }
+
+my @roles := Baz.HOW.role_typecheck_list(Baz);
+ok(nqp::eqaddr(@roles[0], Bar), 'role typecheck list includes roles done');
+ok(nqp::eqaddr(@roles[1], Foo), 'role typecheck list includes roles done by roles done');
