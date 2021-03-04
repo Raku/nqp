@@ -286,7 +286,7 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::getcomp('JavaScript').eval('return (function(paths) {nqp.libpath(paths)})')($*LIBPATH);
         }
 
-        my $*EXECNAME;
+        my $*EXECNAME := '';
         if %adverbs<execname> {
             $*EXECNAME := %adverbs<execname>;
         }
