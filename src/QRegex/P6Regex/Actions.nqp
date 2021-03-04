@@ -1016,7 +1016,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         elsif $qast.rxtype eq 'concat' {
             my @tmp;
             while nqp::elems(@($qast)) { @tmp.push(@($qast).shift) }
-            while @tmp { @($qast).push(self.flip_ast(@tmp.pop)) }
+            while nqp::elems(@tmp)     { @($qast).push(self.flip_ast(@tmp.pop)) }
         }
         elsif $qast.rxtype eq 'anchor' {
             if $qast.subtype eq 'rwb' {

@@ -200,7 +200,7 @@ class HLL::Actions {
         }
         if $lastlit gt '' { @parts.push(QAST::SVal.new( :value($lastlit) )); }
         my $ast := @parts ?? @parts.shift !! QAST::SVal.new( :value('') );
-        while @parts {
+        while nqp::elems(@parts) {
             $ast := QAST::Op.new( $ast, @parts.shift, :op('concat') );
         }
         make $ast;

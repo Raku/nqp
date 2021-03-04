@@ -567,7 +567,7 @@ An operator precedence parser.
         elsif $opassoc eq 'list' {
             $sym := nqp::ifnull(nqp::atkey(%opOPER, 'sym'), '');
             nqp::unshift($op, nqp::pop(@termstack));
-            while @opstack {
+            while nqp::elems(@opstack) {
                 last if $sym ne nqp::ifnull(
                     nqp::atkey(nqp::atkey(nqp::atpos(@opstack,
                         nqp::elems(@opstack) - 1), 'OPER'), 'sym'), '');
