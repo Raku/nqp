@@ -54,6 +54,7 @@ knowhow NQPParametricRoleHOW {
         @!method_order := nqp::list();
         @!multi_methods_to_incorporate := nqp::list();
         @!roles := nqp::list();
+        @!role_typecheck_list := nqp::list();
         $!composed := 0;
         $!specialize_lock := $specialize_lock;
     }
@@ -106,11 +107,10 @@ knowhow NQPParametricRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
-        @!role_typecheck_list := my @rtl;
         for @!roles {
-            @rtl.push: $_;
+            nqp::push(@!role_typecheck_list, $_);
             for $_.HOW.role_typecheck_list($_) {
-                @rtl.push: $_;
+                nqp::push(@!role_typecheck_list, $_);
             }
         }
 
