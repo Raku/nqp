@@ -6,9 +6,51 @@ produces a parse tree. As the name suggests, this is strongly tied to the
 syntax of the language being parsed, and reflects the structure of the grammar.
 This parse tree is mapped by action methods into an abstract syntax tree - a
 tree of QAST nodes. Rather than talking about program syntax, they talk about
-what happens at runtime: loops, conditionals, variable lookups, etc. This
+what happens at runtime: loops, conditionals, variable lookups, etc. 
+Down the compiling line, when the MoarVM backend is used, the QAST tree is
+used to generate a MAST tree which is itself used to generate bytecode.
+See [MAST](https://github.com/Raku/nqp/tree/master/src/vm/moar/QAST) for code
+that implements that.
+
+For raku, parsing will not generate directly a QAST tree but will involve
+an intermediate phase which will be used by other tools than the compiler (
+linters, typechecker, or tools specific to the compiled Domain specific language (DSL)
+[1 pdf](https://drops.dagstuhl.de/opus/volltexte/2015/5043/pdf/dagrep_v005_i002_p026_s15062.pdf)
+[2 pdf](http://people.cs.ksu.edu/~schmidt/505f12/Lectures/DSLbib.pdf)
+[3 wikipedia](https://en.wikipedia.org/wiki/Domain-specific_language)
+Combined with the powerful parsing capabilities of grammars, rakuast with JIT capabilities
+provided by MoarVM will make the rakudo compiler toolchain well suited to implement
+DSLs.
+
+See the [rakuast branch](https://github.com/rakudo/rakudo/tree/rakuast), 
+this [video of the rakuAST keynote](https://www.youtube.com/watch?v=91uaaSyrKm0)
+and the 
+[pdf](https://www.jnthn.net/papers/2020-cic-rakuast.pdf) used in the said video
+
+This
 document describes the available nodes and what they are for.
 
+Defined [here](https://github.com/Raku/nqp/tree/master/src/QAST)
+
+* [QAST::Compunit](#QAST::Compunit)
+* [QAST::Block](#QAST::Block)
+* [QAST::Ival](#QAST::Ival, QAST::NVal and QAST::SVal) 
+* [QAST::Op](#QAST::Op)
+* [QAST::Var](#QAST::Var)
+* [QAST::VarWithFallback](#QAST::VarWithFallback)
+* [QAST::BVal](#QAST::BVal)
+* [QAST::WVal](#QAST::WVal)
+* [QAST::CompileTimeValue](#QAST::CompileTimeValue)
+* [QAST::Want](#QAST::Want)
+* [QAST::ParamTypeCheck](#QAST::ParamTypeCheck)
+
+The following are advanced nodes. You probably don't need them.
+
+* [QAST::VM](#QAST::VM)
+* [QAST::Unquote](#QAST::Unquote)
+* [QAST::Regex QAST::NodeList](#QAST::Regex QAST::NodeList)
+* [QAST::](#QAST::)
+* [QAST::](#QAST::)
 ## QAST::CompUnit
 While it's not mandatory, most QAST trees that are produced should have a
 QAST::CompUnit at the top. It should have a single QAST::Block child. This
@@ -373,6 +415,11 @@ While obscure at first, QAST::WVal is an extremely powerful tool. Much in
 NQP and even more in the Rakudo Perl 6 compiler hangs of the notion of
 bounded serialization and a World that builds up a model of the declarative
 aspects of a program.
+## QAST::CompileTimeValue
+
+Role currently mixed on;y into QAST::WVal.
+Provides the methods `has_compile_time_value`, `compile_time_value`, `set_compile_time_value`
+
 
 ## QAST::Want
 QAST::Want nodes will appear in the QAST tree whenever you emit a value, but
@@ -415,11 +462,86 @@ returns 0 the 'bind_error' of the current HLL is called.
         )
     )
 
-
 ## QAST::VM
+
+QAST is for generating backend specific code. An example spotted in
+[World.nqp](https://github.com/Raku/nqp/blob/30b1d064da767bbe7cd73843bb97d29914e23fbc/src/NQP/World.nqp#L101)
+
+     QAST::Op.new(
+         :op('loadbytecode'),
+         QAST::VM.new(
+             :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
+             :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
+             :js(QAST::SVal.new( :value('ModuleLoader') ))
+         )
+     )
+
+Another example also spotted in [World.nqp](https://github.com/Raku/nqp/blob/30b1d064da767bbe7cd73843bb97d29914e23fbc/src/NQP/World.nqp#L498-L517).
+It appears in a section specific to the MOARVM backend and specifies the generation of a MoarVM bytecode
+instruction. Here the opcode is `loadlib` and its has two arguments.
+
+    #?if moar
+        ...
+        $libs.push(QAST::VM.new(
+            :moarop('loadlib'),
+            QAST::SVal.new( :value(@bits[0]) ),
+            QAST::SVal.new( :value(@bits[0]) )
+        ));
+        ...
+    #endif
+
+
+
+
+QAST::VM.new( :moarop())
+## QAST::Unquote 
+
+They are used to implement splicing within quasis in macros.
+Macros are experimental feature. So probably is this node and its documentation.
+
+For source code examples which leads to generation of this node,
+See the test of 
+[quasis](https://github.com/Raku/roast/blob/master/S06-macros/unquoting.t) 
+in macros
+
+For grammars and actions involved in that
+generation see  [raku grammar](https://github.com/rakudo/rakudo/blob/20e6f50e26b4b8705c4e41060a6fd764ed6f7d29/src/Perl6/Grammar.nqp#L1505)
+and [raku actions](https://github.com/rakudo/rakudo/blob/master/src/Perl6/Actions.nqp#L2824-L2827)
+
+We see that splicing within a quote implemented by `term:sym<unquote>` which
+pushes into `@*UNQUOTE_ASTS` which is used within the code in `quote:sym<quasi>`
+to create a list.
+
+Splicing as seem in the grammar file.
+
+    token term:sym<unquote>  { '{{{' <?{ $*IN_QUASI }> <statementlist> '}}}' }
+
+in actions
+
+    method term:sym<unquote>($/) {
+        make QAST::Unquote.new(:position(nqp::elems(@*UNQUOTE_ASTS)));
+        @*UNQUOTE_ASTS.push($<statementlist>.ast);
+    }
+    
+    method quote:sym<quasi>($/) {
+        ...
+        QAST::Op.new( :op('list'), |@*UNQUOTE_ASTS ));
+    }
+
+
+## QAST::InlinePlaceHolder
+
+## QAST::Regex QAST::NodeList
+
+You won't need those except if you want to extend a regex
+engine. See [P6Regex actions](https://github.com/Raku/nqp/blob/master/src/QRegex/P6Regex/Actions.nqp)
+and [P5Regex actions](https://github.com/Raku/nqp/blob/master/src/QRegex/P5Regex/Actions.nqp) for examples
+
+## QAST::SpecialArg
 
 ---------------------------------------
 
 ## Third-Party Resources
 
 * [Perl 6 Core Hacking: QASTalicious blog post](https://rakudo.party/post/Perl-6-Core-Hacking-QASTalicious)
+* Rakudo and NQP internals [1](https://edumentab.github.io/rakudo-and-nqp-internals-course/slides-day1.pdf), [2](https://edumentab.github.io/rakudo-and-nqp-internals-course/slides-day2.pdf)
