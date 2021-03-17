@@ -489,14 +489,11 @@ The opcodes are grouped into the following categories:
 ## [Trigonometric](#trig)
 
 [acos](#acos) |
-[asec](#asec) |
 [asin](#asin) |
 [atan](#atan) |
 [atan2](#atan2) |
 [cos](#cos) |
 [cosh](#cosh) |
-[sec](#sec) |
-[sech](#sech) |
 [sin](#sin) |
 [sinh](#sinh) |
 [tan](#tan) |
@@ -3276,11 +3273,6 @@ an integral number of seconds, `_n` returns a fractional amount.
 
 Arccosine.
 
-## asec
-* `asec_n(num $n --> num)`
-
-Arcsecant.
-
 ## asin
 * `asin_n(num $n --> num)`
 
@@ -3305,16 +3297,6 @@ Cosine.
 * `cosh_n(num $n --> num))`
 
 Hyperbolic cosine.
-
-## sec
-* `sec_n(num $n --> num))`
-
-Secant.
-
-## sech
-* `sech_n(num $n --> num))`
-
-Hyperbolic secant.
 
 ## sin
 * `sin_n(num $n --> num))`

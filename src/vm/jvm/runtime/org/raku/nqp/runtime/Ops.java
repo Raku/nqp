@@ -3723,18 +3723,6 @@ public final class Ops {
     }
 
     /* Math operations. */
-    public static double sec_n(double val) {
-        return 1 / Math.cos(val);
-    }
-
-    public static double asec_n(double val) {
-        return Math.acos(1 / val);
-    }
-
-    public static double sech_n(double val) {
-        return 1 / Math.cosh(val);
-    }
-
     public static long gcd_i(long valA, long valB) {
         return BigInteger.valueOf(valA).gcd(BigInteger.valueOf(valB))
                 .longValue();

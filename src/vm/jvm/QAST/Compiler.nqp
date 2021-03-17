@@ -2275,9 +2275,6 @@ QAST::OperationsJAST.map_classlib_core_op('atan2_n', $TYPE_MATH, 'atan2', [$RT_N
 QAST::OperationsJAST.map_classlib_core_op('sinh_n', $TYPE_MATH, 'sinh', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('cosh_n', $TYPE_MATH, 'cosh', [$RT_NUM], $RT_NUM);
 QAST::OperationsJAST.map_classlib_core_op('tanh_n', $TYPE_MATH, 'tanh', [$RT_NUM], $RT_NUM);
-QAST::OperationsJAST.map_classlib_core_op('sec_n', $TYPE_OPS, 'sec_n', [$RT_NUM], $RT_NUM);
-QAST::OperationsJAST.map_classlib_core_op('asec_n', $TYPE_OPS, 'asec_n', [$RT_NUM], $RT_NUM);
-QAST::OperationsJAST.map_classlib_core_op('sech_n', $TYPE_OPS, 'sech_n', [$RT_NUM], $RT_NUM);
 
 # esoteric math opcodes
 QAST::OperationsJAST.map_classlib_core_op('gcd_i', $TYPE_OPS, 'gcd_i', [$RT_INT, $RT_INT], $RT_INT);
