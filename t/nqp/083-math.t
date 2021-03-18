@@ -1,4 +1,4 @@
-plan(63);
+plan(50);
 
 # Basic tests for a bunch of mathematical functions
 
@@ -44,11 +44,6 @@ is_approx(nqp::tan_n(2.0), -2.18503986326152, "nqp::tan_n(2.0)");
 is_approx(nqp::tan_n(3.0), -0.142546543074278, "nqp::tan_n(3.0)");
 is_approx(nqp::tan_n(4.0), 1.15782128234958, "nqp::tan_n(4.0)");
 
-is_approx(nqp::sec_n(1.0), 1.85081571768093, "nqp::sec_n(1.0)");
-is_approx(nqp::sec_n(2.0), -2.40299796172238, "nqp::sec_n(2.0)");
-is_approx(nqp::sec_n(3.0), -1.01010866590799, "nqp::sec_n(3.0)");
-is_approx(nqp::sec_n(4.0), -1.5298856564664, "nqp::sec_n(4.0)");
-
 is_approx(nqp::atan_n(-10.0), -1.47112767430373, "nqp::atan_n(-10.0)");
 is_approx(nqp::atan_n(-3.0), -1.24904577239825, "nqp::atan_n(-3.0)");
 is_approx(nqp::atan_n(0.0), 0.0, "nqp::atan_n(0.0)");
@@ -67,11 +62,6 @@ is_approx(nqp::asin_n(0.0), 0.0, "nqp::asin_n(0.0)");
 is_approx(nqp::asin_n(0.5), 0.523598775598299, "nqp::asin_n(0.5)");
 is_approx(nqp::asin_n(1.0), 1.5707963267949, "nqp::asin_n(1.0)");
 
-is_approx(nqp::asec_n(-2.0), 2.0943951023932, "nqp::asec_n(-2.0)");
-is_approx(nqp::asec_n(-1.0), 3.14159265358979, "nqp::asec_n(-1.0)");
-is_approx(nqp::asec_n(1.0), 0.0, "nqp::asec_n(1.0)");
-is_approx(nqp::asec_n(2.0), 1.0471975511966, "nqp::asec_n(2.0)");
-
 is_approx(nqp::sinh_n(-7.0), -548.316123273246, "nqp::sinh_n(-7.0)");
 is_approx(nqp::sinh_n(-1.0), -1.1752011936438, "nqp::sinh_n(-1.0)");
 is_approx(nqp::sinh_n(0.0), 0.0, "nqp::sinh_n(0.0)");
@@ -89,12 +79,6 @@ is_approx(nqp::tanh_n(-1.0), -0.761594155955765, "nqp::tanh_n(-1.0)");
 is_approx(nqp::tanh_n(0.0), 0.0, "nqp::tanh_n(0.0)");
 is_approx(nqp::tanh_n(1.0), 0.761594155955765, "nqp::tanh_n(1.0)");
 is_approx(nqp::tanh_n(7.0), 0.999998336943945, "nqp::tanh_n(7.0)");
-
-is_approx(nqp::sech_n(-2.0), 0.26580222883408, "nqp::sech_n(-2.0)");
-is_approx(nqp::sech_n(-1.5), 0.42509603494228, "nqp::sech_n(-1.5)");
-is_approx(nqp::sech_n(0.0), 1.0, "nqp::sech_n(0.0)");
-is_approx(nqp::sech_n(1.5), 0.42509603494228, "nqp::sech_n(1.5)");
-is_approx(nqp::sech_n(2.0), 0.26580222883408, "nqp::sech_n(2.0)");
 
 is_approx(nqp::atan2_n(90.0, 15.0), 1.4056476493802699, "nqp::atan2_n(90.0, 15.0)");
 is_approx(nqp::atan2_n(15.0, 90.0), 0.16514867741462683, "nqp::atan2_n(15.0, 90.0)");

@@ -1014,10 +1014,6 @@ class QAST::OperationsJS {
 
     add_simple_op('atan2_n', $T_NUM, [$T_NUM, $T_NUM], sub ($y, $x) {"Math.atan2($y, $x)"});
 
-    add_simple_op('sec_n', $T_NUM, [$T_NUM]);
-    add_simple_op('asec_n', $T_NUM, [$T_NUM]);
-    add_simple_op('sech_n', $T_NUM, [$T_NUM]);
-
     add_simple_op('abs_i', $T_INT, [$T_INT], sub ($arg) {"Math.abs($arg)"});
     add_simple_op('pow_n', $T_NUM, [$T_NUM, $T_NUM]);
 

@@ -2432,13 +2432,10 @@ QAST::MASTOperations.add_core_moarop_mapping('acos_n', 'acos_n');
 QAST::MASTOperations.add_core_moarop_mapping('tan_n', 'tan_n');
 QAST::MASTOperations.add_core_moarop_mapping('atan_n', 'atan_n');
 QAST::MASTOperations.add_core_moarop_mapping('atan2_n', 'atan2_n');
-QAST::MASTOperations.add_core_moarop_mapping('sec_n', 'sec_n');
-QAST::MASTOperations.add_core_moarop_mapping('asec_n', 'asec_n');
 QAST::MASTOperations.add_core_moarop_mapping('asin_n', 'asin_n');
 QAST::MASTOperations.add_core_moarop_mapping('sinh_n', 'sinh_n');
 QAST::MASTOperations.add_core_moarop_mapping('cosh_n', 'cosh_n');
 QAST::MASTOperations.add_core_moarop_mapping('tanh_n', 'tanh_n');
-QAST::MASTOperations.add_core_moarop_mapping('sech_n', 'sech_n');
 
 # esoteric math opcodes
 QAST::MASTOperations.add_core_moarop_mapping('gcd_i', 'gcd_i');
