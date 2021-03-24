@@ -119,7 +119,7 @@ class JavaScriptBackend {
 
 
     method fresh_profile_filename() {
-        my $filename := 'profile-' ~ nqp::time_n() ~ '.cpuprofile';
+        my $filename := 'profile-' ~ nqp::time() ~ '.cpuprofile';
         note("Writing profiling data to $filename");
         $filename;
     }

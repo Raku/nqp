@@ -2217,8 +2217,7 @@ QAST::OperationsJAST.map_classlib_core_op('getport', $TYPE_OPS, 'getport', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('debugnoop', $TYPE_OPS, 'debugnoop', [$RT_OBJ], $RT_OBJ, :tc);
 
 # terms
-QAST::OperationsJAST.map_classlib_core_op('time_i', $TYPE_OPS, 'time_i', [], $RT_INT);
-QAST::OperationsJAST.map_classlib_core_op('time_n', $TYPE_OPS, 'time_n', [], $RT_NUM);
+QAST::OperationsJAST.map_classlib_core_op('time', $TYPE_OPS, 'time', [], $RT_INT);
 
 # Arithmetic ops
 QAST::OperationsJAST.map_jvm_core_op('add_i', 'ladd', [$RT_INT, $RT_INT], $RT_INT);

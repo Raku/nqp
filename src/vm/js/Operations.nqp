@@ -519,8 +519,7 @@ class QAST::OperationsJS {
     add_simple_op('null_s', $T_STR, [], sub () {"nqp.null_s"});
     add_simple_op('isnull_s', $T_BOOL, [$T_STR], sub ($obj) {"($obj === nqp.null_s)"});
 
-    add_simple_op('time_n', $T_NUM, [], sub () {"(new Date().getTime() / 1000)"}, :side_effects);
-    add_simple_op('time_i', $T_NUM, [], sub () {"Math.floor(new Date().getTime() / 1000)"}, :side_effects);
+    add_simple_op('time', $T_NUM, [], sub () {"new Date().getTime() * 1000000"}, :side_effects);
 
     add_simple_op('escape', $T_STR, [$T_STR]);
     add_simple_op('x', $T_STR, [$T_STR, $T_INT], sub ($what, $times) {"$what.repeat($times)"});

@@ -97,8 +97,8 @@ my class CondVar is repr('ConditionVariable') { }
     my $c := nqp::getlockcondvar($l, CondVar);
     ok(nqp::defined($c), 'Can create condition variable from lock');
 
-    my $now1 := 0.0;
-    my $now2 := nqp::time_n();
+    my $now1 := 0;
+    my $now2 := nqp::time();
     my @log;
 
     my $t1 := nqp::newthread({
@@ -109,7 +109,7 @@ my class CondVar is repr('ConditionVariable') { }
         }
         nqp::push(@log, 'stout');
         nqp::condsignalall($c);
-        $now1 := nqp::time_n();
+        $now1 := nqp::time();
         nqp::unlock($l);
     }, 0);
     nqp::threadrun($t1);
@@ -134,7 +134,7 @@ my class CondVar is repr('ConditionVariable') { }
     nqp::threadrun($t2);
 
     nqp::threadjoin($t1);
-    $now2 := nqp::time_n();
+    $now2 := nqp::time();
     nqp::threadjoin($t2);
 
     my $ok := nqp::join(',', @log) eq 'ale,porter,stout,lager';

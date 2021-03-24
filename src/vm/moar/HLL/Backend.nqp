@@ -157,12 +157,12 @@ class HLL::Backend::MoarVM {
 
         if $kind eq "heap" {
             unless $filename {
-                $filename := 'heap-snapshot-' ~ nqp::time_n() ~ '.mvmheap';
+                $filename := 'heap-snapshot-' ~ nqp::time() ~ '.mvmheap';
             }
             $conf-hash := nqp::hash('kind', $kind, 'path', $filename);
         } else {
             unless $filename {
-                $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+                $filename := 'profile-' ~ nqp::time() ~ '.html';
             }
             $conf-hash := nqp::hash('kind', $kind);
         }
@@ -197,7 +197,7 @@ class HLL::Backend::MoarVM {
         my @pieces := nqp::list_s();
 
         unless nqp::defined($filename) {
-            $filename := 'profile-' ~ nqp::time_n() ~ '.html';
+            $filename := 'profile-' ~ nqp::time() ~ '.html';
         }
         note("Writing profiler output to $filename");
         my $profile_fh;

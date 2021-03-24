@@ -2331,13 +2331,13 @@ class QAST::CompilerJS does DWIMYNameMangling does SerializeOnce {
 
     method emit($ast, :$substagestats, *%named) {
 
-        my num $timestamp := nqp::time_n();
+        my int $timestamp := nqp::time();
         my $chunk := self.as_js_with_prelude($ast, |%named);
-        stderr().print(nqp::sprintf("[as_js %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+        stderr().print(nqp::sprintf("[as_js %.3f] ", [npq::div_n(nqp::time() - $timestamp,1000000000e0)])) if $substagestats;
 
-        $timestamp := nqp::time_n();
+        $timestamp := nqp::time();
         my $source := $chunk.join();
-        stderr().print(nqp::sprintf("[join %.3f] ", [nqp::time_n() - $timestamp])) if $substagestats;
+        stderr().print(nqp::sprintf("[join %.3f] ", [npq::div_n(nqp::time() - $timestamp,1000000000e0)])) if $substagestats;
         $source;
     }
 

@@ -2361,8 +2361,7 @@ QAST::MASTOperations.add_core_op('sprintfaddargumenthandler', -> $qastcomp, $op 
 });
 
 # terms
-QAST::MASTOperations.add_core_moarop_mapping('time_i', 'time_i');
-QAST::MASTOperations.add_core_moarop_mapping('time_n', 'time_n');
+QAST::MASTOperations.add_core_moarop_mapping('time', 'time');
 
 # Arithmetic ops
 QAST::MASTOperations.add_core_moarop_mapping('add_i', 'add_i');
