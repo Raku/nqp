@@ -246,6 +246,23 @@ class NQP::Optimizer {
                 $op[1].blocktype($orig);
             }
         }
+        elsif $opname eq 'while' {
+            my $conditions := $op[0];
+            if nqp::istype($conditions, QAST::Var) && nqp::substr($conditions.name, 0, 1) eq '@' {
+                $op[0] := QAST::Op.new( :op('elems'), $conditions );
+            }
+            self.visit_children($op);
+        }
+        elsif $opname eq 'if' && ($op.name eq '&infix:<&&>' || $op.name eq '&infix:<||>') {
+            my int $i := 0;
+            for @($op) -> $item {
+                if nqp::istype($item, QAST::Var) && nqp::substr($item.name, 0, 1) eq '@' {
+                    $op[$i] := QAST::Op.new( :op('elems'), $item );
+                }
+                $i++;
+            }
+            self.visit_children($op);
+        }
         else {
             self.visit_children($op);
         }
