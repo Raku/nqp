@@ -480,7 +480,7 @@ The opcodes are grouped into the following categories:
 [threadrun](#threadrun-moar-jvm) |
 [threadyield](#threadyield-moar-jvm)
 
-## [Time](#time)
+## [Timish](#timish)
 
 [decodelocaltime](#decodelocaltime) |
 [sleep](#sleep) |
@@ -3243,7 +3243,7 @@ object.
 Tell the scheduler to prefer another thread then the thread this is being
 executed in, for now.
 
-# <a id="time"></a> Time
+# <a id="timish"></a> Timish
 
 ## decodelocaltime
 * `decodelocaltime(int $epoch --> int @tm)`
