@@ -49,10 +49,10 @@ my class Semaphore is repr('Semaphore') { }
         ok(!nqp::semtryacquire($s), 'Trying fourth acquire before release fails');
     }, 0);
     my $t5 := nqp::newthread({
-        my $before := nqp::time_n();
+        my $before := nqp::time();
         nqp::semacquire($s);
-        my $after  := nqp::time_n();
-        ok(nqp::isgt_n(nqp::sub_n($after, $before), 1.0), 'Fourth acquire blocks on empty semaphore');
+        my $after  := nqp::time();
+        ok($after - $before > 1000000000, 'Fourth acquire blocks on empty semaphore');
         ok($released, 'Fourth acquire succeeds after release in other thread');
     }, 0);
     my $t6 := nqp::newthread({

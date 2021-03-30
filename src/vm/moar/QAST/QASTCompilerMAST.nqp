@@ -513,6 +513,9 @@ my class MASTCompilerInstance {
                 if $got == $MVM_reg_int64 {
                     %core_op_generators{'coerce_in'}($res_reg, $reg);
                 }
+                elsif $got == $MVM_reg_uint64 {
+                    %core_op_generators{'coerce_un'}($res_reg, $reg);
+                }
                 elsif $got == $MVM_reg_str {
                     %core_op_generators{'coerce_sn'}($res_reg, $reg);
                 }

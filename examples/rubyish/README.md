@@ -70,7 +70,7 @@ nqp op-codes can be called like regular functions. E.g.
 ```
     puts nqp::if(2+2 == 4, 'yup', 'nope' )
     def sprintf(fmt, *args) ; nqp::sprintf(fmt, args) ; end
-    puts sprintf("pid=%s time=%d", nqp::getpid, nqp::time_i)
+    puts sprintf("pid=%s time=%d", nqp::getpid, nqp::time)
 ```
 this includes nqp control-flow functions:
 ```

@@ -1,6 +1,6 @@
 # Test nqp::op pseudo-functions.
 
-plan(373);
+plan(371);
 
 ok( nqp::add_i(5,2) == 7, 'nqp::add_i');
 ok( nqp::sub_i(5,2) == 3, 'nqp::sub_i');
@@ -262,12 +262,7 @@ ok(nqp::isnull_s(nqp::null_s()), 'test for isnull_s with a null_s');
 
 ok(nqp::isnull_s(nqp::decont(nqp::null_s())), 'null_s survives nqp::decont');
 
-ok(nqp::isne_n(nqp::time_n(), 0.0), 'time_n is not zero');
-ok(nqp::time_i() != 0, 'time_i is not zero');
-
-my $time_a := nqp::time_i();
-my $time_b := nqp::time_n();
-ok($time_b >= $time_a, "time_n >= time_i");
+ok(nqp::time() != 0, 'time is not zero');
 
 ok(nqp::eqat("foobar","foo", 0) == 1, "eqat with needle argument that matches at 0");
 ok(nqp::eqat("foobar","oob", 1) == 1, "eqat with needle argument that matches at 1");
@@ -604,7 +599,7 @@ is(nqp::codes('hello'), 5, 'nqp::codes with ascii');
 is(nqp::codes(nqp::chr(0x10426) ~ nqp::chr(0x10427)), 2, 'nqp::codes with chars bigger than a single code unit');
 
 {
-  my @a := nqp::decodelocaltime(nqp::time_i());
+  my @a := nqp::decodelocaltime(nqp::div_i(nqp::time(),1000000000));
 
   ok(nqp::elems(@a) == 6 || nqp::elems(@a) == 9, 'nqp::decodelocaltime returns correct around of elements');
   my @b := nqp::decodelocaltime(0);

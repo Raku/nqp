@@ -3238,12 +3238,8 @@ public final class Ops {
     }
 
     /* Terms */
-    public static long time_i() {
-        return (long) (System.currentTimeMillis() / 1000);
-    }
-
-    public static double time_n() {
-        return System.currentTimeMillis() / 1000.0;
+    public static long time() {
+        return System.currentTimeMillis() * 1000000;
     }
 
     /* Aggregate operations. */

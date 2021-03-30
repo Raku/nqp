@@ -1,7 +1,7 @@
 # naive approximation: pi = 4 * (1 - /1/3 + 1/5 ...)
 
 LIMIT = 50000
-def time() ; nqp::time_n() ; end
+def time() ; nqp::time() ; end
 def sprintf(fmt, *args) ; nqp::sprintf(fmt, args) ; end
 
 pi_over_4 = 0.0
@@ -19,7 +19,7 @@ while n > 0 do
 end
 
 puts sprintf("(completed %d iterations in %.2f sec)",
-             LIMIT, time() - start_time)
+             LIMIT, (time() - start_time) / 1000000000.0)
 
 pi = pi_over_4 * 4
 puts pi

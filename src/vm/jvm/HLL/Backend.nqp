@@ -53,13 +53,13 @@ class HLL::Backend::JVM {
     
     method classname($source, *%adverbs) {
         unless %*COMPILING<%?OPTIONS><javaclass> {
-            %*COMPILING<%?OPTIONS><javaclass> := nqp::sha1(nqp::sha1($source) ~ nqp::time_n() ~ $compile_count++);
+            %*COMPILING<%?OPTIONS><javaclass> := nqp::sha1(nqp::sha1($source) ~ nqp::time() ~ $compile_count++);
         }
         $source
     }
     
     method jast($qast, *%adverbs) {
-        my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time_n() ~ $compile_count++);
+        my $classname := %*COMPILING<%?OPTIONS><javaclass> || nqp::sha1('eval-at-' ~ nqp::time() ~ $compile_count++);
         nqp::getcomp('QAST').jast($qast, :$classname);
     }
 

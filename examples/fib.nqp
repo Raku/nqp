@@ -6,9 +6,9 @@ sub fib($n) {
 
 my $N := 29;
 
-my $t0 := nqp::time_n();
+my $t0 := nqp::time();
 my $z  := fib($N);
-my $t1 := nqp::time_n();
+my $t1 := nqp::time();
 
 say("fib($N) = " ~ fib($N));
 say("time    = " ~ ($t1-$t0));

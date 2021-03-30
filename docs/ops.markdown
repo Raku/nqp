@@ -3260,11 +3260,9 @@ Sleep for the given number of seconds (no guarantee is made how exact the
 time sleeping is spent.) Returns the passed in number.
 
 ## time
-* `time_i(--> int)`
-* `time_n(--> num)`
+* `time(--> int)`
 
-Return the time in seconds since January 1, 1970 UTC. `_i` variant returns
-an integral number of seconds, `_n` returns a fractional amount.
+Return the time in nanoseconds since January 1, 1970 UTC.
 
 # <a id="trig"></a> Trigonometric
 

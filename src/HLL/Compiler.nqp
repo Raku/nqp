@@ -498,7 +498,7 @@ class HLL::Compiler does HLL::Backend::Default {
 
         for @stages {
             $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats) && $_ ne "parse";
-            my num $timestamp := nqp::time_n();
+            my int $timestamp := nqp::time();
 
             my sub run() {
                 self.execute_stage($_, $result, %adverbs)
@@ -508,7 +508,7 @@ class HLL::Compiler does HLL::Backend::Default {
                 ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>)
                 !! run();
 
-            my num $diff := nqp::sub_n(nqp::time_n(), $timestamp);
+            my num $diff := nqp::div_n(nqp::time() - $timestamp,1000000000e0);
             if nqp::defined($stagestats) {
                 $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if $_ eq "parse";
                 $stderr.print(nqp::sprintf("%7.3f", [$diff]));
