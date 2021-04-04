@@ -5893,6 +5893,12 @@ public final class Ops {
         }
     }
     public static SixModelObject backtrace(SixModelObject obj, ThreadContext tc) {
+        if (isnull(obj) == 1) {
+            obj = newexception(tc);
+            ((VMExceptionInstance)obj).origin = tc.curFrame;
+            ((VMExceptionInstance)obj).nativeTrace = (new Throwable()).getStackTrace();
+        }
+
         if (obj instanceof VMExceptionInstance) {
             SixModelObject Array = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.listType;
             SixModelObject Hash = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
