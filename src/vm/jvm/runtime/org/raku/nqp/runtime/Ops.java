@@ -2599,7 +2599,7 @@ public final class Ops {
             return obj.get_attribute_boxed(tc, decont(ch, tc), name, STable.NO_HINT);
         }
         catch (P6OpaqueBaseInstance.BadReferenceRuntimeException badRef) {
-            SixModelObject retval = null;
+            SixModelObject retval = createNull(tc);
             obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
             if (tc.native_type == ThreadContext.NATIVE_INT) {
                 retval = box_i((long)tc.native_i, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
@@ -2660,7 +2660,7 @@ public final class Ops {
             return obj.get_attribute_boxed(tc, decont(ch, tc), name, hint);
         }
         catch (P6OpaqueBaseInstance.BadReferenceRuntimeException badRef) {
-            SixModelObject retval = null;
+            SixModelObject retval = createNull(tc);
             obj.get_attribute_native(tc, decont(ch, tc), name, hint);
             if (tc.native_type == ThreadContext.NATIVE_INT) {
                 retval = box_i((long)tc.native_i, tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
