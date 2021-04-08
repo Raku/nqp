@@ -3264,7 +3264,7 @@ time sleeping is spent.) Returns the passed in number.
 * `time_n(--> num)` (DEPRECATED)
 * `time(--> int)`
 
-Return the time in nanoseconds since January 1, 1970 UTC.
+Return the time in nanoseconds since January 1, 1970 UTC (1970-01-01T00:00:00Z).
 
 The **DEPRECATED** `_i` and `_n` variants return the number of seconds
 since January 1, 1970 UTC.  `_i` as an integer value, `_n` as a fractional
