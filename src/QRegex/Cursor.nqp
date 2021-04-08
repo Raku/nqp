@@ -267,8 +267,6 @@ role NQPMatchRole is export {
                     unless nqp::index($name,"-actions") > 0;
                 $ERR.say("  (value in braid: " ~ $bvalue.HOW.name($bvalue) ~ ", value in %*LANG: " ~ $value.HOW.name($value) ~ ")")
                     unless nqp::isnull($bvalue);
-                # XXX Override braid from %*LANG until after everyone fixes their modules.
-                nqp::bindkey(nqp::getattr($!braid, Braid, '$!slangs'), $name, $value);
             }
         }
         self
