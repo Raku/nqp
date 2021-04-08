@@ -8,7 +8,7 @@ sub test_line($rxsub,$target,$expect,$desc) {
                            !! "";
 
     try {
-        my $cursor := NQPCursor."!cursor_init"($target, :c(0));
+        my $cursor := NQPMatch."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
         if $expect_substr {
             my $got := ~$match."!dump_str"("mob");

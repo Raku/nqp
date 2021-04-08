@@ -1272,8 +1272,6 @@ class NQPMatch is NQPCapture does NQPMatchRole {
     }
 }
 
-my constant NQPCursor := NQPMatch;
-
 class NQPRegexMethod {
     has $!code;
     method new($code) {

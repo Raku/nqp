@@ -48,7 +48,7 @@ sub test_line($line) {
     my $rxcomp := nqp::getcomp('QRegex::P6Regex');
     try {
         my $rxsub  := $rxcomp.compile($regex);
-        my $cursor := NQPCursor."!cursor_init"($target, :c(0));
+        my $cursor := NQPMatch."!cursor_init"($target, :c(0));
         my $match  := $rxsub($cursor).MATCH;
 
         if $expect_error {
