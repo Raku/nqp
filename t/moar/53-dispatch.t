@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(133);
+plan(135);
 
 {
     sub const($x) {
@@ -95,6 +95,21 @@ plan(133);
         'dispatcher-insert-arg-literal-str works at end of capture');
     ok(insert() eq 'hello world',
         'dispatcher-insert-arg-literal-str works at end of capture after link too');
+}
+
+{
+    my $target := -> $x, $y { $x + $y }
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'insert-answer', -> $capture {
+        my $capture-derived := nqp::dispatch('boot-syscall',
+                'dispatcher-insert-arg-literal-int', $capture, 2, 42);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+                'boot-code-constant', $capture-derived);
+    });
+    sub insert() { nqp::dispatch('insert-answer', $target, 58) }
+    ok(insert() == 100,
+        'dispatcher-insert-arg-literal-int works at end of capture');
+    ok(insert() == 100,
+        'dispatcher-insert-arg-literal-int works at end of capture after link too');
 }
 
 {
