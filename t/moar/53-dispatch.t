@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(135);
+plan(140);
 
 {
     sub const($x) {
@@ -867,4 +867,38 @@ class Exhausted {};
         'Can handle resumptions creating further resumable dispatchers (record)');
     ok(test-call() eq 'cwxcmxpwxpmx',
         'Can handle resumptions creating further resumable dispatchers (run)');
+}
+
+# Test bind fail via assertparamcheck can lead to a boot-resume
+{
+    sub first($x) { nqp::assertparamcheck($x == 0); "first $x" }
+    sub second($x) { "second $x" }
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-resume-on-bind-fail',
+        # Dispatch
+        -> $capture {
+            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::dispatch('boot-syscall', 'dispatcher-resume-on-bind-failure', 42);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $capture, 0, &first));
+        },
+        # Resume
+        -> $capture {
+            # Check we got the expected argument.
+            ok(nqp::captureposarg_i($capture, 0) == 42, 'Correct argument to resume');
+
+            # Call second function with original args.
+            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $init-args, 0, &second));
+        });
+
+    sub test-call($arg) {
+        nqp::dispatch('test-resume-on-bind-fail', $arg)
+    }
+    ok(test-call(0) eq 'first 0', 'Case where bind check is OK just runs function (record)');
+    ok(test-call(1) eq 'second 1', 'Case where bind check fails runs second function (record)');
+    ok(test-call(0) eq 'first 0', 'Case where bind check is OK just runs function (run)');
+    ok(test-call(1) eq 'second 1', 'Case where bind check fails runs second function (run)');
 }
