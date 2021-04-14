@@ -2159,6 +2159,7 @@ QAST::MASTOperations.add_core_moarop_mapping('capturenamedshash', 'capturenameds
 QAST::MASTOperations.add_core_moarop_mapping('objprimspec', 'objprimspec');
 QAST::MASTOperations.add_core_moarop_mapping('objprimbits', 'objprimbits');
 QAST::MASTOperations.add_core_moarop_mapping('objprimunsigned', 'objprimunsigned');
+QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamcheck');
 
 # Multiple dispatch related.
 QAST::MASTOperations.add_core_moarop_mapping('invokewithcapture', 'invokewithcapture');
