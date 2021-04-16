@@ -143,13 +143,9 @@ class QAST::MASTOperations {
         my @release_kinds;
 
         # if the op has operands, and the first operand is a write register,
-        # and the number of args provided is one less than the number of operands needed,
         # mark that we need to generate a result register at the end, and
         # advance to the second operand.
-        if ($num_operands
-                && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) == $MVM_operand_write_reg
-                    # allow the QASTree to define its own write register
-                && $num_args == $num_operands - 1) {
+        if $num_operands && (nqp::atpos_i(@operands_values, $operands_offset) +& $MVM_operand_rw_mask) == $MVM_operand_write_reg {
             $needs_write := 1;
             $operand_num++;
         }
