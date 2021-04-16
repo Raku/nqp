@@ -327,9 +327,11 @@ my module sprintf {
 
         sub stringify-to-precision2(num $float, $precision) {
             my $exp := nqp::iseq_n($float, 0.0) ?? 0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
-            $float := nqp::add_n(nqp::mul_n(nqp::abs_n($float), nqp::pow_n(10, nqp::sub_n($precision, nqp::add_n($exp, 1.0)))), 0.5);
+            my $to_the := nqp::sub_n($precision, nqp::add_n($exp, 1.0));
+            my num $ten_to_the := nqp::pow_n(10, $to_the);
+            $float := nqp::add_n(nqp::mul_n(nqp::abs_n($float), $ten_to_the), 0.5);
             $float := nqp::floor_n($float);
-            $float := nqp::div_n($float, nqp::pow_n(10.0, nqp::sub_n($precision, nqp::add_n($exp, 1.0))));
+            $float := nqp::div_n($float, $ten_to_the);
 #?if jvm
             if $exp == -4 {
                 my $float_str := stringify-to-precision($float, $precision + 3);
@@ -363,8 +365,11 @@ my module sprintf {
                      !! has_flag($/, 'space') ?? ' '
                      !! '';
             $float := nqp::abs_n($float);
-            my $float_str := ~$float;
-            unless nqp::isnanorinf($float) {
+            my $float_str;
+            if nqp::isnanorinf($float) {
+                $float_str := ~$float;
+            }
+            else {
                 my num $exp := nqp::iseq_n($float, 0.0) ?? 0.0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
                 $float := nqp::div_n($float, nqp::pow_n(10.0, $exp));
                 $float_str := stringify-to-precision($float, $precision);
