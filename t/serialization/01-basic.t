@@ -1,4 +1,4 @@
-plan(1523);
+plan(1525);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -605,6 +605,7 @@ sub fresh_out_sc() {
 
 # Serializing an SC with a VMArray
 {
+    my $old-empty-hash := nqp::hash();
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
 
@@ -628,6 +629,10 @@ sub fresh_out_sc() {
     is(nqp::scgetobj($dsc, 0)<hi>, 123, 'element of hash is correct');
     is(nqp::scgetobj($dsc, 0)<hello>, 456, 'element of hash is correct');
     is(nqp::scgetobj($dsc, 0)<ciao>, 789, 'element of hash is correct');
+
+    is(nqp::elems($old-empty-hash), 0, 'other hash unaffected by deserialization');
+    my $new-empty-hash := nqp::hash();
+    is(nqp::elems($new-empty-hash), 0, 'newly created hash starts empty');
 }
 
 {
