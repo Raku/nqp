@@ -325,13 +325,97 @@ my module sprintf {
             $return;
         }
 
+        # Initialisers for a lookup table to calculate 10.0 ** $i accurately.
+        # See tools/generate-sprintf-pow10-table.raku
+        my @offset := [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15,
+                       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+                       15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14,
+                       15, 15, 13, 15, 14, 15, 15, 15, 14, 15, 15, 15, 13, 14,
+                       15, 15, 15, 15, 14, 14, 15, 15, 15, 15, 15, 15, 14, 15,
+                       15, 15, 14, 15, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15,
+                       15, 15, 15, 15, 15, 15, 15, 15, 13, 14, 15, 14, 15, 15,
+                       15, 15, 15, 15, 15, 15, 15, 15, 15, 13, 14, 15, 15, 15,
+                       15, 14, 15, 15, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15,
+                       15, 13, 15, 15, 15, 15, 15, 15, 15, 11, 13, 14, 14, 15,
+                       15, 13, 15, 15, 15, 13, 15, 15, 15, 15, 15, 15, 15, 15,
+                       13, 15, 15, 14, 15, 13, 15, 15, 15, 15, 15, 14, 15, 15,
+                       12, 15, 14, 15, 15, 13, 14, 15, 13, 15, 15, 15, 15, 15,
+                       15, 12, 15, 15, 14, 15, 15, 15, 15, 15, 15, 14, 14, 15,
+                       15, 15, 15, 15, 15, 13, 15, 15, 14, 11, 15, 15, 15, 15,
+                       14, 15, 15, 15, 15, 15, 15, 15, 15, 14, 14, 15, 15, 11,
+                       15, 15, 14, 15, 14, 15, 15, 15, 15, 13, 15, 15, 15, 14,
+                       15, 14, 14, 15, 15, 14, 14, 15, 13, 15, 14, 14, 15, 15,
+                       15, 15, 15, 12, 15, 14, 15, 15, 13, 14, 15, 14, 15, 14,
+                       15, 15, 15, 14, 15, 14, 14, 15, 15, 15, 15, 15, 15, 15,
+                       15, 14, 15, 15, 15, 14, 14, 14, 15, 15, 15, 15, 15, 15,
+                       15, 15, 15, 15, 15, 15, 13, 14, 15, 15, 15];
+
+        class Lookup is repr('VMArray') is array_type(uint8) {
+        }
+
+        class Nums is repr('VMArray') is array_type(num) {
+        }
+
+        # Pack the lookup table into a byte array, and the floating point values
+        # into a native num array
+        my $pow_hop := Lookup.new;
+        my $pow_lookup := Nums.new;
+
+        my $pow := nqp::elems(@offset) - 1;
+        while $pow {
+            nqp::bindpos_i($pow_hop, $pow, @offset[$pow]);
+            $pow := $pow - 1;
+        }
+
+        $pow := 16; # 1 + max hop (values in @offset above)
+        while $pow {
+            $pow := $pow - 1;
+            my num $val := nqp::pow_i(10, $pow);
+            nqp::bindpos_n($pow_lookup, $pow, $val);
+        }
+
+        sub pow10(int $pow) {
+            # We don't handle negative powers. Should we throw instead?
+            if ($pow < 0) {
+                return nqp::nan();
+            }
+            if ($pow > nqp::elems($pow_hop) - 1) {
+                return nqp::inf();
+            }
+
+            my $factors := nqp::list();
+            my int $i := $pow;
+            while 1 {
+                my $hop := nqp::atpos_i($pow_hop, $i);
+                if (!$hop) {
+                    # When we reach a hop of zero that means that we have a list
+                    # of factors to multiply together. So do this and return:
+                    my num $result := nqp::atpos_n($pow_lookup, $i);
+                    while (nqp::elems($factors)) {
+                        $result := nqp::mul_n($result, nqp::atpos_n($pow_lookup, nqp::pop($factors)));
+            }
+                    return $result
+                }
+                nqp::push($factors, $hop);
+                $i := $i - $hop;
+            }
+        }
+
         sub stringify-to-precision2(num $float, $precision) {
-            my $exp := nqp::iseq_n($float, 0.0) ?? 0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
-            my $to_the := nqp::sub_n($precision, nqp::add_n($exp, 1.0));
-            my num $ten_to_the := nqp::pow_n(10, $to_the);
-            $float := nqp::add_n(nqp::mul_n(nqp::abs_n($float), $ten_to_the), 0.5);
-            $float := nqp::floor_n($float);
-            $float := nqp::div_n($float, $ten_to_the);
+            my int $exp := nqp::iseq_n($float, 0.0) ?? 0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
+            my int $to_the := $precision - ($exp + 1);
+            if ($to_the >= 0) {
+                my num $ten_to_the := pow10($to_the);
+                $float := nqp::add_n(nqp::mul_n(nqp::abs_n($float), $ten_to_the), 0.5);
+                $float := nqp::floor_n($float);
+                $float := nqp::div_n($float, $ten_to_the);
+            }
+            else {
+                my num $ten_to_the := pow10(-$to_the);
+                $float := nqp::add_n(nqp::div_n(nqp::abs_n($float), $ten_to_the), 0.5);
+                $float := nqp::floor_n($float);
+                $float := nqp::mul_n($float, $ten_to_the);
+            }
 #?if jvm
             if $exp == -4 {
                 my $float_str := stringify-to-precision($float, $precision + 3);
@@ -370,14 +454,16 @@ my module sprintf {
                 $float_str := ~$float;
             }
             else {
-                my num $exp := nqp::iseq_n($float, 0.0) ?? 0.0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
-                $float := nqp::div_n($float, nqp::pow_n(10.0, $exp));
-                $float_str := stringify-to-precision($float, $precision);
-                if nqp::islt_n($exp, 0.0) {
-                    $exp := nqp::neg_n($exp);
-                    $float_str := $float_str ~ $e ~ '-' ~ (nqp::islt_n($exp, 10.0) ?? '0' !! '') ~ $exp;
+                my int $exp := nqp::iseq_n($float, 0.0) ?? 0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
+                if $exp < 0 {
+                    $exp := -$exp;
+                    $float := nqp::mul_n($float, pow10($exp));
+                    $float_str := stringify-to-precision($float, $precision);
+                    $float_str := $float_str ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 } else {
-                    $float_str := $float_str ~ $e ~ '+' ~ (nqp::islt_n($exp, 10.0) ?? '0' !! '') ~ $exp;
+                    $float := nqp::div_n($float, pow10($exp));
+                    $float_str := stringify-to-precision($float, $precision);
+                    $float_str := $float_str ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 }
             }
             pad-with-sign($sign, $float_str, $size, $pad);
@@ -394,20 +480,22 @@ my module sprintf {
 
             return pad-with-sign($sign, ~$float, $size, $pad) if nqp::isnanorinf($float);
 
-            my num $exp := nqp::iseq_n($float, 0.0) ?? 0.0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
+            my int $exp := nqp::iseq_n($float, 0.0) ?? 0 !! nqp::floor_n(nqp::div_n(nqp::log_n($float), nqp::log_n(10.0)));
 
-            if nqp::islt_n(-2 - $precision, $exp) && nqp::islt_n($exp, $precision) {
+            if (-2 - $precision) < $exp && $exp < $precision {
                 my $fixed-precision := $precision - ($exp + 1);
                 my $fixed := stringify-to-precision2($float, $precision);
                 pad-with-sign($sign, $fixed, $size, $pad);
             } else {
-                $float := nqp::div_n($float, nqp::pow_n(10.0, $exp));
-                my $float_str := stringify-to-precision2($float, $precision);
-                my $sci := '';
+                my $sci;
                 if $exp < 0 {
                     $exp := -$exp;
+                    $float := nqp::mul_n($float, pow10($exp));
+                    my $float_str := stringify-to-precision2($float, $precision);
                     $sci := $float_str ~ $e ~ '-' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 } else {
+                    $float := nqp::div_n($float, pow10($exp));
+                    my $float_str := stringify-to-precision2($float, $precision);
                     $sci := $float_str ~ $e ~ '+' ~ ($exp < 10 ?? '0' !! '') ~ $exp;
                 }
 
