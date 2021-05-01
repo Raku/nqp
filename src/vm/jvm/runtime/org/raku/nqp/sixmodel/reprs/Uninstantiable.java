@@ -20,7 +20,7 @@ public class Uninstantiable extends REPR {
 
     @Override
     public SixModelObject allocate(ThreadContext tc, STable st) {
-        throw ExceptionHandling.dieInternal(tc, "You cannot create an instance of this type");
+        throw ExceptionHandling.dieInternal(tc, "You cannot create an instance of this type (" + st.debugName + ")");
     }
 
     @Override
