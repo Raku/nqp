@@ -123,8 +123,6 @@ public class VMArray extends REPR {
             default:
                 throw ExceptionHandling.dieInternal(tc, "Invalid REPR name for VMArray");
             }
-            // Set real REPR name (we cheated during serialization).
-            st.REPR.name = "VMArray";
         }
         else {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
