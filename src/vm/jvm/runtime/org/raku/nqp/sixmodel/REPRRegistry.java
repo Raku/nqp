@@ -73,6 +73,15 @@ public class REPRRegistry {
         addREPR("P6opaque", new P6Opaque());
         addREPR("VMHash", new VMHash());
         addREPR("VMArray", new VMArray());
+        addREPR("VMArray_i8", new VMArray());
+        addREPR("VMArray_u8", new VMArray());
+        addREPR("VMArray_i16", new VMArray());
+        addREPR("VMArray_u16", new VMArray());
+        addREPR("VMArray_i32", new VMArray());
+        addREPR("VMArray_u32", new VMArray());
+        addREPR("VMArray_i", new VMArray());
+        addREPR("VMArray_n", new VMArray());
+        addREPR("VMArray_s", new VMArray());
         addREPR("VMIter", new VMIter());
         addREPR("P6str", new P6str());
         addREPR("P6int", new P6int());

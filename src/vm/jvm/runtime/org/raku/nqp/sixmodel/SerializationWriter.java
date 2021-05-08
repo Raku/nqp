@@ -16,6 +16,7 @@ import org.raku.nqp.runtime.ThreadContext;
 import org.raku.nqp.sixmodel.reprs.CallCapture;
 import org.raku.nqp.sixmodel.reprs.IOHandle;
 import org.raku.nqp.sixmodel.reprs.MultiCache;
+import org.raku.nqp.sixmodel.reprs.VMArrayREPRData;
 
 public class SerializationWriter {
     /* The current version of the serialization format. */
@@ -549,7 +550,45 @@ public class SerializationWriter {
         growToHold(STABLES, STABLES_TABLE_ENTRY_SIZE);
 
         /* Make STables table entry. */
-        outputs[STABLES].putInt(addStringToHeap(st.REPR.name));
+        if (st.REPRData instanceof VMArrayREPRData) {
+            /* Workaround for native arrays. If they end up as VMArray in the
+             * string heap, a plain VMArray will be created in deserialize_stub.
+             * So we cheat and add a suffix to the real REPR name. */
+            String reprNameForSerialization;
+            StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
+            switch (ss.boxed_primitive) {
+            case StorageSpec.BP_INT:
+                if (ss.bits == 64)
+                    reprNameForSerialization = "VMArray_i";
+                else if (ss.bits == 8)
+                    reprNameForSerialization = ss.is_unsigned == 0
+                        ? "VMArray_i8"
+                        : "VMArray_u8";
+                else if (ss.bits == 16)
+                    reprNameForSerialization = ss.is_unsigned == 0
+                        ? "VMArray_i16"
+                        : "VMArray_u16";
+                else if (ss.bits == 32)
+                    reprNameForSerialization = ss.is_unsigned == 0
+                        ? "VMArray_i32"
+                        : "VMArray_u32";
+                else
+                    reprNameForSerialization = "VMArray_i";
+                break;
+            case StorageSpec.BP_NUM:
+                reprNameForSerialization = "VMArray_n";
+                break;
+            case StorageSpec.BP_STR:
+                reprNameForSerialization = "VMArray_s";
+                break;
+            default:
+                throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
+            }
+            outputs[STABLES].putInt(addStringToHeap(reprNameForSerialization));
+        }
+        else {
+            outputs[STABLES].putInt(addStringToHeap(st.REPR.name));
+        }
         outputs[STABLES].putInt(outputs[STABLE_DATA].position());
 
         /* Make sure we're going to write to the correct place. */

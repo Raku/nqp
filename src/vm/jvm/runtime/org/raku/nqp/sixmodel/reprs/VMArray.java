@@ -88,7 +88,43 @@ public class VMArray extends REPR {
     public SixModelObject deserialize_stub(ThreadContext tc, STable st) {
         SixModelObject obj;
         if (st.REPRData == null) {
-            obj = new VMArrayInstance();
+            // Either a real VMArray or REPRData not yet known.
+            switch (st.REPR.name) {
+            case "VMArray":
+                obj = new VMArrayInstance();
+                break;
+            case "VMArray_i8":
+                obj = new VMArrayInstance_i8();
+                break;
+            case "VMArray_u8":
+                obj = new VMArrayInstance_u8();
+                break;
+            case "VMArray_i16":
+                obj = new VMArrayInstance_i16();
+                break;
+            case "VMArray_u16":
+                obj = new VMArrayInstance_u16();
+                break;
+            case "VMArray_i32":
+                obj = new VMArrayInstance_i32();
+                break;
+            case "VMArray_u32":
+                obj = new VMArrayInstance_u32();
+                break;
+            case "VMArray_i":
+                obj = new VMArrayInstance_i();
+                break;
+            case "VMArray_n":
+                obj = new VMArrayInstance_n();
+                break;
+            case "VMArray_s":
+                obj = new VMArrayInstance_s();
+                break;
+            default:
+                throw ExceptionHandling.dieInternal(tc, "Invalid REPR name for VMArray");
+            }
+            // Set real REPR name (we cheated during serialization).
+            st.REPR.name = "VMArray";
         }
         else {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
