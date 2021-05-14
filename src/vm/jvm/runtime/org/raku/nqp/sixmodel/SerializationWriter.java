@@ -550,11 +550,11 @@ public class SerializationWriter {
         growToHold(STABLES, STABLES_TABLE_ENTRY_SIZE);
 
         /* Make STables table entry. */
+        String reprNameForSerialization = st.REPR.name;
         if (st.REPRData instanceof VMArrayREPRData) {
             /* Workaround for native arrays. If they end up as VMArray in the
              * string heap, a plain VMArray will be created in deserialize_stub.
              * So we cheat and add a suffix to the real REPR name. */
-            String reprNameForSerialization;
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
@@ -584,11 +584,8 @@ public class SerializationWriter {
             default:
                 throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
             }
-            outputs[STABLES].putInt(addStringToHeap(reprNameForSerialization));
         }
-        else {
-            outputs[STABLES].putInt(addStringToHeap(st.REPR.name));
-        }
+        outputs[STABLES].putInt(addStringToHeap(reprNameForSerialization));
         outputs[STABLES].putInt(outputs[STABLE_DATA].position());
 
         /* Make sure we're going to write to the correct place. */
