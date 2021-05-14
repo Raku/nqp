@@ -89,7 +89,7 @@ public class VMArray extends REPR {
         SixModelObject obj;
         if (st.REPRData == null) {
             // Either a real VMArray or REPRData not yet known.
-            switch (st.REPR.name) {
+            switch (st.REPR.vmarray_name) {
             case "VMArray":
                 obj = new VMArrayInstance();
                 break;
@@ -123,8 +123,6 @@ public class VMArray extends REPR {
             default:
                 throw ExceptionHandling.dieInternal(tc, "Invalid REPR name for VMArray");
             }
-            // Set real REPR name (we cheated during serialization).
-            st.REPR.name = "VMArray";
         }
         else {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
