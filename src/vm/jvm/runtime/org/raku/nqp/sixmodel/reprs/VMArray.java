@@ -89,7 +89,7 @@ public class VMArray extends REPR {
         SixModelObject obj;
         if (st.REPRData == null) {
             // Either a real VMArray or REPRData not yet known.
-            switch (st.REPR.vmarray_name) {
+            switch (st.REPR.subtype_name) {
             case "VMArray":
                 obj = new VMArrayInstance();
                 break;
