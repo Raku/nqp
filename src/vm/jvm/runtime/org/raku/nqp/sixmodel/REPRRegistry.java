@@ -64,12 +64,11 @@ public class REPRRegistry {
         REPR.ID = reprs.size();
         reprIdMap.put(name, reprs.size());
         if (name.startsWith("VMArray")) {
-            /* To detect native VMArrays during deserialization we set an extra
-             * field. This isn't used for other representations.
-             * We can set the correct name (VMArray) at this point, since
+            /* To detect native VMArrays during deserialization we use an extra
+             * field. We can set the correct name (VMArray) at this point, since
              * lookup will be done from reprIdMap, which knows the long name.
              */
-            REPR.vmarray_name = name;
+            REPR.subtype_name = name;
             name = "VMArray";
         }
         REPR.name = name;

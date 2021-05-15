@@ -22,10 +22,12 @@ public abstract class REPR {
     public String name;
 
     /**
-     * Name that is used to differentiate between native and non-native
-     * VMArrays during deserialization. Not used for other representations.
+     * A name that is used to differentiate between different (sub)types that
+     * have the same representation otherwise.
+     * Can be left unset for most representations, but is used to detect
+     * native VMArrays during deserialization.
      */
-    public String vmarray_name;
+    public String subtype_name;
 
     /**
      * Creates a new type object of this representation, and associates it
