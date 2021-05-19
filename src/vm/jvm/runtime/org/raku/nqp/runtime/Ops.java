@@ -1,5 +1,14 @@
 package org.raku.nqp.runtime;
 
+import com.sun.jna.Memory;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinError;
+import com.sun.jna.platform.win32.WinNT;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
+import com.sun.jna.platform.win32.WinBase;
+import com.sun.jna.platform.win32.WinBase.FILETIME;
+import com.sun.jna.platform.win32.WinBase.FILE_BASIC_INFO;
+import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.management.OperatingSystemMXBean;
 import java.io.File;
 import java.io.IOException;
@@ -196,6 +205,30 @@ public final class Ops {
 
     public static final int MAX_GRAPHEMES           = 2147483647;
 
+    private static long windows_native_changetime(String filename) {
+        HANDLE hFile = null;
+        try {
+            hFile = Kernel32.INSTANCE.CreateFile(filename, WinNT.GENERIC_READ, WinNT.FILE_SHARE_READ, new WinBase.SECURITY_ATTRIBUTES(), WinNT.OPEN_EXISTING, WinNT.FILE_ATTRIBUTE_NORMAL, null);
+            if (Kernel32.INSTANCE.GetLastError() != WinError.ERROR_SUCCESS) {
+                return -1;
+            }
+
+            Memory p = new Memory(FILE_BASIC_INFO.sizeOf());
+            if (Kernel32.INSTANCE.GetFileInformationByHandleEx(hFile, WinBase.FileBasicInfo, p, new DWORD(p.size()))) {
+                FILE_BASIC_INFO fbi = new FILE_BASIC_INFO(p);
+                return new FILETIME(fbi.ChangeTime).toTime() / 1000;
+            } else {
+                return -1;
+            }
+        } catch (Exception e) {
+            return -1;
+        } finally {
+            if (hFile != null) {
+                Kernel32.INSTANCE.CloseHandle(hFile);
+            }
+        }
+    }
+
     public static long stat(String filename, long status) {
         return stat_internal(filename, status);
     }
@@ -277,6 +310,12 @@ public final class Ops {
             case STAT_CHANGETIME:
                 try {
                     rval = ((FileTime) Files.getAttribute(Paths.get(filename), "unix:ctime", linkOption)).to(TimeUnit.SECONDS);
+                } catch (UnsupportedOperationException oue) {
+                    if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
+                        rval = windows_native_changetime(filename);
+                    } else {
+                        rval = -1;
+                    }
                 } catch (Exception e) {
                     rval = -1;
                 }
@@ -395,6 +434,12 @@ public final class Ops {
         try {
             FileTime ft = ((FileTime) Files.getAttribute(Paths.get(filename), attrName, linkOption));
             return ft.to(TimeUnit.NANOSECONDS) / 1000000000;
+        } catch (UnsupportedOperationException oue) {
+            if ((int) status == STAT_CHANGETIME && System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
+                return windows_native_changetime(filename);
+            } else {
+                return -1;
+            }
         } catch (Exception e) {
             return -1;
         }
