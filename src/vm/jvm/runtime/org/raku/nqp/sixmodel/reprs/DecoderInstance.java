@@ -24,6 +24,7 @@ public class DecoderInstance extends SixModelObject {
     private List<ByteBuffer> toDecode;
     private List<CharBuffer> decoded;
     private List<String> lineSeps;
+    private boolean translate_newlines = false;
 
     public void configure(ThreadContext tc, String encoding, SixModelObject config) {
         if (decoder == null) {
@@ -33,6 +34,8 @@ public class DecoderInstance extends SixModelObject {
             lineSeps = new ArrayList<String>();
             lineSeps.add("\n");
             lineSeps.add("\r\n");
+            if (config.exists_key(tc, "translate_newlines") != 0)
+                translate_newlines = (long) config.at_key_boxed(tc, "translate_newlines").get_int(tc) != 0;
         }
         else {
             throw ExceptionHandling.dieInternal(tc, "Decoder already configured");
@@ -156,7 +159,8 @@ public class DecoderInstance extends SixModelObject {
             decoder.flush(target);
             decoder.reset();
         }
-        return Normalizer.normalize(decodedBuffer(target), Normalizer.Form.NFC);
+        String normalized = Normalizer.normalize(decodedBuffer(target), Normalizer.Form.NFC);
+        return translate_newlines ? normalized.replace("\r\n", "\n") : normalized;
     }
 
     public synchronized String takeLine(ThreadContext tc, boolean chomp, boolean eof) {
