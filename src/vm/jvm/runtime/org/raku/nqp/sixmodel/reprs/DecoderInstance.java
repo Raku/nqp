@@ -69,6 +69,10 @@ public class DecoderInstance extends SixModelObject {
         }
     }
 
+    public synchronized String maybe_translate_newlines(ThreadContext tc, String str) {
+        return translate_newlines ? str.replace("\r\n", "\n") : str;
+    }
+
     public synchronized String takeChars(ThreadContext tc, long chars, boolean eof) {
         ensureConfigured(tc);
 
@@ -92,6 +96,7 @@ public class DecoderInstance extends SixModelObject {
         String normalized = Normalizer.normalize(
             decodedBuffer(target),
             Normalizer.Form.NFC);
+        normalized = maybe_translate_newlines(tc, normalized);
         if (normalized.length() > chars) {
             String result = normalized.substring(0, (int)chars);
             String remaining = normalized.substring((int)chars, normalized.length());
@@ -131,6 +136,7 @@ public class DecoderInstance extends SixModelObject {
         String normalized = Normalizer.normalize(
             decodedBuffer(target),
             Normalizer.Form.NFC);
+        normalized = maybe_translate_newlines(tc, normalized);
         if (normalized.length() == 0 || isNormTerminated(normalized))
             return normalized;
         String result = normalized.substring(0, normalized.length() - 1);
@@ -160,7 +166,7 @@ public class DecoderInstance extends SixModelObject {
             decoder.reset();
         }
         String normalized = Normalizer.normalize(decodedBuffer(target), Normalizer.Form.NFC);
-        return translate_newlines ? normalized.replace("\r\n", "\n") : normalized;
+        return maybe_translate_newlines(tc, normalized);
     }
 
     public synchronized String takeLine(ThreadContext tc, boolean chomp, boolean eof) {
