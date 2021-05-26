@@ -363,7 +363,7 @@ if $is-windows {
     is($fh.readchars(2), 'π1', 'readchars the second time with a multi byte character');
     $fh.get;
     is($fh.readchars(5), 'line3', 'readchars after get');
-    is($fh.readchars(150), "line4\n", 'readchars with more chars then they are in the file');
+    is($fh.readchars(150), "line4\n", 'readchars with more chars than are in the file');
     close($fh);
 }
 
