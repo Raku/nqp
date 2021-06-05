@@ -69,8 +69,7 @@ class NQP::Optimizer {
                     next if nqp::existskey(%exclude, $name);
                     my @existing := %set{$name};
                     if @existing {
-                        for %to_add{$name} { nqp::push(@existing, $_) }
-                        #nqp::splice(@existing, $_.value, 0, 0);
+                        nqp::splice(@existing, %to_add{$name}, nqp::elems(@existing), 0);
                     }
                     else {
                         %set{$name} := %to_add{$name};
