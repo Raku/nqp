@@ -15,10 +15,12 @@ sub sorted_keys($hash) {
 
     sub sift_down(@a, int $start, int $end) {
         my int $root := $start;
+        my int $child;
+        my int $swap;
 
         while 2*$root + 1 <= $end {
-            my $child := 2*$root + 1;
-            my $swap := $root;
+            $child := 2*$root + 1;
+            $swap := $root;
 
             if @a[$swap] gt @a[$child] {
                 $swap := $child;
@@ -38,13 +40,19 @@ sub sorted_keys($hash) {
     }
 
     my int $count := +@keys;
+    if $count < 3 {
+        if $count == 2 && @keys[0] gt @keys[1] {
+            nqp::push(@keys, nqp::shift(@keys));
+        }
+        return @keys;
+    }
     my int $start := $count / 2 - 1;
+    my int $end := $count - 1;
     while $start >= 0 {
-        sift_down(@keys, $start, $count - 1);
+        sift_down(@keys, $start, $end);
         $start := $start - 1;
     }
 
-    my int $end := +@keys - 1;
     while $end > 0 {
         my str $swap := @keys[$end];
         @keys[$end] := @keys[0];
