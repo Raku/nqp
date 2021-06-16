@@ -25,9 +25,6 @@
   @moar::ccinc@@nfpq(@moar::prefix@/include/moar)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libatomic_ops)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/dyncall)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/moar)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/sha1)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/tinymt)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libtommath)@ \
   @moar::ccinc@@nfpq(@moar::prefix@/include/libuv)@
 
