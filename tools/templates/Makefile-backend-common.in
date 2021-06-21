@@ -188,4 +188,4 @@
 @backend_prefix@-qregex-test-loud: @bpm(BUILD_RUNNER)@
 	$(PROVE) -r -v --exec @nfpq(@bpm(BUILD_RUNNER)@)@ @nfp(t/qregex)@
 
-# vim: ft=make tw=4 sw=4 noexpandtab
+# vim: ft=make ts=4 sw=4 noexpandtab

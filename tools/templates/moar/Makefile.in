@@ -20,13 +20,7 @@
   @bpm(INST_NQP)@
 
 @bpv(MOAR_INC_PATHS)@ = \
-  @moar::cincludes@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/moar)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/libatomic_ops)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/dyncall)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/libtommath)@ \
-  @moar::ccinc@@nfpq(@moar::prefix@/include/libuv)@
+    @insert_list(moar_includes)@
 
 @for_stages(@bpv(@ucstage@_GEN_CAT)@ = @bpm(GEN_CAT)@ @lcstage@
 )@
