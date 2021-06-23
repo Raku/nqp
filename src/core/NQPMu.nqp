@@ -98,7 +98,8 @@ my class NQPMu {
     }
 }
 
-# A few bits when we're bootstrapping everything 6model-style
+# An NQP array, which is the standard array representation with a few methods
+# added.
 my class NQPArray is repr('VMArray') {
     method push($value) { nqp::push(self, $value) }
     method pop() { nqp::pop(self) }
@@ -107,6 +108,8 @@ my class NQPArray is repr('VMArray') {
 }
 nqp::setboolspec(NQPArray, 8, nqp::null());
 nqp::settypehllrole(NQPArray, 4);
+
+# Iterator types.
 my class NQPArrayIter is repr('VMIter') { }
 nqp::setboolspec(NQPArrayIter, 7, nqp::null());
 my class NQPHashIter is repr('VMIter') {
@@ -115,6 +118,8 @@ my class NQPHashIter is repr('VMIter') {
     method Str() { nqp::iterkey_s(self) }
 }
 nqp::setboolspec(NQPHashIter, 7, nqp::null());
+
+# NQP HLL configuration.
 nqp::sethllconfig('nqp', nqp::hash(
     'list', NQPArray,
     'slurpy_array', NQPArray,
@@ -124,6 +129,10 @@ nqp::sethllconfig('nqp', nqp::hash(
         # BOOTHashes don't actually need transformation
         nqp::ishash($hash) ?? $hash !! $hash.FLATTENABLE_HASH
     },
+#?if moar
+    'call_dispatcher', 'nqp-call',
+    'call_method_dispatcher', 'nqp-meth-call',
+#?endif
 ));
 
 my class NQPLabel { }
