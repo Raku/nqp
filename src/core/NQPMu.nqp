@@ -131,7 +131,7 @@ nqp::sethllconfig('nqp', nqp::hash(
     },
 #?if moar
     'call_dispatcher', 'nqp-call',
-    'call_method_dispatcher', 'nqp-meth-call',
+    'method_call_dispatcher', 'nqp-meth-call',
 #?endif
 ));
 
