@@ -41,7 +41,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
         my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
         my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
             $args, 0, $track-do);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
             $delegate);
     }
     elsif nqp::istype($callee, NQPRegex) {
@@ -51,12 +51,12 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
         my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
         my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
             $args, 0, $track-do);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
             $delegate);
     }
     elsif nqp::iscoderef($callee) {
         # VM-level code handle.
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
             $capture);
     }
     else {
