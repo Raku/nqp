@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(142);
+plan(152);
 
 {
     sub const($x) {
@@ -909,4 +909,50 @@ class Exhausted {};
     ok(test-call(1) eq 'second 1', 'Case where bind check fails runs second function (record)');
     ok(test-call(0) eq 'first 0', 'Case where bind check is OK just runs function (run)');
     ok(test-call(1) eq 'second 1', 'Case where bind check fails runs second function (run)');
+}
+
+{
+    my $foo := -> $x { $x + 19 }
+    sub lang-call($i) {
+        nqp::dispatch('lang-call', $foo, $i);
+    }
+    ok(nqp::iscoderef($foo), 'Really are testing lang-call on a VM code ref');
+    ok(lang-call(23) == 42, 'lang-call works with deferring to NQP dispatcher (record)');
+    ok(lang-call(80) == 99, 'lang-call works with deferring to NQP dispatcher (run)');
+}
+
+{
+    my $foo := nqp::create(NQPRoutine);
+    nqp::bindattr($foo, NQPRoutine, '$!do', -> $x { $x + 19 });
+    sub lang-call($i) {
+        nqp::dispatch('lang-call', $foo, $i);
+    }
+    ok($foo.HOW.name($foo) eq 'NQPRoutine', 'Really are testing lang-call on NQPRoutine');
+    ok(lang-call(23) == 42, 'lang-call works with deferring to NQP dispatcher (record)');
+    ok(lang-call(80) == 99, 'lang-call works with deferring to NQP dispatcher (run)');
+}
+
+{
+    my class C { method m($name) { "Axiom $name" } }
+    sub lang-meth-call($name) {
+        nqp::dispatch('lang-meth-call', C, 'm', C, $name)
+    }
+    ok(lang-meth-call('Greek Fire') eq 'Axiom Greek Fire',
+        'lang-meth-call on an NQP class works (record)');
+    ok(lang-meth-call('Queen Vaccine') eq 'Axiom Queen Vaccine',
+        'lang-meth-call on an NQP class works (run)');
+}
+
+{
+    my $type := nqp::knowhow().new_type(:name('DispTest'));
+    sub lang-meth-call($name, $code) {
+        nqp::dispatch('lang-meth-call', $type.HOW, 'add_method', $type.HOW, $type, $name, $code);
+    }
+    lang-meth-call('m1', -> $obj { 111 });
+    lang-meth-call('m2', -> $obj { 222 });
+    $type.HOW.compose($type);
+    ok(nqp::dispatch('lang-meth-call', $type, 'm1', $type) == 111,
+        'lang-meth-call KnowHOW fallback works (record)');
+    ok(nqp::dispatch('lang-meth-call', $type, 'm2', $type) == 222,
+        'lang-meth-call KnowHOW fallback works (run)');
 }
