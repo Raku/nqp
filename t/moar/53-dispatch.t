@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(140);
+plan(142);
 
 {
     sub const($x) {
@@ -26,6 +26,14 @@ plan(140);
     }
     ok(code-constant(-> $x, $y { $x + $y }) == 5, 'boot-code-constant invokes bytecode with args');
     ok(code-constant(-> $x, $y { $x * $y }) == 5, 'boot-code-constant fixates the callee');
+}
+
+{
+    sub code($code) {
+        nqp::dispatch('boot-code', $code, 2, 3);
+    }
+    ok(code(-> $x, $y { $x + $y }) == 5, 'boot-code invokes bytecode with args');
+    ok(code(-> $x, $y { $x * $y }) == 6, 'boot-code does not fixate the callee');
 }
 
 {
