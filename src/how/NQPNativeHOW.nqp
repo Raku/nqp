@@ -27,9 +27,9 @@ knowhow NQPNativeHOW {
     # XXX Should check that this is an inlineable REPR.
     method new_type(:$name = '<anon>', :$repr!) {
         my $metaclass := self.new(:name($name));
-        nqp::setdebugtypename(
-            nqp::setwho(nqp::newtype($metaclass, $repr), {}),
-            $name)
+        my $type := nqp::newtype($metaclass, $repr);
+        nqp::settypehll($type, 'nqp');
+        nqp::setdebugtypename(nqp::setwho($type, {}), $name)
     }
 
     method add_method($obj, $name, $code_obj) {

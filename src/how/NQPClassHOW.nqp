@@ -112,6 +112,7 @@ knowhow NQPClassHOW {
             $new_type := nqp::newtype($metaclass, $repr);
         }
         $metaclass.setup_mixin_cache($new_type);
+        nqp::settypehll($new_type, 'nqp');
         nqp::setdebugtypename(nqp::setwho($new_type, {}), $name)
     }
 

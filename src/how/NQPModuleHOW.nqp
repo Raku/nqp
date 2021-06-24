@@ -22,9 +22,9 @@ knowhow NQPModuleHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>') {
         my $metaclass := self.new(:name($name));
-        nqp::setdebugtypename(
-            nqp::setwho(nqp::newtype($metaclass, 'Uninstantiable'), {}),
-            $name);
+        my $type := nqp::newtype($metaclass, 'Uninstantiable');
+        nqp::settypehll($type, 'nqp');
+        nqp::setdebugtypename(nqp::setwho($type, {}), $name);
     }
 
     method add_method($obj, $name, $code_obj) {

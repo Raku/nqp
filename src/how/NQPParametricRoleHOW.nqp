@@ -61,9 +61,9 @@ knowhow NQPParametricRoleHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>') {
         my $metarole := self.new(:name($name), :specialize_lock(nqp::create(NQPSpecializationLock)));
-        nqp::setdebugtypename(
-            nqp::setwho(nqp::newtype($metarole, 'Uninstantiable'), {}),
-            $name);
+        my $type := nqp::newtype($metarole, 'Uninstantiable');
+        nqp::settypehll($type, 'nqp');
+        nqp::setdebugtypename(nqp::setwho($type, {}), $name);
     }
 
     method set_body_block($obj, $body_block) {
