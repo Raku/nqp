@@ -355,6 +355,7 @@ nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 nqp::setmultispec(NQPRoutine, NQPRoutine, '$!onlystar', '$!dispatch_cache');
 #?endif
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
+nqp::settypehll(NQPRoutine, 'nqp');
 
 my knowhow NQPSignature {
     has $!types;
@@ -362,6 +363,7 @@ my knowhow NQPSignature {
     method types() { $!types }
     method definednesses() { $!definednesses }
 }
+nqp::settypehll(NQPSignature, 'nqp');
 
 # Data on the captures that a particular rule has.
 my knowhow RegexCaptures {
@@ -481,7 +483,7 @@ my knowhow RegexCaptures {
     # Get the name of the only capture, if there is only one.
     method onlyname() { $!onlyname }
 }
-
+nqp::settypehll(RegexCaptures, 'nqp');
 
 my knowhow NQPRegex {
     has $!do;
@@ -579,3 +581,4 @@ my knowhow NQPRegex {
 }
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
 nqp::setboolspec(NQPRegex, 5, nqp::null());
+nqp::settypehll(NQPRegex, 'nqp');
