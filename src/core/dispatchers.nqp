@@ -33,34 +33,46 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
 
     # Go by callee type to decide how to invoke it.
     my $callee := nqp::captureposarg($capture, 0);
-    if nqp::istype($callee, NQPRoutine) {
-        # Routine, maybe multi.
-        # TODO multi
-        my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
-            $track-callee, NQPRoutine, '$!do');
-        my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-            $args, 0, $track-do);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
-            $delegate);
-    }
-    elsif nqp::istype($callee, NQPRegex) {
-        # Regex, just unwrap the code handle and delegate.
-        my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
-            $track-callee, NQPRegex, '$!do');
-        my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-            $args, 0, $track-do);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
-            $delegate);
-    }
-    elsif nqp::iscoderef($callee) {
+    if nqp::iscoderef($callee) {
         # VM-level code handle.
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
             $capture);
     }
     else {
-        nqp::die("Cannot invoke object of type '{$callee.HOW.name($callee)}'");
+        # Normally we can go on the type objects, but due to the bootstrap,
+        # we may be expected to dispatch for the compiling NQP version too,
+        # thus the mildly deplorable string name workaround here.
+        my int $is-routine := nqp::istype($callee, NQPRoutine);
+        my int $is-regex := $is-routine ?? 0 !! nqp::istype($callee, NQPRegex);
+        unless $is-routine || $is-regex {
+            my str $name := $callee.HOW.name($callee);
+            if $name eq 'NQPRoutine' { $is-routine := 1 }
+            elsif $name eq 'NQPRegex' { $is-regex := 1 }
+        }
+        if $is-routine {
+            # Routine, maybe multi.
+            # TODO multi
+            my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+                $track-callee, $callee.WHAT, '$!do');
+            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+                $args, 0, $track-do);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
+                $delegate);
+        }
+        elsif $is-regex {
+            # Regex, just unwrap the code handle and delegate.
+            my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+                $track-callee, $callee.WHAT, '$!do');
+            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+                $args, 0, $track-do);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
+                $delegate);
+        }
+        else {
+            nqp::die("Cannot invoke object of type '{$callee.HOW.name($callee)}'");
+        }
     }
 });
 #?endif
