@@ -565,8 +565,7 @@ is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
     my sub create_buf($type) {
         my $buf := nqp::newtype(nqp::null(), 'VMArray');
         nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
-        nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
-        $buf;
+        $buf
     }
 
     sub buf_dump($buf) {
@@ -579,7 +578,7 @@ is(nqp::tc("\x1044E"), "\x10426", 'tc works on codepoints greater than 0xffff');
       nqp::join(" ", @parts);
     };
 
-    my $buf := nqp::encode(nqp::chr(0x28B81), 'utf8', create_buf(uint8).new);
+    my $buf := nqp::encode(nqp::chr(0x28B81), 'utf8', nqp::create(create_buf(uint8)));
     is(buf_dump($buf), "0xF0 0xA8 0xAE 0x81", 'nqp::chr with 0x28B81 works properly');
 }
 
