@@ -792,8 +792,7 @@ sub round_trip_int_array($desc, @a) {
 sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
     nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
-    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
-    $buf;
+    $buf
 }
 
 sub encode_as_base64($buf) {
