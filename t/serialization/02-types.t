@@ -421,7 +421,6 @@ sub add_to_sc($sc, $idx, $obj) {
 
 # Serializing a type with HLL owner
 {
-
     my $type := NQPClassHOW.new_type(:name('hll test'), :repr('P6opaque'));
     $type.HOW.add_parent($type, NQPMu);
     $type.HOW.compose($type);
@@ -454,7 +453,7 @@ sub add_to_sc($sc, $idx, $obj) {
     my $dsc := nqp::createsc('TEST_SC_11_OUT');
     nqp::deserialize($serialized, $dsc, $sh, $cr, nqp::null());
 
-    my $obj := nqp::scgetobj($dsc, 0).new;
+    my $obj := nqp::create(nqp::scgetobj($dsc, 0));
 
     nqp::settypehllrole(nqp::scgetobj($dsc, 0), 4);
 
