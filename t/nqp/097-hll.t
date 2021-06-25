@@ -77,7 +77,14 @@ nqp::sethllconfig('baz', nqp::hash(
     },
     'foreign_transform_hash', -> $hash {
         nqp::list('HASH:' ~ $hash.bazify());
-    }
+    },
+    'method_call_dispatcher', 'nqp-meth-call'
+));
+nqp::sethllconfig('foobar', nqp::hash(
+    'method_call_dispatcher', 'nqp-meth-call'
+));
+nqp::sethllconfig('other', nqp::hash(
+    'method_call_dispatcher', 'nqp-meth-call'
 ));
 
 class FooBarArray {
