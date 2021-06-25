@@ -15,6 +15,7 @@ HLL_COMBINED = NQPHLL.nqp
 CORE_SETTING_SOURCES = \
   @nfp(src/core/NativeTypes.nqp)@ \
   @nfp(src/core/NQPRoutine.nqp)@ \
+  @nfp(src/core/dispatchers.nqp)@ \
   @nfp(src/core/NQPMu.nqp)@ \
   @nfp(src/core/NQPCapture.nqp)@ \
   @nfp(src/core/IO.nqp)@ \
@@ -22,7 +23,6 @@ CORE_SETTING_SOURCES = \
   @nfp(src/core/Hash.nqp)@ \
   @nfp(src/core/NQPLock.nqp)@ \
   @nfp(src/core/testing.nqp)@ \
-  @nfp(src/core/dispatchers.nqp)@ \
   @nfp(src/core/YOUAREHERE.nqp)@ \
 
 CORE_SETTING_COMBINED = NQPCORE.setting
