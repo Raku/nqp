@@ -1624,39 +1624,54 @@ QAST::MASTOperations.add_core_op('nativeinvoke', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('getarg_i', 'getarg_i');
 
 QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
+    # Copy args to avoid mutating original QAST during compilation.
     my @args := nqp::clone($op.list);
     if nqp::elems(@args) == 0 {
         nqp::die('Method call node requires at least one child');
     }
-    # evaluate the invocant expression
+
+    # Compile the invocant expression
     my $invocant_qast := @args.shift();
     my $invocant := $qastcomp.as_mast($invocant_qast, :want($MVM_reg_obj));
-    my $methodname_expr;
+    nqp::die("Invocant expression must be an object, got " ~ $invocant.result_kind)
+        unless nqp::unbox_i($invocant.result_kind) == $MVM_reg_obj;
+    nqp::die("Invocant code did not result in a MAST::Local")
+        unless $invocant.result_reg && $invocant.result_reg ~~ MAST::Local;
+
+    # Also decontainerize the invocant.
+    my $regalloc := $*REGALLOC;
+    my $decont_inv_reg := $regalloc.fresh_o();
+    op_decont($decont_inv_reg, $invocant.result_reg);
+
+    # If there is a non-literal method name, compile that also.
+    my $method_name_expr;
     if $op.name {
-        # great!
+        $method_name_expr := QAST::SVal.new( :value($op.name) );
     }
     elsif nqp::elems(@args) >= 1 {
-        $methodname_expr := @args.shift();
+        $method_name_expr := @args.shift();
     }
     else {
         nqp::die("Method call must either supply a name or have a child node that evaluates to the name");
     }
+    my $method_name_ilist := $qastcomp.as_mast($method_name_expr, :want($MVM_reg_str));
+    my $method_name := $method_name_ilist.result_reg;
+
+    # Start to assemble the dispatch arguments and things we need to build a
+    # callsite. A method call dispatch starts with the decontainerized
+    # invocant, the method name, and the original invocant.
+    my @dispatch_qast := [$invocant_qast, $method_name_expr, $invocant_qast];
+    my @dispatch_mast := [MAST::InstructionList.new($decont_inv_reg, $MVM_reg_obj),
+                          $method_name_ilist, $invocant];
+    my @dispatch_arg_idxs := [$decont_inv_reg, $method_name, $invocant.result_reg];
+
+    # Compile each of the arguments and add those onto the list also.
     @args := arrange_args(@args);
-
-    nqp::die("Invocant expression must be an object, got " ~ $invocant.result_kind)
-        unless nqp::unbox_i($invocant.result_kind) == $MVM_reg_obj;
-
-    nqp::die("Invocant code did not result in a MAST::Local")
-        unless $invocant.result_reg && $invocant.result_reg ~~ MAST::Local;
-
     my $frame := $*MAST_FRAME;
     my $bytecode := $frame.bytecode;
-
-    # The arg's results
     my @arg_mast := [$invocant];
-
-    # Process arguments.
     for @args -> $arg {
+        nqp::push(@dispatch_qast, $arg);
         my $arg_mast := $qastcomp.as_mast($arg);
         my int $arg_mast_kind := nqp::unbox_i($arg_mast.result_kind);
         if $arg_mast_kind == $MVM_reg_num32 {
@@ -1668,114 +1683,20 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
                 $arg_mast_kind == $MVM_reg_uint8 {
             $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
         }
-        nqp::push(@arg_mast, $arg_mast);
-    }
-    nqp::unshift(@args, $invocant_qast);
-
-    # generate and emit findmethod code
-    my $regalloc   := $*REGALLOC;
-    my $callee_reg := $regalloc.fresh_o();
-
-    # This will hold the 3rd argument to findmeth(_s) - the method name
-    # either a MAST::SVal or an $MVM_reg_str
-    my $method_name;
-    if $op.name {
-        $method_name := $op.name;
-    }
-    else {
-        my $method_name_ilist := $qastcomp.as_mast($methodname_expr, :want($MVM_reg_str));
-        $method_name := $method_name_ilist.result_reg;
+        nqp::push(@dispatch_mast, $arg_mast);
+        nqp::push(@dispatch_arg_idxs, $arg_mast.result_reg);
     }
 
-    # push the op that finds the method based on either the provided name
-    # or the provided name-producing expression.
-    my $decont_inv_reg := $regalloc.fresh_o();
-    op_decont($decont_inv_reg, $invocant.result_reg);
-    $op.name
-        ?? %core_op_generators{'findmeth'}($callee_reg, $decont_inv_reg, $method_name)
-        !! %core_op_generators{'findmeth_s'}($callee_reg, $decont_inv_reg, $method_name);
-    $regalloc.release_register($decont_inv_reg, $MVM_reg_obj);
-
-    # release the method name register if we used one
-    $regalloc.release_register($method_name, $MVM_reg_str) unless $op.name;
-
-    my uint $callsite-id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
-    my uint64 $bytecode_pos := nqp::elems($bytecode);
-
-    nqp::writeuint($bytecode, $bytecode_pos, $op_code_prepargs, 5);
-    nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callsite-id, 5);
-    $bytecode_pos := $bytecode_pos + 4;
-
-    my $i := 0;
-    my uint64 $arg_out_pos := 0;
-    for @args -> $arg {
-        if nqp::can($arg, 'named') && !$arg.flat && $arg.named -> $name {
-            nqp::writeuint($bytecode, $bytecode_pos, $op_code_argconst_s, 5);
-            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 5);
-            my uint $name_idx := $frame.add-string($name);
-            nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $name_idx, 9);
-            $bytecode_pos := $bytecode_pos + 8;
-        }
-
-        my $arg_mast := @arg_mast[$i++];
-        my int $kind := nqp::unbox_i($arg_mast.result_kind);
-        my uint64 $arg_opcode := nqp::atpos_i(@kind_to_opcode, $kind);
-        nqp::die("Unhandled arg type $kind") unless $arg_opcode;
-        nqp::writeuint($bytecode, $bytecode_pos, $arg_opcode, 5);
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $arg_out_pos++, 5);
-        my uint64 $res_index := nqp::unbox_u($arg_mast.result_reg);
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $res_index, 5);
-        $bytecode_pos := $bytecode_pos + 6;
-
-        $regalloc.release_register($arg_mast.result_reg, $kind);
+    # Release the registers used
+    for @dispatch_mast {
+        $regalloc.release_register($_.result_reg, $_.result_kind);
     }
 
-    # release the callee register
-    $regalloc.release_register($callee_reg, $MVM_reg_obj);
-
-    # Figure out expected result register type
-    my int $res_kind := $qastcomp.type_to_register_kind($op.returns);
-
-    # and allocate a register for it. Probably reuse an arg's or the invocant's.
-    my $res_reg := $regalloc.fresh_register($res_kind);
-
-    # Generate call.
-    if $res_reg.isa(MAST::Local) { # We got a return value
-        my @local_types := $frame.local_types;
-        my uint $index := nqp::unbox_u($res_reg);
-        if $index >= nqp::elems(@local_types) {
-            nqp::die("MAST::Local index out of range");
-        }
-        my int $primspec := nqp::objprimspec(@local_types[$index]);
-        my uint $op_code;
-        if $primspec == 1 {
-            $op_code := $op_code_invoke_i;
-        }
-        elsif $primspec == 2 {
-            $op_code := $op_code_invoke_n;
-        }
-        elsif $primspec == 3 {
-            $op_code := $op_code_invoke_s;
-        }
-        elsif $primspec == 0 { # object
-            $op_code := $op_code_invoke_o;
-        }
-        else {
-            nqp::die('Invalid MAST::Local type ' ~ @local_types[$index] ~ ' for return value ' ~ $index);
-        }
-        nqp::writeuint($bytecode, $bytecode_pos, $op_code, 5);
-        my uint $res_index := nqp::unbox_u($res_reg);
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $res_index, 5);
-        my uint $callee_reg_index := nqp::unbox_u($callee_reg);
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 4), $callee_reg_index, 5);
-    }
-    else {
-        nqp::writeuint($bytecode, $bytecode_pos, $op_code_invoke_v, 5);
-        my uint $callee_reg_index := nqp::unbox_u($callee_reg);
-        nqp::writeuint($bytecode, nqp::add_i($bytecode_pos, 2), $callee_reg_index, 5);
-    }
-
-    MAST::InstructionList.new($res_reg, $res_kind)
+    # Build callsite and produce dispatch instruction.
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(@dispatch_qast,
+        @dispatch_mast);
+    emit_dispatch_instruction($qastcomp, 'lang-meth-call', $callsite_id,
+        @dispatch_arg_idxs, $op.returns)
 });
 
 my &op_dispatch_v := %core_op_generators<dispatch_v>;
@@ -1783,6 +1704,38 @@ my &op_dispatch_i := %core_op_generators<dispatch_i>;
 my &op_dispatch_n := %core_op_generators<dispatch_n>;
 my &op_dispatch_s := %core_op_generators<dispatch_s>;
 my &op_dispatch_o := %core_op_generators<dispatch_o>;
+sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id,
+        @arg_idxs, $returns) {
+    # Emit the correct dispatch instruction, allocating a result register if
+    # not in void context.
+    my $res_reg;
+    my int $res_kind;
+    if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+        $res_reg := MAST::VOID;
+        $res_kind := $MVM_reg_void;
+        op_dispatch_v($dispatcher_name, $callsite_id, @arg_idxs);
+    }
+    else {
+        $res_kind := $qastcomp.type_to_register_kind($returns);
+        $res_reg := $*REGALLOC.fresh_register($res_kind);
+        if $res_kind == $MVM_reg_obj {
+            op_dispatch_o($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_int64 {
+            op_dispatch_i($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_num64 {
+            op_dispatch_n($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_str {
+            op_dispatch_s($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        else {
+            nqp::die('Unsupported register return kind for dispatch op');
+        }
+    }
+    MAST::InstructionList.new($res_reg, $res_kind)
+}
 QAST::MASTOperations.add_core_op('dispatch', :!inlinable, -> $qastcomp, $op {
     # Ensure named/positional constraint is upheld.
     my @args := arrange_args($op.list);
@@ -1816,41 +1769,13 @@ QAST::MASTOperations.add_core_op('dispatch', :!inlinable, -> $qastcomp, $op {
     }
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
 
-    # Emit the correct dispatch instruction, allocating a result register if
-    # not in void context.
-    my $res_reg;
-    my int $res_kind;
-    if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
-        $res_reg := MAST::VOID;
-        $res_kind := $MVM_reg_void;
-        op_dispatch_v($dispatcher_name, $callsite_id, @arg_idxs);
-    }
-    else {
-        $res_kind := $qastcomp.type_to_register_kind($op.returns);
-        $res_reg := $regalloc.fresh_register($res_kind);
-        if $res_kind == $MVM_reg_obj {
-            op_dispatch_o($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
-        }
-        elsif $res_kind == $MVM_reg_int64 {
-            op_dispatch_i($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
-        }
-        elsif $res_kind == $MVM_reg_num64 {
-            op_dispatch_n($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
-        }
-        elsif $res_kind == $MVM_reg_str {
-            op_dispatch_s($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
-        }
-        else {
-            nqp::die('Unsupported register return kind for dispatch op');
-        }
-    }
-
-    # Free argument registers.
+    # Emit dispatch, then free argument registers.
+    my $res := emit_dispatch_instruction($qastcomp, $dispatcher_name, $callsite_id,
+            @arg_idxs, $op.returns);
     for @arg_mast -> $arg_mast {
         $regalloc.release_register($arg_mast.result_reg, $arg_mast.result_kind);
     }
-
-    MAST::InstructionList.new($res_reg, $res_kind)
+    $res
 });
 
 # Binding
