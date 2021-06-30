@@ -1467,6 +1467,70 @@ sub arrange_args(@in) {
     @posit
 }
 
+my $dispatch_call_gen := -> $qastcomp, $op {
+    # Work out what callee is.
+    my @args := $op.list;
+    my $callee_qast;
+    if $op.name {
+        $callee_qast := QAST::Op.new(
+            :op('decont'),
+            $op.op eq 'callstatic'
+                ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
+                !! QAST::Var.new( :name($op.name), :scope('lexical') ));
+    }
+    elsif nqp::elems(@args) {
+        @args := nqp::clone(@args);
+        my $callee_arg := @args.shift;
+        my $no_decont := nqp::istype($callee_arg, QAST::WVal) && !nqp::iscont($callee_arg.value);
+        $callee_qast := $no_decont
+            ?? $callee_arg
+            !! QAST::Op.new( :op('decont'), $callee_arg );
+    }
+    else {
+        nqp::die("No name for call and empty children list");
+    }
+
+    # Start to assemble the dispatch arguments and things we need to build a
+    # callsite. A call dispatch starts with the (decontainerized) callee, and
+    # the args will follow it.
+    my $callee := $qastcomp.as_mast($callee_qast, :want($MVM_reg_obj));
+    my @dispatch_qast := [$callee_qast];
+    my @dispatch_mast := [$callee];
+    my @dispatch_arg_idxs := [$callee.result_reg];
+
+    # Compile each of the arguments and add those onto the list also.
+    @args := arrange_args(@args);
+    my @arg_mast;
+    for @args -> $arg {
+        nqp::push(@dispatch_qast, $arg);
+        my $arg_mast := $qastcomp.as_mast($arg);
+        my int $arg_mast_kind := nqp::unbox_i($arg_mast.result_kind);
+        if $arg_mast_kind == $MVM_reg_num32 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
+        }
+        elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
+                $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
+                $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+                $arg_mast_kind == $MVM_reg_uint8 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+        }
+        nqp::push(@dispatch_mast, $arg_mast);
+        nqp::push(@dispatch_arg_idxs, $arg_mast.result_reg);
+    }
+
+    # Release the registers used
+    my $regalloc := $*REGALLOC;
+    for @dispatch_mast {
+        $regalloc.release_register($_.result_reg, $_.result_kind);
+    }
+
+    # Build callsite and produce dispatch instruction.
+    my $frame := $*MAST_FRAME;
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(@dispatch_qast,
+        @dispatch_mast);
+    emit_dispatch_instruction($qastcomp, 'lang-call', $callsite_id,
+        @dispatch_arg_idxs, $op.returns)
+}
 my @kind_to_opcode := nqp::list_i;
 nqp::bindpos_i(@kind_to_opcode, $MVM_reg_obj, %MAST::Ops::codes<arg_o>);
 nqp::bindpos_i(@kind_to_opcode, $MVM_reg_str, %MAST::Ops::codes<arg_s>);
@@ -1618,8 +1682,8 @@ my $call_gen := sub ($qastcomp, $op) {
 
     MAST::InstructionList.new($res_reg, $res_kind)
 };
-QAST::MASTOperations.add_core_op('call', $call_gen, :!inlinable);
-QAST::MASTOperations.add_core_op('callstatic', $call_gen, :!inlinable);
+QAST::MASTOperations.add_core_op('call', $dispatch_call_gen, :!inlinable);
+QAST::MASTOperations.add_core_op('callstatic', $dispatch_call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('nativeinvoke', $call_gen, :!inlinable);
 QAST::MASTOperations.add_core_moarop_mapping('getarg_i', 'getarg_i');
 
