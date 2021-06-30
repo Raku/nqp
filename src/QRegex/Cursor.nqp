@@ -1289,6 +1289,7 @@ class NQPRegexMethod {
     }
 }
 nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
+nqp::bindhllsym('nqp', 'NQPRegexMethod', NQPRegexMethod);
 
 class NQPRegex is NQPRegexMethod {
     multi method ACCEPTS(NQPRegex:D $self: $target) {
