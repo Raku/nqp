@@ -657,6 +657,7 @@ my $chain_gen := sub ($qastcomp, $op) {
     }
 
     my $regalloc := $*REGALLOC;
+    my $frame    := $*MAST_FRAME;
     my $res_reg  := $regalloc.fresh_register($MVM_reg_obj);
     my $endlabel := MAST::Label.new();
 
@@ -671,20 +672,18 @@ my $chain_gen := sub ($qastcomp, $op) {
         my $bqast := $cqast[$arg_idx + 1];
         my $bcomp := $qastcomp.as_mast($bqast, :want($MVM_reg_obj));
 
-        my $callee := $qastcomp.as_mast: :want($MVM_reg_obj),
-            !$cqast.name
-                ?? $cqast[0]
-                !! $cqast.op eq 'chainstatic'
-                    ?? QAST::VM.new:   :moarop<getlexstatic_o>,
-                       QAST::SVal.new: :value($cqast.name)
-                    !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
+        my $callee_qast := !$cqast.name
+            ?? $cqast[0]
+            !! $cqast.op eq 'chainstatic'
+                ?? QAST::VM.new:   :moarop<getlexstatic_o>,
+                   QAST::SVal.new: :value($cqast.name)
+                !! QAST::Var.new:  :name( $cqast.name), :scope<lexical>;
+        my $callee := $qastcomp.as_mast: :want($MVM_reg_obj), $callee_qast;
 
-        MAST::Call.new(
-            :target($callee.result_reg),
-            :flags([$Arg::obj, $Arg::obj]),
-            :result($res_reg),
-            $acomp.result_reg, $bcomp.result_reg
-        );
+        my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
+            [$callee_qast, $aqast, $bqast], [$callee, $acomp, $bcomp]);
+        op_dispatch_o($res_reg, 'lang-call', $callsite_id,
+            [$callee.result_reg, $acomp.result_reg, $bcomp.result_reg]);
 
         $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
         $regalloc.release_register($acomp.result_reg, $MVM_reg_obj);
