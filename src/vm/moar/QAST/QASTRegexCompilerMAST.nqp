@@ -23,7 +23,7 @@ my @Condition-op-kinds := nqp::list(
     'if_i',     'if_i',     # $MVM_reg_int16,  $MVM_reg_int32
     'if_i',     'if_n',     # $MVM_reg_int64,  $MVM_reg_num32
     'if_n',     'if_s',     # $MVM_reg_num64,  $MVM_reg_str
-    'if_o',                 # $MVM_reg_obj
+    nqp::null,              # $MVM_reg_obj requires special generation
     nqp::null, nqp::null, nqp::null, nqp::null,
     nqp::null, nqp::null, nqp::null, nqp::null,
     'if_i',                 # $MVM_reg_uint8
@@ -35,7 +35,7 @@ my @Negated-condition-op-kinds := nqp::list(
     'unless_i', 'unless_i', # $MVM_reg_int16,  $MVM_reg_int32
     'unless_i', 'unless_n', # $MVM_reg_int64,  $MVM_reg_num32
     'unless_n', 'unless_s', # $MVM_reg_num64,  $MVM_reg_str
-    'unless_o',             # $MVM_reg_obj,
+    nqp::null,              # $MVM_reg_obj requires special generation
     nqp::null, nqp::null, nqp::null, nqp::null,
     nqp::null, nqp::null, nqp::null, nqp::null,
     'unless_i', 'unless_i', # $MVM_reg_uint8,  $MVM_reg_uint16
@@ -51,6 +51,14 @@ my @Full-width-coerce-to := nqp::list( # 0 means we don't need any coersion
     $MVM_reg_int64, $MVM_reg_int64, # $MVM_reg_uint8,  $MVM_reg_uint16
     $MVM_reg_int64, $MVM_reg_int64, # $MVM_reg_uint32, $MVM_reg_uint64
 );
+
+my %core_op_generators := MAST::Ops.WHO<%generators>;
+
+# Emits an instruction to boolify an object. The result register should
+# be an int64, the object should have already been decontainerized.
+sub emit_object_boolify($result_reg, $object_reg) {
+    %core_op_generators<istrue>($result_reg, $object_reg);
+}
 
 class QAST::MASTRegexCompiler {
     # The compiler we're working against.
@@ -242,7 +250,8 @@ class QAST::MASTRegexCompiler {
             my $cutlabel := label();
             op('isnull', $i0, $cstack);
             op('if_i', $i0, $jumplabel);
-            op('unless_o', $cstack, $jumplabel);
+            emit_object_boolify($i0, $cstack);
+            op('unless_i', $i0, $jumplabel);
             op('elems', $i18, $bstack);
             op('le_i', $i0, $i18, $zero);
             op('if_i', $i0, $cutlabel);
@@ -707,15 +716,25 @@ class QAST::MASTRegexCompiler {
         op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'), %!reg<pos>, ival(-1));
         op('bindlex', $*BLOCK.resolve_lexical('$¢'), %!reg<cur>);
         my $cmast := $!qastcomp.as_mast($node[0]);
-        $!regalloc.release_register($cmast.result_reg, $cmast.result_kind);
-        my $cndop := $node.negate # the negation meaning is reversed for the op
-          ?? @Condition-op-kinds[        $cmast.result_kind]
-          !! @Negated-condition-op-kinds[$cmast.result_kind];
-        if $node.subtype eq 'zerowidth' && ! nqp::isnull($cndop) {
-            op('decont', $cmast.result_reg, $cmast.result_reg)
-                if $cmast.result_kind == $MVM_reg_obj;
-            op($cndop, $cmast.result_reg, %!reg<fail>);
+        if $node.subtype eq 'zerowidth' {
+            my int $result_kind := $cmast.result_kind;
+            if $result_kind == $MVM_reg_obj {
+                op('decont', $cmast.result_reg, $cmast.result_reg);
+                my $boolification_reg := $!regalloc.fresh_register($MVM_reg_int64);
+                emit_object_boolify($boolification_reg, $cmast.result_reg);
+                op($node.negate ?? 'if_i' !! 'unless_i', $boolification_reg, %!reg<fail>);
+                $!regalloc.release_register($boolification_reg, $MVM_reg_int64);
+            }
+            else {
+                my $cndop := $node.negate # the negation meaning is reversed for the op
+                    ?? @Condition-op-kinds[        $result_kind]
+                    !! @Negated-condition-op-kinds[$result_kind];
+                unless nqp::isnull($cndop) {
+                    op($cndop, $cmast.result_reg, %!reg<fail>);
+                }
+            }
         }
+        $!regalloc.release_register($cmast.result_reg, $cmast.result_kind);
     }
 
     method dynquant($node) {

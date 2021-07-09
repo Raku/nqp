@@ -24,7 +24,6 @@ my int $MVM_operand_uint16      := ($MVM_reg_uint16 * 8);
 my int $MVM_operand_uint32      := ($MVM_reg_uint32 * 8);
 my int $MVM_operand_uint64      := ($MVM_reg_uint64 * 8);
 
-my %core_op_generators    := MAST::Ops.WHO<%generators>;
 my &op_decont := %core_op_generators<decont>;
 my &op_goto   := %core_op_generators<goto>;
 my &op_null   := %core_op_generators<null>;
@@ -691,7 +690,10 @@ my $chain_gen := sub ($qastcomp, $op) {
         $regalloc.release_register($acomp.result_reg, $MVM_reg_obj);
 
         if @clist {
-            %core_op_generators{'unless_o'}($res_reg, $endlabel);
+            my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
+            emit_object_boolify($boolification_reg, $res_reg);
+            %core_op_generators{'unless_i'}($boolification_reg, $endlabel);
+            $regalloc.release_register($boolification_reg, $MVM_reg_int64);
             $cqast := nqp::pop(@clist);
             $arg_idx := get_arg_idx($cqast);
             $acomp := $bcomp;
@@ -751,9 +753,8 @@ for <if unless with without> -> $op_name {
                     $op[0]));
             }
         }
-        elsif nqp::istype($op[0], QAST::Var)
-        && $op[0].scope eq 'lexicalref'
-        && (!$*WANT || $operands == 3) {
+        elsif nqp::istype($op[0], QAST::Var) && $op[0].scope eq 'lexicalref'
+                && (!$*WANT || $operands == 3) {
             # lexical refs are expensive; try to coerce them to something cheap
             my $spec := nqp::objprimspec($op[0].returns);
             @comp_ops[0] := $qastcomp.as_mast(:want(
@@ -838,8 +839,12 @@ for <if unless with without> -> $op_name {
 
         # Emit the jump.
         if nqp::unbox_i(@comp_ops[0].result_kind) == $MVM_reg_obj {
+            # First decontainerize the object.
             my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
             op_decont($decont_reg, @comp_ops[0].result_reg);
+
+            # If it's a `with` or `without`, need to call defined.
+            # TODO emit dispatch op
             if $is_withy {
                 my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
                 %core_op_generators{'findmeth'}($method_reg, $decont_reg, 'defined');
@@ -847,15 +852,21 @@ for <if unless with without> -> $op_name {
                 $regalloc.release_register($method_reg, $MVM_reg_obj);
             }
 
+            # Boolify the object
+            my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
+            emit_object_boolify($boolification_reg, $decont_reg);
+            $regalloc.release_register($decont_reg, $MVM_reg_obj);
+
+            # Generate the branch instruction.
             %core_op_generators{
                 # the conditional routines are reversed on purpose
                 $op_name eq 'if' || $op_name eq 'with'
-                  ?? 'unless_o' !! 'if_o'
+                  ?? 'unless_i' !! 'if_i'
             }(
-                $decont_reg,
+                $boolification_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
-            $regalloc.release_register($decont_reg, $MVM_reg_obj);
+            $regalloc.release_register($boolification_reg, $MVM_reg_int64);
         }
         elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
             # workaround for coercion unconditionally releasing the source register while we still need it later on
@@ -983,7 +994,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $apost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
     op_set($res_reg, $apost.result_reg);
     op_decont($d, $apost.result_reg);
-    %core_op_generators{'istrue'}($t, $d);
+    emit_object_boolify($t, $d);
     $*REGALLOC.release_register($apost.result_reg, $MVM_reg_obj);
 
     my $have_middle_child := 1;
@@ -991,7 +1002,7 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     while $have_middle_child {
         $bpost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
         op_decont($d, $bpost.result_reg);
-        %core_op_generators{'istrue'}($u, $d);
+        emit_object_boolify($u, $d);
 
         my $jumplabel := MAST::Label.new();
         %core_op_generators{'unless_i'}($t, $jumplabel);
@@ -1094,16 +1105,20 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
         if $operands != 2 && $operands != 3;
 
     if @comp_ops[0].result_kind == $MVM_reg_obj {
+        # Decontainerize it and perform boolean conversion, then test that.
         my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
         op_decont($decont_reg, @comp_ops[0].result_reg);
+        my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
+        emit_object_boolify($boolification_reg, $decont_reg);
+        $regalloc.release_register($decont_reg, $MVM_reg_obj);
         %core_op_generators{
             # the conditional routines are reversed on purpose
-            $op_name eq 'while' ?? 'unless_o' !! 'if_o'
+            $op_name eq 'while' ?? 'unless_i' !! 'if_i'
         }(
-            $decont_reg,
+            $boolification_reg,
             $done_lbl
         );
-        $regalloc.release_register($decont_reg, $MVM_reg_obj);
+        $regalloc.release_register($boolification_reg, $MVM_reg_int64);
     }
     elsif @Full-width-coerce-to[@comp_ops[0].result_kind]
     -> $coerce-kind {
@@ -1266,7 +1281,10 @@ for ('', 'repeat_') -> $repness {
 sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo, $block_res, @val_temps) {
     # Emit loop test.
     $*MAST_FRAME.add-label($lbl_next);
-    %core_op_generators{'unless_o'}($iter_tmp, $lbl_done);
+    my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
+    emit_object_boolify($boolification_reg, $iter_tmp);
+    %core_op_generators{'unless_i'}($boolification_reg, $lbl_done);
+    $regalloc.release_register($boolification_reg, $MVM_reg_int64);
 
     # Fetch values into temporaries (on the stack ain't enough in case
     # of redo).
