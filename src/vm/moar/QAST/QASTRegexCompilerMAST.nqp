@@ -54,10 +54,51 @@ my @Full-width-coerce-to := nqp::list( # 0 means we don't need any coersion
 
 my %core_op_generators := MAST::Ops.WHO<%generators>;
 
+my &op_dispatch_v := %core_op_generators<dispatch_v>;
+my &op_dispatch_i := %core_op_generators<dispatch_i>;
+my &op_dispatch_n := %core_op_generators<dispatch_n>;
+my &op_dispatch_s := %core_op_generators<dispatch_s>;
+my &op_dispatch_o := %core_op_generators<dispatch_o>;
+sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id,
+        @arg_idxs, $returns) {
+    # Emit the correct dispatch instruction, allocating a result register if
+    # not in void context.
+    my $res_reg;
+    my int $res_kind;
+    if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
+        $res_reg := MAST::VOID;
+        $res_kind := $MVM_reg_void;
+        op_dispatch_v($dispatcher_name, $callsite_id, @arg_idxs);
+    }
+    else {
+        $res_kind := $qastcomp.type_to_register_kind($returns);
+        $res_reg := $*REGALLOC.fresh_register($res_kind);
+        if $res_kind == $MVM_reg_obj {
+            op_dispatch_o($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_int64 {
+            op_dispatch_i($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_num64 {
+            op_dispatch_n($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        elsif $res_kind == $MVM_reg_str {
+            op_dispatch_s($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        }
+        else {
+            nqp::die('Unsupported register return kind for dispatch op');
+        }
+    }
+    MAST::InstructionList.new($res_reg, $res_kind)
+}
+
 # Emits an instruction to boolify an object. The result register should
 # be an int64, the object should have already been decontainerized.
+my $FAKE_OBJECT_ARG := [QAST::Op.new( :op<null> )];
 sub emit_object_boolify($result_reg, $object_reg) {
-    %core_op_generators<istrue>($result_reg, $object_reg);
+    my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+        $FAKE_OBJECT_ARG, [MAST::InstructionList.new($result_reg, $MVM_reg_obj)]);
+    op_dispatch_i($result_reg, 'boot-boolify', $callsite_id, [$object_reg]);
 }
 
 class QAST::MASTRegexCompiler {
