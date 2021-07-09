@@ -17,13 +17,14 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
 
     # Drop the first two arguments, which are the decontainerized invocant
     # and the method name. Then insert the resolved method and delegate to
-    # nqp-call to invoke it.
+    # lang-call to invoke it (we may have other languages mixing into NQP
+    # types and adding their methods).
     my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg',
         nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
         0);
     my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
         $args, 0, $meth);
-    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-call', $delegate);
+    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
 });
 
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
