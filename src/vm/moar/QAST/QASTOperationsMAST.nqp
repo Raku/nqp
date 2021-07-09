@@ -2864,8 +2864,29 @@ QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');
 QAST::MASTOperations.add_core_moarop_mapping('decont_s', 'decont_s');
 QAST::MASTOperations.add_core_moarop_mapping('isnull', 'isnull');
 QAST::MASTOperations.add_core_moarop_mapping('isnull_s', 'isnull_s');
-QAST::MASTOperations.add_core_moarop_mapping('istrue', 'istrue', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('isfalse', 'isfalse', :decont(0));
+QAST::MASTOperations.add_core_op('istrue', -> $qastcomp, $op {
+    my $regalloc := $*REGALLOC;
+    my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+    my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
+    op_decont($decont_reg, $obj_mast.result_reg);
+    $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
+    my $result_reg := $regalloc.fresh_register($MVM_reg_int64);
+    emit_object_boolify($result_reg, $decont_reg);
+    $regalloc.release_register($decont_reg, $MVM_reg_obj);
+    MAST::InstructionList.new($result_reg, $MVM_reg_int64)
+});
+QAST::MASTOperations.add_core_op('isfalse', -> $qastcomp, $op {
+    my $regalloc := $*REGALLOC;
+    my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+    my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
+    op_decont($decont_reg, $obj_mast.result_reg);
+    $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
+    my $result_reg := $regalloc.fresh_register($MVM_reg_int64);
+    emit_object_boolify($result_reg, $decont_reg);
+    $regalloc.release_register($decont_reg, $MVM_reg_obj);
+    %core_op_generators<not_i>($result_reg, $result_reg);
+    MAST::InstructionList.new($result_reg, $MVM_reg_int64)
+});
 QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('eqaddr', 'eqaddr');
 QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
