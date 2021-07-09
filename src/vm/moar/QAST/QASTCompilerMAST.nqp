@@ -907,7 +907,8 @@ my class MASTCompilerInstance {
         }
 
         # Code references.
-        my $cr_ast := QAST::Op.new( :op('list_b'), |@code_ref_blocks );
+        my $cr_ast := QAST::Op.new( :op('list_b') );
+        $cr_ast.set_children(@code_ref_blocks);
 
         # Handle repossession conflict resolution code, if any.
         if $repo_conf_res {
