@@ -843,12 +843,17 @@ for <if unless with without> -> $op_name {
             op_decont($decont_reg, @comp_ops[0].result_reg);
 
             # If it's a `with` or `without`, need to call defined.
-            # TODO emit dispatch op
             if $is_withy {
-                my $method_reg := $regalloc.fresh_register($MVM_reg_obj);
-                %core_op_generators{'findmeth'}($method_reg, $decont_reg, 'defined');
-                MAST::Call.new( :target($method_reg), :result($decont_reg), :flags([$Arg::obj]), $decont_reg);
-                $regalloc.release_register($method_reg, $MVM_reg_obj);
+                my $method_name_reg := $regalloc.fresh_register($MVM_reg_str);
+                MAST::Op.new(:op('const_s'), $method_name_reg, 'defined');
+                my $decont := MAST::InstructionList.new($decont_reg, $MVM_reg_obj);
+                my $method_name := MAST::InstructionList.new($method_name_reg, $MVM_reg_str);
+                my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+                    [$op[0], QAST::SVal.new( :value('defined') ), $op[0]],
+                    [$decont, $method_name, $decont]);
+                op_dispatch_o($decont_reg, 'lang-meth-call', $callsite_id,
+                    [$decont_reg, $method_name_reg, $decont_reg]);
+                $regalloc.release_register($method_name_reg, $MVM_reg_str);
             }
 
             # Boolify the object
