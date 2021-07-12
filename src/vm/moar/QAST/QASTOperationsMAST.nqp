@@ -1282,6 +1282,7 @@ for ('', 'repeat_') -> $repness {
     }
 }
 
+my $FAKE_POS_ARG := QAST::Op.new( :op('null') );
 sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo, $block_res, @val_temps) {
     # Emit loop test.
     $*MAST_FRAME.add-label($lbl_next);
@@ -1292,13 +1293,16 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
 
     # Fetch values into temporaries (on the stack ain't enough in case
     # of redo).
-    my @arg_flags;
+    my @arg_regs := [$block_res.result_reg];
+    my @arg_qasts := [$FAKE_POS_ARG];
+    my @arg_masts := [$block_res];
     my $arity := @operands[1].arity || 1;
     while $arity > 0 {
         my $tmp := $regalloc.fresh_o();
         %core_op_generators{'shift_o'}($tmp, $iter_tmp);
-        nqp::push(@val_temps, $tmp);
-        nqp::push(@arg_flags, $Arg::obj);
+        nqp::push(@arg_regs, $tmp);
+        nqp::push(@arg_qasts, $FAKE_POS_ARG);
+        nqp::push(@arg_masts, MAST::InstructionList.new($tmp, $MVM_reg_obj));
         $arity := $arity - 1;
     }
 
@@ -1306,16 +1310,12 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
     %core_op_generators{'osrpoint'}();
 
     # Now do block invocation.
-    my $inv_il := MAST::Call.new(
-        :target($block_res.result_reg),
-        :flags(@arg_flags),
-        |@val_temps
-    );
-    $inv_il := MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
+    my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+        @arg_qasts, @arg_masts);
+    op_dispatch_v('boot-code', $callsite_id, @arg_regs);
 
     # Emit next.
     op_goto($lbl_next );
-    $regalloc.release_register($inv_il.result_reg, $inv_il.result_kind);
 }
 
 QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
