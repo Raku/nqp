@@ -1,3 +1,73 @@
+# Stringification dispatcher comes here, because we use it during module
+# loading, and so can't have it with the others that are in the setting,
+# as the module loader is used to load the setting.
+my $get-exception-message := -> $ex { nqp::getmessage($ex) };
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-stringify', -> $capture {
+    # Guard on the type of the argument for stringification.
+    my $track-arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-arg);
+
+    # A null argument always maps to the empty string.
+    my $arg := nqp::captureposarg($capture, 0);
+    if nqp::isnull($arg) {
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+            $capture, 0, '');
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+    }
+
+    # Anything that can unbox as a string will simply just be handed back;
+    # we rely on the argument handling to do the unbox.
+    elsif nqp::isconcrete($arg) &&
+            (nqp::isstr($arg) || nqp::isconcrete(try { nqp::unbox_s($arg) })) {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    }
+
+    # If there's a Str method when we'll invoke that
+    elsif nqp::isconcrete(my $meth := $arg.HOW.find_method($arg, 'Str')) {
+        my $with-name := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+            $capture, 0, 'Str');
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+            $with-name, 0, $track-arg);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-call', $delegate);
+    }
+
+    # If it's undefined, then the empty string.
+    elsif !nqp::isconcrete($arg) {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+            $capture, 0, '');
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+    }
+
+    # Boxed int/num.
+    elsif nqp::isint($arg) || nqp::isconcrete(try { nqp::unbox_i($arg) }) {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+            $capture, 0, 'coerce-boxed-int-to-str');
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+    }
+    elsif nqp::isnum($arg) || nqp::isconcrete(try { nqp::unbox_n($arg) }) {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+            $capture, 0, 'coerce-boxed-num-to-str');
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+    }
+
+    # Exception stringifies to its message
+    elsif nqp::isconcrete(try { nqp::getmessage($arg) }) {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+            $capture, 0, $get-exception-message);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant', $delegate);
+    }
+
+    # Otherwise, don't know what to do.
+    else {
+        nqp::die('Cannot stringify object of type ' ~ $arg.HOW.name($arg));
+    }
+});
+
 knowhow ModuleLoader {
     my %modules_loaded;
     my %settings_loaded;
