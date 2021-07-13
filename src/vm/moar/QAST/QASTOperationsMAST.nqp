@@ -2040,7 +2040,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
     }
 });
 
-# Default ways to box/unbox (for no particular HLL).
+# Default ways to box/unbox (used for NQP).
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     my $regalloc := $*REGALLOC;
     my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
@@ -2067,7 +2067,9 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
     op_decont($dc, $reg);
-    %core_op_generators{'smrt_strify'}($res_reg, $dc);
+    my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+        $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
+    op_dispatch_s($res_reg, 'nqp-stringify', $callsite_id, [$dc]);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_str)
 });
