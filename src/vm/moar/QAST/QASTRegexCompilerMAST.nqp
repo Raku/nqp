@@ -141,6 +141,47 @@ class QAST::MASTRegexCompiler {
         %!reg<cstack>
     }
 
+    my $FAKE-POS-NODE := QAST::Op.new( :op('null') );
+    method call-meth(str $name, $invocant-reg, :@arg-regs, :@arg-types, :@arg-qasts,
+            :$result-reg, :$int-result) {
+        # Form pieces to generate callsite and dispatch op.
+        my $name-reg := $!regalloc.fresh_s();
+        op('const_s', $name-reg, sval($name));
+        my @all-arg-regs := [$invocant-reg, $name-reg, $invocant-reg];
+        my @all-arg-masts := [
+            MAST::InstructionList.new($invocant-reg, $MVM_reg_obj),
+            MAST::InstructionList.new($name-reg, $MVM_reg_str),
+            MAST::InstructionList.new($invocant-reg, $MVM_reg_obj)
+        ];
+        my @all-arg-qasts := [$FAKE-POS-NODE, $FAKE-POS-NODE, $FAKE-POS-NODE];
+        if @arg-regs {
+            my int $i;
+            my int $n := nqp::elems(@arg-regs);
+            while $i < $n {
+                nqp::push(@all-arg-regs, @arg-regs[$i]);
+                nqp::push(@all-arg-masts, MAST::InstructionList.new(@arg-regs[$i],
+                    @arg-types ?? @arg-types[$i] !! $MVM_reg_obj));
+                nqp::push(@all-arg-qasts, @arg-qasts ?? @arg-qasts[$i] !! $FAKE-POS-NODE);
+                $i++;
+            }
+        }
+
+        # Generate callsite and emit dispatch.
+        my uint $callsite-id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+            @all-arg-qasts, @all-arg-masts);
+        if $result-reg {
+            if $int-result {
+                op_dispatch_i($result-reg, 'lang-meth-call', $callsite-id, @all-arg-regs);
+            }
+            else {
+                op_dispatch_o($result-reg, 'lang-meth-call', $callsite-id, @all-arg-regs);
+            }
+        }
+        else {
+            op_dispatch_v('lang-meth-call', $callsite-id, @all-arg-regs);
+        }
+    }
+
     method as_mast($node, :$want) {
         # Build the list of (unique) registers we need
         my $tgt      := $!regalloc.fresh_s();
@@ -206,8 +247,7 @@ class QAST::MASTRegexCompiler {
         op('const_i64', $two, ival(2));
         op('const_i64', $three, ival(3));
         op('const_i64', $four, ival(4));
-        op('findmeth', $method, $self, sval('!cursor_start'));
-        call($method, [ $Arg::obj ], :result($cur), $self );
+        self.call-meth('!cursor_start', $self, :result-reg($cur));
 
         my $sharedclass;
         my int $has_cursor_type := $node.has_cursor_type();
@@ -225,8 +265,7 @@ class QAST::MASTRegexCompiler {
         }
         else {
             $sharedclass := $!regalloc.fresh_o();
-            op('findmeth', $shared, $self, sval('!shared'));
-            call($shared, [ $Arg::obj ], :result($shared), $self );
+            self.call-meth('!shared', $self, :result-reg($shared));
             op('getwhat', $sharedclass, $shared);
             op('getattr_o', $curclass, $shared, $sharedclass, sval('$!CUR_CLASS'), ival(-1));
         }
@@ -305,8 +344,7 @@ class QAST::MASTRegexCompiler {
         op('jumplist', ival(+@!rxjumps), $itmp);
         op('goto', $_) for @!rxjumps;
         $*MAST_FRAME.add-label($donelabel);
-        op('findmeth', $method, $cur, sval('!cursor_fail'));
-        call($method, [ $Arg::obj ], $cur); # don't pass a :result so it's void
+        self.call-meth('!cursor_fail', $cur);
 
         MAST::InstructionList.new($cur, $MVM_reg_obj)
     }
@@ -361,11 +399,11 @@ class QAST::MASTRegexCompiler {
         }
 
         self.regex_mark($endlabel_index, %!reg<negone>, %!reg<zero>);
-        op('findmeth', %!reg<method>, %!reg<cur>, sval('!alt'));
         my $name := $!regalloc.fresh_s();
         op('const_s', $name, sval($node.name));
-        call(%!reg<method>, [ $Arg::obj, $Arg::int, $Arg::str, $Arg::obj ],
-            %!reg<cur>, %!reg<pos>, $name, %!reg<back_cur>);
+        self.call-meth('!alt', %!reg<cur>,
+            :arg-regs([%!reg<pos>, $name, %!reg<back_cur>]),
+            :arg-types([$MVM_reg_int64, $MVM_reg_str, $MVM_reg_obj]));
         $!regalloc.release_register($name, $MVM_reg_str);
         op('goto', %!reg<fail>);
 
@@ -727,29 +765,29 @@ class QAST::MASTRegexCompiler {
     }
 
     method pass($node) {
-        my @args := [%!reg<cur>, %!reg<pos>];
-        my @flags := [$Arg::obj, $Arg::int];
+        my @arg-regs := [%!reg<pos>];
+        my @arg-types := [$MVM_reg_int64];
+        my @arg-qasts := [$FAKE-POS-NODE];
         my $op;
-        my $meth := $!regalloc.fresh_o();
-        op('findmeth', $meth, %!reg<cur>, sval('!cursor_pass'));
         if $node.name {
             my $sname := $!regalloc.fresh_s();
             op('const_s', $sname, sval($node.name));
-            nqp::push(@args, $sname);
-            nqp::push(@flags, $Arg::str);
+            nqp::push(@arg-regs, $sname);
+            nqp::push(@arg-types, $MVM_reg_str);
+            nqp::push(@arg-qasts, $FAKE-POS-NODE);
         }
         elsif nqp::elems(@($node)) == 1 {
             my $name := $!qastcomp.as_mast($node[0], :want($MVM_reg_str));
-            nqp::push(@args, $name.result_reg);
-            nqp::push(@flags, $Arg::str);
+            nqp::push(@arg-regs, $name.result_reg);
+            nqp::push(@arg-types, $MVM_reg_str);
+            nqp::push(@arg-qasts, $FAKE-POS-NODE);
         }
         if $node.backtrack ne 'r' {
-            nqp::push(@args, sval('backtrack'));
-            nqp::push(@args, %!reg<one>);
-            nqp::push(@flags, $Arg::named +| $Arg::int);
+            nqp::push(@arg-regs, %!reg<one>);
+            nqp::push(@arg-types, $MVM_reg_int64);
+            nqp::push(@arg-qasts, QAST::IVal.new( :value(1), :named<backtrack> ));
         }
-        call($meth, @flags, :result($meth), |@args);
-        $!regalloc.release_register($meth, $MVM_reg_obj);
+        self.call-meth('!cursor_pass', %!reg<cur>, :@arg-regs, :@arg-types, :@arg-qasts);
         op('return_o', %!reg<cur>);
     }
 
@@ -1049,14 +1087,13 @@ class QAST::MASTRegexCompiler {
         self.regex_peek($faillabel_index, $itmp);
         op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
             %!reg<pos>, ival(-1));
-        op('findmeth', %!reg<method>, %!reg<cur>, sval('!cursor_start_subcapture'));
-        call(%!reg<method>, [$Arg::obj, $Arg::int], %!reg<cur>, $itmp, :result($p11));
-        op('findmeth', %!reg<method>, $p11, sval('!cursor_pass'));
-        call(%!reg<method>, [$Arg::obj, $Arg::int], $p11, %!reg<pos>);
-        op('findmeth', %!reg<method>, %!reg<cur>, sval('!cursor_capture'));
+        self.call-meth('!cursor_start_subcapture', %!reg<cur>, :result-reg($p11),
+            :arg-regs([$itmp]), :arg-types([$MVM_reg_int64]));
+        self.call-meth('!cursor_pass', $p11,
+            :arg-regs([%!reg<pos>]), :arg-types([$MVM_reg_int64]));
         op('const_s', $s11, sval($node.name));
-        call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-            %!reg<cur>, $p11, $s11, :result(self.'!get_cstack'()));
+        self.call-meth('!cursor_capture', %!reg<cur>, :result-reg(self.'!get_cstack'()),
+            :arg-regs([$p11, $s11]), :arg-types([$MVM_reg_obj, $MVM_reg_str]));
         op('goto', $donelabel);
         $*MAST_FRAME.add-label($faillabel);
         op('goto', %!reg<fail>);
@@ -1077,67 +1114,55 @@ class QAST::MASTRegexCompiler {
         $Arg::obj   # $MVM_reg_obj             := 8;
     ];
 
-     method children($node) {
-        my @masts := nqp::list();
-        my @results := nqp::list();
-        my @result_kinds := nqp::list();
-        my @flags := nqp::list();
-        for @($node) {
-            my $mast := $!qastcomp.as_mast($_);
-            my $kind := $mast.result_kind;
-            my $flag := @kind_to_args[$kind];
-            if $_.flat {
-                $flag := $flag +| ($_.named ?? $Arg::flatnamed !! $Arg::flat);
-            }
-            elsif $_.named {
-                nqp::push(@results, $_.named);
-                nqp::push(@result_kinds, NQPMu);
-                $flag := $flag +| $Arg::named;
-            }
-            nqp::push(@results, $mast.result_reg);
-            nqp::push(@result_kinds, $kind);
-            nqp::push(@flags, $flag);
-        }
-        [@masts, @results, @result_kinds, @flags]
-    }
-
     method subrule($node) {
         my $subtype  := $node.subtype;
         my $testop   := $node.negate ?? 'ge_i' !! 'lt_i';
         my $captured := 0;
 
-        my @arg_info := self.children($node[0]);
-        my @args := @arg_info[1];
-        my @kinds := @arg_info[2];
-        my @flags := @arg_info[3];
-
-        my $submast := nqp::shift(@args);
-        my $submast_kind := nqp::shift(@kinds);
-        $!regalloc.release_register($submast, $submast_kind);
-
-        my $i := 0;
-        for @kinds {
-            $!regalloc.release_register(@args[$i], $_)
-                if nqp::isconcrete($_);
-            $i++;
+        # Compile all the children.
+        my @arg-regs;
+        my @arg-masts;
+        my @arg-types;
+        my @arg-qasts;
+        for @($node[0]) {
+            my $mast := $!qastcomp.as_mast($_);
+            nqp::push(@arg-regs, $mast.result_reg);
+            nqp::push(@arg-masts, $mast);
+            nqp::push(@arg-types, $mast.result_kind);
+            nqp::push(@arg-qasts, $_);
         }
 
-        @flags[0] := $Arg::obj;
-
+        # Emit the call.
         my $p11 := %!reg<back_cur>;
         my $itmp := $!regalloc.fresh_i();
-
         op('bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
             %!reg<pos>, ival(-1));
         if nqp::istype($node[0][0], QAST::SVal) {
-            # Method call.
-            op('findmeth', %!reg<method>, %!reg<cur>, sval($node[0][0].value));
-            call(%!reg<method>, @flags, %!reg<cur>, |@args, :result($p11));
+            # Method call. Shift the method name from the compiled bits
+            # before doing the call.
+            nqp::shift(@arg-regs);
+            nqp::shift(@arg-types);
+            nqp::shift(@arg-qasts);
+            self.call-meth($node[0][0].value, %!reg<cur>, :result-reg($p11),
+                :@arg-regs, :@arg-types, :@arg-qasts);
+            for @arg-masts {
+                $!regalloc.release_register($_.result_reg, $_.result_kind);
+            }
         }
         else {
-            # Normal invocation (probably positional capture).
-            call($submast, @flags, %!reg<cur>, |@args, :result($p11));
+            # Normal invocation (probably positional capture). Insert the
+            # cursor register after the callee.
+            for @arg-masts {
+                $!regalloc.release_register($_.result_reg, $_.result_kind);
+            }
+            nqp::splice(@arg-regs, [%!reg<cur>], 1, 0);
+            nqp::splice(@arg-masts, [MAST::InstructionList.new(%!reg<cur>, $MVM_reg_obj)], 1, 0);
+            nqp::splice(@arg-qasts, [$FAKE-POS-NODE], 1, 0);
+            my uint $callsite-id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+                @arg-qasts, @arg-masts);
+            op_dispatch_o($p11, 'lang-call', $callsite-id, @arg-regs);
         }
+
         op('getattr_i', $itmp, $p11, %!reg<curclass>, sval('$!pos'),
             ival(nqp::hintfor($!cursor_type, '$!pos')));
         op($testop, $itmp, $itmp, %!reg<zero>);
@@ -1158,8 +1183,7 @@ class QAST::MASTRegexCompiler {
                 op('goto', $passlabel);
                 $*MAST_FRAME.add-label($backlabel);
                 # %!reg<back_cur> is magically set just before the jump at the backtracker
-                op('findmeth', %!reg<method>, $p11, sval('!cursor_next'));
-                call(%!reg<method>, [$Arg::obj], $p11, :result($p11));
+                self.call-meth('!cursor_next', $p11, :result-reg($p11));
                 op('getattr_i', $itmp, $p11, %!reg<curclass>, sval('$!pos'),
                     ival(nqp::hintfor($!cursor_type, '$!pos')));
                 op($testop, $itmp, $itmp, %!reg<zero>);
@@ -1168,11 +1192,11 @@ class QAST::MASTRegexCompiler {
 
                 if $subtype eq 'capture' {
                     my $sname := $!regalloc.fresh_s();
-                    op('findmeth', %!reg<method>, %!reg<cur>,
-                        sval('!cursor_capture'));
                     op('const_s', $sname, sval($node.name));
-                    call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                        %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'()));
+                    self.call-meth('!cursor_capture', %!reg<cur>,
+                        :result-reg(self.'!get_cstack'()),
+                        :arg-regs([$p11, $sname]),
+                        :arg-types([$MVM_reg_obj, $MVM_reg_str]));
                     $!regalloc.release_register($sname, $MVM_reg_str);
                     $captured := 1;
 
@@ -1190,10 +1214,9 @@ class QAST::MASTRegexCompiler {
                     op('push_i', $bstack, $itmp);
                 }
                 else {
-                    op('findmeth', %!reg<method>, %!reg<cur>,
-                        sval('!cursor_push_cstack'));
-                    call(%!reg<method>, [$Arg::obj, $Arg::obj],
-                        %!reg<cur>, $p11, :result(self.'!get_cstack'()));
+                    self.call-meth('!cursor_push_cstack', %!reg<cur>,
+                        :result-reg(self.'!get_cstack'()),
+                        :arg-regs([$p11]), :arg-types([$MVM_reg_obj]));
                 }
 
                 my $bstack := %!reg<bstack>;
@@ -1208,11 +1231,11 @@ class QAST::MASTRegexCompiler {
 
         if !$captured && $subtype eq 'capture' {
             my $sname := $!regalloc.fresh_s();
-            op('findmeth', %!reg<method>, %!reg<cur>,
-                sval('!cursor_capture'));
             op('const_s', $sname, sval($node.name));
-            call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str],
-                %!reg<cur>, $p11, $sname, :result(self.'!get_cstack'()));
+            self.call-meth('!cursor_capture', %!reg<cur>,
+                :result-reg(self.'!get_cstack'()),
+                :arg-regs([$p11, $sname]),
+                :arg-types([$MVM_reg_obj, $MVM_reg_str]));
             $!regalloc.release_register($sname, $MVM_reg_str);
         }
 
@@ -1392,9 +1415,10 @@ class QAST::MASTRegexCompiler {
             my $s0            := $!regalloc.fresh_s();
             op('ordat', $i0, %!reg<tgt>, %!reg<pos>);
             op('getuniname', $s0, $i0);
-            op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS'));
-            call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
-                %!reg<cur>, $smrtmtch_mast.result_reg, $s0);
+            self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
+                :result-reg($i0), :result-int,
+                :arg-regs([$smrtmtch_mast.result_reg, $s0]),
+                :arg-types([$MVM_reg_obj, $MVM_reg_str]));
             op($testop, $i0, %!reg<fail>);
         }
         else {
@@ -1409,16 +1433,18 @@ class QAST::MASTRegexCompiler {
 
             op('getuniprop_str', $s0, $i0, $pcode);
             op('unless_s', $s0, $tryintprop);
-            op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS'));
-            call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::str], :result($i0),
-                %!reg<cur>, $smrtmtch_mast.result_reg, $s0);
+            self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
+                :result-reg($i0), :result-int,
+                :arg-regs([$smrtmtch_mast.result_reg, $s0]),
+                :arg-types([$MVM_reg_obj, $MVM_reg_str]));
             op('goto', $succeed);
 
             $*MAST_FRAME.add-label($tryintprop);
             op('getuniprop_int', $i0, $i0, $pcode);
-            op('findmeth', %!reg<method>, %!reg<cur>, sval('!DELEGATE_ACCEPTS'));
-            call(%!reg<method>, [$Arg::obj, $Arg::obj, $Arg::int], :result($i0),
-                %!reg<cur>, $smrtmtch_mast.result_reg, $i0);
+            self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
+                :result-reg($i0), :result-int,
+                :arg-regs([$smrtmtch_mast.result_reg, $i0]),
+                :arg-types([$MVM_reg_obj, $MVM_reg_int64]));
 
             $*MAST_FRAME.add-label($succeed);
             op($testop, $i0, %!reg<fail>);
@@ -1429,11 +1455,11 @@ class QAST::MASTRegexCompiler {
     method ws($node) { self.subrule($node) }
 
     method dba($node) {
-        my @flags := [$Arg::obj, $Arg::int, $Arg::str];
         my $sname := $!regalloc.fresh_s();
         op('const_s', $sname, sval($node.name));
-        op('findmeth', %!reg<method>, %!reg<cur>, sval('!dba'));
-        call(%!reg<method>, @flags, %!reg<cur>, %!reg<pos>, $sname);
+        self.call-meth('!dba', %!reg<cur>,
+            :arg-regs([%!reg<pos>, $sname]),
+            :arg-types([$MVM_reg_int64, $MVM_reg_str]));
         $!regalloc.release_register($sname, $MVM_reg_str);
     }
 
@@ -1445,16 +1471,6 @@ class QAST::MASTRegexCompiler {
 
     sub op(str $op, *@args) {
         MAST::Op.new_with_operand_array( :$op, @args );
-    }
-
-    sub call($target, @flags, :$result?, *@args) {
-        nqp::defined($result) ??
-        MAST::Call.new(
-            :target($target), :result($result), :flags(@flags), |@args
-        ) !!
-        MAST::Call.new(
-            :target($target), :flags(@flags), |@args
-        )
     }
 
     sub label()    { MAST::Label.new() }
