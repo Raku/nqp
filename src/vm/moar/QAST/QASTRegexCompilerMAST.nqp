@@ -1416,7 +1416,7 @@ class QAST::MASTRegexCompiler {
             op('ordat', $i0, %!reg<tgt>, %!reg<pos>);
             op('getuniname', $s0, $i0);
             self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
-                :result-reg($i0), :result-int,
+                :result-reg($i0), :int-result,
                 :arg-regs([$smrtmtch_mast.result_reg, $s0]),
                 :arg-types([$MVM_reg_obj, $MVM_reg_str]));
             op($testop, $i0, %!reg<fail>);
@@ -1434,7 +1434,7 @@ class QAST::MASTRegexCompiler {
             op('getuniprop_str', $s0, $i0, $pcode);
             op('unless_s', $s0, $tryintprop);
             self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
-                :result-reg($i0), :result-int,
+                :result-reg($i0), :int-result,
                 :arg-regs([$smrtmtch_mast.result_reg, $s0]),
                 :arg-types([$MVM_reg_obj, $MVM_reg_str]));
             op('goto', $succeed);
@@ -1442,7 +1442,7 @@ class QAST::MASTRegexCompiler {
             $*MAST_FRAME.add-label($tryintprop);
             op('getuniprop_int', $i0, $i0, $pcode);
             self.call-meth('!DELEGATE_ACCEPTS', %!reg<cur>,
-                :result-reg($i0), :result-int,
+                :result-reg($i0), :int-result,
                 :arg-regs([$smrtmtch_mast.result_reg, $i0]),
                 :arg-types([$MVM_reg_obj, $MVM_reg_int64]));
 
