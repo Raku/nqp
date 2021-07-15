@@ -84,9 +84,9 @@ my module sprintf {
             nqp::throw($ex);
         }
 
-        sub bad-type-for-directive($type, $directive, @value) {
-            my $value := nqp::join('', @value);
-            my $message := "Directive $directive not applicable for value of type " ~ $type.HOW.name($type) ~ " ($value)";
+        sub bad-type-for-directive($type, $directive, $value) {
+            my $message := "Directive $directive not applicable for value of type " ~
+                $type.HOW.name($type);
             my $payload := nqp::hash('BAD_TYPE_FOR_DIRECTIVE',
                 nqp::hash('TYPE', $type.HOW.name($type), 'DIRECTIVE', $directive, 'VALUE', $value));
             panic($message, $payload);
