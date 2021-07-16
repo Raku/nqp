@@ -399,10 +399,9 @@ my knowhow RegexCaptures {
         my str $onlyname := '';
         my int $quant-list-captures := 0;
         my int $quant-hash-captures := 0;
-        for %capnames {
-            my $name := nqp::iterkey_s($_);
+        for sorted_keys(%capnames) -> $name {
             if $name ne '' {
-                my $count := nqp::iterval($_);
+                my $count := %capnames{$name};
                 if nqp::ord($name) != 36 && nqp::ord($name) < 58 {
                     nqp::bindpos_i(@!pos-capture-counts, +$name, $count);
                     $quant-list-captures++ if $count >= 2;
