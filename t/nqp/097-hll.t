@@ -172,7 +172,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
     my $missing_on_object;
     my $method_not_found;
 
-    nqp::sethllconfig('nqp', nqp::hash('method_not_found_error', -> $obj, $name {
+    nqp::sethllconfig('nqp', nqp::hash('method_not_found_error', -> $obj, $name, *@args {
         $missing_on_object := $obj;
         $method_not_found := $name;
         $method_not_found_called := $method_not_found_called + 1;
