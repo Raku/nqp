@@ -215,7 +215,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 
     class TestHOW {
         method new_type() {
-            nqp::newtype(self, 'P6opaque');
+            nqp::settypehll(nqp::newtype(self, 'P6opaque'), 'nqp');
         }
 
         method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
