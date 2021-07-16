@@ -28,6 +28,42 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     }
 });
 
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $capture {
+    # Guard on the invocant type and method name.
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1));
+
+    # Try to find the method.
+    my $obj := nqp::captureposarg($capture, 0);
+    my str $name := nqp::captureposarg_s($capture, 1);
+    my $meth := nqp::how_nd($obj).find_method($obj, $name);
+
+    # If it's found, evaluate to it.
+    if nqp::isconcrete($meth) {
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+            $capture, 0, $meth);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+    }
+
+    # Otherwise, depends on exceptional flag whether we report the missing
+    # method or hand back a null.
+    else {
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
+        if nqp::captureposarg_i($capture, 2) {
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-not-found',
+                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0));
+        }
+        else {
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                $capture, 0, nqp::null());
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        }
+    }
+});
+
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
     # Guard on the type of the callee.
     my $track-callee := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
