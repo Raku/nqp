@@ -2793,8 +2793,50 @@ QAST::MASTOperations.add_core_moarop_mapping('how', 'gethow', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('who', 'getwho', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('where', 'getwhere', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('objectid', 'objectid', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('findmethod', 'findmeth_s', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('tryfindmethod', 'tryfindmeth_s', :decont(0));
+my $findmethodish := -> $qastcomp, $op {
+    # Compile and decont the object.
+    my $regalloc := $*REGALLOC;
+    my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
+    $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
+    my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
+    op_decont($decont_reg, $obj_mast.result_reg);
+
+    # Load name and exceptional flag into registers.
+    my int $exceptional := $op.op eq 'findmethod';
+    my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[1] );
+    my $ex_flag_reg := $regalloc.fresh_register($MVM_reg_int64);
+    %core_op_generators{'const_i64'}($ex_flag_reg, $exceptional);
+
+    # Do this dispatch.
+    my $result_reg := $regalloc.fresh_register($MVM_reg_obj);
+    my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+        [$op[0], $op[1], QAST::IVal.new( :value($exceptional) )],
+        [MAST::InstructionList.new($result_reg, $MVM_reg_obj),
+        $name_mast,
+        MAST::InstructionList.new($ex_flag_reg, $MVM_reg_int64)]);
+    op_dispatch_o($result_reg, 'lang-find-meth', $callsite_id,
+        [$decont_reg, $name_mast.result_reg, $ex_flag_reg]);
+
+    # Clean up and produce value.
+    $regalloc.release_register($decont_reg, $MVM_reg_obj);
+    $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
+    if $op.op eq 'can' {
+        # Want a boolean for if the result was non-null; reuse the int
+        # register we already allocated.
+        %core_op_generators{'isnull'}($ex_flag_reg, $result_reg);
+        %core_op_generators{'not_i'}($ex_flag_reg, $ex_flag_reg);
+        $regalloc.release_register($result_reg, $MVM_reg_obj);
+        MAST::InstructionList.new($ex_flag_reg, $MVM_reg_int64)
+    }
+    else {
+        # Want the method result.
+        $regalloc.release_register($ex_flag_reg, $MVM_reg_int64);
+        MAST::InstructionList.new($result_reg, $MVM_reg_obj)
+    }
+}
+QAST::MASTOperations.add_core_op('findmethod', $findmethodish);
+QAST::MASTOperations.add_core_op('tryfindmethod', $findmethodish);
+QAST::MASTOperations.add_core_op('can', $findmethodish);
 QAST::MASTOperations.add_core_moarop_mapping('setwho', 'setwho', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('knowhow', 'knowhow');
@@ -2950,7 +2992,6 @@ QAST::MASTOperations.add_core_moarop_mapping('box_u', 'box_u');
 QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_i', 'hllboxtype_i');
 QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_n', 'hllboxtype_n');
 QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_s', 'hllboxtype_s');
-QAST::MASTOperations.add_core_moarop_mapping('can', 'can_s', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newmixintype', 'newmixintype', :decont(0));
