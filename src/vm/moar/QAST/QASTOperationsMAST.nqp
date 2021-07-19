@@ -3220,7 +3220,7 @@ QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
         $op[0], $op[1],
         QAST::Op.new(
             :op('call'),
-            QAST::WVal.new( :value(nqp::getcodeobj(&decont_all)) ),
+            QAST::WVal.new( :value(&decont_all) ),
             $op[2]
         )));
 });
