@@ -1321,12 +1321,12 @@ my class MASTCompilerInstance {
         elsif $node.blocktype eq 'immediate' {
             my $clone_reg := $*BLOCK.clone_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
-                $*MAST_FRAME.compile-simple-call($clone_reg, nqp::null);
+                self.compile-simple-call($clone_reg, nqp::null, $MVM_reg_void, 0);
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
             else {
-                my $res_reg   := $*REGALLOC.fresh_register($block.return_kind);
-                $*MAST_FRAME.compile-simple-call($clone_reg, $res_reg);
+                my $res_reg := $*REGALLOC.fresh_register($block.return_kind);
+                self.compile-simple-call($clone_reg, $res_reg, $block.return_kind, 0);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
@@ -1335,11 +1335,11 @@ my class MASTCompilerInstance {
             my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
             %core_op_generators{'getcode'}($code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
-                $*MAST_FRAME.compile-simple-call($code_reg, nqp::null);
+                self.compile-simple-call($code_reg, nqp::null, $MVM_reg_void, 1);
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             } else {
-                my $res_reg  := $*REGALLOC.fresh_register($block.return_kind);
-                $*MAST_FRAME.compile-simple-call($code_reg, $res_reg);
+                my $res_reg := $*REGALLOC.fresh_register($block.return_kind);
+                self.compile-simple-call($code_reg, $res_reg, $block.return_kind, 1);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
@@ -1361,6 +1361,28 @@ my class MASTCompilerInstance {
         }
         else {
             nqp::die("Unhandled blocktype " ~ $node.blocktype);
+        }
+    }
+
+    method compile-simple-call($code-reg, $result-reg, $result-kind, int $constant) {
+        my str $disp-name := $constant ?? 'boot-code-constant' !! 'boot-code';
+        my uint $callsite-id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+            $FAKE_OBJECT_ARG,
+            [MAST::InstructionList.new($code-reg, $MVM_reg_obj)]);
+        if $result-kind == $MVM_reg_void {
+            op_dispatch_v($disp-name, $callsite-id, [$code-reg]);
+        }
+        elsif $result-kind == $MVM_reg_obj {
+            op_dispatch_o($result-reg, $disp-name, $callsite-id, [$code-reg]);
+        }
+        elsif $result-kind == $MVM_reg_int64 {
+            op_dispatch_i($result-reg, $disp-name, $callsite-id, [$code-reg]);
+        }
+        elsif $result-kind == $MVM_reg_num64 {
+            op_dispatch_n($result-reg, $disp-name, $callsite-id, [$code-reg]);
+        }
+        elsif $result-kind == $MVM_reg_str {
+            op_dispatch_s($result-reg, $disp-name, $callsite-id, [$code-reg]);
         }
     }
 
