@@ -7,7 +7,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             :compilation_mode(0),
             :pre_deserialize($*W.load_dependency_tasks()),
             :post_deserialize($*W.fixup_tasks()),
-            self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1))
+            self.qbuildsub($<nibbler>.ast, :node($/), :anon(1), :addself(1))
         );
     }
 
@@ -215,7 +215,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
     }
 
     method metachar:sym<( )>($/) {
-        my $sub_ast := QAST::NodeList.new(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+        my $sub_ast := QAST::NodeList.new(self.qbuildsub($<nibbler>.ast, :node($/), :anon(1), :addself(1)));
         my $ast := QAST::Regex.new( $sub_ast, $<nibbler>.ast, :rxtype('subrule'),
                                      :subtype('capture'), :node($/) );
         make $ast;
@@ -605,15 +605,15 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                     my int $litlen := self.offset_ast($<nibbler>.ast);
                     if $litlen >= 0 {
                         $qast[0][0].value('before');
-                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :node($/), :anon(1), :addself(1)));
                         $qast[0].push(QAST::IVal.new( :value($litlen) ));  # optional offset to before
                     }
                     else {
-                        $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)));
+                        $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :node($/), :anon(1), :addself(1)));
                     }
                 }
                 else {
-                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                    $qast[0].push(self.qbuildsub($<nibbler>.ast, :node($/), :anon(1), :addself(1)));
                 }
             }
         }
@@ -831,7 +831,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         return $qast
     }
 
-    method qbuildsub($qast, $block = QAST::Block.new(), :$anon, :$addself, *%rest) {
+    method qbuildsub($qast, $block = QAST::Block.new(), :$node, :$anon, :$addself, *%rest) {
 	my $*LANG := $qast.node;
         my $code_obj := nqp::existskey(%rest, 'code_obj')
             ?? %rest<code_obj>
@@ -879,7 +879,7 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         if %*RX<r> {
             $qast[2].backtrack('r');
         }
-        $block.push($qast);
+        $block.push(QAST::Stmts.new($qast, :$node));
 
         self.set_cursor_type($qast);
 
