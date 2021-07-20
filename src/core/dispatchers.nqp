@@ -85,14 +85,28 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
         my int $is-regex := $is-routine ?? 0 !! nqp::istype($callee, NQPRegex);
         my int $is-regex-method;
         unless $is-routine || $is-regex {
-            $NQPRegexMethod := nqp::gethllsym('nqp', 'NQPRegexMethod');
-            if nqp::istype($callee, $NQPRegexMethod) {
-                $is-regex-method := 1;
+            my str $name := $callee.HOW.name($callee);
+            if $name eq 'NQPRoutine' { $is-routine := 1 }
+            elsif $name eq 'NQPRegexMethod' {
+                $NQPRegexMethod := $callee.WHAT;
+                $is-regex-method := 1
             }
-            else {
-                my str $name := $callee.HOW.name($callee);
-                if $name eq 'NQPRoutine' { $is-routine := 1 }
-                elsif $name eq 'NQPRegex' { $is-regex := 1 }
+            elsif $name eq 'NQPRegex' {
+                # Oddly we have two of these: one subclassing NQPRegexMethod
+                # and another that is a KnowHOW and so has no parents.
+                if nqp::can($callee.HOW, 'parents') {
+                    my @parents := $callee.HOW.parents($callee, :local);
+                    if @parents {
+                        my $parent := @parents[0];
+                        if $parent.HOW.name($parent) eq 'NQPRegexMethod' {
+                            $NQPRegexMethod := $parent.WHAT;
+                            $is-regex-method := 1
+                        }
+                    }
+                }
+                unless $is-regex-method {
+                    $is-regex := 1
+                }
             }
         }
         if $is-routine {
