@@ -2143,8 +2143,6 @@ QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamche
 
 # Multiple dispatch related.
 QAST::MASTOperations.add_core_moarop_mapping('invokewithcapture', 'invokewithcapture');
-QAST::MASTOperations.add_core_moarop_mapping('multicacheadd', 'multicacheadd');
-QAST::MASTOperations.add_core_moarop_mapping('multicachefind', 'multicachefind');
 
 # Constant mapping.
 my %const_map := nqp::hash(
