@@ -219,6 +219,8 @@ my knowhow NQPRoutine {
         return @result;
     }
 
+    # On MoarVM, we use new-disp to do the multiple dispatch.
+#?if !moar
     method dispatch($capture) {
         # Count arguments.
         my int $num_args := nqp::captureposelems($capture);
@@ -318,6 +320,7 @@ my knowhow NQPRoutine {
             nqp::die("Ambiguous dispatch to multi '" ~ self.name ~ "'.")
         }
     }
+#?endif
 
     method clone() {
         # Clone the underlying VM code ref.
