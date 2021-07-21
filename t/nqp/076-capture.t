@@ -1,4 +1,4 @@
-plan(36);
+plan(34);
 
 my $x;
 sub savecapture($arg, *%named) {
@@ -10,7 +10,7 @@ sub savecapture($arg, *%named) {
 sub foo($a,$b,$c,:$d) {
   my $capture := nqp::usecapture();
   ok(nqp::captureposelems($capture) == 3,"nqp::captureposelems on result of usecapture");
-  ok(nqp::captureposarg($capture,1) == 20,"nqp::captureposarg on result of usecapture");
+  ok(nqp::captureposarg_i($capture,1) == 20,"nqp::captureposarg on result of usecapture");
   ok(nqp::capturehasnameds($capture) == 0,"nqp::capturehasnameds with no nameds");
 }
 foo(10,20,30);
@@ -27,13 +27,7 @@ bar(1, 2, :c(3));
 
 my $saved := savecapture(100, :named_arg_1(200));
 savecapture(200);
-ok(nqp::captureposarg($saved,0) == 100,"the capture returned by nqp::savecapture survives the next call to savecapture");
-
-sub invokee($arg, :$named_arg_1) {
-  ok($arg == 100,"nqp::invokewithcapture");
-  ok($named_arg_1 == 200, "nqp::invokewithcapture takes a named argument");
-}
-nqp::invokewithcapture(&invokee,$saved);
+ok(nqp::captureposarg_i($saved,0) == 100,"the capture returned by nqp::savecapture survives the next call to savecapture");
 
 sub namedhash(:$known, *%c) {
   my $capture := nqp::usecapture();
@@ -55,7 +49,7 @@ class Foo {
   method foo($a,$b,$c,:$d) {
     my $capture := nqp::usecapture();
     ok(nqp::captureposelems($capture) == 4,"nqp::captureposelems on result of usecapture in a class");
-    ok(nqp::captureposarg($capture,2) == 20,"nqp::captureposarg on result of usecapture in a class");
+    ok(nqp::captureposarg_i($capture,2) == 20,"nqp::captureposarg on result of usecapture in a class");
     ok(nqp::capturehasnameds($capture) == 0,"nqp::capturehasnameds with no nameds in a class");
     is(nqp::captureposarg($capture,0).attr, 'foobar' ,"nqp::captureposarg on an invocant");
   }
@@ -68,7 +62,7 @@ $foo.foo(10,20,30);
 my $capture := savecapture(100);
 
 my $clone := nqp::clone($capture);
-ok(nqp::captureposarg($clone, 0) == 100,"nqp::captureposarg on a cloned capture");
+ok(nqp::captureposarg_i($clone, 0) == 100,"nqp::captureposarg on a cloned capture");
 
 sub savecapture_three($arg1, $arg2, $arg3) {
   my $capture := nqp::savecapture();

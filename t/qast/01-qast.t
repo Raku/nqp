@@ -2124,7 +2124,7 @@ else {
             $wrongly_bound_capture := $capture;
             if $throw_exception {
                 my $exception := nqp::newexception();
-                nqp::setpayload($exception, nqp::captureposarg($capture, 0));
+                nqp::setpayload($exception, nqp::captureposarg_i($capture, 0));
                 nqp::throw($exception);
             }
             else {
@@ -2163,7 +2163,7 @@ else {
             is($in_bind_error, 0, 'the bind_error handler is not called');
             $r(207);
             is($in_bind_error, 1, "the bind_error handler is called when the type check doesn't pass");
-            ok(nqp::captureposelems($wrongly_bound_capture) == 1 && nqp::captureposarg($wrongly_bound_capture, 0) == 207, 'correct capture passed to bind_error handler');
+            ok(nqp::captureposelems($wrongly_bound_capture) == 1 && nqp::captureposarg_i($wrongly_bound_capture, 0) == 207, 'correct capture passed to bind_error handler');
 
             $throw_exception := 1;
 
