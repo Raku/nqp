@@ -2141,9 +2141,6 @@ QAST::MASTOperations.add_core_moarop_mapping('objprimbits', 'objprimbits');
 QAST::MASTOperations.add_core_moarop_mapping('objprimunsigned', 'objprimunsigned');
 QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamcheck');
 
-# Multiple dispatch related.
-QAST::MASTOperations.add_core_moarop_mapping('invokewithcapture', 'invokewithcapture');
-
 # Constant mapping.
 my %const_map := nqp::hash(
     'CCLASS_ANY',           65535,
