@@ -2297,6 +2297,13 @@ my %const_map := nqp::hash(
     'SOCKET_FAMILY_INET',         1,
     'SOCKET_FAMILY_INET6',        2,
     'SOCKET_FAMILY_UNIX',         3,
+
+    'DISP_CALLSAME',              0,
+    'DISP_CALLWITH',              1,
+    'DISP_LASTCALL',              2,
+    'DISP_NEXTCALLEE',            3,
+    'DISP_ONLYSTAR',              5,
+    'DISP_DECONT',                6,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
