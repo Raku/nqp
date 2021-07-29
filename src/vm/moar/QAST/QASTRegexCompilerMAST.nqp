@@ -769,26 +769,68 @@ class QAST::MASTRegexCompiler {
         my @arg-types := [$MVM_reg_int64];
         my @arg-qasts := [$FAKE-POS-NODE];
         my $op;
-        if $node.name {
-            my $sname := $!regalloc.fresh_s();
-            op('const_s', $sname, sval($node.name));
-            nqp::push(@arg-regs, $sname);
-            nqp::push(@arg-types, $MVM_reg_str);
-            nqp::push(@arg-qasts, $FAKE-POS-NODE);
-        }
-        elsif nqp::elems(@($node)) == 1 {
-            my $name := $!qastcomp.as_mast($node[0], :want($MVM_reg_str));
-            nqp::push(@arg-regs, $name.result_reg);
-            nqp::push(@arg-types, $MVM_reg_str);
-            nqp::push(@arg-qasts, $FAKE-POS-NODE);
-        }
         if $node.backtrack ne 'r' {
             nqp::push(@arg-regs, %!reg<one>);
             nqp::push(@arg-types, $MVM_reg_int64);
             nqp::push(@arg-qasts, QAST::IVal.new( :value(1), :named<backtrack> ));
         }
-        self.call-meth('!cursor_pass', %!reg<cur>, :@arg-regs, :@arg-types, :@arg-qasts);
+        self.call-meth('!cursor_pass_no_reduce', %!reg<cur>,
+            :@arg-regs, :@arg-types, :@arg-qasts);
+        if $node.name {
+            my $sname := $!regalloc.fresh_s();
+            op('const_s', $sname, sval($node.name));
+            self.reduce($sname, :literal);
+        }
+        elsif nqp::elems(@($node)) == 1 {
+            my $name := $!qastcomp.as_mast($node[0], :want($MVM_reg_str));
+            self.reduce($name.result_reg);
+        }
         op('return_o', %!reg<cur>);
+    }
+
+    method reduce($name_reg, :$literal) {
+        # Emit call to obtain actions, and ensure they aren't null.
+        my $actions_reg := $!regalloc.fresh_o();
+        self.call-meth('actions', %!reg<cur>, :result-reg($actions_reg));
+        my $actions_done_label := label();
+        my $itmp := $!regalloc.fresh_i();
+        op('isnull', $itmp, $actions_reg);
+        op('if_i', $itmp, $actions_done_label);
+
+        # Try to find a method on it.
+        my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+            [
+                $FAKE-POS-NODE,
+                $literal ?? QAST::SVal.new( :value('') ) !! $FAKE-POS-NODE,
+                QAST::IVal.new( :value(0) )
+            ],
+            [
+                MAST::InstructionList.new($actions_reg, $MVM_reg_obj),
+                MAST::InstructionList.new($name_reg, $MVM_reg_str),
+                MAST::InstructionList.new(%!reg<zero>, $MVM_reg_int64)
+            ]);
+        op_dispatch_o(%!reg<method>, 'lang-find-meth', $callsite_id,
+            [$actions_reg, $name_reg, %!reg<zero>]);
+
+        # If we find one, call it with the match object.
+        op('isnull', $itmp, %!reg<method>);
+        op('if_i', $itmp, $actions_done_label);
+        my $match_reg := $!regalloc.fresh_o();
+        self.call-meth('MATCH', %!reg<cur>, :result-reg($match_reg));
+        $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+            [ $FAKE-POS-NODE, $FAKE-POS-NODE, $FAKE-POS-NODE ],
+            [
+                MAST::InstructionList.new(%!reg<method>, $MVM_reg_obj),
+                MAST::InstructionList.new($actions_reg, $MVM_reg_obj),
+                MAST::InstructionList.new($match_reg, $MVM_reg_obj)
+            ]);
+        op_dispatch_v('lang-call', $callsite_id,
+            [%!reg<method>, $actions_reg, $match_reg]);
+        $*MAST_FRAME.add-label($actions_done_label);
+
+        $!regalloc.release_register($actions_reg, $MVM_reg_obj);
+        $!regalloc.release_register($match_reg, $MVM_reg_obj);
+        $!regalloc.release_register($itmp, $MVM_reg_int64);
     }
 
     method qastnode($node) {
@@ -1089,7 +1131,7 @@ class QAST::MASTRegexCompiler {
             %!reg<pos>, ival(-1));
         self.call-meth('!cursor_start_subcapture', %!reg<cur>, :result-reg($p11),
             :arg-regs([$itmp]), :arg-types([$MVM_reg_int64]));
-        self.call-meth('!cursor_pass', $p11,
+        self.call-meth('!cursor_pass_no_reduce', $p11,
             :arg-regs([%!reg<pos>]), :arg-types([$MVM_reg_int64]));
         op('const_s', $s11, sval($node.name));
         self.call-meth('!cursor_capture', %!reg<cur>, :result-reg(self.'!get_cstack'()),
