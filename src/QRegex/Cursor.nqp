@@ -33,8 +33,8 @@ my class Braid is export {
 
     method !braid_init(:$grammar, :$actions, :$package, *%ignore) {
         my $new := nqp::create(self);
-        nqp::bindattr($new, Braid, '$!grammar', $grammar);
-        nqp::bindattr($new, Braid, '$!actions', $actions);
+        nqp::bindattr($new, Braid, '$!grammar', nqp::decont($grammar));
+        nqp::bindattr($new, Braid, '$!actions', nqp::decont($actions));
         nqp::bindattr($new, Braid, '$!package', $package);
         nqp::bindattr($new, Braid, '$!slangs', nqp::hash());
         $new
@@ -48,8 +48,8 @@ my class Braid is export {
         $new
     }
     method !switch($name) {
-        nqp::bindattr(self, Braid, '$!grammar', $!slangs{$name});
-        nqp::bindattr(self, Braid, '$!actions', $!slangs{$name ~ '-actions'});
+        nqp::bindattr(self, Braid, '$!grammar', nqp::decont($!slangs{$name}));
+        nqp::bindattr(self, Braid, '$!actions', nqp::decont($!slangs{$name ~ '-actions'}));
         self
     }
     method !dump($tag) {
@@ -284,7 +284,7 @@ role NQPMatchRole is export {
     method set_actions($actions) {
 #        nqp::die("No braid in set_actions!") unless $!braid;
         nqp::bindattr($!braid, Braid, '$!grammar', self);
-        nqp::bindattr($!braid, Braid, '$!actions', $actions);
+        nqp::bindattr($!braid, Braid, '$!actions', nqp::decont($actions));
         self
     }
 
@@ -531,6 +531,18 @@ role NQPMatchRole is export {
           ?? self.'!reduce'($name)
           !! self;
     }
+
+    # Version of !cursor_pass where we don't do the reduce, because it is
+    # separately code-gen'd
+    method !cursor_pass_no_reduce(int $pos, :$backtrack) {
+        $!match   := $pass_mark;
+        $!pos     := $pos;
+        $backtrack
+          ?? ($!restart := $!regexsub)
+          !! ($!bstack   := nqp::null);
+        self
+    }
+
     # Reduced functionality version of !cursor_pass
     method !cursor_pass_quick(int $pos) {
         $!match  := $pass_mark;
