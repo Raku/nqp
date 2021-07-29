@@ -3123,49 +3123,6 @@ QAST::MASTOperations.add_core_moarop_mapping('setcodeobj', 'setcodeobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('getcodename', 'getcodename');
 QAST::MASTOperations.add_core_moarop_mapping('setcodename', 'setcodename', 0);
 QAST::MASTOperations.add_core_moarop_mapping('forceouterctx', 'forceouterctx', 0);
-QAST::MASTOperations.add_core_moarop_mapping('setdispatcher', 'setdispatcher', 0);
-QAST::MASTOperations.add_core_moarop_mapping('setdispatcherfor', 'setdispatcherfor', 0);
-QAST::MASTOperations.add_core_moarop_mapping('nextdispatcherfor', 'nextdispatcherfor', 0);
-QAST::MASTOperations.add_core_op('takedispatcher', -> $qastcomp, $op {
-    my $regalloc := $*REGALLOC;
-    unless nqp::istype($op[0], QAST::SVal) {
-        nqp::die("The 'takedispatcher' op must have a single QAST::SVal child, got " ~ $op[0].HOW.name($op[0]));
-    }
-    my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
-    my $isnull_reg := $regalloc.fresh_register($MVM_reg_int64);
-    my $done_lbl   := MAST::Label.new();
-    %core_op_generators{'takedispatcher'}($disp_reg);
-    %core_op_generators{'isnull'}($isnull_reg, $disp_reg);
-    %core_op_generators{'if_i'}($isnull_reg, $done_lbl);
-    if $*BLOCK.lexical($op[0].value) -> $lex {
-        %core_op_generators{'bindlex'}($lex, $disp_reg);
-    }
-    $*MAST_FRAME.add-label($done_lbl);
-    $regalloc.release_register($disp_reg, $MVM_reg_obj);
-    $regalloc.release_register($isnull_reg, $MVM_reg_int64);
-    MAST::InstructionList.new(MAST::VOID, $MVM_reg_void)
-});
-QAST::MASTOperations.add_core_op('takenextdispatcher', -> $qastcomp, $op {
-    my $regalloc := $*REGALLOC;
-    unless nqp::istype($op[0], QAST::SVal) {
-        nqp::die("The 'takenextdispatcher' op must have a single QAST::SVal child, got " ~ $op[0].HOW.name($op[0]));
-    }
-    my $disp_reg   := $regalloc.fresh_register($MVM_reg_obj);
-    my $isnull_reg := $regalloc.fresh_register($MVM_reg_int64);
-    my $done_lbl   := MAST::Label.new();
-    %core_op_generators{'takenextdispatcher'}($disp_reg);
-    %core_op_generators{'isnull'}($isnull_reg, $disp_reg);
-    %core_op_generators{'if_i'}($isnull_reg, $done_lbl);
-    if $*BLOCK.lexical($op[0].value) -> $lex {
-        %core_op_generators{'bindlex'}($lex, $disp_reg);
-    }
-    $*MAST_FRAME.add-label($done_lbl);
-    $regalloc.release_register($disp_reg, $MVM_reg_obj);
-    $regalloc.release_register($isnull_reg, $MVM_reg_int64);
-    MAST::InstructionList.new(MAST::VOID, $MVM_reg_void)
-});
-QAST::MASTOperations.add_core_moarop_mapping('cleardispatcher', 'takedispatcher');
-QAST::MASTOperations.add_core_moarop_mapping('clearnextdispatcher', 'takenextdispatcher');
 QAST::MASTOperations.add_core_moarop_mapping('freshcoderef', 'freshcoderef');
 QAST::MASTOperations.add_core_moarop_mapping('iscoderef', 'iscoderef');
 QAST::MASTOperations.add_core_moarop_mapping('markcodestatic', 'markcodestatic');
