@@ -1,16 +1,66 @@
 #?if moar
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $capture {
-    # Try to find the method; complain if there's none found.
+    # See if this callsite is heading megamorphic due to loads of different
+    # method names; if so, we'll try to cope with that.
     my $obj := nqp::captureposarg($capture, 0);
+    my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
+    if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
+            && nqp::can($obj.HOW, 'mro') {
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-meth-call-mega', $capture);
+    }
+    else {
+        # Try to find the method; complain if there's none found.
+        my str $name := nqp::captureposarg_s($capture, 1);
+        my $meth := $obj.HOW.find_method($obj, $name);
+        if nqp::isconcrete($meth) {
+            # Establish a guard on the invocant type and method name (however the name
+            # may well be a literal, in which case this is free).
+            nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+                nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+                nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1));
+
+            # Drop the first two arguments, which are the decontainerized invocant
+            # and the method name. Then insert the resolved method and delegate to
+            # lang-call to invoke it (we may have other languages mixing into NQP
+            # types and adding their methods).
+            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg',
+                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+                0);
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                $args, 0, $meth);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
+        }
+        else {
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-not-found', $capture);
+        }
+    }
+});
+
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $capture {
+    # When we have a megamorphic callsite due to loads of different method
+    # names, we build a hash table of the methods.
+    my $obj := nqp::captureposarg($capture, 0);
+    my %lookup;
+    for $obj.HOW.mro($obj) {
+        for $_.HOW.method_table($_) {
+            my str $name := $_.key;
+            %lookup{$name} := $_.value unless nqp::existskey(%lookup, $name);
+        }
+    }
+
+    # Make sure we really can find the method name; error if not.
     my str $name := nqp::captureposarg_s($capture, 1);
-    my $meth := $obj.HOW.find_method($obj, $name);
-    if nqp::isconcrete($meth) {
-        # Establish a guard on the invocant type and method name (however the name
-        # may well be a literal, in which case this is free).
+    if nqp::existskey(%lookup, $name) {
+        # Guard on the type of the invocant.
         nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
             nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1));
+
+        # Do the lookup of the method; the lookup table gets stored as a constant,
+        # and the dispatch fails in the event that the name is not found.
+        my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
+        my $track-resolution := nqp::dispatch('boot-syscall', 'dispatcher-index-lookup-table',
+            %lookup, $track-name);
 
         # Drop the first two arguments, which are the decontainerized invocant
         # and the method name. Then insert the resolved method and delegate to
@@ -19,8 +69,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
         my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg',
             nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
             0);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-            $args, 0, $meth);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+            $args, 0, $track-resolution);
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
     }
     else {
