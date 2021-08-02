@@ -2140,6 +2140,7 @@ QAST::MASTOperations.add_core_moarop_mapping('objprimspec', 'objprimspec');
 QAST::MASTOperations.add_core_moarop_mapping('objprimbits', 'objprimbits');
 QAST::MASTOperations.add_core_moarop_mapping('objprimunsigned', 'objprimunsigned');
 QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamcheck');
+QAST::MASTOperations.add_core_moarop_mapping('bindcomplete', 'bindcomplete');
 
 # Constant mapping.
 my %const_map := nqp::hash(
@@ -2305,6 +2306,8 @@ my %const_map := nqp::hash(
     'DISP_NEXTCALLEE',            4,
     'DISP_ONLYSTAR',              5,
     'DISP_DECONT',                6,
+    'DISP_BIND_SUCCESS',          7,
+    'DISP_BIND_FAILURE',          8,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
