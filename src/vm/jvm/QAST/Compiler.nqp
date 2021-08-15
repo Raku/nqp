@@ -831,6 +831,7 @@ for <if unless with without> -> $op_name {
 
         # Emit test.
         if $is_withy {
+            $il.append($qastcomp.coercion($cond, $RT_OBJ));
             $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new(:op('invokestatic'),
                 $TYPE_OPS, 'isconcrete', 'Long', $TYPE_SMO, $TYPE_TC));
