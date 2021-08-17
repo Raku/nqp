@@ -3148,6 +3148,7 @@ QAST::MASTOperations.add_core_moarop_mapping('buffertocu', 'buffertocu');
 QAST::MASTOperations.add_core_moarop_mapping('loadbytecodefh', 'loadbytecodefh');
 QAST::MASTOperations.add_core_moarop_mapping('settypehll', 'settypehll', 0);
 QAST::MASTOperations.add_core_moarop_mapping('settypehllrole', 'settypehllrole', 0);
+QAST::MASTOperations.add_core_moarop_mapping('gettypehllrole', 'gettypehllrole');
 QAST::MASTOperations.add_core_moarop_mapping('usecompileehllconfig', 'usecompileehllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('usecompilerhllconfig', 'usecompilerhllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('hllize', 'hllize');
