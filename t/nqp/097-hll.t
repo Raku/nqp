@@ -1,4 +1,4 @@
-plan(50);
+plan(54);
 
 is(nqp::bindhllsym("blabla", "key1", "value1"), 'value1', 'nqp::bindhllsym');
 nqp::bindhllsym("blabla", "key2", "value2");
@@ -241,3 +241,19 @@ nqp::sethllconfig('true_and_false', nqp::hash(
 
 ok(nqp::eqaddr(nqp::hllboolfor(0, 'true_and_false'), FalseValue), 'hllboolfor with false');
 ok(nqp::eqaddr(nqp::hllboolfor(7, 'true_and_false'), TrueValue), 'hllboolfor with true');
+
+{
+    ok(nqp::ishash(nqp::hllize(nqp::hash())), 'hllize nqp::hash');
+    my $obj := nqp::list;
+    ok(!nqp::ishash(nqp::hllize($obj)), 'hllize nqp::list');
+    ok(nqp::eqaddr(nqp::hllize($obj), $obj), 'hllize returns list unmodified');
+    my $hash := nqp::hash;
+    class Hash {
+        method FLATTENABLE_HASH() {
+            $hash
+        }
+    }
+    nqp::settypehll(Hash, "Raku");
+    nqp::settypehllrole(Hash, 5);
+    ok(nqp::eqaddr(nqp::hllize(nqp::create(Hash)), $hash), 'Foreign Hash transformed');
+}

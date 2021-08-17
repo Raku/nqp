@@ -3151,7 +3151,14 @@ QAST::MASTOperations.add_core_moarop_mapping('settypehllrole', 'settypehllrole',
 QAST::MASTOperations.add_core_moarop_mapping('gettypehllrole', 'gettypehllrole');
 QAST::MASTOperations.add_core_moarop_mapping('usecompileehllconfig', 'usecompileehllconfig');
 QAST::MASTOperations.add_core_moarop_mapping('usecompilerhllconfig', 'usecompilerhllconfig');
-QAST::MASTOperations.add_core_moarop_mapping('hllize', 'hllize');
+QAST::MASTOperations.add_core_op('hllize', -> $qastcomp, $op {
+    # desugar into nqp::dispatch('lang-hllize', $op[0]);
+    my $regalloc := $*REGALLOC;
+    my $dispatch := $qastcomp.as_mast(
+        QAST::Op.new( :op('dispatch'), QAST::SVal.new(:value('lang-hllize')), $op[0] )
+    );
+    $dispatch
+});
 QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
 
 # regex engine related opcodes
