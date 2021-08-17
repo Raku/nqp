@@ -3159,7 +3159,14 @@ QAST::MASTOperations.add_core_op('hllize', -> $qastcomp, $op {
     );
     $dispatch
 });
-QAST::MASTOperations.add_core_moarop_mapping('hllizefor', 'hllizefor');
+QAST::MASTOperations.add_core_op('hllizefor', -> $qastcomp, $op {
+    # desugar into nqp::dispatch('lang-hllize', $op[0], $op[1]);
+    my $regalloc := $*REGALLOC;
+    my $dispatch := $qastcomp.as_mast(
+        QAST::Op.new( :op('dispatch'), QAST::SVal.new(:value('lang-hllize')), $op[0], $op[1] )
+    );
+    $dispatch
+});
 
 # regex engine related opcodes
 QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
