@@ -831,11 +831,33 @@ for <if unless with without> -> $op_name {
 
         # Emit test.
         if $is_withy {
+            $il.append($qastcomp.coercion($cond, $RT_OBJ));
+
+            # Use 'findmethod' to detect and invoke method 'defined'.
+            $il.append($DUP);
+            $il.append(JAST::PushSVal.new( :value('defined') ));
             $il.append($ALOAD_1);
             $il.append(JAST::Instruction.new(:op('invokestatic'),
-                $TYPE_OPS, 'isconcrete', 'Long', $TYPE_SMO, $TYPE_TC));
-            $il.append($IVAL_ZERO);
-            $il.append($LCMP);
+                $TYPE_OPS, 'findmethod', $TYPE_SMO, $TYPE_SMO, $TYPE_STR, $TYPE_TC));
+
+            my $meth_temp := $*TA.fresh_o();
+            my $cond_temp := $*TA.fresh_o();
+            $il.append(JAST::Instruction.new( :op('astore'), $meth_temp));
+            $il.append(JAST::Instruction.new( :op('astore'), $cond_temp));
+            my $cs_idx := $*CODEREFS.get_callsite_idx([$ARG_OBJ], []);
+            my @argTypes := ['I', $TYPE_TC, $TYPE_SMO, $TYPE_SMO];
+            $il.append(JAST::PushIndex.new( :value($cs_idx) ));
+            $il.append($ALOAD_1);
+            $il.append(JAST::Instruction.new( :op('aload'), $meth_temp ));
+            $il.append(JAST::Instruction.new( :op('aload'), $cond_temp ));
+            $il.append(savesite(JAST::InvokeDynamic.new(
+                'indcall_noa', 'V', @argTypes, 'org/raku/nqp/runtime/IndyBootstrap', 'indcall_noa'
+            )));
+            $il.append(JAST::Instruction.new( :op('aload'), 'cf' ));
+            $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+                'result_o', $TYPE_SMO, $TYPE_CF ));
+
+            boolify_instructions($il, $RT_OBJ);
         }
         else {
             boolify_instructions($il, $cond.type);

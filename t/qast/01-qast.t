@@ -1453,70 +1453,66 @@ test_qast_result(
 
 $dont_call := 0;
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("with/without are broken on the jvm", 4);
-} else {
-    my class IsDefined {
-        has int $!defined;
-        has $!left;
-        has $!right;
-        method new($defined, $left, $right) {
-            my $obj := nqp::create(self);
-            $obj.BUILD($defined, $left, $right);
-            $obj;
-        }
-        method BUILD($defined, $left, $right) {
-            $!defined := $defined;
-            $!left := $left;
-            $!right := $right;
-        }
-        method defined() {
-            $!defined;
-        }
-        method left() {
-            $!left;
-        }
-        method right() {
-            $!right;
-        }
+my class IsDefined {
+    has int $!defined;
+    has $!left;
+    has $!right;
+    method new($defined, $left, $right) {
+        my $obj := nqp::create(self);
+        $obj.BUILD($defined, $left, $right);
+        $obj;
     }
-
-    my sub with_arity($arity, $block) {
-        $block.arity($arity);
-        $block;
+    method BUILD($defined, $left, $right) {
+        $!defined := $defined;
+        $!left := $left;
+        $!right := $right;
     }
-
-    my $test := -> $op {
-        QAST::Block.new(
-            QAST::Var.new( :name<arg>, :scope<local>, :decl<param>),
-            QAST::Op.new(
-                :op($op),
-                QAST::Var.new(:name<arg>, :scope<local>),
-                with_arity(1, QAST::Block.new(
-                    :blocktype<immediate>,
-                    QAST::Op.new(
-                        :op<callmethod>,
-                        :name<left>,
-                        QAST::Var.new(:name<b>, :scope<local>, :decl<param>)
-                    )
-                )),
-                with_arity(1, QAST::Block.new(
-                    :blocktype<immediate>,
-                    QAST::Op.new(
-                        :op<callmethod>,
-                        :name<right>,
-                        QAST::Var.new(:name<b>, :scope<local>, :decl<param>)
-                    )
-                ))
-             )
-        );
-    };
-
-    is_qast_args($test('with'), [IsDefined.new(1, 'good', 'bad')], 'good', 'with op - defined');
-    is_qast_args($test('with'), [IsDefined.new(0, 'good', 'bad')], 'bad', 'with op - not defined');
-    is_qast_args($test('without'), [IsDefined.new(1, 'bad', 'good')], 'good', 'without op - defined');
-    is_qast_args($test('without'), [IsDefined.new(0, 'bad', 'good')], 'bad', 'without op - not defined');
+    method defined() {
+        $!defined;
+    }
+    method left() {
+        $!left;
+    }
+    method right() {
+        $!right;
+    }
 }
+
+my sub with_arity($arity, $block) {
+    $block.arity($arity);
+    $block;
+}
+
+my $test := -> $op {
+    QAST::Block.new(
+        QAST::Var.new( :name<arg>, :scope<local>, :decl<param>),
+        QAST::Op.new(
+            :op($op),
+            QAST::Var.new(:name<arg>, :scope<local>),
+            with_arity(1, QAST::Block.new(
+                :blocktype<immediate>,
+                QAST::Op.new(
+                    :op<callmethod>,
+                    :name<left>,
+                    QAST::Var.new(:name<b>, :scope<local>, :decl<param>)
+                )
+            )),
+            with_arity(1, QAST::Block.new(
+                :blocktype<immediate>,
+                QAST::Op.new(
+                    :op<callmethod>,
+                    :name<right>,
+                    QAST::Var.new(:name<b>, :scope<local>, :decl<param>)
+                )
+            ))
+         )
+    );
+};
+
+is_qast_args($test('with'), [IsDefined.new(1, 'good', 'bad')], 'good', 'with op - defined');
+is_qast_args($test('with'), [IsDefined.new(0, 'good', 'bad')], 'bad', 'with op - not defined');
+is_qast_args($test('without'), [IsDefined.new(1, 'bad', 'good')], 'good', 'without op - defined');
+is_qast_args($test('without'), [IsDefined.new(0, 'bad', 'good')], 'bad', 'without op - not defined');
 
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
     skip('children of a QAST::Var with a "param" decl are not implemented', 6);
