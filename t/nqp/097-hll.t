@@ -30,48 +30,8 @@ nqp::sethllconfig('foobar', nqp::hash(
     'foreign_transform_code', -> $code {
         sub ($value) {$code($value) * 10};
     },
-    'null_value', 'fearsome *NULL*',
-    'hllize_dispatcher', 'foobar-hllize',
+    'null_value', 'fearsome *NULL*'
 ));
-
-my @transform_type := nqp::list(
-    NQPMu,
-    NQPMu,
-    NQPMu,
-    NQPMu,
-    -> $array { nqp::list('ARRAY:' ~ $array[2]); },
-    -> $hash { nqp::list('HASH:' ~ $hash<key>); },
-    -> $code { sub ($value) {$code($value) * 10}; },
-);
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'foobar-hllize', -> $capture {
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-    my $obj := nqp::captureposarg($capture, 0);
-
-    if (nqp::isnull($obj)) {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
-                0, 'fearsome *NULL*',
-            )
-        );
-    }
-    else {
-        my $role := nqp::gettypehllrole($obj);
-        if ($role > 0) {
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-delegate', 'lang-call',
-                nqp::dispatch(
-                    'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    $capture, 0, @transform_type[$role]
-                )
-            )
-        }
-        else {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-        }
-    }
-});
 
 nqp::sethllconfig('empty', nqp::hash(
 ));
@@ -118,8 +78,7 @@ nqp::sethllconfig('baz', nqp::hash(
     'foreign_transform_hash', -> $hash {
         nqp::list('HASH:' ~ $hash.bazify());
     },
-    'method_call_dispatcher', 'nqp-meth-call',
-    'hllize_dispatcher', 'baz-hllize',
+    'method_call_dispatcher', 'nqp-meth-call'
 ));
 nqp::sethllconfig('foobar', nqp::hash(
     'method_call_dispatcher', 'nqp-meth-call'
@@ -127,35 +86,6 @@ nqp::sethllconfig('foobar', nqp::hash(
 nqp::sethllconfig('other', nqp::hash(
     'method_call_dispatcher', 'nqp-meth-call'
 ));
-
-my @baz_transform_type := nqp::list(
-    NQPMu,
-    NQPMu,
-    NQPMu,
-    NQPMu,
-    -> $array { nqp::list('ARRAY:' ~ $array.bazify()); },
-    -> $hash { nqp::list('HASH:' ~ $hash.bazify()); },
-    -> $code { nqp::list('CODE:' ~ $code.bazify()); },
-);
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'baz-hllize', -> $capture {
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-    my $obj := nqp::captureposarg($capture, 0);
-
-    my $role := nqp::gettypehllrole($obj);
-    if ($role > 0) {
-        nqp::dispatch(
-            'boot-syscall', 'dispatcher-delegate', 'lang-call',
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $capture, 0, @baz_transform_type[$role]
-            )
-        )
-    }
-    else {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-    }
-});
 
 class FooBarArray {
     method bazify() {
@@ -220,34 +150,8 @@ class BoxxyInt is repr('P6int') {
 nqp::sethllconfig('boxxy', nqp::hash(
     'foreign_type_num', BoxxyNum,
     'foreign_type_str', BoxxyStr,
-    'foreign_type_int', BoxxyInt,
-    'hllize_dispatcher', 'boxxy-hllize',
+    'foreign_type_int', BoxxyInt
 ));
-
-my @boxxy_transform_type := nqp::list(
-    NQPMu,
-    -> $int { nqp::box_i($int, BoxxyInt) },
-    -> $num { nqp::box_n($num, BoxxyNum) },
-    -> $str { nqp::box_s($str, BoxxyStr) },
-);
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'boxxy-hllize', -> $capture {
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-    my $spec := nqp::captureposprimspec($capture, 0);
-
-    if ($spec > 0) {
-        nqp::dispatch(
-            'boot-syscall', 'dispatcher-delegate', 'lang-call',
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $capture, 0, @boxxy_transform_type[$spec]
-            )
-        )
-    }
-    else {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-    }
-});
 
 my $num := nqp::hllizefor(1.3, 'boxxy');
 my $int := nqp::hllizefor(1, 'boxxy');

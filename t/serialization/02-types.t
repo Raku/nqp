@@ -378,53 +378,13 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::sethllconfig('foo', nqp::hash(
         'foreign_transform_array', -> $array {
             nqp::list('fooifed');
-         },
-        'hllize_dispatcher', 'foo-hllize',
+         }
     ));
     nqp::sethllconfig('baz', nqp::hash(
         'foreign_transform_array', -> $array {
             Baz;
         },
-        'hllize_dispatcher', 'baz-hllize',
     ));
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'foo-hllize', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-        my $obj := nqp::captureposarg($capture, 0);
-
-        my $role := nqp::gettypehllrole($obj);
-        if ($role == 4) {
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-delegate', 'lang-call',
-                nqp::dispatch(
-                    'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    $capture, 0, -> $array { nqp::list('fooifed') },
-                )
-            )
-        }
-        else {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-        }
-    });
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'baz-hllize', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-        my $obj := nqp::captureposarg($capture, 0);
-
-        my $role := nqp::gettypehllrole($obj);
-        if ($role == 4) {
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-delegate', 'lang-call',
-                nqp::dispatch(
-                    'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    $capture, 0, -> $array { Baz },
-                )
-            )
-        }
-        else {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-        }
-    });
 
     my $sc := nqp::createsc('TEST_SC_11_IN');
     my $sh := nqp::list_s();
@@ -458,8 +418,7 @@ sub add_to_sc($sc, $idx, $obj) {
     nqp::sethllconfig('somelang', nqp::hash(
         'foreign_transform_array', -> $array {
             nqp::list('fooifed');
-        },
-        'hllize_dispatcher', 'foo-hllize', # same as foo
+         }
     ));
     my $sc := nqp::createsc('TEST_SC_12_IN');
     my $sh := nqp::list_s();
