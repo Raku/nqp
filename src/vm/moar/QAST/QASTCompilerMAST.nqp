@@ -182,8 +182,9 @@ my class MASTCompilerInstance {
             my $mf    := $*MAST_FRAME;
             my $type  := $var.returns;
             my $kind  := $!compiler.type_to_register_kind($type);
-            my $index := $mf.add_lexical($type, $var.name);
-            self.register_lexical($var.name, $index, $kind);
+            my str $name := $var.name;
+            my $index := $mf.add_lexical($type, $name);
+            self.register_lexical($name, $index, $kind);
             if $is_static || $is_cont || $is_state {
                 my int $flags := $is_static ?? 0 !!
                                  $is_cont   ?? 1 !! 2;
@@ -1575,8 +1576,8 @@ my class MASTCompilerInstance {
     }
 
     method compile_var($node, :$want) {
-        my $scope := $node.scope;
-        my $decl  := $node.decl;
+        my str $scope := $node.scope;
+        my str $decl  := $node.decl;
 
         my $res_reg;
         my int $res_kind;
@@ -1665,7 +1666,7 @@ my class MASTCompilerInstance {
         }
 
         # Now go by scope.
-        my $name := $node.name;
+        my str $name := $node.name;
         if $scope eq 'local' {
             my $local := $*BLOCK.local($name);
             if $local {
@@ -2746,12 +2747,13 @@ class MoarVM::BytecodeWriter {
         nqp::closefh($file);
     }
     method get_frame_index(MAST::Frame $f) {
-        my $idx := 0;
+        my int $idx := 0;
         if nqp::getattr($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
             return nqp::getattr($f, MAST::Frame, '$!frame_idx');
         }
+        my str $fid := nqp::objectid($f);
         for nqp::getattr($!compunit, MAST::CompUnit, '@!frames') {
-            return $idx if nqp::objectid($_) eq nqp::objectid($f);
+            return $idx if nqp::objectid($_) eq $fid;
             $idx++;
         }
         nqp::die("Could not find frame " ~ $f.name);
