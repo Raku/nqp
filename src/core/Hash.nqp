@@ -8,9 +8,9 @@ sub hash(*%new) {
 # a build of the Rakudo settings), so use a heapsort
 # instead.
 sub sorted_keys($hash) {
-    my @keys;
+    my @keys := nqp::list_s();
     for $hash {
-        nqp::push(@keys, $_.key);
+        nqp::push_s(@keys, $_.key);
     }
 
     sub sift_down(@a, int $start, int $end) {
@@ -22,18 +22,18 @@ sub sorted_keys($hash) {
             $child := 2*$root + 1;
             $swap := $root;
 
-            if @a[$swap] gt @a[$child] {
+            if nqp::atpos_s(@a, $swap) gt nqp::atpos_s(@a, $child) {
                 $swap := $child;
             }
-            if $child + 1 <= $end && @a[$swap] ge @a[$child + 1] {
+            if $child + 1 <= $end && nqp::atpos_s(@a, $swap) ge nqp::atpos_s(@a, $child + 1) {
                 $swap := $child + 1;
             }
             if $swap == $root {
                 return;
             } else {
-                my str $tmp := @a[$root];
-                @a[$root] := @a[$swap];
-                @a[$swap] := $tmp;
+                my str $tmp := nqp::atpos_s(@a, $root);
+                nqp::bindpos_s(@a, $root, nqp::atpos_s(@a, $swap));
+                nqp::bindpos_s(@a, $swap, $tmp);
                 $root := $swap;
             }
         }
@@ -41,8 +41,8 @@ sub sorted_keys($hash) {
 
     my int $count := +@keys;
     if $count < 3 {
-        if $count == 2 && @keys[0] gt @keys[1] {
-            nqp::push(@keys, nqp::shift(@keys));
+        if $count == 2 && nqp::atpos_s(@keys, 0) gt nqp::atpos_s(@keys, 1) {
+            nqp::push_s(@keys, nqp::shift_s(@keys));
         }
         return @keys;
     }
@@ -54,9 +54,9 @@ sub sorted_keys($hash) {
     }
 
     while $end > 0 {
-        my str $swap := @keys[$end];
-        @keys[$end] := @keys[0];
-        @keys[0] := $swap;
+        my str $swap := nqp::atpos_s(@keys, $end);
+        nqp::bindpos_s(@keys, $end, nqp::atpos_s(@keys, 0));
+        nqp::bindpos_s(@keys, 0, $swap);
         $end := $end - 1;
         sift_down(@keys, 0, $end);
     }
