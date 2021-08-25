@@ -3010,7 +3010,6 @@ QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmo
 QAST::MASTOperations.add_core_moarop_mapping('settypefinalize', 'settypefinalize', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('isinvokable', 'isinvokable');
 QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('setmultispec', 'setmultispec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
 
