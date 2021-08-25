@@ -354,9 +354,6 @@ my knowhow NQPRoutine {
     }
 }
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
-#?if moar
-nqp::setmultispec(NQPRoutine, NQPRoutine, '$!onlystar', '$!dispatch_cache');
-#?endif
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
 nqp::settypehll(NQPRoutine, 'nqp');
 
