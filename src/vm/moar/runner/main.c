@@ -340,6 +340,8 @@ int wmain(int argc, wchar_t *wargv[])
         }
     }
 
+    instance->full_cleanup = full_cleanup;
+
     MVM_vm_run_file(instance, nqp_file);
 
 #ifdef HAVE_TELEMEH
