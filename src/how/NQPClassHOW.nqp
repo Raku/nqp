@@ -123,7 +123,9 @@ knowhow NQPClassHOW {
         if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
+#?if !moar
         nqp::setmethcacheauth($obj, 0);
+#?endif
         nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
@@ -137,7 +139,9 @@ knowhow NQPClassHOW {
         %todo<name> := $name;
         %todo<code> := $code_obj;
         nqp::push(@!multi_methods_to_incorporate, %todo);
+#?if !moar
         nqp::setmethcacheauth($obj, 0);
+#?endif
         $code_obj;
     }
 
@@ -494,6 +498,7 @@ knowhow NQPClassHOW {
     }
 
     method publish_method_cache($obj) {
+#?if !moar
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
@@ -505,6 +510,7 @@ knowhow NQPClassHOW {
         }
         nqp::setmethcache($obj, %cache);
         nqp::setmethcacheauth($obj, 1);
+#?endif
     }
 
     method publish_boolification_spec($obj) {
@@ -797,7 +803,9 @@ knowhow NQPClassHOW {
 
     ##
     ## Tracing
+    ## TODO Find a new way to do this on MoarVM with new-disp
     ##
+#?if !moar
     method trace-on($obj, $depth?, :@exclude = <MATCH CAPHASH CREATE orig pos>) {
         $!trace := 1;
         $!trace_depth := $depth // 0;
@@ -834,4 +842,5 @@ knowhow NQPClassHOW {
         }
         1;
     }
+#?endif
 }

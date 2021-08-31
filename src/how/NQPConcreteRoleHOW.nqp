@@ -119,8 +119,10 @@ knowhow NQPConcreteRoleHOW {
         # Mark composed.
         $!composed := 1;
         nqp::settypecache($obj, [$obj.WHAT]);
+#?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
+#?endif
         $obj
     }
 

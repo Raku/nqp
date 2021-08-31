@@ -40,8 +40,10 @@ knowhow NQPModuleHOW {
     }
 
     method compose($obj) {
-        nqp::setmethcache($obj, my %empty);
+#?if !moar
+        nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
+#?endif
         $!composed := 1;
     }
 

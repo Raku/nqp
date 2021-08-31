@@ -107,8 +107,10 @@ knowhow NQPParametricRoleHOW {
     method compose($obj) {
         $!composed := 1;
         nqp::settypecache($obj, [$obj.WHAT]);
+#?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
+#?endif
         $obj
     }
 
