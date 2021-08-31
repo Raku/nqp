@@ -3007,8 +3007,6 @@ QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('newmixintype', 'newmixintype', :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('composetype', 'composetype');
 QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('setmethcache', 'setmethcache', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('setmethcacheauth', 'setmethcacheauth', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('settypefinalize', 'settypefinalize', 0, :decont(0));
