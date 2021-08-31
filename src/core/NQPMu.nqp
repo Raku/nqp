@@ -133,6 +133,7 @@ nqp::sethllconfig('nqp', nqp::hash(
     'method_call_dispatcher', 'nqp-meth-call',
     'find_method_dispatcher', 'nqp-find-meth',
     'hllize_dispatcher', 'nqp-hllize',
+    'istype_dispatcher', 'nqp-istype',
 #?endif
 ));
 
