@@ -443,7 +443,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
     my $obj := nqp::captureposarg($capture, 0);
     if $mode +& 1 || !nqp::dispatch('boot-syscall', 'has-type-check-cache', $obj) {
         # Need to produce a call to obj.HOW.type_check(obj, type), so long as
-        # the method exists. However, will be also need to call accepts_type?
+        # the method exists. However, will we also need to call accepts_type?
         nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
             nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
         if $mode +& 2 {
