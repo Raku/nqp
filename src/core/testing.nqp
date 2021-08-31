@@ -168,7 +168,9 @@ sub run-command($command, :$stdout, :$stderr) {
     sub create-buf($type) {
         my $buf := nqp::newtype(nqp::null(), 'VMArray');
         nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
+#?if !moar
         nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
+#?endif
         $buf;
     }
 }
