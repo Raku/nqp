@@ -3017,7 +3017,6 @@ QAST::MASTOperations.add_core_op('isinvokable', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::MASTOperations.add_core_moarop_mapping('setinvokespec', 'setinvokespec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
 
