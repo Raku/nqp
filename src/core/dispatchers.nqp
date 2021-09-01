@@ -514,7 +514,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-isinvokable', -> $capt
             $name eq 'NQPRegex';
     }
 
-    # Produce a constnat result.
+    # Produce a constant result.
     my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
         $capture, 0, $is-invokable);
     nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
