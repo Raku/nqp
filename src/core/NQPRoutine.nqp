@@ -353,7 +353,9 @@ my knowhow NQPRoutine {
         self.name()
     }
 }
+#?if !moar
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
+#?endif
 nqp::setboolspec(NQPRoutine, 5, nqp::null());
 nqp::settypehll(NQPRoutine, 'nqp');
 
@@ -579,6 +581,8 @@ my knowhow NQPRegex {
         nqp::setcodename($!do, $name);
     }
 }
+#?if !moar
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
+#?endif
 nqp::setboolspec(NQPRegex, 5, nqp::null());
 nqp::settypehll(NQPRegex, 'nqp');

@@ -1300,7 +1300,9 @@ class NQPRegexMethod {
         self.name()
     }
 }
+#?if !moar
 nqp::setinvokespec(NQPRegexMethod, NQPRegexMethod, '$!code', nqp::null);
+#?endif
 
 class NQPRegex is NQPRegexMethod {
     multi method ACCEPTS(NQPRegex:D $self: $target) {
@@ -1310,4 +1312,6 @@ class NQPRegex is NQPRegexMethod {
         nqp::isfalse(NQPMatch.parse($target, :rule(self), :c(0)))
     }
 }
+#?if !moar
 nqp::setinvokespec(NQPRegex, NQPRegexMethod, '$!code', nqp::null);
+#?endif
