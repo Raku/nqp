@@ -636,9 +636,6 @@ An operator precedence parser.
         $lang_cursor.clone_braid_from(self);
         $lang_cursor.set_actions(self.slang_actions($lang));
 
-        $lang_cursor.HOW.trace-on($lang_cursor, self.HOW.trace_depth(self))
-          if self.HOW.traced(self);
-
         $lang_cursor.check_PACKAGE_oopsies('LANG2');
         (@args ?? $lang_cursor."$regex"(|@args) !! $lang_cursor."$regex"()
           ).set_braid_from(self)

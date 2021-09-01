@@ -22,7 +22,7 @@ class HLL::Compiler does HLL::Backend::Default {
         @!stages     := nqp::split(' ', 'start parse ast ' ~ $!backend.stages());
 
         # Command options and usage.
-        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception rxtrace nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s rakudo-home'
+        @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s rakudo-home'
 #?if js
         ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
 #?endif
@@ -553,9 +553,7 @@ class HLL::Compiler does HLL::Backend::Default {
             $grammar := self.parsegrammar;
             $actions := self.parseactions;
         }
-        $grammar.HOW.trace-on($grammar) if %adverbs<rxtrace>;
-        my $match   := $grammar.parse($s, p => 0, actions => $actions);
-        $grammar.HOW.trace-off($grammar) if %adverbs<rxtrace>;
+        my $match := $grammar.parse($s, p => 0, actions => $actions);
         self.panic('Unable to parse source') unless $match;
         return $match;
     }
