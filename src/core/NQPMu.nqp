@@ -134,6 +134,7 @@ nqp::sethllconfig('nqp', nqp::hash(
     'find_method_dispatcher', 'nqp-find-meth',
     'hllize_dispatcher', 'nqp-hllize',
     'istype_dispatcher', 'nqp-istype',
+    'isinvokable_dispatcher', 'nqp-isinvokable',
 #?endif
 ));
 

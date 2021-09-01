@@ -494,4 +494,29 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
         nqp::die("Unknown type check mode $mode");
     }
 });
+
+# The isinvokable dispatcher, which checks if it's a known kind of NQP code object.
+# A bit twisty thanks to bootstrapping.
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-isinvokable', -> $capture {
+    # Guard on the type of the object.
+    my $track-callee := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-callee);
+
+    # Now see if it's invokable. Note that VM code references should never make it
+    # here, so long as lang-isinvokable was used, so we don't consider it. See
+    # the nqp-call dispatcher for an explanation of the logic here.
+    my $callee := nqp::captureposarg($capture, 0);
+    my int $is-invokable := nqp::istype($callee, NQPRoutine) ||
+        nqp::istype($callee, NQPRegex);
+    unless $is-invokable {
+        my str $name := $callee.HOW.name($callee);
+        $is-invokable := $name eq 'NQPRoutine' || $name eq 'NQPRegexMethod' ||
+            $name eq 'NQPRegex';
+    }
+
+    # Produce a constnat result.
+    my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+        $capture, 0, $is-invokable);
+    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+});
 #?endif
