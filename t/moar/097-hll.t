@@ -314,7 +314,7 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
             nqp::settypehll(nqp::newtype(self, 'P6opaque'), 'nqp');
         }
 
-        method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
+        method find_method($obj, $name, :$no_fallback = 0) {
             if $name eq 'exists' {
                 method () { "found" }
             } else {
