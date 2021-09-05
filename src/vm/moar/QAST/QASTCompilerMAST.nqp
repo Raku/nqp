@@ -61,6 +61,13 @@ my class MASTCompilerInstance {
     # The most recent op we tried to compile, for error reporting.
     has $!last_op;
 
+    # The current register allocator.
+    has $!regalloc;
+
+    # Stack of register allocators in enclosing frames.
+    has @!regalloc_stack;
+
+    # Instance of the MoarVM bytecode writer.
     has $!writer;
 
     # This uses a very simple scheme. Write registers are assumed
@@ -172,7 +179,7 @@ my class MASTCompilerInstance {
             }
             else {
                 my int $res_kind := self.add_lexical($var);
-                my $res_reg := $*REGALLOC.fresh_register($res_kind);
+                my $res_reg := $!compiler.regalloc.fresh_register($res_kind);
                 %!lexical_params{$var.name} := $res_reg;
                 [$res_kind, $res_reg]
             }
@@ -243,7 +250,7 @@ my class MASTCompilerInstance {
             my $kind := $!compiler.type_to_register_kind($var.returns);
             %!local_kinds{$name} := $kind;
             # pass a 1 meaning get a Totally New MAST::Local
-            my $local := $*REGALLOC.fresh_register($kind, !$temporary);
+            my $local := $!compiler.regalloc.fresh_register($kind, !$temporary);
             %!locals{$name} := $local;
             %!local_names_by_index{nqp::unbox_u($local.index)} := $name;
             if $temporary {
@@ -274,7 +281,7 @@ my class MASTCompilerInstance {
             my $local := %!locals{$name};
             my $index := $local.index();
             my $kind := %!local_kinds{$name};
-            $*REGALLOC.release_register($local, $kind, 1);
+            $!compiler.regalloc.release_register($local, $kind, 1);
             nqp::deletekey(%!local_names_by_index, $index);
             nqp::deletekey(%!locals, $name);
             nqp::deletekey(%!local_kinds, $name);
@@ -317,7 +324,7 @@ my class MASTCompilerInstance {
                 $already
             }
             else {
-                my $reg  := $*REGALLOC.fresh_register($MVM_reg_obj, 1);
+                my $reg  := $!compiler.regalloc.fresh_register($MVM_reg_obj, 1);
                 %!cloned_inners{$cuid} := $reg;
                 %!local_names_by_index{$reg.index} := $cuid;
                 $reg
@@ -348,6 +355,17 @@ my class MASTCompilerInstance {
     method mast_compunit() { $!mast_compunit }
     method mast_frames() { %!mast_frames }
     method sc() { $!sc }
+
+    method push_regalloc($frame) {
+        nqp::push(@!regalloc_stack, $!regalloc) if $!regalloc;
+        $!regalloc := RegAlloc.new($frame)
+    }
+
+    method pop_regalloc() {
+        $!regalloc := @!regalloc_stack ?? nqp::pop(@!regalloc_stack) !! NQPMu
+    }
+
+    method regalloc() { $!regalloc }
 
     method to_mast($qast) {
         # Set up compilation state.
@@ -476,7 +494,7 @@ my class MASTCompilerInstance {
             }
         }
         else {
-            my $res_reg := $*REGALLOC.fresh_register($desired);
+            my $res_reg := $!regalloc.fresh_register($desired);
             my int $release_type := $got;
             if $desired == $MVM_reg_int64 {
                 if $got == $MVM_reg_num64 {
@@ -643,7 +661,7 @@ my class MASTCompilerInstance {
             else {
                 nqp::die("Coercion from type '$got' to '$desired' NYI");
             }
-            $*REGALLOC.release_register($reg, $release_type);
+            $!regalloc.release_register($reg, $release_type);
             $reg := $res_reg;
         }
         MAST::InstructionList.new($reg, $desired)
@@ -1021,8 +1039,8 @@ my class MASTCompilerInstance {
             {
                 my $*BINDVAL := 0;
 
-                # Create a register allocator for this frame.
-                my $*REGALLOC := RegAlloc.new($frame);
+                # Create a register allocator for this frame, saving the outer one.
+                my $*REGALLOC := self.push_regalloc($frame);
 
                 # when we enter a QAST::Stmt, the contextual will be cloned, and the locals of
                 # newly declared QAST::Vars of local scope inside the Stmt will be stashed here,
@@ -1069,12 +1087,12 @@ my class MASTCompilerInstance {
 
                 # Build up the frame prologue. Start with lexical captures and clones.
                 my @pre := nqp::list();
-                my $capture_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                my $capture_reg := $!regalloc.fresh_register($MVM_reg_obj);
                 for $block.captured_inners() {
                     %core_op_generators{'getcode'}($capture_reg, %!mast_frames{$_});
                     %core_op_generators{'capturelex'}($capture_reg);
                 }
-                $*REGALLOC.release_register($capture_reg, $MVM_reg_obj);
+                $!regalloc.release_register($capture_reg, $MVM_reg_obj);
                 my %cloned_inners := $block.cloned_inners();
                 for sorted_keys(%cloned_inners) {
                     my $frame := %!mast_frames{$_};
@@ -1233,7 +1251,7 @@ my class MASTCompilerInstance {
                         # Get a fresh register to store the result of the
                         # truncation, but only if needed
                         if $valreg_kind != $param_kind {
-                            $valreg := $*REGALLOC.fresh_register($valreg_kind);
+                            $valreg := $!regalloc.fresh_register($valreg_kind);
                         }
 
                         # NQP->QAST always provides a default value for optional NQP params
@@ -1253,7 +1271,7 @@ my class MASTCompilerInstance {
 
                             # put the initialization result in the variable register
                             op_set($valreg, $default_mast.result_reg);
-                            $*REGALLOC.release_register($default_mast.result_reg, nqp::unbox_i($default_mast.result_kind));
+                            $!regalloc.release_register($default_mast.result_reg, nqp::unbox_i($default_mast.result_kind));
 
                             # end label to skip initialization code
                             $*MAST_FRAME.add-label($endlbl);
@@ -1287,7 +1305,7 @@ my class MASTCompilerInstance {
                             if nqp::istype($_, QAST::ParamTypeCheck) {
                                 my $tc_mast := self.as_mast($_[0], :want($MVM_reg_int64));
                                 %core_op_generators{'assertparamcheck'}($tc_mast.result_reg);
-                                $*REGALLOC.release_register($tc_mast.result_reg, $MVM_reg_int64);
+                                $!regalloc.release_register($tc_mast.result_reg, $MVM_reg_int64);
                             }
                             else {
                                 self.as_mast($_, :want($MVM_reg_void));
@@ -1303,6 +1321,9 @@ my class MASTCompilerInstance {
                 }
                 my $subbuffer := $frame.end_subbuffer;
                 $frame.insert_bytecode($subbuffer, 0);
+
+                # Pop off the registr allocator, now the frame is compiled.
+                self.pop_regalloc();
             }
 
             # Set up debug symbols in the MAST::Frame.
@@ -1326,20 +1347,20 @@ my class MASTCompilerInstance {
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             }
             else {
-                my $res_reg := $*REGALLOC.fresh_register($block.return_kind);
+                my $res_reg := $!regalloc.fresh_register($block.return_kind);
                 self.compile-simple-call($clone_reg, $res_reg, $block.return_kind, 0);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
         }
         elsif $node.blocktype eq 'immediate_static' {
             $*BLOCK.capture_inner($node);
-            my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+            my $code_reg := $!regalloc.fresh_register($MVM_reg_obj);
             %core_op_generators{'getcode'}($code_reg, %!mast_frames{$node.cuid});
             if nqp::defined($want) && $want == $MVM_reg_void {
                 self.compile-simple-call($code_reg, nqp::null, $MVM_reg_void, 1);
                 MAST::InstructionList.new(MAST::VOID, $MVM_reg_void);
             } else {
-                my $res_reg := $*REGALLOC.fresh_register($block.return_kind);
+                my $res_reg := $!regalloc.fresh_register($block.return_kind);
                 self.compile-simple-call($code_reg, $res_reg, $block.return_kind, 1);
                 MAST::InstructionList.new($res_reg, $block.return_kind)
             }
@@ -1351,7 +1372,7 @@ my class MASTCompilerInstance {
         elsif $node.blocktype eq 'declaration_static' {
             $*BLOCK.capture_inner($node);
             if nqp::defined($want) && $want == $MVM_reg_void {
-                my $code_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                my $code_reg := $!regalloc.fresh_register($MVM_reg_obj);
                 %core_op_generators{'getcode'}($code_reg, %!mast_frames{$node.cuid});
                 MAST::InstructionList.new($code_reg, $MVM_reg_obj)
             }
@@ -1467,7 +1488,7 @@ my class MASTCompilerInstance {
             }
             else {
                 # release top-level results (since they can't be used by anything anyway)
-                $*REGALLOC.release_register($last_stmt.result_reg, nqp::unbox_i($last_stmt.result_kind));
+                $!regalloc.release_register($last_stmt.result_reg, nqp::unbox_i($last_stmt.result_kind));
             }
             $result_count++;
         }
@@ -1559,7 +1580,7 @@ my class MASTCompilerInstance {
         else {
             my $fallback_if_nonnull := MAST::Label.new();
             my $fallback_end := MAST::Label.new();
-            my $res_reg := $*REGALLOC.fresh_o();
+            my $res_reg := $!regalloc.fresh_o();
             %core_op_generators{'ifnonnull'}($var_res.result_reg, $fallback_if_nonnull);
 
             my $fallback_res := self.as_mast($node.fallback, :want($MVM_reg_obj));
@@ -1568,8 +1589,8 @@ my class MASTCompilerInstance {
             $*MAST_FRAME.add-label($fallback_if_nonnull);
             op_set($res_reg, $var_res.result_reg);
             $*MAST_FRAME.add-label($fallback_end);
-            $*REGALLOC.release_register($var_res.result_reg, $MVM_reg_obj);
-            $*REGALLOC.release_register($fallback_res.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($var_res.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($fallback_res.result_reg, $MVM_reg_obj);
 
             MAST::InstructionList.new($res_reg, $MVM_reg_obj)
         }
@@ -1674,7 +1695,7 @@ my class MASTCompilerInstance {
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($res_kind));
                     op_set($local, $valmast.result_reg);
-                    $*REGALLOC.release_register($valmast.result_reg, $res_kind);
+                    $!regalloc.release_register($valmast.result_reg, $res_kind);
                 }
                 $res_reg := $local;
             }
@@ -1711,7 +1732,7 @@ my class MASTCompilerInstance {
                     %core_op_generators{'bindlex'}($lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
-                    $res_reg := $*REGALLOC.fresh_register($res_kind);
+                    $res_reg := $!regalloc.fresh_register($res_kind);
                     %core_op_generators{'getlex'}($res_reg, $lex);
                 }
                 else {
@@ -1719,9 +1740,9 @@ my class MASTCompilerInstance {
                     # since the param bindlex may be stale by the time the result register
                     # could be used, since the bindlex always occurs at the very top,
                     # so turn around and release the temp register already preallocated.
-                    $*REGALLOC.release_register($res_reg, $res_kind);
+                    $!regalloc.release_register($res_reg, $res_kind);
                     # get another one in case someone is using it...
-                    $res_reg := $*REGALLOC.fresh_register($res_kind);
+                    $res_reg := $!regalloc.fresh_register($res_kind);
                     %core_op_generators{'getlex'}($res_reg, $lex);
                 }
             }
@@ -1733,11 +1754,11 @@ my class MASTCompilerInstance {
                 if $outer {
                     $lexref := MAST::Lexical.new( :index($lexref.index), :frames_out($outer) );
                 }
-                my $tmp_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
-                $res_reg := $*REGALLOC.fresh_register($res_kind);
+                my $tmp_reg := $!regalloc.fresh_register($MVM_reg_obj);
+                $res_reg := $!regalloc.fresh_register($res_kind);
                 %core_op_generators{'getlex'}($tmp_reg, $lexref);
                 %core_op_generators{@decont_opnames[@kind_to_op_slot[$res_kind]]}($res_reg, $tmp_reg);
-                $*REGALLOC.release_register($tmp_reg, $MVM_reg_obj);
+                $!regalloc.release_register($tmp_reg, $MVM_reg_obj);
             }
             else {
                 $res_kind := $lex
@@ -1750,7 +1771,7 @@ my class MASTCompilerInstance {
                     $res_kind := $valmast.result_kind;
                 }
                 else {
-                    $res_reg := $*REGALLOC.fresh_register($res_kind);
+                    $res_reg := $!regalloc.fresh_register($res_kind);
                     %core_op_generators{"get"~@lex_n_opnames[@kind_to_op_slot[$res_kind]]}(
                         $res_reg, $name);
                 }
@@ -1772,7 +1793,7 @@ my class MASTCompilerInstance {
                 $outer++;
             }
             $res_kind := $MVM_reg_obj;
-            $res_reg := $*REGALLOC.fresh_register($res_kind);
+            $res_reg := $!regalloc.fresh_register($res_kind);
             if $lex {
                 # We need to take a reference to the lexical.
                 if $*BINDVAL {
@@ -1815,15 +1836,15 @@ my class MASTCompilerInstance {
             if $*BINDVAL {
                 nqp::die('Cannot bind to QAST::Var with scope typevar');
             }
-            my $name_reg := $*REGALLOC.fresh_s();
-            $res_reg     := $*REGALLOC.fresh_o();
+            my $name_reg := $!regalloc.fresh_s();
+            $res_reg     := $!regalloc.fresh_o();
             $res_kind    := $MVM_reg_obj;
             %core_op_generators{'const_s'}($name_reg, $name);
             %core_op_generators{'getlexperinvtype_o'}($res_reg, $name_reg);
-            $*REGALLOC.release_register($name_reg, $MVM_reg_str);
+            $!regalloc.release_register($name_reg, $MVM_reg_str);
         }
         elsif $scope eq 'contextual' {
-            my $name_const := const_s($name);
+            my $name_const := self.const_s($name);
             my $lex := $*BLOCK.lexical($name);
             if $lex {
                 # In current frame; do as lexical does.
@@ -1834,12 +1855,12 @@ my class MASTCompilerInstance {
                     %core_op_generators{'bindlex'}($lex, $res_reg);
                 }
                 elsif $decl ne 'param' {
-                    $res_reg := $*REGALLOC.fresh_register($res_kind);
+                    $res_reg := $!regalloc.fresh_register($res_kind);
                     %core_op_generators{'getlex'}($res_reg, $lex);
                 }
                 else {
-                    $*REGALLOC.release_register($res_reg, $res_kind);
-                    $res_reg := $*REGALLOC.fresh_register($res_kind);
+                    $!regalloc.release_register($res_reg, $res_kind);
+                    $res_reg := $!regalloc.fresh_register($res_kind);
                     %core_op_generators{'getlex'}($res_reg, $lex);
                 }
             }
@@ -1851,11 +1872,11 @@ my class MASTCompilerInstance {
                     %core_op_generators{'binddynlex'}($name_const.result_reg, $res_reg);
                 }
                 else {
-                    $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+                    $res_reg := $!regalloc.fresh_register($MVM_reg_obj);
                     %core_op_generators{'getdynlex'}($res_reg, $name_const.result_reg);
                 }
             }
-            $*REGALLOC.release_register($name_const.result_reg, $MVM_reg_str);
+            $!regalloc.release_register($name_const.result_reg, $MVM_reg_str);
             $res_kind := $MVM_reg_obj;
         }
         elsif $scope eq 'attribute' {
@@ -1899,13 +1920,13 @@ my class MASTCompilerInstance {
                 $res_kind := $valmast.result_kind;
             }
             else {
-                $res_reg := $*REGALLOC.fresh_register($kind);
+                $res_reg := $!regalloc.fresh_register($kind);
                 $res_kind := $kind;
                 %core_op_generators{'get' ~ @attr_opnames[$kind]}($res_reg, $obj.result_reg,
                     $han.result_reg, $name, $hint);
             }
-            $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
-            $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($obj.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($han.result_reg, $MVM_reg_obj);
         }
         elsif $scope eq 'attributeref' {
             # Ensure we have object and class handle, and aren't binding.
@@ -1932,12 +1953,12 @@ my class MASTCompilerInstance {
             }
 
             # Emit lookup.
-            $res_reg := $*REGALLOC.fresh_register($MVM_reg_obj);
+            $res_reg := $!regalloc.fresh_register($MVM_reg_obj);
             $res_kind := $MVM_reg_obj;
             %core_op_generators{@attrref_opnames[$kind]}($res_reg, $obj.result_reg,
                 $han.result_reg, $name, $hint );
-            $*REGALLOC.release_register($obj.result_reg, $MVM_reg_obj);
-            $*REGALLOC.release_register($han.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($obj.result_reg, $MVM_reg_obj);
+            $!regalloc.release_register($han.result_reg, $MVM_reg_obj);
         }
         elsif $scope eq 'positional' {
             return self.as_mast_clear_bindval($*BINDVAL
@@ -2008,7 +2029,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::IVal $iv, :$want) {
-        my $reg := $*REGALLOC.fresh_i();
+        my $reg := $!regalloc.fresh_i();
         MAST::Op.new(
             :op('const_i64'),
             $reg,
@@ -2020,7 +2041,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::NVal $nv, :$want) {
-        my $reg := $*REGALLOC.fresh_n();
+        my $reg := $!regalloc.fresh_n();
         MAST::Op.new(
             :op('const_n64'),
             $reg,
@@ -2031,8 +2052,8 @@ my class MASTCompilerInstance {
             $MVM_reg_num64)
     }
 
-    sub const_s($val) {
-        my $reg := $*REGALLOC.fresh_s();
+    method const_s($val) {
+        my $reg := $!regalloc.fresh_s();
         MAST::Op.new(:op('const_s'), $reg, $val);
         MAST::InstructionList.new(
             $reg,
@@ -2040,7 +2061,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::SVal $sv, :$want) {
-        const_s($sv.value)
+        self.const_s($sv.value)
     }
 
     multi method compile_node(QAST::BVal $bv, :$want) {
@@ -2050,7 +2071,7 @@ my class MASTCompilerInstance {
         nqp::die("QAST::Block with cuid $cuid has not appeared")
             unless $frame && $frame ~~ MAST::Frame;
 
-        my $reg := $*REGALLOC.fresh_o();
+        my $reg := $!regalloc.fresh_o();
         MAST::Op.new(
             :op('getcode'),
             $reg,
@@ -2073,7 +2094,7 @@ my class MASTCompilerInstance {
             }
             my $idx    := nqp::scgetobjidx($sc, $val);
             my $sc_idx := $!mast_compunit.sc_idx($sc);
-            my $reg    := $*REGALLOC.fresh_o();
+            my $reg    := $!regalloc.fresh_o();
             my $op     := $idx < 32768 ?? 'wval' !! 'wval_wide';
             MAST::Op.new(
                 :op($op),
@@ -2088,7 +2109,7 @@ my class MASTCompilerInstance {
     }
 
     multi method compile_node(QAST::Regex $node, :$want) {
-        my $rxcomp := QAST::MASTRegexCompiler.new(:qastcomp(self), :regalloc($*REGALLOC));
+        my $rxcomp := QAST::MASTRegexCompiler.new(:qastcomp(self), :regalloc($!regalloc));
         nqp::defined($want)
             ?? $rxcomp.as_mast($node, :want($want))
             !! $rxcomp.as_mast($node)

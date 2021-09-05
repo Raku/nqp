@@ -109,7 +109,7 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
         nqp::die('falsey op requires one child');
     }
     my $val      := $qastcomp.as_mast($op[0]);
-    my $regalloc := $*REGALLOC;
+    my $regalloc := $qastcomp.regalloc;
     if $val.result_kind == $MVM_reg_int64 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         MAST::Op.new(:op<not_i>, $not_reg, $val.result_reg);
