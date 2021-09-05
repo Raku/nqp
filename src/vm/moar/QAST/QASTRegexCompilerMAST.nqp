@@ -72,7 +72,7 @@ sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id
     }
     else {
         $res_kind := $qastcomp.type_to_register_kind($returns);
-        $res_reg := $*REGALLOC.fresh_register($res_kind);
+        $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
         if $res_kind == $MVM_reg_obj {
             op_dispatch_o($res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
         }
