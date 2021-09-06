@@ -3,15 +3,16 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     # See if this callsite is heading megamorphic due to loads of different
     # method names; if so, we'll try to cope with that.
     my $obj := nqp::captureposarg($capture, 0);
+    my $how := nqp::how_nd($obj);
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
     if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
-            && nqp::can($obj.HOW, 'mro') {
+            && nqp::can($how, 'mro') {
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-meth-call-mega', $capture);
     }
     else {
         # Try to find the method; complain if there's none found.
         my str $name := nqp::captureposarg_s($capture, 1);
-        my $meth := $obj.HOW.find_method($obj, $name);
+        my $meth := $how.find_method($obj, $name);
         if nqp::isconcrete($meth) {
             # Establish a guard on the invocant type and method name (however the name
             # may well be a literal, in which case this is free).
@@ -42,7 +43,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $c
     # names, we build a hash table of the methods.
     my $obj := nqp::captureposarg($capture, 0);
     my %lookup;
-    for $obj.HOW.mro($obj) {
+    for nqp::how_nd($obj).mro($obj) {
         for $_.HOW.method_table($_) {
             my str $name := $_.key;
             %lookup{$name} := $_.value unless nqp::existskey(%lookup, $name);
@@ -506,10 +507,10 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-isinvokable', -> $capt
     # here, so long as lang-isinvokable was used, so we don't consider it. See
     # the nqp-call dispatcher for an explanation of the logic here.
     my $callee := nqp::captureposarg($capture, 0);
-    my int $is-invokable := nqp::istype($callee, NQPRoutine) ||
-        nqp::istype($callee, NQPRegex);
+    my int $is-invokable := nqp::istype_nd($callee, NQPRoutine) ||
+        nqp::istype_nd($callee, NQPRegex);
     unless $is-invokable {
-        my str $name := $callee.HOW.name($callee);
+        my str $name := nqp::how_nd($callee).name($callee);
         $is-invokable := $name eq 'NQPRoutine' || $name eq 'NQPRegexMethod' ||
             $name eq 'NQPRegex';
     }
