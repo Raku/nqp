@@ -67,6 +67,12 @@ my class MASTCompilerInstance {
     # Stack of register allocators in enclosing frames.
     has @!regalloc_stack;
 
+    # The current MAST::Frame.
+    has $!mast_frame;
+
+    # Stack of MAST::Frames of enclosing frames.
+    has @!mast_frame_stack;
+
     # Instance of the MoarVM bytecode writer.
     has $!writer;
 
@@ -186,7 +192,7 @@ my class MASTCompilerInstance {
         }
 
         method add_lexical($var, :$is_static, :$is_cont, :$is_state) {
-            my $mf    := $*MAST_FRAME;
+            my $mf    := $!compiler.mast_frame;
             my $type  := $var.returns;
             my $kind  := $!compiler.type_to_register_kind($type);
             my str $name := $var.name;
@@ -219,7 +225,7 @@ my class MASTCompilerInstance {
         }
 
         method add_lexicalref($var) {
-            my $mf   := $*MAST_FRAME;
+            my $mf   := $!compiler.mast_frame;
             my $type := $var.returns;
             my $kind := $!compiler.type_to_register_kind($type);
             unless nqp::objprimspec($type) {
@@ -366,6 +372,17 @@ my class MASTCompilerInstance {
     }
 
     method regalloc() { $!regalloc }
+
+    method push_mast_frame($frame) {
+        nqp::push(@!mast_frame_stack, $!mast_frame) if $!mast_frame;
+        $!mast_frame := $frame
+    }
+
+    method pop_mast_frame() {
+        $!mast_frame := @!mast_frame_stack ?? nqp::pop(@!mast_frame_stack) !! NQPMu
+    }
+
+    method mast_frame() { $!mast_frame }
 
     method to_mast($qast) {
         # Set up compilation state.
@@ -981,14 +998,12 @@ my class MASTCompilerInstance {
         my $cuid := $node.cuid();
         my $block;
         my $outer;
-        #my $*MAST_FRAME;
         if %*BLOCKS_DONE{$cuid} -> @already {
             $block := @already[0];
             $outer := @already[1];
-            #$*MAST_FRAME := %!mast_frames{$cuid};
         }
         else {
-            my $outer_frame := try $*MAST_FRAME;
+            my $outer_frame := $!mast_frame;
 
             # Create an empty frame and add it to the compilation unit.
             my $frame := MAST::Frame.new(
@@ -1052,6 +1067,7 @@ my class MASTCompilerInstance {
 
                 my $*BLOCK := $block;
                 my $*MAST_FRAME := $frame;
+                self.push_mast_frame($frame);
 
                 my $*WANT;
                 if $node.blocktype eq 'immediate' || $node.blocktype eq 'immediate_static' {
@@ -1274,7 +1290,7 @@ my class MASTCompilerInstance {
                             $!regalloc.release_register($default_mast.result_reg, nqp::unbox_i($default_mast.result_kind));
 
                             # end label to skip initialization code
-                            $*MAST_FRAME.add-label($endlbl);
+                            $!mast_frame.add-label($endlbl);
                         }
                         elsif $var.slurpy {
                             if $var.named {
@@ -1322,8 +1338,9 @@ my class MASTCompilerInstance {
                 my $subbuffer := $frame.end_subbuffer;
                 $frame.insert_bytecode($subbuffer, 0);
 
-                # Pop off the registr allocator, now the frame is compiled.
+                # Pop off frame-scoped bits now that the frame is compiled.
                 self.pop_regalloc();
+                self.pop_mast_frame();
             }
 
             # Set up debug symbols in the MAST::Frame.
@@ -1388,7 +1405,7 @@ my class MASTCompilerInstance {
 
     method compile-simple-call($code-reg, $result-reg, $result-kind, int $constant) {
         my str $disp-name := $constant ?? 'boot-code-constant' !! 'boot-code';
-        my uint $callsite-id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+        my uint $callsite-id := $!mast_frame.callsites.get_callsite_id_from_args(
             $FAKE_OBJECT_ARG,
             [MAST::InstructionList.new($code-reg, $MVM_reg_obj)]);
         if $result-kind == $MVM_reg_void {
@@ -1586,9 +1603,9 @@ my class MASTCompilerInstance {
             my $fallback_res := self.as_mast($node.fallback, :want($MVM_reg_obj));
             op_set($res_reg, $fallback_res.result_reg);
             %core_op_generators{'goto'}($fallback_end);
-            $*MAST_FRAME.add-label($fallback_if_nonnull);
+            $!mast_frame.add-label($fallback_if_nonnull);
             op_set($res_reg, $var_res.result_reg);
-            $*MAST_FRAME.add-label($fallback_end);
+            $!mast_frame.add-label($fallback_end);
             $!regalloc.release_register($var_res.result_reg, $MVM_reg_obj);
             $!regalloc.release_register($fallback_res.result_reg, $MVM_reg_obj);
 
