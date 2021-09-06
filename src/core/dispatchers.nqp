@@ -434,19 +434,19 @@ my $type-check-then-accepts-type := -> $obj, $type {
     }
 }
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
-    # Obtain and guard on the type we're checking against.
-    my $type := nqp::captureposarg($capture, 1);
+    # Obtain and guard on the types we're checking.
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
     my $track-type := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
     nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-type);
 
     # Go by typecheck mode.
+    my $type := nqp::captureposarg($capture, 1);
     my int $mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $type);
     my $obj := nqp::captureposarg($capture, 0);
     if $mode +& 1 || !nqp::dispatch('boot-syscall', 'has-type-check-cache', $obj) {
         # Need to produce a call to obj.HOW.type_check(obj, type), so long as
         # the method exists. However, will we also need to call accepts_type?
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
         if $mode +& 2 {
             # Yes, so delegate to thunk.
             my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
