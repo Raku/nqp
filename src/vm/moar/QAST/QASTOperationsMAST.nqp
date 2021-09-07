@@ -135,6 +135,7 @@ class QAST::MASTOperations {
         my int $needs_write := 0;
         my int $type_var_kind := 0;
         my $regalloc := $qastcomp.regalloc;
+        my $frame := $qastcomp.mast_frame;
 
         my @arg_regs;
         my @release_regs;
@@ -217,7 +218,7 @@ class QAST::MASTOperations {
             if @deconts[$arg_num] &&
                     (!$_.has_compile_time_value || nqp::iscont($_.compile_time_value)) {
                 my $dc_reg := $regalloc.fresh_register($MVM_reg_obj);
-                MAST::Op.new( :op('decont'), $dc_reg, $arg.result_reg );
+                MAST::Op.new( :$frame, :op('decont'), $dc_reg, $arg.result_reg );
                 nqp::push(@arg_regs, $dc_reg);
                 nqp::push(@release_regs, $dc_reg);
                 nqp::push(@release_kinds, $MVM_reg_obj);
@@ -257,7 +258,7 @@ class QAST::MASTOperations {
             MAST::ExtOp.new_with_operand_array( :op($op), :cu($qastcomp.mast_compunit), @arg_regs )
         }
         else {
-            %core_op_generators{$op}(|@arg_regs);
+            %core_op_generators{$op}($frame, |@arg_regs);
         }
 
         # Build instruction list.
@@ -475,14 +476,15 @@ QAST::MASTOperations.add_core_op('stmts', -> $qastcomp, $op {
 my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
     if $size != 1 {
         my $int_reg := $qastcomp.regalloc.fresh_i();
+        my $frame := $qastcomp.mast_frame;
         my int $size_i := +$size;
-        %core_op_generators{'const_i64'}($int_reg, $size_i);
-        %core_op_generators{'setelemspos'}($array_reg, $int_reg);
+        %core_op_generators{'const_i64'}($frame, $int_reg, $size_i);
+        %core_op_generators{'setelemspos'}($frame, $array_reg, $int_reg);
         # reset the number of elements to 0 so that we don't push to the end
         # since our lists don't shrink by themselves (or by setting elems), we'll
         # end up with enough storage to hold all elements exactly
-        %core_op_generators{'const_i64'}($int_reg, 0);
-        %core_op_generators{'setelemspos'}($array_reg, $int_reg);
+        %core_op_generators{'const_i64'}($frame, $int_reg, 0);
+        %core_op_generators{'setelemspos'}($frame, $array_reg, $int_reg);
         $qastcomp.regalloc.release_register($int_reg, $MVM_reg_int64);
     }
 }
@@ -498,12 +500,13 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
+        my $frame := $qastcomp.mast_frame;
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_obj));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_o'}($arr_reg, $item_reg);
+            %core_op_generators{'push_o'}($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_obj);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -521,12 +524,13 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
+        my $frame := $qastcomp.mast_frame;
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_int64));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_i'}($arr_reg, $item_reg);
+            %core_op_generators{'push_i'}($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_int64);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -544,12 +548,13 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
+        my $frame := $qastcomp.mast_frame;
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_num64));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_n'}($arr_reg, $item_reg);
+            %core_op_generators{'push_n'}($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_num64);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -567,12 +572,13 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
+        my $frame := $qastcomp.mast_frame;
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_str));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_s'}($arr_reg, $item_reg);
+            %core_op_generators{'push_s'}($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_str);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -590,6 +596,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
+        my $mast_frame := $qastcomp.mast_frame;
         # Push things to the list.
         my $item_reg := $regalloc.fresh_register($MVM_reg_obj);
         for $op.list {
@@ -597,8 +604,8 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
                 unless nqp::istype($_, QAST::Block);
             my $cuid  := $_.cuid();
             my $frame := $qastcomp.mast_frames{$cuid};
-            %core_op_generators{'getcode'}($item_reg, $frame);
-            %core_op_generators{'push_o'}($arr_reg, $item_reg);
+            %core_op_generators{'getcode'}($mast_frame, $item_reg, $frame);
+            %core_op_generators{'push_o'}($mast_frame, $arr_reg, $item_reg);
         }
         $regalloc.release_register($item_reg, $MVM_reg_obj);
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -621,6 +628,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
     ));
     if nqp::elems($op.list) {
         my $hash_reg := $hash.result_reg;
+        my $frame := $qastcomp.mast_frame;
         for $op.list -> $key, $val {
             my $key_mast := $qastcomp.as_mast($key, :want($MVM_reg_str));
             my $val_mast := $qastcomp.as_mast($val, :want($MVM_reg_obj));
@@ -628,7 +636,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
             my $val_reg := $val_mast.result_reg;
             $hash.append($key_mast);
             $hash.append($val_mast);
-            %core_op_generators{'bindkey_o'}($hash_reg, $key_reg, $val_reg);
+            %core_op_generators{'bindkey_o'}($frame, $hash_reg, $key_reg, $val_reg);
             $regalloc.release_register($key_reg, $MVM_reg_str);
             $regalloc.release_register($val_reg, $MVM_reg_obj);
         }
@@ -682,7 +690,7 @@ my $chain_gen := sub ($qastcomp, $op) {
 
         my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
             [$callee_qast, $aqast, $bqast], [$callee, $acomp, $bcomp]);
-        op_dispatch_o($res_reg, 'lang-call', $callsite_id,
+        op_dispatch_o($frame, $res_reg, 'lang-call', $callsite_id,
             [$callee.result_reg, $acomp.result_reg, $bcomp.result_reg]);
 
         $regalloc.release_register($callee.result_reg, $MVM_reg_obj);
@@ -691,7 +699,7 @@ my $chain_gen := sub ($qastcomp, $op) {
         if @clist {
             my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
             emit_object_boolify($qastcomp, $boolification_reg, $res_reg);
-            %core_op_generators{'unless_i'}($boolification_reg, $endlabel);
+            %core_op_generators{'unless_i'}($frame, $boolification_reg, $endlabel);
             $regalloc.release_register($boolification_reg, $MVM_reg_int64);
             $cqast := nqp::pop(@clist);
             $arg_idx := get_arg_idx($cqast);
@@ -702,7 +710,7 @@ my $chain_gen := sub ($qastcomp, $op) {
         }
     }
 
-    $qastcomp.mast_frame.add-label($endlabel);
+    $frame.add-label($endlabel);
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 }
 QAST::MASTOperations.add_core_op: 'chain',       $chain_gen;
@@ -722,6 +730,7 @@ for <if unless with without> -> $op_name {
             if $operands < 2 || $operands > 3;
 
         my $regalloc := $qastcomp.regalloc;
+        my $frame := $qastcomp.mast_frame;
 
         # Compile each of the children, handling any that want the conditional
         # value to be passed.
@@ -767,7 +776,7 @@ for <if unless with without> -> $op_name {
             @comp_ops[0] := $qastcomp.as_mast($op[0]);
         }
 
-        $qastcomp.mast_frame.start_subbuffer;
+        $frame.start_subbuffer;
 
         if needs_cond_passed($op[1]) {
             my $orig_type := $op[1].blocktype;
@@ -787,25 +796,25 @@ for <if unless with without> -> $op_name {
             nqp::die("The '$op_name' op condition cannot be void, cannot use the results of '" ~ $op[0].op ~ "'");
         }
 
-        my $then-subbuffer := $qastcomp.mast_frame.end_subbuffer;
+        my $then-subbuffer := $frame.end_subbuffer;
         my $else-subbuffer;
 
         if needs_cond_passed($op[2]) {
             my $orig_type := $op[2].blocktype;
             $op[2].blocktype('declaration');
-            $qastcomp.mast_frame.start_subbuffer;
+            $frame.start_subbuffer;
             @comp_ops[2] := $qastcomp.as_mast(QAST::Op.new(
                 :op('call'),
                 $op[2],
                 QAST::Var.new( :name($cond_temp_lbl), :scope('local') )),
                 :want($wanted));
-            $else-subbuffer := $qastcomp.mast_frame.end_subbuffer;
+            $else-subbuffer := $frame.end_subbuffer;
             $op[2].blocktype($orig_type);
         }
         elsif $op[2] {
-            $qastcomp.mast_frame.start_subbuffer;
+            $frame.start_subbuffer;
             @comp_ops[2] := $qastcomp.as_mast($op[2], :want($wanted), :want-decont($*WANT-DECONT));
-            $else-subbuffer := $qastcomp.mast_frame.end_subbuffer;
+            $else-subbuffer := $frame.end_subbuffer;
         }
 
 
@@ -833,25 +842,25 @@ for <if unless with without> -> $op_name {
         if $operands == 2 && !$is_void {
             my $il := MAST::InstructionList.new(@comp_ops[0].result_reg, nqp::unbox_i(@comp_ops[0].result_kind));
             $qastcomp.coerce($il, $res_kind);
-            op_set($res_reg, $il.result_reg);
+            op_set($frame, $res_reg, $il.result_reg);
         }
 
         # Emit the jump.
         if nqp::unbox_i(@comp_ops[0].result_kind) == $MVM_reg_obj {
             # First decontainerize the object.
             my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-            op_decont($decont_reg, @comp_ops[0].result_reg);
+            op_decont($frame, $decont_reg, @comp_ops[0].result_reg);
 
             # If it's a `with` or `without`, need to call defined.
             if $is_withy {
                 my $method_name_reg := $regalloc.fresh_register($MVM_reg_str);
-                MAST::Op.new(:op('const_s'), $method_name_reg, 'defined');
+                MAST::Op.new(:frame($frame), :op('const_s'), $method_name_reg, 'defined');
                 my $decont := MAST::InstructionList.new($decont_reg, $MVM_reg_obj);
                 my $method_name := MAST::InstructionList.new($method_name_reg, $MVM_reg_str);
-                my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+                my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
                     [$op[0], QAST::SVal.new( :value('defined') ), $op[0]],
                     [$decont, $method_name, $decont]);
-                op_dispatch_o($decont_reg, 'lang-meth-call', $callsite_id,
+                op_dispatch_o($frame, $decont_reg, 'lang-meth-call', $callsite_id,
                     [$decont_reg, $method_name_reg, $decont_reg]);
                 $regalloc.release_register($method_name_reg, $MVM_reg_str);
             }
@@ -867,6 +876,7 @@ for <if unless with without> -> $op_name {
                 $op_name eq 'if' || $op_name eq 'with'
                   ?? 'unless_i' !! 'if_i'
             }(
+                $frame,
                 $boolification_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
@@ -875,7 +885,7 @@ for <if unless with without> -> $op_name {
         elsif @Full-width-coerce-to[@comp_ops[0].result_kind] -> $coerce-kind {
             # workaround for coercion unconditionally releasing the source register while we still need it later on
             my $coerce-reg := $regalloc.fresh_register: @comp_ops[0].result_kind;
-            op_set($coerce-reg, @comp_ops[0].result_reg);
+            op_set($frame, $coerce-reg, @comp_ops[0].result_reg);
             my $il := MAST::InstructionList.new($coerce-reg, nqp::unbox_i(@comp_ops[0].result_kind));
             $qastcomp.coerce($il, $coerce-kind);
             %core_op_generators{
@@ -883,6 +893,7 @@ for <if unless with without> -> $op_name {
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
                   !! @Condition-op-kinds[        @comp_ops[0].result_kind]
             }(
+                $frame,
                 $il.result_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
@@ -894,40 +905,41 @@ for <if unless with without> -> $op_name {
                   ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
                   !! @Condition-op-kinds[        @comp_ops[0].result_kind]
             }(
+                $frame,
                 @comp_ops[0].result_reg,
                 ($operands == 3 ?? $else_lbl !! $end_lbl)
             );
         }
 
         # Emit the then, stash the result
-        $qastcomp.mast_frame.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+        $frame.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
 
         if (!$is_void && nqp::unbox_i(@comp_ops[1].result_kind) != $res_kind) {
             # coercion will automatically release @comp_ops[1].result_reg
             my $coercion := $qastcomp.coercion(@comp_ops[1], $res_kind);
-            op_set($res_reg, $coercion.result_reg);
+            op_set($frame, $res_reg, $coercion.result_reg);
         }
         elsif !$is_void {
-            op_set($res_reg, @comp_ops[1].result_reg);
+            op_set($frame, $res_reg, @comp_ops[1].result_reg);
             $regalloc.release_register(@comp_ops[1].result_reg, nqp::unbox_i(@comp_ops[1].result_kind));
         }
 
         # Handle else branch (coercion of condition result if 2-arg).
         if $operands == 3 {
             # Terminate the then branch first.
-            op_goto($end_lbl);
-            $qastcomp.mast_frame.add-label($else_lbl);
+            op_goto($frame, $end_lbl);
+            $frame.add-label($else_lbl);
 
-            $qastcomp.mast_frame.insert_bytecode($else-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+            $frame.insert_bytecode($else-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
 
             if !$is_void {
                 if nqp::unbox_i(@comp_ops[2].result_kind) != $res_kind {
                     # coercion will automatically release @comp_ops[2].result_reg
                     my $coercion := $qastcomp.coercion(@comp_ops[2], $res_kind);
-                    op_set($res_reg, $coercion.result_reg);
+                    op_set($frame, $res_reg, $coercion.result_reg);
                 }
                 else {
-                    op_set($res_reg, @comp_ops[2].result_reg);
+                    op_set($frame, $res_reg, @comp_ops[2].result_reg);
                     $regalloc.release_register(@comp_ops[2].result_reg, nqp::unbox_i(@comp_ops[2].result_kind));
                 }
             }
@@ -938,7 +950,7 @@ for <if unless with without> -> $op_name {
             $regalloc.release_register(@comp_ops[0].result_reg, nqp::unbox_i(@comp_ops[0].result_kind));
         }
 
-        $qastcomp.mast_frame.add-label($end_lbl);
+        $frame.add-label($end_lbl);
 
         MAST::InstructionList.new($res_reg, $res_kind)
     });
@@ -951,23 +963,24 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
 
     # Compile the expression.
     my $regalloc := $qastcomp.regalloc;
+    my $frame := $qastcomp.mast_frame;
     my $res_reg := $regalloc.fresh_o();
     my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj));
 
     # Emit defined check.
     my $def_reg := $regalloc.fresh_i();
     my $lbl := MAST::Label.new();
-    op_set($res_reg, $expr.result_reg);
-    %core_op_generators{'isconcrete'}($def_reg, $res_reg);
-    %core_op_generators{'if_i'}($def_reg, $lbl);
+    op_set($frame, $res_reg, $expr.result_reg);
+    %core_op_generators{'isconcrete'}($frame, $def_reg, $res_reg);
+    %core_op_generators{'if_i'}($frame, $def_reg, $lbl);
     $regalloc.release_register($def_reg, $MVM_reg_int64);
 
     # Emit "then" part.
     my $then := $qastcomp.as_mast($op[1], :want($MVM_reg_obj));
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     $expr.append($then);
-    op_set($res_reg, $then.result_reg);
-    $qastcomp.mast_frame.add-label($lbl);
+    op_set($frame, $res_reg, $then.result_reg);
+    $frame.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
     my $newer := MAST::InstructionList.new($res_reg, $MVM_reg_obj);
     $expr.append($newer);
@@ -977,6 +990,7 @@ QAST::MASTOperations.add_core_op('defor', -> $qastcomp, $op {
 
 QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my int $res_kind   := $MVM_reg_obj;
+    my $frame      := $qastcomp.mast_frame;
     my $res_reg    := $qastcomp.regalloc.fresh_o();
     my $t          := $qastcomp.regalloc.fresh_i();
     my $u          := $qastcomp.regalloc.fresh_i();
@@ -996,8 +1010,8 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     }
 
     my $apost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
-    op_set($res_reg, $apost.result_reg);
-    op_decont($d, $apost.result_reg);
+    op_set($frame, $res_reg, $apost.result_reg);
+    op_decont($frame, $d, $apost.result_reg);
     emit_object_boolify($qastcomp, $t, $d);
     $qastcomp.regalloc.release_register($apost.result_reg, $MVM_reg_obj);
 
@@ -1005,22 +1019,22 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     my $bpost;
     while $have_middle_child {
         $bpost := $qastcomp.as_mast(nqp::shift(@comp_ops), :want($MVM_reg_obj));
-        op_decont($d, $bpost.result_reg);
+        op_decont($frame, $d, $bpost.result_reg);
         emit_object_boolify($qastcomp, $u, $d);
 
         my $jumplabel := MAST::Label.new();
-        %core_op_generators{'unless_i'}($t, $jumplabel);
-        %core_op_generators{'unless_i'}($u, $jumplabel);
-        op_goto($falselabel);
-        $qastcomp.mast_frame.add-label($jumplabel);
+        %core_op_generators{'unless_i'}($frame, $t, $jumplabel);
+        %core_op_generators{'unless_i'}($frame, $u, $jumplabel);
+        op_goto($frame, $falselabel);
+        $frame.add-label($jumplabel);
 
         if @comp_ops {
             my $truelabel := MAST::Label.new();
-            %core_op_generators{'if_i'}($t, $truelabel);
-            op_set($res_reg, $bpost.result_reg);
+            %core_op_generators{'if_i'}($frame, $t, $truelabel);
+            op_set($frame, $res_reg, $bpost.result_reg);
             $qastcomp.regalloc.release_register($bpost.result_reg, $MVM_reg_obj);
-            op_set($t, $u);
-            $qastcomp.mast_frame.add-label($truelabel);
+            op_set($frame, $t, $u);
+            $frame.add-label($truelabel);
         }
         else {
             $have_middle_child := 0;
@@ -1028,23 +1042,23 @@ QAST::MASTOperations.add_core_op('xor', -> $qastcomp, $op {
     }
     $qastcomp.regalloc.release_register($u, $MVM_reg_int64);
 
-    %core_op_generators{'if_i'}($t, $endlabel);
+    %core_op_generators{'if_i'}($frame, $t, $endlabel);
     $qastcomp.regalloc.release_register($t, $MVM_reg_int64);
-    op_set($res_reg, $bpost.result_reg);
+    op_set($frame, $res_reg, $bpost.result_reg);
     $qastcomp.regalloc.release_register($bpost.result_reg, $MVM_reg_obj);
-    op_goto($endlabel);
-    $qastcomp.mast_frame.add-label($falselabel);
+    op_goto($frame, $endlabel);
+    $frame.add-label($falselabel);
 
     if $f {
         my $f_ast := $qastcomp.as_mast($f, :want($MVM_reg_obj));
-        op_set($res_reg, $f_ast.result_reg);
+        op_set($frame, $res_reg, $f_ast.result_reg);
         $qastcomp.regalloc.release_register($f_ast.result_reg, $MVM_reg_obj);
     }
     else {
-        op_null($res_reg);
+        op_null($frame, $res_reg);
     }
 
-    $qastcomp.mast_frame.add-label($endlabel);
+    $frame.add-label($endlabel);
 
     $qastcomp.regalloc.release_register($d, $MVM_reg_obj);
 
@@ -1058,20 +1072,21 @@ QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
 
     # Compile the expression.
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $res_reg := $regalloc.fresh_o();
     my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj));
 
     # Emit null check.
     my $lbl := MAST::Label.new();
-    op_set($res_reg, $expr.result_reg);
-    %core_op_generators{'ifnonnull'}($expr.result_reg, $lbl);
+    op_set($frame, $res_reg, $expr.result_reg);
+    %core_op_generators{'ifnonnull'}($frame, $expr.result_reg, $lbl);
 
     # Emit "then" part.
     my $then := $qastcomp.as_mast($op[1], :want($MVM_reg_obj));
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     $expr.append($then);
-    op_set($res_reg, $then.result_reg);
-    $qastcomp.mast_frame.add-label($lbl);
+    op_set($frame, $res_reg, $then.result_reg);
+    $frame.add-label($lbl);
     $regalloc.release_register($then.result_reg, $MVM_reg_obj);
     my $newer := MAST::InstructionList.new($res_reg, $MVM_reg_obj);
     $expr.append($newer);
@@ -1080,20 +1095,21 @@ QAST::MASTOperations.add_core_op('ifnull', -> $qastcomp, $op {
 });
 
 sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind) {
+    my $frame    := $qastcomp.mast_frame;
     # Generate a lousy return value for our while loop.
     unless $res_reg =:= MAST::VOID {
-        op_null($res_reg);
+        op_null($frame, $res_reg);
     }
 
     if $repness {
         # It's a repeat_ variant, need to go straight into the
         # loop body unconditionally.
         #if $cond_temp {
-        #    op_null($*BLOCK.local($cond_temp));
+        #    op_null($frame, $*BLOCK.local($cond_temp));
         #}
-        op_goto($redo_lbl);
+        op_goto($frame, $redo_lbl);
     }
-    $qastcomp.mast_frame.add-label($test_lbl);
+    $frame.add-label($test_lbl);
 
     # Compile each of the children.
     my @comp_ops;
@@ -1111,7 +1127,7 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     if @comp_ops[0].result_kind == $MVM_reg_obj {
         # Decontainerize it and perform boolean conversion, then test that.
         my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-        op_decont($decont_reg, @comp_ops[0].result_reg);
+        op_decont($frame, $decont_reg, @comp_ops[0].result_reg);
         my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
         emit_object_boolify($qastcomp, $boolification_reg, $decont_reg);
         $regalloc.release_register($decont_reg, $MVM_reg_obj);
@@ -1119,6 +1135,7 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
             # the conditional routines are reversed on purpose
             $op_name eq 'while' ?? 'unless_i' !! 'if_i'
         }(
+            $frame,
             $boolification_reg,
             $done_lbl
         );
@@ -1128,7 +1145,7 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     -> $coerce-kind {
         # workaround for coercion unconditionally releasing the source register while we still need it later on
         my $coerce-reg := $regalloc.fresh_register: @comp_ops[0].result_kind;
-        op_set($coerce-reg, @comp_ops[0].result_reg);
+        op_set($frame, $coerce-reg, @comp_ops[0].result_reg);
         my $il := MAST::InstructionList.new($coerce-reg, nqp::unbox_i(@comp_ops[0].result_kind));
         $qastcomp.coerce($il, $coerce-kind);
         %core_op_generators{
@@ -1136,6 +1153,7 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
               ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
               !! @Condition-op-kinds[        @comp_ops[0].result_kind]
         }(
+            $frame,
             $il.result_reg,
             $done_lbl
         );
@@ -1147,13 +1165,14 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
               ?? @Negated-condition-op-kinds[@comp_ops[0].result_kind]
               !! @Condition-op-kinds[        @comp_ops[0].result_kind]
         }(
+            $frame,
             @comp_ops[0].result_reg,
             $done_lbl
         );
     }
 
-    $qastcomp.mast_frame.add-label($redo_lbl);
-    %core_op_generators{'osrpoint'}();
+    $frame.add-label($redo_lbl);
+    %core_op_generators{'osrpoint'}($frame);
 
     # Emit the loop body; stash the result.
 
@@ -1169,14 +1188,14 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     # If there's a third child, evaluate it as part of the
     # "next".
     if $operands == 3 {
-        $qastcomp.mast_frame.add-label($next_lbl);
+        $frame.add-label($next_lbl);
         $comp := $qastcomp.as_mast(@children[2], :want($MVM_reg_void));
         @comp_ops.push($comp);
         @comp_types.push($comp.result_kind);
     }
 
     # Emit the iteration jump.
-    op_goto($test_lbl);
+    op_goto($frame, $test_lbl);
 }
 
 # Loops.
@@ -1218,6 +1237,7 @@ for ('', 'repeat_') -> $repness {
 
             # Allocate result register if needed.
             my $regalloc := $qastcomp.regalloc;
+            my $frame    := $qastcomp.mast_frame;
             my int $res_kind := $MVM_reg_obj;
             my $res_reg;
             if nqp::defined($*WANT) && $*WANT == $MVM_reg_void {
@@ -1229,7 +1249,7 @@ for ('', 'repeat_') -> $repness {
 
             # Test the condition and jump to the loop end if it's
             # not met.
-            my $loop_start := nqp::elems($qastcomp.mast_frame.bytecode);
+            my $loop_start := nqp::elems($frame.bytecode);
 
             # Emit postlude, with exception handlers if needed. Note that we
             # don't actually need to emit a bunch of handlers; since a handler
@@ -1247,8 +1267,8 @@ for ('', 'repeat_') -> $repness {
                     $last_mask  := $last_mask + $HandlerCategory::labeled;
                     my $labmast := $qastcomp.as_mast($label_wval, :want($MVM_reg_obj)); #nqp::where($label.value);
                     my $labreg  := $labmast.result_reg;
-                    $lablocal   := MAST::Local.new(:index($qastcomp.mast_frame.add_local(NQPMu)));
-                    op_set($lablocal, $labreg);
+                    $lablocal   := MAST::Local.new(:index($frame.add_local(NQPMu)));
+                    op_set($frame, $lablocal, $labreg);
                     $regalloc.release_register($labreg, $MVM_reg_obj);
                 }
                 loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind);
@@ -1274,12 +1294,12 @@ for ('', 'repeat_') -> $repness {
                     :goto($done_lbl),
                     :label($lablocal)
                 );
-                $qastcomp.mast_frame.add-label($done_lbl);
+                $frame.add-label($done_lbl);
                 MAST::InstructionList.new($res_reg, $res_kind)
             }
             else {
                 loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $orig_type, $regalloc, $op_name, $done_lbl, $qastcomp, $next_lbl, $res_kind);
-                $qastcomp.mast_frame.add-label($done_lbl);
+                $frame.add-label($done_lbl);
                 MAST::InstructionList.new($res_reg, $res_kind)
             }
         });
@@ -1289,11 +1309,12 @@ for ('', 'repeat_') -> $repness {
 my $FAKE_POS_ARG := QAST::Op.new( :op('null') );
 sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo,
         $block_res, @val_temps, $qastcomp) {
+    my $frame := $qastcomp.mast_frame;
     # Emit loop test.
-    $qastcomp.mast_frame.add-label($lbl_next);
+    $frame.add-label($lbl_next);
     my $boolification_reg := $regalloc.fresh_register($MVM_reg_int64);
     emit_object_boolify($qastcomp, $boolification_reg, $iter_tmp);
-    %core_op_generators{'unless_i'}($boolification_reg, $lbl_done);
+    %core_op_generators{'unless_i'}($frame, $boolification_reg, $lbl_done);
     $regalloc.release_register($boolification_reg, $MVM_reg_int64);
 
     # Fetch values into temporaries (on the stack ain't enough in case
@@ -1304,23 +1325,23 @@ sub for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_re
     my $arity := @operands[1].arity || 1;
     while $arity > 0 {
         my $tmp := $regalloc.fresh_o();
-        %core_op_generators{'shift_o'}($tmp, $iter_tmp);
+        %core_op_generators{'shift_o'}($frame, $tmp, $iter_tmp);
         nqp::push(@arg_regs, $tmp);
         nqp::push(@arg_qasts, $FAKE_POS_ARG);
         nqp::push(@arg_masts, MAST::InstructionList.new($tmp, $MVM_reg_obj));
         $arity := $arity - 1;
     }
 
-    $qastcomp.mast_frame.add-label($lbl_redo);
-    %core_op_generators{'osrpoint'}();
+    $frame.add-label($lbl_redo);
+    %core_op_generators{'osrpoint'}($frame, );
 
     # Now do block invocation.
-    my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         @arg_qasts, @arg_masts);
-    op_dispatch_v('boot-code', $callsite_id, @arg_regs);
+    op_dispatch_v($frame, 'boot-code', $callsite_id, @arg_regs);
 
     # Emit next.
-    op_goto($lbl_next );
+    op_goto($frame, $lbl_next );
 }
 
 QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
@@ -1352,9 +1373,10 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
     # Evaluate the thing we'll iterate over, get the iterator and
     # store it in a temporary.
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $list_il := $qastcomp.as_mast(@operands[0], :want($MVM_reg_obj));
     my $iter_tmp := $regalloc.fresh_o();
-    %core_op_generators{'iter'}($iter_tmp, $list_il.result_reg);
+    %core_op_generators{'iter'}($frame, $iter_tmp, $list_il.result_reg);
 
     # Do similar for the block.
     my $block_res := $qastcomp.as_mast(@operands[1], :want($MVM_reg_obj));
@@ -1379,11 +1401,11 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
             $last_mask  := $last_mask + $HandlerCategory::labeled;
             my $labmast := $qastcomp.as_mast($label_wval, :want($MVM_reg_obj));
             my $labreg  := $labmast.result_reg;
-            $lablocal   := MAST::Local.new(:index($qastcomp.mast_frame.add_local(NQPMu)));
-            op_set($lablocal, $labreg);
+            $lablocal   := MAST::Local.new(:index($frame.add_local(NQPMu)));
+            op_set($frame, $lablocal, $labreg);
             $regalloc.release_register($labreg, $MVM_reg_obj);
         }
-        my $loop_start := nqp::elems($qastcomp.mast_frame.bytecode);
+        my $loop_start := nqp::elems($frame.bytecode);
         for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo,
             $block_res, @val_temps, $qastcomp);
         MAST::HandlerScope.new(
@@ -1412,7 +1434,7 @@ QAST::MASTOperations.add_core_op('for', -> $qastcomp, $op {
         for_loop_body($lbl_next, $iter_tmp, $lbl_done, @operands, $regalloc, $lbl_redo,
             $block_res, @val_temps, $qastcomp);
     }
-    $qastcomp.mast_frame.add-label($lbl_done);
+    $frame.add-label($lbl_done);
 
     @operands[1].blocktype($orig_blocktype);
 
@@ -1733,8 +1755,9 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 
     # Also decontainerize the invocant.
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $decont_inv_reg := $regalloc.fresh_o();
-    op_decont($decont_inv_reg, $invocant.result_reg);
+    op_decont($frame, $decont_inv_reg, $invocant.result_reg);
 
     # If there is a non-literal method name, compile that also.
     my $method_name_expr;
@@ -1760,7 +1783,6 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
 
     # Compile each of the arguments and add those onto the list also.
     @args := arrange_args(@args);
-    my $frame := $qastcomp.mast_frame;
     my $bytecode := $frame.bytecode;
     my @arg_mast := [$invocant];
     for @args -> $arg {
@@ -1903,6 +1925,7 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     # Otherwise, we need to generate and install a handler block, which will
     # decide that to do by category.
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $mask := 0;
     my $hblock := QAST::Block.new(
         QAST::Op.new(
@@ -1919,8 +1942,8 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
             $mask       := $HandlerCategory::labeled;
             my $labmast := $qastcomp.as_mast($handler, :want($MVM_reg_obj));
             my $labreg  := $labmast.result_reg;
-            $lablocal   := MAST::Local.new(:index($qastcomp.mast_frame.add_local(NQPMu)));
-            op_set($lablocal, $labreg);
+            $lablocal   := MAST::Local.new(:index($frame.add_local(NQPMu)));
+            op_set($frame, $lablocal, $labreg);
             $regalloc.release_register($labreg, $MVM_reg_obj);
         }
         else {
@@ -1950,27 +1973,27 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
     }
 
     # Add a local and store the handler block into it.
-    my $hblocal := MAST::Local.new(:index($qastcomp.mast_frame.add_local(NQPMu)));
+    my $hblocal := MAST::Local.new(:index($frame.add_local(NQPMu)));
     my $hbmast  := $qastcomp.as_mast($hblock, :want($MVM_reg_obj));
-    op_set($hblocal, $hbmast.result_reg);
+    op_set($frame, $hblocal, $hbmast.result_reg);
     $regalloc.release_register($hbmast.result_reg, $MVM_reg_obj);
 
     # Wrap instructions to try up in a handler and evaluate to the result
     # of the protected code of the exception handler.
     my $protected_result  := $regalloc.fresh_o();
-    my $prot_start := nqp::elems($qastcomp.mast_frame.bytecode);
+    my $prot_start := nqp::elems($frame.bytecode);
     my $protil := $qastcomp.as_mast($protected, :want($MVM_reg_obj));
     my $uwlbl  := MAST::Label.new();
     my $endlbl := MAST::Label.new();
-    op_set($protected_result, $protil.result_reg);
-    op_goto($endlbl);
+    op_set($frame, $protected_result, $protil.result_reg);
+    op_goto($frame, $endlbl);
     MAST::HandlerScope.new(
         :start($prot_start), :goto($uwlbl), :block($hblocal),
         :category_mask($mask), :action($HandlerAction::invoke_and_we'll_see),
         :label($lablocal));
-    $qastcomp.mast_frame.add-label($uwlbl);
-    %core_op_generators{'takehandlerresult'}($protected_result);
-    $qastcomp.mast_frame.add-label($endlbl);
+    $frame.add-label($uwlbl);
+    %core_op_generators{'takehandlerresult'}($frame, $protected_result);
+    $frame.add-label($endlbl);
 
     $regalloc.release_register($protil.result_reg, $MVM_reg_obj);
 
@@ -1988,19 +2011,20 @@ QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $
         nqp::die("Invalid handler type '$type'");
     }
     my int $mask := %handler_names{$type};
+    my $frame    := $qastcomp.mast_frame;
 
-    my $prot_start := nqp::elems($qastcomp.mast_frame.bytecode);
+    my $prot_start := nqp::elems($frame.bytecode);
     my $protected := $qastcomp.as_mast(@children[0], :want($MVM_reg_obj));
     my $endlbl     := MAST::Label.new();
     my $handlelbl  := MAST::Label.new();
-    op_goto($endlbl);
+    op_goto($frame, $endlbl);
     MAST::HandlerScope.new(
         :start($prot_start), :goto($handlelbl),
         :category_mask($mask), :action($HandlerAction::unwind_and_goto_with_payload));
-    $qastcomp.mast_frame.add-label($handlelbl);
+    $frame.add-label($handlelbl);
     my $handler   := $qastcomp.as_mast(@children[2], :want($MVM_reg_obj));
-    op_set($protected.result_reg, $handler.result_reg);
-    $qastcomp.mast_frame.add-label($endlbl);
+    op_set($frame, $protected.result_reg, $handler.result_reg);
+    $frame.add-label($endlbl);
     $qastcomp.regalloc.release_register($handler.result_reg, $MVM_reg_obj);
 
     MAST::InstructionList.new($protected.result_reg, $MVM_reg_obj)
@@ -2021,6 +2045,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
     }
 
     if nqp::existskey(%control_map, $name) {
+        my $frame := $qastcomp.mast_frame;
         if $label {
             # Create an exception object, and attach the label to its payload.
             my $res := $regalloc.fresh_register($MVM_reg_obj);
@@ -2029,16 +2054,16 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             my $cat := $regalloc.fresh_register($MVM_reg_int64);
             my $il  := MAST::InstructionList.new($res, $MVM_reg_obj);
             $il.append($lbl);
-            %core_op_generators{'newexception'}($ex);
-            %core_op_generators{'bindexpayload'}($ex,  $lbl.result_reg );
-            %core_op_generators{'const_i64'}($cat, nqp::add_i(%control_map{$name}, $HandlerCategory::labeled));
-            %core_op_generators{'bindexcategory'}($ex,  $cat );
-            %core_op_generators{'throwdyn'}($res, $ex);
+            %core_op_generators{'newexception'}($frame, $ex);
+            %core_op_generators{'bindexpayload'}($frame, $ex,  $lbl.result_reg );
+            %core_op_generators{'const_i64'}($frame, $cat, nqp::add_i(%control_map{$name}, $HandlerCategory::labeled));
+            %core_op_generators{'bindexcategory'}($frame, $ex,  $cat );
+            %core_op_generators{'throwdyn'}($frame, $res, $ex);
             $il
         }
         else {
             my $res := $regalloc.fresh_register($MVM_reg_obj);
-            %core_op_generators{'throwcatdyn'}($res, %control_map{$name});
+            %core_op_generators{'throwcatdyn'}($frame, $res, %control_map{$name});
             MAST::InstructionList.new($res, $MVM_reg_obj)
         }
     }
@@ -2050,49 +2075,53 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
 # Default ways to box/unbox (used for NQP).
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     my $regalloc := $qastcomp.regalloc;
+    my $frame := $qastcomp.mast_frame;
     my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($dc, $reg);
-    my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+    op_decont($frame, $dc, $reg);
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_i($res_reg, 'nqp-intify', $callsite_id, [$dc]);
+    op_dispatch_i($frame, $res_reg, 'nqp-intify', $callsite_id, [$dc]);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_int64)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     my $regalloc := $qastcomp.regalloc;
+    my $frame := $qastcomp.mast_frame;
     my $res_reg := $regalloc.fresh_register($MVM_reg_num64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($dc, $reg);
-    my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+    op_decont($frame, $dc, $reg);
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_n($res_reg, 'nqp-numify', $callsite_id, [$dc]);
+    op_dispatch_n($frame, $res_reg, 'nqp-numify', $callsite_id, [$dc]);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_num64)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     my $regalloc := $qastcomp.regalloc;
+    my $frame := $qastcomp.mast_frame;
     my $res_reg := $regalloc.fresh_register($MVM_reg_str);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($dc, $reg);
-    my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+    op_decont($frame, $dc, $reg);
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_s($res_reg, 'nqp-stringify', $callsite_id, [$dc]);
+    op_dispatch_s($frame, $res_reg, 'nqp-stringify', $callsite_id, [$dc]);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_str)
 });
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     my $regalloc := $qastcomp.regalloc;
+    my $frame := $qastcomp.mast_frame;
     my $a := $regalloc.fresh_register($MVM_reg_int64);
     my $b := $regalloc.fresh_register($MVM_reg_uint64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($dc, $reg);
-    %core_op_generators{'smrt_intify'}($a, $dc);
-    %core_op_generators{'coerce_iu'}($b, $a);
+    op_decont($frame, $dc, $reg);
+    %core_op_generators{'smrt_intify'}($frame, $a, $dc);
+    %core_op_generators{'coerce_iu'}($frame, $b, $a);
     $regalloc.release_register($a, $MVM_reg_int64);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($b, $MVM_reg_int64)
@@ -2100,9 +2129,10 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
 sub boxer($kind, $type_op, $op) {
     -> $qastcomp, $reg {
         my $regalloc := $qastcomp.regalloc;
+        my $frame := $qastcomp.mast_frame;
         my $res_reg := $regalloc.fresh_register($MVM_reg_obj);
-        %core_op_generators{$type_op}($res_reg);
-        %core_op_generators{$op}($res_reg, $reg, $res_reg);
+        %core_op_generators{$type_op}($frame, $res_reg);
+        %core_op_generators{$op}($frame, $res_reg, $reg, $res_reg);
         $regalloc.release_register($reg, $kind);
         MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
@@ -2113,7 +2143,7 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_str, boxer($MVM_reg_str, 'hllboxty
 QAST::MASTOperations.add_hll_box('', $MVM_reg_uint64, boxer($MVM_reg_uint64, 'hllboxtype_i', 'box_u'));
 QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
     my $res_reg := $qastcomp.regalloc.fresh_register($MVM_reg_obj);
-    op_null($res_reg);
+    op_null($qastcomp.mast_frame, $res_reg);
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 
@@ -2796,7 +2826,7 @@ QAST::MASTOperations.add_core_op('null', -> $qastcomp, $op {
     }
     else {
         my $res_reg := $qastcomp.regalloc.fresh_register($MVM_reg_obj);
-        op_null($res_reg);
+        op_null($qastcomp.mast_frame, $res_reg);
         MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
 });
@@ -2809,25 +2839,26 @@ QAST::MASTOperations.add_core_moarop_mapping('objectid', 'objectid', :decont(0))
 my $findmethodish := -> $qastcomp, $op {
     # Compile and decont the object.
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
     $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
     my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($decont_reg, $obj_mast.result_reg);
+    op_decont($frame, $decont_reg, $obj_mast.result_reg);
 
     # Load name and exceptional flag into registers.
     my int $exceptional := $op.op eq 'findmethod';
     my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[1] );
     my $ex_flag_reg := $regalloc.fresh_register($MVM_reg_int64);
-    %core_op_generators{'const_i64'}($ex_flag_reg, $exceptional);
+    %core_op_generators{'const_i64'}($frame, $ex_flag_reg, $exceptional);
 
     # Do this dispatch.
     my $result_reg := $regalloc.fresh_register($MVM_reg_obj);
-    my uint $callsite_id := $qastcomp.mast_frame.callsites.get_callsite_id_from_args(
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         [$op[0], $op[1], QAST::IVal.new( :value($exceptional) )],
         [MAST::InstructionList.new($result_reg, $MVM_reg_obj),
         $name_mast,
         MAST::InstructionList.new($ex_flag_reg, $MVM_reg_int64)]);
-    op_dispatch_o($result_reg, 'lang-find-meth', $callsite_id,
+    op_dispatch_o($frame, $result_reg, 'lang-find-meth', $callsite_id,
         [$decont_reg, $name_mast.result_reg, $ex_flag_reg]);
 
     # Clean up and produce value.
@@ -2836,8 +2867,8 @@ my $findmethodish := -> $qastcomp, $op {
     if $op.op eq 'can' {
         # Want a boolean for if the result was non-null; reuse the int
         # register we already allocated.
-        %core_op_generators{'isnull'}($ex_flag_reg, $result_reg);
-        %core_op_generators{'not_i'}($ex_flag_reg, $ex_flag_reg);
+        %core_op_generators{'isnull'}($frame, $ex_flag_reg, $result_reg);
+        %core_op_generators{'not_i'}($frame, $ex_flag_reg, $ex_flag_reg);
         $regalloc.release_register($result_reg, $MVM_reg_obj);
         MAST::InstructionList.new($ex_flag_reg, $MVM_reg_int64)
     }
@@ -2879,7 +2910,7 @@ QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
     my $regalloc := $qastcomp.regalloc;
     my $res_reg := $regalloc.fresh_o();
     my $expr := $qastcomp.as_mast($op[0], :want($MVM_reg_obj), :want-decont);
-    op_decont($res_reg, $expr.result_reg);
+    op_decont($qastcomp.mast_frame, $res_reg, $expr.result_reg);
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
@@ -2896,7 +2927,7 @@ QAST::MASTOperations.add_core_op('istrue', -> $qastcomp, $op {
     my $regalloc := $qastcomp.regalloc;
     my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
     my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($decont_reg, $obj_mast.result_reg);
+    op_decont($qastcomp.mast_frame, $decont_reg, $obj_mast.result_reg);
     $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
     my $result_reg := $regalloc.fresh_register($MVM_reg_int64);
     emit_object_boolify($qastcomp, $result_reg, $decont_reg);
@@ -2905,14 +2936,15 @@ QAST::MASTOperations.add_core_op('istrue', -> $qastcomp, $op {
 });
 QAST::MASTOperations.add_core_op('isfalse', -> $qastcomp, $op {
     my $regalloc := $qastcomp.regalloc;
+    my $frame    := $qastcomp.mast_frame;
     my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
     my $decont_reg := $regalloc.fresh_register($MVM_reg_obj);
-    op_decont($decont_reg, $obj_mast.result_reg);
+    op_decont($frame, $decont_reg, $obj_mast.result_reg);
     $regalloc.release_register($obj_mast.result_reg, $MVM_reg_obj);
     my $result_reg := $regalloc.fresh_register($MVM_reg_int64);
     emit_object_boolify($qastcomp, $result_reg, $decont_reg);
     $regalloc.release_register($decont_reg, $MVM_reg_obj);
-    %core_op_generators<not_i>($result_reg, $result_reg);
+    %core_op_generators<not_i>($frame, $result_reg, $result_reg);
     MAST::InstructionList.new($result_reg, $MVM_reg_int64)
 });
 QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
@@ -2922,6 +2954,7 @@ QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont
 sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
     QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
         my $regalloc := $qastcomp.regalloc;
+        my $frame    := $qastcomp.mast_frame;
         my $val_mast := $qastcomp.as_mast( :$want, $op[3] );
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
         my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
@@ -2935,11 +2968,11 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            %core_op_generators{$hintedop}($obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$hintedop}($frame, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $val_mast.result_reg, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            %core_op_generators{$namedop}($obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$namedop}($frame, $obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg, $val_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
@@ -2957,6 +2990,7 @@ add_bindattr_op('bindattr_s', 'bindattr_s', 'bindattrs_s', $MVM_reg_str);
 sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
     QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
         my $regalloc := $qastcomp.regalloc;
+        my $frame    := $qastcomp.mast_frame;
         my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
         my $type_mast := $qastcomp.as_mast( :want($MVM_reg_obj),
             nqp::istype($op[1], QAST::WVal) && !nqp::isconcrete($op[1].value)
@@ -2970,11 +3004,11 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            %core_op_generators{$hintedop}($res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$hintedop}($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            %core_op_generators{$namedop}($res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            %core_op_generators{$namedop}($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
@@ -3069,7 +3103,7 @@ sub add_native_assign_op($op_name, $kind) {
             my $regalloc := $qastcomp.regalloc;
             my $target_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
             my $value_mast  := $qastcomp.as_mast( :want($kind), $op[1] );
-            %core_op_generators{$op_name}($target_mast.result_reg, $value_mast.result_reg);
+            %core_op_generators{$op_name}($qastcomp.mast_frame, $target_mast.result_reg, $value_mast.result_reg);
             $regalloc.release_register($value_mast.result_reg, $kind);
             MAST::InstructionList.new($target_mast.result_reg, $MVM_reg_obj)
         }
@@ -3316,8 +3350,8 @@ QAST::MASTOperations.add_core_moarop_mapping('serializetobuf', 'serializetobuf')
 QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
 QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
 
-sub push_op(str $op, *@args) {
-    MAST::Op.new_with_operand_array( :$op, @args );
+sub push_op($frame, str $op, *@args) {
+    MAST::Op.new_with_operand_array(:$frame, :$op, @args );
 }
 
 QAST::MASTOperations.add_core_op('js', -> $qastcomp, $op {
