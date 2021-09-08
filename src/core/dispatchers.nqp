@@ -492,7 +492,11 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
         }
     }
     else {
-        nqp::die("Unknown type check mode $mode");
+        # No cache and no additional ways to check, so answer no.
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+            $capture, 0, 0);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
+            $delegate);
     }
 });
 
