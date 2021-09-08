@@ -1055,7 +1055,7 @@ my class MASTCompilerInstance {
                 my $*BINDVAL := 0;
 
                 # Create a register allocator for this frame, saving the outer one.
-                my $*REGALLOC := self.push_regalloc($frame);
+                self.push_regalloc($frame);
 
                 # when we enter a QAST::Stmt, the contextual will be cloned, and the locals of
                 # newly declared QAST::Vars of local scope inside the Stmt will be stashed here,
