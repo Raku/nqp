@@ -478,13 +478,15 @@ my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
         my $int_reg := $qastcomp.regalloc.fresh_i();
         my $frame := $qastcomp.mast_frame;
         my int $size_i := +$size;
-        %core_op_generators{'const_i64'}($frame, $int_reg, $size_i);
-        %core_op_generators{'setelemspos'}($frame, $array_reg, $int_reg);
+        my &const_i64_op := %core_op_generators{'const_i64'};
+        my &setelemspos_op := %core_op_generators{'setelemspos'};
+        const_i64_op($frame, $int_reg, $size_i);
+        setelemspos_op($frame, $array_reg, $int_reg);
         # reset the number of elements to 0 so that we don't push to the end
         # since our lists don't shrink by themselves (or by setting elems), we'll
         # end up with enough storage to hold all elements exactly
-        %core_op_generators{'const_i64'}($frame, $int_reg, 0);
-        %core_op_generators{'setelemspos'}($frame, $array_reg, $int_reg);
+        const_i64_op($frame, $int_reg, 0);
+        setelemspos_op($frame, $array_reg, $int_reg);
         $qastcomp.regalloc.release_register($int_reg, $MVM_reg_int64);
     }
 }
@@ -501,12 +503,13 @@ QAST::MASTOperations.add_core_op('list', -> $qastcomp, $op {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         my $frame := $qastcomp.mast_frame;
+        my &push_o_op := %core_op_generators{'push_o'};
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_obj));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_o'}($frame, $arr_reg, $item_reg);
+            push_o_op($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_obj);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -525,12 +528,13 @@ QAST::MASTOperations.add_core_op('list_i', -> $qastcomp, $op {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         my $frame := $qastcomp.mast_frame;
+        my &push_i_op := %core_op_generators{'push_i'};
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_int64));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_i'}($frame, $arr_reg, $item_reg);
+            push_i_op($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_int64);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -549,12 +553,13 @@ QAST::MASTOperations.add_core_op('list_n', -> $qastcomp, $op {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         my $frame := $qastcomp.mast_frame;
+        my &push_n_op := %core_op_generators{'push_n'};
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_num64));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_n'}($frame, $arr_reg, $item_reg);
+            push_n_op($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_num64);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -573,12 +578,13 @@ QAST::MASTOperations.add_core_op('list_s', -> $qastcomp, $op {
         my $arr_reg := $arr.result_reg;
         pre-size-array($qastcomp, $arr, $arr_reg, nqp::elems($op.list));
         my $frame := $qastcomp.mast_frame;
+        my &push_s_op := %core_op_generators{'push_s'};
         # Push things to the list.
         for $op.list {
             my $item := $qastcomp.as_mast($_, :want($MVM_reg_str));
             my $item_reg := $item.result_reg;
             $arr.append($item);
-            %core_op_generators{'push_s'}($frame, $arr_reg, $item_reg);
+            push_s_op($frame, $arr_reg, $item_reg);
             $regalloc.release_register($item_reg, $MVM_reg_str);
         }
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -599,13 +605,15 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
         my $mast_frame := $qastcomp.mast_frame;
         # Push things to the list.
         my $item_reg := $regalloc.fresh_register($MVM_reg_obj);
+        my &getcode_op := %core_op_generators{'getcode'};
+        my &push_o_op := %core_op_generators{'push_o'};
         for $op.list {
             nqp::die("The 'list_b' op needs a list of blocks, got " ~ $_.HOW.name($_))
                 unless nqp::istype($_, QAST::Block);
             my $cuid  := $_.cuid();
             my $frame := $qastcomp.mast_frames{$cuid};
-            %core_op_generators{'getcode'}($mast_frame, $item_reg, $frame);
-            %core_op_generators{'push_o'}($mast_frame, $arr_reg, $item_reg);
+            getcode_op($mast_frame, $item_reg, $frame);
+            push_o_op($mast_frame, $arr_reg, $item_reg);
         }
         $regalloc.release_register($item_reg, $MVM_reg_obj);
         my $ensure_return_register := MAST::InstructionList.new($arr_reg, $MVM_reg_obj);
@@ -629,6 +637,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
     if nqp::elems($op.list) {
         my $hash_reg := $hash.result_reg;
         my $frame := $qastcomp.mast_frame;
+        my &bindkey_o_op := %core_op_generators{'bindkey_o'};
         for $op.list -> $key, $val {
             my $key_mast := $qastcomp.as_mast($key, :want($MVM_reg_str));
             my $val_mast := $qastcomp.as_mast($val, :want($MVM_reg_obj));
@@ -636,7 +645,7 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
             my $val_reg := $val_mast.result_reg;
             $hash.append($key_mast);
             $hash.append($val_mast);
-            %core_op_generators{'bindkey_o'}($frame, $hash_reg, $key_reg, $val_reg);
+            bindkey_o_op($frame, $hash_reg, $key_reg, $val_reg);
             $regalloc.release_register($key_reg, $MVM_reg_str);
             $regalloc.release_register($val_reg, $MVM_reg_obj);
         }
@@ -2127,12 +2136,14 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     MAST::InstructionList.new($b, $MVM_reg_int64)
 });
 sub boxer($kind, $type_op, $op) {
+    $type_op := %core_op_generators{$type_op};
+    $op := %core_op_generators{$op};
     -> $qastcomp, $reg {
         my $regalloc := $qastcomp.regalloc;
         my $frame := $qastcomp.mast_frame;
         my $res_reg := $regalloc.fresh_register($MVM_reg_obj);
-        %core_op_generators{$type_op}($frame, $res_reg);
-        %core_op_generators{$op}($frame, $res_reg, $reg, $res_reg);
+        $type_op($frame, $res_reg);
+        $op($frame, $res_reg, $reg, $res_reg);
         $regalloc.release_register($reg, $kind);
         MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
@@ -2952,6 +2963,8 @@ QAST::MASTOperations.add_core_moarop_mapping('eqaddr', 'eqaddr');
 QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
 
 sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
+    $hintedop := %core_op_generators{$hintedop};
+    $namedop := %core_op_generators{$namedop};
     QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
         my $regalloc := $qastcomp.regalloc;
         my $frame    := $qastcomp.mast_frame;
@@ -2968,11 +2981,11 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            %core_op_generators{$hintedop}($frame, $obj_mast.result_reg, $type_mast.result_reg,
+            $hintedop($frame, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $val_mast.result_reg, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            %core_op_generators{$namedop}($frame, $obj_mast.result_reg, $type_mast.result_reg,
+            $namedop($frame, $obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg, $val_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
@@ -2988,6 +3001,8 @@ add_bindattr_op('bindattr_n', 'bindattr_n', 'bindattrs_n', $MVM_reg_num64);
 add_bindattr_op('bindattr_s', 'bindattr_s', 'bindattrs_s', $MVM_reg_str);
 
 sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
+    $hintedop := %core_op_generators{$hintedop};
+    $namedop := %core_op_generators{$namedop};
     QAST::MASTOperations.add_core_op($nqpop, -> $qastcomp, $op {
         my $regalloc := $qastcomp.regalloc;
         my $frame    := $qastcomp.mast_frame;
@@ -3004,11 +3019,11 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
             if nqp::istype($op[1], QAST::WVal) {
                 $hint := nqp::hintfor($op[1].value, $name.value);
             }
-            %core_op_generators{$hintedop}($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            $hintedop($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $hint);
         } else {
             my $name_mast := $qastcomp.as_mast( :want($MVM_reg_str), $op[2] );
-            %core_op_generators{$namedop}($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
+            $namedop($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name_mast.result_reg);
             $regalloc.release_register($name_mast.result_reg, $MVM_reg_str);
         }
@@ -3086,6 +3101,7 @@ sub try_get_bind_scope($var) {
     ''
 }
 sub add_native_assign_op($op_name, $kind) {
+    my $op_gen := %core_op_generators{$op_name};
     QAST::MASTOperations.add_core_op($op_name, -> $qastcomp, $op {
         my @operands := $op.list;
         unless nqp::elems(@operands) == 2 {
@@ -3103,7 +3119,7 @@ sub add_native_assign_op($op_name, $kind) {
             my $regalloc := $qastcomp.regalloc;
             my $target_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
             my $value_mast  := $qastcomp.as_mast( :want($kind), $op[1] );
-            %core_op_generators{$op_name}($qastcomp.mast_frame, $target_mast.result_reg, $value_mast.result_reg);
+            $op_gen($qastcomp.mast_frame, $target_mast.result_reg, $value_mast.result_reg);
             $regalloc.release_register($value_mast.result_reg, $kind);
             MAST::InstructionList.new($target_mast.result_reg, $MVM_reg_obj)
         }
