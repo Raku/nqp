@@ -1459,7 +1459,7 @@ my class MASTCompilerInstance {
     method compile_annotation($qast) {
         my $node := $qast.node;
         if nqp::isconcrete($node) && nqp::can($node,'orig') {
-            my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(0));
+            my @line_file := HLL::Compiler.linefileof($node.orig(), $node.from(), :cache(1), :directives(1));
             my $line := @line_file[0];
             my $file := @line_file[1] || $!file;
             MAST::Annotated.new(:$file, :$line);
