@@ -4289,6 +4289,8 @@ public final class Ops {
             return "windows-1251";
         if (nameIn.equals("utf16be"))
             return "UTF-16BE";
+        if (nameIn.equals("utf16le"))
+            return "UTF-16LE";
         return null;
     }
 
@@ -4434,7 +4436,7 @@ public final class Ops {
     public static String decode(SixModelObject buf, String encoding, ThreadContext tc) {
         String mangledEncoding = javaEncodingName(encoding);
         if (mangledEncoding != null) {
-            if (mangledEncoding.equals("UTF-16BE")
+            if ((mangledEncoding.equals("UTF-16BE") || mangledEncoding.equals("UTF-16LE"))
                 && (buf instanceof VMArrayInstance_u8 || buf instanceof VMArrayInstance_i8)
                 && ((int)buf.elems(tc) % 2 == 1)
             ) {
