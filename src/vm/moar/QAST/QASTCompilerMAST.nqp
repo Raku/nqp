@@ -2324,7 +2324,8 @@ class MoarVM::Callsites {
                 }
             }
             if nqp::istype($_, QAST::SVal) || nqp::istype($_, QAST::WVal) ||
-                    nqp::istype($_, QAST::IVal) || nqp::istype($_, QAST::NVal) {
+                    nqp::istype($_, QAST::IVal) || nqp::istype($_, QAST::NVal) ||
+                    nqp::istype($_, QAST::VM) && $_.alternative('moarop') eq 'getlexstatic_o' {
                 $result_typeflag := $result_typeflag +| $literal;
             }
             nqp::push_i(@flags, $result_typeflag);

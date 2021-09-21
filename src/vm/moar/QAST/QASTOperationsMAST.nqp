@@ -1531,18 +1531,18 @@ my $dispatch_call_gen := -> $qastcomp, $op {
     # Work out what callee is.
     my @args := $op.list;
     my $callee_qast;
+    my $callee_qast_for_flags; # To expose callstatic as a literal
     if $op.name {
-        $callee_qast := QAST::Op.new(
-            :op('decont'),
-            $op.op eq 'callstatic'
-                ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
-                !! QAST::Var.new( :name($op.name), :scope('lexical') ));
+        $callee_qast_for_flags := $op.op eq 'callstatic'
+            ?? QAST::VM.new( :moarop('getlexstatic_o'), QAST::SVal.new( :value($op.name) ) )
+            !! QAST::Var.new( :name($op.name), :scope('lexical') );
+        $callee_qast := QAST::Op.new( :op('decont'), $callee_qast_for_flags );
     }
     elsif nqp::elems(@args) {
         @args := nqp::clone(@args);
         my $callee_arg := @args.shift;
         my $no_decont := nqp::istype($callee_arg, QAST::WVal) && !nqp::iscont($callee_arg.value);
-        $callee_qast := $no_decont
+        $callee_qast_for_flags := $callee_qast := $no_decont
             ?? $callee_arg
             !! QAST::Op.new( :op('decont'), $callee_arg );
     }
@@ -1554,7 +1554,7 @@ my $dispatch_call_gen := -> $qastcomp, $op {
     # callsite. A call dispatch starts with the (decontainerized) callee, and
     # the args will follow it.
     my $callee := $qastcomp.as_mast($callee_qast, :want($MVM_reg_obj));
-    my @dispatch_qast := [$callee_qast];
+    my @dispatch_qast := [$callee_qast_for_flags];
     my @dispatch_mast := [$callee];
     my @dispatch_arg_idxs := [$callee.result_reg];
 
