@@ -38,10 +38,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     }
 });
 
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $capture {
-    # When we have a megamorphic callsite due to loads of different method
-    # names, we build a hash table of the methods.
-    my $obj := nqp::captureposarg($capture, 0);
+sub build-flat-method-table($obj) {
     my %lookup;
     for nqp::how_nd($obj).mro($obj) {
         for $_.HOW.method_table($_) {
@@ -49,19 +46,28 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $c
             %lookup{$name} := $_.value unless nqp::existskey(%lookup, $name);
         }
     }
+    %lookup
+}
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $capture {
+    # When we have a megamorphic callsite due to loads of different method
+    # names, we build a hash table of the methods.
+    my $obj := nqp::captureposarg($capture, 0);
+    my %lookup := build-flat-method-table($obj);
 
     # Make sure we really can find the method name; error if not.
     my str $name := nqp::captureposarg_s($capture, 1);
-    if nqp::existskey(%lookup, $name) {
+    if nqp::isconcrete(nqp::atkey(%lookup, $name)) {
         # Guard on the type of the invocant.
         nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
             nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
 
-        # Do the lookup of the method; the lookup table gets stored as a constant,
-        # and the dispatch fails in the event that the name is not found.
+        # Do the lookup of the method. The flat table is stored at the callsite.
+        # Guard that we get a concrete value back from the lookup - that is, a
+        # method was found.
         my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
         my $track-resolution := nqp::dispatch('boot-syscall', 'dispatcher-index-lookup-table',
             %lookup, $track-name);
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-resolution);
 
         # Drop the first two arguments, which are the decontainerized invocant
         # and the method name. Then insert the resolved method and delegate to
@@ -80,39 +86,75 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $c
 });
 
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $capture {
-    # Guard on the invocant type and method name.
+    # See if this callsite is going megamorphic and do a fallback if so. We only do
+    # this in the non-exceptional case.
+    my $obj := nqp::captureposarg($capture, 0);
+    my $how := nqp::how_nd($obj);
+    my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
+    my int $exceptional := nqp::captureposarg_i($capture, 2);
+    if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
+            && !$exceptional && nqp::can($how, 'mro') {
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega', $capture);
+    }
+    else {
+        # Guard on the invocant type and method name.
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1));
+
+        # Try to find the method.
+        my str $name := nqp::captureposarg_s($capture, 1);
+        my $meth := $how.find_method($obj, $name);
+
+        # If it's found, evaluate to it.
+        if nqp::isconcrete($meth) {
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                $capture, 0, $meth);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        }
+
+        # Otherwise, depends on exceptional flag whether we report the missing
+        # method or hand back a null.
+        else {
+            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+                nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
+            if $exceptional {
+                nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-not-found',
+                    nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0));
+            }
+            else {
+                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $capture, 0, nqp::null());
+                nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+            }
+        }
+    }
+});
+
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega', -> $capture {
+    # Always guard on the exception mode (which should always be false, since we
+    # don't handle it here) and also the type.
     nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
         nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
     nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
-        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1));
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
+    my int $exceptional := nqp::captureposarg_i($capture, 2);
 
-    # Try to find the method.
+    # When we have a megamorphic callsite due to loads of different method
+    # names, we build a hash table of the methods.
     my $obj := nqp::captureposarg($capture, 0);
-    my str $name := nqp::captureposarg_s($capture, 1);
-    my $meth := nqp::how_nd($obj).find_method($obj, $name);
+    my %lookup := build-flat-method-table($obj);
 
-    # If it's found, evaluate to it.
-    if nqp::isconcrete($meth) {
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-            $capture, 0, $meth);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
-    }
-
-    # Otherwise, depends on exceptional flag whether we report the missing
-    # method or hand back a null.
-    else {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
-        if nqp::captureposarg_i($capture, 2) {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-not-found',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0));
-        }
-        else {
-            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $capture, 0, nqp::null());
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
-        }
-    }
+    # Do the lookup of the method; the lookup table gets stored as a constant
+    # at the callsite. If it's not found, the outcome will be a null, which is
+    # exactly what we want.
+    my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
+    my $track-resolution := nqp::dispatch('boot-syscall', 'dispatcher-index-lookup-table',
+        %lookup, $track-name);
+    my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        $capture, 0, $track-resolution);
+    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
 });
 
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
