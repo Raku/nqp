@@ -1903,7 +1903,7 @@ QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayl
 QAST::MASTOperations.add_core_moarop_mapping('lastexpayload', 'lastexpayload');
 QAST::MASTOperations.add_core_moarop_mapping('throwextype', 'throwcatdyn');
 
-my %handler_names := nqp::hash(
+my constant HANDLER_NAMES := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
     'CONTROL', $HandlerCategory::control,
     'NEXT',    $HandlerCategory::next,
@@ -1957,10 +1957,10 @@ QAST::MASTOperations.add_core_op('handle', :!inlinable, sub ($qastcomp, $op) {
         }
         else {
             # Get the category mask.
-            unless nqp::existskey(%handler_names, $type) {
+            unless nqp::existskey(HANDLER_NAMES, $type) {
                 nqp::die("Invalid handler type '$type'");
             }
-            my $cat_mask := $type eq 'CONTROL' ?? 0xEFFE !! %handler_names{$type};
+            my $cat_mask := $type eq 'CONTROL' ?? 0xEFFE !! HANDLER_NAMES{$type};
 
             # Chain in this handler.
             my $check := QAST::Op.new(
@@ -2016,10 +2016,10 @@ QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $
         nqp::die("The 'handlepayload' op needs 3 children, got " ~ +@children);
     }
     my str $type := @children[1];
-    unless nqp::existskey(%handler_names, $type) {
+    unless nqp::existskey(HANDLER_NAMES, $type) {
         nqp::die("Invalid handler type '$type'");
     }
-    my int $mask := %handler_names{$type};
+    my int $mask := HANDLER_NAMES{$type};
     my $frame    := $qastcomp.mast_frame;
 
     my $prot_start := nqp::elems($frame.bytecode);
@@ -2040,7 +2040,7 @@ QAST::MASTOperations.add_core_op('handlepayload', :!inlinable, sub ($qastcomp, $
 });
 
 # Control exception throwing.
-my %control_map := nqp::hash(
+my constant CONTROL_MAP := nqp::hash(
     'next', $HandlerCategory::next,
     'last', $HandlerCategory::last,
     'redo', $HandlerCategory::redo
@@ -2053,7 +2053,7 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
         $label := $_ if $_.named eq 'label';
     }
 
-    if nqp::existskey(%control_map, $name) {
+    if nqp::existskey(CONTROL_MAP, $name) {
         my $frame := $qastcomp.mast_frame;
         if $label {
             # Create an exception object, and attach the label to its payload.
@@ -2065,14 +2065,14 @@ QAST::MASTOperations.add_core_op('control', -> $qastcomp, $op {
             $il.append($lbl);
             %core_op_generators{'newexception'}($frame, $ex);
             %core_op_generators{'bindexpayload'}($frame, $ex,  $lbl.result_reg );
-            %core_op_generators{'const_i64'}($frame, $cat, nqp::add_i(%control_map{$name}, $HandlerCategory::labeled));
+            %core_op_generators{'const_i64'}($frame, $cat, nqp::add_i(CONTROL_MAP{$name}, $HandlerCategory::labeled));
             %core_op_generators{'bindexcategory'}($frame, $ex,  $cat );
             %core_op_generators{'throwdyn'}($frame, $res, $ex);
             $il
         }
         else {
             my $res := $regalloc.fresh_register($MVM_reg_obj);
-            %core_op_generators{'throwcatdyn'}($frame, $res, %control_map{$name});
+            %core_op_generators{'throwcatdyn'}($frame, $res, CONTROL_MAP{$name});
             MAST::InstructionList.new($res, $MVM_reg_obj)
         }
     }
@@ -2191,7 +2191,7 @@ QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamche
 QAST::MASTOperations.add_core_moarop_mapping('bindcomplete', 'bindcomplete');
 
 # Constant mapping.
-my %const_map := nqp::hash(
+my constant CONST_MAP := nqp::hash(
     'CCLASS_ANY',           65535,
     'CCLASS_UPPERCASE',     1,
     'CCLASS_LOWERCASE',     2,
@@ -2358,11 +2358,12 @@ my %const_map := nqp::hash(
     'DISP_BIND_FAILURE',          8,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
-    if nqp::existskey(%const_map, $op.name) {
-        $qastcomp.as_mast(QAST::IVal.new( :value(%const_map{$op.name}) ))
+    my str $name := $op.name;
+    if nqp::existskey(CONST_MAP, $name) {
+        $qastcomp.as_mast(QAST::IVal.new( :value(CONST_MAP{$name}) ))
     }
     else {
-        nqp::die("Unknown constant '" ~ $op.name ~ "'");
+        nqp::die("Unknown constant '$name'");
     }
 });
 
