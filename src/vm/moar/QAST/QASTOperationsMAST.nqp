@@ -1745,7 +1745,6 @@ my $call_gen := sub ($qastcomp, $op) {
 QAST::MASTOperations.add_core_op('call', $dispatch_call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('callstatic', $dispatch_call_gen, :!inlinable);
 QAST::MASTOperations.add_core_op('nativeinvoke', $call_gen, :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('getarg_i', 'getarg_i');
 
 QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
     # Copy args to avoid mutating original QAST during compilation.
@@ -1883,26 +1882,6 @@ QAST::MASTOperations.add_core_op('bind', -> $qastcomp, $op {
 });
 
 # Exception handling/munging.
-QAST::MASTOperations.add_core_moarop_mapping('die', 'die');
-QAST::MASTOperations.add_core_moarop_mapping('die_s', 'die');
-QAST::MASTOperations.add_core_moarop_mapping('exception', 'exception');
-QAST::MASTOperations.add_core_moarop_mapping('getextype', 'getexcategory');
-QAST::MASTOperations.add_core_moarop_mapping('setextype', 'bindexcategory', 1);
-QAST::MASTOperations.add_core_moarop_mapping('getpayload', 'getexpayload');
-QAST::MASTOperations.add_core_moarop_mapping('setpayload', 'bindexpayload', 1);
-QAST::MASTOperations.add_core_moarop_mapping('getmessage', 'getexmessage');
-QAST::MASTOperations.add_core_moarop_mapping('setmessage', 'bindexmessage', 1);
-QAST::MASTOperations.add_core_moarop_mapping('newexception', 'newexception');
-QAST::MASTOperations.add_core_moarop_mapping('backtracestrings', 'backtracestrings');
-QAST::MASTOperations.add_core_moarop_mapping('backtrace', 'backtrace');
-QAST::MASTOperations.add_core_moarop_mapping('throw', 'throwdyn');
-QAST::MASTOperations.add_core_moarop_mapping('rethrow', 'rethrow');
-QAST::MASTOperations.add_core_moarop_mapping('resume', 'resume');
-QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlex', 'throwpayloadlex', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('throwpayloadlexcaller', 'throwpayloadlexcaller', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('lastexpayload', 'lastexpayload');
-QAST::MASTOperations.add_core_moarop_mapping('throwextype', 'throwcatdyn');
-
 my constant HANDLER_NAMES := nqp::hash(
     'CATCH',   $HandlerCategory::catch,
     'CONTROL', $HandlerCategory::control,
@@ -2158,38 +2137,6 @@ QAST::MASTOperations.add_hll_box('', $MVM_reg_void, -> $qastcomp, $reg {
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
 
-# Context introspection
-QAST::MASTOperations.add_core_moarop_mapping('ctx', 'ctx', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxouter', 'ctxouter', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxcaller', 'ctxcaller', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxcode', 'ctxcode', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxouterskipthunks', 'ctxouterskipthunks', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxcallerskipthunks', 'ctxcallerskipthunks', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('curcode', 'curcode', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('callercode', 'callercode', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('ctxlexpad', 'ctxlexpad', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('curlexpad', 'ctx', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('lexprimspec', 'lexprimspec');
-
-# Argument capture processing, for writing things like multi-dispatchers in
-# high level languages.
-QAST::MASTOperations.add_core_moarop_mapping('usecapture', 'usecapture', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('savecapture', 'savecapture', :!inlinable);
-QAST::MASTOperations.add_core_moarop_mapping('captureposelems', 'captureposelems');
-QAST::MASTOperations.add_core_moarop_mapping('captureposarg', 'captureposarg');
-QAST::MASTOperations.add_core_moarop_mapping('captureposarg_i', 'captureposarg_i');
-QAST::MASTOperations.add_core_moarop_mapping('captureposarg_n', 'captureposarg_n');
-QAST::MASTOperations.add_core_moarop_mapping('captureposarg_s', 'captureposarg_s');
-QAST::MASTOperations.add_core_moarop_mapping('captureposprimspec', 'captureposprimspec');
-QAST::MASTOperations.add_core_moarop_mapping('captureexistsnamed', 'captureexistsnamed');
-QAST::MASTOperations.add_core_moarop_mapping('capturehasnameds', 'capturehasnameds');
-QAST::MASTOperations.add_core_moarop_mapping('capturenamedshash', 'capturenamedshash');
-QAST::MASTOperations.add_core_moarop_mapping('objprimspec', 'objprimspec');
-QAST::MASTOperations.add_core_moarop_mapping('objprimbits', 'objprimbits');
-QAST::MASTOperations.add_core_moarop_mapping('objprimunsigned', 'objprimunsigned');
-QAST::MASTOperations.add_core_moarop_mapping('assertparamcheck', 'assertparamcheck');
-QAST::MASTOperations.add_core_moarop_mapping('bindcomplete', 'bindcomplete');
-
 # Constant mapping.
 my constant CONST_MAP := nqp::hash(
     'CCLASS_ANY',           65535,
@@ -2367,61 +2314,10 @@ QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     }
 });
 
-# Default way to do positional and associative lookups.
-QAST::MASTOperations.add_core_moarop_mapping('positional_get', 'atpos_o');
-QAST::MASTOperations.add_core_moarop_mapping('positional_bind', 'bindpos_o', 2);
-QAST::MASTOperations.add_core_moarop_mapping('associative_get', 'atkey_o');
-QAST::MASTOperations.add_core_moarop_mapping('associative_bind', 'bindkey_o', 2);
-
 # I/O opcodes
-QAST::MASTOperations.add_core_moarop_mapping('say', 'say', 0);
-QAST::MASTOperations.add_core_moarop_mapping('print', 'print', 0);
-QAST::MASTOperations.add_core_moarop_mapping('stat', 'stat');
-QAST::MASTOperations.add_core_moarop_mapping('stat_time', 'stat_time');
-QAST::MASTOperations.add_core_moarop_mapping('lstat', 'lstat');
-QAST::MASTOperations.add_core_moarop_mapping('lstat_time', 'lstat_time');
-QAST::MASTOperations.add_core_moarop_mapping('open', 'open_fh');
-QAST::MASTOperations.add_core_moarop_mapping('filereadable', 'filereadable');
-QAST::MASTOperations.add_core_moarop_mapping('filewritable', 'filewritable');
-QAST::MASTOperations.add_core_moarop_mapping('fileexecutable', 'fileexecutable');
 QAST::MASTOperations.add_core_op('fileislink', -> $qastcomp, $op {
     $qastcomp.as_mast( QAST::Op.new( :op('stat'), $op[0], QAST::IVal.new( :value(12) )) )
 });
-QAST::MASTOperations.add_core_moarop_mapping('flushfh', 'sync_fh');
-QAST::MASTOperations.add_core_moarop_mapping('getstdin', 'getstdin');
-QAST::MASTOperations.add_core_moarop_mapping('getstdout', 'getstdout');
-QAST::MASTOperations.add_core_moarop_mapping('getstderr', 'getstderr');
-QAST::MASTOperations.add_core_moarop_mapping('tellfh', 'tell_fh');
-QAST::MASTOperations.add_core_moarop_mapping('seekfh', 'seek_fh');
-QAST::MASTOperations.add_core_moarop_mapping('lockfh', 'lock_fh');
-QAST::MASTOperations.add_core_moarop_mapping('unlockfh', 'unlock_fh');
-QAST::MASTOperations.add_core_moarop_mapping('readfh', 'read_fhb', 1);
-QAST::MASTOperations.add_core_moarop_mapping('writefh', 'write_fhb', 1);
-QAST::MASTOperations.add_core_moarop_mapping('eoffh', 'eof_fh');
-QAST::MASTOperations.add_core_moarop_mapping('closefh', 'close_fh', 0);
-QAST::MASTOperations.add_core_moarop_mapping('isttyfh', 'istty_fh');
-QAST::MASTOperations.add_core_moarop_mapping('filenofh', 'fileno_fh');
-QAST::MASTOperations.add_core_moarop_mapping('socket', 'socket');
-QAST::MASTOperations.add_core_moarop_mapping('connect', 'connect_sk', 0);
-QAST::MASTOperations.add_core_moarop_mapping('bindsock', 'bind_sk', 0);
-QAST::MASTOperations.add_core_moarop_mapping('accept', 'accept_sk');
-QAST::MASTOperations.add_core_moarop_mapping('getport', 'getport_sk');
-QAST::MASTOperations.add_core_moarop_mapping('setbuffersizefh', 'setbuffersize_fh', 0);
-
-QAST::MASTOperations.add_core_moarop_mapping('chmod', 'chmod_f', 0);
-QAST::MASTOperations.add_core_moarop_mapping('unlink', 'delete_f', 0);
-QAST::MASTOperations.add_core_moarop_mapping('rmdir', 'rmdir', 0);
-QAST::MASTOperations.add_core_moarop_mapping('cwd', 'cwd');
-QAST::MASTOperations.add_core_moarop_mapping('chdir', 'chdir', 0);
-QAST::MASTOperations.add_core_moarop_mapping('mkdir', 'mkdir', 0);
-QAST::MASTOperations.add_core_moarop_mapping('rename', 'rename_f', 0);
-QAST::MASTOperations.add_core_moarop_mapping('copy', 'copy_f', 0);
-QAST::MASTOperations.add_core_moarop_mapping('symlink', 'symlink');
-QAST::MASTOperations.add_core_moarop_mapping('readlink', 'readlink');
-QAST::MASTOperations.add_core_moarop_mapping('link', 'link');
-QAST::MASTOperations.add_core_moarop_mapping('opendir', 'open_dir');
-QAST::MASTOperations.add_core_moarop_mapping('nextfiledir', 'read_dir');
-QAST::MASTOperations.add_core_moarop_mapping('closedir', 'close_dir');
 QAST::MASTOperations.add_core_op('sprintf', -> $qastcomp, $op {
     my @operands := $op.list;
     $qastcomp.as_mast(
@@ -2465,143 +2361,6 @@ QAST::MASTOperations.add_core_op('sprintfaddargumenthandler', -> $qastcomp, $op 
     );
 });
 
-# terms
-QAST::MASTOperations.add_core_moarop_mapping('time', 'time');
-
-# Arithmetic ops
-QAST::MASTOperations.add_core_moarop_mapping('add_i', 'add_i');
-QAST::MASTOperations.add_core_moarop_mapping('add_I', 'add_I');
-QAST::MASTOperations.add_core_moarop_mapping('add_n', 'add_n');
-QAST::MASTOperations.add_core_moarop_mapping('sub_i', 'sub_i');
-QAST::MASTOperations.add_core_moarop_mapping('sub_I', 'sub_I');
-QAST::MASTOperations.add_core_moarop_mapping('sub_n', 'sub_n');
-QAST::MASTOperations.add_core_moarop_mapping('mul_i', 'mul_i');
-QAST::MASTOperations.add_core_moarop_mapping('mul_I', 'mul_I');
-QAST::MASTOperations.add_core_moarop_mapping('mul_n', 'mul_n');
-QAST::MASTOperations.add_core_moarop_mapping('div_i', 'div_i');
-QAST::MASTOperations.add_core_moarop_mapping('div_I', 'div_I');
-QAST::MASTOperations.add_core_moarop_mapping('div_In', 'div_In');
-QAST::MASTOperations.add_core_moarop_mapping('div_n', 'div_n');
-QAST::MASTOperations.add_core_moarop_mapping('mod_i', 'mod_i');
-QAST::MASTOperations.add_core_moarop_mapping('mod_I', 'mod_I');
-QAST::MASTOperations.add_core_moarop_mapping('expmod_I', 'expmod_I');
-QAST::MASTOperations.add_core_moarop_mapping('mod_n', 'mod_n');
-QAST::MASTOperations.add_core_moarop_mapping('neg_i', 'neg_i');
-QAST::MASTOperations.add_core_moarop_mapping('neg_I', 'neg_I');
-QAST::MASTOperations.add_core_moarop_mapping('neg_n', 'neg_n');
-QAST::MASTOperations.add_core_moarop_mapping('pow_i', 'pow_i');
-QAST::MASTOperations.add_core_moarop_mapping('pow_I', 'pow_I');
-QAST::MASTOperations.add_core_moarop_mapping('pow_n', 'pow_n');
-QAST::MASTOperations.add_core_moarop_mapping('abs_i', 'abs_i');
-QAST::MASTOperations.add_core_moarop_mapping('abs_I', 'abs_I');
-QAST::MASTOperations.add_core_moarop_mapping('abs_n', 'abs_n');
-QAST::MASTOperations.add_core_moarop_mapping('ceil_n', 'ceil_n');
-QAST::MASTOperations.add_core_moarop_mapping('floor_n', 'floor_n');
-QAST::MASTOperations.add_core_moarop_mapping('sqrt_n', 'sqrt_n');
-QAST::MASTOperations.add_core_moarop_mapping('base_I', 'base_I');
-QAST::MASTOperations.add_core_moarop_mapping('isbig_I', 'isbig_I');
-QAST::MASTOperations.add_core_moarop_mapping('radix', 'radix');
-QAST::MASTOperations.add_core_moarop_mapping('radix_I', 'radix_I');
-QAST::MASTOperations.add_core_moarop_mapping('log_n', 'log_n');
-QAST::MASTOperations.add_core_moarop_mapping('exp_n', 'exp_n');
-QAST::MASTOperations.add_core_moarop_mapping('isnanorinf', 'isnanorinf');
-QAST::MASTOperations.add_core_moarop_mapping('inf', 'inf');
-QAST::MASTOperations.add_core_moarop_mapping('neginf', 'neginf');
-QAST::MASTOperations.add_core_moarop_mapping('nan', 'nan');
-QAST::MASTOperations.add_core_moarop_mapping('isprime_I', 'isprime_I');
-QAST::MASTOperations.add_core_moarop_mapping('rand_I', 'rand_I');
-
-# bigint <-> string/num conversions
-QAST::MASTOperations.add_core_moarop_mapping('tostr_I', 'coerce_Is');
-QAST::MASTOperations.add_core_moarop_mapping('fromstr_I', 'coerce_sI');
-QAST::MASTOperations.add_core_moarop_mapping('tonum_I', 'coerce_In');
-QAST::MASTOperations.add_core_moarop_mapping('fromnum_I', 'coerce_nI');
-QAST::MASTOperations.add_core_moarop_mapping('fromI_I', 'coerce_II');
-
-QAST::MASTOperations.add_core_moarop_mapping('coerce_in', 'coerce_in');
-QAST::MASTOperations.add_core_moarop_mapping('coerce_ni', 'coerce_ni');
-
-QAST::MASTOperations.add_core_moarop_mapping('coerce_ui', 'coerce_ui');
-QAST::MASTOperations.add_core_moarop_mapping('coerce_iu', 'coerce_iu');
-
-QAST::MASTOperations.add_core_moarop_mapping('coerce_is', 'coerce_is');
-QAST::MASTOperations.add_core_moarop_mapping('coerce_us', 'coerce_us');
-QAST::MASTOperations.add_core_moarop_mapping('coerce_si', 'coerce_si');
-
-# trig opcodes
-QAST::MASTOperations.add_core_moarop_mapping('sin_n', 'sin_n');
-QAST::MASTOperations.add_core_moarop_mapping('asin_n', 'asin_n');
-QAST::MASTOperations.add_core_moarop_mapping('cos_n', 'cos_n');
-QAST::MASTOperations.add_core_moarop_mapping('acos_n', 'acos_n');
-QAST::MASTOperations.add_core_moarop_mapping('tan_n', 'tan_n');
-QAST::MASTOperations.add_core_moarop_mapping('atan_n', 'atan_n');
-QAST::MASTOperations.add_core_moarop_mapping('atan2_n', 'atan2_n');
-QAST::MASTOperations.add_core_moarop_mapping('asin_n', 'asin_n');
-QAST::MASTOperations.add_core_moarop_mapping('sinh_n', 'sinh_n');
-QAST::MASTOperations.add_core_moarop_mapping('cosh_n', 'cosh_n');
-QAST::MASTOperations.add_core_moarop_mapping('tanh_n', 'tanh_n');
-
-# esoteric math opcodes
-QAST::MASTOperations.add_core_moarop_mapping('gcd_i', 'gcd_i');
-QAST::MASTOperations.add_core_moarop_mapping('gcd_I', 'gcd_I');
-QAST::MASTOperations.add_core_moarop_mapping('lcm_i', 'lcm_i');
-QAST::MASTOperations.add_core_moarop_mapping('lcm_I', 'lcm_I');
-
-# string opcodes
-QAST::MASTOperations.add_core_moarop_mapping('chars', 'chars');
-QAST::MASTOperations.add_core_moarop_mapping('codes', 'codes_s');
-QAST::MASTOperations.add_core_moarop_mapping('uc', 'uc');
-QAST::MASTOperations.add_core_moarop_mapping('lc', 'lc');
-QAST::MASTOperations.add_core_moarop_mapping('tc', 'tc');
-QAST::MASTOperations.add_core_moarop_mapping('fc', 'fc');
-QAST::MASTOperations.add_core_moarop_mapping('x', 'repeat_s');
-QAST::MASTOperations.add_core_moarop_mapping('iscclass', 'iscclass');
-QAST::MASTOperations.add_core_moarop_mapping('findcclass', 'findcclass');
-QAST::MASTOperations.add_core_moarop_mapping('findnotcclass', 'findnotcclass');
-QAST::MASTOperations.add_core_moarop_mapping('escape', 'escape');
-QAST::MASTOperations.add_core_moarop_mapping('replace', 'replace');
-QAST::MASTOperations.add_core_moarop_mapping('flip', 'flip');
-QAST::MASTOperations.add_core_moarop_mapping('concat', 'concat_s');
-QAST::MASTOperations.add_core_moarop_mapping('join', 'join');
-QAST::MASTOperations.add_core_moarop_mapping('split', 'split');
-QAST::MASTOperations.add_core_moarop_mapping('chr', 'chr');
-QAST::MASTOperations.add_core_moarop_mapping('ordfirst', 'ordfirst');
-QAST::MASTOperations.add_core_moarop_mapping('ordat', 'ordat');
-QAST::MASTOperations.add_core_moarop_mapping('ordbaseat', 'ordbaseat');
-QAST::MASTOperations.add_core_moarop_mapping('indexfrom', 'index_s');
-QAST::MASTOperations.add_core_moarop_mapping('indexic', 'indexic_s');
-QAST::MASTOperations.add_core_moarop_mapping('indexim', 'indexim_s');
-QAST::MASTOperations.add_core_moarop_mapping('indexicim', 'indexicim_s');
-QAST::MASTOperations.add_core_moarop_mapping('rindexfrom', 'rindexfrom');
-QAST::MASTOperations.add_core_moarop_mapping('substr_s', 'substr_s');
-QAST::MASTOperations.add_core_moarop_mapping('codepointfromname', 'getcpbyname');
-QAST::MASTOperations.add_core_moarop_mapping('getcp_s', 'getcp_s');
-QAST::MASTOperations.add_core_moarop_mapping('encode', 'encode');
-QAST::MASTOperations.add_core_moarop_mapping('encodeconf', 'encodeconf');
-QAST::MASTOperations.add_core_moarop_mapping('encoderep', 'encoderep');
-QAST::MASTOperations.add_core_moarop_mapping('encoderepconf', 'encoderepconf');
-QAST::MASTOperations.add_core_moarop_mapping('decode', 'decode');
-QAST::MASTOperations.add_core_moarop_mapping('decodeconf', 'decodeconf');
-QAST::MASTOperations.add_core_moarop_mapping('decoderepconf', 'decoderepconf');
-QAST::MASTOperations.add_core_moarop_mapping('decodetocodes', 'decodetocodes', 3);
-QAST::MASTOperations.add_core_moarop_mapping('encodefromcodes', 'encodefromcodes', 2);
-QAST::MASTOperations.add_core_moarop_mapping('encodenorm', 'encodenorm', 3);
-QAST::MASTOperations.add_core_moarop_mapping('normalizecodes', 'normalizecodes', 2);
-QAST::MASTOperations.add_core_moarop_mapping('strfromcodes', 'strfromcodes');
-QAST::MASTOperations.add_core_moarop_mapping('strtocodes', 'strtocodes', 2);
-QAST::MASTOperations.add_core_moarop_mapping('decoderconfigure', 'decoderconfigure', 0);
-QAST::MASTOperations.add_core_moarop_mapping('decodersetlineseps', 'decodersetlineseps', 0);
-QAST::MASTOperations.add_core_moarop_mapping('decoderaddbytes', 'decoderaddbytes', 1);
-QAST::MASTOperations.add_core_moarop_mapping('decodertakechars', 'decodertakechars');
-QAST::MASTOperations.add_core_moarop_mapping('decodertakecharseof', 'decodertakecharseof');
-QAST::MASTOperations.add_core_moarop_mapping('decodertakeallchars', 'decodertakeallchars');
-QAST::MASTOperations.add_core_moarop_mapping('decodertakeavailablechars', 'decodertakeavailablechars');
-QAST::MASTOperations.add_core_moarop_mapping('decodertakeline', 'decodertakeline');
-QAST::MASTOperations.add_core_moarop_mapping('decoderbytesavailable', 'decoderbytesavailable');
-QAST::MASTOperations.add_core_moarop_mapping('decodertakebytes', 'decodertakebytes');
-QAST::MASTOperations.add_core_moarop_mapping('decoderempty', 'decoderempty');
-QAST::MASTOperations.add_core_moarop_mapping('indexingoptimized', 'indexingoptimized');
-
 QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
     my @operands := $op.list;
     unless nqp::elems(@operands) == 1 {
@@ -2617,12 +2376,6 @@ QAST::MASTOperations.add_core_op('tclc', -> $qastcomp, $op {
                         @operands[0], QAST::IVal.new( :value(1) ))),
         ));
 });
-
-QAST::MASTOperations.add_core_moarop_mapping('eqat', 'eqat_s');
-QAST::MASTOperations.add_core_moarop_mapping('eqatic', 'eqatic_s');
-QAST::MASTOperations.add_core_moarop_mapping('eqatim', 'eqatim_s');
-QAST::MASTOperations.add_core_moarop_mapping('eqaticim', 'eqaticim_s');
-
 
 QAST::MASTOperations.add_core_op('substr', -> $qastcomp, $op {
     my @operands := $op.list;
@@ -2651,185 +2404,6 @@ QAST::MASTOperations.add_core_op('rindex',  -> $qastcomp, $op {
         !! QAST::Op.new( :op('rindexfrom'), |@operands ));
 });
 
-# unicode properties
-QAST::MASTOperations.add_core_moarop_mapping('unipropcode', 'unipropcode');
-QAST::MASTOperations.add_core_moarop_mapping('unipvalcode', 'unipvalcode');
-QAST::MASTOperations.add_core_moarop_mapping('hasuniprop', 'hasuniprop');
-QAST::MASTOperations.add_core_moarop_mapping('getuniname', 'getuniname');
-QAST::MASTOperations.add_core_moarop_mapping('getuniprop_str', 'getuniprop_str');
-QAST::MASTOperations.add_core_moarop_mapping('getuniprop_bool', 'getuniprop_bool');
-QAST::MASTOperations.add_core_moarop_mapping('getuniprop_int', 'getuniprop_int');
-QAST::MASTOperations.add_core_moarop_mapping('matchuniprop', 'matchuniprop');
-
-# serialization context opcodes
-QAST::MASTOperations.add_core_moarop_mapping('sha1', 'sha1');
-QAST::MASTOperations.add_core_moarop_mapping('createsc', 'createsc');
-QAST::MASTOperations.add_core_moarop_mapping('scsetobj', 'scsetobj', 2);
-QAST::MASTOperations.add_core_moarop_mapping('scsetcode', 'scsetcode', 2);
-QAST::MASTOperations.add_core_moarop_mapping('scgetobj', 'scgetobj');
-QAST::MASTOperations.add_core_moarop_mapping('scgethandle', 'scgethandle');
-QAST::MASTOperations.add_core_moarop_mapping('scgetdesc', 'scgetdesc');
-QAST::MASTOperations.add_core_moarop_mapping('scgetobjidx', 'scgetobjidx');
-QAST::MASTOperations.add_core_moarop_mapping('scsetdesc', 'scsetdesc', 1);
-QAST::MASTOperations.add_core_moarop_mapping('scobjcount', 'scobjcount');
-QAST::MASTOperations.add_core_moarop_mapping('setobjsc', 'setobjsc', 0);
-QAST::MASTOperations.add_core_moarop_mapping('getobjsc', 'getobjsc');
-QAST::MASTOperations.add_core_moarop_mapping('serialize', 'serialize');
-QAST::MASTOperations.add_core_moarop_mapping('deserialize', 'deserialize', 0);
-QAST::MASTOperations.add_core_moarop_mapping('scwbdisable', 'scwbdisable');
-QAST::MASTOperations.add_core_moarop_mapping('scwbenable', 'scwbenable');
-QAST::MASTOperations.add_core_moarop_mapping('pushcompsc', 'pushcompsc', 0);
-QAST::MASTOperations.add_core_moarop_mapping('popcompsc', 'popcompsc');
-QAST::MASTOperations.add_core_moarop_mapping('neverrepossess', 'neverrepossess', 0);
-QAST::MASTOperations.add_core_moarop_mapping('scdisclaim', 'scdisclaim', 0);
-
-# bitwise opcodes
-QAST::MASTOperations.add_core_moarop_mapping('bitor_i', 'bor_i');
-QAST::MASTOperations.add_core_moarop_mapping('bitxor_i', 'bxor_i');
-QAST::MASTOperations.add_core_moarop_mapping('bitand_i', 'band_i');
-QAST::MASTOperations.add_core_moarop_mapping('bitshiftl_i', 'blshift_i');
-QAST::MASTOperations.add_core_moarop_mapping('bitshiftr_i', 'brshift_i');
-QAST::MASTOperations.add_core_moarop_mapping('bitneg_i', 'bnot_i');
-
-QAST::MASTOperations.add_core_moarop_mapping('bitor_I', 'bor_I');
-QAST::MASTOperations.add_core_moarop_mapping('bitxor_I', 'bxor_I');
-QAST::MASTOperations.add_core_moarop_mapping('bitand_I', 'band_I');
-QAST::MASTOperations.add_core_moarop_mapping('bitneg_I', 'bnot_I');
-QAST::MASTOperations.add_core_moarop_mapping('bitshiftl_I', 'blshift_I');
-QAST::MASTOperations.add_core_moarop_mapping('bitshiftr_I', 'brshift_I');
-
-# string bitwise ops
-QAST::MASTOperations.add_core_moarop_mapping('bitor_s', 'bitor_s');
-QAST::MASTOperations.add_core_moarop_mapping('bitxor_s', 'bitxor_s');
-QAST::MASTOperations.add_core_moarop_mapping('bitand_s', 'bitand_s');
-
-# relational opcodes
-QAST::MASTOperations.add_core_moarop_mapping('cmp_i', 'cmp_i');
-QAST::MASTOperations.add_core_moarop_mapping('iseq_i', 'eq_i');
-QAST::MASTOperations.add_core_moarop_mapping('isne_i', 'ne_i');
-QAST::MASTOperations.add_core_moarop_mapping('islt_i', 'lt_i');
-QAST::MASTOperations.add_core_moarop_mapping('isle_i', 'le_i');
-QAST::MASTOperations.add_core_moarop_mapping('isgt_i', 'gt_i');
-QAST::MASTOperations.add_core_moarop_mapping('isge_i', 'ge_i');
-
-QAST::MASTOperations.add_core_moarop_mapping('cmp_n', 'cmp_n');
-QAST::MASTOperations.add_core_moarop_mapping('not_i', 'not_i');
-QAST::MASTOperations.add_core_moarop_mapping('iseq_n', 'eq_n');
-QAST::MASTOperations.add_core_moarop_mapping('isne_n', 'ne_n');
-QAST::MASTOperations.add_core_moarop_mapping('islt_n', 'lt_n');
-QAST::MASTOperations.add_core_moarop_mapping('isle_n', 'le_n');
-QAST::MASTOperations.add_core_moarop_mapping('isgt_n', 'gt_n');
-QAST::MASTOperations.add_core_moarop_mapping('isge_n', 'ge_n');
-
-QAST::MASTOperations.add_core_moarop_mapping('cmp_s', 'cmp_s');
-QAST::MASTOperations.add_core_moarop_mapping('unicmp_s', 'unicmp_s');
-QAST::MASTOperations.add_core_moarop_mapping('strfromname', 'strfromname');
-QAST::MASTOperations.add_core_moarop_mapping('iseq_s', 'eq_s');
-QAST::MASTOperations.add_core_moarop_mapping('isne_s', 'ne_s');
-QAST::MASTOperations.add_core_moarop_mapping('islt_s', 'lt_s');
-QAST::MASTOperations.add_core_moarop_mapping('isle_s', 'le_s');
-QAST::MASTOperations.add_core_moarop_mapping('isgt_s', 'gt_s');
-QAST::MASTOperations.add_core_moarop_mapping('isge_s', 'ge_s');
-
-QAST::MASTOperations.add_core_moarop_mapping('bool_I', 'bool_I');
-QAST::MASTOperations.add_core_moarop_mapping('cmp_I', 'cmp_I');
-QAST::MASTOperations.add_core_moarop_mapping('iseq_I', 'eq_I');
-QAST::MASTOperations.add_core_moarop_mapping('isne_I', 'ne_I');
-QAST::MASTOperations.add_core_moarop_mapping('islt_I', 'lt_I');
-QAST::MASTOperations.add_core_moarop_mapping('isle_I', 'le_I');
-QAST::MASTOperations.add_core_moarop_mapping('isgt_I', 'gt_I');
-QAST::MASTOperations.add_core_moarop_mapping('isge_I', 'ge_I');
-
-# aggregate opcodes
-QAST::MASTOperations.add_core_moarop_mapping('atpos', 'atpos_o');
-QAST::MASTOperations.add_core_moarop_mapping('atpos_i', 'atpos_i');
-QAST::MASTOperations.add_core_moarop_mapping('atpos_n', 'atpos_n');
-QAST::MASTOperations.add_core_moarop_mapping('atpos_s', 'atpos_s');
-QAST::MASTOperations.add_core_moarop_mapping('atposref_i', 'atposref_i');
-QAST::MASTOperations.add_core_moarop_mapping('atposref_n', 'atposref_n');
-QAST::MASTOperations.add_core_moarop_mapping('atposref_s', 'atposref_s');
-QAST::MASTOperations.add_core_moarop_mapping('atpos2d', 'atpos2d_o');
-QAST::MASTOperations.add_core_moarop_mapping('atpos2d_i', 'atpos2d_i');
-QAST::MASTOperations.add_core_moarop_mapping('atpos2d_n', 'atpos2d_n');
-QAST::MASTOperations.add_core_moarop_mapping('atpos2d_s', 'atpos2d_s');
-QAST::MASTOperations.add_core_moarop_mapping('atpos3d', 'atpos3d_o');
-QAST::MASTOperations.add_core_moarop_mapping('atpos3d_i', 'atpos3d_i');
-QAST::MASTOperations.add_core_moarop_mapping('atpos3d_n', 'atpos3d_n');
-QAST::MASTOperations.add_core_moarop_mapping('atpos3d_s', 'atpos3d_s');
-QAST::MASTOperations.add_core_moarop_mapping('atposnd', 'atposnd_o');
-QAST::MASTOperations.add_core_moarop_mapping('atposnd_i', 'atposnd_i');
-QAST::MASTOperations.add_core_moarop_mapping('atposnd_n', 'atposnd_n');
-QAST::MASTOperations.add_core_moarop_mapping('atposnd_s', 'atposnd_s');
-QAST::MASTOperations.add_core_moarop_mapping('multidimref_i', 'multidimref_i');
-QAST::MASTOperations.add_core_moarop_mapping('multidimref_n', 'multidimref_n');
-QAST::MASTOperations.add_core_moarop_mapping('multidimref_s', 'multidimref_s');
-QAST::MASTOperations.add_core_moarop_mapping('atkey', 'atkey_o');
-QAST::MASTOperations.add_core_moarop_mapping('atkey_i', 'atkey_i');
-QAST::MASTOperations.add_core_moarop_mapping('atkey_u', 'atkey_u');
-QAST::MASTOperations.add_core_moarop_mapping('atkey_n', 'atkey_n');
-QAST::MASTOperations.add_core_moarop_mapping('atkey_s', 'atkey_s');
-QAST::MASTOperations.add_core_moarop_mapping('bindpos', 'bindpos_o', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos_i', 'bindpos_i', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos_n', 'bindpos_n', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos_s', 'bindpos_s', 2);
-
-QAST::MASTOperations.add_core_moarop_mapping('bindpos2d', 'bindpos2d_o', 3);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos2d_i', 'bindpos2d_i', 3);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos2d_n', 'bindpos2d_n', 3);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos2d_s', 'bindpos2d_s', 3);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos3d', 'bindpos3d_o', 4);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos3d_i', 'bindpos3d_i', 4);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos3d_n', 'bindpos3d_n', 4);
-QAST::MASTOperations.add_core_moarop_mapping('bindpos3d_s', 'bindpos3d_s', 4);
-QAST::MASTOperations.add_core_moarop_mapping('bindposnd', 'bindposnd_o', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindposnd_i', 'bindposnd_i', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindposnd_n', 'bindposnd_n', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindposnd_s', 'bindposnd_s', 2);
-QAST::MASTOperations.add_core_moarop_mapping('writeint', 'writeint');
-QAST::MASTOperations.add_core_moarop_mapping('writeuint', 'writeuint');
-QAST::MASTOperations.add_core_moarop_mapping('writenum', 'writenum');
-QAST::MASTOperations.add_core_moarop_mapping('readint', 'readint');
-QAST::MASTOperations.add_core_moarop_mapping('readuint', 'readuint');
-QAST::MASTOperations.add_core_moarop_mapping('readnum', 'readnum');
-QAST::MASTOperations.add_core_moarop_mapping('bindkey', 'bindkey_o', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindkey_i', 'bindkey_i', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindkey_n', 'bindkey_n', 2);
-QAST::MASTOperations.add_core_moarop_mapping('bindkey_s', 'bindkey_s', 2);
-QAST::MASTOperations.add_core_moarop_mapping('existskey', 'existskey');
-QAST::MASTOperations.add_core_moarop_mapping('deletekey', 'deletekey');
-QAST::MASTOperations.add_core_moarop_mapping('elems', 'elems');
-QAST::MASTOperations.add_core_moarop_mapping('setelems', 'setelemspos', 0);
-QAST::MASTOperations.add_core_moarop_mapping('dimensions', 'dimensions');
-QAST::MASTOperations.add_core_moarop_mapping('setdimensions', 'setdimensions', 0);
-QAST::MASTOperations.add_core_moarop_mapping('numdimensions', 'numdimensions');
-QAST::MASTOperations.add_core_moarop_mapping('existspos', 'existspos');
-QAST::MASTOperations.add_core_moarop_mapping('push', 'push_o', 1);
-QAST::MASTOperations.add_core_moarop_mapping('push_i', 'push_i', 1);
-QAST::MASTOperations.add_core_moarop_mapping('push_n', 'push_n', 1);
-QAST::MASTOperations.add_core_moarop_mapping('push_s', 'push_s', 1);
-QAST::MASTOperations.add_core_moarop_mapping('pop', 'pop_o');
-QAST::MASTOperations.add_core_moarop_mapping('pop_i', 'pop_i');
-QAST::MASTOperations.add_core_moarop_mapping('pop_n', 'pop_n');
-QAST::MASTOperations.add_core_moarop_mapping('pop_s', 'pop_s');
-QAST::MASTOperations.add_core_moarop_mapping('unshift', 'unshift_o', 1);
-QAST::MASTOperations.add_core_moarop_mapping('unshift_i', 'unshift_i', 1);
-QAST::MASTOperations.add_core_moarop_mapping('unshift_n', 'unshift_n', 1);
-QAST::MASTOperations.add_core_moarop_mapping('unshift_s', 'unshift_s', 1);
-QAST::MASTOperations.add_core_moarop_mapping('shift', 'shift_o');
-QAST::MASTOperations.add_core_moarop_mapping('shift_i', 'shift_i');
-QAST::MASTOperations.add_core_moarop_mapping('shift_n', 'shift_n');
-QAST::MASTOperations.add_core_moarop_mapping('shift_s', 'shift_s');
-QAST::MASTOperations.add_core_moarop_mapping('splice', 'splice', 0);
-QAST::MASTOperations.add_core_moarop_mapping('slice', 'slice');
-QAST::MASTOperations.add_core_moarop_mapping('isint', 'isint', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('isnum', 'isnum', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('isstr', 'isstr', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('islist', 'islist', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('ishash', 'ishash', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('iterator', 'iter');
-QAST::MASTOperations.add_core_moarop_mapping('iterkey_s', 'iterkey_s');
-QAST::MASTOperations.add_core_moarop_mapping('iterval', 'iterval');
-
 # object opcodes
 QAST::MASTOperations.add_core_op('null', -> $qastcomp, $op {
     my $want := $*WANT;
@@ -2842,12 +2416,6 @@ QAST::MASTOperations.add_core_op('null', -> $qastcomp, $op {
         MAST::InstructionList.new($res_reg, $MVM_reg_obj)
     }
 });
-QAST::MASTOperations.add_core_moarop_mapping('null_s', 'null_s');
-QAST::MASTOperations.add_core_moarop_mapping('what', 'getwhat', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('how', 'gethow', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('who', 'getwho', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('where', 'getwhere', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('objectid', 'objectid', :decont(0));
 my $findmethodish := -> $qastcomp, $op {
     # Compile and decont the object.
     my $regalloc := $qastcomp.regalloc;
@@ -2893,28 +2461,6 @@ my $findmethodish := -> $qastcomp, $op {
 QAST::MASTOperations.add_core_op('findmethod', $findmethodish);
 QAST::MASTOperations.add_core_op('tryfindmethod', $findmethodish);
 QAST::MASTOperations.add_core_op('can', $findmethodish);
-QAST::MASTOperations.add_core_moarop_mapping('setwho', 'setwho', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless', :decont(0, 1));
-QAST::MASTOperations.add_core_moarop_mapping('knowhow', 'knowhow');
-QAST::MASTOperations.add_core_moarop_mapping('knowhowattr', 'knowhowattr');
-QAST::MASTOperations.add_core_moarop_mapping('bootint', 'bootint');
-QAST::MASTOperations.add_core_moarop_mapping('bootnum', 'bootnum');
-QAST::MASTOperations.add_core_moarop_mapping('bootstr', 'bootstr');
-QAST::MASTOperations.add_core_moarop_mapping('bootarray', 'bootarray');
-QAST::MASTOperations.add_core_moarop_mapping('bootintarray', 'bootintarray');
-QAST::MASTOperations.add_core_moarop_mapping('bootnumarray', 'bootnumarray');
-QAST::MASTOperations.add_core_moarop_mapping('bootstrarray', 'bootstrarray');
-QAST::MASTOperations.add_core_moarop_mapping('boothash', 'boothash');
-QAST::MASTOperations.add_core_moarop_mapping('hlllist', 'hlllist');
-QAST::MASTOperations.add_core_moarop_mapping('hllhash', 'hllhash');
-QAST::MASTOperations.add_core_moarop_mapping('create', 'create');
-QAST::MASTOperations.add_core_moarop_mapping('clone', 'clone', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('isconcrete', 'isconcrete', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('iscont', 'iscont');
-QAST::MASTOperations.add_core_moarop_mapping('iscont_i', 'iscont_i');
-QAST::MASTOperations.add_core_moarop_mapping('iscont_n', 'iscont_n');
-QAST::MASTOperations.add_core_moarop_mapping('iscont_s', 'iscont_s');
-QAST::MASTOperations.add_core_moarop_mapping('isrwcont', 'isrwcont');
 QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
     if nqp::elems($op.list) != 1 {
         nqp::die("The 'decont' op needs 1 operand, got " ~ nqp::elems($op.list));
@@ -2926,15 +2472,9 @@ QAST::MASTOperations.add_core_op('decont', -> $qastcomp, $op {
     $regalloc.release_register($expr.result_reg, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_obj)
 });
-QAST::MASTOperations.add_core_moarop_mapping('decont', 'decont');
 QAST::MASTOperations.add_core_op('wantdecont', -> $qastcomp, $op {
     $qastcomp.as_mast($op[0], :want-decont)
 });
-QAST::MASTOperations.add_core_moarop_mapping('decont_i', 'decont_i');
-QAST::MASTOperations.add_core_moarop_mapping('decont_n', 'decont_n');
-QAST::MASTOperations.add_core_moarop_mapping('decont_s', 'decont_s');
-QAST::MASTOperations.add_core_moarop_mapping('isnull', 'isnull');
-QAST::MASTOperations.add_core_moarop_mapping('isnull_s', 'isnull_s');
 QAST::MASTOperations.add_core_op('istrue', -> $qastcomp, $op {
     my $regalloc := $qastcomp.regalloc;
     my $obj_mast := $qastcomp.as_mast( :want($MVM_reg_obj), $op[0] );
@@ -2959,9 +2499,6 @@ QAST::MASTOperations.add_core_op('isfalse', -> $qastcomp, $op {
     %core_op_generators<not_i>($frame, $result_reg, $result_reg);
     MAST::InstructionList.new($result_reg, $MVM_reg_int64)
 });
-QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
-QAST::MASTOperations.add_core_moarop_mapping('eqaddr', 'eqaddr');
-QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
 
 sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
     $hintedop := %core_op_generators{$hintedop};
@@ -3043,26 +2580,6 @@ add_getattr_op('getattrref_i', 'getattrref_i', 'getattrsref_i', $MVM_reg_obj);
 add_getattr_op('getattrref_n', 'getattrref_n', 'getattrsref_n', $MVM_reg_obj);
 add_getattr_op('getattrref_s', 'getattrref_s', 'getattrsref_s', $MVM_reg_obj);
 
-QAST::MASTOperations.add_core_moarop_mapping('hintfor', 'hintfor');
-QAST::MASTOperations.add_core_moarop_mapping('unbox_i', 'unbox_i', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('unbox_n', 'unbox_n', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('unbox_s', 'unbox_s', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('unbox_u', 'unbox_u', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('box_i', 'box_i');
-QAST::MASTOperations.add_core_moarop_mapping('box_n', 'box_n');
-QAST::MASTOperations.add_core_moarop_mapping('box_s', 'box_s');
-QAST::MASTOperations.add_core_moarop_mapping('box_u', 'box_u');
-QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_i', 'hllboxtype_i');
-QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_n', 'hllboxtype_n');
-QAST::MASTOperations.add_core_moarop_mapping('hllboxtype_s', 'hllboxtype_s');
-QAST::MASTOperations.add_core_moarop_mapping('reprname', 'reprname', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('newtype', 'newtype', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('newmixintype', 'newmixintype', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('composetype', 'composetype');
-QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('settypefinalize', 'settypefinalize', 0, :decont(0));
 QAST::MASTOperations.add_core_op('isinvokable', -> $qastcomp, $op {
     $qastcomp.as_mast(QAST::Op.new(
         :op('dispatch'),
@@ -3070,8 +2587,6 @@ QAST::MASTOperations.add_core_op('isinvokable', -> $qastcomp, $op {
         $op[0]
     ))
 });
-QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
 
 sub try_get_bind_scope($var) {
     if nqp::istype($var, QAST::Var) {
@@ -3130,43 +2645,6 @@ add_native_assign_op('assign_i', $MVM_reg_int64);
 add_native_assign_op('assign_n', $MVM_reg_num64);
 add_native_assign_op('assign_s', $MVM_reg_str);
 
-QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('setparameterizer', 'setparameterizer', 0, :decont(0, 1));
-QAST::MASTOperations.add_core_moarop_mapping('parameterizetype', 'parameterizetype', :decont(0, 1));
-QAST::MASTOperations.add_core_moarop_mapping('typeparameterized', 'typeparameterized', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('typeparameters', 'typeparameters', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('typeparameterat', 'typeparameterat', :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('setdebugtypename', 'setdebugtypename', 0);
-
-# object ops that don't do the usual decontainerization
-QAST::MASTOperations.add_core_moarop_mapping('what_nd', 'getwhat');
-QAST::MASTOperations.add_core_moarop_mapping('isconcrete_nd', 'isconcrete');
-QAST::MASTOperations.add_core_moarop_mapping('clone_nd', 'clone');
-QAST::MASTOperations.add_core_moarop_mapping('how_nd', 'gethow');
-QAST::MASTOperations.add_core_moarop_mapping('istype_nd', 'istype');
-
-# defined - overridden by HLL, but by default same as .DEFINITE.
-QAST::MASTOperations.add_core_moarop_mapping('defined', 'isconcrete', :decont(0));
-
-# lexical related opcodes
-QAST::MASTOperations.add_core_moarop_mapping('getlex', 'getlex_no');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_i', 'getlex_ni');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_n', 'getlex_nn');
-QAST::MASTOperations.add_core_moarop_mapping('getlex_s', 'getlex_ns');
-QAST::MASTOperations.add_core_moarop_mapping('getlexref_i', 'getlexref_ni');
-QAST::MASTOperations.add_core_moarop_mapping('getlexref_n', 'getlexref_nn');
-QAST::MASTOperations.add_core_moarop_mapping('getlexref_s', 'getlexref_ns');
-QAST::MASTOperations.add_core_moarop_mapping('bindlex', 'bindlex_no', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_i', 'bindlex_ni', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_n', 'bindlex_nn', 1);
-QAST::MASTOperations.add_core_moarop_mapping('bindlex_s', 'bindlex_ns', 1);
-QAST::MASTOperations.add_core_moarop_mapping('getlexdyn', 'getdynlex');
-QAST::MASTOperations.add_core_moarop_mapping('bindlexdyn', 'binddynlex');
-QAST::MASTOperations.add_core_moarop_mapping('getlexouter', 'getlexouter');
-QAST::MASTOperations.add_core_moarop_mapping('getlexrel', 'getlexrel');
-QAST::MASTOperations.add_core_moarop_mapping('getlexreldyn', 'getlexreldyn');
-QAST::MASTOperations.add_core_moarop_mapping('getlexrelcaller', 'getlexrelcaller');
-QAST::MASTOperations.add_core_moarop_mapping('getlexcaller', 'getlexcaller');
 QAST::MASTOperations.add_core_op('locallifetime', -> $qastcomp, $op {
     # TODO: take advantage of this info for code-gen, if possible.
     $qastcomp.as_mast($op[0], :want($*WANT))
@@ -3181,36 +2659,8 @@ QAST::MASTOperations.add_core_op('takeclosure', -> $qastcomp, $op {
     }
     $qastcomp.as_mast($op[0])
 });
-QAST::MASTOperations.add_core_moarop_mapping('getcodeobj', 'getcodeobj');
-QAST::MASTOperations.add_core_moarop_mapping('setcodeobj', 'setcodeobj', 0);
-QAST::MASTOperations.add_core_moarop_mapping('getcodename', 'getcodename');
-QAST::MASTOperations.add_core_moarop_mapping('setcodename', 'setcodename', 0);
-QAST::MASTOperations.add_core_moarop_mapping('forceouterctx', 'forceouterctx', 0);
-QAST::MASTOperations.add_core_moarop_mapping('freshcoderef', 'freshcoderef');
-QAST::MASTOperations.add_core_moarop_mapping('iscoderef', 'iscoderef');
-QAST::MASTOperations.add_core_moarop_mapping('markcodestatic', 'markcodestatic');
-QAST::MASTOperations.add_core_moarop_mapping('markcodestub', 'markcodestub');
-QAST::MASTOperations.add_core_moarop_mapping('getstaticcode', 'getstaticcode');
-QAST::MASTOperations.add_core_moarop_mapping('getcodecuid', 'getcodecuid');
-QAST::MASTOperations.add_core_moarop_mapping('captureinnerlex', 'captureinnerlex', 0);
 
 # language/compiler ops
-QAST::MASTOperations.add_core_moarop_mapping('getcomp', 'getcomp');
-QAST::MASTOperations.add_core_moarop_mapping('bindcomp', 'bindcomp');
-QAST::MASTOperations.add_core_moarop_mapping('gethllsym', 'gethllsym');
-QAST::MASTOperations.add_core_moarop_mapping('bindhllsym', 'bindhllsym', 2);
-QAST::MASTOperations.add_core_moarop_mapping('getcurhllsym', 'getcurhllsym');
-QAST::MASTOperations.add_core_moarop_mapping('bindcurhllsym', 'bindcurhllsym');
-QAST::MASTOperations.add_core_moarop_mapping('sethllconfig', 'sethllconfig');
-QAST::MASTOperations.add_core_moarop_mapping('loadbytecode', 'loadbytecode');
-QAST::MASTOperations.add_core_moarop_mapping('loadbytecodebuffer', 'loadbytecodebuffer');
-QAST::MASTOperations.add_core_moarop_mapping('buffertocu', 'buffertocu');
-QAST::MASTOperations.add_core_moarop_mapping('loadbytecodefh', 'loadbytecodefh');
-QAST::MASTOperations.add_core_moarop_mapping('settypehll', 'settypehll', 0);
-QAST::MASTOperations.add_core_moarop_mapping('settypehllrole', 'settypehllrole', 0);
-QAST::MASTOperations.add_core_moarop_mapping('gettypehllrole', 'gettypehllrole');
-QAST::MASTOperations.add_core_moarop_mapping('usecompileehllconfig', 'usecompileehllconfig');
-QAST::MASTOperations.add_core_moarop_mapping('usecompilerhllconfig', 'usecompilerhllconfig');
 QAST::MASTOperations.add_core_op('hllize', -> $qastcomp, $op {
     # desugar into nqp::dispatch('lang-hllize', $op[0]);
     $qastcomp.as_mast(
@@ -3224,15 +2674,7 @@ QAST::MASTOperations.add_core_op('hllizefor', -> $qastcomp, $op {
     )
 });
 
-# regex engine related opcodes
-QAST::MASTOperations.add_core_moarop_mapping('nfafromstatelist', 'nfafromstatelist');
-QAST::MASTOperations.add_core_moarop_mapping('nfarunproto', 'nfarunproto');
-QAST::MASTOperations.add_core_moarop_mapping('nfarunalt', 'nfarunalt', 0);
-
 # native call ops
-QAST::MASTOperations.add_core_moarop_mapping('initnativecall', 'no_op');
-QAST::MASTOperations.add_core_moarop_mapping('buildnativecall', 'nativecallbuild');
-QAST::MASTOperations.add_core_moarop_mapping('nativecallinvoke', 'nativecallinvoke');
 QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
     proto decont_all(@args) {
         my int $i := 0;
@@ -3258,114 +2700,6 @@ QAST::MASTOperations.add_core_op('nativecall', -> $qastcomp, $op {
             $op[2]
         )));
 });
-QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0, :decont(0));
-QAST::MASTOperations.add_core_moarop_mapping('nativecallcast', 'nativecallcast');
-QAST::MASTOperations.add_core_moarop_mapping('nativecallglobal', 'nativecallglobal');
-QAST::MASTOperations.add_core_moarop_mapping('nativecallsizeof', 'nativecallsizeof', :decont(0));
-
-QAST::MASTOperations.add_core_moarop_mapping('getcodelocation', 'getcodelocation', :decont(0));
-
-QAST::MASTOperations.add_core_moarop_mapping('uname', 'uname');
-
-# process related opcodes
-QAST::MASTOperations.add_core_moarop_mapping('exit', 'exit', 0);
-QAST::MASTOperations.add_core_moarop_mapping('sleep', 'sleep', 0);
-QAST::MASTOperations.add_core_moarop_mapping('getsignals', 'getsignals');
-QAST::MASTOperations.add_core_moarop_mapping('getenvhash', 'getenvhash');
-QAST::MASTOperations.add_core_moarop_mapping('getpid', 'getpid');
-QAST::MASTOperations.add_core_moarop_mapping('getppid', 'getppid');
-QAST::MASTOperations.add_core_moarop_mapping('gethostname', 'gethostname');
-QAST::MASTOperations.add_core_moarop_mapping('rand_i', 'rand_i');
-QAST::MASTOperations.add_core_moarop_mapping('rand_n', 'randscale_n');
-QAST::MASTOperations.add_core_moarop_mapping('srand', 'srand', 0);
-QAST::MASTOperations.add_core_moarop_mapping('execname', 'execname');
-QAST::MASTOperations.add_core_moarop_mapping('getrusage', 'getrusage');
-
-# thread related opcodes
-QAST::MASTOperations.add_core_moarop_mapping('newthread', 'newthread');
-QAST::MASTOperations.add_core_moarop_mapping('threadrun', 'threadrun', 0);
-QAST::MASTOperations.add_core_moarop_mapping('threadjoin', 'threadjoin', 0);
-QAST::MASTOperations.add_core_moarop_mapping('threadid', 'threadid');
-QAST::MASTOperations.add_core_moarop_mapping('threadyield', 'threadyield');
-QAST::MASTOperations.add_core_moarop_mapping('currentthread', 'currentthread');
-QAST::MASTOperations.add_core_moarop_mapping('lock', 'lock', 0);
-QAST::MASTOperations.add_core_moarop_mapping('unlock', 'unlock', 0);
-QAST::MASTOperations.add_core_moarop_mapping('getlockcondvar', 'getlockcondvar');
-QAST::MASTOperations.add_core_moarop_mapping('condwait', 'condwait', 0);
-QAST::MASTOperations.add_core_moarop_mapping('condsignalone', 'condsignalone', 0);
-QAST::MASTOperations.add_core_moarop_mapping('condsignalall', 'condsignalall', 0);
-QAST::MASTOperations.add_core_moarop_mapping('semacquire', 'semacquire');
-QAST::MASTOperations.add_core_moarop_mapping('semtryacquire', 'semtryacquire');
-QAST::MASTOperations.add_core_moarop_mapping('semrelease', 'semrelease');
-QAST::MASTOperations.add_core_moarop_mapping('queuepoll', 'queuepoll');
-QAST::MASTOperations.add_core_moarop_mapping('cpucores', 'cpucores');
-QAST::MASTOperations.add_core_moarop_mapping('freemem', 'freemem');
-QAST::MASTOperations.add_core_moarop_mapping('totalmem', 'totalmem');
-QAST::MASTOperations.add_core_moarop_mapping('threadlockcount', 'threadlockcount');
-QAST::MASTOperations.add_core_moarop_mapping('setthreadname', 'setthreadname');
-
-# asynchrony related ops
-QAST::MASTOperations.add_core_moarop_mapping('timer', 'timer');
-QAST::MASTOperations.add_core_moarop_mapping('permit', 'permit', 0);
-QAST::MASTOperations.add_core_moarop_mapping('cancel', 'cancel', 0);
-QAST::MASTOperations.add_core_moarop_mapping('cancelnotify', 'cancelnotify', 0);
-QAST::MASTOperations.add_core_moarop_mapping('signal', 'signal');
-QAST::MASTOperations.add_core_moarop_mapping('watchfile', 'watchfile');
-QAST::MASTOperations.add_core_moarop_mapping('asyncconnect', 'asyncconnect');
-QAST::MASTOperations.add_core_moarop_mapping('asynclisten', 'asynclisten');
-QAST::MASTOperations.add_core_moarop_mapping('asyncudp', 'asyncudp');
-QAST::MASTOperations.add_core_moarop_mapping('asyncwritebytes', 'asyncwritebytes');
-QAST::MASTOperations.add_core_moarop_mapping('asyncwritebytesto', 'asyncwritebytesto');
-QAST::MASTOperations.add_core_moarop_mapping('asyncreadbytes', 'asyncreadbytes');
-QAST::MASTOperations.add_core_moarop_mapping('spawnprocasync', 'spawnprocasync');
-QAST::MASTOperations.add_core_moarop_mapping('killprocasync', 'killprocasync', 1);
-
-# Atomic ops
-QAST::MASTOperations.add_core_moarop_mapping('cas', 'cas_o', :decont(1,2));
-QAST::MASTOperations.add_core_moarop_mapping('cas_i', 'cas_i');
-QAST::MASTOperations.add_core_moarop_mapping('atomicinc_i', 'atomicinc_i');
-QAST::MASTOperations.add_core_moarop_mapping('atomicdec_i', 'atomicdec_i');
-QAST::MASTOperations.add_core_moarop_mapping('atomicadd_i', 'atomicadd_i');
-QAST::MASTOperations.add_core_moarop_mapping('atomicload', 'atomicload_o');
-QAST::MASTOperations.add_core_moarop_mapping('atomicload_i', 'atomicload_i');
-QAST::MASTOperations.add_core_moarop_mapping('atomicstore', 'atomicstore_o', 1, :decont(1));
-QAST::MASTOperations.add_core_moarop_mapping('atomicstore_i', 'atomicstore_i', 1);
-QAST::MASTOperations.add_core_moarop_mapping('barrierfull', 'barrierfull');
-QAST::MASTOperations.add_core_moarop_mapping('atomicbindattr', 'atomicbindattr_o', 3);
-QAST::MASTOperations.add_core_moarop_mapping('casattr', 'casattr_o');
-
-# MoarVM-specific compilation ops
-QAST::MASTOperations.add_core_moarop_mapping('iscompunit', 'iscompunit');
-QAST::MASTOperations.add_core_moarop_mapping('compunitmainline', 'compunitmainline');
-QAST::MASTOperations.add_core_moarop_mapping('compunitcodes', 'compunitcodes');
-QAST::MASTOperations.add_core_moarop_mapping('backendconfig', 'backendconfig');
-
-# MoarVM-specific (matching NQP JVM API, though no clone and one-shot only) continuation ops.
-QAST::MASTOperations.add_core_moarop_mapping('continuationreset', 'continuationreset');
-QAST::MASTOperations.add_core_moarop_mapping('continuationcontrol', 'continuationcontrol');
-QAST::MASTOperations.add_core_moarop_mapping('continuationinvoke', 'continuationinvoke');
-
-# MoarVM-specific profiling ops.
-QAST::MASTOperations.add_core_moarop_mapping('mvmstartprofile', 'startprofile', 0);
-QAST::MASTOperations.add_core_moarop_mapping('mvmendprofile', 'endprofile');
-
-# MoarVM-specific GC ops
-QAST::MASTOperations.add_core_moarop_mapping('force_gc', 'force_gc');
-
-# MoarVM-specific coverage ops
-QAST::MASTOperations.add_core_moarop_mapping('coveragecontrol', 'coveragecontrol');
-
-# MoarVM-specific configuration program op
-QAST::MASTOperations.add_core_moarop_mapping('installconfprog', 'installconfprog');
-
-# MoarVM-specific event subscription op
-QAST::MASTOperations.add_core_moarop_mapping('vmeventsubscribe', 'vmeventsubscribe');
-
-QAST::MASTOperations.add_core_moarop_mapping('hllbool', 'hllbool');
-QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
-QAST::MASTOperations.add_core_moarop_mapping('serializetobuf', 'serializetobuf');
-QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
-QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
 
 sub push_op($frame, str $op, *@args) {
     MAST::Op.new_with_operand_array(:$frame, :$op, @args );
@@ -3374,5 +2708,695 @@ sub push_op($frame, str $op, *@args) {
 QAST::MASTOperations.add_core_op('js', -> $qastcomp, $op {
     $qastcomp.as_mast(QAST::Op.new( :op('die'), QAST::SVal.new( :value('Running JS NYI on MoarVM') )))
 });
+
+# Basic op mappings; to avoid having a load of different callsites to build at
+# startup, we initialize these from constants in a loop, except for a handful
+# that have unusual setup (combinations of result and decont).
+
+my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
+    'die', 'die',
+    'die_s', 'die',
+    'exception', 'exception',
+    'getextype', 'getexcategory',
+    'getpayload', 'getexpayload',
+    'getmessage', 'getexmessage',
+    'newexception', 'newexception',
+    'backtracestrings', 'backtracestrings',
+    'backtrace', 'backtrace',
+    'throw', 'throwdyn',
+    'rethrow', 'rethrow',
+    'resume', 'resume',
+    'lastexpayload', 'lastexpayload',
+    'throwextype', 'throwcatdyn',
+    'getarg_i', 'getarg_i',
+    'lexprimspec', 'lexprimspec',
+    'captureposelems', 'captureposelems',
+    'captureposarg', 'captureposarg',
+    'captureposarg_i', 'captureposarg_i',
+    'captureposarg_n', 'captureposarg_n',
+    'captureposarg_s', 'captureposarg_s',
+    'captureposprimspec', 'captureposprimspec',
+    'captureexistsnamed', 'captureexistsnamed',
+    'capturehasnameds', 'capturehasnameds',
+    'capturenamedshash', 'capturenamedshash',
+    'objprimspec', 'objprimspec',
+    'objprimbits', 'objprimbits',
+    'objprimunsigned', 'objprimunsigned',
+    'assertparamcheck', 'assertparamcheck',
+    'bindcomplete', 'bindcomplete',
+    'positional_get', 'atpos_o',
+    'associative_get', 'atkey_o',
+    'stat', 'stat',
+    'stat_time', 'stat_time',
+    'lstat', 'lstat',
+    'lstat_time', 'lstat_time',
+    'open', 'open_fh',
+    'filereadable', 'filereadable',
+    'filewritable', 'filewritable',
+    'fileexecutable', 'fileexecutable',
+    'flushfh', 'sync_fh',
+    'getstdin', 'getstdin',
+    'getstdout', 'getstdout',
+    'getstderr', 'getstderr',
+    'tellfh', 'tell_fh',
+    'seekfh', 'seek_fh',
+    'lockfh', 'lock_fh',
+    'unlockfh', 'unlock_fh',
+    'eoffh', 'eof_fh',
+    'isttyfh', 'istty_fh',
+    'filenofh', 'fileno_fh',
+    'socket', 'socket',
+    'accept', 'accept_sk',
+    'getport', 'getport_sk',
+    'cwd', 'cwd',
+    'symlink', 'symlink',
+    'readlink', 'readlink',
+    'link', 'link',
+    'opendir', 'open_dir',
+    'nextfiledir', 'read_dir',
+    'closedir', 'close_dir',
+    'time', 'time',
+    'add_i', 'add_i',
+    'add_I', 'add_I',
+    'add_n', 'add_n',
+    'sub_i', 'sub_i',
+    'sub_I', 'sub_I',
+    'sub_n', 'sub_n',
+    'mul_i', 'mul_i',
+    'mul_I', 'mul_I',
+    'mul_n', 'mul_n',
+    'div_i', 'div_i',
+    'div_I', 'div_I',
+    'div_In', 'div_In',
+    'div_n', 'div_n',
+    'mod_i', 'mod_i',
+    'mod_I', 'mod_I',
+    'expmod_I', 'expmod_I',
+    'mod_n', 'mod_n',
+    'neg_i', 'neg_i',
+    'neg_I', 'neg_I',
+    'neg_n', 'neg_n',
+    'pow_i', 'pow_i',
+    'pow_I', 'pow_I',
+    'pow_n', 'pow_n',
+    'abs_i', 'abs_i',
+    'abs_I', 'abs_I',
+    'abs_n', 'abs_n',
+    'ceil_n', 'ceil_n',
+    'floor_n', 'floor_n',
+    'sqrt_n', 'sqrt_n',
+    'base_I', 'base_I',
+    'isbig_I', 'isbig_I',
+    'radix', 'radix',
+    'radix_I', 'radix_I',
+    'log_n', 'log_n',
+    'exp_n', 'exp_n',
+    'isnanorinf', 'isnanorinf',
+    'inf', 'inf',
+    'neginf', 'neginf',
+    'nan', 'nan',
+    'isprime_I', 'isprime_I',
+    'rand_I', 'rand_I',
+    'tostr_I', 'coerce_Is',
+    'fromstr_I', 'coerce_sI',
+    'tonum_I', 'coerce_In',
+    'fromnum_I', 'coerce_nI',
+    'fromI_I', 'coerce_II',
+    'coerce_in', 'coerce_in',
+    'coerce_ni', 'coerce_ni',
+    'coerce_ui', 'coerce_ui',
+    'coerce_iu', 'coerce_iu',
+    'coerce_is', 'coerce_is',
+    'coerce_us', 'coerce_us',
+    'coerce_si', 'coerce_si',
+    'sin_n', 'sin_n',
+    'asin_n', 'asin_n',
+    'cos_n', 'cos_n',
+    'acos_n', 'acos_n',
+    'tan_n', 'tan_n',
+    'atan_n', 'atan_n',
+    'atan2_n', 'atan2_n',
+    'asin_n', 'asin_n',
+    'sinh_n', 'sinh_n',
+    'cosh_n', 'cosh_n',
+    'tanh_n', 'tanh_n',
+    'gcd_i', 'gcd_i',
+    'gcd_I', 'gcd_I',
+    'lcm_i', 'lcm_i',
+    'lcm_I', 'lcm_I',
+    'chars', 'chars',
+    'codes', 'codes_s',
+    'uc', 'uc',
+    'lc', 'lc',
+    'tc', 'tc',
+    'fc', 'fc',
+    'x', 'repeat_s',
+    'iscclass', 'iscclass',
+    'findcclass', 'findcclass',
+    'findnotcclass', 'findnotcclass',
+    'escape', 'escape',
+    'replace', 'replace',
+    'flip', 'flip',
+    'concat', 'concat_s',
+    'join', 'join',
+    'split', 'split',
+    'chr', 'chr',
+    'ordfirst', 'ordfirst',
+    'ordat', 'ordat',
+    'ordbaseat', 'ordbaseat',
+    'indexfrom', 'index_s',
+    'indexic', 'indexic_s',
+    'indexim', 'indexim_s',
+    'indexicim', 'indexicim_s',
+    'rindexfrom', 'rindexfrom',
+    'substr_s', 'substr_s',
+    'codepointfromname', 'getcpbyname',
+    'getcp_s', 'getcp_s',
+    'encode', 'encode',
+    'encodeconf', 'encodeconf',
+    'encoderep', 'encoderep',
+    'encoderepconf', 'encoderepconf',
+    'decode', 'decode',
+    'decodeconf', 'decodeconf',
+    'decoderepconf', 'decoderepconf',
+    'strfromcodes', 'strfromcodes',
+    'decodertakechars', 'decodertakechars',
+    'decodertakecharseof', 'decodertakecharseof',
+    'decodertakeallchars', 'decodertakeallchars',
+    'decodertakeavailablechars', 'decodertakeavailablechars',
+    'decodertakeline', 'decodertakeline',
+    'decoderbytesavailable', 'decoderbytesavailable',
+    'decodertakebytes', 'decodertakebytes',
+    'decoderempty', 'decoderempty',
+    'indexingoptimized', 'indexingoptimized',
+    'eqat', 'eqat_s',
+    'eqatic', 'eqatic_s',
+    'eqatim', 'eqatim_s',
+    'eqaticim', 'eqaticim_s',
+    'unipropcode', 'unipropcode',
+    'unipvalcode', 'unipvalcode',
+    'hasuniprop', 'hasuniprop',
+    'getuniname', 'getuniname',
+    'getuniprop_str', 'getuniprop_str',
+    'getuniprop_bool', 'getuniprop_bool',
+    'getuniprop_int', 'getuniprop_int',
+    'matchuniprop', 'matchuniprop',
+    'sha1', 'sha1',
+    'createsc', 'createsc',
+    'scgetobj', 'scgetobj',
+    'scgethandle', 'scgethandle',
+    'scgetdesc', 'scgetdesc',
+    'scgetobjidx', 'scgetobjidx',
+    'getobjsc', 'getobjsc',
+    'scobjcount', 'scobjcount',
+    'serialize', 'serialize',
+    'scwbdisable', 'scwbdisable',
+    'scwbenable', 'scwbenable',
+    'popcompsc', 'popcompsc',
+    'bitor_i', 'bor_i',
+    'bitxor_i', 'bxor_i',
+    'bitand_i', 'band_i',
+    'bitshiftl_i', 'blshift_i',
+    'bitshiftr_i', 'brshift_i',
+    'bitneg_i', 'bnot_i',
+    'bitor_I', 'bor_I',
+    'bitxor_I', 'bxor_I',
+    'bitand_I', 'band_I',
+    'bitneg_I', 'bnot_I',
+    'bitshiftl_I', 'blshift_I',
+    'bitshiftr_I', 'brshift_I',
+    'bitor_s', 'bitor_s',
+    'bitxor_s', 'bitxor_s',
+    'bitand_s', 'bitand_s',
+    'cmp_i', 'cmp_i',
+    'iseq_i', 'eq_i',
+    'isne_i', 'ne_i',
+    'islt_i', 'lt_i',
+    'isle_i', 'le_i',
+    'isgt_i', 'gt_i',
+    'isge_i', 'ge_i',
+    'cmp_n', 'cmp_n',
+    'not_i', 'not_i',
+    'iseq_n', 'eq_n',
+    'isne_n', 'ne_n',
+    'islt_n', 'lt_n',
+    'isle_n', 'le_n',
+    'isgt_n', 'gt_n',
+    'isge_n', 'ge_n',
+    'cmp_s', 'cmp_s',
+    'unicmp_s', 'unicmp_s',
+    'strfromname', 'strfromname',
+    'iseq_s', 'eq_s',
+    'isne_s', 'ne_s',
+    'islt_s', 'lt_s',
+    'isle_s', 'le_s',
+    'isgt_s', 'gt_s',
+    'isge_s', 'ge_s',
+    'bool_I', 'bool_I',
+    'cmp_I', 'cmp_I',
+    'iseq_I', 'eq_I',
+    'isne_I', 'ne_I',
+    'islt_I', 'lt_I',
+    'isle_I', 'le_I',
+    'isgt_I', 'gt_I',
+    'isge_I', 'ge_I',
+    'atpos', 'atpos_o',
+    'atpos_i', 'atpos_i',
+    'atpos_n', 'atpos_n',
+    'atpos_s', 'atpos_s',
+    'atposref_i', 'atposref_i',
+    'atposref_n', 'atposref_n',
+    'atposref_s', 'atposref_s',
+    'atpos2d', 'atpos2d_o',
+    'atpos2d_i', 'atpos2d_i',
+    'atpos2d_n', 'atpos2d_n',
+    'atpos2d_s', 'atpos2d_s',
+    'atpos3d', 'atpos3d_o',
+    'atpos3d_i', 'atpos3d_i',
+    'atpos3d_n', 'atpos3d_n',
+    'atpos3d_s', 'atpos3d_s',
+    'atposnd', 'atposnd_o',
+    'atposnd_i', 'atposnd_i',
+    'atposnd_n', 'atposnd_n',
+    'atposnd_s', 'atposnd_s',
+    'multidimref_i', 'multidimref_i',
+    'multidimref_n', 'multidimref_n',
+    'multidimref_s', 'multidimref_s',
+    'atkey', 'atkey_o',
+    'atkey_i', 'atkey_i',
+    'atkey_u', 'atkey_u',
+    'atkey_n', 'atkey_n',
+    'atkey_s', 'atkey_s',
+    'writeint', 'writeint',
+    'writeuint', 'writeuint',
+    'writenum', 'writenum',
+    'readint', 'readint',
+    'readuint', 'readuint',
+    'readnum', 'readnum',
+    'existskey', 'existskey',
+    'deletekey', 'deletekey',
+    'elems', 'elems',
+    'dimensions', 'dimensions',
+    'numdimensions', 'numdimensions',
+    'existspos', 'existspos',
+    'pop', 'pop_o',
+    'pop_i', 'pop_i',
+    'pop_n', 'pop_n',
+    'pop_s', 'pop_s',
+    'shift', 'shift_o',
+    'shift_i', 'shift_i',
+    'shift_n', 'shift_n',
+    'shift_s', 'shift_s',
+    'slice', 'slice',
+    'iterator', 'iter',
+    'iterkey_s', 'iterkey_s',
+    'iterval', 'iterval',
+    'null_s', 'null_s',
+    'knowhow', 'knowhow',
+    'knowhowattr', 'knowhowattr',
+    'bootint', 'bootint',
+    'bootnum', 'bootnum',
+    'bootstr', 'bootstr',
+    'bootarray', 'bootarray',
+    'bootintarray', 'bootintarray',
+    'bootnumarray', 'bootnumarray',
+    'bootstrarray', 'bootstrarray',
+    'boothash', 'boothash',
+    'hlllist', 'hlllist',
+    'hllhash', 'hllhash',
+    'create', 'create',
+    'iscont', 'iscont',
+    'iscont_i', 'iscont_i',
+    'iscont_n', 'iscont_n',
+    'iscont_s', 'iscont_s',
+    'isrwcont', 'isrwcont',
+    'decont', 'decont',
+    'decont_i', 'decont_i',
+    'decont_n', 'decont_n',
+    'decont_s', 'decont_s',
+    'isnull', 'isnull',
+    'isnull_s', 'isnull_s',
+    'eqaddr', 'eqaddr',
+    'hintfor', 'hintfor',
+    'box_i', 'box_i',
+    'box_n', 'box_n',
+    'box_s', 'box_s',
+    'box_u', 'box_u',
+    'hllboxtype_i', 'hllboxtype_i',
+    'hllboxtype_n', 'hllboxtype_n',
+    'hllboxtype_s', 'hllboxtype_s',
+    'composetype', 'composetype',
+    'what_nd', 'getwhat',
+    'isconcrete_nd', 'isconcrete',
+    'clone_nd', 'clone',
+    'how_nd', 'gethow',
+    'istype_nd', 'istype',
+    'getlex', 'getlex_no',
+    'getlex_i', 'getlex_ni',
+    'getlex_n', 'getlex_nn',
+    'getlex_s', 'getlex_ns',
+    'getlexref_i', 'getlexref_ni',
+    'getlexref_n', 'getlexref_nn',
+    'getlexref_s', 'getlexref_ns',
+    'getlexdyn', 'getdynlex',
+    'bindlexdyn', 'binddynlex',
+    'getlexouter', 'getlexouter',
+    'getlexrel', 'getlexrel',
+    'getlexreldyn', 'getlexreldyn',
+    'getlexrelcaller', 'getlexrelcaller',
+    'getlexcaller', 'getlexcaller',
+    'getcodeobj', 'getcodeobj',
+    'getcodename', 'getcodename',
+    'freshcoderef', 'freshcoderef',
+    'iscoderef', 'iscoderef',
+    'markcodestatic', 'markcodestatic',
+    'markcodestub', 'markcodestub',
+    'getstaticcode', 'getstaticcode',
+    'getcodecuid', 'getcodecuid',
+    'getcomp', 'getcomp',
+    'bindcomp', 'bindcomp',
+    'gethllsym', 'gethllsym',
+    'getcurhllsym', 'getcurhllsym',
+    'bindcurhllsym', 'bindcurhllsym',
+    'sethllconfig', 'sethllconfig',
+    'loadbytecode', 'loadbytecode',
+    'loadbytecodebuffer', 'loadbytecodebuffer',
+    'buffertocu', 'buffertocu',
+    'loadbytecodefh', 'loadbytecodefh',
+    'gettypehllrole', 'gettypehllrole',
+    'usecompileehllconfig', 'usecompileehllconfig',
+    'usecompilerhllconfig', 'usecompilerhllconfig',
+    'nfafromstatelist', 'nfafromstatelist',
+    'nfarunproto', 'nfarunproto',
+    'initnativecall', 'no_op',
+    'buildnativecall', 'nativecallbuild',
+    'nativecallinvoke', 'nativecallinvoke',
+    'nativecallcast', 'nativecallcast',
+    'nativecallglobal', 'nativecallglobal',
+    'uname', 'uname',
+    'getsignals', 'getsignals',
+    'getenvhash', 'getenvhash',
+    'getpid', 'getpid',
+    'getppid', 'getppid',
+    'gethostname', 'gethostname',
+    'rand_i', 'rand_i',
+    'rand_n', 'randscale_n',
+    'execname', 'execname',
+    'getrusage', 'getrusage',
+    'newthread', 'newthread',
+    'threadid', 'threadid',
+    'threadyield', 'threadyield',
+    'currentthread', 'currentthread',
+    'semacquire', 'semacquire',
+    'semtryacquire', 'semtryacquire',
+    'semrelease', 'semrelease',
+    'queuepoll', 'queuepoll',
+    'cpucores', 'cpucores',
+    'freemem', 'freemem',
+    'totalmem', 'totalmem',
+    'threadlockcount', 'threadlockcount',
+    'getlockcondvar', 'getlockcondvar',
+    'setthreadname', 'setthreadname',
+    'timer', 'timer',
+    'signal', 'signal',
+    'watchfile', 'watchfile',
+    'asyncconnect', 'asyncconnect',
+    'asynclisten', 'asynclisten',
+    'asyncudp', 'asyncudp',
+    'asyncwritebytes', 'asyncwritebytes',
+    'asyncwritebytesto', 'asyncwritebytesto',
+    'asyncreadbytes', 'asyncreadbytes',
+    'spawnprocasync', 'spawnprocasync',
+    'cas_i', 'cas_i',
+    'atomicinc_i', 'atomicinc_i',
+    'atomicdec_i', 'atomicdec_i',
+    'atomicadd_i', 'atomicadd_i',
+    'atomicload', 'atomicload_o',
+    'atomicload_i', 'atomicload_i',
+    'barrierfull', 'barrierfull',
+    'casattr', 'casattr_o',
+    'iscompunit', 'iscompunit',
+    'compunitmainline', 'compunitmainline',
+    'compunitcodes', 'compunitcodes',
+    'backendconfig', 'backendconfig',
+    'continuationreset', 'continuationreset',
+    'continuationcontrol', 'continuationcontrol',
+    'continuationinvoke', 'continuationinvoke',
+    'mvmendprofile', 'endprofile',
+    'force_gc', 'force_gc',
+    'coveragecontrol', 'coveragecontrol',
+    'installconfprog', 'installconfprog',
+    'vmeventsubscribe', 'vmeventsubscribe',
+    'hllbool', 'hllbool',
+    'hllboolfor', 'hllboolfor',
+    'serializetobuf', 'serializetobuf',
+    'decodelocaltime', 'decodelocaltime',
+    'fork', 'fork',
+);
+my int $i := 0;
+my int $n := nqp::elems(SIMPLE_OP_MAPPINGS);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS, $i + 1));
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_RESULT_ZERO := nqp::list_s(
+    'say', 'say',
+    'print', 'print',
+    'closefh', 'close_fh',
+    'connect', 'connect_sk',
+    'bindsock', 'bind_sk',
+    'setbuffersizefh', 'setbuffersize_fh',
+    'chmod', 'chmod_f',
+    'unlink', 'delete_f',
+    'rmdir', 'rmdir',
+    'chdir', 'chdir',
+    'mkdir', 'mkdir',
+    'rename', 'rename_f',
+    'copy', 'copy_f',
+    'decoderconfigure', 'decoderconfigure',
+    'decodersetlineseps', 'decodersetlineseps',
+    'setobjsc', 'setobjsc',
+    'deserialize', 'deserialize',
+    'pushcompsc', 'pushcompsc',
+    'neverrepossess', 'neverrepossess',
+    'scdisclaim', 'scdisclaim',
+    'setelems', 'setelemspos',
+    'setdimensions', 'setdimensions',
+    'splice', 'splice',
+    'setdebugtypename', 'setdebugtypename',
+    'setcodeobj', 'setcodeobj',
+    'setcodename', 'setcodename',
+    'forceouterctx', 'forceouterctx',
+    'captureinnerlex', 'captureinnerlex',
+    'settypehll', 'settypehll',
+    'settypehllrole', 'settypehllrole',
+    'nfarunalt', 'nfarunalt',
+    'exit', 'exit',
+    'sleep', 'sleep',
+    'srand', 'srand',
+    'threadrun', 'threadrun',
+    'threadjoin', 'threadjoin',
+    'lock', 'lock',
+    'unlock', 'unlock',
+    'condwait', 'condwait',
+    'condsignalone', 'condsignalone',
+    'condsignalall', 'condsignalall',
+    'permit', 'permit',
+    'cancel', 'cancel',
+    'cancelnotify', 'cancelnotify',
+    'mvmstartprofile', 'startprofile',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_RESULT_ZERO);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_ZERO, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_ZERO, $i + 1),
+        0);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_RESULT_ONE := nqp::list_s(
+    'setextype', 'bindexcategory',
+    'setpayload', 'bindexpayload',
+    'setmessage', 'bindexmessage',
+    'readfh', 'read_fhb',
+    'writefh', 'write_fhb',
+    'decoderaddbytes', 'decoderaddbytes',
+    'scsetdesc', 'scsetdesc',
+    'push', 'push_o',
+    'push_i', 'push_i',
+    'push_n', 'push_n',
+    'push_s', 'push_s',
+    'unshift', 'unshift_o',
+    'unshift_i', 'unshift_i',
+    'unshift_n', 'unshift_n',
+    'unshift_s', 'unshift_s',
+    'bindlex', 'bindlex_no',
+    'bindlex_i', 'bindlex_ni',
+    'bindlex_n', 'bindlex_nn',
+    'bindlex_s', 'bindlex_ns',
+    'killprocasync', 'killprocasync',
+    'atomicstore_i', 'atomicstore_i',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_RESULT_ONE);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_ONE, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_ONE, $i + 1),
+        1);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_RESULT_TWO := nqp::list_s(
+    'positional_bind', 'bindpos_o',
+    'associative_bind', 'bindkey_o',
+    'encodefromcodes', 'encodefromcodes',
+    'normalizecodes', 'normalizecodes',
+    'strtocodes', 'strtocodes',
+    'scsetobj', 'scsetobj',
+    'scsetcode', 'scsetcode',
+    'bindpos', 'bindpos_o',
+    'bindpos_i', 'bindpos_i',
+    'bindpos_n', 'bindpos_n',
+    'bindpos_s', 'bindpos_s',
+    'bindposnd', 'bindposnd_o',
+    'bindposnd_i', 'bindposnd_i',
+    'bindposnd_n', 'bindposnd_n',
+    'bindposnd_s', 'bindposnd_s',
+    'bindkey', 'bindkey_o',
+    'bindkey_i', 'bindkey_i',
+    'bindkey_n', 'bindkey_n',
+    'bindkey_s', 'bindkey_s',
+    'bindhllsym', 'bindhllsym',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_RESULT_TWO);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_TWO, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_TWO, $i + 1),
+        2);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_RESULT_THREE := nqp::list_s(
+    'decodetocodes', 'decodetocodes',
+    'encodenorm', 'encodenorm',
+    'bindpos2d', 'bindpos2d_o',
+    'bindpos2d_i', 'bindpos2d_i',
+    'bindpos2d_n', 'bindpos2d_n',
+    'bindpos2d_s', 'bindpos2d_s',
+    'atomicbindattr', 'atomicbindattr_o',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_RESULT_THREE);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_THREE, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_THREE, $i + 1),
+        3);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_RESULT_FOUR := nqp::list_s(
+    'bindpos3d', 'bindpos3d_o',
+    'bindpos3d_i', 'bindpos3d_i',
+    'bindpos3d_n', 'bindpos3d_n',
+    'bindpos3d_s', 'bindpos3d_s',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_RESULT_FOUR);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_FOUR, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_RESULT_FOUR, $i + 1),
+        4);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_NO_INLINE := nqp::list_s(
+    'throwpayloadlex', 'throwpayloadlex',
+    'throwpayloadlexcaller', 'throwpayloadlexcaller',
+    'ctx', 'ctx',
+    'ctxouter', 'ctxouter',
+    'ctxcaller', 'ctxcaller',
+    'ctxcode', 'ctxcode',
+    'ctxouterskipthunks', 'ctxouterskipthunks',
+    'ctxcallerskipthunks', 'ctxcallerskipthunks',
+    'curcode', 'curcode',
+    'callercode', 'callercode',
+    'ctxlexpad', 'ctxlexpad',
+    'curlexpad', 'ctx',
+    'usecapture', 'usecapture',
+    'savecapture', 'savecapture',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_NO_INLINE);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_NO_INLINE, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_NO_INLINE, $i + 1),
+        :!inlinable);
+    $i := $i + 2;
+}
+
+my constant SIMPLE_OP_MAPPINGS_DECONT_ZERO := nqp::list_s(
+    'isint', 'isint',
+    'isnum', 'isnum',
+    'isstr', 'isstr',
+    'islist', 'islist',
+    'ishash', 'ishash',
+    'what', 'getwhat',
+    'how', 'gethow',
+    'who', 'getwho',
+    'where', 'getwhere',
+    'objectid', 'objectid',
+    'setwho', 'setwho',
+    'clone', 'clone',
+    'isconcrete', 'isconcrete',
+    'unbox_i', 'unbox_i',
+    'unbox_n', 'unbox_n',
+    'unbox_s', 'unbox_s',
+    'unbox_u', 'unbox_u',
+    'reprname', 'reprname',
+    'newtype', 'newtype',
+    'newmixintype', 'newmixintype',
+    'typeparameterized', 'typeparameterized',
+    'typeparameters', 'typeparameters',
+    'typeparameterat', 'typeparameterat',
+    'defined', 'isconcrete',
+    'nativecallsizeof', 'nativecallsizeof',
+    'getcodelocation', 'getcodelocation',
+);
+$i := 0;
+$n := nqp::elems(SIMPLE_OP_MAPPINGS_DECONT_ZERO);
+while $i < $n {
+    QAST::MASTOperations.add_core_moarop_mapping(
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_DECONT_ZERO, $i),
+        nqp::atpos_s(SIMPLE_OP_MAPPINGS_DECONT_ZERO, $i + 1),
+        :decont(0));
+    $i := $i + 2;
+}
+
+QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless', :decont(0, 1));
+QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
+QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('settypefinalize', 'settypefinalize', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('setcontspec', 'setcontspec', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('assign', 'assign', 0, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('assignunchecked', 'assignunchecked', 0, :decont(1));
+QAST::MASTOperations.add_core_moarop_mapping('setparameterizer', 'setparameterizer', 0, :decont(0, 1));
+QAST::MASTOperations.add_core_moarop_mapping('parameterizetype', 'parameterizetype', :decont(0, 1));
+QAST::MASTOperations.add_core_moarop_mapping('nativecallrefresh', 'nativecallrefresh', 0, :decont(0));
+QAST::MASTOperations.add_core_moarop_mapping('cas', 'cas_o', :decont(1,2));
+QAST::MASTOperations.add_core_moarop_mapping('atomicstore', 'atomicstore_o', 1, :decont(1));
 
 # vim: ft=perl6 expandtab sw=4
