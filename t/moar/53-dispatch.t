@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(152);
+plan(154);
 
 {
     sub const($x) {
@@ -73,6 +73,22 @@ plan(152);
     });
     ok(nqp::dispatch('drop-first-two', 'first', 'second', 'third', 'fourth') eq 'third',
         'Multiple applications of dispatcher-drop-arg work');
+}
+
+{
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first-two', -> $capture {
+        my $capture-derived := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args', $capture, 0, 2);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-derived);
+    });
+    ok(nqp::dispatch('drop-first-two', 'first', 'second', 'third') eq 'third',
+        'dispatcher-drop-n-args works');
+
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first-three', -> $capture {
+        my $capture-derived := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args', $capture, 0, 3);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-derived);
+    });
+    ok(nqp::dispatch('drop-first-three', 'first', 'second', 'third', 'fourth', 'fifth') eq 'fourth',
+        'dropping three arguments works');
 }
 
 {

@@ -25,9 +25,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
             # and the method name. Then insert the resolved method and delegate to
             # lang-call to invoke it (we may have other languages mixing into NQP
             # types and adding their methods).
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
-                0);
+            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args',
+                $capture, 0, 2);
             my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
                 $args, 0, $meth);
             nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
@@ -73,9 +72,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $c
         # and the method name. Then insert the resolved method and delegate to
         # lang-call to invoke it (we may have other languages mixing into NQP
         # types and adding their methods).
-        my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg',
-            nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
-            0);
+        my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args',
+            $capture, 0, 2);
         my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
             $args, 0, $track-resolution);
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
