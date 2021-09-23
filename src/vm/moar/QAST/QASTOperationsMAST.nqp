@@ -3323,6 +3323,8 @@ my constant SIMPLE_OP_MAPPINGS_NO_INLINE := nqp::list_s(
     'throwpayloadlex', 'throwpayloadlex',
     'throwpayloadlexcaller', 'throwpayloadlexcaller',
     'ctx', 'ctx',
+    'ctxnt', 'ctxnt',
+    'curlexpad', 'ctxnt',
     'ctxouter', 'ctxouter',
     'ctxcaller', 'ctxcaller',
     'ctxcode', 'ctxcode',
@@ -3331,7 +3333,6 @@ my constant SIMPLE_OP_MAPPINGS_NO_INLINE := nqp::list_s(
     'curcode', 'curcode',
     'callercode', 'callercode',
     'ctxlexpad', 'ctxlexpad',
-    'curlexpad', 'ctx',
     'usecapture', 'usecapture',
     'savecapture', 'savecapture',
 );
