@@ -19,6 +19,7 @@ knowhow NQPParametricRoleHOW {
 
     # Other roles that this one does.
     has @!roles;
+    has @!role_typecheck_list;
 
     # Have we been composed?
     has $!composed;
@@ -53,6 +54,7 @@ knowhow NQPParametricRoleHOW {
         @!method_order := nqp::list();
         @!multi_methods_to_incorporate := nqp::list();
         @!roles := nqp::list();
+        @!role_typecheck_list := nqp::list();
         $!composed := 0;
         $!specialize_lock := $specialize_lock;
     }
@@ -105,6 +107,13 @@ knowhow NQPParametricRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
+        for @!roles {
+            nqp::push(@!role_typecheck_list, $_);
+            for $_.HOW.role_typecheck_list($_) {
+                nqp::push(@!role_typecheck_list, $_);
+            }
+        }
+
         $!composed := 1;
         nqp::settypecache($obj, [$obj.WHAT]);
         nqp::setmethcache($obj, {});
@@ -205,5 +214,9 @@ knowhow NQPParametricRoleHOW {
 
     method roles($obj, :$transitive = 0) {
         @!roles
+    }
+
+    method role_typecheck_list($obj) {
+        @!role_typecheck_list
     }
 }
