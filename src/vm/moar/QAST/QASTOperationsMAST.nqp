@@ -2303,6 +2303,7 @@ my constant CONST_MAP := nqp::hash(
     'DISP_DECONT',                6,
     'DISP_BIND_SUCCESS',          7,
     'DISP_BIND_FAILURE',          8,
+    'DISP_PROPAGATE_CALLWITH',    9,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     my str $name := $op.name;
