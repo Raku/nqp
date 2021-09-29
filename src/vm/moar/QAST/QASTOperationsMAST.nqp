@@ -3219,6 +3219,7 @@ QAST::MASTOperations.add_core_moarop_mapping('speshguardtypeobj', 'speshguardtyp
 QAST::MASTOperations.add_core_moarop_mapping('speshguardobj', 'speshguardobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardnotobj', 'speshguardnotobj', 0);
 QAST::MASTOperations.add_core_moarop_mapping('speshguardgetattr', 'speshguardgetattr');
+QAST::MASTOperations.add_core_moarop_mapping('speshguardgetstaticcode', 'speshguardgetstaticcode');
 QAST::MASTOperations.add_core_op('speshresolve', -> $qastcomp, $op {
     # Get the target name.
     my @args := nqp::clone($op.list);
