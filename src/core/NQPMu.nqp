@@ -4,12 +4,10 @@ my class NQPMu {
     }
 
     method bless(NQPMu:U $self: *%attributes) {
-        my $instance := self.CREATE();
-        $instance.BUILDALL(|%attributes);
-        $instance
+        self.CREATE().BUILDALL(%attributes)
     }
 
-    method BUILDALL(NQPMu:D $self: *%attrinit) {
+    method BUILDALL(NQPMu:D $self: %attrinit) {
         # Get the build plan.
         my $build_plan := self.HOW.BUILDALLPLAN(self);
         my int $count  := nqp::elems($build_plan);
@@ -76,7 +74,8 @@ my class NQPMu {
     }
 
     method new(*%attributes) {
-        self.bless(|%attributes);
+        # Assume nobody will be overriding bless in NQP
+        self.CREATE().BUILDALL(%attributes)
     }
 
     method defined() {
@@ -98,7 +97,8 @@ my class NQPMu {
     }
 }
 
-# A few bits when we're bootstrapping everything 6model-style
+# An NQP array, which is the standard array representation with a few methods
+# added.
 my class NQPArray is repr('VMArray') {
     method push($value) { nqp::push(self, $value) }
     method pop() { nqp::pop(self) }
@@ -107,6 +107,8 @@ my class NQPArray is repr('VMArray') {
 }
 nqp::setboolspec(NQPArray, 8, nqp::null());
 nqp::settypehllrole(NQPArray, 4);
+
+# Iterator types.
 my class NQPArrayIter is repr('VMIter') { }
 nqp::setboolspec(NQPArrayIter, 7, nqp::null());
 my class NQPHashIter is repr('VMIter') {
@@ -115,6 +117,8 @@ my class NQPHashIter is repr('VMIter') {
     method Str() { nqp::iterkey_s(self) }
 }
 nqp::setboolspec(NQPHashIter, 7, nqp::null());
+
+# NQP HLL configuration.
 nqp::sethllconfig('nqp', nqp::hash(
     'list', NQPArray,
     'slurpy_array', NQPArray,
@@ -124,6 +128,38 @@ nqp::sethllconfig('nqp', nqp::hash(
         # BOOTHashes don't actually need transformation
         nqp::ishash($hash) ?? $hash !! $hash.FLATTENABLE_HASH
     },
+#?if moar
+    'call_dispatcher', 'nqp-call',
+    'method_call_dispatcher', 'nqp-meth-call',
+    'find_method_dispatcher', 'nqp-find-meth',
+    'hllize_dispatcher', 'nqp-hllize',
+    'istype_dispatcher', 'nqp-istype',
+    'isinvokable_dispatcher', 'nqp-isinvokable',
+#?endif
 ));
+
+#?if moar
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-hllize', -> $capture {
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+    my $obj := nqp::captureposarg($capture, 0);
+
+    if nqp::gettypehllrole($obj) == 5 && !nqp::ishash($obj) {
+        my $transform-hash := nqp::how_nd($obj).find_method($obj, 'FLATTENABLE_HASH');
+        nqp::die('Could not find method FLATTENABLE_HASH on ' ~ nqp::how_nd($obj).name($obj) ~ ' object when trying to hllize')
+            unless nqp::defined($transform-hash);
+        nqp::dispatch(
+            'boot-syscall', 'dispatcher-delegate', 'lang-call',
+            nqp::dispatch(
+                'boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                $capture, 0, $transform-hash
+            )
+        );
+    }
+    else {
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    }
+});
+#?endif
 
 my class NQPLabel { }

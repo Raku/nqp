@@ -10,8 +10,7 @@ nqp::decoderconfigure($dec, 'utf8', nqp::hash());
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
     nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
-    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
-    $buf;
+    $buf
 }
 
 # reusable vars

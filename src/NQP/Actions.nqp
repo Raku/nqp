@@ -945,10 +945,11 @@ class NQP::Actions is HLL::Actions {
 					$BLOCK[0].push(QAST::Op.new(
                         :op('bind'),
                         QAST::Var.new( :name('&' ~ $name), :scope('lexical'), :decl('var') ),
-                        $ast
+                        QAST::Op.new( :op('getcodeobj'), $ast )
                     ));
                     $BLOCK.symbol('&' ~ $name, :scope('lexical'), :proto(1), :value($code), :declared(1) );
 
+#?if !moar
                     # Also stash the current lexical dispatcher and capture, for the {*}
                     # to resolve.
                     $block[0].push(QAST::Op.new(
@@ -961,6 +962,7 @@ class NQP::Actions is HLL::Actions {
                         QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
                         QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
                     ));
+#?endif
                 }
                 else {
                     my $BLOCK := $*W.cur_lexpad();
@@ -1077,6 +1079,7 @@ class NQP::Actions is HLL::Actions {
                 $*W.install_package_routine($package, $name, $ast);
             }
 
+#?if !moar
             # If it's a proto, also stash the current lexical dispatcher, for the {*}
             # to resolve.
             if $is_dispatcher {
@@ -1091,6 +1094,7 @@ class NQP::Actions is HLL::Actions {
                     QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
                 ));
             }
+#?endif
         }
 
         # Install AST node in match object, then apply traits.
@@ -1108,6 +1112,13 @@ class NQP::Actions is HLL::Actions {
 
     sub only_star_block() {
         my $ast := $*W.pop_lexpad();
+#?if moar
+        $ast.push(QAST::Op.new(
+            :op('dispatch'),
+            QAST::SVal.new( :value('boot-resume') )
+        ));
+#?endif
+#?if !moar
         $ast.push(QAST::Op.new(
             :op('invokewithcapture'),
             QAST::Op.new(
@@ -1129,6 +1140,7 @@ class NQP::Actions is HLL::Actions {
             ),
             QAST::Op.new( :op('usecapture') )
         ));
+#?endif
         $ast
     }
 
@@ -1461,6 +1473,13 @@ class NQP::Actions is HLL::Actions {
     }
 
     method term:sym<onlystar>($/) {
+#?if moar
+        make QAST::Op.new(
+            :op('dispatch'),
+            QAST::SVal.new( :value('boot-resume') )
+        );
+#?endif
+#?if !moar
         my $dc_name := QAST::Node.unique('dispatch_cap');
         my $stmts := QAST::Stmts.new(
             QAST::Op.new(
@@ -1490,6 +1509,7 @@ class NQP::Actions is HLL::Actions {
                 QAST::Var.new( :name($dc_name), :scope('local') )
             ));
         make QAST::Op.new( :op('locallifetime'), $stmts, $dc_name );
+#?endif
         $/.prune;
     }
 

@@ -101,41 +101,47 @@ $ops.add_hll_op('nqp', 'stringify', -> $qastcomp, $op {
     $qastcomp.as_mast($op[0], :want($MVM_reg_str))
 });
 
+my $FAKE_OBJECT_ARG := [QAST::Op.new( :op<null> )];
+my %core_op_generators := MAST::Ops.WHO<%generators>;
+my &op_dispatch_i := %core_op_generators<dispatch_i>;
 $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     unless nqp::elems($op.list) == 1 {
         nqp::die('falsey op requires one child');
     }
     my $val      := $qastcomp.as_mast($op[0]);
-    my $regalloc := $*REGALLOC;
+    my $regalloc := $qastcomp.regalloc;
     if $val.result_kind == $MVM_reg_int64 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        MAST::Op.new(:op<not_i>, $not_reg, $val.result_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $val.result_reg);
         MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_int32 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        MAST::Op.new(:op<extend_i32>, $not_reg, $val.result_reg);
-        MAST::Op.new(:op<not_i>, $not_reg, $not_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<extend_i32>, $not_reg, $val.result_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $not_reg);
         MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_obj {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         my $dc := $regalloc.fresh_register($MVM_reg_obj);
-        MAST::Op.new(:op<decont>, $dc, $val.result_reg);
-        MAST::Op.new(:op<isfalse>, $not_reg, $dc);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<decont>, $dc, $val.result_reg);
+        my uint $callsite_id := $*MAST_FRAME.callsites.get_callsite_id_from_args(
+            $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
+        op_dispatch_i($qastcomp.mast_frame, $not_reg, 'boot-boolify', $callsite_id, [$dc]);
         $regalloc.release_register($dc, $MVM_reg_obj);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $not_reg);
         MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_str {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
-        MAST::Op.new(:op<isfalse_s>, $not_reg, $val.result_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<isfalse_s>, $not_reg, $val.result_reg);
         MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_num64 {
         my $tmp_reg := $regalloc.fresh_register($MVM_reg_num64);
         my $res_reg := $regalloc.fresh_register($MVM_reg_int64);
-        MAST::Op.new(:op<const_n64>, $tmp_reg, 0.0);
-        MAST::Op.new(:op<eq_n>, $res_reg, $val.result_reg, $tmp_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<const_n64>, $tmp_reg, 0.0);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<eq_n>, $res_reg, $val.result_reg, $tmp_reg);
         MAST::InstructionList.new($res_reg, $MVM_reg_int64)
     }
     else {

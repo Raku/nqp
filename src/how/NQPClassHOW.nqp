@@ -56,11 +56,6 @@ knowhow NQPClassHOW {
     has %!caches;
     has $!is_mixin;
 
-    # Call tracing.
-    has $!trace;
-    has $!trace_depth;
-    has @!trace_exclude;
-
     # Build plan.
     has @!BUILDALLPLAN;
     has @!BUILDPLAN;
@@ -94,8 +89,6 @@ knowhow NQPClassHOW {
         @!BUILDALLPLAN := nqp::list();
         @!BUILDPLAN := nqp::list();
         $!is_mixin := 0;
-        $!trace := 0;
-        $!trace_depth := 0;
         $!composed := 0;
     }
 
@@ -112,6 +105,7 @@ knowhow NQPClassHOW {
             $new_type := nqp::newtype($metaclass, $repr);
         }
         $metaclass.setup_mixin_cache($new_type);
+        nqp::settypehll($new_type, 'nqp');
         nqp::setdebugtypename(nqp::setwho($new_type, {}), $name)
     }
 
@@ -122,7 +116,9 @@ knowhow NQPClassHOW {
         if nqp::isnull($code_obj) || !nqp::defined($code_obj) {
             nqp::die("Cannot add a null method '$name' to class '$!name'");
         }
+#?if !moar
         nqp::setmethcacheauth($obj, 0);
+#?endif
         nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
@@ -136,7 +132,9 @@ knowhow NQPClassHOW {
         %todo<name> := $name;
         %todo<code> := $code_obj;
         nqp::push(@!multi_methods_to_incorporate, %todo);
+#?if !moar
         nqp::setmethcacheauth($obj, 0);
+#?endif
         $code_obj;
     }
 
@@ -493,6 +491,7 @@ knowhow NQPClassHOW {
     }
 
     method publish_method_cache($obj) {
+#?if !moar
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
@@ -504,6 +503,7 @@ knowhow NQPClassHOW {
         }
         nqp::setmethcache($obj, %cache);
         nqp::setmethcacheauth($obj, 1);
+#?endif
     }
 
     method publish_boolification_spec($obj) {
@@ -642,14 +642,6 @@ knowhow NQPClassHOW {
         @parts ?? @parts[nqp::elems(@parts) - 1] !! '<anon>'
     }
 
-    method traced($obj) {
-        $!trace
-    }
-
-    method trace_depth($obj) {
-        $!trace_depth
-    }
-
     method attributes($obj, :$local = 0) {
         my @attrs;
         if $local {
@@ -709,15 +701,11 @@ knowhow NQPClassHOW {
     ##
     ## Dispatchy
     ##
-    method find_method($obj, $name, :$no_fallback = 0, :$no_trace = 0) {
+    method find_method($obj, $name, :$no_fallback = 0) {
         for @!mro {
             my %meths := $_.HOW.method_table($obj);
-            if nqp::existskey(%meths, $name) {
-                my $found := %meths{$name};
-                return $!trace && !$no_trace && self.should_trace($obj, $name)
-                    ?? self.make_tracer($name, $found)
-                    !! $found;
-            }
+            my $found := nqp::atkey(%meths, $name);
+            return $found if nqp::isconcrete($found);
         }
         nqp::null()
     }
@@ -792,45 +780,5 @@ knowhow NQPClassHOW {
         $new_type.HOW.compose($new_type);
 
         $new_type
-    }
-
-    ##
-    ## Tracing
-    ##
-    method trace-on($obj, $depth?, :@exclude = <MATCH CAPHASH CREATE orig pos>) {
-        $!trace := 1;
-        $!trace_depth := $depth // 0;
-        @!trace_exclude := @exclude;
-        my %trace_cache;
-        my @mro_reversed := reverse(@!mro);
-        for @mro_reversed {
-            for $_.HOW.method_table($_) {
-                my $name := nqp::iterkey_s($_);
-                %trace_cache{$name} := self.should_trace($obj, $name)
-                    ?? self.make_tracer($name, nqp::iterval($_))
-                    !! nqp::iterval($_);
-            }
-        }
-        nqp::setmethcache($obj, %trace_cache);
-    }
-    method trace-off($obj) {
-        self.publish_method_cache($obj);
-        $!trace := 0;
-    }
-    method make_tracer($name, $found) {
-        -> *@pos, *%named {
-            nqp::say(nqp::x('  ', $!trace_depth) ~ "Calling $name");
-            $!trace_depth := $!trace_depth + 1;
-            my $result := $found(|@pos, |%named);
-            $!trace_depth := $!trace_depth - 1;
-            $result
-        }
-    }
-    method should_trace($obj, $name) {
-        return 0 if nqp::eqat($name, '!', 0);
-        for @!trace_exclude {
-            return 0 if $name eq $_;
-        }
-        1;
     }
 }

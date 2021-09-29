@@ -380,13 +380,12 @@ my sub buf_dump($buf) {
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
     nqp::composetype($buf, nqp::hash('array', nqp::hash('type', $type)));
-    nqp::setmethcache($buf, nqp::hash('new', method () {nqp::create($buf)}));
-    $buf;
+    $buf
 };
 
 {
     my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
-    my $buf := create_buf(uint8).new;
+    my $buf := nqp::create(create_buf(uint8));
     ok(nqp::eqaddr(nqp::readfh($fh, $buf, 5), $buf), 'nqp::readfh should return the buffer');
     is(buf_dump($buf), '108,105,110,207,128', 'nqp::readfh read in correct unsigned bytes');
     is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next bytes correctly');
@@ -395,7 +394,7 @@ my sub create_buf($type) {
 
 {
     my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
-    my $buf := create_buf(int8).new;
+    my $buf := nqp::create(create_buf(int8));
     ok(nqp::eqaddr(nqp::readfh($fh, $buf, 5), $buf), 'nqp::readfh should return the buffer');
     is(buf_dump($buf), '108,105,110,-49,-128', 'nqp::readfh read in correct signed bytes');
     is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next signed bytes correctly');
@@ -405,14 +404,14 @@ my sub create_buf($type) {
 {
     my $out := nqp::open($test-file, 'w');
 
-    my $buf1 := create_buf(uint8).new;
+    my $buf1 := nqp::create(create_buf(uint8));
     nqp::push_i($buf1, 108);
     nqp::push_i($buf1, 105);
     nqp::push_i($buf1, 110);
     nqp::push_i($buf1, 207);
     nqp::push_i($buf1, 128);
 
-    my $buf2 := create_buf(uint8).new;
+    my $buf2 := nqp::create(create_buf(uint8));
     nqp::push_i($buf2, 49);
     nqp::push_i($buf2, 46);
     nqp::push_i($buf2, 108);

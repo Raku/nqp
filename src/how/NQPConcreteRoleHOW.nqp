@@ -62,6 +62,7 @@ knowhow NQPConcreteRoleHOW {
     # to go with it, and return that.
     method new_type(:$name = '<anon>', :$instance_of!) {
         my $metarole := self.new(:name($name), :instance_of($instance_of));
+        nqp::settypehll($metarole, 'nqp');
         nqp::setdebugtypename(nqp::newtype($metarole, 'Uninstantiable'), $name);
     }
 
@@ -118,8 +119,10 @@ knowhow NQPConcreteRoleHOW {
         # Mark composed.
         $!composed := 1;
         nqp::settypecache($obj, [$obj.WHAT]);
+#?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
+#?endif
         $obj
     }
 
