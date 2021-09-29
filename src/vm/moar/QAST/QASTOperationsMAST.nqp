@@ -3286,6 +3286,10 @@ QAST::MASTOperations.add_core_moarop_mapping('hllboolfor', 'hllboolfor');
 QAST::MASTOperations.add_core_moarop_mapping('serializetobuf', 'serializetobuf');
 QAST::MASTOperations.add_core_moarop_mapping('decodelocaltime', 'decodelocaltime');
 QAST::MASTOperations.add_core_moarop_mapping('fork', 'fork');
+QAST::MASTOperations.add_core_moarop_mapping('loadlib', 'loadlib');
+QAST::MASTOperations.add_core_moarop_mapping('droplib', 'droplib');
+QAST::MASTOperations.add_core_moarop_mapping('getlib', 'getlib');
+QAST::MASTOperations.add_core_moarop_mapping('findsym', 'findsym');
 
 sub push_op(str $op, *@args) {
     MAST::Op.new_with_operand_array( :$op, @args );
