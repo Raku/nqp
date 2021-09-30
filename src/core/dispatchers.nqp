@@ -6,7 +6,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     my $how := nqp::how_nd($obj);
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
     if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
-            && nqp::can($how, 'mro') {
+            && nqp::can($how, 'all_method_table') {
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-meth-call-mega', $capture);
     }
     else {
@@ -37,21 +37,12 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     }
 });
 
-sub build-flat-method-table($obj) {
-    my %lookup;
-    for nqp::how_nd($obj).mro($obj) {
-        for $_.HOW.method_table($_) {
-            my str $name := $_.key;
-            %lookup{$name} := $_.value unless nqp::existskey(%lookup, $name);
-        }
-    }
-    %lookup
-}
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega', -> $capture {
     # When we have a megamorphic callsite due to loads of different method
-    # names, we build a hash table of the methods.
+    # names, we'll use a lookup hash instead, storing it at the callsite.
     my $obj := nqp::captureposarg($capture, 0);
-    my %lookup := build-flat-method-table($obj);
+    my $how := nqp::how_nd($obj);
+    my %lookup := $how.all_method_table($obj);
 
     # Make sure we really can find the method name; error if not.
     my str $name := nqp::captureposarg_s($capture, 1);
@@ -91,7 +82,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $captur
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
     my int $exceptional := nqp::captureposarg_i($capture, 2);
     if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
-            && !$exceptional && nqp::can($how, 'mro') {
+            && !$exceptional && nqp::can($how, 'all_method_table') {
         nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega', $capture);
     }
     else {
@@ -142,7 +133,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega', -> $c
     # When we have a megamorphic callsite due to loads of different method
     # names, we build a hash table of the methods.
     my $obj := nqp::captureposarg($capture, 0);
-    my %lookup := build-flat-method-table($obj);
+    my $how := nqp::how_nd($obj);
+    my %lookup := $how.all_method_table($obj);
 
     # Do the lookup of the method; the lookup table gets stored as a constant
     # at the callsite. If it's not found, the outcome will be a null, which is

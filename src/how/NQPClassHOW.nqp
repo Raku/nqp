@@ -50,6 +50,12 @@ knowhow NQPClassHOW {
     # Full list of roles that we do.
     has @!done;
 
+    # If needed, a cached flattened method table accounting for all methods in
+    # this class and its parents. This is only needed in the sitaution that a
+    # megamorphic callsite involves the class, so calculated and cached on
+    # demand.
+    has $!cached_all_method_table;
+
     # Cached values, which are thrown away if the class changes. We don't ever
     # mutate the %!caches hash, but instead clone/mutate/replace; additions
     # are rare compared to lookups, and this beats locking.
@@ -504,6 +510,22 @@ knowhow NQPClassHOW {
         nqp::setmethcache($obj, %cache);
         nqp::setmethcacheauth($obj, 1);
 #?endif
+    }
+
+    method all_method_table($obj) {
+        my $table := $!cached_all_method_table;
+        unless nqp::isconcrete($table) {
+            $table := nqp::hash();
+            for reverse(@!mro) {
+                for $_.HOW.method_table($_) {
+                    $table{nqp::iterkey_s($_)} := nqp::iterval($_);
+                }
+            }
+            nqp::scwbdisable();
+            $!cached_all_method_table := $table;
+            nqp::scwbenable();
+        }
+        $table
     }
 
     method publish_boolification_spec($obj) {
