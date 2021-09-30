@@ -125,6 +125,7 @@ knowhow NQPClassHOW {
 #?if !moar
         nqp::setmethcacheauth($obj, 0);
 #?endif
+        $!cached_all_method_table := nqp::null();
         nqp::push(@!method_order, %!methods{$name} := $code_obj);
     }
 
@@ -141,6 +142,7 @@ knowhow NQPClassHOW {
 #?if !moar
         nqp::setmethcacheauth($obj, 0);
 #?endif
+        $!cached_all_method_table := nqp::null();
         $code_obj;
     }
 
@@ -204,6 +206,7 @@ knowhow NQPClassHOW {
         }
         @!parents[0] := $new_parent;
         @!mro := compute_c3_mro($obj);
+        $!cached_all_method_table := nqp::null();
         self.publish_type_cache($obj);
         self.publish_method_cache($obj);
         self.publish_boolification_spec($obj);
