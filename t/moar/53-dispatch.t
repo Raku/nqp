@@ -1,6 +1,6 @@
 # Tests for the MoarVM dispatch mechanism
 
-plan(154);
+plan(160);
 
 {
     sub const($x) {
@@ -971,4 +971,51 @@ class Exhausted {};
         'lang-meth-call KnowHOW fallback works (record)');
     ok(nqp::dispatch('lang-meth-call', $type, 'm2', $type) == 222,
         'lang-meth-call KnowHOW fallback works (run)');
+}
+
+{
+    my int $entries := 0;
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-how', -> $capture {
+        $entries++;
+        my $obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $how := nqp::dispatch('boot-syscall', 'dispatcher-track-how', $obj);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+            $capture, 0, $how);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
+    });
+    sub check-it-works($obj) {
+        nqp::dispatch('test-how', $obj)
+    }
+    my class TestA {}
+    my class TestB {};
+    ok(nqp::eqaddr(check-it-works(TestA), TestA.HOW), 'dispatcher-track-how (record)');
+    ok(nqp::eqaddr(check-it-works(TestB), TestB.HOW), 'dispatcher-track-how (run)');
+    ok($entries == 1, 'No type guard enforced by dispatcher-track-how');
+}
+
+{
+    my class WithHash {
+        has $!the-hash;
+    }
+    my $table := nqp::create(WithHash);
+    nqp::bindattr($table, WithHash, '$!the-hash', nqp::hash('a', 42, 'b', 100));
+    my int $entries := 0;
+    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-lookup', -> $capture {
+        $entries++;
+        my $obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $key := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
+        my $table-attr := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+            $obj, WithHash, '$!the-hash');
+        my $result := nqp::dispatch('boot-syscall', 'dispatcher-index-tracked-lookup-table',
+            $table-attr, $key);
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+            $capture, 0, $result);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
+    });
+    sub check-it-works(str $key) {
+        nqp::dispatch('test-lookup', $table, $key)
+    }
+    ok(check-it-works('a') == 42, 'dispatcher-index-tracked-lookup-table (record)');
+    ok(check-it-works('b') == 100, 'dispatcher-index-tracked-lookup-table (run)');
+    ok($entries == 1, 'Only one recording of dispatch program made');
 }
