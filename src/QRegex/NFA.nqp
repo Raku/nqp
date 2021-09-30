@@ -564,8 +564,9 @@ class QRegex::NFA {
             $n := $meth.name;
 #            note("$indent mergesubrule $n start $start to $to fate $fate") if $nfadeb;
             if !nqp::existskey(%seen, $n) {
-                if nqp::can($meth, 'NFA') {
-                    @substates := $meth.NFA();
+                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
+                if nqp::isconcrete($nfa_meth) {
+                    @substates := $nfa_meth($meth);
                     @substates := [] if nqp::isnull(@substates);
                 }
                 %seen{$n} := 1;
@@ -574,13 +575,13 @@ class QRegex::NFA {
 #                note("$indent ...skipping $n to avoid left recursion") if $nfadeb;
             }
         }
-        elsif nqp::can($cursor, $name) {
+        elsif nqp::isconcrete($meth := nqp::tryfindmethod($cursor, $name)) {
 #            note("$indent mergesubrule $name start $start to $to fate $fate") if $nfadeb;
             $n := $name;
             if !nqp::existskey(%seen, $name) {
-                $meth := nqp::findmethod($cursor, $name);
-                if nqp::can($meth, 'NFA') {
-                    @substates := $meth.NFA();
+                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
+                if nqp::isconcrete($nfa_meth) {
+                    @substates := $nfa_meth($meth);
                     @substates := [] if nqp::isnull(@substates);
                 }
                 if !@substates {
