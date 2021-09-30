@@ -81,9 +81,18 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $captur
     my $how := nqp::how_nd($obj);
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
     my int $exceptional := nqp::captureposarg_i($capture, 2);
-    if $cache-size >= 4 && !nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1)
-            && !$exceptional && nqp::can($how, 'all_method_table') {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega', $capture);
+    if $cache-size >= 4 && !$exceptional && nqp::istype($how, nqp::getcurhllsym('NQPClassHOW')) {
+        # We determine it is megamorphic in type if either the name is literal
+        # (so only the type could be varying) or it's non-literal but we have at
+        # least 8 entries (meaning it is likely megamorphic in name *and* type).
+        if $cache-size >= 8 || nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1) {
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega-type',
+                $capture);
+        }
+        else {
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega-name',
+                $capture);
+        }
     }
     else {
         # Guard on the invocant type and method name.
@@ -121,14 +130,13 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $captur
     }
 });
 
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega', -> $capture {
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega-name', -> $capture {
     # Always guard on the exception mode (which should always be false, since we
     # don't handle it here) and also the type.
     nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
         nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
     nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
         nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
-    my int $exceptional := nqp::captureposarg_i($capture, 2);
 
     # When we have a megamorphic callsite due to loads of different method
     # names, we build a hash table of the methods.
@@ -142,6 +150,34 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega', -> $c
     my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
     my $track-resolution := nqp::dispatch('boot-syscall', 'dispatcher-index-lookup-table',
         %lookup, $track-name);
+    my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        $capture, 0, $track-resolution);
+    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
+});
+
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega-type', -> $capture {
+    # Always guard on the exception mode (which should always be false, since we
+    # don't handle it here).
+    nqp::dispatch('boot-syscall', 'dispatcher-guard-literal',
+        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 2));
+
+    # Make sure that we have a method table build for this type (but we don't
+    # actually need the table itself).
+    my $obj := nqp::captureposarg($capture, 0);
+    my $how := nqp::how_nd($obj);
+    $how.all_method_table($obj);
+
+    # Track the HOW and then the attribute holding the table.
+    my $track-obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+    my $track-how := nqp::dispatch('boot-syscall', 'dispatcher-track-how', $track-obj);
+    my $track-table := nqp::dispatch('boot-syscall', 'dispatcher-track-attr', $track-how,
+        nqp::getcurhllsym('NQPClassHOW'), '$!cached_all_method_table');
+
+    # Do the lookup of the method in the table we found in the meta-object. If
+    # it's not found, the outcome will be a null, which is exactly what we want.
+    my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
+    my $track-resolution := nqp::dispatch('boot-syscall',
+        'dispatcher-index-tracked-lookup-table', $track-table, $track-name);
     my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
         $capture, 0, $track-resolution);
     nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);

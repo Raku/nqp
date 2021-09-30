@@ -804,3 +804,5 @@ knowhow NQPClassHOW {
         $new_type
     }
 }
+
+nqp::bindcurhllsym('NQPClassHOW', NQPClassHOW);
