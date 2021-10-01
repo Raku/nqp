@@ -85,9 +85,17 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega-name', 
 
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega-type', -> $capture {
     # We're megamorphic in both type and name. Make sure the type has a lookup
-    # table, and ensure the method exists.
+    # table, and ensure the method exists. If it does not have a method table
+    # then we will not install this dispatcher; we may already have a type
+    # megamorphic handler in place and only missed it because we temporarily
+    # lacked the calculated flattened method table. This avoids us stacking
+    # up the same program repeatedly at the callsite.
     my $obj := nqp::captureposarg($capture, 0);
     my $how := nqp::how_nd($obj);
+    my $class-how := nqp::getcurhllsym('NQPClassHOW');
+    unless nqp::isconcrete(nqp::getattr($how, $class-how, '$!cached_all_method_table')) {
+        nqp::dispatch('boot-syscall', 'dispatcher-do-not-install');
+    }
     my %lookup := $how.all_method_table($obj);
     my str $name := nqp::captureposarg_s($capture, 1);
     if nqp::isconcrete(nqp::atkey(%lookup, $name)) {
@@ -97,7 +105,7 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call-mega-type', 
         my $track-obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
         my $track-how := nqp::dispatch('boot-syscall', 'dispatcher-track-how', $track-obj);
         my $track-table := nqp::dispatch('boot-syscall', 'dispatcher-track-attr', $track-how,
-            nqp::getcurhllsym('NQPClassHOW'), '$!cached_all_method_table');
+            $class-how, '$!cached_all_method_table');
         my $track-name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
         my $track-resolution := nqp::dispatch('boot-syscall',
             'dispatcher-index-tracked-lookup-table', $track-table, $track-name);
@@ -212,13 +220,17 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth-mega-type', 
     # actually need the table itself).
     my $obj := nqp::captureposarg($capture, 0);
     my $how := nqp::how_nd($obj);
+    my $class-how := nqp::getcurhllsym('NQPClassHOW');
+    unless nqp::isconcrete(nqp::getattr($how, $class-how, '$!cached_all_method_table')) {
+        nqp::dispatch('boot-syscall', 'dispatcher-do-not-install');
+    }
     $how.all_method_table($obj);
 
     # Track the HOW and then the attribute holding the table.
     my $track-obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
     my $track-how := nqp::dispatch('boot-syscall', 'dispatcher-track-how', $track-obj);
     my $track-table := nqp::dispatch('boot-syscall', 'dispatcher-track-attr', $track-how,
-        nqp::getcurhllsym('NQPClassHOW'), '$!cached_all_method_table');
+        $class-how, '$!cached_all_method_table');
 
     # Do the lookup of the method in the table we found in the meta-object. If
     # it's not found, the outcome will be a null, which is exactly what we want.
