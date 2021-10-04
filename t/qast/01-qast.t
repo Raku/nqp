@@ -1,6 +1,6 @@
 use QAST;
 
-plan(179);
+plan(178);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -1280,49 +1280,27 @@ if nqp::getcomp('nqp').backend.name eq 'jvm' {
 
 }
 
-is_qast(
-    QAST::CompUnit.new(
-        :hll<funnylang>,
-        QAST::Block.new(
-            QAST::Op.new(:op<sethllconfig>, QAST::SVal.new(:value<funnylang>),
-                QAST::Op.new(:op<hash>,
-                    QAST::SVal.new(:value<null_value>),
-                    QAST::SVal.new(:value<hilarious>),
-                )
-            ),
-            QAST::Op.new(:op<hllize>, QAST::Op.new(:op<null>)),
-        )
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    skip("New hllize via lang-hllize dispatcher not implemented on the JVM", 1);
+}
+else {
+    is_qast(
+        QAST::CompUnit.new(
+            :hll<funnylang>,
+            QAST::Block.new(
+                QAST::Op.new(:op<sethllconfig>, QAST::SVal.new(:value<funnylang>),
+                    QAST::Op.new(:op<hash>,
+                        QAST::SVal.new(:value<null_value>),
+                        QAST::SVal.new(:value<hilarious>),
+                    )
+                ),
+                QAST::Op.new(:op<hllize>, QAST::Op.new(:op<null>)),
+            )
 
-    ),
-    '',
-    'hllize without registered lang-hllize dispatcher');
-
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'funnylang-hllize', -> $capture {
-    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-        nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
-            nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
-            0, 'hilarious'
-        )
-    );
-});
-is_qast(
-    QAST::CompUnit.new(
-        :hll<funnylang>,
-        QAST::Block.new(
-            QAST::Op.new(:op<sethllconfig>, QAST::SVal.new(:value<funnylang>),
-                QAST::Op.new(:op<hash>,
-                    QAST::SVal.new(:value<null_value>),
-                    QAST::SVal.new(:value<hilarious>),
-                    QAST::SVal.new(:value<hllize_dispatcher>),
-                    QAST::SVal.new(:value<funnylang-hllize>),
-                )
-            ),
-            QAST::Op.new(:op<hllize>, QAST::Op.new(:op<null>)),
-        )
-
-    ),
-    'hilarious',
-    'hllize');
+        ),
+        '',
+        'hllize without registered lang-hllize dispatcher');
+}
 
 test_qast_result(
     QAST::CompUnit.new(
