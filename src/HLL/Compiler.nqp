@@ -809,6 +809,10 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::die("The backend { $backend.HOW.name($backend) } doesn't support profiler-snapshot");
         }
     }
+
+    method supports-op($opname) {
+        self.backend.supports-op($opname)
+    }
 }
 
 my $compiler := HLL::Compiler.new();
