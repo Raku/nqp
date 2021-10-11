@@ -19,7 +19,7 @@ qregex-test:@for_backends( @backend_prefix@-qregex-test)@
 @for_backends(@ctx_include(Makefile)@)@
 
 @nfp(t/*/*.t)@: all
-	$(PROVE) -r -v --exec @nfp(./nqp@bat@)@ $@
+	$(PROVE) -r -v --exec ./@nfp(./nqp@bat@)@ $@
 
 manifest:
 	echo MANIFEST >MANIFEST
