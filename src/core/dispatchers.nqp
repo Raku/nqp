@@ -5,11 +5,11 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-meth-call', -> $captur
     my $obj := nqp::captureposarg($capture, 0);
     my $how := nqp::how_nd($obj);
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
-    if $cache-size >= 4 && nqp::istype($how, nqp::getcurhllsym('NQPClassHOW')) {
+    if $cache-size >= 8 && nqp::istype($how, nqp::getcurhllsym('NQPClassHOW')) {
         # We determine it is megamorphic in type if either the name is literal
         # (so only the type could be varying) or it's non-literal but we have at
-        # least 8 entries (meaning it is likely megamorphic in name *and* type).
-        if $cache-size >= 8 || nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1) {
+        # least 16 entries (meaning it is likely megamorphic in name *and* type).
+        if $cache-size >= 16 || nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1) {
             nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-meth-call-mega-type',
                 $capture);
         }
@@ -136,11 +136,11 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-find-meth', -> $captur
     my $how := nqp::how_nd($obj);
     my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
     my int $exceptional := nqp::captureposarg_i($capture, 2);
-    if $cache-size >= 4 && !$exceptional && nqp::istype($how, nqp::getcurhllsym('NQPClassHOW')) {
+    if $cache-size >= 8 && !$exceptional && nqp::istype($how, nqp::getcurhllsym('NQPClassHOW')) {
         # We determine it is megamorphic in type if either the name is literal
         # (so only the type could be varying) or it's non-literal but we have at
-        # least 8 entries (meaning it is likely megamorphic in name *and* type).
-        if $cache-size >= 8 || nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1) {
+        # least 16 entries (meaning it is likely megamorphic in name *and* type).
+        if $cache-size >= 16 || nqp::dispatch('boot-syscall', 'capture-is-literal-arg', $capture, 1) {
             nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'nqp-find-meth-mega-type',
                 $capture);
         }
