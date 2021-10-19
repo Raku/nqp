@@ -560,70 +560,116 @@ my $type-check-then-accepts-type := -> $obj, $type {
             !! nqp::die("Expected 'accepts_type' method, but none found in meta-object")
     }
 }
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
-    # Obtain and guard on the types we're checking.
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-        nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
-    my $track-type := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-type);
-
-    # Go by typecheck mode.
-    my $type := nqp::captureposarg($capture, 1);
-    my int $mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $type);
-    my $obj := nqp::captureposarg($capture, 0);
-    if $mode +& 1 || !nqp::dispatch('boot-syscall', 'has-type-check-cache', $obj) {
-        # Need to produce a call to obj.HOW.type_check(obj, type), so long as
-        # the method exists. However, will we also need to call accepts_type?
-        if $mode +& 2 {
-            # Yes, so delegate to thunk.
-            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $capture, 0, $type-check-then-accepts-type);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
-                $delegate);
+my $nqp-istype-mega := -> $obj, $type {
+    my int $obj-mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $obj);
+    my int $type-mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $type);
+    if $obj-mode +& 1 || !nqp::dispatch('boot-syscall', 'has-type-check-cache', $obj) {
+        my $obj-how := nqp::how_nd($obj);
+        my $type-check := nqp::tryfindmethod($obj-how, 'type_check');
+        my int $type-check-ok := nqp::isconcrete($type-check)
+            ?? $type-check($obj-how, $obj, $type)
+            !! 0;
+        if $type-check-ok {
+            1
+        }
+        elsif $type-mode +& 2 {
+            my $type-how := nqp::how_nd($type);
+            my $accepts-type := nqp::tryfindmethod($type-how, 'accepts_type');
+            nqp::isconcrete($accepts-type)
+                ?? $accepts-type($type-how, $type, $obj)
+                !! nqp::die("Expected 'accepts_type' method, but none found in meta-object")
         }
         else {
-            # No, so rewrite to type_check call.
-            my $how := nqp::how_nd($obj);
-            my $meth := $how.HOW.find_method($how, 'type_check');
+            0
+        }
+    }
+    elsif $type-mode +& 2 {
+        my $type-how := nqp::how_nd($type);
+        my $accepts-type := nqp::tryfindmethod($type-how, 'accepts_type');
+        nqp::isconcrete($accepts-type)
+            ?? $accepts-type($type-how, $type, $obj)
+            !! nqp::die("Expected 'accepts_type' method, but none found in meta-object")
+    }
+    else {
+        0
+    }
+}
+nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-istype', -> $capture {
+    # If this site is heading megamorphic, then fall back to a general
+    # path.
+    my int $cache-size := nqp::dispatch('boot-syscall', 'dispatcher-inline-cache-size');
+    if $cache-size >= 8 {
+        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+            $capture, 0, $nqp-istype-mega);
+        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+            $delegate);
+    }
+    else {
+        # Obtain and guard on the types we're checking.
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
+            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+        my $track-type := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
+        nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-type);
+
+        # Go by typecheck mode.
+        my $type := nqp::captureposarg($capture, 1);
+        my $obj := nqp::captureposarg($capture, 0);
+        my int $type-mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $type);
+        my int $obj-mode := nqp::dispatch('boot-syscall', 'type-check-mode-flags', $obj);
+        if $obj-mode +& 1 || !nqp::dispatch('boot-syscall', 'has-type-check-cache', $obj) {
+            # Need to produce a call to obj.HOW.type_check(obj, type), so long as
+            # the method exists. However, will we also need to call accepts_type?
+            if $type-mode +& 2 {
+                # Yes, so delegate to thunk.
+                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $capture, 0, $type-check-then-accepts-type);
+                nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
+                    $delegate);
+            }
+            else {
+                # No, so rewrite to type_check call.
+                my $how := nqp::how_nd($obj);
+                my $meth := $how.HOW.find_method($how, 'type_check');
+                if nqp::isconcrete($meth) {
+                    my $with-how := nqp::dispatch('boot-syscall',
+                        'dispatcher-insert-arg-literal-obj', $capture, 0, $how);
+                    my $delegate := nqp::dispatch('boot-syscall',
+                        'dispatcher-insert-arg-literal-obj', $with-how, 0, $meth);
+                    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
+                }
+                else {
+                    my $delegate := nqp::dispatch('boot-syscall',
+                        'dispatcher-insert-arg-literal-int', $capture, 0, 0);
+                    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+                }
+            }
+        }
+        elsif $type-mode +& 2 {
+            # Need to produce a call to type.HOW.accepts_type(type, obj) (note the
+            # permutation of the arguments).
+            my $how := nqp::how_nd($type);
+            my $meth := $how.HOW.find_method($how, 'accepts_type');
             if nqp::isconcrete($meth) {
-                my $with-how := nqp::dispatch('boot-syscall',
-                    'dispatcher-insert-arg-literal-obj', $capture, 0, $how);
-                my $delegate := nqp::dispatch('boot-syscall',
-                    'dispatcher-insert-arg-literal-obj', $with-how, 0, $meth);
+                my $permuted := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+                    nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 1),
+                    0, $track-type);
+                my $with-how := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $permuted, 0, $how);
+                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                    $with-how, 0, $meth);
                 nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
             }
             else {
-                my $delegate := nqp::dispatch('boot-syscall',
-                    'dispatcher-insert-arg-literal-int', $capture, 0, 0);
-                nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+                nqp::die("Expected 'accepts_type' method, but none found in meta-object");
             }
         }
-    }
-    elsif $mode +& 2 {
-        # Need to produce a call to type.HOW.accepts_type(type, obj) (note the
-        # permutation of the arguments).
-        my $how := nqp::how_nd($type);
-        my $meth := $how.HOW.find_method($how, 'accepts_type');
-        if nqp::isconcrete($meth) {
-            my $permuted := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 1),
-                0, $track-type);
-            my $with-how := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $permuted, 0, $how);
-            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                $with-how, 0, $meth);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call', $delegate);
-        }
         else {
-            nqp::die("Expected 'accepts_type' method, but none found in meta-object");
+            # No cache and no additional ways to check, so answer no.
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+                $capture, 0, 0);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
+                $delegate);
         }
-    }
-    else {
-        # No cache and no additional ways to check, so answer no.
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
-            $capture, 0, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            $delegate);
     }
 });
 
