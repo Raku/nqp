@@ -166,12 +166,7 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderconfigure($dec, 'utf8', nqp::hash('translate_newlines', 1));
     nqp::decoderaddbytes($dec, $testbuf1);
     my $got := nqp::decodertakeallchars($dec);
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('translate_newline option does not work on the jvm', 1);
-    }
-    else {
-        is($got, "one\ntwo\nthree\n", 'Newlines get translated if the options is passed');
-    }
+    is($got, "one\ntwo\nthree\n", 'Newlines get translated if the options is passed');
 }
 
 {
