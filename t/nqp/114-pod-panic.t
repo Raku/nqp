@@ -30,11 +30,6 @@ my $regex := /^ \h* Obsolete \h+ pod \h+ format \h+ .+ ',' \h+ please \h+ use \h
 my @arr := run-command($args, :stderr);
 my $err := @arr[2];
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip('local tests good, failing on travis-ci on the jvm', 1);
-}
-else {
-    ok($err ~~ $regex, 'got the correct output from stderr');
-}
+ok($err ~~ $regex, 'got the correct output from stderr');
 
 nqp::unlink($fname);
