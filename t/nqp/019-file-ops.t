@@ -222,18 +222,12 @@ ok($atime > 0, 'integer atime');
 my $ctime := nqp::stat('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
 ok($ctime > 0, 'integer ctime');
 
-my $backend := nqp::getcomp('nqp').backend.name;
-if $backend eq 'moar' || $backend eq 'js' || $backend eq 'jvm' {
-    my $mtime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
-    ok($mtime_n >= $mtime, 'float mtime >= integer');
-    my $atime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_ACCESSTIME);
-    ok($atime_n >= $atime, 'float atime >= integer');
-    my $ctime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
-    ok($ctime_n >= $ctime, 'float ctime >= integer');
-}
-else {
-    skip("no stat_time op on $backend", 3);
-}
+my $mtime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_MODIFYTIME);
+ok($mtime_n >= $mtime, 'float mtime >= integer');
+my $atime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_ACCESSTIME);
+ok($atime_n >= $atime, 'float atime >= integer');
+my $ctime_n := nqp::stat_time('t/nqp/019-file-ops.t', nqp::const::STAT_CHANGETIME);
+ok($ctime_n >= $ctime, 'float ctime >= integer');
 
 # copy
 nqp::unlink($test-file ~ '-copied') if nqp::stat($test-file ~ '-copied', nqp::const::STAT_EXISTS);
@@ -315,6 +309,7 @@ else {
     nqp::unlink($test-file ~ '-missing-symlink') if nqp::lstat($test-file ~ '-missing-symlink', nqp::const::STAT_EXISTS);
 }
 
+my $backend := nqp::getcomp('nqp').backend.name;
 my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
 if $crlf-conversion {
     my $wfh := open($test-file, :w);
