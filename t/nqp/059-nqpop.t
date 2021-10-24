@@ -522,21 +522,16 @@ ok(nqp::istrue(nqp::null_s()) == 0, "null_s isn't true");
 ok(nqp::istrue(nqp::atpos(nqp::list(nqp::null_s()), 0)) == 0, "null_s isn't true");
 
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("with/without are broken on the jvm", 4);
-} else {
-    my class Defined {
-        method defined() { 1 }
-    }
-    my class NotDefined {
-        method defined() { 0 }
-    }
-    is(nqp::with(Defined.new, "good", "bad"), "good");
-    is(nqp::with(NotDefined.new, "good", "bad"), "bad");
-
-    is(nqp::without(Defined.new, "good", "bad"), "bad");
-    is(nqp::without(NotDefined.new, "good", "bad"), "good");
+my class Defined {
+    method defined() { 1 }
 }
+my class NotDefined {
+    method defined() { 0 }
+}
+is(nqp::with(Defined.new, "good", "bad"), "good");
+is(nqp::with(NotDefined.new, "good", "bad"), "bad");
+is(nqp::without(Defined.new, "good", "bad"), "bad");
+is(nqp::without(NotDefined.new, "good", "bad"), "good");
 
 is(nqp::tclc('aBcD'), 'Abcd', 'tclc sub form on mixed-case latin string');
 is(nqp::tclc('ßß'), 'Ssß', 'tclc and German sharp s');
