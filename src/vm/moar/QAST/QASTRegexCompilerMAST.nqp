@@ -73,21 +73,41 @@ sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id
     }
     else {
         $res_kind := $qastcomp.type_to_register_kind($returns);
-        $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
-        if $res_kind == $MVM_reg_obj {
+        my int $primspec := nqp::objprimspec($returns);
+        if $primspec == 0 {
+            $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
             op_dispatch_o($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
         }
-        elsif $res_kind == $MVM_reg_int64 {
-            op_dispatch_i($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        elsif $primspec == 1 {
+            if $res_kind == $MVM_reg_int64 {
+                $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
+                op_dispatch_i($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+            }
+            else {
+                my $temp_reg := $qastcomp.regalloc.fresh_register($MVM_reg_int64);
+                op_dispatch_i($frame, $temp_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+                $res_reg := $qastcomp.coerce(
+                    MAST::InstructionList.new($temp_reg, $MVM_reg_int64), $res_kind).result_reg;
+            }
         }
-        elsif $res_kind == $MVM_reg_num64 {
-            op_dispatch_n($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+        elsif $primspec == 2 {
+            if $res_kind == $MVM_reg_num64 {
+                $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
+                op_dispatch_n($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+            }
+            else {
+                my $temp_reg := $qastcomp.regalloc.fresh_register($MVM_reg_num64);
+                op_dispatch_n($frame, $temp_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+                $res_reg := $qastcomp.coerce(
+                    MAST::InstructionList.new($temp_reg, $MVM_reg_num64), $res_kind).result_reg;
+            }
         }
-        elsif $res_kind == $MVM_reg_str {
+        elsif $primspec == 3 {
+            $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
             op_dispatch_s($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
         }
         else {
-            nqp::die('Unsupported register return kind for dispatch op');
+            nqp::die("Unsupported register return kind for dispatch op: $res_kind");
         }
     }
     MAST::InstructionList.new($res_reg, $res_kind)
