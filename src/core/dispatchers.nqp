@@ -304,8 +304,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
             }
             else {
                 # Non-multi call; run the underlying code reference.
-                my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
                 if $code-constant {
+                    my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
                     # It's a constant, so just extract the do and insert it as a
                     # constant also.
                     my $do := nqp::getattr($callee, $callee.WHAT, '$!do');
@@ -322,8 +322,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
                         $track-dispatchees);
                     my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
                         $track-callee, $callee.WHAT, '$!do');
-                    my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                        $args, 0, $track-do);
+                    my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-replace-arg',
+                        $capture, 0, $track-do);
                     nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
                         $delegate);
                 }
@@ -331,8 +331,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
         }
         elsif $is-regex {
             # Regex, just unwrap the code handle and delegate.
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
             if $code-constant {
+                my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
                 my $do := nqp::getattr($callee, $callee.WHAT, '$!do');
                 my $delegate := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $args, 0, $do);
@@ -342,16 +342,16 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
             else {
                 my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
                     $track-callee, $callee.WHAT, '$!do');
-                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                    $args, 0, $track-do);
+                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-replace-arg',
+                    $capture, 0, $track-do);
                 nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
                     $delegate);
             }
         }
         elsif $is-regex-method {
             # NQP regex method object.
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
             if $code-constant {
+                my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
                 my $code := nqp::getattr($callee, $NQPRegexMethod, '$!code');
                 my $delegate := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $args, 0, $code);
@@ -361,8 +361,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
             else {
                 my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
                     $track-callee, $NQPRegexMethod, '$!code');
-                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                    $args, 0, $track-do);
+                my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-replace-arg',
+                    $capture, 0, $track-do);
                 nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
                     $delegate);
             }
@@ -394,9 +394,8 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-multi',
                 $capture, 0);
             my $track-do := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
                 $track-callee, $callee.WHAT, '$!do');
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
-            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                $args, 0, $track-do);
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-replace-arg',
+                $capture, 0, $track-do);
             nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code',
                 $delegate);
         }
