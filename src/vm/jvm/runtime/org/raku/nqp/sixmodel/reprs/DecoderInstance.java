@@ -201,10 +201,13 @@ public class DecoderInstance extends SixModelObject {
             CharBuffer target = CharBuffer.allocate(decodee.limit());
 
             CoderResult result = decoder.decode(decodee, target, eof && toDecode.size() == 1);
-            /* TODO It looks like we read binary data with UTF_8 during
-             * normal operation; don't die then. */
-            if (result.isMalformed() && charset != StandardCharsets.UTF_8)
-                Ops.die_s("Will not decode invalid " + charset, tc);
+            if (result.isMalformed()) {
+                /* We encountered malformed input. But it could be that we found enough
+                 * valid input to return a whole line. So we should only die if we
+                 * didn't get anything in the output buffer. */
+                if (target.position() == 0)
+                    Ops.die_s("Will not decode invalid " + charset, tc);
+            }
 
             decoded.add(decodedBuffer(target));
             if (decodee.remaining() == 0)
