@@ -2729,7 +2729,6 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'resume', 'resume',
     'lastexpayload', 'lastexpayload',
     'throwextype', 'throwcatdyn',
-    'getarg_i', 'getarg_i',
     'lexprimspec', 'lexprimspec',
     'captureposelems', 'captureposelems',
     'captureposarg', 'captureposarg',
