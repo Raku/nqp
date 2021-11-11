@@ -28,7 +28,7 @@ my class NQPMu {
                     }
                 }
                 elsif nqp::iseq_i($code, 4) {
-                    unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
+                    unless nqp::eqaddr(nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2)), NQPMu) {
                         nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
                             nqp::atpos($task, 3)(self,
                                 nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))));
