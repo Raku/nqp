@@ -339,7 +339,6 @@ The opcodes are grouped into the following categories:
 
 ## [Objects](#objects)
 
-[attrinited](#attrinited) |
 [bind](#bind) |
 [bindattr](#bindattr) |
 [bindcomp](#bindcomp) |
@@ -2177,13 +2176,6 @@ truncated, `nqp::srand(1)` and `nqp::srand(1.1)` are the same so always pass `nq
 an integer.
 
 # <a id="objects"></a> Objects
-
-## attrinited
-* `attrinited(Mu $obj. Mu:T $type, str $attributename --> int)`
-
-Test if the attribute of name `$attributename` of object `$obj`
-has been bound, see `bindattr`. Note that any access to the atribute
-that results in a `getattr` call causes it to be inited.
 
 ## bind
 * `bind(Mu $variable, Mu $value)`
