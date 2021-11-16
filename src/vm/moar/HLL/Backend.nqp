@@ -1,5 +1,7 @@
 # Backend class for the MoarVM.
 
+use MASTOps;
+
 my sub literal_subst(str $source, str $pattern, $replacement) {
     my $where := 0;
     my $result := $source;
@@ -823,6 +825,10 @@ class HLL::Backend::MoarVM {
 
     method compunit_coderefs($cu) {
         nqp::compunitcodes($cu)
+    }
+
+    method supports-op($opname) {
+        nqp::existskey(%MAST::Ops::codes, $opname)
     }
 }
 

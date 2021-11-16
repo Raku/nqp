@@ -362,6 +362,10 @@ class JavaScriptBackend {
     method is_compunit($cuish) {
         nqp::isinvokable($cuish) || nqp::iscompunit($cuish);
     }
+
+    method supports-op($opname) {
+        0 # NYI, so give the safe answer
+    }
 }
 
 # Role specifying the default backend for this build.
