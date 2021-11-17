@@ -364,7 +364,7 @@ my module sprintf {
 
         my $pow := nqp::elems(@offset) - 1;
         while $pow {
-            nqp::bindpos_i($pow_hop, $pow, @offset[$pow]);
+            nqp::bindpos_u($pow_hop, $pow, @offset[$pow]);
             $pow := $pow - 1;
         }
 

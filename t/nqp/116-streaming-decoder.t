@@ -62,13 +62,13 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     my $testbuf1 := nqp::create($buf_type);
     my $dec := nqp::create(VMDecoder);
     nqp::decoderconfigure($dec, 'ascii', nqp::hash());
-    nqp::bindpos_i($testbuf1, 0, 0x6E); # 'n'
-    nqp::bindpos_i($testbuf1, 1, 0x71); # 'q'
-    nqp::bindpos_i($testbuf1, 2, 0x70); # 'p'
+    nqp::bindpos_u($testbuf1, 0, 0x6E); # 'n'
+    nqp::bindpos_u($testbuf1, 1, 0x71); # 'q'
+    nqp::bindpos_u($testbuf1, 2, 0x70); # 'p'
     nqp::decoderaddbytes($dec, $testbuf1);
-    nqp::bindpos_i($testbuf1, 0, 0x78); # 'x'
-    nqp::bindpos_i($testbuf1, 1, 0x78); # 'x'
-    nqp::bindpos_i($testbuf1, 2, 0x78); # 'x'
+    nqp::bindpos_u($testbuf1, 0, 0x78); # 'x'
+    nqp::bindpos_u($testbuf1, 1, 0x78); # 'x'
+    nqp::bindpos_u($testbuf1, 2, 0x78); # 'x'
     nqp::decoderaddbytes($dec, $testbuf1);
     ok(nqp::decodertakeallchars($dec) eq 'nqpxxx',
         'internal buffer of decoder gets its own copy of the added bytes');
@@ -194,26 +194,26 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
     nqp::decoderconfigure($dec, 'utf8', nqp::hash());
 
     ## decode complete code point
-    nqp::bindpos_i($testbuf1, 0, 0xD0);
-    nqp::bindpos_i($testbuf1, 1, 0xB4);
+    nqp::bindpos_u($testbuf1, 0, 0xD0);
+    nqp::bindpos_u($testbuf1, 1, 0xB4);
     nqp::decoderaddbytes($dec, $testbuf1);
     ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed together)');
-    nqp::bindpos_i($testbuf2, 0, 0xD0);
+    nqp::bindpos_u($testbuf2, 0, 0xD0);
     nqp::decoderaddbytes($dec, $testbuf2);
-    nqp::bindpos_i($testbuf2, 0, 0xB4);
+    nqp::bindpos_u($testbuf2, 0, 0xB4);
     nqp::decoderaddbytes($dec, $testbuf2);
     ok(nqp::decodertakeallchars($dec) eq 'д', 'Got valid code point back (bytes pushed separately)');
 
     ## push invalid code point (second byte of multibyte character must by larger than 0x7F)
-    nqp::bindpos_i($testbuf1, 0, 0xD0);
-    nqp::bindpos_i($testbuf1, 1, 0x7F);
+    nqp::bindpos_u($testbuf1, 0, 0xD0);
+    nqp::bindpos_u($testbuf1, 1, 0x7F);
     nqp::decoderaddbytes($dec, $testbuf1);
     dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed together)');
     $dec := nqp::create(VMDecoder);
     nqp::decoderconfigure($dec, 'utf8', nqp::hash());
-    nqp::bindpos_i($testbuf2, 0, 0xD0);
+    nqp::bindpos_u($testbuf2, 0, 0xD0);
     nqp::decoderaddbytes($dec, $testbuf2);
-    nqp::bindpos_i($testbuf2, 0, 0x7F);
+    nqp::bindpos_u($testbuf2, 0, 0x7F);
     nqp::decoderaddbytes($dec, $testbuf2);
     dies-ok({ nqp::decodertakeallchars($dec) }, 'error with invalid code point (bytes pushed separately)');
 }
