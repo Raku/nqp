@@ -2645,6 +2645,7 @@ sub add_native_assign_op($op_name, $kind) {
     })
 }
 add_native_assign_op('assign_i', $MVM_reg_int64);
+add_native_assign_op('assign_u', $MVM_reg_uint64);
 add_native_assign_op('assign_n', $MVM_reg_num64);
 add_native_assign_op('assign_s', $MVM_reg_str);
 
@@ -2735,6 +2736,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'captureposelems', 'captureposelems',
     'captureposarg', 'captureposarg',
     'captureposarg_i', 'captureposarg_i',
+    'captureposarg_u', 'captureposarg_u',
     'captureposarg_n', 'captureposarg_n',
     'captureposarg_s', 'captureposarg_s',
     'captureposprimspec', 'captureposprimspec',
@@ -2964,9 +2966,11 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'isge_I', 'ge_I',
     'atpos', 'atpos_o',
     'atpos_i', 'atpos_i',
+    'atpos_u', 'atpos_u',
     'atpos_n', 'atpos_n',
     'atpos_s', 'atpos_s',
     'atposref_i', 'atposref_i',
+    'atposref_u', 'atposref_u',
     'atposref_n', 'atposref_n',
     'atposref_s', 'atposref_s',
     'atpos2d', 'atpos2d_o',
@@ -3029,6 +3033,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'create', 'create',
     'iscont', 'iscont',
     'iscont_i', 'iscont_i',
+    'iscont_u', 'iscont_u',
     'iscont_n', 'iscont_n',
     'iscont_s', 'iscont_s',
     'isrwcont', 'isrwcont',
@@ -3264,6 +3269,7 @@ my constant SIMPLE_OP_MAPPINGS_RESULT_TWO := nqp::list_s(
     'scsetcode', 'scsetcode',
     'bindpos', 'bindpos_o',
     'bindpos_i', 'bindpos_i',
+    'bindpos_u', 'bindpos_u',
     'bindpos_n', 'bindpos_n',
     'bindpos_s', 'bindpos_s',
     'bindposnd', 'bindposnd_o',
