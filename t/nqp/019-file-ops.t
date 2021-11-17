@@ -371,6 +371,15 @@ my sub buf_dump($buf) {
     }
     nqp::join(",", @parts);
 }
+my sub ubuf_dump($buf) {
+    my @parts;
+    my $i := 0;
+    while $i < nqp::elems($buf) {
+        @parts.push(~nqp::atpos_u($buf, $i));
+        $i := $i + 1;
+    }
+    nqp::join(",", @parts);
+}
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -382,8 +391,8 @@ my sub create_buf($type) {
     my $fh := nqp::open('t/nqp/019-chars.txt', 'r');
     my $buf := nqp::create(create_buf(uint8));
     ok(nqp::eqaddr(nqp::readfh($fh, $buf, 5), $buf), 'nqp::readfh should return the buffer');
-    is(buf_dump($buf), '108,105,110,207,128', 'nqp::readfh read in correct unsigned bytes');
-    is(buf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next bytes correctly');
+    is(ubuf_dump($buf), '108,105,110,207,128', 'nqp::readfh read in correct unsigned bytes');
+    is(ubuf_dump(nqp::readfh($fh, $buf, 4)), '49,46,108,105', 'nqp::readfh read in the next bytes correctly');
     nqp::closefh($fh);
 }
 

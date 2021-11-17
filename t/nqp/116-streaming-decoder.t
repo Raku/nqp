@@ -150,12 +150,12 @@ nqp::composetype($buf_type, nqp::hash('array', nqp::hash('type', uint8)));
         'Trying to take more bytes than are available gives back null');
     my $bytes := nqp::decodertakebytes($dec, $buf_type, 6);
     ok(nqp::elems($bytes), 'Could take 6 bytes as byte array');
-    ok(nqp::atpos_i($bytes, 0) == 0xd0, 'Byte 1 correct');
-    ok(nqp::atpos_i($bytes, 1) == 0xbf, 'Byte 2 correct');
-    ok(nqp::atpos_i($bytes, 2) == 0xd0, 'Byte 3 correct');
-    ok(nqp::atpos_i($bytes, 3) == 0xbe, 'Byte 4 correct');
-    ok(nqp::atpos_i($bytes, 4) == 0xd0, 'Byte 5 correct');
-    ok(nqp::atpos_i($bytes, 5) == 0xb4, 'Byte 6 correct');
+    ok(nqp::atpos_u($bytes, 0) == 0xd0, 'Byte 1 correct');
+    ok(nqp::atpos_u($bytes, 1) == 0xbf, 'Byte 2 correct');
+    ok(nqp::atpos_u($bytes, 2) == 0xd0, 'Byte 3 correct');
+    ok(nqp::atpos_u($bytes, 3) == 0xbe, 'Byte 4 correct');
+    ok(nqp::atpos_u($bytes, 4) == 0xd0, 'Byte 5 correct');
+    ok(nqp::atpos_u($bytes, 5) == 0xb4, 'Byte 6 correct');
     ok(nqp::decoderbytesavailable($dec) == 0, 'Now no bytes available');
     ok(nqp::decoderempty($dec), 'And so the decoder is empty');
 }

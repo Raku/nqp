@@ -387,7 +387,7 @@ my module sprintf {
             my $factors := nqp::list();
             my int $i := $pow;
             while 1 {
-                my $hop := nqp::atpos_i($pow_hop, $i);
+                my $hop := nqp::atpos_u($pow_hop, $i);
                 if (!$hop) {
                     # When we reach a hop of zero that means that we have a list
                     # of factors to multiply together. So do this and return:

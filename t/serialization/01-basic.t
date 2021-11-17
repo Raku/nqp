@@ -741,17 +741,17 @@ sub encode_as_base64($buf) {
     my int $size := nqp::elems($buf);
 
     while $i < $size {
-        my int $c := nqp::atpos_i($buf, $i++);
+        my uint $c := nqp::atpos_u($buf, $i++);
         $c := $c * 256;
         if $i < $size {
-            $c := $c + nqp::atpos_i($buf, $i);
+            $c := $c + nqp::atpos_u($buf, $i);
         }
 
         $i++;
 
         $c := $c * 256;
         if $i < $size {
-            $c := $c + nqp::atpos_i($buf, $i);
+            $c := $c + nqp::atpos_u($buf, $i);
         }
         $i++;
 
