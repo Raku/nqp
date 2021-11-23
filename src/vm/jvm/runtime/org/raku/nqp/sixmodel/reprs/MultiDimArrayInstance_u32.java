@@ -9,7 +9,7 @@ public class MultiDimArrayInstance_u32 extends MultiDimArrayInstanceBase {
     public int[] slots;
 
     private static long widen(int i) {
-        return i < 0 ? i + (1 << 32) : i;
+        return i < 0 ? i + (1L << 32) : i;
     }
 
     @Override
