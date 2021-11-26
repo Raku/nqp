@@ -4295,21 +4295,168 @@ public final class Ops {
     }
 
     private static void encodeUTF16(String str, SixModelObject res, ThreadContext tc) {
-        short[] buffer = new short[str.length()];
-        for (int i = 0; i < str.length(); i++)
-            buffer[i] = (short)str.charAt(i);
-        if (res instanceof VMArrayInstance_i16) {
-            VMArrayInstance_i16 arr = (VMArrayInstance_i16)res;
-            arr.elems = buffer.length;
-            arr.start = 0;
-            arr.slots = buffer;
+        int[] buffer = new int[str.length()]; /* Can be an overestimate. */
+        int bufPos = 0;
+        for (int i = 0; i < str.length(); ) {
+            int cp = str.codePointAt(i);
+            buffer[bufPos++] = cp;
+            i += Character.charCount(cp);
+        }
+
+        /* In the following code we ignore that:
+         * - 2-byte codepoints between 0xD800 and 0xDFFF are invalid
+         * - 4-byte codepoints greater than 0x10FFFF are invalid */
+        if (res instanceof VMArrayInstance_i8 || res instanceof VMArrayInstance_u8) {
+            res.set_elems(tc, str.length() * 4); /* Very likely too much. */
+            int elems = 0;
+            for (int i = 0; i < bufPos; i++) {
+                int cp = buffer[i];
+                if (cp < 0x10000) { // 2-byte UTF-16
+                    tc.native_i = cp & 0xFF;
+                    res.bind_pos_native(tc, elems++);
+                    tc.native_i = cp >> 8;
+                    res.bind_pos_native(tc, elems++);
+                }
+                else { // 4-byte UTF-16
+                    /* Get a 20-bit value between 0x00000 and 0xFFFFF. */
+                    cp -= 0x10000;
+                    cp &= 0xFFFFF;
+                    int highWord = 0xD800 + (cp >> 10); // 0xD800 + high ten bits
+                    int lowWord = 0xDC00 + (cp & 0x3FF); // 0xDC00 + low ten bits
+                    tc.native_i = highWord & 0xFF;
+                    res.bind_pos_native(tc, elems++);
+                    tc.native_i = highWord >> 8;
+                    res.bind_pos_native(tc, elems++);
+                    tc.native_i = lowWord & 0xFF;
+                    res.bind_pos_native(tc, elems++);
+                    tc.native_i = lowWord >> 8;
+                    res.bind_pos_native(tc, elems++);
+                }
+            }
+            res.set_elems(tc, elems); /* Shorten VMArray as needed. */
+        }
+        else if (res instanceof VMArrayInstance_i16 || res instanceof VMArrayInstance_u16) {
+            res.set_elems(tc, str.length() * 2); /* Likely too much. */
+            int elems = 0;
+            for (int i = 0; i < bufPos; i++) {
+                int cp = buffer[i];
+                if (cp < 0x10000) { // 2-byte UTF-16
+                    tc.native_i = cp;
+                    res.bind_pos_native(tc, elems++);
+                }
+                else { // 4-byte UTF-16
+                    /* Get a 20-bit value between 0x00000 and 0xFFFFF. */
+                    cp -= 0x10000;
+                    cp &= 0xFFFFF;
+                    tc.native_i = 0xD800 + (cp >> 10); // 0xD800 + high ten bits
+                    res.bind_pos_native(tc, elems++);
+                    tc.native_i = 0xDC00 + (cp & 0x3FF); // 0xDC00 + low ten bits
+                    res.bind_pos_native(tc, elems++);
+                }
+            }
+            res.set_elems(tc, elems); /* Shorten VMArray as needed. */
+        }
+        else if (res instanceof VMArrayInstance_i32 || res instanceof VMArrayInstance_u32) {
+            res.set_elems(tc, str.length()); /* Likely too much. */
+            int elems = 0;
+            long cpTemp = 0;
+            byte elemsTemp = 0;
+            for (int i = 0; i < bufPos; i++) {
+                long cp = buffer[i];
+                if (cp < 0x10000) { // 2-byte UTF-16
+                    if (elemsTemp == 0) {
+                        cpTemp = cp;
+                        elemsTemp = 1;
+                    }
+                    else {
+                        tc.native_i = cpTemp + (cp << 16);
+                        res.bind_pos_native(tc, elems++);
+                        cpTemp = 0;
+                        elemsTemp = 0;
+                    }
+                }
+                else { // 4-byte UTF-16
+                    /* Get a 20-bit value between 0x00000 and 0xFFFFF. */
+                    cp -= 0x10000;
+                    cp &= 0xFFFFF;
+                    long highSurrogate = 0xD800 + (cp >> 10); // 0xD800 + high ten bits
+                    long lowSurrogate = 0xDC00 + (cp & 0x3FF); // 0xDC00 + low ten bits
+                    if (elemsTemp == 0) {
+                        tc.native_i = highSurrogate + (lowSurrogate << 16);
+                        res.bind_pos_native(tc, elems++);
+                    }
+                    else {
+                        tc.native_i = cpTemp + (highSurrogate << 16);
+                        res.bind_pos_native(tc, elems++);
+                        cpTemp = lowSurrogate;
+                    }
+                }
+            }
+            if (elemsTemp != 0) {
+                tc.native_i = cpTemp;
+                res.bind_pos_native(tc, elems++);
+            }
+            res.set_elems(tc, elems); /* Shorten VMArray as needed. */
         }
         else {
-            res.set_elems(tc, buffer.length);
-            for (int i = 0; i < buffer.length; i++) {
-                tc.native_i = buffer[i];
-                res.bind_pos_native(tc, i);
+            res.set_elems(tc, (str.length() + 1) / 2); /* Likely too much. */
+            int elems = 0;
+            long cpTemp = 0;
+            byte elemsTemp = 0;
+            for (int i = 0; i < bufPos; i++) {
+                long cp = buffer[i];
+                if (cp < 0x10000) { // 2-byte UTF-16
+                    if (elemsTemp == 0) {
+                        cpTemp = cp;
+                        elemsTemp = 1;
+                    }
+                    else {
+                        if (elemsTemp == 3) { // buffer elem full
+                            tc.native_i = cpTemp + (cp << 48);
+                            res.bind_pos_native(tc, elems++);
+                            cpTemp = 0;
+                            elemsTemp = 0;
+                        }
+                        else {
+                            cpTemp += cp << (elemsTemp++ * 16);
+                        }
+                    }
+                }
+                else { // 4-byte UTF-16
+                    /* Get a 20-bit value between 0x00000 and 0xFFFFF. */
+                    cp -= 0x10000;
+                    cp &= 0xFFFFF;
+                    long highSurrogate = 0xD800 + (cp >> 10); // 0xD800 + high ten bits
+                    long lowSurrogate = 0xDC00 + (cp & 0x3FF); // 0xDC00 + low ten bits
+                    if (elemsTemp == 0) {
+                        cpTemp = highSurrogate + (lowSurrogate << 16);
+                        elemsTemp = 2;
+                    }
+                    else {
+                        if (elemsTemp == 3) { // buffer elem full
+                            tc.native_i = cpTemp + (highSurrogate << 48);
+                            res.bind_pos_native(tc, elems++);
+                            cpTemp = lowSurrogate;
+                            elemsTemp = 1;
+                        }
+                        else if (elemsTemp == 2) {
+                            tc.native_i = cpTemp + (highSurrogate << 32) + (lowSurrogate << 48);
+                            res.bind_pos_native(tc, elems++);
+                            cpTemp = 0;
+                            elemsTemp = 0;
+                        }
+                        else { // elemsTemp == 1
+                            cpTemp += (highSurrogate << 16) + (lowSurrogate << 32);
+                            elemsTemp = 3;
+                        }
+                    }
+                }
             }
+            if (elemsTemp != 0) {
+                tc.native_i = cpTemp;
+                res.bind_pos_native(tc, elems++);
+            }
+            res.set_elems(tc, elems); /* Shorten VMArray as needed. */
         }
     }
 
