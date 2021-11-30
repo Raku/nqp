@@ -331,7 +331,7 @@ sub gen_moar {
     my $force_rebuild = $options->{'force-rebuild'};
     my $has_gen_moar  = defined $gen_moar;
     my @opts          = @{ $options->{'moar-option'} || [] };
-    push @opts, "--optimize";
+    push @opts, "--optimize" unless grep('--no-optimize', @{ $options->{'moar-option'} });
     push @opts, '--relocatable' if $options->{relocatable};
     push @opts,
         '--git-cache-dir=' . File::Spec->rel2abs($options->{'git-cache-dir'})
