@@ -33,7 +33,23 @@ role QAST::SpecialArg {
         if $!flat {
             $info ~ ":flat" ~ ($!named ?? " :named" !! "");
         } else {
-            $info ~ ($!named ?? ":named<$!named>" !! "");
+            my $named-str;
+            my @vstr;
+            my sub v2str($v) {
+                nqp::objprimspec($v)
+                    ?? nqp::stringify($v)
+                    !! $v.HOW.name($v) ~ "|" ~ nqp::objectid($v)
+            }
+            if nqp::islist($!named) {
+                my @n := $!named;
+                for @n -> $v {
+                    nqp::push(@vstr, v2str($v));
+                }
+            }
+            else {
+                nqp::push(@vstr, v2str($!named))
+            }
+            $info ~ ($!named ?? ":named<" ~ nqp::join(" ", @vstr) ~ ">" !! "");
         }
     }
 }
