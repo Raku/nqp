@@ -29,11 +29,7 @@ role QAST::Children {
             else {
                 nqp::push(@onto, self.dump_indent_string($indent, :guide-line($guide-requested) )) ;
                 nqp::push(@onto, '- ');
-                nqp::istype($_, NQPMu)
-                    ?? nqp::push(@onto, '(NQPMu)')
-                    !! $_.HOW.name($_) eq 'Sub' || $_.HOW.name($_) eq 'Regex'
-                        ?? nqp::push(@onto, $_.name)
-                        !! nqp::push(@onto, ~$_ );
+                nqp::push(@onto, self.stringify_value($_));
                 nqp::push(@onto, "\n");
             }
         }

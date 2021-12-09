@@ -35,19 +35,14 @@ role QAST::SpecialArg {
         } else {
             my $named-str;
             my @vstr;
-            my sub v2str($v) {
-                nqp::objprimspec($v)
-                    ?? nqp::stringify($v)
-                    !! $v.HOW.name($v) ~ "|" ~ nqp::objectid($v)
-            }
             if nqp::islist($!named) {
                 my @n := $!named;
                 for @n -> $v {
-                    nqp::push(@vstr, v2str($v));
+                    nqp::push(@vstr, self.stringify_value($v));
                 }
             }
             else {
-                nqp::push(@vstr, v2str($!named))
+                nqp::push(@vstr, self.stringify_value($!named))
             }
             $info ~ ($!named ?? ":named<" ~ nqp::join(" ", @vstr) ~ ">" !! "");
         }

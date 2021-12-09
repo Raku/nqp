@@ -131,6 +131,20 @@ class QAST::Node {
         nqp::die(self.HOW.name(self) ~ " does not support evaluating unquotes");
     }
 
+    method stringify_value($v, $max_length = 80) {
+        unless nqp::isconcrete($v) {
+            return '(' ~ $v.HOW.name($v) ~ ')'
+        }
+        if nqp::objprimspec($v) {
+            return nqp::stringify($v);
+        }
+        if nqp::can($v, 'raku') {
+            my str $raku_s := nqp::join('\n', nqp::split("\n", $v.raku));
+            return nqp::substr($raku_s, 0, $max_length - 3) ~ "..." if nqp::chars($raku_s) > $max_length;
+        }
+        $v.HOW.name($v) ~ '|' ~ nqp::objectid($v);
+    }
+
     method dump(int $indent = 0, :$guide-line = 0) {
         my @chunks := [
             self.dump_indent_string($indent, :$guide-line), '- ', self.HOW.name(self)
