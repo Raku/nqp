@@ -1498,11 +1498,9 @@ sub handle_arg($arg, $qastcomp, @arg_regs, @arg_flags, @arg_kinds) {
     # build up the typeflag
     my $result_typeflag := @kind_to_args[$arg_mast.result_kind];
     if nqp::can($arg, 'flat') && $arg.flat {
+        $result_typeflag := $result_typeflag +| $Arg::flat;
         if $arg.named {
-            $result_typeflag := $result_typeflag +| $Arg::flatnamed;
-        }
-        else {
-            $result_typeflag := $result_typeflag +| $Arg::flat;
+            $result_typeflag := $result_typeflag +| $Arg::named;
         }
     }
     elsif nqp::can($arg, 'named') && $arg.named -> $name {
