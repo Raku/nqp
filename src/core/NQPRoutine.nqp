@@ -6,6 +6,7 @@ my knowhow NQPRoutine {
     has $!dispatch_order;
     has $!clone_callback;
     has int $!onlystar;
+    has int $!is-pure;
 
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
@@ -345,6 +346,13 @@ my knowhow NQPRoutine {
 
     method name() {
         nqp::getcodename($!do)
+    }
+
+    method mark_pure() {
+        $!is-pure := 1;
+    }
+    method is-pure() {
+        $!is-pure
     }
 
     method signature() { $!signature }

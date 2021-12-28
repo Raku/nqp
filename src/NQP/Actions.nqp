@@ -1273,6 +1273,12 @@ class NQP::Actions is HLL::Actions {
         $/.prune;
     }
 
+    role is-pure {
+        method is-pure() {
+            1
+        }
+    }
+
     method trait_mod:sym<is>($/) {
         if $<longname> eq 'positional_delegate' {
             make -> $m { $*DECLARAND_ATTR.set_positional_delegate(1) };
@@ -1290,6 +1296,15 @@ class NQP::Actions is HLL::Actions {
         }
         elsif $<longname> eq 'box_target' {
             make -> $m { $*DECLARAND_ATTR.set_box_target(1) };
+        }
+        elsif $<longname> eq 'pure' {
+            make -> $match {
+                my $ast := $match.ast;
+                my $name := $ast.ann('block_ast').name;
+                my $code_obj := $ast.ann('code_obj') //
+                    $*W.create_code($ast.ann('block_ast'), $name, 0);
+                $code_obj.mark_pure;
+            }
         }
         else {
             $/.panic("Trait '$<longname>' not implemented");
