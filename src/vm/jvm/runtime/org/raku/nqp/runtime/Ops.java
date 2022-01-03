@@ -3802,10 +3802,10 @@ public final class Ops {
 
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
         long zvalue = 0;
-        long zbase = 1;
+        int chars_converted = 0;
         int chars = str.length();
         long value = zvalue;
-        long base = zbase;
+        int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -3827,9 +3827,9 @@ public final class Ops {
             else break;
             if (ch >= radix) break;
             zvalue = zvalue * radix + ch;
-            zbase = zbase * radix;
+            chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; base=zbase; }
+            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
@@ -3845,7 +3845,7 @@ public final class Ops {
                 hllConfig.slurpyArrayType.st);
 
         result.push_boxed(tc, box_i(value, hllConfig.intBoxType, tc));
-        result.push_boxed(tc, box_i(base, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(chars_really_converted, hllConfig.intBoxType, tc));
         result.push_boxed(tc, box_i(pos, hllConfig.intBoxType, tc));
 
         return result;
@@ -7030,10 +7030,10 @@ public final class Ops {
 
     public static SixModelObject radix_I(long radix_l, String str, long zpos, long flags, SixModelObject type, ThreadContext tc) {
         BigInteger zvalue = BigInteger.ZERO;
-        BigInteger zbase = BigInteger.ONE;
+        int chars_converted = 0;
         int chars = str.length();
         BigInteger value = zvalue;
-        BigInteger base = zbase;
+        int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -7056,9 +7056,9 @@ public final class Ops {
             else break;
             if (ch >= radix_l) break;
             zvalue = zvalue.multiply(radix).add(BigInteger.valueOf(ch));
-            zbase = zbase.multiply(radix);
+            chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; base=zbase; }
+            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
@@ -7074,7 +7074,7 @@ public final class Ops {
                 hllConfig.slurpyArrayType.st);
 
         result.push_boxed(tc, makeBI(tc, type, value));
-        result.push_boxed(tc, makeBI(tc, type, base));
+        result.push_boxed(tc, makeBI(tc, type, BigInteger.valueOf(chars_really_converted)));
         result.push_boxed(tc, makeBI(tc, type, BigInteger.valueOf(pos)));
 
         return result;
