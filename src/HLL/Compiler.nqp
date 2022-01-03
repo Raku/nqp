@@ -311,7 +311,7 @@ class HLL::Compiler does HLL::Backend::Default {
                     $!user_progname := '-e';
                     my $?FILES := '-e';
                     $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
-                    unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
+                    unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> || %adverbs<o> {
                         self.dumper($result, $target, |%adverbs);
                     }
                 }
@@ -334,8 +334,8 @@ class HLL::Compiler does HLL::Backend::Default {
                 elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
                 else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
 
-                if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output>) {
-                    my $output := %adverbs<output>;
+                if !nqp::isnull($result) && ($!backend.is_textual_stage($target) || %adverbs<output> || %adverbs<o>) {
+                    my $output := %adverbs<output>//%adverbs<o>;
                     my $fh := ($output eq '' || $output eq '-')
                             ?? stdout()
                             !! open($output, :w);
@@ -443,7 +443,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my $code := join('', @codes);
         my $?FILES := %adverbs<source-name> || join(' ', @files);
         my $r := self.eval($code, |@args, |%adverbs);
-        if $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> {
+        if $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> || %adverbs<o> {
             return $r;
         } else {
             return self.dumper($r, $target, |%adverbs);
