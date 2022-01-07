@@ -2296,7 +2296,7 @@ class MoarVM::Callsites {
     nqp::push_i(@kind_to_args, $Arg::num);
     nqp::push_i(@kind_to_args, $Arg::str);
     nqp::push_i(@kind_to_args, $Arg::obj);
-    my int $flatnamed := $Arg::flatnamed;
+    my int $flatnamed := $Arg::flat +| $Arg::named;
     my int $flat      := $Arg::flat;
     my int $literal   := $Arg::literal;
     my int $named     := $Arg::named;
