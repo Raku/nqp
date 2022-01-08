@@ -1086,8 +1086,10 @@ my class MASTCompilerInstance {
                     $ins := self.coerce($ins, $MVM_reg_num64);
                 }
                 elsif $ins_result_kind == $MVM_reg_int32 || $ins_result_kind == $MVM_reg_int16 ||
-                        $ins_result_kind == $MVM_reg_int8 || $ins_result_kind == $MVM_reg_uint64 ||
-                        $ins_result_kind == $MVM_reg_uint32 || $ins_result_kind == $MVM_reg_uint16 ||
+                        $ins_result_kind == $MVM_reg_int8 {
+                    $ins := self.coerce($ins, $MVM_reg_int64);
+                }
+                elsif $ins_result_kind == $MVM_reg_uint64 || $ins_result_kind == $MVM_reg_uint32 || $ins_result_kind == $MVM_reg_uint16 ||
                         $ins_result_kind == $MVM_reg_uint8 {
                     $ins := self.coerce($ins, $MVM_reg_int64);
                 }

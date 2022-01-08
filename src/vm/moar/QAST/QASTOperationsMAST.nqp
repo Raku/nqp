@@ -1568,10 +1568,12 @@ my $dispatch_call_gen := -> $qastcomp, $op {
             $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
         }
         elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
-                $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
-                $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
-                $arg_mast_kind == $MVM_reg_uint8 {
+                $arg_mast_kind == $MVM_reg_int8 {
             $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+        }
+        elsif $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+                $arg_mast_kind == $MVM_reg_uint8 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_uint64);
         }
         nqp::push(@dispatch_mast, $arg_mast);
         nqp::push(@dispatch_arg_idxs, $arg_mast.result_reg);
@@ -1803,10 +1805,12 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
             $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_num64);
         }
         elsif $arg_mast_kind == $MVM_reg_int32 || $arg_mast_kind == $MVM_reg_int16 ||
-                $arg_mast_kind == $MVM_reg_int8 || $arg_mast_kind == $MVM_reg_uint64 ||
-                $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
-                $arg_mast_kind == $MVM_reg_uint8 {
+                $arg_mast_kind == $MVM_reg_int8 {
             $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_int64);
+        }
+        elsif $arg_mast_kind == $MVM_reg_uint32 || $arg_mast_kind == $MVM_reg_uint16 ||
+                $arg_mast_kind == $MVM_reg_uint8 {
+            $arg_mast := $qastcomp.coerce($arg_mast, $MVM_reg_uint64);
         }
         nqp::push(@dispatch_mast, $arg_mast);
         nqp::push(@dispatch_arg_idxs, $arg_mast.result_reg);
