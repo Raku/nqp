@@ -732,7 +732,12 @@ my class MASTCompilerInstance {
         'return_n',
         'return_n',
         'return_s',
-        'return_o'
+        'return_o',
+        '','','','','','','','',
+        'return_i', #FIXME need a return_u
+        'return_i',
+        'return_i',
+        'return_i'
     ];
 
     my @type_initials := [
@@ -2176,8 +2181,19 @@ my class MASTCompilerInstance {
                 elsif $size == 32 { $MVM_reg_num32 }
                 else { nqp::die("Unknown num size $size") }
             }
-            else {
+            elsif $primspec == 10 {
+                my int $size := nqp::objprimbits($type);
+                if $size == 64    { $MVM_reg_uint64 }
+                elsif $size == 32 { $MVM_reg_uint32 }
+                elsif $size == 16 { $MVM_reg_uint16 }
+                elsif $size == 8  { $MVM_reg_uint8 }
+                else { nqp::die("Unknown uint size $size") }
+            }
+            elsif $primspec == 3 {
                 $MVM_reg_str
+            }
+            else {
+                nqp::die("Unsupported primspec $primspec in type_to_register_kind");
             }
         }
     }
@@ -2230,8 +2246,11 @@ sub type_to_local_type($t) {
     elsif $spec == 3 {
         7
     }
+    elsif $spec == 10 {
+        %uint_map{nqp::objprimbits($t)}
+    }
     else {
-        nqp::die("Unknwon local type: " ~ $t.HOW.name($t) ~ ": " ~ $spec);
+        nqp::die("Unknown local type: " ~ $t.HOW.name($t) ~ ": " ~ $spec);
     }
 }
 
@@ -2296,6 +2315,18 @@ class MoarVM::Callsites {
     nqp::push_i(@kind_to_args, $Arg::num);
     nqp::push_i(@kind_to_args, $Arg::str);
     nqp::push_i(@kind_to_args, $Arg::obj);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, 0);
+    nqp::push_i(@kind_to_args, $Arg::uint);
+    nqp::push_i(@kind_to_args, $Arg::uint);
+    nqp::push_i(@kind_to_args, $Arg::uint);
+    nqp::push_i(@kind_to_args, $Arg::uint);
     my int $flatnamed := $Arg::flat +| $Arg::named;
     my int $flat      := $Arg::flat;
     my int $literal   := $Arg::literal;

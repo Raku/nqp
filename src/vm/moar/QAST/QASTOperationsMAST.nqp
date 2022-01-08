@@ -776,6 +776,7 @@ for <if unless with without> -> $op_name {
             my $spec := nqp::objprimspec($op[0].returns);
             @comp_ops[0] := $qastcomp.as_mast(:want(
                 $spec == 1 ?? $MVM_reg_int64 !!
+                $spec == 10 ?? $MVM_reg_uint64 !!
                 $spec == 2 ?? $MVM_reg_num64 !!
                 $spec == 3 ?? $MVM_reg_str   !!
                               $MVM_reg_obj
@@ -1708,6 +1709,9 @@ my $call_gen := sub ($qastcomp, $op) {
         my int $primspec := nqp::objprimspec(@local_types[$index]);
         if $primspec == 1 {
             $op_name := $op_name ~ 'i';
+        }
+        elsif $primspec == 10 {
+            $op_name := $op_name ~ 'u';
         }
         elsif $primspec == 2 {
             $op_name := $op_name ~ 'n';
