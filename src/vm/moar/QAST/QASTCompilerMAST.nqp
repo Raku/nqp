@@ -1341,7 +1341,7 @@ my class MASTCompilerInstance {
                     push_op($!mast_frame, 'paramnamesused') unless $named_slurpy;
                 }
                 my $subbuffer := $frame.end_subbuffer;
-                $frame.insert_bytecode($subbuffer, 0);
+                $frame.insert_bytecode($subbuffer, my uint $zero := 0);
 
                 # Pop off frame-scoped bits now that the frame is compiled.
                 self.pop_regalloc();
@@ -2360,6 +2360,7 @@ class MoarVM::Callsites {
                 $result_typeflag := $result_typeflag +| $literal;
             }
             nqp::push_i(@flags, $result_typeflag);
+            nqp::die("0 flag for arg $i with kind " ~ @arg_mast[$i].result_kind) if $result_typeflag == 0;
 
             nqp::writeuint($identifier, $id_offset++, $result_typeflag, 1);
             $i++;
@@ -2430,15 +2431,16 @@ class MoarVM::StringHeap {
             $utf8 := 1 if $g < 0 || $g >= 0xff || $g == 0x0d;
         }
 
-        my int $prev_total_size := nqp::elems($!strings);
+        my uint $prev_total_size := nqp::elems($!strings);
         nqp::setelems($!strings, $prev_total_size + 4);
         nqp::encode($s, ($utf8 ?? "utf8" !! "iso-8859-1"), $!strings);
-        my int $encoded_size := nqp::elems($!strings) - 4 - $prev_total_size;
-        my int $pad := 4 - $encoded_size % 4;
+        my uint $encoded_size := nqp::elems($!strings) - 4 - $prev_total_size;
+        my uint $pad := 4 - $encoded_size % 4;
         $pad := 0 if $pad == 4;
 
-        $!strings.write_uint32_at($encoded_size * 2 + $utf8, $prev_total_size); # LSB is UTF-8 flag
-        $!strings.write_uint8(0) while $pad--;
+        my uint $pos := $encoded_size * 2 + $utf8;
+        $!strings.write_uint32_at($pos, $prev_total_size); # LSB is UTF-8 flag
+        $!strings.write_uint8(my uint8 $zero := 0) while $pad--;
 
         nqp::push_s(@!orig-strings, $s);
 
@@ -2511,8 +2513,9 @@ class MoarVM::BytecodeWriter {
     method write_header() {
         # 92 bytes
 
+        my uint $zero := 0;
         my uint32 $header_size := +align_section(8 + 21 * 4);
-        my uint32 $frames_size := 0;
+        my uint32 $frames_size := $zero;
         for @!frames {
             my uint32 $size := +$_.size;
             $frames_size := $frames_size + $size;
@@ -2527,14 +2530,14 @@ class MoarVM::BytecodeWriter {
         my uint32 $bytecode_size := +align_section($!bytecode_size || nqp::elems($!bytecode));
         my uint32 $annotations_size := nqp::elems($!annotations); # doesn't need to be aligned because annotations are written last
         my $serialized := $!compunit.serialized;
-        my uint32 $serialized_size := +align_section(nqp::defined($serialized) ?? nqp::elems($serialized) !! 0);
+        my uint32 $serialized_size := +align_section(nqp::defined($serialized) ?? nqp::elems($serialized) !! $zero);
 
         my uint32 $offset := $header_size;
         $!mbc.write_s("MOARVM\r\n");
-        $!mbc.write_uint32(7); # Version
+        $!mbc.write_uint32(my uint $version := 7); # Version
 
         $!mbc.write_uint32($offset); # Offset of SC dependencies table
-        $!mbc.write_uint32(nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
+        $!mbc.write_uint32(my uint $num_sc_handles := nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
         $offset := $offset + $sc_deps_size;
 
         $!mbc.write_uint32($offset); # Offset of extension ops table
@@ -2542,15 +2545,15 @@ class MoarVM::BytecodeWriter {
         $offset := $offset + $extops_size;
 
         $!mbc.write_uint32($offset); # Offset of frames segment
-        $!mbc.write_uint32(nqp::elems(@!frames)); # Number of frames
+        $!mbc.write_uint32(my uint $num_frames := nqp::elems(@!frames)); # Number of frames
         $offset := $offset + $frames_size;
 
         $!mbc.write_uint32($offset); # Offset of callsites segment
-        $!mbc.write_uint32($!callsites.elems); # Number of callsites
+        $!mbc.write_uint32(my uint $num_callsites := $!callsites.elems); # Number of callsites
         $offset := $offset + $callsites_size;
 
         $!mbc.write_uint32($offset); # Offset of strings heap
-        $!mbc.write_uint32($!string-heap.elems); # Number of strings in heap
+        $!mbc.write_uint32(my uint $num_strings := $!string-heap.elems); # Number of strings in heap
         $offset := $offset + $string_heap_size;
 
         $!mbc.write_uint32($offset); # Offset of SC data segment
@@ -2558,20 +2561,20 @@ class MoarVM::BytecodeWriter {
         $offset := $offset + $serialized_size;
 
         $!mbc.write_uint32($offset); # Offset of bytecode segment
-        $!mbc.write_uint32($!bytecode_size || nqp::elems($!bytecode)); # Length of bytecode segment
+        $!mbc.write_uint32(my uint $num_bytecode := ($!bytecode_size || nqp::elems($!bytecode))); # Length of bytecode segment
         $offset := $offset + $bytecode_size;
 
         $!mbc.write_uint32($offset); # Offset of annotation segment
         $!mbc.write_uint32($annotations_size); # Length of annotation segment
 
-        $!mbc.write_uint32($!hll); # HLL Name
+        $!mbc.write_uint32(my uint32 $hll := $!hll); # HLL Name
         my $mainline_frame := $!compunit.mainline_frame;
         if $mainline_frame {
             my uint32 $mainline_frame_idx := self.get_frame_index($mainline_frame) + 1;
             $!mbc.write_uint32($mainline_frame_idx); # Main entry point frame index + 1
         }
         else {
-            $!mbc.write_uint32(0); # No mainline frame
+            $!mbc.write_uint32($zero); # No mainline frame
         }
         my $main_frame := $!compunit.main_frame;
         if $main_frame {
@@ -2579,7 +2582,7 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32($main_frame_idx); # Main entry point frame index + 1
         }
         else {
-            $!mbc.write_uint32(0); # No main entry point frame
+            $!mbc.write_uint32($zero); # No main entry point frame
         }
         my $load_frame := $!compunit.load_frame;
         if $load_frame {
@@ -2587,7 +2590,7 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32($load_frame_idx); # Library load frame index + 1
         }
         else {
-            $!mbc.write_uint32(0); # No library load frame
+            $!mbc.write_uint32($zero); # No library load frame
         }
         my $deserialize_frame := $!compunit.deserialize_frame;
         if $deserialize_frame {
@@ -2595,10 +2598,10 @@ class MoarVM::BytecodeWriter {
             $!mbc.write_uint32($deserialize_frame_idx); # Deserialization frame index + 1
         }
         else {
-            $!mbc.write_uint32(0); # No deserialize frame
+            $!mbc.write_uint32($zero); # No deserialize frame
         }
     }
-    method write_frame(MAST::Frame $f, int $idx) {
+    method write_frame(MAST::Frame $f, uint $idx) {
         # 12 * 4 + 3 * 2 = 54
         my @local_types := $f.local_types;
         my @lexical_types := $f.lexical_types;
@@ -2610,38 +2613,39 @@ class MoarVM::BytecodeWriter {
         my int $debug_map_idxs_length := nqp::elems(@debug_map_idxs);
         $!mbc.write_uint32($f.bytecode-offset); # Bytecode segment offset
         $!mbc.write_uint32($f.bytecode-length); # Bytecode length in bytes
-        $!mbc.write_uint32(nqp::elems(@local_types)); # Number of locals/registers
-        $!mbc.write_uint32(nqp::elems(@lexical_types)); # Number of lexicals
+        $!mbc.write_uint32(my uint $num_local_types := nqp::elems(@local_types)); # Number of locals/registers
+        $!mbc.write_uint32(my uint $num_lexical_types := nqp::elems(@lexical_types)); # Number of lexicals
         $!mbc.write_uint32($f.cuuid-idx); # Compilation unit unique ID (string heap index)
         $!mbc.write_uint32($f.name-idx); # Name (string heap index)
         my $outer := $f.outer;
         if nqp::defined($outer) {
-            $!mbc.write_uint16(self.get_frame_index($outer)); # Outer
+            $!mbc.write_uint16(my uint $frame_index := self.get_frame_index($outer)); # Outer
         }
         else {
             $!mbc.write_uint16($idx); # Outer
         }
         $!mbc.write_uint32($f.annotations-offset); # Annotation segment offset
         $!mbc.write_uint32($f.num-annotations); # Number of annotations
-        $!mbc.write_uint32(nqp::elems(@handlers)); # Number of handlers
-        $!mbc.write_uint16($f.flags); # Frame flag bits
+        $!mbc.write_uint32(my uint $num_handlers := nqp::elems(@handlers)); # Number of handlers
+        $!mbc.write_uint16(my uint $flags := $f.flags); # Frame flag bits
         $!mbc.write_uint16($num_static_lex_values); # Number of entries in static lexical values table
         if $f.flags +& 4 { # FRAME_FLAG_HAS_CODE_OBJ
-            $!mbc.write_uint32(nqp::add_i($f.code_obj_sc_dep_idx, 1)); # Code object SC dependency index + 1
+            $!mbc.write_uint32(my uint $idx := nqp::add_i($f.code_obj_sc_dep_idx, 1)); # Code object SC dependency index + 1
             $!mbc.write_uint32($f.code_obj_sc_idx); # SC object index
         }
         else {
-            $!mbc.write_uint32(0); # No code object SC dependency index
-            $!mbc.write_uint32(0); # No SC object index
+            my uint $zero := 0;
+            $!mbc.write_uint32($zero); # No code object SC dependency index
+            $!mbc.write_uint32($zero); # No SC object index
         }
-        $!mbc.write_uint32(nqp::elems($f.debug_map));
+        $!mbc.write_uint32(my uint $num_debug_map := nqp::elems($f.debug_map));
         for @local_types {
-            $!mbc.write_uint16(type_to_local_type($_));
+            $!mbc.write_uint16(my uint16 $type := type_to_local_type($_));
         }
         my int $i := 0;
         for @lexical_types {
-            $!mbc.write_uint16(type_to_local_type($_));
-            $!mbc.write_uint32(nqp::atpos_i(@lexical_names, $i++));
+            $!mbc.write_uint16(my uint16 $type := type_to_local_type($_));
+            $!mbc.write_uint32(my uint32 $name := nqp::atpos_i(@lexical_names, $i++));
         }
         for @handlers {
             $!mbc.write_uint32($_.start_offset);
@@ -2656,16 +2660,16 @@ class MoarVM::BytecodeWriter {
         }
         $i := 0;
         while ($i < $num_static_lex_values) {
-            $!mbc.write_uint16(nqp::atpos_i(@static_lex_values, 4 * $i));
-            $!mbc.write_uint16(nqp::atpos_i(@static_lex_values, 4 * $i + 1));
-            $!mbc.write_uint32(nqp::atpos_i(@static_lex_values, 4 * $i + 2));
-            $!mbc.write_uint32(nqp::atpos_i(@static_lex_values, 4 * $i + 3));
+            $!mbc.write_uint16(my uint $index  := nqp::atpos_i(@static_lex_values, 4 * $i));
+            $!mbc.write_uint16(my uint $flags  := nqp::atpos_i(@static_lex_values, 4 * $i + 1));
+            $!mbc.write_uint32(my uint $sc_idx := nqp::atpos_i(@static_lex_values, 4 * $i + 2));
+            $!mbc.write_uint32(my uint $idx    := nqp::atpos_i(@static_lex_values, 4 * $i + 3));
             $i++;
         }
         $i := 0;
         while $i < $debug_map_idxs_length {
-            $!mbc.write_uint16(nqp::atpos_i(@debug_map_idxs, $i++));
-            $!mbc.write_uint32(nqp::atpos_i(@debug_map_idxs, $i++));
+            $!mbc.write_uint16(my uint $idx  := nqp::atpos_i(@debug_map_idxs, $i++));
+            $!mbc.write_uint32(my uint $name := nqp::atpos_i(@debug_map_idxs, $i++));
         }
     }
     method collect_bytecode() {
@@ -2709,8 +2713,9 @@ class MoarVM::BytecodeWriter {
             my @sig_array := @extop_sigs[$i];
             my $num_operands := nqp::elems(@sig_array);
             my $j := 0;
+            my uint $zero := 0;
             while $j < 8 {
-                $!mbc.write_uint8($j < $num_operands ?? nqp::atpos_i(@sig_array, $j) !! 0);
+                $!mbc.write_uint8($j < $num_operands ?? my uint $op := nqp::atpos_i(@sig_array, $j) !! $zero);
                 $j++;
             }
             $i++;
@@ -2725,22 +2730,24 @@ class MoarVM::BytecodeWriter {
             return;
         }
         $off := 8 - $off;
+        my uint $zero := 0;
         while $off-- > 0 {
-            $!mbc.write_uint8(0);
+            $!mbc.write_uint8($zero);
         }
     }
     method align_and_write($file) {
         self.align;
         nqp::writefh($file, $!mbc);
-        nqp::setelems($!mbc, 0);
+        nqp::setelems($!mbc, my uint $zero := 0);
     }
     method align_file($size, $file) {
         my $off := $size % 8;
         if $off != 0 {
             my $tmp := MAST::Bytecode.new;
             $off := 8 - $off;
+            my uint $zero := 0;
             while $off-- > 0 {
-                $tmp.write_uint8(0);
+                $tmp.write_uint8($zero);
             }
             nqp::writefh($file, $tmp);
         }
@@ -2756,7 +2763,7 @@ class MoarVM::BytecodeWriter {
         self.align;
         self.write_extops;
         self.align;
-        my int $idx := 0;
+        my uint $idx := 0;
         for @!frames {
             self.write_frame($_, $idx++);
         }
@@ -2783,7 +2790,7 @@ class MoarVM::BytecodeWriter {
         self.align_and_write($file);
         self.write_extops;
         self.align_and_write($file);
-        my int $idx := 0;
+        my uint $idx := 0;
         for @!frames {
             # need to set the bycode offset here since we don't call self.collect_bytecode()
             $_.set-bytecode-offset($!bytecode_size);

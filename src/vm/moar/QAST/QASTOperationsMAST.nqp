@@ -922,7 +922,7 @@ for <if unless with without> -> $op_name {
         }
 
         # Emit the then, stash the result
-        $frame.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+        $frame.insert_bytecode($then-subbuffer, my uint $elems := nqp::elems($*MAST_FRAME.bytecode));
 
         if (!$is_void && nqp::unbox_i(@comp_ops[1].result_kind) != $res_kind) {
             # coercion will automatically release @comp_ops[1].result_reg
@@ -940,7 +940,7 @@ for <if unless with without> -> $op_name {
             op_goto($frame, $end_lbl);
             $frame.add-label($else_lbl);
 
-            $frame.insert_bytecode($else-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+            $frame.insert_bytecode($else-subbuffer, my uint $elems := nqp::elems($*MAST_FRAME.bytecode));
 
             if !$is_void {
                 if nqp::unbox_i(@comp_ops[2].result_kind) != $res_kind {
