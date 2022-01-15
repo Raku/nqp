@@ -1807,7 +1807,7 @@ Returns the value associated with the given key-value pair.
 
 # <a id="hll-specific"></a> HLL-Specific
 
-See [MoarVM testfile](https://Raku/nqp/t/moar/097-hll.t)
+See [MoarVM testfile](https://github.com/Raku/nqp/blob/master/t/moar/097-hll.t)
 for MoarVM specific examples
 
 ## bindcurhllsym
