@@ -16,6 +16,7 @@ public class StorageSpec {
     public static final short BP_INT = 1;
     public static final short BP_NUM = 2;
     public static final short BP_STR = 3;
+    public static final short BP_UINT = 10;
 
     /* can_box bit field values. */
     public static final short CAN_BOX_INT = 1;
