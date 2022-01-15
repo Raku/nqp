@@ -2845,6 +2845,12 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
         return tc.native_i;
     }
+    public static long atpos_u(SixModelObject arr, long idx, ThreadContext tc) {
+        arr.at_pos_native(tc, idx);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
     public static double atpos_n(SixModelObject arr, long idx, ThreadContext tc) {
         arr.at_pos_native(tc, idx);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
@@ -2869,6 +2875,15 @@ public final class Ops {
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
         if (arr.sc != null) { /*new Exception("bindpos_i").printStackTrace(); */
+            scwbObject(tc, arr); }
+        return value;
+    }
+    public static long bindpos_u(SixModelObject arr, long idx, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_native(tc, idx);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        if (arr.sc != null) { /*new Exception("bindpos_u").printStackTrace(); */
             scwbObject(tc, arr); }
         return value;
     }
