@@ -78,7 +78,7 @@ sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id
             $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
             op_dispatch_o($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
         }
-        elsif $primspec == 1 {
+        elsif $primspec == 1 || $primspec == 10 {
             if $res_kind == $MVM_reg_int64 {
                 $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
                 op_dispatch_i($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);

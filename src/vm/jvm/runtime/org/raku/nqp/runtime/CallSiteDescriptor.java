@@ -17,6 +17,7 @@ public class CallSiteDescriptor {
     public static final byte ARG_INT = 1;
     public static final byte ARG_NUM = 2;
     public static final byte ARG_STR = 4;
+    public static final byte ARG_UINT = 32;
     public static final byte ARG_NAMED = 8;
     public static final byte ARG_FLAT = 16;
 
