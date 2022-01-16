@@ -2563,6 +2563,9 @@ public final class Ops {
     public static long unbox_i(SixModelObject obj, ThreadContext tc) {
         return decont(obj, tc).get_int(tc);
     }
+    public static long unbox_u(SixModelObject obj, ThreadContext tc) {
+        return decont(obj, tc).get_int(tc);
+    }
     public static double unbox_n(SixModelObject obj, ThreadContext tc) {
         return decont(obj, tc).get_num(tc);
     }
