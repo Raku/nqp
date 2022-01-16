@@ -1593,6 +1593,8 @@ QAST::OperationsJAST.add_core_op('callmethod', -> $qastcomp, $node {
     result_from_cf($il, rttype_from_typeobj($node.returns));
 });
 
+QAST::OperationsJAST.map_classlib_core_op('dispatch', $TYPE_OPS, 'dispatch', [$RT_STR, $RT_STR, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
+
 # Binding
 QAST::OperationsJAST.add_core_op('bind', -> $qastcomp, $op {
     # Sanity checks.

@@ -2258,6 +2258,19 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "invokewithcapture requires a CallCapture");
         }
     }
+    public static SixModelObject dispatch(String dispatcher, String syscall, String key, SixModelObject arg3, ThreadContext tc) {
+        if (!dispatcher.equals("boot-syscall"))
+            throw ExceptionHandling.dieInternal(tc,
+                "Unknown dispatcher '" + dispatcher + "' called");
+        if (!syscall.equals("set-cur-hll-config-key"))
+            throw ExceptionHandling.dieInternal(tc,
+                "Unknown syscall '" + syscall + "' called");
+        if (!key.equals("uint_box"))
+            throw ExceptionHandling.dieInternal(tc,
+                "Tried to set unsupported config key '" + key + "'");
+
+        return null;
+    }
 
     /* Multi-dispatch cache. */
     public static SixModelObject multicacheadd(SixModelObject cache, SixModelObject capture, SixModelObject result, ThreadContext tc) {
