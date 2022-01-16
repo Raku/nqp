@@ -28,7 +28,7 @@ sub buf_dump($buf) {
   my @parts;
   my $i := 0;
   while $i < nqp::elems($buf) {
-    @parts.push(~nqp::atpos_i($buf, $i));
+    @parts.push(~nqp::atpos_u($buf, $i));
     $i := $i + 1;
   }
   nqp::join(",", @parts);

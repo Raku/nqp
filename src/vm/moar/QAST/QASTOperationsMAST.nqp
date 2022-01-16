@@ -776,6 +776,7 @@ for <if unless with without> -> $op_name {
             my $spec := nqp::objprimspec($op[0].returns);
             @comp_ops[0] := $qastcomp.as_mast(:want(
                 $spec == 1 ?? $MVM_reg_int64 !!
+                $spec == 10 ?? $MVM_reg_uint64 !!
                 $spec == 2 ?? $MVM_reg_num64 !!
                 $spec == 3 ?? $MVM_reg_str   !!
                               $MVM_reg_obj
@@ -921,7 +922,7 @@ for <if unless with without> -> $op_name {
         }
 
         # Emit the then, stash the result
-        $frame.insert_bytecode($then-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+        $frame.insert_bytecode($then-subbuffer, my uint $elems := nqp::elems($*MAST_FRAME.bytecode));
 
         if (!$is_void && nqp::unbox_i(@comp_ops[1].result_kind) != $res_kind) {
             # coercion will automatically release @comp_ops[1].result_reg
@@ -939,7 +940,7 @@ for <if unless with without> -> $op_name {
             op_goto($frame, $end_lbl);
             $frame.add-label($else_lbl);
 
-            $frame.insert_bytecode($else-subbuffer, nqp::elems($*MAST_FRAME.bytecode));
+            $frame.insert_bytecode($else-subbuffer, my uint $elems := nqp::elems($*MAST_FRAME.bytecode));
 
             if !$is_void {
                 if nqp::unbox_i(@comp_ops[2].result_kind) != $res_kind {
@@ -1498,11 +1499,9 @@ sub handle_arg($arg, $qastcomp, @arg_regs, @arg_flags, @arg_kinds) {
     # build up the typeflag
     my $result_typeflag := @kind_to_args[$arg_mast.result_kind];
     if nqp::can($arg, 'flat') && $arg.flat {
+        $result_typeflag := $result_typeflag +| $Arg::flat;
         if $arg.named {
-            $result_typeflag := $result_typeflag +| $Arg::flatnamed;
-        }
-        else {
-            $result_typeflag := $result_typeflag +| $Arg::flat;
+            $result_typeflag := $result_typeflag +| $Arg::named;
         }
     }
     elsif nqp::can($arg, 'named') && $arg.named -> $name {
@@ -1710,6 +1709,9 @@ my $call_gen := sub ($qastcomp, $op) {
         my int $primspec := nqp::objprimspec(@local_types[$index]);
         if $primspec == 1 {
             $op_name := $op_name ~ 'i';
+        }
+        elsif $primspec == 10 {
+            $op_name := $op_name ~ 'u';
         }
         elsif $primspec == 2 {
             $op_name := $op_name ~ 'n';
@@ -2103,16 +2105,18 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
 QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     my $regalloc := $qastcomp.regalloc;
     my $frame := $qastcomp.mast_frame;
-    my $a := $regalloc.fresh_register($MVM_reg_int64);
-    my $b := $regalloc.fresh_register($MVM_reg_uint64);
+    my $tmp_reg := $regalloc.fresh_register($MVM_reg_int64);
+    my $res_reg := $regalloc.fresh_register($MVM_reg_uint64);
     $regalloc.release_register($reg, $MVM_reg_obj);
     my $dc := $regalloc.fresh_register($MVM_reg_obj);
     op_decont($frame, $dc, $reg);
-    %core_op_generators{'smrt_intify'}($frame, $a, $dc);
-    %core_op_generators{'coerce_iu'}($frame, $b, $a);
-    $regalloc.release_register($a, $MVM_reg_int64);
+    my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
+        $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
+    op_dispatch_i($frame, $tmp_reg, 'nqp-uintify', $callsite_id, [$dc]);
     $regalloc.release_register($dc, $MVM_reg_obj);
-    MAST::InstructionList.new($b, $MVM_reg_int64)
+    %core_op_generators{'coerce_iu'}($frame, $res_reg, $tmp_reg);
+    $regalloc.release_register($tmp_reg, $MVM_reg_int64);
+    MAST::InstructionList.new($res_reg, $MVM_reg_uint64)
 });
 sub boxer($kind, $type_op, $op) {
     $type_op := %core_op_generators{$type_op};
@@ -2643,6 +2647,7 @@ sub add_native_assign_op($op_name, $kind) {
     })
 }
 add_native_assign_op('assign_i', $MVM_reg_int64);
+add_native_assign_op('assign_u', $MVM_reg_uint64);
 add_native_assign_op('assign_n', $MVM_reg_num64);
 add_native_assign_op('assign_s', $MVM_reg_str);
 
@@ -2733,6 +2738,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'captureposelems', 'captureposelems',
     'captureposarg', 'captureposarg',
     'captureposarg_i', 'captureposarg_i',
+    'captureposarg_u', 'captureposarg_u',
     'captureposarg_n', 'captureposarg_n',
     'captureposarg_s', 'captureposarg_s',
     'captureposprimspec', 'captureposprimspec',
@@ -2962,9 +2968,11 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'isge_I', 'ge_I',
     'atpos', 'atpos_o',
     'atpos_i', 'atpos_i',
+    'atpos_u', 'atpos_u',
     'atpos_n', 'atpos_n',
     'atpos_s', 'atpos_s',
     'atposref_i', 'atposref_i',
+    'atposref_u', 'atposref_u',
     'atposref_n', 'atposref_n',
     'atposref_s', 'atposref_s',
     'atpos2d', 'atpos2d_o',
@@ -3027,6 +3035,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'create', 'create',
     'iscont', 'iscont',
     'iscont_i', 'iscont_i',
+    'iscont_u', 'iscont_u',
     'iscont_n', 'iscont_n',
     'iscont_s', 'iscont_s',
     'isrwcont', 'isrwcont',
@@ -3262,6 +3271,7 @@ my constant SIMPLE_OP_MAPPINGS_RESULT_TWO := nqp::list_s(
     'scsetcode', 'scsetcode',
     'bindpos', 'bindpos_o',
     'bindpos_i', 'bindpos_i',
+    'bindpos_u', 'bindpos_u',
     'bindpos_n', 'bindpos_n',
     'bindpos_s', 'bindpos_s',
     'bindposnd', 'bindposnd_o',

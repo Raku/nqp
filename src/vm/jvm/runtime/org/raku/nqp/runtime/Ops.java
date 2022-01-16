@@ -2058,6 +2058,21 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "captureposarg_i requires a CallCapture");
         }
     }
+    public static long captureposarg_u(SixModelObject obj, long idx, ThreadContext tc) {
+        if (obj instanceof CallCaptureInstance) {
+            CallCaptureInstance cc = (CallCaptureInstance)obj;
+            int i = (int)idx;
+            if (cc.descriptor.argFlags[i] == CallSiteDescriptor.ARG_UINT) {
+                return (long)cc.args[i];
+            }
+            else {
+                throw ExceptionHandling.dieInternal(tc, "Expected native int argument");
+            }
+        }
+        else {
+            throw ExceptionHandling.dieInternal(tc, "captureposarg_u requires a CallCapture");
+        }
+    }
     public static String captureposarg_s(SixModelObject obj, long idx, ThreadContext tc) {
         if (obj instanceof CallCaptureInstance) {
             CallCaptureInstance cc = (CallCaptureInstance)obj;
@@ -2845,6 +2860,12 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
         return tc.native_i;
     }
+    public static long atpos_u(SixModelObject arr, long idx, ThreadContext tc) {
+        arr.at_pos_native(tc, idx);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        return tc.native_i;
+    }
     public static double atpos_n(SixModelObject arr, long idx, ThreadContext tc) {
         arr.at_pos_native(tc, idx);
         if (tc.native_type != ThreadContext.NATIVE_NUM)
@@ -2869,6 +2890,15 @@ public final class Ops {
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
         if (arr.sc != null) { /*new Exception("bindpos_i").printStackTrace(); */
+            scwbObject(tc, arr); }
+        return value;
+    }
+    public static long bindpos_u(SixModelObject arr, long idx, long value, ThreadContext tc) {
+        tc.native_i = value;
+        arr.bind_pos_native(tc, idx);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "This is not a native int array");
+        if (arr.sc != null) { /*new Exception("bindpos_u").printStackTrace(); */
             scwbObject(tc, arr); }
         return value;
     }
@@ -3162,6 +3192,16 @@ public final class Ops {
         ref.idx = idx;
         return ref;
     }
+    public static SixModelObject atposref_u(SixModelObject obj, long idx, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.uintPosRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No uint positional reference type registered for current HLL");
+        NativeRefInstancePositional ref = (NativeRefInstancePositional)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.idx = idx;
+        return ref;
+    }
     public static SixModelObject atposref_n(SixModelObject obj, long idx, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numPosRef;
         if (isnull(refType) == 1)
@@ -3447,6 +3487,9 @@ public final class Ops {
     public static long iscont_i(SixModelObject obj) {
         return getContainerPrimitive(obj) == StorageSpec.BP_INT ? 1 : 0;
     }
+    public static long iscont_u(SixModelObject obj) {
+        return getContainerPrimitive(obj) == StorageSpec.BP_UINT ? 1 : 0;
+    }
     public static long iscont_n(SixModelObject obj) {
         return getContainerPrimitive(obj) == StorageSpec.BP_NUM ? 1 : 0;
     }
@@ -3495,6 +3538,14 @@ public final class Ops {
         ContainerSpec cs = cont.st.ContainerSpec;
         if (cs != null)
             cs.store_i(tc, cont, value);
+        else
+            ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
+        return cont;
+    }
+    public static SixModelObject assign_u(SixModelObject cont, long value, ThreadContext tc) {
+        ContainerSpec cs = cont.st.ContainerSpec;
+        if (cs != null)
+            cs.store_i(tc, cont, value); /* FIXME Need a store_u */
         else
             ExceptionHandling.dieInternal(tc, "Cannot assign to an immutable value");
         return cont;
@@ -3802,10 +3853,10 @@ public final class Ops {
 
     public static SixModelObject radix(long radix, String str, long zpos, long flags, ThreadContext tc) {
         long zvalue = 0;
-        long zbase = 1;
+        int chars_converted = 0;
         int chars = str.length();
         long value = zvalue;
-        long base = zbase;
+        int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -3827,9 +3878,9 @@ public final class Ops {
             else break;
             if (ch >= radix) break;
             zvalue = zvalue * radix + ch;
-            zbase = zbase * radix;
+            chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; base=zbase; }
+            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
@@ -3845,7 +3896,7 @@ public final class Ops {
                 hllConfig.slurpyArrayType.st);
 
         result.push_boxed(tc, box_i(value, hllConfig.intBoxType, tc));
-        result.push_boxed(tc, box_i(base, hllConfig.intBoxType, tc));
+        result.push_boxed(tc, box_i(chars_really_converted, hllConfig.intBoxType, tc));
         result.push_boxed(tc, box_i(pos, hllConfig.intBoxType, tc));
 
         return result;
@@ -6146,6 +6197,8 @@ public final class Ops {
             config.strAttrRef = configHash.at_key_boxed(tc, "str_attr_ref");
         if (configHash.exists_key(tc, "int_pos_ref") != 0)
             config.intPosRef = configHash.at_key_boxed(tc, "int_pos_ref");
+        if (configHash.exists_key(tc, "uint_pos_ref") != 0)
+            config.intPosRef = configHash.at_key_boxed(tc, "uint_pos_ref");
         if (configHash.exists_key(tc, "num_pos_ref") != 0)
             config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
         if (configHash.exists_key(tc, "str_pos_ref") != 0)
@@ -7030,10 +7083,10 @@ public final class Ops {
 
     public static SixModelObject radix_I(long radix_l, String str, long zpos, long flags, SixModelObject type, ThreadContext tc) {
         BigInteger zvalue = BigInteger.ZERO;
-        BigInteger zbase = BigInteger.ONE;
+        int chars_converted = 0;
         int chars = str.length();
         BigInteger value = zvalue;
-        BigInteger base = zbase;
+        int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
         boolean neg = false;
@@ -7056,9 +7109,9 @@ public final class Ops {
             else break;
             if (ch >= radix_l) break;
             zvalue = zvalue.multiply(radix).add(BigInteger.valueOf(ch));
-            zbase = zbase.multiply(radix);
+            chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; base=zbase; }
+            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
@@ -7074,7 +7127,7 @@ public final class Ops {
                 hllConfig.slurpyArrayType.st);
 
         result.push_boxed(tc, makeBI(tc, type, value));
-        result.push_boxed(tc, makeBI(tc, type, base));
+        result.push_boxed(tc, makeBI(tc, type, BigInteger.valueOf(chars_really_converted)));
         result.push_boxed(tc, makeBI(tc, type, BigInteger.valueOf(pos)));
 
         return result;

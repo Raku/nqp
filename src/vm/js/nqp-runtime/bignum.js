@@ -286,11 +286,11 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
   }
 
   if (radix == 10) {
-    const pow = JSBI.exponentiate(TEN, JSBI.BigInt(extracted.power));
+    const pow = JSBI.BigInt(extracted.power);
     return hll.slurpyArray(currentHLL, [makeBI(type, JSBI.BigInt(extracted.number)), makeBI(type, pow), new NQPInt(extracted.offset)]);
   } else {
     const n = extracted.number;
-    let base = ONE;
+    let base = 0;
     let result = ZERO;
 
     for (let i = n.length - 1; i >= 0; i--) {
@@ -301,12 +301,12 @@ op.radix_I = function(currentHLL, radix, str, zpos, flags, type) {
       else break;
 
       result = JSBI.add(result, JSBI.multiply(base, JSBI.BigInt(digit)));
-      base = JSBI.multiply(base, JSBI.BigInt(radix));
+      base++;
     }
 
     if (n[0] == '-') result = JSBI.unaryMinus(result);
 
-    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, base), new NQPInt(extracted.offset)]);
+    return hll.slurpyArray(currentHLL, [makeBI(type, result), makeBI(type, JSBI.BigInt(base)), new NQPInt(extracted.offset)]);
   }
 };
 

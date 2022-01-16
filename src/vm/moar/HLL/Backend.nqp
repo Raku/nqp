@@ -798,8 +798,8 @@ class HLL::Backend::MoarVM {
 
     method mbc($mast, *%adverbs) {
         my $assmblr := nqp::getcomp('MAST');
-        if %adverbs<target> eq 'mbc' && %adverbs<output> {
-            $assmblr.assemble_to_file($mast, %adverbs<output>);
+        if %adverbs<target> eq 'mbc' && (%adverbs<output> || %adverbs<o>) {
+            $assmblr.assemble_to_file($mast, %adverbs<output> // %adverbs<o>);
             nqp::null()
         }
         else {

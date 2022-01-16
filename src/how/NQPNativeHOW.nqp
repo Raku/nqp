@@ -17,7 +17,6 @@ knowhow NQPNativeHOW {
 
     method BUILD(:$name) {
         $!name := $name;
-        $!nativesize := 0;
         $!unsigned := 0;
         $!composed := 0;
     }
@@ -45,7 +44,7 @@ knowhow NQPNativeHOW {
     }
 
     method compose($obj) {
-        if !$!composed && $!nativesize {
+        if !$!composed && ($!nativesize || $!unsigned) {
             my $info := nqp::hash();
             $info<integer> := nqp::hash();
             $info<integer><unsigned> := 1 if $!unsigned;

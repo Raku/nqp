@@ -275,6 +275,7 @@ The opcodes are grouped into the following categories:
 [hllboxtype](#hllboxtype) |
 [hllhash](#hllhash-moar-jvm) |
 [hlllist](#hlllist-moar-jvm) |
+[sethllconfig](#sethllconfig) |
 [usecompileehll](#usecompileehll) |
 [usecompilerhll](#usecompilerhll)
 
@@ -1806,6 +1807,9 @@ Returns the value associated with the given key-value pair.
 
 # <a id="hll-specific"></a> HLL-Specific
 
+See [MoarVM testfile](https://github.com/Raku/nqp/blob/master/t/moar/097-hll.t)
+for MoarVM specific examples
+
 ## bindcurhllsym
 * `bindcurhllsym(str $symname, $value)`
 
@@ -1853,6 +1857,9 @@ Ignores optional argument.
 
 Returns HLL specific type object for a list.
 Ignores optional argument.
+
+## sethllconfig `moar`
+* `sethllconfig(string, Hash)`
 
 ## usecompileehll
 * `usecompileehllconfig`
@@ -2864,7 +2871,7 @@ Convert string $str into a number starting at offset $pos and using radix $radix
 The result of the conversion returns an array with
 
     out[0] = converted value
-    out[1] = $radix ** $number-of-digits-converted
+    out[1] = $number-of-digits-converted
     out[2] = offset after consuming digits, -1 if no digits consumed
 
 The opcode skips single underscores between pairs of digits, per the Raku
