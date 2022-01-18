@@ -100,6 +100,7 @@ my $RT_OBJ  := 0;
 my $RT_INT  := 1;
 my $RT_NUM  := 2;
 my $RT_STR  := 3;
+my $RT_UINT := 10;
 my $RT_VOID := -1;
 my class Result {
     has $!jast;         # The JAST
@@ -131,25 +132,25 @@ sub result_from_cf($il, $rtype) {
         result($il, $RT_VOID)
     }
 }
-my @jtypes := [$TYPE_SMO, 'Long', 'Double', $TYPE_STR];
+my @jtypes := [$TYPE_SMO, 'Long', 'Double', $TYPE_STR, $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, $TYPE_SMO, 'Long'];
 sub jtype($type_idx) { @jtypes[$type_idx] }
-my @rttypes := [$RT_OBJ, $RT_INT, $RT_NUM, $RT_STR];
+my @rttypes := [$RT_OBJ, $RT_INT, $RT_NUM, $RT_STR, -1, -1, -1, -1, -1, -1, $RT_UINT];
 sub rttype_from_typeobj($typeobj) {
     @rttypes[nqp::objprimspec($typeobj)]
 }
-my @typeobjs := [NQPMu, int, num, str];
+my @typeobjs := [NQPMu, int, num, str, NQPMu, NQPMu, NQPMu, NQPMu, NQPMu, NQPMu, uint];
 sub typeobj_from_rttype($rttype) {
     @typeobjs[$rttype]
 }
-my @typechars := ['o', 'i', 'n', 's'];
+my @typechars := ['o', 'i', 'n', 's', '', '', '', '', '', '', 'u'];
 sub typechar($type_idx) { @typechars[$type_idx] }
 
 # Various typed instructions.
-my @store_ins := ['astore', 'lstore', 'dstore', 'astore'];
+my @store_ins := ['astore', 'lstore', 'dstore', 'astore', '', '', '', '', '', '', 'lstore'];
 sub store_ins($type) {
     @store_ins[$type]
 }
-my @load_ins := ['aload', 'lload', 'dload', 'aload'];
+my @load_ins := ['aload', 'lload', 'dload', 'aload', '', '', '', '', '', '', 'lload'];
 sub load_ins($type) {
     @load_ins[$type]
 }
@@ -157,7 +158,14 @@ my @dup_ins := [
     $DUP,
     $DUP2,
     $DUP2,
-    $DUP
+    $DUP,
+    $DUP,
+    $DUP,
+    $DUP,
+    $DUP,
+    $DUP,
+    $DUP,
+    $DUP2,
 ];
 sub dup_ins($type) {
     @dup_ins[$type]
@@ -166,7 +174,14 @@ my @pop_ins := [
     $POP,
     $POP2,
     $POP2,
-    $POP
+    $POP,
+    $POP,
+    $POP,
+    $POP,
+    $POP,
+    $POP,
+    $POP,
+    $POP2,
 ];
 sub pop_ins($type) {
     @pop_ins[$type]
@@ -176,13 +191,14 @@ sub pop_ins($type) {
 my %WANTMAP := nqp::hash(
     'v', $RT_VOID,
     'I', $RT_INT, 'i', $RT_INT,
+    'U', $RT_UINT, 'u', $RT_UINT,
     'N', $RT_NUM, 'n', $RT_NUM,
     'S', $RT_STR, 's', $RT_STR,
     'P', $RT_OBJ, 'p', $RT_OBJ
 );
 
 # Utility for getting a fresh temporary by type.
-my @fresh_methods := ["fresh_o", "fresh_i", "fresh_n", "fresh_s"];
+my @fresh_methods := ["fresh_o", "fresh_i", "fresh_n", "fresh_s", '', '', '', '', '' ,'', "fresh_i"];
 sub fresh($type) {
     my $meth := @fresh_methods[$type];
     $*TA."$meth"()
@@ -197,9 +213,10 @@ my $ARG_OBJ   := 0;
 my $ARG_INT   := 1;
 my $ARG_NUM   := 2;
 my $ARG_STR   := 4;
+my $ARG_UINT  := 32;
 my $ARG_NAMED := 8;
 my $ARG_FLAT  := 16;
-my @arg_types := [$ARG_OBJ, $ARG_INT, $ARG_NUM, $ARG_STR];
+my @arg_types := [$ARG_OBJ, $ARG_INT, $ARG_NUM, $ARG_STR, -1, -1, -1, -1, -1, -1, $ARG_UINT];
 sub arg_type($t) { @arg_types[$t] }
 
 class QAST::OperationsJAST {
@@ -361,6 +378,9 @@ class QAST::OperationsJAST {
         if $type == $RT_INT {
             %core_result_type{$op} := int;
         }
+        elsif $type == $RT_UINT {
+            %core_result_type{$op} := uint;
+        }
         elsif $type == $RT_NUM {
             %core_result_type{$op} := num;
         }
@@ -375,6 +395,9 @@ class QAST::OperationsJAST {
         %hll_result_type{$hll} := {} unless nqp::existskey(%hll_result_type, $hll);
         if $type == $RT_INT {
             %hll_result_type{$hll}{$op} := int;
+        }
+        elsif $type == $RT_UINT {
+            %hll_result_type{$hll}{$op} := uint;
         }
         elsif $type == $RT_NUM {
             %hll_result_type{$hll}{$op} := num;
@@ -400,7 +423,7 @@ class QAST::OperationsJAST {
 
     # Adds a HLL box handler.
     method add_hll_box($hll, $type, $handler) {
-        unless $type == $RT_INT || $type == $RT_NUM || $type == $RT_STR {
+        unless $type == $RT_INT || $type == $RT_UINT || $type == $RT_NUM || $type == $RT_STR {
             nqp::die("Unknown box type '$type'");
         }
         %hll_box{$hll} := {} unless nqp::existskey(%hll_box, $hll);
@@ -409,7 +432,7 @@ class QAST::OperationsJAST {
 
     # Adds a HLL unbox handler.
     method add_hll_unbox($hll, $type, $handler) {
-        unless $type == $RT_INT || $type == $RT_NUM || $type == $RT_STR {
+        unless $type == $RT_INT || $type == $RT_UINT || $type == $RT_NUM || $type == $RT_STR {
             nqp::die("Unknown unbox type '$type'");
         }
         %hll_unbox{$hll} := {} unless nqp::existskey(%hll_unbox, $hll);
@@ -742,6 +765,10 @@ QAST::OperationsJAST.add_core_op('hash', -> $qastcomp, $op {
 # Conditionals.
 sub boolify_instructions($il, $cond_type) {
     if $cond_type == $RT_INT {
+        $il.append($IVAL_ZERO);
+        $il.append($LCMP);
+    }
+    elsif $cond_type == $RT_UINT {
         $il.append($IVAL_ZERO);
         $il.append($LCMP);
     }
@@ -1450,6 +1477,9 @@ sub process_args_onto_stack($qastcomp, @children, $il, :$obj_first, :$inv_first,
         if $type == $RT_INT {
             nqp::push(@arg_jtypes, 'J');
         }
+        elsif $type == $RT_UINT {
+            nqp::push(@arg_jtypes, 'J');
+        }
         elsif $type == $RT_NUM {
             nqp::push(@arg_jtypes, 'D');
         }
@@ -1926,6 +1956,16 @@ QAST::OperationsJAST.add_hll_box('nqp', $RT_INT, -> $qastcomp {
         'box_i', $TYPE_SMO, 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
+QAST::OperationsJAST.add_hll_box('nqp', $RT_UINT, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'bootint', $TYPE_SMO, $TYPE_TC ));
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'box_i', $TYPE_SMO, 'Long', $TYPE_SMO, $TYPE_TC ));
+    $il
+});
 QAST::OperationsJAST.add_hll_box('nqp', $RT_NUM, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
@@ -1956,6 +1996,13 @@ QAST::OperationsJAST.add_hll_box('', $RT_INT, -> $qastcomp {
         'hllboxtype_i', $TYPE_SMO, 'Long', $TYPE_TC ));
     $il
 });
+QAST::OperationsJAST.add_hll_box('', $RT_UINT, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'hllboxtype_i', $TYPE_SMO, 'Long', $TYPE_TC ));
+    $il
+});
 QAST::OperationsJAST.add_hll_box('', $RT_NUM, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
@@ -1971,6 +2018,13 @@ QAST::OperationsJAST.add_hll_box('', $RT_STR, -> $qastcomp {
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_INT, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append($ALOAD_1);
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'unbox_i', 'Long', $TYPE_SMO, $TYPE_TC ));
+    $il
+});
+QAST::OperationsJAST.add_hll_unbox('', $RT_UINT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
@@ -2646,6 +2700,7 @@ QAST::OperationsJAST.map_classlib_core_op('istype', $TYPE_OPS, 'istype', [$RT_OB
 QAST::OperationsJAST.map_classlib_core_op('eqaddr', $TYPE_OPS, 'eqaddr', [$RT_OBJ, $RT_OBJ], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('getattr', $TYPE_OPS, 'getattr', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_i', $TYPE_OPS, 'getattr_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattr_u', $TYPE_OPS, 'getattr_u', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_UINT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_n', $TYPE_OPS, 'getattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_s', $TYPE_OPS, 'getattr_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattrref_i', $TYPE_OPS, 'getattrref_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
@@ -2662,6 +2717,7 @@ QAST::OperationsJAST.map_classlib_core_op('unbox_u', $TYPE_OPS, 'unbox_u', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('unbox_n', $TYPE_OPS, 'unbox_n', [$RT_OBJ], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('unbox_s', $TYPE_OPS, 'unbox_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_i', $TYPE_OPS, 'box_i', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('box_u', $TYPE_OPS, 'box_u', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_n', $TYPE_OPS, 'box_n', [$RT_NUM, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_s', $TYPE_OPS, 'box_s', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('hllboxtype_i', $TYPE_OPS, 'hllboxtype_i', [], $RT_OBJ, :tc);
@@ -2736,6 +2792,7 @@ QAST::OperationsJAST.map_classlib_core_op('getlexref_n', $TYPE_OPS, 'getlexref_n
 QAST::OperationsJAST.map_classlib_core_op('getlexref_s', $TYPE_OPS, 'getlexref_s', [$RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex', $TYPE_OPS, 'bindlex', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_i', $TYPE_OPS, 'bindlex_i', [$RT_STR, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindlex_u', $TYPE_OPS, 'bindlex_u', [$RT_STR, $RT_UINT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_n', $TYPE_OPS, 'bindlex_n', [$RT_STR, $RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindlex_s', $TYPE_OPS, 'bindlex_s', [$RT_STR, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getlexdyn', $TYPE_OPS, 'getlexdyn', [$RT_STR], $RT_OBJ, :tc);
@@ -3134,7 +3191,7 @@ class QAST::CompilerJAST {
             %!lexicalref_types := nqp::hash();
             %!lexical_idxs := nqp::hash();
             %!local2temp := nqp::hash();
-            @!lexical_names := nqp::list([],[],[],[]);
+            @!lexical_names := nqp::list([],[],[],[], nqp::null, nqp::null, nqp::null, nqp::null, nqp::null, nqp::null, []);
         }
 
         method add_param($var) {
@@ -3200,6 +3257,7 @@ class QAST::CompilerJAST {
                 nqp::die("Lexical '$name' already declared");
             }
             %!lexical_types{$name} := $type;
+            $type := 1 if $type == 10; # Work around for missing unsigned lexical type category
             %!lexical_idxs{$name} := nqp::elems(@!lexical_names[$type]);
             nqp::push(@!lexical_names[$type], $name);
         }
@@ -4065,6 +4123,9 @@ class QAST::CompilerJAST {
                 $*JMETH.add_local($name, jtype($type));
                 # Use $*JMETH so it goes into the prelude section and doesn't clobber the assignments above...
                 if $type == $RT_INT {
+                    $*JMETH.append(JAST::PushIVal.new( :value(0) ));
+                }
+                elsif $type == $RT_UINT {
                     $*JMETH.append(JAST::PushIVal.new( :value(0) ));
                 }
                 elsif $type == $RT_NUM {
@@ -5032,7 +5093,9 @@ class QAST::CompilerJAST {
             return QAST::OperationsJAST.unbox(self, $hll, $desired);
         }
         elsif $desired == $RT_INT {
-            if $got == $RT_NUM {
+            if $got == $RT_UINT {
+            }
+            elsif $got == $RT_NUM {
                 $il.append($D2L);
             }
             elsif $got == $RT_STR {
@@ -5043,8 +5106,25 @@ class QAST::CompilerJAST {
                 nqp::die("Unknown coercion case for int");
             }
         }
+        elsif $desired == $RT_UINT {
+            if $got == $RT_INT {
+            }
+            elsif $got == $RT_NUM {
+                $il.append($D2L);
+            }
+            elsif $got == $RT_STR {
+                $il.append(JAST::Instruction.new( :op('invokestatic'),
+                    $TYPE_OPS, 'coerce_s2i', 'Long', $TYPE_STR ));
+            }
+            else {
+                nqp::die("Unknown coercion case for uint");
+            }
+        }
         elsif $desired == $RT_NUM {
             if $got == $RT_INT {
+                $il.append($L2D);
+            }
+            elsif $got == $RT_UINT {
                 $il.append($L2D);
             }
             elsif $got == $RT_STR {
@@ -5052,7 +5132,7 @@ class QAST::CompilerJAST {
                     $TYPE_OPS, 'coerce_s2n', 'Double', $TYPE_STR ));
             }
             else {
-                nqp::die("Unknown coercion case for num");
+                nqp::die("Unknown coercion case for num got $got desired $desired");
             }
         }
         elsif $desired == $RT_STR {

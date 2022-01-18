@@ -37,7 +37,7 @@ public class P6int extends REPR {
 
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
-        ss.boxed_primitive = StorageSpec.BP_INT;
+        ss.boxed_primitive = ss.is_unsigned == 0 ? StorageSpec.BP_INT : StorageSpec.BP_UINT;
         ss.bits = 64;
         ss.can_box = StorageSpec.CAN_BOX_INT;
         st.REPRData = ss;
@@ -84,8 +84,10 @@ public class P6int extends REPR {
             }
 
             SixModelObject unsigned = integerInfo.at_key_boxed(tc, "unsigned");
-            if (Ops.isnull(unsigned) == 0)
+            if (Ops.isnull(unsigned) == 0) {
                 ((StorageSpec)st.REPRData).is_unsigned = (short)unsigned.get_int(tc);
+                ((StorageSpec)st.REPRData).boxed_primitive = ((StorageSpec)st.REPRData).is_unsigned == 0 ? StorageSpec.BP_INT : StorageSpec.BP_UINT;
+            }
         }
     }
 
@@ -212,7 +214,6 @@ public class P6int extends REPR {
     {
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
-        ss.boxed_primitive = StorageSpec.BP_INT;
         if (reader.version >= 7)
             ss.bits = (short)reader.readLong();
         else
@@ -221,6 +222,7 @@ public class P6int extends REPR {
             ss.is_unsigned = (short)reader.readLong();
         else
             ss.is_unsigned = 0;
+        ss.boxed_primitive = ss.is_unsigned == 0 ? StorageSpec.BP_INT : StorageSpec.BP_UINT;
         ss.can_box = StorageSpec.CAN_BOX_INT;
         st.REPRData = ss;
     }

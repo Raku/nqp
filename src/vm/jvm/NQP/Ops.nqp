@@ -4,6 +4,7 @@ my $RT_OBJ    := 0;
 my $RT_INT    := 1;
 my $RT_NUM    := 2;
 my $RT_STR    := 3;
+my $RT_UINT   := 10;
 my $TYPE_TC   := 'Lorg/raku/nqp/runtime/ThreadContext;';
 my $TYPE_OPS  := 'Lorg/raku/nqp/runtime/Ops;';
 my $TYPE_SMO  := 'Lorg/raku/nqp/sixmodel/SixModelObject;';
@@ -122,15 +123,15 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
         $il.append(JAST::Instruction.new( :op('invokestatic'),
             $TYPE_OPS, 'isfalse_s', 'Long', $TYPE_STR ));
     }
-    elsif $res.type == $RT_INT || $res.type == $RT_NUM {
+    elsif $res.type == $RT_INT || $res.type == $RT_UINT || $res.type == $RT_NUM {
         my $false := JAST::Label.new( :name($op.unique('not_false')) );
         my $done  := JAST::Label.new( :name($op.unique('not_done')) );
         $il.append(
-            $res.type == $RT_INT
+            $res.type == $RT_INT || $res.type == $RT_UINT
             ?? JAST::PushIVal.new( :value(0) )
             !! JAST::PushNVal.new( :value(0.0) )
         );
-        $il.append(JAST::Instruction.new( :op($res.type == $RT_INT ?? 'lcmp' !! 'dcmpl') ));
+        $il.append(JAST::Instruction.new( :op($res.type == $RT_INT || $res.type == $RT_UINT ?? 'lcmp' !! 'dcmpl') ));
         $il.append(JAST::Instruction.new( :op('ifne'), $false ));
         $il.append(JAST::PushIVal.new( :value(1) ));
         $il.append(JAST::Instruction.new( :op('goto'), $done ));
@@ -147,6 +148,13 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
 
 # NQP object unbox, which also must somewhat handle coercion.
 QAST::OperationsJAST.add_hll_unbox('nqp', $RT_INT, -> $qastcomp {
+    my $il := JAST::InstructionList.new();
+    $il.append(JAST::Instruction.new( :op('aload_1') ));
+    $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
+        'smart_intify', 'Long', $TYPE_SMO, $TYPE_TC ));
+    $il
+});
+QAST::OperationsJAST.add_hll_unbox('nqp', $RT_UINT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append(JAST::Instruction.new( :op('aload_1') ));
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,

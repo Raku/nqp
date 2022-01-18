@@ -123,6 +123,20 @@ public class StaticCodeInfo implements Cloneable {
         }
     }
 
+    public Integer uTryGetLexicalIdx(String name) {
+        if (iLexicalNames != null) {
+            if (iLexicalMap == null) {
+                HashMap<String, Integer> map = new HashMap<String, Integer>(iLexicalNames.length);
+                for (int i = 0; i < iLexicalNames.length; i++)
+                    map.put(iLexicalNames[i], i);
+                iLexicalMap = map;
+            }
+            return iLexicalMap.get(name);
+        } else {
+            return null;
+        }
+    }
+
     public Integer nTryGetLexicalIdx(String name) {
         if (nLexicalNames != null) {
             if (nLexicalMap == null) {

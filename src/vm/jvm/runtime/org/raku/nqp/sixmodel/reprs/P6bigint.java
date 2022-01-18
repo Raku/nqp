@@ -36,7 +36,7 @@ public class P6bigint extends REPR {
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
         StorageSpec ss = new StorageSpec();
         ss.inlineable = StorageSpec.INLINED;
-        ss.boxed_primitive = StorageSpec.BP_INT;
+        ss.boxed_primitive = ss.is_unsigned == 0 ? StorageSpec.BP_INT : StorageSpec.BP_UINT;
         ss.bits = 64;
         ss.can_box = StorageSpec.CAN_BOX_INT;
         return ss;

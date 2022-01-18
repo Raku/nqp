@@ -178,7 +178,7 @@ public class CUnion extends REPR {
         REPR repr = info.type.st.REPR;
         StorageSpec spec = repr.get_storage_spec(tc, info.type.st);
         info.bits = spec.bits;
-        if (spec.inlineable == StorageSpec.INLINED && spec.boxed_primitive == StorageSpec.BP_INT) {
+        if (spec.inlineable == StorageSpec.INLINED && (spec.boxed_primitive == StorageSpec.BP_INT || spec.boxed_primitive == StorageSpec.BP_UINT)) {
             if (spec.bits == 8) {
                 info.argType = NativeCall.ArgType.CHAR;
                 return "B";

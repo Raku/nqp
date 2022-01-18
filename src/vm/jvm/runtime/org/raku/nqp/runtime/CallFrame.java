@@ -57,6 +57,7 @@ public class CallFrame implements Cloneable {
     public static final int RET_INT = 1;
     public static final int RET_NUM = 2;
     public static final int RET_STR = 3;
+    public static final int RET_UINT = 10;
 
     /**
      * The current handler we're in, in this block. 0 if none.

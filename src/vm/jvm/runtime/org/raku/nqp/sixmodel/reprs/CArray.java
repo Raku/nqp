@@ -54,7 +54,7 @@ public class CArray extends REPR {
 
         StorageSpec ss = data.elem_type.st.REPR.get_storage_spec(tc, data.elem_type.st);
         data.elem_size = ss.bits;
-        if (ss.boxed_primitive == StorageSpec.BP_INT) {
+        if (ss.boxed_primitive == StorageSpec.BP_INT || ss.boxed_primitive == StorageSpec.BP_UINT) {
             if (ss.bits == 8) {
                 data.jna_size = Native.getNativeSize(Byte.class);
             }

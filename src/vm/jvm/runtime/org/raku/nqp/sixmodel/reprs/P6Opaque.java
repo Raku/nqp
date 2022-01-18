@@ -130,6 +130,9 @@ public class P6Opaque extends REPR {
                         case StorageSpec.BP_INT:
                             ((P6OpaqueREPRData)st.REPRData).unboxIntSlot = curAttr;
                             break;
+                        //case StorageSpec.BP_UINT:
+                        //    ((P6OpaqueREPRData)st.REPRData).unboxUIntSlot = curAttr;
+                        //    break;
                         case StorageSpec.BP_NUM:
                             ((P6OpaqueREPRData)st.REPRData).unboxNumSlot = curAttr;
                             break;

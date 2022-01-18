@@ -24,6 +24,7 @@ public class HLLConfig {
      * The types the languages wish to get things boxed as.
      */
     public SixModelObject intBoxType;
+    public SixModelObject uintBoxType;
     public SixModelObject numBoxType;
     public SixModelObject strBoxType;
 
@@ -103,9 +104,11 @@ public class HLLConfig {
      * Native reference types.
      */
     public SixModelObject intLexRef;
+    public SixModelObject uintLexRef;
     public SixModelObject numLexRef;
     public SixModelObject strLexRef;
     public SixModelObject intAttrRef;
+    public SixModelObject uintAttrRef;
     public SixModelObject numAttrRef;
     public SixModelObject strAttrRef;
     public SixModelObject intPosRef;
@@ -113,6 +116,7 @@ public class HLLConfig {
     public SixModelObject numPosRef;
     public SixModelObject strPosRef;
     public SixModelObject intMultidimRef;
+    public SixModelObject uintMultidimRef;
     public SixModelObject numMultidimRef;
     public SixModelObject strMultidimRef;
 }

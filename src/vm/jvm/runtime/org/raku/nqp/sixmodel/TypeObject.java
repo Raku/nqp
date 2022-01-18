@@ -31,15 +31,15 @@ public class TypeObject extends SixModelObject {
 
     @Override
     public long get_int(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object in get_int");
     }
     @Override
     public double get_num(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object in get_num");
     }
     @Override
     public String get_str(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot unbox a type object in get_str");
     }
 
     @Override
@@ -48,35 +48,35 @@ public class TypeObject extends SixModelObject {
     }
     @Override
     public void bind_pos_boxed(ThreadContext tc, long index, SixModelObject value) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation bind_pos_boxed on a type object");
     }
     @Override
     public void set_elems(ThreadContext tc, long count) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation set_elems on a type object");
     }
     @Override
     public void push_boxed(ThreadContext tc, SixModelObject value) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation push_boxed on a type object");
     }
     @Override
     public SixModelObject pop_boxed(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation pop_boxed on a type object");
     }
     @Override
     public void unshift_boxed(ThreadContext tc, SixModelObject value) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation unshift_boxed on a type object");
     }
     @Override
     public SixModelObject shift_boxed(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation shift_boxed on a type object");
     }
     @Override
     public SixModelObject slice(ThreadContext tc, SixModelObject dest, long beginning, long end) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation slice on a type object");
     }
     @Override
     public void splice(ThreadContext tc, SixModelObject from, long offset, long count) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation splice on a type object");
     }
     @Override
     public SixModelObject at_key_boxed(ThreadContext tc, String key) {
@@ -84,19 +84,19 @@ public class TypeObject extends SixModelObject {
     }
     @Override
     public void bind_key_boxed(ThreadContext tc, String key, SixModelObject value) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation bind_key_boxed on a type object");
     }
     @Override
     public long exists_key(ThreadContext tc, String key) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation exists_key on a type object");
     }
     @Override
     public void delete_key(ThreadContext tc, String key) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation delete_key on a type object");
     }
     @Override
     public long elems(ThreadContext tc) {
-        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation on a type object");
+        throw ExceptionHandling.dieInternal(tc, "Cannot do aggregate operation elems on a type object");
     }
 
     public SixModelObject clone(ThreadContext tc) {

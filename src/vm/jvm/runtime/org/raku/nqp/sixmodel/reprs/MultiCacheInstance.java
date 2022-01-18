@@ -13,6 +13,7 @@ public class MultiCacheInstance extends SixModelObject {
     private static final int MD_CACHE_INT = 1;
     private static final int MD_CACHE_NUM = 2;
     private static final int MD_CACHE_STR = 3;
+    private static final int MD_CACHE_UINT = 10;
 
     private SixModelObject zeroArity;
     private ArityCache[] arityCaches = new ArityCache[MD_CACHE_MAX_ARITY];
@@ -156,7 +157,8 @@ public class MultiCacheInstance extends SixModelObject {
     }
 
     private boolean denotesPositionalArgument(byte argFlag) {
-        return argFlag == CallSiteDescriptor.ARG_INT || argFlag == CallSiteDescriptor.ARG_NUM
+        return argFlag == CallSiteDescriptor.ARG_INT || argFlag == CallSiteDescriptor.ARG_UINT
+            || argFlag == CallSiteDescriptor.ARG_NUM
             || argFlag == CallSiteDescriptor.ARG_STR || argFlag == CallSiteDescriptor.ARG_OBJ;
     }
 
@@ -164,6 +166,8 @@ public class MultiCacheInstance extends SixModelObject {
         switch (flag) {
         case CallSiteDescriptor.ARG_INT:
             return MD_CACHE_INT;
+        case CallSiteDescriptor.ARG_UINT:
+            return MD_CACHE_UINT;
         case CallSiteDescriptor.ARG_NUM:
             return MD_CACHE_NUM;
         case CallSiteDescriptor.ARG_STR:
@@ -173,8 +177,8 @@ public class MultiCacheInstance extends SixModelObject {
                 return MD_CACHE_NULL;
             SixModelObject cont = (SixModelObject)arg;
             SixModelObject decont = Ops.decont(cont, tc);
-            long typeId = ((long)decont.st.hashCode()) << 3;
-            if (Ops.iscont_i(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
+            long typeId = ((long)decont.st.hashCode()) << 4;
+            if (Ops.iscont_i(cont) == 1 || Ops.iscont_u(cont) == 1 || Ops.iscont_n(cont) == 1 || Ops.iscont_s(cont) == 1) {
                 typeId |= 4;    /* Native ref vs. non-native ref */
                 typeId |= 2;    /* Native refs are always writable. */
             }
@@ -182,6 +186,8 @@ public class MultiCacheInstance extends SixModelObject {
                 typeId |= 2;
             if (!(decont instanceof TypeObject))
                 typeId |= 1;
+            if (Ops.iscont_u(cont) == 1) /* Unsigned */
+                typeId |= 8;
             return typeId;
         default:
             return -1;
