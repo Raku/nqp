@@ -50,6 +50,7 @@ public class ArgsExpectation {
                         cr.staticInfo.mh.invokeExact(tc, cr, csd, (SixModelObject)args[0]);
                         break;
                     case CallSiteDescriptor.ARG_INT:
+                    case CallSiteDescriptor.ARG_UINT:
                         cr.staticInfo.mh.invokeExact(tc, cr, csd, Ops.box_i(
                             (long)args[0], cr.staticInfo.compUnit.hllConfig.intBoxType, tc));
                         break;
@@ -97,6 +98,7 @@ public class ArgsExpectation {
                         arg1 = (SixModelObject)args[0];
                         break;
                     case CallSiteDescriptor.ARG_INT:
+                    case CallSiteDescriptor.ARG_UINT:
                         arg1 = Ops.box_i((long)args[0], cr.staticInfo.compUnit.hllConfig.intBoxType, tc);
                         break;
                     case CallSiteDescriptor.ARG_NUM:
@@ -116,6 +118,7 @@ public class ArgsExpectation {
                         arg2 = (SixModelObject)args[1];
                         break;
                     case CallSiteDescriptor.ARG_INT:
+                    case CallSiteDescriptor.ARG_UINT:
                         arg2 = Ops.box_i((long)args[1], cr.staticInfo.compUnit.hllConfig.intBoxType, tc);
                         break;
                     case CallSiteDescriptor.ARG_NUM:

@@ -17,6 +17,7 @@ public class NativeRefContainerSpec extends ContainerSpec {
             hll = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig;
         switch (rd.primitive_type) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 return Ops.box_i(fetch_i(tc, cont), hll.intBoxType, tc);
             case StorageSpec.BP_NUM:
                 return Ops.box_n(fetch_n(tc, cont), hll.numBoxType, tc);
@@ -46,6 +47,7 @@ public class NativeRefContainerSpec extends ContainerSpec {
         NativeRefREPRData rd = (NativeRefREPRData)cont.st.REPRData;
         switch (rd.primitive_type) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 store_i(tc, cont, obj.get_int(tc));
                 break;
             case StorageSpec.BP_NUM:

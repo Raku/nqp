@@ -558,6 +558,7 @@ public class SerializationWriter {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 if (ss.bits == 64)
                     reprNameForSerialization = "VMArray_i";
                 else if (ss.bits == 8)

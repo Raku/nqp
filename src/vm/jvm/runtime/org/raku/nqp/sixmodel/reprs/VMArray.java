@@ -31,6 +31,7 @@ public class VMArray extends REPR {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 if (ss.bits == 64)
                     obj = new VMArrayInstance_i();
                 else if (ss.bits == 8)
@@ -55,7 +56,7 @@ public class VMArray extends REPR {
                 obj = new VMArrayInstance_s();
                 break;
             default:
-                throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
+                throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray in allocate");
             }
         }
         obj.st = st;
@@ -70,6 +71,7 @@ public class VMArray extends REPR {
             StorageSpec ss = type.st.REPR.get_storage_spec(tc, type.st);
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
             case StorageSpec.BP_NUM:
             case StorageSpec.BP_STR:
                 VMArrayREPRData reprData = new VMArrayREPRData();
@@ -128,6 +130,7 @@ public class VMArray extends REPR {
             StorageSpec ss = ((VMArrayREPRData)st.REPRData).ss;
             switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 if (ss.bits == 8)
                     obj = ss.is_unsigned == 0
                         ? new VMArrayInstance_i8()
@@ -150,7 +153,7 @@ public class VMArray extends REPR {
                 obj = new VMArrayInstance_s();
                 break;
             default:
-                throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
+                throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray in deserialize_stub");
             }
         }
         obj.st = st;
@@ -171,6 +174,7 @@ public class VMArray extends REPR {
             for (long i = 0; i < elems; i++) {
                 switch (boxPrim) {
                 case StorageSpec.BP_INT:
+                case StorageSpec.BP_UINT:
                     tc.native_i = reader.readLong();
                     break;
                 case StorageSpec.BP_NUM:
@@ -180,7 +184,7 @@ public class VMArray extends REPR {
                     tc.native_s = reader.readStr();
                     break;
                 default:
-                    throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
+                    throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray in deserialize_finish");
                 }
                 obj.bind_pos_native(tc, i);
             }
@@ -201,6 +205,7 @@ public class VMArray extends REPR {
                 obj.at_pos_native(tc, i);
                 switch (boxPrim) {
                 case StorageSpec.BP_INT:
+                case StorageSpec.BP_UINT:
                     writer.writeInt(tc.native_i);
                     break;
                 case StorageSpec.BP_NUM:
@@ -210,7 +215,7 @@ public class VMArray extends REPR {
                     writer.writeStr(tc.native_s);
                     break;
                 default:
-                    throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray");
+                    throw ExceptionHandling.dieInternal(tc, "Invalid REPR data for VMArray in serialize");
                 }
             }
         }

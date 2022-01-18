@@ -25,7 +25,7 @@ public class CallSiteDescriptor {
     public byte[] argFlags;
 
     /* Maps string names for named params do an Integer that has
-     * arg index << 3 + type flag. */
+     * arg index << 6 + type flag. */
     public HashMap<String, Integer> nameMap;
 
     /* Singleton empty name map. */
@@ -59,6 +59,10 @@ public class CallSiteDescriptor {
                 pos++;
                 numPositionals++;
                 break;
+            case ARG_UINT:
+                pos++;
+                numPositionals++;
+                break;
             case ARG_NUM:
                 pos++;
                 numPositionals++;
@@ -68,16 +72,19 @@ public class CallSiteDescriptor {
                 numPositionals++;
                 break;
             case ARG_OBJ | ARG_NAMED:
-                nameMap.put(names[name++], (pos++ << 3) | ARG_OBJ);
+                nameMap.put(names[name++], (pos++ << 6) | ARG_OBJ);
                 break;
             case ARG_INT | ARG_NAMED:
-                nameMap.put(names[name++], (pos++ << 3) | ARG_INT);
+                nameMap.put(names[name++], (pos++ << 6) | ARG_INT);
+                break;
+            case ARG_UINT | ARG_NAMED:
+                nameMap.put(names[name++], (pos++ << 6) | ARG_UINT);
                 break;
             case ARG_NUM | ARG_NAMED:
-                nameMap.put(names[name++], (pos++ << 3) | ARG_NUM);
+                nameMap.put(names[name++], (pos++ << 6) | ARG_NUM);
                 break;
             case ARG_STR | ARG_NAMED:
-                nameMap.put(names[name++], (pos++ << 3) | ARG_STR);
+                nameMap.put(names[name++], (pos++ << 6) | ARG_STR);
                 break;
             case ARG_OBJ | ARG_FLAT:
                 pos++;
@@ -120,6 +127,10 @@ public class CallSiteDescriptor {
                                 newArgs.add(cf.tc.native_i);
                                 newFlags.add(ARG_INT);
                                 break;
+                            case StorageSpec.BP_UINT:
+                                newArgs.add(cf.tc.native_i);
+                                newFlags.add(ARG_UINT);
+                                break;
                             case StorageSpec.BP_NUM:
                                 newArgs.add(cf.tc.native_n);
                                 newFlags.add(ARG_NUM);
@@ -150,6 +161,7 @@ public class CallSiteDescriptor {
                 break;
             case ARG_OBJ | ARG_NAMED:
             case ARG_INT | ARG_NAMED:
+            case ARG_UINT | ARG_NAMED:
             case ARG_NUM | ARG_NAMED:
             case ARG_STR | ARG_NAMED:
                 newArgs.add(oldArgs[oldArgsIdx++]);

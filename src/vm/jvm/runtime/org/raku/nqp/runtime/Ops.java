@@ -1090,12 +1090,14 @@ public final class Ops {
 
     /* Lexical lookup in current scope. */
     public static long getlex_i(CallFrame cf, int i) { return cf.iLex[i]; }
+    public static long getlex_u(CallFrame cf, int i) { return cf.iLex[i]; }
     public static double getlex_n(CallFrame cf, int i) { return cf.nLex[i]; }
     public static String getlex_s(CallFrame cf, int i) { return cf.sLex[i]; }
     public static SixModelObject getlex_o(CallFrame cf, int i) { return cf.oLex[i]; }
 
     /* Lexical binding in current scope. */
     public static long bindlex_i(long v, CallFrame cf, int i) { cf.iLex[i] = v; return v; }
+    public static long bindlex_u(long v, CallFrame cf, int i) { cf.iLex[i] = v; return v; }
     public static double bindlex_n(double v, CallFrame cf, int i) { cf.nLex[i] = v; return v; }
     public static String bindlex_s(String v, CallFrame cf, int i) { cf.sLex[i] = v; return v; }
     public static SixModelObject bindlex_o(SixModelObject v, CallFrame cf, int i) { cf.oLex[i] = v; return v; }
@@ -1169,6 +1171,16 @@ public final class Ops {
         }
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
+    public static long getlex_u(String name, ThreadContext tc) {
+        CallFrame curFrame = tc.curFrame;
+        while (curFrame != null) {
+            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != null)
+                return curFrame.iLex[found];
+            curFrame = curFrame.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
     public static double getlex_n(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
@@ -1221,6 +1233,16 @@ public final class Ops {
         }
         throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
     }
+    public static long bindlex_u(String name, long value, ThreadContext tc) {
+        CallFrame curFrame = tc.curFrame;
+        while (curFrame != null) {
+            Integer found = curFrame.codeRef.staticInfo.uTryGetLexicalIdx(name);
+            if (found != null)
+                return curFrame.iLex[found] = value;
+            curFrame = curFrame.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
     public static double bindlex_n(String name, double value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
@@ -1246,6 +1268,17 @@ public final class Ops {
     public static SixModelObject getlexref_i(ThreadContext tc, int idx) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
+    public static SixModelObject getlexref_u(ThreadContext tc, int idx) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.uintLexRef;
         if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
@@ -1289,6 +1322,19 @@ public final class Ops {
         ref.idx = idx;
         return ref;
     }
+    public static SixModelObject getlexref_u_si(ThreadContext tc, int idx, int si) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.uintLexRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (si-- > 0)
+            cf = cf.outer;
+        NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+        ref.lexicals = cf.iLex;
+        ref.idx = idx;
+        return ref;
+    }
     public static SixModelObject getlexref_n_si(ThreadContext tc, int idx, int si) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.numLexRef;
@@ -1318,6 +1364,24 @@ public final class Ops {
     public static SixModelObject getlexref_i(String name, ThreadContext tc) {
         CallFrame cf = tc.curFrame;
         SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.intLexRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int lexical reference type registered for current HLL");
+        while (cf != null) {
+            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != null) {
+                NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
+                ref.lexicals = cf.iLex;
+                ref.idx = (int)found;
+                return ref;
+            }
+            cf = cf.outer;
+        }
+        throw ExceptionHandling.dieInternal(tc, "Lexical '" + name + "' not found");
+    }
+    public static SixModelObject getlexref_u(String name, ThreadContext tc) {
+        CallFrame cf = tc.curFrame;
+        SixModelObject refType = cf.codeRef.staticInfo.compUnit.hllConfig.uintLexRef;
         if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
@@ -1558,6 +1622,7 @@ public final class Ops {
             StaticCodeInfo sci = ((ContextRefInstance)pad).context.codeRef.staticInfo;
             if (sci.oTryGetLexicalIdx(key) != null) return StorageSpec.BP_NONE;
             if (sci.iTryGetLexicalIdx(key) != null) return StorageSpec.BP_INT;
+            if (sci.uTryGetLexicalIdx(key) != null) return StorageSpec.BP_UINT;
             if (sci.nTryGetLexicalIdx(key) != null) return StorageSpec.BP_NUM;
             if (sci.sTryGetLexicalIdx(key) != null) return StorageSpec.BP_STR;
             throw ExceptionHandling.dieInternal(tc, "Invalid lexical name passed to lexprimspec");
@@ -1587,6 +1652,8 @@ public final class Ops {
             return (SixModelObject)args[idx];
         case CallSiteDescriptor.ARG_INT:
             return box_i((long)args[idx], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
+        case CallSiteDescriptor.ARG_UINT:
+            return box_i((long)args[idx], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
         case CallSiteDescriptor.ARG_NUM:
             return box_n((double)args[idx], cf.codeRef.staticInfo.compUnit.hllConfig.numBoxType, cf.tc);
         case CallSiteDescriptor.ARG_STR:
@@ -1598,6 +1665,8 @@ public final class Ops {
     public static long posparam_i(CallFrame cf, CallSiteDescriptor cs, Object[] args, int idx) {
         switch (cs.argFlags[idx]) {
         case CallSiteDescriptor.ARG_INT:
+            return (long)args[idx];
+        case CallSiteDescriptor.ARG_UINT:
             return (long)args[idx];
         case CallSiteDescriptor.ARG_NUM:
             throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
@@ -1615,6 +1684,8 @@ public final class Ops {
             return (double)args[idx];
         case CallSiteDescriptor.ARG_INT:
             throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
+        case CallSiteDescriptor.ARG_UINT:
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got uint");
         case CallSiteDescriptor.ARG_STR:
             throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
         case CallSiteDescriptor.ARG_OBJ:
@@ -1629,6 +1700,8 @@ public final class Ops {
             return (String)args[idx];
         case CallSiteDescriptor.ARG_INT:
             throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
+        case CallSiteDescriptor.ARG_UINT:
+            throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got uint");
         case CallSiteDescriptor.ARG_NUM:
             throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
         case CallSiteDescriptor.ARG_OBJ:
@@ -1696,6 +1769,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_INT:
                 result.push_boxed(tc, box_i((long)args[i], hllConfig.intBoxType, tc));
                 break;
+            case CallSiteDescriptor.ARG_UINT:
+                result.push_boxed(tc, box_i((long)args[i], hllConfig.intBoxType, tc));
+                break;
             case CallSiteDescriptor.ARG_NUM:
                 result.push_boxed(tc, box_n((double)args[i], hllConfig.numBoxType, tc));
                 break;
@@ -1716,13 +1792,15 @@ public final class Ops {
         if (lookup != null) {
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
-                return (SixModelObject)args[lookup >> 3];
+                return (SixModelObject)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
-                return box_i((long)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
+                return box_i((long)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
+            case CallSiteDescriptor.ARG_UINT:
+                return box_i((long)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
             case CallSiteDescriptor.ARG_NUM:
-                return box_n((double)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.numBoxType, cf.tc);
+                return box_n((double)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.numBoxType, cf.tc);
             case CallSiteDescriptor.ARG_STR:
-                return box_s((String)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.strBoxType, cf.tc);
+                return box_s((String)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.strBoxType, cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1737,13 +1815,15 @@ public final class Ops {
         if (lookup != null) {
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
-                return (long)args[lookup >> 3];
+                return (long)args[lookup >> 6];
+            case CallSiteDescriptor.ARG_UINT:
+                return (long)args[lookup >> 6];
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1758,13 +1838,15 @@ public final class Ops {
         if (lookup != null) {
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
-                return (double)args[lookup >> 3];
+                return (double)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
+            case CallSiteDescriptor.ARG_UINT:
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got uint");
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1779,13 +1861,15 @@ public final class Ops {
         if (lookup != null) {
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
-                return (String)args[lookup >> 3];
+                return (String)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
+            case CallSiteDescriptor.ARG_UINT:
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got uint");
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1803,13 +1887,15 @@ public final class Ops {
             cf.tc.lastParameterExisted = 1;
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
-                return (SixModelObject)args[lookup >> 3];
+                return (SixModelObject)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
-                return box_i((long)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
+                return box_i((long)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
+            case CallSiteDescriptor.ARG_UINT:
+                return box_i((long)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.intBoxType, cf.tc);
             case CallSiteDescriptor.ARG_NUM:
-                return box_n((double)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.numBoxType, cf.tc);
+                return box_n((double)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.numBoxType, cf.tc);
             case CallSiteDescriptor.ARG_STR:
-                return box_s((String)args[lookup >> 3], cf.codeRef.staticInfo.compUnit.hllConfig.strBoxType, cf.tc);
+                return box_s((String)args[lookup >> 6], cf.codeRef.staticInfo.compUnit.hllConfig.strBoxType, cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1827,13 +1913,15 @@ public final class Ops {
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
-                return (long)args[lookup >> 3];
+                return (long)args[lookup >> 6];
+            case CallSiteDescriptor.ARG_UINT:
+                return (long)args[lookup >> 6];
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got num");
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native int argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_int(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_int(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1851,13 +1939,15 @@ public final class Ops {
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
-                return (double)args[lookup >> 3];
+                return (double)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got int");
+            case CallSiteDescriptor.ARG_UINT:
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got uint");
             case CallSiteDescriptor.ARG_STR:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native num argument, but got str");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_num(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_num(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1875,13 +1965,15 @@ public final class Ops {
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
-                return (String)args[lookup >> 3];
+                return (String)args[lookup >> 6];
             case CallSiteDescriptor.ARG_INT:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got int");
+            case CallSiteDescriptor.ARG_UINT:
+                throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got uint");
             case CallSiteDescriptor.ARG_NUM:
                 throw ExceptionHandling.dieInternal(cf.tc, "Expected native str argument, but got num");
             case CallSiteDescriptor.ARG_OBJ:
-                return decont(((SixModelObject)args[lookup >> 3]), cf.tc).get_str(cf.tc);
+                return decont(((SixModelObject)args[lookup >> 6]), cf.tc).get_str(cf.tc);
             default:
                 throw ExceptionHandling.dieInternal(cf.tc, "Error in argument processing");
             }
@@ -1906,16 +1998,19 @@ public final class Ops {
             Integer lookup = cf.workingNameMap.get(name);
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
-                result.bind_key_boxed(tc, name, (SixModelObject)args[lookup >> 3]);
+                result.bind_key_boxed(tc, name, (SixModelObject)args[lookup >> 6]);
                 break;
             case CallSiteDescriptor.ARG_INT:
-                result.bind_key_boxed(tc, name, box_i((long)args[lookup >> 3], hllConfig.intBoxType, tc));
+                result.bind_key_boxed(tc, name, box_i((long)args[lookup >> 6], hllConfig.intBoxType, tc));
+                break;
+            case CallSiteDescriptor.ARG_UINT:
+                result.bind_key_boxed(tc, name, box_i((long)args[lookup >> 6], hllConfig.intBoxType, tc));
                 break;
             case CallSiteDescriptor.ARG_NUM:
-                result.bind_key_boxed(tc, name, box_n((double)args[lookup >> 3], hllConfig.numBoxType, tc));
+                result.bind_key_boxed(tc, name, box_n((double)args[lookup >> 6], hllConfig.numBoxType, tc));
                 break;
             case CallSiteDescriptor.ARG_STR:
-                result.bind_key_boxed(tc, name, box_s((String)args[lookup >> 3], hllConfig.strBoxType, tc));
+                result.bind_key_boxed(tc, name, box_s((String)args[lookup >> 6], hllConfig.strBoxType, tc));
                 break;
             }
         }
@@ -1931,6 +2026,12 @@ public final class Ops {
         caller.retType = CallFrame.RET_OBJ;
     }
     public static void return_i(long v, CallFrame cf) {
+        CallFrame caller = cf.caller;
+        if (caller == null) caller = cf.tc.dummyCaller;
+        caller.iRet = v;
+        caller.retType = CallFrame.RET_INT;
+    }
+    public static void return_u(long v, CallFrame cf) {
         CallFrame caller = cf.caller;
         if (caller == null) caller = cf.tc.dummyCaller;
         caller.iRet = v;
@@ -1965,6 +2066,22 @@ public final class Ops {
     public static long result_i(CallFrame cf) {
         switch (cf.retType) {
             case CallFrame.RET_INT:
+                return cf.iRet;
+            case CallFrame.RET_UINT:
+                return cf.iRet;
+            case CallFrame.RET_NUM:
+                return (long)cf.nRet;
+            case CallFrame.RET_STR:
+                return coerce_s2i(cf.sRet);
+            default:
+                return unbox_i(cf.oRet, cf.tc);
+        }
+    }
+    public static long result_u(CallFrame cf) {
+        switch (cf.retType) {
+            case CallFrame.RET_INT:
+                return cf.iRet;
+            case CallFrame.RET_UINT:
                 return cf.iRet;
             case CallFrame.RET_NUM:
                 return (long)cf.nRet;
@@ -2027,6 +2144,9 @@ public final class Ops {
             case CallSiteDescriptor.ARG_OBJ:
                 return (SixModelObject)cc.args[i];
             case CallSiteDescriptor.ARG_INT:
+                return box_i((long)cc.args[i],
+                        tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
+            case CallSiteDescriptor.ARG_UINT:
                 return box_i((long)cc.args[i],
                         tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
             case CallSiteDescriptor.ARG_NUM:
@@ -2121,7 +2241,7 @@ public final class Ops {
 
             for (String name : cc.descriptor.nameMap.keySet()) {
                 Integer flagged = cc.descriptor.nameMap.get(name);
-                int i = flagged >> 3;
+                int i = flagged >> 6;
 
                 SixModelObject arg = null;
 
@@ -2165,6 +2285,8 @@ public final class Ops {
             switch (cc.descriptor.argFlags[(int)idx]) {
             case CallSiteDescriptor.ARG_INT:
                 return StorageSpec.BP_INT;
+            case CallSiteDescriptor.ARG_UINT:
+                return StorageSpec.BP_UINT;
             case CallSiteDescriptor.ARG_NUM:
                 return StorageSpec.BP_NUM;
             case CallSiteDescriptor.ARG_STR:
@@ -2258,7 +2380,7 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "invokewithcapture requires a CallCapture");
         }
     }
-    public static SixModelObject dispatch(String dispatcher, String syscall, String key, SixModelObject arg3, ThreadContext tc) {
+    public static SixModelObject dispatch(String dispatcher, String syscall, String key, SixModelObject value, ThreadContext tc) {
         if (!dispatcher.equals("boot-syscall"))
             throw ExceptionHandling.dieInternal(tc,
                 "Unknown dispatcher '" + dispatcher + "' called");
@@ -2268,6 +2390,10 @@ public final class Ops {
         if (!key.equals("uint_box"))
             throw ExceptionHandling.dieInternal(tc,
                 "Tried to set unsupported config key '" + key + "'");
+
+        String hllName = tc.curFrame.codeRef.staticInfo.compUnit.hllName();
+        HLLConfig config = tc.gc.getHLLConfigFor(hllName);
+        config.uintBoxType = value;
 
         return null;
     }
@@ -2563,6 +2689,11 @@ public final class Ops {
         res.set_int(tc, value);
         return res;
     }
+    public static SixModelObject box_u(long value, SixModelObject type, ThreadContext tc) {
+        SixModelObject res = type.st.REPR.allocate(tc, type.st);
+        res.set_int(tc, value);
+        return res;
+    }
     public static SixModelObject box_n(double value, SixModelObject type, ThreadContext tc) {
         SixModelObject res = type.st.REPR.allocate(tc, type.st);
         res.set_num(tc, value);
@@ -2669,6 +2800,13 @@ public final class Ops {
         else
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
     }
+    public static long getattr_u(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
+        if (tc.native_type == ThreadContext.NATIVE_INT)
+            return tc.native_i;
+        else
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+    }
     public static double getattr_n(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         obj.get_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
         if (tc.native_type == ThreadContext.NATIVE_NUM)
@@ -2724,6 +2862,17 @@ public final class Ops {
         }
     }
     public static long getattr_i(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
+        // XXX: when we get other REPRs that do multiple inheritance
+        //      this check should probably move into codegen
+        if (obj.st.REPRData instanceof P6OpaqueREPRData && ((P6OpaqueREPRData) obj.st.REPRData).mi)
+            hint = STable.NO_HINT;
+        obj.get_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type == ThreadContext.NATIVE_INT)
+            return tc.native_i;
+        else
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+    }
+    public static long getattr_u(SixModelObject obj, SixModelObject ch, String name, long hint, ThreadContext tc) {
         // XXX: when we get other REPRs that do multiple inheritance
         //      this check should probably move into codegen
         if (obj.st.REPRData instanceof P6OpaqueREPRData && ((P6OpaqueREPRData) obj.st.REPRData).mi)
@@ -2831,6 +2980,18 @@ public final class Ops {
     /* Attribute reference operations. */
     public static SixModelObject getattrref_i(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intAttrRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int attribute reference type registered for current HLL");
+        NativeRefInstanceAttribute ref = (NativeRefInstanceAttribute)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.classHandle = decont(ch, tc);
+        ref.name = name;
+        ref.hint = STable.NO_HINT;
+        return ref;
+    }
+    public static SixModelObject getattrref_u(SixModelObject obj, SixModelObject ch, String name, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.uintAttrRef;
         if (isnull(refType) == 1)
             throw ExceptionHandling.dieInternal(tc,
                 "No int attribute reference type registered for current HLL");
@@ -3251,6 +3412,17 @@ public final class Ops {
         return ref;
     }
 
+    public static SixModelObject multidimref_u(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
+        SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.uintMultidimRef;
+        if (isnull(refType) == 1)
+            throw ExceptionHandling.dieInternal(tc,
+                "No int multidim positional reference type registered for current HLL");
+        NativeRefInstanceMultidim ref = (NativeRefInstanceMultidim)refType.st.REPR.allocate(tc, refType.st);
+        ref.obj = obj;
+        ref.indices = smoToLongArray(tc, indices);
+        return ref;
+    }
+
     public static SixModelObject multidimref_n(SixModelObject obj, SixModelObject indices, ThreadContext tc) {
         SixModelObject refType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numMultidimRef;
         if (isnull(refType) == 1)
@@ -3600,6 +3772,7 @@ public final class Ops {
             iter.idx = -1;
             iter.limit = agg.elems(tc);
             switch (agg.st.REPR.get_value_storage_spec(tc, agg.st).boxed_primitive) {
+                case StorageSpec.BP_UINT:
                 case StorageSpec.BP_INT:
                     iter.iterMode = VMIterInstance.MODE_ARRAY_INT;
                     break;
@@ -6201,12 +6374,16 @@ public final class Ops {
             config.exitHandler = configHash.at_key_boxed(tc, "exit_handler");
         if (configHash.exists_key(tc, "int_lex_ref") != 0)
             config.intLexRef = configHash.at_key_boxed(tc, "int_lex_ref");
+        if (configHash.exists_key(tc, "uint_lex_ref") != 0)
+            config.uintLexRef = configHash.at_key_boxed(tc, "uint_lex_ref");
         if (configHash.exists_key(tc, "num_lex_ref") != 0)
             config.numLexRef = configHash.at_key_boxed(tc, "num_lex_ref");
         if (configHash.exists_key(tc, "str_lex_ref") != 0)
             config.strLexRef = configHash.at_key_boxed(tc, "str_lex_ref");
         if (configHash.exists_key(tc, "int_attr_ref") != 0)
             config.intAttrRef = configHash.at_key_boxed(tc, "int_attr_ref");
+        if (configHash.exists_key(tc, "uint_attr_ref") != 0)
+            config.uintAttrRef = configHash.at_key_boxed(tc, "uint_attr_ref");
         if (configHash.exists_key(tc, "num_attr_ref") != 0)
             config.numAttrRef = configHash.at_key_boxed(tc, "num_attr_ref");
         if (configHash.exists_key(tc, "str_attr_ref") != 0)
@@ -6214,13 +6391,15 @@ public final class Ops {
         if (configHash.exists_key(tc, "int_pos_ref") != 0)
             config.intPosRef = configHash.at_key_boxed(tc, "int_pos_ref");
         if (configHash.exists_key(tc, "uint_pos_ref") != 0)
-            config.intPosRef = configHash.at_key_boxed(tc, "uint_pos_ref");
+            config.uintPosRef = configHash.at_key_boxed(tc, "uint_pos_ref");
         if (configHash.exists_key(tc, "num_pos_ref") != 0)
             config.numPosRef = configHash.at_key_boxed(tc, "num_pos_ref");
         if (configHash.exists_key(tc, "str_pos_ref") != 0)
             config.strPosRef = configHash.at_key_boxed(tc, "str_pos_ref");
         if (configHash.exists_key(tc, "int_multidim_ref") != 0)
             config.intMultidimRef = configHash.at_key_boxed(tc, "int_multidim_ref");
+        if (configHash.exists_key(tc, "uint_multidim_ref") != 0)
+            config.uintMultidimRef = configHash.at_key_boxed(tc, "uint_multidim_ref");
         if (configHash.exists_key(tc, "num_multidim_ref") != 0)
             config.numMultidimRef = configHash.at_key_boxed(tc, "num_multidim_ref");
         if (configHash.exists_key(tc, "str_multidim_ref") != 0)

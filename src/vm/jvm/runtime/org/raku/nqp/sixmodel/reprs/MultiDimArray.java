@@ -33,17 +33,23 @@ public class MultiDimArray extends REPR {
                     if (ss.bits == 64)
                         obj = new MultiDimArrayInstance_i();
                     else if (ss.bits == 8)
-                        obj = ss.is_unsigned == 0
-                            ? new MultiDimArrayInstance_i8()
-                            : new MultiDimArrayInstance_u8();
+                        obj = new MultiDimArrayInstance_i8();
                     else if (ss.bits == 16)
-                        obj = ss.is_unsigned == 0
-                            ? new MultiDimArrayInstance_i16()
-                            : new MultiDimArrayInstance_u16();
+                        obj = new MultiDimArrayInstance_i16();
                     else if (ss.bits == 32)
-                        obj = ss.is_unsigned == 0
-                            ? new MultiDimArrayInstance_i32()
-                            : new MultiDimArrayInstance_u32();
+                        obj = new MultiDimArrayInstance_i32();
+                    else
+                        obj = new MultiDimArrayInstance_i();
+                    break;
+                case StorageSpec.BP_UINT:
+                    if (ss.bits == 64)
+                        obj = new MultiDimArrayInstance_i();
+                    else if (ss.bits == 8)
+                        obj = new MultiDimArrayInstance_u8();
+                    else if (ss.bits == 16)
+                        obj = new MultiDimArrayInstance_u16();
+                    else if (ss.bits == 32)
+                        obj = new MultiDimArrayInstance_u32();
                     else
                         obj = new MultiDimArrayInstance_i();
                     break;
@@ -90,6 +96,7 @@ public class MultiDimArray extends REPR {
             StorageSpec ss = Ops.isnull(type) == 0 ? type.st.REPR.get_storage_spec(tc, type.st) : null;
             switch (ss != null ? ss.boxed_primitive : StorageSpec.REFERENCE) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
             case StorageSpec.BP_NUM:
             case StorageSpec.BP_STR:
                 reprData.type = type;
@@ -123,17 +130,23 @@ public class MultiDimArray extends REPR {
                 if (ss.bits == 64)
                     obj = new MultiDimArrayInstance_i();
                 else if (ss.bits == 8)
-                    obj = ss.is_unsigned == 0
-                        ? new MultiDimArrayInstance_i8()
-                        : new MultiDimArrayInstance_u8();
+                    obj = new MultiDimArrayInstance_i8();
                 else if (ss.bits == 16)
-                    obj = ss.is_unsigned == 0
-                        ? new MultiDimArrayInstance_i16()
-                        : new MultiDimArrayInstance_u16();
+                    obj = new MultiDimArrayInstance_i16();
                 else if (ss.bits == 32)
-                    obj = ss.is_unsigned == 0
-                        ? new MultiDimArrayInstance_i32()
-                        : new MultiDimArrayInstance_u32();
+                    obj = new MultiDimArrayInstance_i32();
+                else
+                    obj = new MultiDimArrayInstance_i();
+                break;
+            case StorageSpec.BP_UINT:
+                if (ss.bits == 64)
+                    obj = new MultiDimArrayInstance_i();
+                else if (ss.bits == 8)
+                    obj = new MultiDimArrayInstance_u8();
+                else if (ss.bits == 16)
+                    obj = new MultiDimArrayInstance_u16();
+                else if (ss.bits == 32)
+                    obj = new MultiDimArrayInstance_u32();
                 else
                     obj = new MultiDimArrayInstance_i();
                 break;

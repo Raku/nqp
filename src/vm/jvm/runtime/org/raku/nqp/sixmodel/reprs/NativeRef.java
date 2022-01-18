@@ -32,6 +32,7 @@ public class NativeRef extends REPR {
             case NativeRefREPRData.REF_LEXICAL:
                 switch (rd.primitive_type) {
                     case StorageSpec.BP_INT:
+                    case StorageSpec.BP_UINT:
                         obj = new NativeRefInstanceIntLex();
                         break;
                     case StorageSpec.BP_NUM:

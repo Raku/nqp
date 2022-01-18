@@ -229,6 +229,7 @@ public final class NativeCallOps {
 
         switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
             case StorageSpec.BP_NUM:
                 return ss.bits / 8;
             case StorageSpec.BP_STR:
@@ -300,6 +301,7 @@ public final class NativeCallOps {
 
         switch (ss.boxed_primitive) {
             case StorageSpec.BP_INT:
+            case StorageSpec.BP_UINT:
                 switch (ss.bits) {
                     case 8:
                         nqpobj.set_int(tc, o.getByte(0));
