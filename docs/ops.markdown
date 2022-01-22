@@ -154,10 +154,13 @@ The opcodes are grouped into the following categories:
 
 [coerce_in](#coerce_in-moar) |
 [coerce_is](#coerce_is) |
+[coerce_is](#coerce_iu-moar) |
 [coerce_ni](#coerce_ni-moar) |
 [coerce_ns](#coerce_ns-moar) |
 [coerce_si](#coerce_si) |
 [coerce_sn](#coerce_sn-moar) |
+[coerce_ui](#coerce_ui-moar) |
+[coerce_us](#coerce_us-moar) |
 [intify](#intify-moar) |
 [numify](#numify-moar) |
 [stringify](#stringify)
@@ -1109,6 +1112,11 @@ Coerce from int to num.
 
 Coerce from int to str.
 
+## coerce_iu `moar`
+* `coerce_iu(int --> uint)`
+
+Coerce from int to uint.
+
 ## coerce_ni `moar`
 * `coerce_ni(num --> int)`
 
@@ -1128,6 +1136,16 @@ Coerce from str to int.
 * `coerce_sn(str --> num)`
 
 Coerce from str to num.
+
+## coerce_ui `moar`
+* `coerce_ui(uint --> int)`
+
+Coerce from uint to int.
+
+## coerce_us `moar`
+* `coerce_us(uint --> str)`
+
+Coerce from uint to str.
 
 ## intify `moar`
 * `intify($o --> int)`
