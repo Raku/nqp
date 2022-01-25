@@ -3047,6 +3047,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'decont_i', 'decont_i',
     'decont_n', 'decont_n',
     'decont_s', 'decont_s',
+    'decont_u', 'decont_u',
     'isnull', 'isnull',
     'isnull_s', 'isnull_s',
     'eqaddr', 'eqaddr',
