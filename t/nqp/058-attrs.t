@@ -1,4 +1,4 @@
-plan(35);
+plan(30);
 
 class Foo {
     has $!answer;
@@ -114,38 +114,6 @@ class ClassB {
 }
 ok(nqp::ishash(ClassA.new.get_attr), 'BUILD initializes a % attribute with a hash');
 ok(nqp::isnull(ClassB.new.get_attr), 'without a BUILD a % attribute is initialized with a null');
-
-class AttrInitedTest {
-    has $!attr1;
-    has $!attr2;
-    method get_attr1() {
-        $!attr1;
-    }
-    method set_attr2() {
-        $!attr2 := 200
-    }
-    has int $!attr3;
-    method set_attr3() {
-        $!attr3 := 200
-    }
-
-    has int $!attr4;
-    method get_attr4() {
-        $!attr1;
-    }
-}
-my $partial := AttrInitedTest.new;
-ok(!nqp::attrinited($partial, AttrInitedTest, '$!attr1'), 'nqp::attrinitied on a uninitialized attr');
-$partial.get_attr1;
-ok(nqp::attrinited($partial, AttrInitedTest, '$!attr1'), 'nqp::attrinitied on a attr that has been autovivified');
-$partial.set_attr2;
-ok(nqp::attrinited($partial, AttrInitedTest, '$!attr2'), 'nqp::attrinitied on a attr that has been bound to');
-
-my $in_void := AttrInitedTest.new;
-ok(!nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied before getting attr');
-nqp::getattr($in_void, AttrInitedTest, '$!attr1');
-ok(nqp::attrinited($in_void, AttrInitedTest, '$!attr1'), 'nqp::attrinitied with nqp::getattr as void');
-
 
 use nqpmo;
 

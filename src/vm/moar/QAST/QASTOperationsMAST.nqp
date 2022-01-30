@@ -3401,7 +3401,6 @@ while $i < $n {
 
 QAST::MASTOperations.add_core_moarop_mapping('rebless', 'rebless', :decont(0, 1));
 QAST::MASTOperations.add_core_moarop_mapping('istype', 'istype', :decont(0, 1));
-QAST::MASTOperations.add_core_moarop_mapping('attrinited', 'attrinited', :decont(1));
 QAST::MASTOperations.add_core_moarop_mapping('setboolspec', 'setboolspec', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('settypecache', 'settypecache', 0, :decont(0));
 QAST::MASTOperations.add_core_moarop_mapping('settypecheckmode', 'settypecheckmode', 0, :decont(0));
