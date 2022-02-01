@@ -27,18 +27,18 @@ my class NQPMu {
                         nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2), %attrinit{$key_name});
                     }
                 }
-                elsif nqp::iseq_i($code, 4) {
+                elsif nqp::iseq_i($code, 400) {
                     unless nqp::attrinited(self, nqp::atpos($task, 1), nqp::atpos($task, 2)) {
                         nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2),
                             nqp::atpos($task, 3)(self,
                                 nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))));
                     }
                 }
-                elsif nqp::iseq_i($code, 10) {
+                elsif nqp::iseq_i($code, 1000) {
                     # Defeat lazy allocation
                     nqp::getattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2))
                 }
-                elsif nqp::iseq_i($code, 11) {
+                elsif nqp::iseq_i($code, 1100) {
                     # See if we have a value to initialize this attr with;
                     # if not, set it to an empty array.
                     my $key_name := nqp::atpos($task, 3);
@@ -49,7 +49,7 @@ my class NQPMu {
                         nqp::bindattr(self, nqp::atpos($task, 1), nqp::atpos($task, 2), nqp::list());
                     }
                 }
-                elsif nqp::iseq_i($code, 12) {
+                elsif nqp::iseq_i($code, 1200) {
                     # See if we have a value to initialize this attr with;
                     # if not, set it to an empty array.
                     my $key_name := nqp::atpos($task, 3);

@@ -550,9 +550,9 @@ knowhow NQPClassHOW {
     # representing the task to perform:
     #   code = call specified BUILD method
     #   0 class name attr_name = find initialization value
-    #   4 class attr_name code = call default value closure if uninitialized
-    #   11 class name attr_name = find initialization value, or set nqp::list()
-    #   12 class name attr_name = find initialization value, or set nqp::hash()
+    #   400 class attr_name code = call default value closure if uninitialized
+    #   1100 class name attr_name = find initialization value, or set nqp::list()
+    #   1200 class name attr_name = find initialization value, or set nqp::hash()
     # Note the numbers are a bit odd, but they are this way to conform to the
     # HLL version of BUILDALL.
     method create_BUILDPLAN($obj) {
@@ -574,7 +574,7 @@ knowhow NQPClassHOW {
                 my $attr_name := $_.name;
                 my $name      := nqp::substr($attr_name, 2);
                 my $sigil     := nqp::substr($attr_name, 0, 1);
-                my $sigop     := $sigil eq '@' ?? 11 !! $sigil eq '%' ?? 12 !! 0;
+                my $sigop     := $sigil eq '@' ?? 1100 !! $sigil eq '%' ?? 1200 !! 0;
                 nqp::push(@plan, [$sigop, $obj, $attr_name, $name]);
             }
         }
@@ -584,7 +584,7 @@ knowhow NQPClassHOW {
             if nqp::can($_, 'build') {
                 my $default := $_.build;
                 if nqp::defined($default) {
-                    nqp::push(@plan, [4, $obj, $_.name, $default]);
+                    nqp::push(@plan, [400, $obj, $_.name, $default]);
                 }
             }
         }
