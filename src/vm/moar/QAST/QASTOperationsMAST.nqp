@@ -2929,6 +2929,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'bitshiftl_i', 'blshift_i',
     'bitshiftr_i', 'brshift_i',
     'bitneg_i', 'bnot_i',
+    'bitneg_u', 'bnot_u',
     'bitor_I', 'bor_I',
     'bitxor_I', 'bxor_I',
     'bitand_I', 'band_I',

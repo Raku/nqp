@@ -2527,6 +2527,7 @@ QAST::OperationsJAST.map_classlib_core_op('bitxor_I', $TYPE_OPS, 'bitxor_I', [$R
 QAST::OperationsJAST.map_classlib_core_op('bitand_i', $TYPE_OPS, 'bitand_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('bitand_I', $TYPE_OPS, 'bitand_I', [$RT_OBJ, $RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bitneg_i', $TYPE_OPS, 'bitneg_i', [$RT_INT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('bitneg_u', $TYPE_OPS, 'bitneg_i', [$RT_UINT], $RT_UINT);
 QAST::OperationsJAST.map_classlib_core_op('bitneg_I', $TYPE_OPS, 'bitneg_I', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bitshiftl_i', $TYPE_OPS, 'bitshiftl_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('bitshiftl_I', $TYPE_OPS, 'bitshiftl_I', [$RT_OBJ, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
