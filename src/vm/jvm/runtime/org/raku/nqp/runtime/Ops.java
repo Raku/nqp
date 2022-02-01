@@ -2918,6 +2918,15 @@ public final class Ops {
             scwbObject(tc, obj);
         return value;
     }
+    public static long bindattr_u(SixModelObject obj, SixModelObject ch, String name, long value, ThreadContext tc) {
+        tc.native_i = value;
+        obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native unsigned int");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
     public static double bindattr_n(SixModelObject obj, SixModelObject ch, String name, double value, ThreadContext tc) {
         tc.native_n = value;
         obj.bind_attribute_native(tc, decont(ch, tc), name, STable.NO_HINT);
@@ -2947,6 +2956,15 @@ public final class Ops {
         obj.bind_attribute_native(tc, decont(ch, tc), name, hint);
         if (tc.native_type != ThreadContext.NATIVE_INT)
             throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native int");
+        if (obj.sc != null)
+            scwbObject(tc, obj);
+        return value;
+    }
+    public static long bindattr_u(SixModelObject obj, SixModelObject ch, String name, long value, long hint, ThreadContext tc) {
+        tc.native_i = value;
+        obj.bind_attribute_native(tc, decont(ch, tc), name, hint);
+        if (tc.native_type != ThreadContext.NATIVE_INT)
+            throw ExceptionHandling.dieInternal(tc, "Attribute '" + name + "' is not a native unsigned int");
         if (obj.sc != null)
             scwbObject(tc, obj);
         return value;

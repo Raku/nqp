@@ -2544,6 +2544,7 @@ sub add_bindattr_op($nqpop, $hintedop, $namedop, $want) {
 
 add_bindattr_op('bindattr',   'bindattr_o', 'bindattrs_o', $MVM_reg_obj);
 add_bindattr_op('bindattr_i', 'bindattr_i', 'bindattrs_i', $MVM_reg_int64);
+add_bindattr_op('bindattr_u', 'bindattr_u', 'bindattrs_u', $MVM_reg_uint64);
 add_bindattr_op('bindattr_n', 'bindattr_n', 'bindattrs_n', $MVM_reg_num64);
 add_bindattr_op('bindattr_s', 'bindattr_s', 'bindattrs_s', $MVM_reg_str);
 
@@ -2582,6 +2583,7 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
 
 add_getattr_op('getattr',   'getattr_o', 'getattrs_o', $MVM_reg_obj);
 add_getattr_op('getattr_i', 'getattr_i', 'getattrs_i', $MVM_reg_int64);
+add_getattr_op('getattr_u', 'getattr_u', 'getattrs_u', $MVM_reg_uint64);
 add_getattr_op('getattr_n', 'getattr_n', 'getattrs_n', $MVM_reg_num64);
 add_getattr_op('getattr_s', 'getattr_s', 'getattrs_s', $MVM_reg_str);
 
