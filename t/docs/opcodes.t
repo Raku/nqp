@@ -15,7 +15,7 @@ sub debug($text) {
 }
 
 my @*vms = <jvm moar js>;
-my @*variants = <_i _n _s _I>;
+my @*variants = <_i _u _n _s _I>;
 
 my %documented_ops = find_documented_opcodes();
 
