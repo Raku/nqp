@@ -2705,6 +2705,7 @@ QAST::OperationsJAST.map_classlib_core_op('getattr_u', $TYPE_OPS, 'getattr_u', [
 QAST::OperationsJAST.map_classlib_core_op('getattr_n', $TYPE_OPS, 'getattr_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattr_s', $TYPE_OPS, 'getattr_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattrref_i', $TYPE_OPS, 'getattrref_i', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('getattrref_u', $TYPE_OPS, 'getattrref_u', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattrref_n', $TYPE_OPS, 'getattrref_n', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getattrref_s', $TYPE_OPS, 'getattrref_s', [$RT_OBJ, $RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindattr', $TYPE_OPS, 'bindattr', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);

@@ -2588,6 +2588,7 @@ add_getattr_op('getattr_n', 'getattr_n', 'getattrs_n', $MVM_reg_num64);
 add_getattr_op('getattr_s', 'getattr_s', 'getattrs_s', $MVM_reg_str);
 
 add_getattr_op('getattrref_i', 'getattrref_i', 'getattrsref_i', $MVM_reg_obj);
+add_getattr_op('getattrref_u', 'getattrref_u', 'getattrsref_i', $MVM_reg_obj);
 add_getattr_op('getattrref_n', 'getattrref_n', 'getattrsref_n', $MVM_reg_obj);
 add_getattr_op('getattrref_s', 'getattrref_s', 'getattrsref_s', $MVM_reg_obj);
 

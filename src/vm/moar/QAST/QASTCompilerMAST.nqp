@@ -766,11 +766,10 @@ my class MASTCompilerInstance {
         'getattrref_n',
         'getattrref_s',
         '', '',  '',  '',  '',  '',  '',  '',  '',
-        # XXX Want a getattrref_u in the end
-        'getattrref_i',
-        'getattrref_i',
-        'getattrref_i',
-        'getattrref_i'
+        'getattrref_u',
+        'getattrref_u',
+        'getattrref_u',
+        'getattrref_u'
     ];
 
     my @kind_to_op_slot := [
