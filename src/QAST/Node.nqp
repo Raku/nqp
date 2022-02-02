@@ -107,11 +107,13 @@ class QAST::Node {
         %!annotations := nqp::null();
     }
 
-    my %uniques;
+    my %global-uniques;
     method unique($prefix) {
+        my %uniques := nqp::clone(%global-uniques);
         my $id := nqp::existskey(%uniques, $prefix) ??
             (%uniques{$prefix} := %uniques{$prefix} + 1) !!
             (%uniques{$prefix} := 1);
+        %global-uniques := %uniques;
         $prefix ~ '_' ~ $id
     }
 
