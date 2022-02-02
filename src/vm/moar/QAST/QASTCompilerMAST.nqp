@@ -740,10 +740,6 @@ my class MASTCompilerInstance {
         'return_i'
     ];
 
-    my @type_initials := [
-        '', 'i', 'i', 'i', 'i', 'n', 'n', 's', 'o'
-    ];
-
     my @attr_opnames := [
         '',
         'attr_i',
@@ -753,7 +749,12 @@ my class MASTCompilerInstance {
         'attr_n',
         'attr_n',
         'attr_s',
-        'attr_o'
+        'attr_o',
+        '',  '',  '',  '',  '',  '',  '',  '',
+        'attr_u',
+        'attr_u',
+        'attr_u',
+        'attr_u',
     ];
 
     my @attrref_opnames := [
@@ -1929,10 +1930,9 @@ my class MASTCompilerInstance {
                     $kind == $MVM_reg_int8 {
                 $kind := $MVM_reg_int64;
             }
-            elsif $kind == $MVM_reg_uint64 || $kind == $MVM_reg_uint32 ||
+            elsif $kind == $MVM_reg_uint32 ||
                     $kind == $MVM_reg_uint16 || $kind == $MVM_reg_uint8 {
-                # For now compile as signed
-                $kind := $MVM_reg_int64;
+                $kind := $MVM_reg_uint64;
             }
             if $*BINDVAL {
                 my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want($kind));
