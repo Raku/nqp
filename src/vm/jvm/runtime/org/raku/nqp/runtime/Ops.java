@@ -7650,6 +7650,10 @@ public final class Ops {
         return Long.toString(l);
     }
 
+    public static String coerce_us(long l, ThreadContext tc) {
+        return Long.toUnsignedString(l);
+    }
+
     public static SixModelObject decodelocaltime(long sinceEpoch, ThreadContext tc) {
         // Get calendar for current local host's timezone.
         Calendar c = Calendar.getInstance();
