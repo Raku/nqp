@@ -2783,6 +2783,7 @@ QAST::OperationsJAST.add_core_op('wantdecont', -> $qastcomp, $op {
     $qastcomp.as_jast($op[0])
 });
 QAST::OperationsJAST.map_classlib_core_op('decont_i', $TYPE_OPS, 'decont_i', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('decont_u', $TYPE_OPS, 'decont_u', [$RT_OBJ], $RT_UINT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_n', $TYPE_OPS, 'decont_n', [$RT_OBJ], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('decont_s', $TYPE_OPS, 'decont_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign', $TYPE_OPS, 'assign', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);

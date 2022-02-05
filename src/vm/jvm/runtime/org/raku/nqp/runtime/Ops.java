@@ -3716,6 +3716,14 @@ public final class Ops {
         }
         return obj.get_int(tc);
     }
+    public static long decont_u(SixModelObject obj, ThreadContext tc) {
+        if (!(obj instanceof TypeObject)) {
+            ContainerSpec cs = obj.st.ContainerSpec;
+            if (cs != null)
+                return cs.fetch_i(tc, obj);
+        }
+        return obj.get_int(tc);
+    }
     public static double decont_n(SixModelObject obj, ThreadContext tc) {
         if (!(obj instanceof TypeObject)) {
             ContainerSpec cs = obj.st.ContainerSpec;
