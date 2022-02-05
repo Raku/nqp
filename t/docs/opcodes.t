@@ -23,24 +23,24 @@ my %ops = hash_of_vms();
 
 %ops<jvm> = find-opcodes(
     :files([
-        "src/vm/jvm/QAST/Compiler.nqp",
-        "src/vm/jvm/NQP/Ops.nqp"
+        ["src/vm/jvm/QAST/Compiler.nqp",],
+        ["src/vm/jvm/NQP/Ops.nqp"]
     ]),
     :keywords(<map_classlib_core_op add_core_op map_jvm_core_op add_hll_op>)
 );
 
 %ops<js> = find-opcodes(
     :files([
-        "src/vm/js/Operations.nqp"
+        ["src/vm/js/Operations.nqp"]
     ]),
     :keywords(<add_op add_simple_op add_hll_op add_cmp_op add_infix_op>)
 );
 
 %ops<moar> = find-opcodes(
     :files([
-        "src/vm/moar/QAST/QASTOperationsMAST.nqp",
-        "src/vm/moar/QAST/QASTCompilerMAST.nqp",
-        "src/vm/moar/NQP/Ops.nqp"
+        ["src/vm/moar/QAST/QASTOperationsMAST.nqp",1],
+        ["src/vm/moar/NQP/Ops.nqp",],
+        ["src/vm/moar/QAST/QASTCompilerMAST.nqp",]
     ]),
     :keywords(<add_core_op add_core_moarop_mapping add_hll_op add_getattr_op add_bindattr_op add_native_assign_op>)
 );
@@ -104,7 +104,10 @@ sub find-opcodes(:@files, :@keywords) {
     my %ops;
     my $keywords = any(@keywords);
 
-    for @files -> $file {
+    for @files -> $item {
+        my $file= $item[0];
+        my $check-init = $item[1];
+
         my $line_no = 0;
         for $file.IO.lines -> $line {
             $line_no++;
@@ -141,6 +144,12 @@ sub find-opcodes(:@files, :@keywords) {
                 for split(' ', ~$match[0]) -> $func {
                     %ops{$func} = 1;
                     debug("$file:$line_no :: for single : $func");
+                }
+            } elsif $line ~~ /  "'" (\w+) "'," \s+ "'" (\w+) "'" / -> $match {
+                if $check-init {
+                    my $func = ~$0;
+                    %ops{$func} = 1;
+                    debug("$file:$line_no :: list init : $func");
                 }
             }
         }
