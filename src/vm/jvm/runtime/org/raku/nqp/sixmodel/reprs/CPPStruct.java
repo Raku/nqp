@@ -181,7 +181,7 @@ public class CPPStruct extends REPR {
         REPR repr = info.type.st.REPR;
         StorageSpec spec = repr.get_storage_spec(tc, info.type.st);
         info.bits = spec.bits;
-        if (spec.inlineable == StorageSpec.INLINED && (spec.boxed_primitive == StorageSpec.BP_INT || spec.boxed_primitive == StorageSpec.BP_UINT)) {
+        if (spec.inlineable == StorageSpec.INLINED && spec.boxed_primitive == StorageSpec.BP_INT) {
             if (spec.bits == 8) {
                 info.argType = ArgType.CHAR;
                 return "B";
@@ -200,6 +200,28 @@ public class CPPStruct extends REPR {
             }
             else {
                 ExceptionHandling.dieInternal(tc, "CPPStruct representation only handles 8, 16, 32 and 64 bit ints");
+                return null;
+            }
+        }
+        else if (spec.inlineable == StorageSpec.INLINED && spec.boxed_primitive == StorageSpec.BP_UINT) {
+            if (spec.bits == 8) {
+                info.argType = ArgType.UCHAR;
+                return "B";
+            }
+            else if (spec.bits == 16) {
+                info.argType = ArgType.USHORT;
+                return "S";
+            }
+            else if (spec.bits == 32) {
+                info.argType = ArgType.UINT;
+                return "I";
+            }
+            else if (spec.bits == 64) {
+                info.argType = ArgType.ULONG;
+                return "J";
+            }
+            else {
+                ExceptionHandling.dieInternal(tc, "CPPStruct representation only handles 8, 16, 32 and 64 bit uints");
                 return null;
             }
         }

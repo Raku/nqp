@@ -178,7 +178,7 @@ public class CUnion extends REPR {
         REPR repr = info.type.st.REPR;
         StorageSpec spec = repr.get_storage_spec(tc, info.type.st);
         info.bits = spec.bits;
-        if (spec.inlineable == StorageSpec.INLINED && (spec.boxed_primitive == StorageSpec.BP_INT || spec.boxed_primitive == StorageSpec.BP_UINT)) {
+        if (spec.inlineable == StorageSpec.INLINED && spec.boxed_primitive == StorageSpec.BP_INT) {
             if (spec.bits == 8) {
                 info.argType = NativeCall.ArgType.CHAR;
                 return "B";
@@ -197,6 +197,28 @@ public class CUnion extends REPR {
             }
             else {
                 ExceptionHandling.dieInternal(tc, "CUnion representation only handles 8, 16, 32 and 64 bit ints");
+                return null;
+            }
+        }
+        else if (spec.inlineable == StorageSpec.INLINED && spec.boxed_primitive == StorageSpec.BP_UINT) {
+            if (spec.bits == 8) {
+                info.argType = NativeCall.ArgType.UCHAR;
+                return "B";
+            }
+            else if (spec.bits == 16) {
+                info.argType = NativeCall.ArgType.USHORT;
+                return "S";
+            }
+            else if (spec.bits == 32) {
+                info.argType = NativeCall.ArgType.UINT;
+                return "I";
+            }
+            else if (spec.bits == 64) {
+                info.argType = NativeCall.ArgType.ULONG;
+                return "J";
+            }
+            else {
+                ExceptionHandling.dieInternal(tc, "CUnion representation only handles 8, 16, 32 and 64 bit uints");
                 return null;
             }
         }
