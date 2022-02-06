@@ -7003,6 +7003,9 @@ public final class Ops {
     public static String coerce_i2s(long in) {
         return Long.toString(in);
     }
+    public static String coerce_u2s(long in) {
+        return Long.toUnsignedString(in);
+    }
     public static String coerce_n2s(double in) {
         if (in == (long)in) {
             if (in == 0 && Double.toString(in).equals("-0.0")) {
