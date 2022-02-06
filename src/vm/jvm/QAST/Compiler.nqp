@@ -2611,7 +2611,7 @@ QAST::OperationsJAST.map_classlib_core_op('atkey_n', $TYPE_OPS, 'atkey_n', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('atkey_s', $TYPE_OPS, 'atkey_s', [$RT_OBJ, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos', $TYPE_OPS, 'bindpos', [$RT_OBJ, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos_i', $TYPE_OPS, 'bindpos_i', [$RT_OBJ, $RT_INT, $RT_INT], $RT_INT, :tc);
-QAST::OperationsJAST.map_classlib_core_op('bindpos_u', $TYPE_OPS, 'bindpos_u', [$RT_OBJ, $RT_INT, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('bindpos_u', $TYPE_OPS, 'bindpos_u', [$RT_OBJ, $RT_INT, $RT_UINT], $RT_UINT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos_n', $TYPE_OPS, 'bindpos_n', [$RT_OBJ, $RT_INT, $RT_NUM], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos_s', $TYPE_OPS, 'bindpos_s', [$RT_OBJ, $RT_INT, $RT_STR], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('bindpos2d', $TYPE_OPS, 'bindpos2d_o', [$RT_OBJ, $RT_INT, $RT_INT, $RT_OBJ], $RT_OBJ, :tc);
@@ -2727,7 +2727,7 @@ QAST::OperationsJAST.map_classlib_core_op('unbox_u', $TYPE_OPS, 'unbox_u', [$RT_
 QAST::OperationsJAST.map_classlib_core_op('unbox_n', $TYPE_OPS, 'unbox_n', [$RT_OBJ], $RT_NUM, :tc);
 QAST::OperationsJAST.map_classlib_core_op('unbox_s', $TYPE_OPS, 'unbox_s', [$RT_OBJ], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_i', $TYPE_OPS, 'box_i', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('box_u', $TYPE_OPS, 'box_u', [$RT_INT, $RT_OBJ], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('box_u', $TYPE_OPS, 'box_u', [$RT_UINT, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_n', $TYPE_OPS, 'box_n', [$RT_NUM, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('box_s', $TYPE_OPS, 'box_s', [$RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('hllboxtype_i', $TYPE_OPS, 'hllboxtype_i', [], $RT_OBJ, :tc);
@@ -2789,7 +2789,7 @@ QAST::OperationsJAST.map_classlib_core_op('decont_s', $TYPE_OPS, 'decont_s', [$R
 QAST::OperationsJAST.map_classlib_core_op('assign', $TYPE_OPS, 'assign', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assignunchecked', $TYPE_OPS, 'assignunchecked', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign_i', $TYPE_OPS, 'assign_i', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
-QAST::OperationsJAST.map_classlib_core_op('assign_u', $TYPE_OPS, 'assign_u', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
+QAST::OperationsJAST.map_classlib_core_op('assign_u', $TYPE_OPS, 'assign_u', [$RT_OBJ, $RT_UINT], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign_n', $TYPE_OPS, 'assign_n', [$RT_OBJ, $RT_NUM], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('assign_s', $TYPE_OPS, 'assign_s', [$RT_OBJ, $RT_STR], $RT_OBJ, :tc);
 
