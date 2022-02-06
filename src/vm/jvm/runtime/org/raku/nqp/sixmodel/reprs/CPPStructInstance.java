@@ -53,18 +53,22 @@ public class CPPStructInstance extends SixModelObject implements Refreshable {
         Object value;
         switch (info.argType) {
         case CHAR:
+        case UCHAR:
             tc.native_type = ThreadContext.NATIVE_INT;
             value = (byte) tc.native_i;
             break;
         case SHORT:
+        case USHORT:
             tc.native_type = ThreadContext.NATIVE_INT;
             value = (short) tc.native_i;
             break;
         case INT:
+        case UINT:
             tc.native_type = ThreadContext.NATIVE_INT;
             value = (int) tc.native_i;
             break;
         case LONG:
+        case ULONG:
             tc.native_type = ThreadContext.NATIVE_INT;
             value = (long) tc.native_i;
             break;
@@ -132,6 +136,35 @@ public class CPPStructInstance extends SixModelObject implements Refreshable {
             tc.native_i = ((Integer) o).intValue();
             break;
         case LONG:
+            tc.native_type = ThreadContext.NATIVE_INT;
+            tc.native_i = ((Long) o).longValue();
+            break;
+        case UCHAR: {
+            tc.native_type = ThreadContext.NATIVE_INT;
+            long val = ((Byte) o).byteValue();
+            if (val < 0)
+                val += 0x100;
+            tc.native_i = val;
+            break;
+        }
+        case USHORT: {
+            tc.native_type = ThreadContext.NATIVE_INT;
+            long val = ((Short) o).shortValue();
+            if (val < 0)
+                val += 0x10000;
+            tc.native_i = val;
+            break;
+        }
+        case UINT: {
+            tc.native_type = ThreadContext.NATIVE_INT;
+            long val = ((Integer) o).intValue();
+            if (val < 0)
+                val += 0x100000000L;
+            tc.native_i = val;
+            break;
+        }
+        case ULONG:
+            /* TODO: handle unsignedness properly. */
             tc.native_type = ThreadContext.NATIVE_INT;
             tc.native_i = ((Long) o).longValue();
             break;
