@@ -2028,7 +2028,7 @@ QAST::OperationsJAST.add_hll_unbox('', $RT_UINT, -> $qastcomp {
     my $il := JAST::InstructionList.new();
     $il.append($ALOAD_1);
     $il.append(JAST::Instruction.new( :op('invokestatic'), $TYPE_OPS,
-        'unbox_i', 'Long', $TYPE_SMO, $TYPE_TC ));
+        'unbox_u', 'Long', $TYPE_SMO, $TYPE_TC ));
     $il
 });
 QAST::OperationsJAST.add_hll_unbox('', $RT_NUM, -> $qastcomp {
