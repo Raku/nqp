@@ -5152,6 +5152,10 @@ class QAST::CompilerJAST {
                 $il.append(JAST::Instruction.new( :op('invokestatic'),
                     $TYPE_OPS, 'coerce_i2s', $TYPE_STR, 'Long' ));
             }
+            elsif $got == $RT_UINT {
+                $il.append(JAST::Instruction.new( :op('invokestatic'),
+                    $TYPE_OPS, 'coerce_u2s', $TYPE_STR, 'Long' ));
+            }
             elsif $got == $RT_NUM {
                 $il.append(JAST::Instruction.new( :op('invokestatic'),
                     $TYPE_OPS, 'coerce_n2s', $TYPE_STR, 'Double' ));
