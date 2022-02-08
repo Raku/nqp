@@ -3940,7 +3940,7 @@ class QAST::CompilerJAST {
         unless $*CODEREFS.know_cuid($node.cuid) {
             # Block gets fresh BlockInfo.
             my $*BINDVAL  := 0;
-            my $outer     := try $*BLOCK;
+            my $outer     := $*BLOCK;
             my $block     := BlockInfo.new($node, $outer);
 
             # This array will contain any catch/control exception handlers the
@@ -4358,7 +4358,7 @@ class QAST::CompilerJAST {
 
         # Now go by block type for producing a result; also need to special-case
         # the top-level, where we need no result.
-        if nqp::istype((try $*STACK), StackState) {
+        if nqp::istype($*STACK, StackState) {
             my $blocktype := $node.blocktype;
             if $blocktype eq '' || $blocktype eq 'declaration' || $blocktype eq 'declaration_static' {
                 return self.as_jast(QAST::BVal.new( :value($node) ));
@@ -4482,8 +4482,7 @@ class QAST::CompilerJAST {
     }
 
     multi method as_jast(QAST::Op $node, :$want) {
-        my $hll := '';
-        try $hll := $*HLL;
+        my $hll := $*HLL // '';
         QAST::OperationsJAST.compile_op(self, $hll, $node);
     }
 
@@ -5095,13 +5094,11 @@ class QAST::CompilerJAST {
             $il.append(pop_ins($got));
         }
         elsif $desired == $RT_OBJ {
-            my $hll := '';
-            try $hll := $*HLL;
+            my $hll := $*HLL // '';
             return QAST::OperationsJAST.box(self, $hll, $got);
         }
         elsif $got == $RT_OBJ {
-            my $hll := '';
-            try $hll := $*HLL;
+            my $hll := $*HLL // '';
             return QAST::OperationsJAST.unbox(self, $hll, $desired);
         }
         elsif $desired == $RT_INT {

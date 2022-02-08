@@ -1018,8 +1018,8 @@ my class MASTCompilerInstance {
                 :compunit($!mast_compunit));
 
             $!mast_compunit.add_frame($frame);
-            try $outer := $*BLOCK;
-            $block     := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu), self);
+            $outer := $*BLOCK;
+            $block := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu), self);
             %*BLOCKS_DONE{$cuid} := [$block, $outer];
 
             # stash the frame by the block's cuid so other references
