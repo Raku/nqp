@@ -268,8 +268,7 @@ knowhow ModuleLoader {
         my @search_paths;
 
         # Put any explicitly specified path on the start of the list.
-        my $explicit;
-        try { $explicit := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {}){$explicit_path}; }
+        my $explicit := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {}){$explicit_path};
         if !nqp::isnull($explicit) && nqp::defined($explicit) {
             nqp::push(@search_paths, $explicit);
         }
@@ -305,8 +304,7 @@ knowhow ModuleLoader {
         else {
             my $*CTXSAVE := self;
             my $*MAIN_CTX := ModuleLoader;
-            my $boot_mode;
-            try { $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>; }
+            my $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>;
             $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
             my $preserve_global := nqp::getcurhllsym('GLOBAL');
             nqp::usecompileehllconfig() if $boot_mode;
@@ -407,8 +405,7 @@ knowhow ModuleLoader {
             unless nqp::existskey(%settings_loaded, $path) {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
-                my $boot_mode;
-                try { $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>; }
+                my $boot_mode := nqp::ifnull(nqp::ifnull(%*COMPILING, {})<%?OPTIONS>, {})<bootstrap>;
                 $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
                 my $preserve_global := nqp::getcurhllsym('GLOBAL');
                 nqp::usecompileehllconfig() if $boot_mode;

@@ -8,13 +8,11 @@ knowhow ModuleLoader {
         # Put any explicitly specified path on the start of the list.
         my $explicit;
         if !nqp::isnull($explicit_path) {
-            try {
-                my $compiling := %*COMPILING;
-                unless nqp::isnull(%*COMPILING) {
-                    my $options := $compiling<%?OPTIONS>;
-                    unless nqp::isnull($options) {
-                        $explicit := $options{$explicit_path};
-                    }
+            my $compiling := %*COMPILING;
+            unless nqp::isnull($compiling) {
+                my $options := $compiling<%?OPTIONS>;
+                unless nqp::isnull($options) {
+                    $explicit := $options{$explicit_path};
                 }
             }
         }
@@ -61,13 +59,11 @@ knowhow ModuleLoader {
             my $*CTXSAVE := self;
             my $*MAIN_CTX := ModuleLoader;
             my $boot_mode;
-            try {
-                my $compiling := %*COMPILING;
-                unless nqp::isnull(%*COMPILING) {
-                    my $options := $compiling<%?OPTIONS>;
-                    unless nqp::isnull($options) {
-                        $boot_mode := $options<bootstrap>;
-                    }
+            my $compiling := %*COMPILING;
+            unless nqp::isnull($compiling) {
+                my $options := $compiling<%?OPTIONS>;
+                unless nqp::isnull($options) {
+                    $boot_mode := $options<bootstrap>;
                 }
             }
             $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
@@ -180,13 +176,11 @@ knowhow ModuleLoader {
                 my $*CTXSAVE := self;
                 my $*MAIN_CTX := ModuleLoader;
                 my $boot_mode;
-                try {
-                    my $compiling := %*COMPILING;
-                    unless nqp::isnull(%*COMPILING) {
-                        my $options := $compiling<%?OPTIONS>;
-                        unless nqp::isnull($options) {
-                            $boot_mode := $options<bootstrap>;
-                        }
+                my $compiling := %*COMPILING;
+                unless nqp::isnull($compiling) {
+                    my $options := $compiling<%?OPTIONS>;
+                    unless nqp::isnull($options) {
+                        $boot_mode := $options<bootstrap>;
                     }
                 }
                 $boot_mode := !nqp::isnull($boot_mode) && $boot_mode;
