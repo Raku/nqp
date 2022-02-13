@@ -1108,6 +1108,11 @@ public final class Ops {
             cf = cf.outer;
         return cf.iLex[i];
     }
+    public static long getlex_u_si(CallFrame cf, int i, int si) {
+        while (si-- > 0)
+            cf = cf.outer;
+        return cf.iLex[i];
+    }
     public static double getlex_n_si(CallFrame cf, int i, int si) {
         while (si-- > 0)
             cf = cf.outer;
@@ -1126,6 +1131,12 @@ public final class Ops {
 
     /* Lexical binding in outer scope. */
     public static long bindlex_i_si(long v, CallFrame cf, int i, int si) {
+        while (si-- > 0)
+            cf = cf.outer;
+        cf.iLex[i] = v;
+        return v;
+    }
+    public static long bindlex_u_si(long v, CallFrame cf, int i, int si) {
         while (si-- > 0)
             cf = cf.outer;
         cf.iLex[i] = v;
