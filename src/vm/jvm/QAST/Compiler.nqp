@@ -3061,6 +3061,7 @@ QAST::OperationsJAST.map_classlib_core_op('force_gc', $TYPE_OPS, 'force_gc', [],
 QAST::OperationsJAST.map_classlib_core_op('coerce_si', $TYPE_OPS, 'coerce_si', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('coerce_is', $TYPE_OPS, 'coerce_is', [$RT_INT], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('coerce_us', $TYPE_OPS, 'coerce_us', [$RT_UINT], $RT_STR, :tc);
+QAST::OperationsJAST.map_classlib_core_op('coerce_ns', $TYPE_OPS, 'coerce_ns', [$RT_NUM], $RT_STR, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('decodelocaltime', $TYPE_OPS, 'decodelocaltime', [$RT_INT], $RT_OBJ, :tc);
 
