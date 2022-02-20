@@ -154,13 +154,13 @@ The opcodes are grouped into the following categories:
 
 [coerce_in](#coerce_in-moar) |
 [coerce_is](#coerce_is) |
-[coerce_is](#coerce_iu-moar) |
+[coerce_iu](#coerce_iu-moar) |
 [coerce_ni](#coerce_ni-moar) |
-[coerce_ns](#coerce_ns-moar) |
+[coerce_ns](#coerce_ns-moar-jvm) |
 [coerce_si](#coerce_si) |
 [coerce_sn](#coerce_sn-moar) |
 [coerce_ui](#coerce_ui-moar) |
-[coerce_us](#coerce_us-moar) |
+[coerce_us](#coerce_us-moar-jvm) |
 [intify](#intify-moar) |
 [numify](#numify-moar) |
 [stringify](#stringify)
@@ -1122,7 +1122,7 @@ Coerce from int to uint.
 
 Coerce from num to int.
 
-## coerce_ns `moar`
+## coerce_ns `moar` `jvm`
 * `coerce_ns(num --> str)`
 
 Coerce from num to str.
@@ -1142,7 +1142,7 @@ Coerce from str to num.
 
 Coerce from uint to int.
 
-## coerce_us `moar`
+## coerce_us `moar` `jvm`
 * `coerce_us(uint --> str)`
 
 Coerce from uint to str.
