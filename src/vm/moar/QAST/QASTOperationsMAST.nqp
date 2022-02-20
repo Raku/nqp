@@ -2837,6 +2837,7 @@ my constant SIMPLE_OP_MAPPINGS := nqp::list_s(
     'fromI_I', 'coerce_II',
     'coerce_in', 'coerce_in',
     'coerce_ni', 'coerce_ni',
+    'coerce_ns', 'coerce_ns',
     'coerce_ui', 'coerce_ui',
     'coerce_iu', 'coerce_iu',
     'coerce_is', 'coerce_is',
