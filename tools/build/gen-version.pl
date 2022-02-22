@@ -12,11 +12,13 @@ use warnings;
 
 use Digest::SHA;
 use File::Find;
+use File::Spec;
 use POSIX 'strftime';
 
 my $prefix = shift // '';
 my $static_nqp_home = shift // '';
 my $libdir = shift // '';
+my $backend = shift // '';
 
 open(my $fh, '<', 'VERSION') or die $!;
 my $VERSION = <$fh>;
@@ -32,6 +34,9 @@ chomp $VERSION;
 
 my $sha = Digest::SHA->new;
 find(sub { return unless /\.nqp\z/; $sha->addfile($_) }, "src");
+if ($backend eq 'moar') {
+    $sha->addfile(File::Spec->catfile($libdir, 'MAST', $_)) for qw(Nodes.nqp Ops.nqp);
+}
 my $source_digest = $sha->hexdigest;
 
 print <<"END_VERSION";

@@ -120,7 +120,7 @@
 
 @nfp(@stage_dir@/nqp-config.nqp)@: @bpm(SOURCES)@
 	@echo(+++ Generating 	stage @stage@ nqp-config.nqp)@
-	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ > @nfpq(@stage_dir@/nqp-config.nqp)@
+	$(NOECHO)$(PERL5) @shquot(@script(gen-version.pl)@)@ @q($(PREFIX))@ @q($(STATIC_NQP_HOME))@ @q($(NQP_LIB_DIR))@ @backend@ > @nfpq(@stage_dir@/nqp-config.nqp)@
 
 @nfp(@stage_dir@/@bsm(NQP)@)@: @bsm(NQP_@ucprev_stage@)@ @nfp(@stage_dir@/@bsm(QAST)@)@ @nfp(@stage_dir@/@bsm(P6QREGEX)@)@ @bpm(SOURCES)@
 	@echo(+++ Creating	stage @stage@ NQP)@
