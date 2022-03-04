@@ -734,10 +734,10 @@ my class MASTCompilerInstance {
         'return_s',
         'return_o',
         '','','','','','','','',
-        'return_i', #FIXME need a return_u
-        'return_i',
-        'return_i',
-        'return_i'
+        'return_u',
+        'return_u',
+        'return_u',
+        'return_u'
     ];
 
     my @attr_opnames := [
@@ -1086,10 +1086,12 @@ my class MASTCompilerInstance {
                     $ins := self.coerce($ins, $MVM_reg_num64);
                 }
                 elsif $ins_result_kind == $MVM_reg_int32 || $ins_result_kind == $MVM_reg_int16 ||
-                        $ins_result_kind == $MVM_reg_int8 || $ins_result_kind == $MVM_reg_uint64 ||
-                        $ins_result_kind == $MVM_reg_uint32 || $ins_result_kind == $MVM_reg_uint16 ||
-                        $ins_result_kind == $MVM_reg_uint8 {
+                        $ins_result_kind == $MVM_reg_int8 {
                     $ins := self.coerce($ins, $MVM_reg_int64);
+                }
+                elsif $ins_result_kind == $MVM_reg_uint32 || $ins_result_kind == $MVM_reg_uint16 ||
+                        $ins_result_kind == $MVM_reg_uint8 {
+                    $ins := self.coerce($ins, $MVM_reg_uint64);
                 }
 
                 $block.return_kind($ins.result_kind);
@@ -1421,6 +1423,9 @@ my class MASTCompilerInstance {
         }
         elsif $result-kind == $MVM_reg_int64 {
             op_dispatch_i($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+        }
+        elsif $result-kind == $MVM_reg_uint64 {
+            op_dispatch_u($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
         }
         elsif $result-kind == $MVM_reg_num64 {
             op_dispatch_n($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
