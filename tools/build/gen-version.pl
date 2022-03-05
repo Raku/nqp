@@ -37,6 +37,10 @@ find(sub { return unless /\.nqp\z/; $sha->addfile($_) }, "src");
 if ($backend eq 'moar') {
     $sha->addfile(File::Spec->catfile($libdir, 'MAST', $_)) for qw(Nodes.nqp Ops.nqp);
 }
+# add everything that could change the generated nqp-config.nqp and thus NQP's
+# sources, despite src/ not getting touched
+$sha->add(join "\0", $VERSION, $prefix, $static_nqp_home, $libdir);
+
 my $source_digest = $sha->hexdigest;
 
 print <<"END_VERSION";
