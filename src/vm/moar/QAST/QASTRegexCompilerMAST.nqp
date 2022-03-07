@@ -56,6 +56,7 @@ my %core_op_generators := MAST::Ops.WHO<%generators>;
 
 my &op_dispatch_v := %core_op_generators<dispatch_v>;
 my &op_dispatch_i := %core_op_generators<dispatch_i>;
+my &op_dispatch_u := %core_op_generators<dispatch_u>;
 my &op_dispatch_n := %core_op_generators<dispatch_n>;
 my &op_dispatch_s := %core_op_generators<dispatch_s>;
 my &op_dispatch_o := %core_op_generators<dispatch_o>;
@@ -78,7 +79,7 @@ sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id
             $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
             op_dispatch_o($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
         }
-        elsif $primspec == 1 || $primspec == 10 {
+        elsif $primspec == 1 {
             if $res_kind == $MVM_reg_int64 {
                 $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
                 op_dispatch_i($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
@@ -88,6 +89,18 @@ sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id
                 op_dispatch_i($frame, $temp_reg, $dispatcher_name, $callsite_id, @arg_idxs);
                 $res_reg := $qastcomp.coerce(
                     MAST::InstructionList.new($temp_reg, $MVM_reg_int64), $res_kind).result_reg;
+            }
+        }
+        elsif $primspec == 10 {
+            if $res_kind == $MVM_reg_uint64 {
+                $res_reg := $qastcomp.regalloc.fresh_register($res_kind);
+                op_dispatch_u($frame, $res_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+            }
+            else {
+                my $temp_reg := $qastcomp.regalloc.fresh_register($MVM_reg_uint64);
+                op_dispatch_u($frame, $temp_reg, $dispatcher_name, $callsite_id, @arg_idxs);
+                $res_reg := $qastcomp.coerce(
+                    MAST::InstructionList.new($temp_reg, $MVM_reg_uint64), $res_kind).result_reg;
             }
         }
         elsif $primspec == 2 {
