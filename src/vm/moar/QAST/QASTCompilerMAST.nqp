@@ -2866,13 +2866,17 @@ class MoarVM::BytecodeWriter {
         self.write_extops;
         self.align_and_write($file);
         my uint $idx := 0;
+        my uint $size_frames := 0;
         for @!frames {
             # need to set the bycode offset here since we don't call self.collect_bytecode()
             $_.set-bytecode-offset($!bytecode_size);
             self.write_frame($_, $idx++);
             $!bytecode_size := $!bytecode_size + nqp::elems($_.bytecode);
+            nqp::writefh($file, $!mbc);
+            $size_frames := $size_frames + nqp::elems($!mbc);
+            nqp::setelems($!mbc, my uint $zero := 0);
         }
-        self.align_and_write($file);
+        self.align_file($size_frames, $file);
         self.write_callsites;
         self.align_and_write($file);
         self.write_string_heap;
