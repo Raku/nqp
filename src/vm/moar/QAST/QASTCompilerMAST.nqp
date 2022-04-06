@@ -2615,136 +2615,93 @@ class MoarVM::BytecodeWriter {
         my @handlers := $f.handlers;
         my @debug_map_idxs := $f.debug_map_idxs;
         my int $debug_map_idxs_length := nqp::elems(@debug_map_idxs);
-        my uint $indx := nqp::elems($!mbc);
-        nqp::setelems($!mbc, $indx + 12 * 4 + 3 * 2 + 2 * nqp::elems(@local_types) + 6 * nqp::elems(@lexical_types) + 20 * nqp::elems(@handlers) + 12 * $num_static_lex_values + 6 * ($debug_map_idxs_length / 2));
 
-        $!mbc.write_uint32_at($f.bytecode-offset, $indx); # Bytecode segment offset
-        $indx := $indx + 4;
+        my uint32 $mbc_pos := nqp::elems($!mbc);
+        sub add_uint32($data) {
+            $!mbc.write_uint32_at($data, $mbc_pos);
+            $mbc_pos := $mbc_pos + 4;
+        }
+        sub add_uint16($data) {
+            $!mbc.write_uint16_at($data, $mbc_pos);
+            $mbc_pos := $mbc_pos + 2;
+        }
+        # Pre-size $!mbc to estimated total size. If any of the @handlers have a category mask of MVM_EX_CATEGORY_LABELED
+        # then we write some extra data, so this is just a lower bound on the size.
+        nqp::setelems($!mbc, $mbc_pos +
+                             12 * 4 +                            # constant number of 32-bit writes
+                             3 * 2 +                             # constant number of 16-bit writes
+                             2 * nqp::elems(@local_types) +      # one 16-bit write per
+                             6 * nqp::elems(@lexical_types) +    # one 16-bit write + one 32-bit write per
+                             20 * nqp::elems(@handlers) +        # two 16-bit writes + four 32-bit writes per
+                             12 * $num_static_lex_values +       # two 16-bit writes + two 32-bit writes per
+                             6 * ($debug_map_idxs_length / 2));  # one 16-bit write + one 32-bit write per
 
-        $!mbc.write_uint32_at($f.bytecode-length, $indx); # Bytecode length in bytes
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at((my uint $num_local_types := nqp::elems(@local_types)), $indx); # Number of locals/registers
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at((my $num_lexical_types := nqp::elems(@lexical_types)), $indx); # Number of lexicals
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at($f.cuuid-idx, $indx); # Compilation unit unique ID (string heap index)
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at($f.name-idx, $indx); # Name (string heap index)
-        $indx := $indx + 4;
+        add_uint32($f.bytecode-offset); # Bytecode segment offset
+        add_uint32($f.bytecode-length); # Bytecode length in bytes
+        add_uint32((my uint $num_local_types := nqp::elems(@local_types))); # Number of locals/registers
+        add_uint32((my $num_lexical_types := nqp::elems(@lexical_types))); # Number of lexicals
+        add_uint32($f.cuuid-idx); # Compilation unit unique ID (string heap index)
+        add_uint32($f.name-idx); # Name (string heap index)
 
         my $outer := $f.outer;
         if nqp::defined($outer) {
-            $!mbc.write_uint16_at((my uint $frame_index := self.get_frame_index($outer)), $indx); # Outer
-            $indx := $indx + 2;
+            add_uint16((my uint $frame_index := self.get_frame_index($outer))); # Outer
         }
         else {
-            $!mbc.write_uint16_at($idx, $indx); # Outer
-            $indx := $indx + 2;
+            add_uint16($idx); # Outer
         }
-
-        $!mbc.write_uint32_at($f.annotations-offset, $indx); # Annotation segment offset
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at($f.num-annotations, $indx); # Number of annotations
-        $indx := $indx + 4;
-
-        $!mbc.write_uint32_at((my uint $num_handlers := nqp::elems(@handlers)), $indx); # Number of handlers
-        $indx := $indx + 4;
-
-        $!mbc.write_uint16_at((my uint $flags := $f.flags), $indx); # Frame flag bits
-        $indx := $indx + 2;
-
-        $!mbc.write_uint16_at($num_static_lex_values, $indx); # Number of entries in static lexical values table
-        $indx := $indx + 2;
-
+        add_uint32($f.annotations-offset); # Annotation segment offset
+        add_uint32($f.num-annotations); # Number of annotations
+        add_uint32((my uint $num_handlers := nqp::elems(@handlers))); # Number of handlers
+        add_uint16((my uint $flags := $f.flags)); # Frame flag bits
+        add_uint16($num_static_lex_values); # Number of entries in static lexical values table
         if $f.flags +& 4 { # FRAME_FLAG_HAS_CODE_OBJ
-            $!mbc.write_uint32_at((my uint $idx := nqp::add_i($f.code_obj_sc_dep_idx, 1)), $indx); # Code object SC dependency index + 1
-            $indx := $indx + 4;
-
-            $!mbc.write_uint32_at($f.code_obj_sc_idx, $indx); # SC object index
-            $indx := $indx + 4;
+            add_uint32((my uint $idx := nqp::add_i($f.code_obj_sc_dep_idx, 1))); # Code object SC dependency index + 1
+            add_uint32($f.code_obj_sc_idx); # SC object index
         }
         else {
             my uint $zero := 0;
-
-            $!mbc.write_uint32_at($zero, $indx); # No code object SC dependency index
-            $indx := $indx + 4;
-
-            $!mbc.write_uint32_at($zero, $indx); # No SC object index
-            $indx := $indx + 4;
+            add_uint32($zero); # No code object SC dependency index
+            add_uint32($zero); # No SC object index
         }
-
-        $!mbc.write_uint32_at((my uint $num_debug_map := nqp::elems($f.debug_map)), $indx);
-        $indx := $indx + 4;
+        add_uint32((my uint $num_debug_map := nqp::elems($f.debug_map)));
 
         for @local_types {
-            $!mbc.write_uint16_at((my uint16 $type := type_to_local_type($_)), $indx);
-            $indx := $indx + 2;
+            add_uint16((my uint16 $type := type_to_local_type($_)));
         }
 
         my int $i := 0;
         for @lexical_types {
-            $!mbc.write_uint16_at((my uint16 $type := type_to_local_type($_)), $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint32_at((my uint32 $name := nqp::atpos_i(@lexical_names, $i++)), $indx);
-            $indx := $indx + 4;
+            add_uint16((my uint16 $type := type_to_local_type($_)));
+            add_uint32((my uint32 $name := nqp::atpos_i(@lexical_names, $i++)));
         }
 
         for @handlers {
-            $!mbc.write_uint32_at($_.start_offset, $indx);
-            $indx := $indx + 4;
-
-            $!mbc.write_uint32_at($_.end_offset, $indx);
-            $indx := $indx + 4;
-
-            $!mbc.write_uint32_at($_.category_mask, $indx);
-            $indx := $indx + 4;
-
-            $!mbc.write_uint16_at($_.action, $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint16_at($_.local, $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint32_at($f.resolve-label($_.label), $indx);
-            $indx := $indx + 4;
-
+            add_uint32($_.start_offset);
+            add_uint32($_.end_offset);
+            add_uint32($_.category_mask);
+            add_uint16($_.action);
+            add_uint16($_.local);
+            add_uint32($f.resolve-label($_.label));
             if $_.category_mask +& 4096 { # MVM_EX_CATEGORY_LABELED
                 nqp::setelems($!mbc, nqp::elems($!mbc) + 2);
-                $!mbc.write_uint16_at($_.label_reg, $indx);
-                $indx := $indx + 2;
+                add_uint16($_.label_reg);
             }
         }
 
         $i := 0;
         while ($i < $num_static_lex_values) {
-            $!mbc.write_uint16_at((my uint $index  := nqp::atpos_i(@static_lex_values, 4 * $i)), $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint16_at((my uint $flags  := nqp::atpos_i(@static_lex_values, 4 * $i + 1)), $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint32_at((my uint $sc_idx := nqp::atpos_i(@static_lex_values, 4 * $i + 2)), $indx);
-            $indx := $indx + 4;
-
-            $!mbc.write_uint32_at((my uint $idx    := nqp::atpos_i(@static_lex_values, 4 * $i + 3)), $indx);
-            $indx := $indx + 4;
-
+            add_uint16((my uint $index  := nqp::atpos_i(@static_lex_values, 4 * $i)));
+            add_uint16((my uint $flags  := nqp::atpos_i(@static_lex_values, 4 * $i + 1)));
+            add_uint32((my uint $sc_idx := nqp::atpos_i(@static_lex_values, 4 * $i + 2)));
+            add_uint32((my uint $idx    := nqp::atpos_i(@static_lex_values, 4 * $i + 3)));
             $i++;
         }
 
         $i := 0;
         while $i < $debug_map_idxs_length {
-            $!mbc.write_uint16_at((my uint $idx  := nqp::atpos_i(@debug_map_idxs, $i++)), $indx);
-            $indx := $indx + 2;
-
-            $!mbc.write_uint32_at((my uint $name := nqp::atpos_i(@debug_map_idxs, $i++)), $indx);
-            $indx := $indx + 4;
+            add_uint16((my uint $idx  := nqp::atpos_i(@debug_map_idxs, $i++)));
+            add_uint32((my uint $name := nqp::atpos_i(@debug_map_idxs, $i++)));
         }
     }
     method collect_bytecode() {
