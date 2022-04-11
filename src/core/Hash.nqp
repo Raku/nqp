@@ -10,6 +10,7 @@ sub hash(*%new) {
 sub sorted_keys($hash) {
     my @keys := nqp::list_s();
 
+    # not empty
     if nqp::elems($hash) -> int $count {
         my $iter := nqp::iterator($hash);
         nqp::while(
@@ -17,16 +18,8 @@ sub sorted_keys($hash) {
           nqp::push_s(@keys,nqp::iterkey_s(nqp::shift($iter)))
         );
 
-        if $count == 1 {
-            # all ok already
-        }
-        elsif $count == 2 {
-            # swap if necessary
-            if nqp::atpos_s(@keys, 0) gt nqp::atpos_s(@keys, 1) {
-                nqp::push_s(@keys, nqp::shift_s(@keys));
-            }
-        }
-        else {
+        # need to do actual sorting
+        if $count > 2 {
             # need to do actual sorting
             sub sift_down(@a, int $start, int $end) {
                 my int $root := $start;
@@ -67,6 +60,12 @@ sub sorted_keys($hash) {
                 $end := $end - 1;
                 sift_down(@keys, 0, $end);
             }
+        }
+        # swap if necessary
+        else {
+            nqp::push_s(@keys, nqp::shift_s(@keys))
+              if $count == 2
+              && nqp::atpos_s(@keys, 0) gt nqp::atpos_s(@keys, 1);
         }
     }
 
