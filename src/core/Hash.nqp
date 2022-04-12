@@ -6,12 +6,14 @@ sub hash(*%new) {
 # so a bubble sort would be fine. However, the
 # number can get much larger (e.g., when profiling
 # a build of the Rakudo settings), so use a heapsort
-# instead.
+# instead.  Note that this sorts in **reverse** order.
 sub sorted_keys($hash) {
     my @keys := nqp::list_s();
-    for $hash {
-        nqp::push_s(@keys, $_.key);
-    }
+    my $iter := nqp::iterator($hash);
+    nqp::while(
+      $iter,
+      nqp::push_s(@keys,nqp::iterkey_s(nqp::shift($iter)))
+    );
 
     sub sift_down(@a, int $start, int $end) {
         my int $root := $start;
@@ -40,26 +42,24 @@ sub sorted_keys($hash) {
     }
 
     my int $count := +@keys;
-    if $count < 3 {
-        if $count == 2 && nqp::atpos_s(@keys, 0) gt nqp::atpos_s(@keys, 1) {
-            nqp::push_s(@keys, nqp::shift_s(@keys));
+    if $count > 2 {
+        my int $start := $count / 2;
+        my int $end := $count - 1;
+        while --$start >= 0 {
+            sift_down(@keys, $start, $end);
         }
-        return @keys;
+
+        while $end > 0 {
+            my str $swap := nqp::atpos_s(@keys, $end);
+            nqp::bindpos_s(@keys, $end, nqp::atpos_s(@keys, 0));
+            nqp::bindpos_s(@keys, 0, $swap);
+            $end := $end - 1;
+            sift_down(@keys, 0, $end);
+        }
     }
-    my int $start := $count / 2 - 1;
-    my int $end := $count - 1;
-    while $start >= 0 {
-        sift_down(@keys, $start, $end);
-        $start := $start - 1;
+    elsif $count == 2 && nqp::atpos_s(@keys, 0) lt nqp::atpos_s(@keys, 1) {
+        nqp::push_s(@keys, nqp::shift_s(@keys));
     }
 
-    while $end > 0 {
-        my str $swap := nqp::atpos_s(@keys, $end);
-        nqp::bindpos_s(@keys, $end, nqp::atpos_s(@keys, 0));
-        nqp::bindpos_s(@keys, 0, $swap);
-        $end := $end - 1;
-        sift_down(@keys, 0, $end);
-    }
-
-    return @keys;
+    @keys
 }

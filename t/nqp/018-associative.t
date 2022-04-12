@@ -1,6 +1,6 @@
 # check hash access methods
 
-plan(19);
+plan(23);
 
 my %h;
 
@@ -48,3 +48,22 @@ sub as_return_value() {
 }
 
 ok(nqp::eqaddr(as_return_value(), NQPMu), 'getting a NQPMu for a missing hash member when used a s return value');
+
+my @keys := <a b c d e f g h i j>;
+my @values := 1,2,3,4,5,6,7,8,9,10;
+
+my %sh;
+for @values {
+    %sh{@keys[$_-1]} := $_;
+}
+
+is(nqp::join("",sorted_keys(%sh)), nqp::flip(nqp::join("",@keys)), 'did we get sorted keys');
+
+my %eh;
+is(nqp::join("",sorted_keys(%eh)), "", 'did we get no keys');
+
+%eh<a> := 1;
+is(nqp::join("",sorted_keys(%eh)), "a", 'did we get one key');
+
+%eh<b> := 1;
+is(nqp::join("",sorted_keys(%eh)), "ba", 'did we get two keys');
