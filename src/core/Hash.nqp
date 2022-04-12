@@ -6,7 +6,7 @@ sub hash(*%new) {
 # so a bubble sort would be fine. However, the
 # number can get much larger (e.g., when profiling
 # a build of the Rakudo settings), so use a heapsort
-# instead.
+# instead.  Note that this sorts in **reverse** order.
 sub sorted_keys($hash) {
     my @keys := nqp::list_s();
     my $iter := nqp::iterator($hash);
@@ -47,7 +47,6 @@ sub sorted_keys($hash) {
         my int $end := $count - 1;
         while --$start >= 0 {
             sift_down(@keys, $start, $end);
-            $start := $start - 1;
         }
 
         while $end > 0 {
@@ -58,7 +57,7 @@ sub sorted_keys($hash) {
             sift_down(@keys, 0, $end);
         }
     }
-    elsif $count == 2 && nqp::atpos_s(@keys, 0) gt nqp::atpos_s(@keys, 1) {
+    elsif $count == 2 && nqp::atpos_s(@keys, 0) lt nqp::atpos_s(@keys, 1) {
         nqp::push_s(@keys, nqp::shift_s(@keys));
     }
 
