@@ -18,7 +18,7 @@ QAST::CompUnit incorporates information that is relevant to the entire
 unit of code that is being compiled. This includes:
 
 * **hll** - the name of the high level language that this QAST tree was
-  produced from, for example, "perl6", "tcl", "bf".
+  produced from, for example, "raku", "tcl", "bf".
 
 * **load** - code to evaluate at the point that the compilation unit is
   loaded as a module (but not if it is invoked as a mainline program).
@@ -32,7 +32,7 @@ Example usage:
 
     QAST::CompUnit.new(
         # Set the HLL.
-        :hll('perl6'),
+        :hll('raku'),
         
         # This variable contains the outermost QAST::Block of the
         # program.

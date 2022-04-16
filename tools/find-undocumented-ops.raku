@@ -1,4 +1,4 @@
-#!/usr/bin/env perl6
+#!/usr/bin/env raku
 sub MAIN (Str:D $nqp-folder, Str:D $moar-folder, Bool :$moar-names, Bool :$moar-and-nqp-names) {
     my $nqp-doc-file = make-io($nqp-folder, "docs/ops.markdown");
     my $moar-oplist  = make-io($moar-folder, "src/core/oplist");

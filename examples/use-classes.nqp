@@ -2,7 +2,7 @@
 
 # based on blog post by Andrew Shitov:
 #
-#   https://perl6.online/2018/01/09/what-does-nqpgetattr-do/
+#   https://andrewshitov.com/2018/01/09/what-does-nqpgetattr-do/
 #
 #   class C {
 #       has $.attr is rw;

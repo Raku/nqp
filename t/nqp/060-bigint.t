@@ -101,7 +101,7 @@ ok(iseq(nqp::bitand_I(nqp::fromstr_I('-1073741825', $one), $one, $one), 1),
     'Bit ops (RT 109740)');
 
 # Now we'll create a type that boxes a P6bigint.
-my $bi_boxer := NQPClassHOW.new_type(:name('TestPerl6Int'), :repr('P6opaque'));
+my $bi_boxer := NQPClassHOW.new_type(:name('TestRakuInt'), :repr('P6opaque'));
 $bi_boxer.HOW.add_attribute($bi_boxer, NQPAttribute.new(
     :name('$!value'), :type($bi_type), :box_target(1)
 ));
@@ -305,6 +305,6 @@ if nqp::getcomp('nqp').backend.name eq 'js' {
     skip("skipping test that uses a 64bit int on a 32bit backend");
 }
 else {
-    # https://github.com/perl6/nqp/issues/363
+    # https://github.com/raku/nqp/issues/363
     ok(100000000000000009 != 100000000000000016, 'int literals that are the same float value are unequal');
 }

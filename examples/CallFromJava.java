@@ -1,7 +1,7 @@
 // nqp$ javac -cp bin/ examples/CallFromJava.java
 // nqp$ java -cp nqp-runtime.jar:3rdparty/asm/asm-4.1.jar:3rdparty/asm/asm-tree-4.1.jar:. examples.CallFromJava nqp.jar nqp 'say(2+2)'
 // 4
-// rakudo$ java -cp ../nqp-jvm:../nqp-jvm/3rdparty/asm/asm-4.1.jar:../nqp-jvm/3rdparty/asm/asm-tree-4.1.jar:../nqp-jvm/nqp-runtime.jar:rakudo-runtime.jar:. examples.CallFromJava perl6.jar perl6 'say 2 + 2'
+// rakudo$ java -cp ../nqp-jvm:../nqp-jvm/3rdparty/asm/asm-4.1.jar:../nqp-jvm/3rdparty/asm/asm-tree-4.1.jar:../nqp-jvm/nqp-runtime.jar:rakudo-runtime.jar:. examples.CallFromJava raku.jar raku 'say 2 + 2'
 // 4
 
 
