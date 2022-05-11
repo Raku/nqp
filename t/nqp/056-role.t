@@ -1,4 +1,4 @@
-plan(18);
+plan(21);
 
 role R1 {
     has $!a;
@@ -57,9 +57,20 @@ class X does PackageUsingRole {
 }
 is(X.name(), 'PackageUsingRole', 'using $?PACKAGE from a role');
 
-role Bar does Foo { }
-role Baz does Bar { }
+role Bar does Foo {
+}
+role Baz does Bar {
+}
+class Qux does Bar {
+}
+class Quux does Baz {
+}
+class Todo is Quux {
+}
 
-my @roles := Baz.HOW.role_typecheck_list(Baz);
-ok(nqp::eqaddr(@roles[0], Bar), 'role typecheck list includes roles done');
-ok(nqp::eqaddr(@roles[1], Foo), 'role typecheck list includes roles done by roles done');
+ok(nqp::istype_nd(Baz, Foo), 'role RTL includes roles done');
+ok(nqp::istype_nd(Qux, Bar), 'class RTL includes roles done after specialization');
+ok(nqp::istype_nd(Quux, Baz), 'class RTL includes roles done by parents');
+ok(nqp::istype_nd(Todo, Baz), 'class RTL includes roles done after reparenting...');
+Todo.HOW.reparent(Todo, Qux);
+ok(!nqp::istype_nd(Todo, Baz), '...and not those prior');
