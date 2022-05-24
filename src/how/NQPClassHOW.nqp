@@ -229,11 +229,12 @@ knowhow NQPClassHOW {
         # the composer.
         if @!roles {
             my @specialized_roles;
-            for @!roles {
-                my $ins := $_.HOW.specialize($_, $obj);
+            for @!roles -> $role {
+                my $ins := nqp::how_nd($role).specialize($role, $obj);
+                my @ins_rtl := nqp::how_nd($ins).role_typecheck_list($ins);
+                nqp::push(@!done, $role);
+                nqp::splice(@!done, @ins_rtl, nqp::elems(@!done), 0);
                 nqp::push(@specialized_roles, $ins);
-                nqp::push(@!done, $_);
-                nqp::push(@!done, $ins);
             }
             RoleToClassApplier.apply($obj, @specialized_roles);
         }
@@ -480,17 +481,16 @@ knowhow NQPClassHOW {
             nqp::push(@tc, $_);
             if nqp::can($_.HOW, 'role_typecheck_list') {
                 for $_.HOW.role_typecheck_list($_) -> $role {
+                    my @role_rtl := nqp::how_nd($role).role_typecheck_list($role);
                     nqp::push(@tc, $role);
-                    if nqp::can($role.HOW, 'role_typecheck_list') {
-                        for $role.HOW.role_typecheck_list($role) {
-                            nqp::push(@tc, $_);
-                        }
-                    }
+                    nqp::splice(@tc, @role_rtl, nqp::elems(@tc), 0);
                 }
             }
         }
 
-        nqp::settypecache($obj, @tc)
+        nqp::settypecache($obj, @tc);
+        nqp::settypecheckmode($obj,
+            nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);
     }
 
     sub reverse(@in) {

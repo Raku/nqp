@@ -107,19 +107,28 @@ knowhow NQPParametricRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
-        for @!roles {
-            nqp::push(@!role_typecheck_list, $_);
-            for $_.HOW.role_typecheck_list($_) {
-                nqp::push(@!role_typecheck_list, $_);
-            }
+        # Update the role typecheck list.
+        for @!roles -> $role {
+            my @role_rtl := nqp::how_nd($role).role_typecheck_list($role);
+            nqp::push(@!role_typecheck_list, $role);
+            nqp::splice(@!role_typecheck_list, @role_rtl, nqp::elems(@!role_typecheck_list), 0);
         }
 
-        $!composed := 1;
-        nqp::settypecache($obj, [$obj.WHAT]);
+        # Publish type cache.
+        my @tc := nqp::clone(@!role_typecheck_list);
+        nqp::unshift(@tc, $obj.WHAT);
+        nqp::settypecache($obj, @tc);
+        nqp::settypecheckmode($obj,
+            nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);
+
+        # Publish method cache.
 #?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
 #?endif
+
+        # Mark composed.
+        $!composed := 1;
         $obj
     }
 
