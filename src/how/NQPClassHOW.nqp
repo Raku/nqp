@@ -627,42 +627,8 @@ knowhow NQPClassHOW {
         @!mro
     }
 
-    method roles($obj, :$local = 0, :$transitive = 1, :$mro = 0) {
-        $local
-            ?? $transitive
-                ?? $mro
-                    ?? self.visit_roles_in_mro($obj, @!roles, nqp::list())
-                    !! self.visit_roles($obj, @!roles, nqp::list())
-                !! @!roles
-            !! self.visit_roles_by_mro($obj, @!roles, nqp::list(), :$transitive, :$mro)
-    }
-
-    method visit_roles($obj, $roles, @result) {
-        for nqp::hllize($roles) -> $role {
-            my @role_roles := nqp::hllize($role.HOW.roles($role, :local, :transitive, :!mro));
-            nqp::push(@result, $role);
-            nqp::splice(@result, @role_roles, nqp::elems(@result), 0);
-        }
-        @result
-    }
-
-    method visit_roles_in_mro($obj, $roles, @result) {
-        for nqp::hllize($roles) -> $role {
-            my @role_roles := nqp::hllize($role.HOW.roles($role, :local, :transitive, :!mro));
-            my @todo := nqp::clone(@role_roles);
-            nqp::unshift(@todo, $role);
-            nqp::push(@result, @todo);
-        }
-        c3_merge(@result)
-    }
-
-    method visit_roles_by_mro($obj, $roles, @result, :$transitive!, :$mro!) {
-        my $i := nqp::elems(@!mro);
-        my $n := nqp::elems(@result);
-        nqp::splice(@result,
-            nqp::hllize(@!mro[$i].HOW.roles(@!mro[$i], :local, :$transitive, :$mro)),
-            $n, 0) while $i--;
-        @result
+    method roles($obj, :$local!) {
+        @!roles
     }
 
     method role_typecheck_list($obj) {

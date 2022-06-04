@@ -177,19 +177,8 @@ knowhow NQPConcreteRoleHOW {
         @!attributes
     }
 
-    method roles($obj, :$local, :$transitive = 1, :$mro) {
-        $transitive
-            ?? self.visit_roles($obj, @!roles, nqp::list())
-            !! @!roles
-    }
-
-    method visit_roles($obj, $roles, @result) {
-        for nqp::hllize($roles) -> $role {
-            my @role_roles := nqp::hllize($role.HOW.roles($role, :local, :transitive, :!mro));
-            nqp::push(@result, $role);
-            nqp::splice(@result, @role_roles, nqp::elems(@result), 0);
-        }
-        @result
+    method roles($obj, :$transitive = 0) {
+        @!roles
     }
 
     method role_typecheck_list($obj) {
