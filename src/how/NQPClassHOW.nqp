@@ -623,7 +623,7 @@ knowhow NQPClassHOW {
         $local ?? @!parents !! @!mro
     }
 
-    method mro($obj) {
+    method mro($obj, :$concretizations, :$roles) {
         @!mro
     }
 
