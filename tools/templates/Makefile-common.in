@@ -90,6 +90,7 @@ QAST_COMBINED = QAST.nqp
 
 NQP_MO_SOURCES = \
   @nfp(src/how/Archetypes.nqp)@ \
+  @nfp(src/how/MonicMachine.nqp)@ \
   @nfp(src/how/RoleToRoleApplier.nqp)@ \
   @nfp(src/how/NQPConcreteRoleHOW.nqp)@ \
   @nfp(src/how/RoleToClassApplier.nqp)@ \
