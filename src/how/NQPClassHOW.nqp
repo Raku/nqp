@@ -232,7 +232,7 @@ knowhow NQPClassHOW {
             for @!roles -> $role {
                 my $ins := nqp::how_nd($role).specialize($role, $obj);
                 my @ins_rtl := nqp::how_nd($ins).role_typecheck_list($ins);
-                nqp::push(@!done, $role);
+                nqp::push(@!done, $ins);
                 nqp::splice(@!done, @ins_rtl, nqp::elems(@!done), 0);
                 nqp::push(@specialized_roles, $ins);
             }
