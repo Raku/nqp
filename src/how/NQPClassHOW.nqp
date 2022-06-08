@@ -542,8 +542,35 @@ knowhow NQPClassHOW {
         @!mro
     }
 
-    method roles($obj, :$local!) {
-        @!roles
+    my &ROLES-REMOTE := nqp::getstaticcode(anon sub ROLES-REMOTE(@self, $obj) {
+        @self.veneer($obj.HOW.roles($obj, :local, :!transitive, :!mro))
+    });
+
+    my &ROLES-TRANSITIVE := nqp::getstaticcode(anon sub ROLES-TRANSITIVE(@self, $obj) {
+        @self.accept($obj).veneer($obj.HOW.roles($obj, :local, :transitive, :!mro))
+    });
+
+    my &ROLES-MRO := nqp::getstaticcode(anon sub ROLES-MRO(@self, $obj) {
+        @self.accept(nqp::splice(nqp::list($obj), $obj.HOW.roles($obj, :local, :transitive, :!mro), 1, 0))
+    });
+
+    method roles($obj, :$local = 0, :$transitive = 1, :$mro = 0) {
+        my @roles;
+        if $local {
+            @roles := @!roles;
+        }
+        else {
+            @roles := nqp::clone(@!roles);
+            MonicMachine.new.veneer(@!parents).banish(&ROLES-REMOTE, @roles);
+            @roles := @roles.list();
+        }
+        if $transitive {
+            @roles := MonicMachine.new.veneer(@roles);
+            @roles := $mro
+                ?? @roles.summon(&ROLES-MRO).beckon(nqp::list())
+                !! @roles.banish(&ROLES-TRANSITIVE, nqp::list());
+        }
+        @roles
     }
 
     method role_typecheck_list($obj) {

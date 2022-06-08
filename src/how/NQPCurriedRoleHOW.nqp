@@ -54,4 +54,8 @@ knowhow NQPCurriedRoleHOW {
     method role_typecheck_list($obj) {
         @!role_typecheck_list
     }
+
+    method roles($obj, *%named) {
+        $!curried_role.HOW.roles($!curried_role, |%named)
+    }
 }

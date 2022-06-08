@@ -223,8 +223,23 @@ knowhow NQPParametricRoleHOW {
         @!attributes
     }
 
-    method roles($obj, :$transitive = 0) {
-        @!roles
+    my &ROLES-TRANSITIVE := nqp::getstaticcode(anon sub ROLES-TRANSITIVE(@self, $obj) {
+        @self.accept($obj).veneer($obj.HOW.roles($obj, :transitive, :!mro))
+    });
+
+    my &ROLES-MRO := nqp::getstaticcode(anon sub ROLES-MRO(@self, $obj) {
+        @self.accept(nqp::splice(nqp::list($obj), $obj.HOW.roles($obj, :transitive, :!mro), 1, 0))
+    });
+
+    method roles($obj, :$local, :$transitive = 1, :$mro = 0) {
+        my @roles := @!roles;
+        if $transitive {
+            @roles := MonicMachine.new.veneer(@roles);
+            @roles := $mro
+                ?? @roles.summon(&ROLES-MRO).beckon(nqp::list())
+                !! @roles.banish(&ROLES-TRANSITIVE, nqp::list());
+        }
+        @roles
     }
 
     method role_typecheck_list($obj) {
