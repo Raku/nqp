@@ -48,7 +48,7 @@ knowhow NQPClassHOW {
     has @!mro;
 
     # Full list of roles that we do.
-    has @!done;
+    has @!role_typecheck_list;
 
     # If needed, a cached flattened method table accounting for all methods in
     # this class and its parents. This is only needed in the sitaution that a
@@ -91,7 +91,7 @@ knowhow NQPClassHOW {
         @!parents := nqp::list();
         @!roles := nqp::list();
         @!mro := nqp::list();
-        @!done := nqp::list();
+        @!role_typecheck_list := nqp::list();
         @!BUILDALLPLAN := nqp::list();
         @!BUILDPLAN := nqp::list();
         $!is_mixin := 0;
@@ -232,8 +232,8 @@ knowhow NQPClassHOW {
             for @!roles -> $role {
                 my $ins := nqp::how_nd($role).specialize($role, $obj);
                 my @ins_rtl := nqp::how_nd($ins).role_typecheck_list($ins);
-                nqp::push(@!done, $ins);
-                nqp::splice(@!done, @ins_rtl, nqp::elems(@!done), 0);
+                nqp::push(@!role_typecheck_list, $ins);
+                nqp::splice(@!role_typecheck_list, @ins_rtl, nqp::elems(@!role_typecheck_list), 0);
                 nqp::push(@specialized_roles, $ins);
             }
             RoleToClassApplier.apply($obj, @specialized_roles);
@@ -547,7 +547,7 @@ knowhow NQPClassHOW {
     }
 
     method role_typecheck_list($obj) {
-        @!done;
+        @!role_typecheck_list
     }
 
     method methods($obj, :$local = 0, :$all) {
@@ -617,10 +617,10 @@ knowhow NQPClassHOW {
     }
 
     method does($obj, $check) {
-        my $i := nqp::elems(@!done);
+        my $i := nqp::elems(@!role_typecheck_list);
         while $i > 0 {
             $i := $i - 1;
-            if @!done[$i] =:= $check {
+            if @!role_typecheck_list[$i] =:= $check {
                 return 1;
             }
         }
