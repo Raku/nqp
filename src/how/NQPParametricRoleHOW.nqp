@@ -245,4 +245,12 @@ knowhow NQPParametricRoleHOW {
     method role_typecheck_list($obj) {
         @!role_typecheck_list
     }
+
+    method parents($obj, *%named) {
+        []
+    }
+
+    method mro($obj, *%named) {
+        [$obj]
+    }
 }

@@ -203,4 +203,12 @@ knowhow NQPConcreteRoleHOW {
     method instance_of($obj) {
         $!instance_of
     }
+
+    method parents($obj, *%named) {
+        []
+    }
+
+    method mro($obj, *%named) {
+        [$obj]
+    }
 }

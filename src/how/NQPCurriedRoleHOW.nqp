@@ -58,4 +58,12 @@ knowhow NQPCurriedRoleHOW {
     method roles($obj, *%named) {
         $!curried_role.HOW.roles($!curried_role, |%named)
     }
+
+    method parents($obj, *%named) {
+        $!curried_role.HOW.parents($!curried_role, |%named)
+    }
+
+    method mro($obj, *%named) {
+        [$obj]
+    }
 }

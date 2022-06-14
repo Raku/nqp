@@ -534,8 +534,28 @@ knowhow NQPClassHOW {
     ## Introspecty
     ##
 
-    method parents($obj, :$local = 0) {
-        $local ?? @!parents !! @!mro
+    my &PARENTS-TREE := nqp::getstaticcode(
+        anon sub PARENTS-TREE(@self, $obj) {
+            (my @parents := $obj.HOW.parents($obj, :tree))
+                ?? @self.accept(nqp::list($obj, @parents))
+                !! @self.accept(nqp::list($obj))
+        });
+
+    my &PARENTS-ALL := nqp::getstaticcode(
+        anon sub PARENTS-ALL(@self, $obj) {
+            @self.emboss(|$obj.HOW.mro($obj))
+        });
+
+    method parents($obj, :$local = 0, :$tree = 0, :$excl, :$all) {
+        $local
+            ?? @!parents
+            !! $tree
+                ?? nqp::elems(my @p := MonicMachine.new.veneer(@!parents).banish(&PARENTS-TREE, nqp::list())) == 1
+                    ?? @p[0]
+                    !! @p
+                !! $!composed
+                    ?? nqp::slice(@!mro, 1, nqp::elems(@!mro) - 1)
+                    !! MonicMachine.new.veneer(@!parents).summon(&PARENTS-ALL).beckon(nqp::list())
     }
 
     method mro($obj, :$concretizations, :$roles) {
