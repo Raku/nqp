@@ -4,6 +4,8 @@ my int $MVM_reg_int64           := 4;
 my int $MVM_reg_num64           := 6;
 my int $MVM_reg_str             := 7;
 my int $MVM_reg_obj             := 8;
+my int $MVM_reg_uint32          := 19;
+my int $MVM_reg_uint64          := 20;
 
 $ops.add_hll_op('nqp', 'preinc', -> $qastcomp, $op {
     my $var := $op[0];
@@ -113,13 +115,20 @@ $ops.add_hll_op('nqp', 'falsey', -> $qastcomp, $op {
     if $val.result_kind == $MVM_reg_int64 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $val.result_reg);
+        MAST::InstructionList.new($not_reg, $val.result_kind)
+    }
+    elsif $val.result_kind == $MVM_reg_uint64 {
+        my $tmp_reg := $regalloc.fresh_register($MVM_reg_uint64);
+        my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<coerce_ui>, $not_reg, $val.result_reg);
+        MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $not_reg);
         MAST::InstructionList.new($not_reg, $MVM_reg_int64)
     }
     elsif $val.result_kind == $MVM_reg_int32 {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
         MAST::Op.new(:frame($qastcomp.mast_frame),:op<extend_i32>, $not_reg, $val.result_reg);
         MAST::Op.new(:frame($qastcomp.mast_frame),:op<not_i>, $not_reg, $not_reg);
-        MAST::InstructionList.new($not_reg, $MVM_reg_int64)
+        MAST::InstructionList.new($not_reg, $val.result_kind)
     }
     elsif $val.result_kind == $MVM_reg_obj {
         my $not_reg := $regalloc.fresh_register($MVM_reg_int64);
