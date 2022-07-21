@@ -32,7 +32,7 @@ knowhow NQPParametricRoleHOW {
     has $!specialize_lock;
 
     my $archetypes := Archetypes.new( :nominal(1), :composable(1), :parametric(1) );
-    method archetypes() {
+    method archetypes($obj?) {
         $archetypes
     }
 

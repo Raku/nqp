@@ -67,7 +67,7 @@ knowhow NQPClassHOW {
     has @!BUILDPLAN;
 
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
-    method archetypes() {
+    method archetypes($obj?) {
         $archetypes
     }
 

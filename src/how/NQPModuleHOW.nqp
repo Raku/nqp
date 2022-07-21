@@ -3,7 +3,7 @@ knowhow NQPModuleHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( );
-    method archetypes() {
+    method archetypes($obj?) {
         $archetypes
     }
 
