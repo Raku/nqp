@@ -97,6 +97,7 @@ NQP_MO_SOURCES = \
   @nfp(src/how/NQPParametricRoleHOW.nqp)@ \
   @nfp(src/how/NQPClassHOW.nqp)@ \
   @nfp(src/how/NQPNativeHOW.nqp)@ \
+  @nfp(src/how/NQPNativeRefHOW.nqp)@ \
   @nfp(src/how/NQPAttribute.nqp)@ \
   @nfp(src/how/NQPModuleHOW.nqp)@ \
   @nfp(src/how/EXPORTHOW.nqp)@ \

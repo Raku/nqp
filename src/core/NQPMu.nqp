@@ -136,6 +136,28 @@ nqp::sethllconfig('nqp', nqp::hash(
     'istype_dispatcher', 'nqp-istype',
     'isinvokable_dispatcher', 'nqp-isinvokable',
 #?endif
+    'int_lex_ref', IntLexRef,
+    'uint_lex_ref', UIntLexRef,
+    'num_lex_ref', NumLexRef,
+    'str_lex_ref', StrLexRef,
+    'int_attr_ref', IntAttrRef,
+    'uint_attr_ref', UIntAttrRef,
+    'num_attr_ref', NumAttrRef,
+    'str_attr_ref', StrAttrRef,
+    'int_pos_ref', IntPosRef,
+    'uint_pos_ref', UIntPosRef,
+    'num_pos_ref', NumPosRef,
+    'str_pos_ref', StrPosRef,
+    'int_multidim_ref', IntMultidimRef,
+    'uint_multidim_ref', UIntMultidimRef,
+    'num_multidim_ref', NumMultidimRef,
+    'str_multidim_ref', StrMultidimRef,
+#?if js
+    'int64_lex_ref', Int64LexRef,
+    'int64_attr_ref', Int64AttrRef,
+    'int64_pos_ref', Int64PosRef,
+    'int64_multidim_ref', Int64MultidimRef,
+#?endif
 ));
 
 #?if moar
