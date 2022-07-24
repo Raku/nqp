@@ -58,15 +58,12 @@ class Counter {
     # Gives the successor unless we're at the upper bound.
     method drop_succ() {
         my $counter := nqp::getattrref_i(self, $?CLASS, '$!counter');
-        if (my int $succ := nqp::atomicload_i($counter)) < $INT_MIN_MAX {
+        unless (my int $succ := nqp::atomicload_i($counter)) == $INT_MIN_MAX {
             nqp::barrierfull();
             nqp::atomicstore_i($counter, ($succ := $succ + 1));
             nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), 0);
-            my uint $this := $succ
         }
-        else {
-            my uint $this := $INT_MIN_MAX
-        }
+        my uint $this := $succ
     }
 
     # Gives the successor, waiting for one to become valid if need be.
