@@ -126,16 +126,16 @@ class Counter {
             nqp::join('_', @operations)
         });
 
-    proto method CALL-ME(*@xs) {*}
-    multi method CALL-ME($a) {
-        self."$a"()
+    proto method CALL-ME(*@xs, *%adverbs) {*}
+    multi method CALL-ME($a, *%adverbs) {
+        self."$a"(|%adverbs)
     }
-    multi method CALL-ME($a, $b) {
+    multi method CALL-ME($a, $b, *%adverbs) {
         my str $method := $a ~ '_' ~ $b;
-        self."$method"()
+        self."$method"(|%adverbs)
     }
-    multi method CALL-ME($a, $b, *@xs) {
+    multi method CALL-ME($a, $b, *@xs, *%adverbs) {
         my str $method := ENCODE($a, $b, |@xs);
-        self."$method"()
+        self."$method"(|%adverbs)
     }
 }
