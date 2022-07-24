@@ -114,7 +114,28 @@ class Counter {
           nqp::how_nd(self).name(self))
     }
 
-    method CALL-ME($counter) {
-        self.new($counter, ~$counter)
+    method COERCE($counter) {
+        self.new(+$counter, ~$counter)
+    }
+
+    my &ENCODE := nqp::getstaticcode(
+        anon sub ENCODE($head, *@tail) {
+            my str $method := nqp::list_s($head);
+            my @operations := nqp::list_s();
+            nqp::push_s(@operations, nqp::shift(@tail)) while nqp::elems(@tail);
+            nqp::join('_', @operations)
+        });
+
+    proto method CALL-ME(*@xs) {*}
+    multi method CALL-ME($a) {
+        self."$a"()
+    }
+    multi method CALL-ME($a, $b) {
+        my str $method := $a ~ '_' ~ $b;
+        self."$method"()
+    }
+    multi method CALL-ME($a, $b, *@xs) {
+        my str $method := ENCODE($a, $b, |@xs);
+        self."$method"()
     }
 }
