@@ -160,6 +160,13 @@ nqp::sethllconfig('nqp', nqp::hash(
 #?endif
 ));
 
+#?if !moar
+nqp::setinvokespec(NQPMu, nqp::null(), nqp::null(),
+    nqp::getstaticcode(anon sub INVOKE(*@pos, *%named) {
+        nqp::invokewithcapture(nqp::findmethod($?CLASS, 'CALL-ME'), nqp::usecapture())
+    }))
+#?endif
+
 #?if moar
 nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-hllize', -> $capture {
     nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
