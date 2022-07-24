@@ -12,9 +12,9 @@
 class Counter {
     my int $INT_MIN_MAX := nqp::bitneg_i(0);
 
-    has int $!counter;
-    has int $!blocker;
-    has str $!moniker;
+    has atomicint $!counter;
+    has atomicint $!blocker;
+    has str       $!moniker;
 
     method new(int $counter, str $moniker = nqp::null_s()) {
         my $self := nqp::create(self);
