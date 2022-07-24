@@ -28,7 +28,7 @@ class Counter {
         if nqp::atomicload_i($counter) -> uint $pred {
             nqp::barrierfull();
             nqp::atomicstore_i($counter, ($pred := $pred - 1));
-            nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), 0) if $pred;
+            nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), $pred == 0);
             $pred
         }
         else {
