@@ -46,6 +46,8 @@ my native num32 is repr('P6num') is nativesize(32) { }
 
 my native str is repr('P6str') { }
 
+my stub atomicint metaclass NQPNativeHOW is repr('P6int') { ... };
+
 my stub IntLexRef metaclass NQPNativeRefHOW { ... };
 my stub UIntLexRef metaclass NQPNativeRefHOW { ... };
 my stub NumLexRef metaclass NQPNativeRefHOW { ... };
@@ -79,6 +81,9 @@ sub setup_native_ref_type($type, $primitive, $ref_kind) {
 }
 
 nqp::scwbenable();
+atomicint.HOW.set_nativesize(atomicint, nqp::const::C_TYPE_ATOMIC_INT);
+atomicint.HOW.compose(atomicint);
+
 setup_native_ref_type(IntLexRef, int, 'lexical');
 setup_native_ref_type(UIntLexRef, uint, 'lexical');
 setup_native_ref_type(NumLexRef, num, 'lexical');
