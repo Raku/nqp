@@ -14,11 +14,13 @@ class Counter {
 
     has int $!counter;
     has int $!blocker;
+    has str $!moniker;
 
-    method new($counter) {
+    method new(uint $counter, str $moniker = nqp::null_s()) {
         my $self := nqp::create(self);
         nqp::bindattr_i($self, $?CLASS, '$!counter', $counter);
         nqp::bindattr_i($self, $?CLASS, '$!blocker', $counter == 0);
+        nqp::bindattr_s($self, $?CLASS, '$!moniker', $moniker);
         $self
     }
 
@@ -83,5 +85,36 @@ class Counter {
         my uint $succ := nqp::add_i(nqp::getattrref_i(self, $?CLASS, '$!counter'), 1);
         nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), $succ == 0);
         $succ
+    }
+
+    method Int() {
+        my uint $counter := nqp::atomicload_i(nqp::getattrref_i(self, $?CLASS, '$!counter'))
+    }
+
+    method Numeric() {
+        self.Int()
+    }
+
+    method Str() {
+        nqp::if(nqp::isnull_s($!moniker), ~self.Int(), $!moniker)
+    }
+
+    method raku() {
+        nqp::if(
+          nqp::isconcrete(self),
+          nqp::join('', nqp::list_s(
+            nqp::how_nd(self).name(self),
+            '.new(',
+            ~self.Int(),
+            nqp::if(
+              nqp::isnull_s($!moniker),
+              '',
+              ', "' ~ nqp::join('\"', nqp::split('"', $!moniker)) ~ '"'),
+            ')')),
+          nqp::how_nd(self).name(self))
+    }
+
+    method CALL-ME($counter) {
+        self.new($counter, ~$counter)
     }
 }
