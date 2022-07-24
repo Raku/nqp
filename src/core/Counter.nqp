@@ -118,14 +118,6 @@ class Counter {
         self.new(+$counter, ~$counter)
     }
 
-    my &ENCODE := nqp::getstaticcode(
-        anon sub ENCODE($head, *@tail) {
-            my str $method := nqp::list_s($head);
-            my @operations := nqp::list_s();
-            nqp::push_s(@operations, nqp::shift(@tail)) while nqp::elems(@tail);
-            nqp::join('_', @operations)
-        });
-
     proto method CALL-ME(*@xs, *%adverbs) {*}
     multi method CALL-ME($a, *%adverbs) {
         self."$a"(|%adverbs)
@@ -135,7 +127,9 @@ class Counter {
         self."$method"(|%adverbs)
     }
     multi method CALL-ME($a, $b, *@xs, *%adverbs) {
-        my str $method := ENCODE($a, $b, |@xs);
+        my @operations := nqp::list_s($a, $b);
+        nqp::push_s(@operations, $_) for @xs;
+        my str $method := nqp::join('_', @operations);
         self."$method"(|%adverbs)
     }
 }
