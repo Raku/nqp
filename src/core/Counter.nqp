@@ -10,13 +10,13 @@
 # performs comparably. We get more flavours of bounds handling and
 # serializability if we ditch that structure, however.
 class Counter {
-    my uint $UINT_MAX := nqp::bitneg_i(0);
+    my int $INT_MIN_MAX := nqp::bitneg_i(0);
 
     has int $!counter;
     has int $!blocker;
     has str $!moniker;
 
-    method new(uint $counter, str $moniker = nqp::null_s()) {
+    method new(int $counter, str $moniker = nqp::null_s()) {
         my $self := nqp::create(self);
         nqp::bindattr_i($self, $?CLASS, '$!counter', $counter);
         nqp::bindattr_i($self, $?CLASS, '$!blocker', $counter == 0);
@@ -27,11 +27,11 @@ class Counter {
     # Gives the predecessor unless we're at the lower bound.
     method drop_pred() {
         my $counter := nqp::getattrref_i(self, $?CLASS, '$!counter');
-        if nqp::atomicload_i($counter) -> uint $pred {
+        if nqp::atomicload_i($counter) -> int $pred {
             nqp::barrierfull();
             nqp::atomicstore_i($counter, ($pred := $pred - 1));
             nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), $pred == 0);
-            $pred
+            my uint $this := $pred
         }
         else {
             0
@@ -58,14 +58,14 @@ class Counter {
     # Gives the successor unless we're at the upper bound.
     method drop_succ() {
         my $counter := nqp::getattrref_i(self, $?CLASS, '$!counter');
-        if (my uint $succ := nqp::atomicload_i($counter)) < $UINT_MAX {
+        if (my int $succ := nqp::atomicload_i($counter)) < $INT_MIN_MAX {
             nqp::barrierfull();
             nqp::atomicstore_i($counter, ($succ := $succ + 1));
             nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), 0);
-            $succ
+            my uint $this := $succ
         }
         else {
-            $UINT_MAX
+            my uint $this := $INT_MIN_MAX
         }
     }
 
@@ -73,11 +73,11 @@ class Counter {
     method want_succ() {
         my $counter := nqp::getattrref_i(self, $?CLASS, '$!counter');
         nqp::threadyield()
-            while (my uint $succ := nqp::atomicload_i($counter)) == $UINT_MAX;
+            while (my int $succ := nqp::atomicload_i($counter)) == $INT_MIN_MAX;
         nqp::barrierfull();
         nqp::atomicstore_i($counter, ($succ := $succ + 1));
         nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), 0);
-        $succ
+        my uint $this := $succ
     }
 
     # Gives the predecessor immediately, ignoring overflows.
