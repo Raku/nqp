@@ -27,15 +27,12 @@ class Counter {
     # Gives the predecessor unless we're at the lower bound.
     method drop_pred() {
         my $counter := nqp::getattrref_i(self, $?CLASS, '$!counter');
-        if nqp::atomicload_i($counter) -> int $pred {
+        if my int $pred := nqp::atomicload_i($counter) {
             nqp::barrierfull();
             nqp::atomicstore_i($counter, ($pred := $pred - 1));
             nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), $pred == 0);
-            my uint $this := $pred
         }
-        else {
-            0
-        }
+        my uint $this := $pred
     }
 
     # Gives the predecessor, waiting for one to become valid if need be.
