@@ -161,10 +161,10 @@ nqp::sethllconfig('nqp', nqp::hash(
 ));
 
 #?if !moar
-nqp::setinvokespec(NQPMu, nqp::null(), nqp::null(),
+nqp::setinvokespec(NQPMu, nqp::null(), nqp::null_s(),
     nqp::getstaticcode(anon sub INVOKE(*@pos, *%named) {
         nqp::invokewithcapture(nqp::findmethod($?CLASS, 'CALL-ME'), nqp::usecapture())
-    }))
+    }));
 #?endif
 
 #?if moar
