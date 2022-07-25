@@ -1,3 +1,4 @@
+#?if moar
 # This adds bounds to a native atomic uint, giving a few means of handling when
 # those are reached via succ/pred operations:
 #
@@ -127,3 +128,4 @@ class Counter {
         self."$method"(|%adverbs)
     }
 }
+#?endif
