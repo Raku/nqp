@@ -50,8 +50,8 @@ class Counter {
 
     # Gives the predecessor immediately, ignoring underflows.
     method need_pred() {
-        nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), 1)
-            if my uint $pred := nqp::sub_i(nqp::getattrref_i(self, $?CLASS, '$!counter'), 1);
+        my uint $pred := nqp::sub_i(nqp::getattrref_i(self, $?CLASS, '$!counter'), 1);
+        nqp::atomicstore_i(nqp::getattrref_i(self, $?CLASS, '$!blocker'), $pred == 0);
         $pred
     }
 
