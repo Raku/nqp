@@ -1,13 +1,12 @@
 package org.raku.nqp.sixmodel.reprs;
+import org.raku.nqp.runtime.ExceptionHandling;
+import org.raku.nqp.runtime.Intrinsics;
 import org.raku.nqp.runtime.Ops;
 import org.raku.nqp.runtime.ThreadContext;
 import org.raku.nqp.sixmodel.STable;
 import org.raku.nqp.sixmodel.SerializationReader;
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
-
-import java.lang.reflect.Field;
-import sun.misc.Unsafe;
 
 public class P6OpaqueBaseInstance extends SixModelObject {
     // If this is not null, all operations are delegate to it. Used when we
@@ -116,51 +115,41 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             return super.is_attribute_initialized(tc, class_handle, name, hint);
     }
 
-    private Unsafe unsafe;
     private long scalarValueOffset;
-
-    @SuppressWarnings("restriction")
-    private void ensureAtomicsReady() {
-        if (unsafe == null) {
-            try {
-                Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-                unsafeField.setAccessible(true);
-                unsafe = (Unsafe)unsafeField.get(null);
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 
     @Override
     public SixModelObject cas_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
                                               String name, SixModelObject expected, SixModelObject value) {
-        ensureAtomicsReady();
-        try {
-            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
-                "field_" + resolveAttribute(class_handle, name)));
-            return unsafe.compareAndSwapObject(this, offset, expected, value)
-                ? expected
-                : (SixModelObject)unsafe.getObjectVolatile(this, offset);
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return Intrinsics.butUnsafe(tc, (unsafe) -> {
+            try {
+                long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
+                    "field_" + resolveAttribute(class_handle, name)));
+                return unsafe.compareAndSwapObject(this, offset, expected, value)
+                    ? expected
+                    : (SixModelObject)unsafe.getObjectVolatile(this, offset);
+            }
+            catch (Exception e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+            finally {
+                return Ops.createNull(tc);
+            }
+        });
     }
 
     @Override
     public void atomic_bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
                                             String name, SixModelObject value) {
-        ensureAtomicsReady();
-        try {
-            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
-                "field_" + resolveAttribute(class_handle, name)));
-            unsafe.putObjectVolatile(this, offset, value);
-        }
-        catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        Intrinsics.itsUnsafe(tc, (unsafe) -> {
+            try {
+                long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
+                    "field_" + resolveAttribute(class_handle, name)));
+                unsafe.putObjectVolatile(this, offset, value);
+            }
+            catch (Exception e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+        });
     }
 
     public SixModelObject posDelegate() {

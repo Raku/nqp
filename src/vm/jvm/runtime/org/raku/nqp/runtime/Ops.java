@@ -140,35 +140,11 @@ import org.raku.nqp.sixmodel.reprs.VMNull;
 import org.raku.nqp.sixmodel.reprs.VMNullInstance;
 import org.raku.nqp.sixmodel.reprs.VMThreadInstance;
 
-import sun.misc.Unsafe;
-
 /**
  * Contains complex operations that are more involved than the simple ops that the
  * JVM makes available.
  */
 public final class Ops {
-    /**
-     * Temporary workaround to avoid warnings about 'illegal reflective access'
-     * (taken from https://stackoverflow.com/a/46458447).
-     * Please note that this is needed for Rakudo, too.
-     * Once something else (e.g. VarHandle) is used instead
-     * of sun.misc.Unsafe this workaround can be removed.
-     */
-    public static void disableWarning() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            Unsafe u = (Unsafe)theUnsafe.get(null);
-
-            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field logger = cls.getDeclaredField("logger");
-            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
-        }
-        catch (Exception e) {
-            // ignore (that's the raison d'être for this method)
-        }
-    }
-
     private static SixModelObject theVMNull = null;
 
     /* I/O opcodes */
