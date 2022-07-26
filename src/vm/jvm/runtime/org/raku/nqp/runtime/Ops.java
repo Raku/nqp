@@ -6038,6 +6038,10 @@ public final class Ops {
         obj.atomic_bind_attribute_boxed(tc, class_handle, name, value);
         return value;
     }
+    public static SixModelObject barrierfull(ThreadContext tc) {
+        Intrinsics.itsUnsafe(tc, (unsafe) -> { unsafe.fullFence(); });
+        return createNull(tc);
+    }
 
     /* Asynchronousy operations. */
 
