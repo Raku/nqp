@@ -130,9 +130,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         catch (Exception e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
-        finally {
-            return result == null ? Ops.createNull(tc) : result;
-        }
+        return result == null ? Ops.createNull(tc) : result;
     }
 
     @Override
@@ -161,9 +159,7 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         catch (Exception e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
-        finally {
-            return result == null ? Ops.createNull(tc) : result;
-        }
+        return result == null ? Ops.createNull(tc) : result;
     }
 
     public SixModelObject posDelegate() {

@@ -63,9 +63,15 @@ public abstract class CompilationUnit {
      */
     public static CompilationUnit setupCompilationUnit(ThreadContext tc, Class<?> cuType, boolean shared)
             throws InstantiationException, IllegalAccessException {
-        CompilationUnit cu = (CompilationUnit)cuType.newInstance();
-        cu.shared = shared;
-        cu.initializeCompilationUnit(tc);
+        CompilationUnit cu = null;
+        try {
+            cu = (CompilationUnit)cuType.getDeclaredConstructor().newInstance();
+            cu.shared = shared;
+            cu.initializeCompilationUnit(tc);
+        }
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
         return cu;
     }
 

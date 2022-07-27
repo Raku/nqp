@@ -66,10 +66,15 @@ public class LibraryLoader {
     }
 
     private static void loadClass(ThreadContext tc, Class<?> c) throws Throwable {
-        CompilationUnit cu = (CompilationUnit)c.newInstance();
-        cu.shared = tc.gc.sharingHint;
-        cu.initializeCompilationUnit(tc);
-        cu.runLoadIfAvailable(tc);
+        try {
+            CompilationUnit cu = (CompilationUnit)c.getDeclaredConstructor().newInstance();
+            cu.shared = tc.gc.sharingHint;
+            cu.initializeCompilationUnit(tc);
+            cu.runLoadIfAvailable(tc);
+        }
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 
     private static Class<?> loadJar(byte[] buffer) throws Exception {

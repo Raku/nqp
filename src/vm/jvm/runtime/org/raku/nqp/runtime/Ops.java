@@ -56,6 +56,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -3804,8 +3805,10 @@ public final class Ops {
         else if (agg.st.REPR instanceof VMHash) {
             SixModelObject iterType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashIteratorType;
             VMIterInstance iter = (VMIterInstance)iterType.st.REPR.allocate(tc, iterType.st);
+            VMHashInstance hash = (VMHashInstance)agg;
+            Map<String, ?> storage = new HashMap< >(hash.storage);
             iter.target = agg;
-            iter.hashKeyIter = ((HashMap)((VMHashInstance)agg).storage.clone()).keySet().iterator();
+            iter.hashKeyIter = storage.keySet().iterator();
             iter.iterMode = VMIterInstance.MODE_HASH;
             return iter;
         }
@@ -7023,12 +7026,12 @@ public final class Ops {
             return Long.MIN_VALUE;
         }
         else {
-            return new Double(in).longValue();
+            return Double.valueOf(in).longValue();
         }
     }
 
     public static double coerce_i2n(long in) {
-        return new Long(in).doubleValue();
+        return Long.valueOf(in).doubleValue();
     }
 
     /* Long literal workaround. */
@@ -7387,7 +7390,7 @@ public final class Ops {
         try {
             EvalResult res = (EvalResult)obj;
             Class<?> cuClass = tc.gc.byteClassLoader.defineClass(res.jc.name, res.jc.bytes);
-            res.cu = (CompilationUnit) cuClass.newInstance();
+            res.cu = (CompilationUnit) cuClass.getDeclaredConstructor().newInstance();
             if (compileeHLL != 0)
                 usecompileehllconfig(tc);
             res.cu.initializeCompilationUnit(tc);
@@ -7396,11 +7399,8 @@ public final class Ops {
             res.jc = null;
             return obj;
         }
-        catch (ControlException e) {
-            throw e;
-        }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
     }
     public static long iscompunit(SixModelObject obj, ThreadContext tc) {

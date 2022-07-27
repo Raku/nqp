@@ -82,11 +82,10 @@ public class CUnion extends REPR {
         CUnionREPRData repr_data = (CUnionREPRData) st.REPRData;
         obj.st = st;
         try {
-            obj.storage = (Union) repr_data.structureClass.newInstance();
+            obj.storage = (Union) repr_data.structureClass.getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
         return obj;
     }

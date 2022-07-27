@@ -258,12 +258,15 @@ public class P6Opaque extends REPR {
 
         ((P6OpaqueREPRData)st.REPRData).jvmClass = use;
         try {
-            ((P6OpaqueREPRData)st.REPRData).instance = (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.newInstance();
+            ((P6OpaqueREPRData)st.REPRData).instance =
+                (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
-        ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+        finally {
+            ((P6OpaqueREPRData)st.REPRData).instance.st = st;
+        }
     }
 
     private Class<?> generateJVMClass(ThreadContext tc, List<AttrInfo> attrInfoList) {
