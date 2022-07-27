@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.VarHandle;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -6039,7 +6040,7 @@ public final class Ops {
         return value;
     }
     public static SixModelObject barrierfull(ThreadContext tc) {
-        Intrinsics.itsUnsafe(tc, (unsafe) -> { unsafe.fullFence(); });
+        VarHandle.fullFence();
         return createNull(tc);
     }
 
