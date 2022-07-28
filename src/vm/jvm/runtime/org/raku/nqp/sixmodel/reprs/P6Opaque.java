@@ -1,11 +1,14 @@
 package org.raku.nqp.sixmodel.reprs;
 
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.SoftReference;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
+import java.util.function.Function;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -38,32 +41,39 @@ public class P6Opaque extends REPR {
         public boolean assDelegate;
     }
 
-    // this is a weak *value* map; it provides instances of V, but does not retain them, and keeps strong refs to the keys
-    @SuppressWarnings("unchecked")
-    private static class ObjectCache<K,V> {
-        private class Ref extends SoftReference<V> {
-            public K key;
-            public Ref(K key, V obj, ReferenceQueue<V> queue) { super(obj, queue); this.key = key; }
+    /**
+     * This is a *weak* map in both senses; the keys are weak because the
+     * values retain them anyhow.
+     */
+    private static class ObjectCache<K, V> {
+        private Map<K, Reference<V>> cache = new WeakHashMap< >();
+
+        protected boolean containsKey(K key) {
+            return cache.containsKey(key);
         }
 
-        private HashMap<K, Ref> store = new HashMap< >();
-        private ReferenceQueue<V> queue = new ReferenceQueue< >();
-
-        public synchronized V get(K key) {
-            Ref ref;
-            while ((ref = (Ref) queue.poll()) != null) store.remove(ref.key);
-            ref = store.get(key);
+        protected V get(K key) {
+            Reference<V> ref = cache.get(key);
             return ref == null ? null : ref.get();
         }
 
-        public synchronized void put(K key, V value) {
-            Ref ref;
-            while ((ref = (Ref) queue.poll()) != null) store.remove(ref.key);
-            store.put(key, new Ref(key, value, queue));
+        protected void put(K key, V value) {
+            WeakReference<V> ref = new WeakReference< >(value);
+            cache.put(key, (Reference<V>)ref);
+        }
+
+        public synchronized V cache(K key, Function<K, V> create) {
+            if (containsKey(key))
+                return get(key);
+            else {
+                V computed = create.apply(key);
+                put(key, computed);
+                return computed;
+            }
         }
     }
 
-    private static ObjectCache<String, Class<?>> classCache = new ObjectCache< >();
+    private static ObjectCache<String, Class<?>> classes = new ObjectCache< >();
 
     @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
@@ -241,22 +251,9 @@ public class P6Opaque extends REPR {
             sigBuilder.append(';');
         }
 
-        Class<?> use;
-        if (forceNew) {
-            use = generateJVMClass(tc, attrInfoList);
-        } else {
-            String sig = sigBuilder.toString();
-            use = classCache.get(sig);
-            if (use == null) {
-                use = generateJVMClass(tc, attrInfoList);
-                classCache.put(sig, use);
-                //System.out.println("CREATE "+sig);
-            } else {
-                //System.out.println("REUSE "+sig);
-            }
-        }
-
-        ((P6OpaqueREPRData)st.REPRData).jvmClass = use;
+        ((P6OpaqueREPRData)st.REPRData).jvmClass = forceNew
+            ? generateJVMClass(tc, attrInfoList)
+            : classes.cache(sigBuilder.toString(), (k) -> generateJVMClass(tc, attrInfoList));
         try {
             ((P6OpaqueREPRData)st.REPRData).instance =
                 (P6OpaqueBaseInstance)((P6OpaqueREPRData)st.REPRData).jvmClass.getDeclaredConstructor().newInstance();
