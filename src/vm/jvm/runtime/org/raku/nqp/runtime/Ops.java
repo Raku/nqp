@@ -27,6 +27,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.InetAddress;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
 import java.nio.CharBuffer;
@@ -5364,7 +5366,8 @@ public final class Ops {
 
             ByteBuffer binaryBlob;
             if (blob == null) {
-                binaryBlob = ByteBuffer.wrap( LibraryLoader.readEverything( cu.getClass().getResourceAsStream( cu.getClass().getSimpleName() + ".serialized" ) ) );
+                InputStream is = cu.getClass().getResourceAsStream(cu.getClass().getSimpleName() + ".serialized");
+                binaryBlob = LibraryLoader.readToHeapBuffer(is);
             } else {
                 binaryBlob = Base64.decode(blob);
             }

@@ -4,13 +4,17 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.BufferUnderflowException;
+import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
 
 public class LibraryLoader {
     static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
@@ -44,131 +48,273 @@ public class LibraryLoader {
             Class<?> c = loadFile(filename, tc.gc.sharingHint);
             loadClass(tc, c);
         }
-        catch (ControlException e) {
-            throw e;
-        }
-        catch (Throwable e) {
+        catch (IOException | RuntimeException e) {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
     }
 
     public void load(ThreadContext tc, byte[] buffer) {
+        ByteBuffer bb;
         try {
-            Class<?> c = loadJar(buffer);
-            loadClass(tc, c);
+            bb = ByteBuffer.allocate(buffer.length);
+            bb.put(buffer);
+            bb.rewind();
         }
-        catch (ControlException e) {
-            throw e;
+        catch (BufferOverflowException | IllegalArgumentException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
-        catch (Throwable e) {
-            throw ExceptionHandling.dieInternal(tc, e.toString());
+        load(tc, bb);
+    }
+
+    public void load(ThreadContext tc, ByteBuffer buffer) {
+        try {
+            loadClass(tc, loadJar(buffer));
+        }
+        catch (IOException | IllegalArgumentException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
     }
 
-    private static void loadClass(ThreadContext tc, Class<?> c) throws Throwable {
-        CompilationUnit cu = (CompilationUnit)c.newInstance();
-        cu.shared = tc.gc.sharingHint;
-        cu.initializeCompilationUnit(tc);
-        cu.runLoadIfAvailable(tc);
-    }
-
-    private static Class<?> loadJar(byte[] buffer) throws Exception {
-        // This is a (non-empty, non-self-extracting) zip file
-        // These are quite constrained for now
-
-        JarEntry je;
-        JarInputStream jis = new JarInputStream(new ByteArrayInputStream(buffer));
-        byte[] kl = null;
-        byte[] ser = null;
-
-        while ((je = jis.getNextJarEntry()) != null) {
-            byte[] data = readEverything(jis);
-
-            if (je.getName().endsWith(".class") && kl == null) kl = data;
-            else if (je.getName().endsWith(".serialized") && ser == null) ser = data;
-            else throw new RuntimeException("Bytecode jar contains unexpected file "+je.getName());
+    public static void loadClass(ThreadContext tc, Class<?> c) {
+        try {
+            CompilationUnit cu = (CompilationUnit)c.getDeclaredConstructor().newInstance();
+            cu.shared = tc.gc.sharingHint;
+            cu.initializeCompilationUnit(tc);
+            cu.runLoadIfAvailable(tc);
         }
-
-        if (kl == null) throw new RuntimeException("Bytecode jar lacks class file");
-        if (ser == null) throw new RuntimeException("Bytecode jar lacks serialization file");
-
-        return loadNew(kl, ser);
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 
-    public static Class<?> loadFile(String cf, boolean shared) throws Exception {
+    public static Class<?> loadFile(String cf, boolean shared) throws IOException, IllegalArgumentException {
         if (shared)
             return sharedClasses.computeIfAbsent(cf, (k) -> {
                 try {
                     return loadFile(k, false);
                 }
-                catch (Exception e) {
-                    throw new RuntimeException(e);
+                catch (IOException | IllegalArgumentException e) {
+                    return null;
                 }
             });
 
-        byte[] b = Files.readAllBytes( FileSystems.getDefault().getPath(cf) );
-        long sig = b.length < 4 ? 0 :
-            (b[3] & 0xFF) | ((b[2] & 0xFF) << 8) | ((b[1] & 0xFF) << 16) | ((b[0] & 0xFFL) << 24);
+        RandomAccessFile ch = new RandomAccessFile(cf, "rw");
+        byte[] ba = new byte[Math.min((int)ch.length(), 4)];
+        ch.readFully(ba);
 
-        if (sig == 0xCAFEBABEL) {
-            // This is a class file
-
-            return loadNew(b, null);
-        } else if (sig == 0x504B0304) {
-            return loadJar(b);
-        } else {
-            throw new RuntimeException("Unrecognized bytecode format in "+cf);
+        int sig = (ba.length < 4)
+            ? 0
+            : ((ba[3] & 0xFF) | ((ba[2] & 0xFF) << 8) | ((ba[1] & 0xFF) << 16) | ((ba[0] & 0xFF) << 24));
+        switch (sig) {
+            case 0xCAFEBABE: // classfile
+                return loadNew(readToMmapBuffer(ch.getChannel()), null);
+            case 0x504B0304: // jar
+                return loadJar(readToMmapBuffer(ch.getChannel()));
+            default:
+                throw new IllegalArgumentException("Unrecognized bytecode format in " + cf);
         }
     }
 
-    public static Class<?> loadNew(byte[] bytes, byte[] serial) {
+    private static final int BUF_SIZE = 0x7FFF;
+
+    public static ByteBuffer readToMmapBuffer(FileChannel bc) throws IOException {
+        List<ByteBuffer> chunks = new ArrayList< >();
+        int length = (int)bc.size();
+        int offset = 0;
+        int sizeof = Math.min(length, BUF_SIZE);
+        do {
+            chunks.add(bc.map(FileChannel.MapMode.READ_WRITE, offset, sizeof));
+            length -= sizeof;
+            offset += sizeof;
+            sizeof  = Math.min(length, BUF_SIZE);
+        } while (sizeof > 0);
+        length = offset;
+
+        ByteBuffer bb = ByteBuffer.allocate(offset);
+        for (ByteBuffer chunk : chunks)
+            bb.put(chunk);
+        bb.rewind();
+        return bb;
+    }
+
+    public static ByteBuffer readToHeapBuffer(InputStream is) throws IOException {
+        return ByteBuffer.wrap(is.readAllBytes());
+    }
+
+    public static Class<?> loadJar(ByteBuffer bb) throws IOException, IllegalArgumentException {
+        // This is a (non-empty, non-self-extracting) zip file
+        // These are quite constrained for now
+        ByteBuffer bytes = null;
+        ByteBuffer serial = null;
+        JarInputStream jis = new JarInputStream(new ByteBufferedInputStream(bb));
+        ZipEntry je;
+        while ((je = jis.getNextEntry()) != null) {
+            String jf = je.getName();
+            ByteBuffer data = readToHeapBuffer(jis);
+            if (jf.endsWith(".class") && bytes == null)
+                bytes = data;
+            else if (jf.endsWith(".serialized") && serial == null)
+                serial = data;
+            else
+                throw new IllegalArgumentException("Bytecode jar contains unexpected file " + jf);
+        }
+        if (bytes == null)
+            throw new IllegalArgumentException("Bytecode jar lacks class file");
+        if (serial == null)
+            throw new IllegalArgumentException("Bytecode jar lacks serialization file");
+        return loadNew(bytes, serial);
+    }
+
+    private static class ByteBufferedInputStream extends InputStream {
+        private final ByteBuffer bb;
+
+        public ByteBufferedInputStream(ByteBuffer bb) {
+            this.bb = bb;
+        }
+
+        public static ByteBufferedInputStream copy(ByteBuffer src) throws IllegalArgumentException {
+            int offset = src.position();
+            ByteBuffer bb = ByteBuffer.allocate(src.capacity() - offset);
+            bb.put(src);
+            bb.rewind();
+            src.position(offset);
+            return new ByteBufferedInputStream(bb);
+        }
+
+        public static InputStream nullInputStream() {
+            return new ByteBufferedInputStream(null);
+        }
+
+        private int get() throws IOException {
+            try {
+                return bb.get();
+            }
+            catch (BufferUnderflowException e) {
+                throw new IOException(e);
+            }
+        }
+
+        private void get(byte[] dst) throws IOException {
+            try {
+                bb.get(dst);
+            }
+            catch (BufferUnderflowException e) {
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            return bb != null && bb.hasRemaining() ? get() : -1;
+        }
+
+        @Override
+        public int read(byte[] dst) throws IOException {
+            if (bb == null)
+                return -1;
+
+            int length = Math.min(dst.length, available());
+            if (length <= 0)
+                return 0;
+
+            byte[] src = new byte[length];
+            get(src);
+            System.arraycopy(src, 0, dst, 0, length);
+            return length;
+        }
+
+        @Override
+        public int read(byte[] dst, int offset, int length) throws IOException {
+            if (bb == null)
+                return -1;
+
+            length = Math.min(length, available());
+            if (length <= 0)
+                return 0;
+
+            byte[] src = new byte[length];
+            get(src);
+            System.arraycopy(src, 0, dst, offset, length);
+            return length;
+        }
+
+        @Override
+        public int readNBytes(byte[] dst, int offset, int length) throws IOException {
+            if (bb == null)
+                return -1;
+
+            length = Math.min(length, available());
+            if (length <= 0)
+                return 0;
+
+            byte[] src = new byte[length];
+            get(src);
+            System.arraycopy(src, 0, dst, offset, length);
+            return length;
+        }
+
+        @Override
+        public byte[] readAllBytes() throws IOException {
+            byte[] dst = new byte[available()];
+            if (dst.length > 0)
+                read(dst);
+            return dst;
+        }
+
+        @Override
+        public long skip(long length) {
+            if (bb == null)
+                return 0;
+
+            int offset = bb.position();
+            length = Long.min(length, bb.capacity() - offset);
+            bb.position(offset + (int)length);
+            return length;
+        }
+
+        @Override
+        public int available() {
+            return bb == null ? 0 : (bb.capacity() - bb.position());
+        }
+
+        @Override
+        public void reset() {
+            if (bb != null)
+                bb.rewind();
+        }
+    }
+
+    public static Class<?> loadNew(ByteBuffer bytes, ByteBuffer serial) {
         IgnoreNameClassLoader incl = new IgnoreNameClassLoader(bytes, serial);
         return incl.loadClass();
     }
 
     private static class IgnoreNameClassLoader extends ClassLoader {
-        private byte[] bytes;
-        private byte[] serial;
+        private ByteBuffer bytes;
+        private ByteBuffer serial;
 
-        public IgnoreNameClassLoader(byte[] bytes, byte[] serial) {
+        public IgnoreNameClassLoader(ByteBuffer bytes, ByteBuffer serial) {
             this.bytes = bytes;
             this.serial = serial;
         }
 
         public Class<?> loadClass() {
-            return defineClass(null, this.bytes, 0, this.bytes.length);
+            try {
+                return defineClass(null, this.bytes, null);
+            }
+            catch (ClassFormatError e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
         public InputStream getResourceAsStream(String name) {
-            return new ByteArrayInputStream(serial);
-        }
-    }
-
-    // this is dumb
-    public static byte[] readEverything(InputStream from) throws IOException {
-        final int bufSize = 65536;
-        ArrayList<byte[]> chunks = new ArrayList<byte[]>();
-        byte[] currentChunk = new byte[bufSize];
-        int currentFill = 0;
-
-        while (true) {
-            if (currentFill == bufSize) {
-                chunks.add(currentChunk);
-                currentChunk = new byte[bufSize];
-                currentFill = 0;
+            try {
+                return ByteBufferedInputStream.copy(serial);
             }
-
-            int addl = from.read(currentChunk, currentFill, bufSize - currentFill);
-            if (addl < 0) break;
-            currentFill += addl;
+            catch (IllegalArgumentException e) {
+                return null;
+            }
         }
-
-        byte[] finished = new byte[chunks.size() * bufSize + currentFill];
-        for (int i = 0; i < chunks.size(); i++)
-            System.arraycopy(chunks.get(i), 0, finished, i*bufSize, bufSize);
-        System.arraycopy(currentChunk, 0, finished, chunks.size()*bufSize, currentFill);
-
-        return finished;
     }
 }
