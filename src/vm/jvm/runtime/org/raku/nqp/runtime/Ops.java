@@ -5366,8 +5366,15 @@ public final class Ops {
 
             ByteBuffer binaryBlob;
             if (blob == null) {
-                InputStream is = cu.getClass().getResourceAsStream(cu.getClass().getSimpleName() + ".serialized");
-                binaryBlob = LibraryLoader.readToHeapBuffer(is);
+                Class<?> cuKlass = cu.getClass();
+                String cuName = cuKlass.getSimpleName();
+                InputStream cuStream = cuKlass.getResourceAsStream(cuName + ".serialized");
+                if (cuStream != null)
+                    binaryBlob = LibraryLoader.readToHeapBuffer(cuStream);
+                else {
+                    cuStream = cuKlass.getResourceAsStream(cuName + ".serialized.xz");
+                    binaryBlob = LibraryLoader.readToHeapBufferXz(cuStream);
+                }
             } else {
                 binaryBlob = Base64.decode(blob);
             }

@@ -1,5 +1,6 @@
 package org.raku.nqp.jast2bc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 
 import java.lang.invoke.CallSite;
@@ -13,6 +14,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
@@ -25,6 +29,9 @@ import org.raku.nqp.runtime.ThreadContext;
 
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.runtime.Ops;
+
+import org.tukaani.xz.LZMA2Options;
+import org.tukaani.xz.XZOutputStream;
 
 public class JASTCompiler {
     public static JavaClass buildClass(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) {
@@ -57,12 +64,28 @@ public class JASTCompiler {
                     mf.getMainAttributes().put( Attributes.Name.MAIN_CLASS, c.name );
 
                 JarOutputStream jos = new JarOutputStream(fos, mf);
-
                 jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".class"));
                 jos.write(c.bytes);
-                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".serialized"));
-                jos.write(c.serialized);
+                jos.closeEntry();
 
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                XZOutputStream zos = new XZOutputStream(baos, new LZMA2Options());
+                zos.write(c.serialized);
+                zos.finish();
+
+                JarEntry jes = new JarEntry(c.name.replace('.','/') + ".serialized.xz");
+                byte[] serial = baos.toByteArray();
+                CRC32 cipher = new CRC32();
+                cipher.update(serial, 0, serial.length);
+                jes.setMethod(ZipEntry.STORED);
+                jes.setCrc(cipher.getValue());
+                jes.setSize(serial.length);
+                jes.setCompressedSize(serial.length);
+                jos.putNextEntry(jes);
+                jos.write(serial, 0, serial.length);
+                jos.closeEntry();
+
+                zos.close();
                 jos.close();
             }
         }

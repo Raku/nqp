@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
+import org.tukaani.xz.XZInputStream;
 
 public class LibraryLoader {
     static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
@@ -141,6 +142,10 @@ public class LibraryLoader {
         return ByteBuffer.wrap(is.readAllBytes());
     }
 
+    public static ByteBuffer readToHeapBufferXz(InputStream is) throws IOException {
+        return readToHeapBuffer(new XZInputStream(is));
+    }
+
     public static Class<?> loadJar(ByteBuffer bb) throws IOException, IllegalArgumentException {
         // This is a (non-empty, non-self-extracting) zip file
         // These are quite constrained for now
@@ -150,11 +155,12 @@ public class LibraryLoader {
         ZipEntry je;
         while ((je = jis.getNextEntry()) != null) {
             String jf = je.getName();
-            ByteBuffer data = readToHeapBuffer(jis);
             if (jf.endsWith(".class") && bytes == null)
-                bytes = data;
+                bytes = readToHeapBuffer(jis);
+            else if (jf.endsWith(".serialized.xz") && serial == null)
+                serial = readToHeapBufferXz(jis);
             else if (jf.endsWith(".serialized") && serial == null)
-                serial = data;
+                serial = readToHeapBuffer(jis);
             else
                 throw new IllegalArgumentException("Bytecode jar contains unexpected file " + jf);
         }
