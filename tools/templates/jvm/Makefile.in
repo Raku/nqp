@@ -31,8 +31,8 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(JN
 @bpv(RUNNER_LIBS)@ = @nfplq(nqp.@bext@)@
 @bpv(EVAL_CLIENT)@ = @nfp(tools/jvm/eval-client.pl)@
 
-@bpv(STAGE0_NQP)@ = $(JAVA) -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
-@bpv(STAGE1_NQP)@ = $(JAVA) -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE0_NQP)@ = $(JAVA) -XX:+UseTransparentHugePages -XX:+AggressiveHeap -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE1_NQP)@ = $(JAVA) -XX:+UseTransparentHugePages -XX:+AggressiveHeap -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
 
 @for_stages(@bpv(@ucstage@_GEN_CAT)@ = @bpm(GEN_CAT)@ @lcstage@
 @bpv(NQP_@ucstage@_FLAGS)@ = --javaclass=nqp
