@@ -5,7 +5,7 @@ knowhow NQPNativeHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( :nominal(1) );
-    method archetypes() {
+    method archetypes($obj?) {
         $archetypes
     }
 

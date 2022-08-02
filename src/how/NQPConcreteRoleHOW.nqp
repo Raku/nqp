@@ -29,7 +29,7 @@ knowhow NQPConcreteRoleHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( :nominal(1), :composable(1) );
-    method archetypes() {
+    method archetypes($obj?) {
         $archetypes
     }
 
