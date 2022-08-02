@@ -6491,15 +6491,15 @@ public final class Ops {
         return value;
     }
     public static String loadbytecode(String filename, ThreadContext tc) {
-        new LibraryLoader().load(tc, filename);
+        LibraryLoader.load(tc, filename);
         return filename;
     }
     public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) throws Exception {
         if (buffer instanceof VMArrayInstance_i8) {
-            new LibraryLoader().load(tc, ((VMArrayInstance_i8)buffer).slots);
+            LibraryLoader.load(tc, ((VMArrayInstance_i8)buffer).slots);
         }
         else if (buffer instanceof VMArrayInstance_u8) {
-            new LibraryLoader().load(tc, ((VMArrayInstance_u8)buffer).slots);
+            LibraryLoader.load(tc, ((VMArrayInstance_u8)buffer).slots);
         }
         else {
             throw new RuntimeException("Must pass a uint8 or int8 buffer to loadbytecodebuffer");

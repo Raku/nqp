@@ -20,7 +20,7 @@ import org.tukaani.xz.XZInputStream;
 public class LibraryLoader {
     static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
 
-    public void load(ThreadContext tc, String origFilename) {
+    public static void load(ThreadContext tc, String origFilename) {
         // Don't load the same thing multiple times.
         if (!tc.gc.loaded.add(origFilename))
             return;
@@ -46,15 +46,14 @@ public class LibraryLoader {
                 }
             }
 
-            Class<?> c = loadFile(filename, tc.gc.sharingHint);
-            loadClass(tc, c);
+            loadClass(tc, loadFile(filename, tc.gc.sharingHint));
         }
         catch (IOException | RuntimeException e) {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
     }
 
-    public void load(ThreadContext tc, byte[] buffer) {
+    public static void load(ThreadContext tc, byte[] buffer) {
         ByteBuffer bb;
         try {
             bb = ByteBuffer.allocate(buffer.length);
@@ -67,7 +66,7 @@ public class LibraryLoader {
         load(tc, bb);
     }
 
-    public void load(ThreadContext tc, ByteBuffer buffer) {
+    public static void load(ThreadContext tc, ByteBuffer buffer) {
         try {
             loadClass(tc, loadJar(buffer));
         }
