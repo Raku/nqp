@@ -14,6 +14,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import java.util.zip.CheckedOutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
@@ -64,25 +65,25 @@ public class JASTCompiler {
                     mf.getMainAttributes().put( Attributes.Name.MAIN_CLASS, c.name );
 
                 JarOutputStream jos = new JarOutputStream(fos, mf);
-                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".class"));
+                String cn = c.name.replace('.', '/');
+                jos.putNextEntry(new JarEntry(cn + ".class"));
                 jos.write(c.bytes);
                 jos.closeEntry();
 
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                XZOutputStream zos = new XZOutputStream(baos, new LZMA2Options());
+                CheckedOutputStream cos = new CheckedOutputStream(baos, new CRC32());
+                XZOutputStream zos = new XZOutputStream(cos, new LZMA2Options());
                 zos.write(c.serialized);
                 zos.finish();
 
-                JarEntry jes = new JarEntry(c.name.replace('.','/') + ".serialized.xz");
-                byte[] serial = baos.toByteArray();
-                CRC32 cipher = new CRC32();
-                cipher.update(serial, 0, serial.length);
+                JarEntry jes = new JarEntry(cn + ".serialized.xz");
                 jes.setMethod(ZipEntry.STORED);
-                jes.setCrc(cipher.getValue());
-                jes.setSize(serial.length);
-                jes.setCompressedSize(serial.length);
+                jes.setSize(baos.size());
+                jes.setCompressedSize(baos.size());
+                jes.setCrc(cos.getChecksum().getValue());
+                jes.setComment(cn);
                 jos.putNextEntry(jes);
-                jos.write(serial, 0, serial.length);
+                baos.writeTo(jos);
                 jos.closeEntry();
 
                 zos.close();

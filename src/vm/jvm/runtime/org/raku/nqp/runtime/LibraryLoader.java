@@ -48,7 +48,7 @@ public class LibraryLoader {
 
             loadClass(tc, loadFile(filename, tc.gc.sharingHint));
         }
-        catch (IOException | RuntimeException e) {
+        catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(tc, e.toString());
         }
     }
@@ -70,7 +70,7 @@ public class LibraryLoader {
         try {
             loadClass(tc, loadJar(buffer));
         }
-        catch (IOException | IllegalArgumentException e) {
+        catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
@@ -87,18 +87,18 @@ public class LibraryLoader {
         }
     }
 
-    public static Class<?> loadFile(String cf, boolean shared) throws IOException, IllegalArgumentException {
+    public static Class<?> loadFile(String cn, boolean shared) throws IOException, IllegalArgumentException, ClassNotFoundException {
         if (shared)
-            return sharedClasses.computeIfAbsent(cf, (k) -> {
+            return sharedClasses.computeIfAbsent(cn, (k) -> {
                 try {
                     return loadFile(k, false);
                 }
-                catch (IOException | IllegalArgumentException e) {
+                catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
                     return null;
                 }
             });
 
-        RandomAccessFile ch = new RandomAccessFile(cf, "rw");
+        RandomAccessFile ch = new RandomAccessFile(cn, "rw");
         byte[] ba = new byte[Math.min((int)ch.length(), 4)];
         ch.readFully(ba);
 
@@ -107,11 +107,11 @@ public class LibraryLoader {
             : ((ba[3] & 0xFF) | ((ba[2] & 0xFF) << 8) | ((ba[1] & 0xFF) << 16) | ((ba[0] & 0xFF) << 24));
         switch (sig) {
             case 0xCAFEBABE: // classfile
-                return loadNew(readToMmapBuffer(ch.getChannel()), null);
+                return loadNew(cn, readToMmapBuffer(ch.getChannel()), null);
             case 0x504B0304: // jar
                 return loadJar(readToMmapBuffer(ch.getChannel()));
             default:
-                throw new IllegalArgumentException("Unrecognized bytecode format in " + cf);
+                throw new IllegalArgumentException("Unrecognized bytecode format in " + cn);
         }
     }
 
@@ -145,19 +145,22 @@ public class LibraryLoader {
         return readToHeapBuffer(new XZInputStream(is));
     }
 
-    public static Class<?> loadJar(ByteBuffer bb) throws IOException, IllegalArgumentException {
+    public static Class<?> loadJar(ByteBuffer bb) throws IOException, IllegalArgumentException, ClassNotFoundException {
         // This is a (non-empty, non-self-extracting) zip file
         // These are quite constrained for now
         ByteBuffer bytes = null;
         ByteBuffer serial = null;
         JarInputStream jis = new JarInputStream(new ByteBufferedInputStream(bb));
         ZipEntry je;
+        String cn = null;
         while ((je = jis.getNextEntry()) != null) {
             String jf = je.getName();
             if (jf.endsWith(".class") && bytes == null)
                 bytes = readToHeapBuffer(jis);
-            else if (jf.endsWith(".serialized.xz") && serial == null)
+            else if (jf.endsWith(".serialized.xz")) {
+                cn = je.getComment();
                 serial = readToHeapBufferXz(jis);
+            }
             else if (jf.endsWith(".serialized") && serial == null)
                 serial = readToHeapBuffer(jis);
             else
@@ -167,7 +170,7 @@ public class LibraryLoader {
             throw new IllegalArgumentException("Bytecode jar lacks class file");
         if (serial == null)
             throw new IllegalArgumentException("Bytecode jar lacks serialization file");
-        return loadNew(bytes, serial);
+        return loadNew(cn, bytes, serial);
     }
 
     private static class ByteBufferedInputStream extends InputStream {
@@ -289,27 +292,50 @@ public class LibraryLoader {
         }
     }
 
-    public static Class<?> loadNew(ByteBuffer bytes, ByteBuffer serial) {
-        IgnoreNameClassLoader incl = new IgnoreNameClassLoader(bytes, serial);
-        return incl.loadClass();
+    public static Class<?> loadNew(String cn, ByteBuffer bytes, ByteBuffer serial) throws ClassNotFoundException {
+        return new SerialClassLoader(bytes, serial).loadSerialClass(cn);
     }
 
-    private static class IgnoreNameClassLoader extends ClassLoader {
+    private static class SerialClassLoader extends ClassLoader {
+        static { ClassLoader.registerAsParallelCapable(); }
+
+        // XXX FIXME: The entire decompressed source of a class and its
+        // serialization persist in memory as long as its classloader does,
+        // which is as long as the class itself does. We depend on this being
+        // true given our getResourceAsStream override even! Yikes!
         private ByteBuffer bytes;
         private ByteBuffer serial;
 
-        public IgnoreNameClassLoader(ByteBuffer bytes, ByteBuffer serial) {
+        public SerialClassLoader(ByteBuffer bytes, ByteBuffer serial) {
+            super();
             this.bytes = bytes;
             this.serial = serial;
         }
 
-        public Class<?> loadClass() {
+        protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
             try {
-                return defineClass(null, this.bytes, null);
+                return defineClass(name, this.bytes, null);
             }
-            catch (ClassFormatError e) {
-                throw new RuntimeException(e);
+            catch (NoClassDefFoundError e) {
+                throw new ClassNotFoundException("serial class not named " + name, e);
             }
+            catch (IndexOutOfBoundsException e) {
+                throw new ClassNotFoundException("could not read serial class " + name, e);
+            }
+            catch (SecurityException e) {
+                throw new ClassNotFoundException("serial class is insecurely named " + name, e);
+            }
+        }
+
+        public synchronized Class<?> loadSerialClass(String name) throws ClassNotFoundException {
+            // Assuming we're only invoked once per instance:
+            Class<?> klass = findSerialClass(name);
+            // Should that not hold true:
+            // Class<?> klass = findLoadedClass(name);
+            // if (klass == null)
+            //     klass = findSerialClass(name);
+            resolveClass(klass);
+            return klass;
         }
 
         @Override
