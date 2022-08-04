@@ -327,15 +327,22 @@ public class LibraryLoader {
             }
         }
 
-        public synchronized Class<?> loadSerialClass(String name) throws ClassNotFoundException {
-            // Assuming we're only invoked once per instance:
-            Class<?> klass = findSerialClass(name);
-            // Should that not hold true:
-            // Class<?> klass = findLoadedClass(name);
-            // if (klass == null)
-            //     klass = findSerialClass(name);
-            resolveClass(klass);
-            return klass;
+        public Class<?> loadSerialClass(String name) throws ClassNotFoundException {
+            synchronized (getClassLoadingLock(name)) {
+                // Assuming we're only invoked once per instance:
+                Class<?> klass = findSerialClass(name);
+                // Should that not hold true:
+                // Class<?> klass = findLoadedClass(name);
+                // if (klass == null)
+                //     klass = findSerialClass(name);
+                resolveClass(klass);
+                return klass;
+            }
+        }
+
+        @Override
+        protected Object getClassLoadingLock(String name) {
+            return this;
         }
 
         @Override
