@@ -1,6 +1,7 @@
 package org.raku.nqp.jast2bc;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 
 import java.lang.invoke.CallSite;
@@ -59,14 +60,14 @@ public class JASTCompiler {
             } else {
                 // writing a jar
                 Manifest mf = new Manifest();
-
-                mf.getMainAttributes().put( Attributes.Name.MANIFEST_VERSION, "1.0" );
+                mf.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
                 if (c.hasMain)
-                    mf.getMainAttributes().put( Attributes.Name.MAIN_CLASS, c.name );
-
+                    mf.getMainAttributes().put(Attributes.Name.MAIN_CLASS, c.name);
                 JarOutputStream jos = new JarOutputStream(fos, mf);
-                String cn = c.name.replace('.', '/');
-                jos.putNextEntry(new JarEntry(cn + ".class"));
+
+                JarEntry jec = new JarEntry(c.name + ".class");
+                jec.setComment(c.name.replace(File.pathSeparatorChar, '.'));
+                jos.putNextEntry(jec);
                 jos.write(c.bytes);
                 jos.closeEntry();
 
@@ -76,12 +77,11 @@ public class JASTCompiler {
                 zos.write(c.serialized);
                 zos.finish();
 
-                JarEntry jes = new JarEntry(cn + ".serialized.xz");
+                JarEntry jes = new JarEntry(c.name + ".serialized.xz");
                 jes.setMethod(ZipEntry.STORED);
                 jes.setSize(baos.size());
                 jes.setCompressedSize(baos.size());
                 jes.setCrc(cos.getChecksum().getValue());
-                jes.setComment(cn);
                 jos.putNextEntry(jes);
                 baos.writeTo(jos);
                 jos.closeEntry();
