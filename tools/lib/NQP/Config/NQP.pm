@@ -249,7 +249,7 @@ sub configure_jars {
             jline => [qw<3rdparty jline jline-1.0.jar>],
             jna => [qw<3rdparty jna jna-4.5.0.jar>],
             'jna-platform' => [qw<3rdparty jna jna-platform-4.5.0.jar>],
-            xz => [qw<3rdparty xz xz-1.9.jar>],
+            lz4 => [qw<3rdparty lz4 lz4-java-1.8.0.jar>],
         }
     );
 }

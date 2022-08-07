@@ -32,4 +32,4 @@ DIR=$(dirname -- "$EXEC")
 @setenv(JAR_DIR)@@q(@jar_dir@)@
 @setenv(LIB_DIR)@@q(@lib_dir@)@
 
-@exec(java)@ -Dnqp.execname="$EXEC" -XX:+AggressiveHeap -XX:+AllowParallelDefineClass -Xbootclasspath/a:"@cur_dir@@envvar(LIB_DIR)@@cpsep@@nfp(@envvar(JAR_DIR)@/nqp-runtime.jar)@@cpsep@@nfp(@envvar(JAR_DIR)@/@asmfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jlinefile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnafile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnaplatformfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@xzfile@)@@cpsep@@nfp(@envvar(LIB_DIR)@/nqp.jar)@" -cp "@cur_dir@@envvar(LIB_DIR)@" nqp "@sh_allparams@"
+@exec(java)@ -Dnqp.execname="$EXEC" -XX:+AggressiveHeap -XX:+AllowParallelDefineClass -Xbootclasspath/a:"@cur_dir@@envvar(LIB_DIR)@@cpsep@@nfp(@envvar(JAR_DIR)@/nqp-runtime.jar)@@cpsep@@nfp(@envvar(JAR_DIR)@/@asmfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jlinefile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnafile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@jnaplatformfile@)@@cpsep@@nfp(@envvar(JAR_DIR)@/@lz4file@)@@cpsep@@nfp(@envvar(LIB_DIR)@/nqp.jar)@" -cp "@cur_dir@@envvar(LIB_DIR)@" nqp "@sh_allparams@"

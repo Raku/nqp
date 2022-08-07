@@ -1,6 +1,7 @@
 package org.raku.nqp.runtime;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.EOFException;
@@ -25,8 +26,8 @@ import java.util.WeakHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
-import org.tukaani.xz.CloseIgnoringInputStream;
-import org.tukaani.xz.XZInputStream;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4DecompressorWithLength;
 
 public class LibraryLoader {
     static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
@@ -135,7 +136,7 @@ public class LibraryLoader {
                     name = je.getComment();
                     bytes = readToHeapBuffer(jis);
                 }
-                else if (jf.endsWith(".serialized.xz") && serial == null)
+                else if (jf.endsWith(".serialized.lz4") && serial == null)
                     serial = readToHeapBuffer(jis);
                 else if (jf.endsWith(".serialized") && serial == null)
                     serial = readToHeapBuffer(jis);
@@ -166,9 +167,10 @@ public class LibraryLoader {
         return ByteBuffer.wrap(is.readAllBytes());
     }
 
-    public static ByteBuffer readToHeapBufferXz(InputStream is) throws IOException {
-        XZInputStream zis = new XZInputStream(new CloseIgnoringInputStream(is));
-        return ByteBuffer.wrap(zis.readAllBytes());
+    public static ByteBuffer readToHeapBufferLz4(InputStream is) throws IOException {
+        LZ4Factory lf = LZ4Factory.fastestInstance();
+        LZ4DecompressorWithLength ld = new LZ4DecompressorWithLength(lf.fastDecompressor());
+        return ByteBuffer.wrap(ld.decompress(is.readAllBytes()));
     }
 
     private static abstract class StreamClassLoader extends ClassLoader {

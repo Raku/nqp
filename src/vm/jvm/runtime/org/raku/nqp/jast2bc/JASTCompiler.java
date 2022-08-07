@@ -1,6 +1,5 @@
 package org.raku.nqp.jast2bc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -15,7 +14,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
-import java.util.zip.CheckedOutputStream;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
@@ -32,8 +30,8 @@ import org.raku.nqp.runtime.ThreadContext;
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.runtime.Ops;
 
-import org.tukaani.xz.LZMA2Options;
-import org.tukaani.xz.XZOutputStream;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4CompressorWithLength;
 
 public class JASTCompiler {
     public static JavaClass buildClass(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) {
@@ -71,22 +69,21 @@ public class JASTCompiler {
                 jos.write(c.bytes);
                 jos.closeEntry();
 
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                CheckedOutputStream cos = new CheckedOutputStream(baos, new CRC32());
-                XZOutputStream zos = new XZOutputStream(cos, new LZMA2Options());
-                zos.write(c.serialized);
-                zos.finish();
+                LZ4Factory lf = LZ4Factory.fastestInstance();
+                LZ4CompressorWithLength lc = new LZ4CompressorWithLength(lf.fastCompressor());
+                byte[] digest = lc.compress(c.serialized);
+                CRC32 cipher = new CRC32();
+                cipher.update(digest, 0, digest.length);
 
-                JarEntry jes = new JarEntry(c.name + ".serialized.xz");
+                JarEntry jes = new JarEntry(c.name + ".serialized.lz4");
                 jes.setMethod(ZipEntry.STORED);
-                jes.setSize(baos.size());
-                jes.setCompressedSize(baos.size());
-                jes.setCrc(cos.getChecksum().getValue());
+                jes.setSize(digest.length);
+                jes.setCompressedSize(digest.length);
+                jes.setCrc(cipher.getValue());
                 jos.putNextEntry(jes);
-                baos.writeTo(jos);
+                jos.write(digest);
                 jos.closeEntry();
 
-                zos.close();
                 jos.close();
             }
         }
