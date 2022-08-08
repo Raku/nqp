@@ -281,8 +281,8 @@ public class LibraryLoader {
     private static class MemoryClassLoader extends ClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        private ByteBuffer bytes;
-        private ByteBuffer serial;
+        private final ByteBuffer bytes;
+        private final ByteBuffer serial;
 
         protected MemoryClassLoader(ByteBuffer bytes, ByteBuffer serial) {
             super();
