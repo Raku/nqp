@@ -167,11 +167,17 @@ public class LibraryLoader {
     }
 
     private static abstract class StreamClassLoader extends ClassLoader {
+        protected final String filename;
         protected InputStream classfile;
 
-        protected StreamClassLoader(InputStream classfile) {
+        protected StreamClassLoader(String filename, InputStream classfile) {
             super();
+            this.filename = filename;
             this.classfile = classfile;
+        }
+
+        public String getFileName() {
+            return filename;
         }
 
         protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
@@ -206,32 +212,25 @@ public class LibraryLoader {
     private static class FileClassLoader extends StreamClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        final String fn;
-
-        protected FileClassLoader(String fn) {
-            super(null);
-            this.fn = fn;
-        }
-
-        public String getFileName() {
-            return fn;
+        protected FileClassLoader(String filename) {
+            super(filename, null);
         }
 
         @Override
         protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
             try {
-                classfile = Files.newInputStream(Paths.get(fn), StandardOpenOption.READ);
+                classfile = Files.newInputStream(Paths.get(filename), StandardOpenOption.READ);
                 Class<?> klass = super.findSerialClass(
-                    name == null ? fn.replace(File.pathSeparatorChar, '.') : name);
+                    name == null ? filename.replace(File.pathSeparatorChar, '.') : name);
                 classfile.close();
                 classfile = null;
                 return klass;
             }
             catch (InvalidPathException e) {
-                throw new ClassNotFoundException("no such classfile " + fn, e);
+                throw new ClassNotFoundException("no such classfile " + filename, e);
             }
             catch (IllegalArgumentException | UnsupportedOperationException | IOException e) {
-                throw new ClassNotFoundException("cannot read " + fn, e);
+                throw new ClassNotFoundException("cannot read " + filename, e);
             }
         }
 
@@ -244,39 +243,32 @@ public class LibraryLoader {
     private static class JarFileClassLoader extends StreamClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        final String fn;
-
-        protected JarFileClassLoader(String fn) {
-            super(null);
-            this.fn = fn;
-        }
-
-        public String getFileName() {
-            return fn;
+        protected JarFileClassLoader(String filename) {
+            super(filename, null);
         }
 
         @Override
         protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
-            try (JarFile jar = new JarFile(fn)) {
+            try (JarFile jar = new JarFile(filename)) {
                 JarEntry entry = null;
                 for (Enumeration<JarEntry> entries = jar.entries(); entries.hasMoreElements(); )
                     if ((entry = entries.nextElement()).getName().endsWith(".class"))
                         break;
                 if (entry == null)
-                    throw new ClassNotFoundException(name + "in " + fn);
+                    throw new ClassNotFoundException(name + " in " + filename);
                 classfile = jar.getInputStream(entry);
                 return super.findSerialClass(
                     name == null ? entry.getComment() : name);
             }
             catch (IOException | ClassNotFoundException e) {
-                throw new ClassNotFoundException(name + "in " + fn, e);
+                throw new ClassNotFoundException(name + " in " + filename, e);
             }
         }
 
         @Override
         public InputStream getResourceAsStream(String name) {
             try {
-                JarFile jar = new JarFile(fn);
+                JarFile jar = new JarFile(filename);
                 JarEntry entry = jar.getJarEntry(name);
                 return entry == null ? null : jar.getInputStream(entry);
             }
