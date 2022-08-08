@@ -1,17 +1,13 @@
 package org.raku.nqp.runtime;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.BufferUnderflowException;
@@ -61,7 +57,6 @@ public class LibraryLoader {
             resolveClass(tc, loadFile(filename, tc.gc.sharingHint));
         }
         catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
-            e.printStackTrace(System.err);
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
@@ -84,7 +79,6 @@ public class LibraryLoader {
             resolveClass(tc, loadJar(buffer));
         }
         catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
-            e.printStackTrace(System.err);
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
@@ -124,11 +118,10 @@ public class LibraryLoader {
     }
 
     public static Class<?> loadJar(ByteBuffer buffer) throws IOException, IllegalArgumentException, ClassNotFoundException {
+        String name = null;
+        ByteBuffer bytes = null;
+        ByteBuffer serial = null;
         try (JarInputStream jis = new JarInputStream(new ByteBufferedInputStream(buffer))) {
-            String name = null;
-            int length = -1;
-            ByteBuffer bytes = null;
-            ByteBuffer serial = null;
             JarEntry je;
             while ((je = jis.getNextJarEntry()) != null) {
                 String jf = je.getName();
@@ -143,12 +136,12 @@ public class LibraryLoader {
                 else
                     throw new IllegalArgumentException("Bytecode jar contains unexpected file " + jf);
             }
-            if (bytes == null)
-                throw new IllegalArgumentException("Bytecode jar lacks class file");
-            if (serial == null)
-                throw new IllegalArgumentException("Bytecode jar lacks serialization file");
-            return new MemoryClassLoader(bytes, serial).loadSerialClass(name);
         }
+        if (bytes == null)
+            throw new IllegalArgumentException("Bytecode jar lacks class file");
+        if (serial == null)
+            throw new IllegalArgumentException("Bytecode jar lacks serialization file");
+        return new MemoryClassLoader(bytes, serial).loadSerialClass(name);
     }
 
     public static void resolveClass(ThreadContext tc, Class<?> c) {
@@ -307,7 +300,7 @@ public class LibraryLoader {
 
         protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
             try {
-                return defineClass(name, this.bytes, null);
+                return defineClass(name, bytes, null);
             }
             catch (NoClassDefFoundError e) {
                 throw new ClassNotFoundException("serial class not named " + name, e);
