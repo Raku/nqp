@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -123,15 +124,15 @@ public class LibraryLoader {
         ByteClassLoader parent
     ) throws IOException, IllegalArgumentException, ClassNotFoundException {
         String name = null;
-        ByteBuffer bytes = null;
+        ByteBuffer classfile = null;
         ByteBuffer serial = null;
         try (JarInputStream jis = new JarInputStream(new ByteBufferedInputStream(buffer))) {
             JarEntry je;
             while ((je = jis.getNextJarEntry()) != null) {
                 String jf = je.getName();
-                if (jf.endsWith(".class") && bytes == null) {
+                if (jf.endsWith(".class") && classfile == null) {
                     name = je.getComment();
-                    bytes = readToHeapBuffer(jis);
+                    classfile = readToHeapBuffer(jis);
                 }
                 else if (jf.endsWith(".serialized.lz4") && serial == null)
                     serial = readToHeapBuffer(jis);
@@ -141,11 +142,11 @@ public class LibraryLoader {
                     throw new IllegalArgumentException("Bytecode jar contains unexpected file " + jf);
             }
         }
-        if (bytes == null)
+        if (classfile == null)
             throw new IllegalArgumentException("Bytecode jar lacks class file");
         if (serial == null)
             throw new IllegalArgumentException("Bytecode jar lacks serialization file");
-        return new MemoryClassLoader(bytes, serial, parent).loadSerialClass(name);
+        return new MemoryClassLoader(classfile, serial, parent).loadSerialClass(name);
     }
 
     public static void resolveClass(ThreadContext tc, Class<?> c) {
@@ -305,27 +306,31 @@ public class LibraryLoader {
     private static class MemoryClassLoader extends SerialClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        private final ByteBuffer bytes;
+        private final WeakReference<ByteBuffer> classfile;
         private final ByteBuffer serial;
 
-        protected MemoryClassLoader(ByteBuffer bytes, ByteBuffer serial, ByteClassLoader parent) {
+        protected MemoryClassLoader(ByteBuffer classfile, ByteBuffer serial, ByteClassLoader parent) {
             super(parent);
-            this.bytes = bytes;
+            this.classfile = new WeakReference(classfile);
             this.serial = serial;
         }
 
         protected Class<?> findSerialClass(String name) throws ClassNotFoundException {
-            try {
-                return defineClass(name, bytes, null);
+            ByteBuffer classfile = this.classfile.get();
+            if (classfile == null) {
+                throw new ClassNotFoundException("in-memory classfile missing; probably already loaded " + name);
+            }
+            else try {
+                return defineClass(name, classfile, null);
             }
             catch (NoClassDefFoundError e) {
-                throw new ClassNotFoundException("serial class not named " + name, e);
+                throw new ClassNotFoundException("classfile not named " + name, e);
             }
             catch (IndexOutOfBoundsException e) {
-                throw new ClassNotFoundException("could not read serial class " + name, e);
+                throw new ClassNotFoundException("could not read classfile " + name, e);
             }
             catch (SecurityException e) {
-                throw new ClassNotFoundException("serial class is insecurely named " + name, e);
+                throw new ClassNotFoundException("classfile is insecurely named " + name, e);
             }
         }
 
