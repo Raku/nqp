@@ -5340,32 +5340,40 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc, "serialize was not passed a valid SCRef");
         }
     }
-    public static String deserialize(String blob, SixModelObject scRef, SixModelObject sh, SixModelObject cr, SixModelObject conflict, ThreadContext tc) throws IOException {
-        if (scRef instanceof SCRefInstance) {
-            SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
+    public static String deserialize(
+        String blob,
+        SixModelObject scRef,
+        SixModelObject sh,
+        SixModelObject cr,
+        SixModelObject conflict,
+        ThreadContext tc
+    ) {
+        if (!(scRef instanceof SCRefInstance))
+            throw ExceptionHandling.dieInternal(tc, "deserialize was not passed a valid SCRef");
+        SerializationContext sc = ((SCRefInstance)scRef).referencedSC;
 
-            String[] shArray = new String[(int)sh.elems(tc)];
-            for (int i = 0; i < shArray.length; i++) {
-                sh.at_pos_native(tc, i);
-                shArray[i] = tc.native_s;
-            }
+        String[] shArray = new String[(int)sh.elems(tc)];
+        for (int i = 0; i < shArray.length; i++) {
+            sh.at_pos_native(tc, i);
+            shArray[i] = tc.native_s;
+        }
 
-            CodeRef[] crArray;
-            int crCount;
+        CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
+        CodeRef[] crArray;
+        int crCount;
+        if (isnull(cr) == 1) {
+            crArray = cu.qbidToCodeRef;
+            crCount = cu.serializedCodeRefCount();
+        } else {
+            crArray = new CodeRef[(int)cr.elems(tc)];
+            crCount = crArray.length;
+            for (int i = 0; i < crArray.length; i++)
+                crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
+        }
 
-            CompilationUnit cu = tc.curFrame.codeRef.staticInfo.compUnit;
-            if (isnull(cr) == 1) {
-                crArray = cu.qbidToCodeRef;
-                crCount = cu.serializedCodeRefCount();
-            } else {
-                crArray = new CodeRef[(int)cr.elems(tc)];
-                crCount = crArray.length;
-                for (int i = 0; i < crArray.length; i++)
-                    crArray[i] = (CodeRef)cr.at_pos_boxed(tc, i);
-            }
-
-            ByteBuffer binaryBlob;
-            if (blob == null) {
+        ByteBuffer binaryBlob;
+        if (blob == null)
+            try {
                 Class<?> cuKlass = cu.getClass();
                 String cuName = cuKlass.getSimpleName();
                 InputStream cuStream = cuKlass.getResourceAsStream(cuName + ".serialized.lz4");
@@ -5377,25 +5385,24 @@ public final class Ops {
                         binaryBlob = LibraryLoader.readToHeapBuffer(cuStream);
                     }
                 }
-                catch (IOException e) {
-                    throw ExceptionHandling.dieInternal(tc, e);
-                }
                 finally {
                     cuStream.close();
                 }
-            } else {
+            }
+            catch (IOException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
+        else
+            try {
                 binaryBlob = Base64.decode(blob);
             }
+            catch (IllegalArgumentException e) {
+                throw ExceptionHandling.dieInternal(tc, e);
+            }
 
-            SerializationReader sr = new SerializationReader(
-                    tc, sc, shArray, crArray, crCount, binaryBlob);
-            sr.deserialize();
-
-            return blob;
-        }
-        else {
-            throw ExceptionHandling.dieInternal(tc, "deserialize was not passed a valid SCRef");
-        }
+        SerializationReader sr = new SerializationReader(tc, sc, shArray, crArray, crCount, binaryBlob);
+        sr.deserialize();
+        return blob;
     }
     public static SixModelObject wval(String sc, long idx, ThreadContext tc) {
         return tc.gc.scs.get(sc).getObject((int)idx);
@@ -6502,16 +6509,13 @@ public final class Ops {
         LibraryLoader.load(tc, filename);
         return filename;
     }
-    public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) throws Exception {
-        if (buffer instanceof VMArrayInstance_i8) {
+    public static SixModelObject loadbytecodebuffer(SixModelObject buffer, ThreadContext tc) {
+        if (buffer instanceof VMArrayInstance_i8)
             LibraryLoader.load(tc, ((VMArrayInstance_i8)buffer).slots);
-        }
-        else if (buffer instanceof VMArrayInstance_u8) {
+        else if (buffer instanceof VMArrayInstance_u8)
             LibraryLoader.load(tc, ((VMArrayInstance_u8)buffer).slots);
-        }
-        else {
-            throw new RuntimeException("Must pass a uint8 or int8 buffer to loadbytecodebuffer");
-        }
+        else
+            throw ExceptionHandling.dieInternal(tc, "loadbytecodebuffer expects a uint8 or int8 VMArray");
         return buffer;
     }
     public static SixModelObject settypehll(SixModelObject type, String language, ThreadContext tc) {
