@@ -47,6 +47,13 @@ public class JASTCompiler {
         }
     }
 
+    private static final LZ4CompressorWithLength lz4 =
+        new LZ4CompressorWithLength(LZ4Factory.fastestInstance().highCompressor(8));
+    // The lower the compression level, the faster the serialization, at the
+    // expense of deserialization and disk space; the higher the compression
+    // level, the lower the disk space, at the expense of both serialization
+    // and deserialization. 8 is a sweet spot of sorts.
+
     public static void writeClass(SixModelObject jast, SixModelObject jastNodes, String filename, ThreadContext tc) {
         JavaClass c = buildClass(jast, jastNodes, false, tc);
         try {
@@ -69,9 +76,7 @@ public class JASTCompiler {
                 jos.write(c.bytes);
                 jos.closeEntry();
 
-                LZ4Factory lf = LZ4Factory.fastestInstance();
-                LZ4CompressorWithLength lc = new LZ4CompressorWithLength(lf.fastCompressor());
-                byte[] digest = lc.compress(c.serialized);
+                byte[] digest = lz4.compress(c.serialized);
                 CRC32 cipher = new CRC32();
                 cipher.update(digest, 0, digest.length);
 

@@ -165,10 +165,11 @@ public class LibraryLoader {
         return ByteBuffer.wrap(is.readAllBytes());
     }
 
+    private static final LZ4DecompressorWithLength lz4 =
+        new LZ4DecompressorWithLength(LZ4Factory.fastestInstance().fastDecompressor());
+
     public static ByteBuffer readToHeapBufferLz4(InputStream is) throws IOException {
-        LZ4Factory lf = LZ4Factory.fastestInstance();
-        LZ4DecompressorWithLength ld = new LZ4DecompressorWithLength(lf.fastDecompressor());
-        return ByteBuffer.wrap(ld.decompress(is.readAllBytes()));
+        return ByteBuffer.wrap(lz4.decompress(is.readAllBytes()));
     }
 
     private static abstract class SerialClassLoader extends ClassLoader {
