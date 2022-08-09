@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -26,16 +25,14 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4DecompressorWithLength;
 
 public class LibraryLoader {
-    static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
+    private static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap< >();
 
-    public static void load(ThreadContext tc, String origFilename) {
+    public static void load(ThreadContext tc, String filename) {
         // Don't load the same thing multiple times.
-        if (!tc.gc.loaded.add(origFilename))
+        if (!tc.gc.byteClassLoader.addRef(filename))
             return;
-
-        try {
+        else try {
             // Read in class data.
-            String filename = origFilename;
             File file = new File(filename);
             if (!file.exists() && filename.equals("ModuleLoader.class")) {
                 /* We special case the initial ModuleLoader loading. */
@@ -54,7 +51,7 @@ public class LibraryLoader {
                 }
             }
 
-            resolveClass(tc, loadFile(filename, tc.gc.sharingHint));
+            resolveClass(tc, loadFile(filename, tc.gc.byteClassLoader, tc.gc.sharingHint));
         }
         catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(tc, e);
@@ -76,18 +73,22 @@ public class LibraryLoader {
 
     public static void load(ThreadContext tc, ByteBuffer buffer) {
         try {
-            resolveClass(tc, loadJar(buffer));
+            resolveClass(tc, loadJar(buffer, tc.gc.byteClassLoader));
         }
         catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
             throw ExceptionHandling.dieInternal(tc, e);
         }
     }
 
-    public static Class<?> loadFile(String fn, boolean shared) throws IOException, IllegalArgumentException, ClassNotFoundException {
+    public static Class<?> loadFile(
+        String fn,
+        ByteClassLoader parent,
+        boolean shared
+    ) throws IOException, IllegalArgumentException, ClassNotFoundException {
         if (shared)
             return sharedClasses.computeIfAbsent(fn, (k) -> {
                 try {
-                    return loadFile(k, false);
+                    return loadFile(k, parent, false);
                 }
                 catch (IOException | IllegalArgumentException | ClassNotFoundException e) {
                     return null;
@@ -96,11 +97,11 @@ public class LibraryLoader {
         else try (RandomAccessFile fh = new RandomAccessFile(fn, "r")) {
             switch (fh.readInt()) {
                 case 0xCAFEBABE: // classfile
-                    return loadClass(fn);
+                    return loadClass(fn, parent);
                 default: // JAR
                     // The manifest alone gives us at least an int's width. Let
                     // the JarInputStream decide if this is a JAR or not.
-                    return loadJar(fn);
+                    return loadJar(fn, parent);
             }
         }
         catch (EOFException e) {
@@ -109,15 +110,18 @@ public class LibraryLoader {
 
     }
 
-    public static Class<?> loadClass(String fn) throws IOException, ClassNotFoundException {
-        return new FileClassLoader(fn).loadSerialClass(null);
+    public static Class<?> loadClass(String fn, ByteClassLoader parent) throws IOException, ClassNotFoundException {
+        return new FileClassLoader(fn, parent).loadSerialClass(null);
     }
 
-    public static Class<?> loadJar(String fn) throws IOException, ClassNotFoundException {
-        return new JarFileClassLoader(fn).loadSerialClass(null);
+    public static Class<?> loadJar(String fn, ByteClassLoader parent) throws IOException, ClassNotFoundException {
+        return new JarFileClassLoader(fn, parent).loadSerialClass(null);
     }
 
-    public static Class<?> loadJar(ByteBuffer buffer) throws IOException, IllegalArgumentException, ClassNotFoundException {
+    public static Class<?> loadJar(
+        ByteBuffer buffer,
+        ByteClassLoader parent
+    ) throws IOException, IllegalArgumentException, ClassNotFoundException {
         String name = null;
         ByteBuffer bytes = null;
         ByteBuffer serial = null;
@@ -141,7 +145,7 @@ public class LibraryLoader {
             throw new IllegalArgumentException("Bytecode jar lacks class file");
         if (serial == null)
             throw new IllegalArgumentException("Bytecode jar lacks serialization file");
-        return new MemoryClassLoader(bytes, serial).loadSerialClass(name);
+        return new MemoryClassLoader(bytes, serial, parent).loadSerialClass(name);
     }
 
     public static void resolveClass(ThreadContext tc, Class<?> c) {
@@ -166,12 +170,44 @@ public class LibraryLoader {
         return ByteBuffer.wrap(ld.decompress(is.readAllBytes()));
     }
 
-    private static abstract class StreamClassLoader extends ClassLoader {
+    private static abstract class SerialClassLoader extends ClassLoader {
+        protected SerialClassLoader(ByteClassLoader parent) {
+            super(parent);
+        }
+
+        protected abstract Class<?> findSerialClass(String name) throws ClassNotFoundException;
+
+        protected synchronized Class<?> loadSerialClass(String name) throws ClassNotFoundException {
+            Class<?> klass = name == null ? null : findLoadedClass(name);
+            if (klass == null) {
+                klass = getRead(name);
+                if (klass == null) {
+                    setRead(name, klass = findSerialClass(name));
+                    if (klass == null)
+                        throw new ClassNotFoundException(name);
+                }
+            }
+            resolveClass(klass);
+            return klass;
+        }
+
+        private Class<?> getRead(String name) {
+            ByteClassLoader parent = (ByteClassLoader)getParent();
+            return parent == null ? null : parent.getRead(this, name);
+        }
+
+        private Class<?> setRead(String name, Class<?> klass) {
+            ByteClassLoader parent = (ByteClassLoader)getParent();
+            return parent == null ? null : parent.setRead(this, name, klass);
+        }
+    }
+
+    private static abstract class StreamClassLoader extends SerialClassLoader {
         protected final String filename;
         protected InputStream classfile;
 
-        protected StreamClassLoader(String filename, InputStream classfile) {
-            super();
+        protected StreamClassLoader(String filename, InputStream classfile, ByteClassLoader parent) {
+            super(parent);
             this.filename = filename;
             this.classfile = classfile;
         }
@@ -195,25 +231,13 @@ public class LibraryLoader {
                 throw new ClassNotFoundException("serial class is insecurely named " + name, e);
             }
         }
-
-        protected synchronized Class<?> loadSerialClass(String name) throws ClassNotFoundException {
-            Class<?> klass = null;
-            if (name != null)
-                klass = findLoadedClass(name);
-            if (klass == null)
-                klass = findSerialClass(name);
-            if (klass == null)
-                throw new ClassNotFoundException(name);
-            resolveClass(klass);
-            return klass;
-        }
     }
 
     private static class FileClassLoader extends StreamClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        protected FileClassLoader(String filename) {
-            super(filename, null);
+        protected FileClassLoader(String filename, ByteClassLoader parent) {
+            super(filename, null, parent);
         }
 
         @Override
@@ -243,8 +267,8 @@ public class LibraryLoader {
     private static class JarFileClassLoader extends StreamClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
-        protected JarFileClassLoader(String filename) {
-            super(filename, null);
+        protected JarFileClassLoader(String filename, ByteClassLoader parent) {
+            super(filename, null, parent);
         }
 
         @Override
@@ -278,14 +302,14 @@ public class LibraryLoader {
         }
     }
 
-    private static class MemoryClassLoader extends ClassLoader {
+    private static class MemoryClassLoader extends SerialClassLoader {
         static { ClassLoader.registerAsParallelCapable(); }
 
         private final ByteBuffer bytes;
         private final ByteBuffer serial;
 
-        protected MemoryClassLoader(ByteBuffer bytes, ByteBuffer serial) {
-            super();
+        protected MemoryClassLoader(ByteBuffer bytes, ByteBuffer serial, ByteClassLoader parent) {
+            super(parent);
             this.bytes = bytes;
             this.serial = serial;
         }
@@ -303,18 +327,6 @@ public class LibraryLoader {
             catch (SecurityException e) {
                 throw new ClassNotFoundException("serial class is insecurely named " + name, e);
             }
-        }
-
-        protected synchronized Class<?> loadSerialClass(String name) throws ClassNotFoundException {
-            Class<?> klass = null;
-            if (name != null)
-                klass = findLoadedClass(name);
-            if (klass == null)
-                klass = findSerialClass(name);
-            if (klass == null)
-                throw new ClassNotFoundException(name + " in raw bytecode");
-            resolveClass(klass);
-            return klass;
         }
 
         @Override

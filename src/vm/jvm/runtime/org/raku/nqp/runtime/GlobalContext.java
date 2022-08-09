@@ -173,11 +173,6 @@ public class GlobalContext {
     public HashMap<String, SixModelObject> scRefs;
 
     /**
-     * Set of library filenames which have been loaded so far.
-     */
-    public Set<String> loaded;
-
-    /**
      * Whether to dump VM-level stack traces for all exceptions.
      */
     public boolean noisyExceptions;
@@ -242,7 +237,6 @@ public class GlobalContext {
         scRefs = new HashMap<String, SixModelObject>();
         compilerRegistry = new HashMap<String, SixModelObject>();
         hllSyms = new HashMap<String, HashMap<String, SixModelObject>>();
-        loaded = new CopyOnWriteArraySet<String>();
 
         contConfigs = new HashMap<String, ContainerConfigurer>();
         contConfigs.put("code_pair", new CodePairContainerConfigurer());
