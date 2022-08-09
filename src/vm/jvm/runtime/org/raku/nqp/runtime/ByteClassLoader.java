@@ -33,8 +33,9 @@ public class ByteClassLoader extends ClassLoader {
     }
 
     public Class<?> setMade(String name, Class<?> klass) {
-        if (name != null)
-            made.put(name, new SoftReference(klass));
+        if (name == null)
+            name = klass.getName();
+        made.put(name, new SoftReference(klass));
         return klass;
     }
 
@@ -42,14 +43,14 @@ public class ByteClassLoader extends ClassLoader {
         if (name != null && made.containsKey(name))
             return made.get(name).get();
         if (child != null && read.containsKey(child))
-            if (made.containsKey(name = read.get(name)))
+            if (made.containsKey(name = read.get(child)))
                 return made.get(name).get();
         return null;
     }
 
     public Class<?> setRead(ClassLoader child, String name, Class<?> klass) {
         if (name == null)
-            name = klass.getCanonicalName();
+            name = klass.getName();
         if (child != null)
             read.put(child, name);
         made.put(name, new SoftReference(klass));
@@ -58,6 +59,6 @@ public class ByteClassLoader extends ClassLoader {
 
     public Class<?> defineClass(String name, byte[] bytes) throws ClassFormatError {
         Class<?> made = getMade(name);
-        return made == null ? setMade(name, defineClass(name, bytes, 0, bytes.length)) : null;
+        return made == null ? setMade(name, defineClass(name, bytes, 0, bytes.length)) : made;
     }
 }
