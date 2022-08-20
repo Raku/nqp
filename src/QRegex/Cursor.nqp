@@ -261,7 +261,7 @@ role NQPMatchRole is export {
             my $name := $_.key;
             my $value := $_.value;
             my $bvalue := nqp::atkey(nqp::getattr($!braid, Braid, '$!slangs'),$name);
-            if nqp::isnull($bvalue) || nqp::objectid($bvalue) != nqp::objectid($value) {
+            if nqp::isnull($bvalue) || !nqp::eqat($name, 'H:', 0) && nqp::objectid($bvalue) != nqp::objectid($value) {
                 my $ERR := NQPFileHandle.new.wrap(nqp::getstderr());
                 $ERR.say("Deprecated use of %*LANG\<$name> assignment detected in " ~ ($tag || '') ~ "; module should export syntax using \$*LANG.define_slang(\"$name\",<grammar>,<actions>) instead")
                     unless nqp::index($name,"-actions") > 0;
