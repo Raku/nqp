@@ -1,13 +1,14 @@
 package org.raku.nqp.sixmodel.reprs;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+import org.raku.nqp.runtime.ExceptionHandling;
 import org.raku.nqp.runtime.Ops;
 import org.raku.nqp.runtime.ThreadContext;
 import org.raku.nqp.sixmodel.STable;
 import org.raku.nqp.sixmodel.SerializationReader;
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.TypeObject;
-
-import java.lang.reflect.Field;
-import sun.misc.Unsafe;
 
 public class P6OpaqueBaseInstance extends SixModelObject {
     // If this is not null, all operations are delegate to it. Used when we
@@ -116,51 +117,49 @@ public class P6OpaqueBaseInstance extends SixModelObject {
             return super.is_attribute_initialized(tc, class_handle, name, hint);
     }
 
-    private Unsafe unsafe;
-    private long scalarValueOffset;
-
-    @SuppressWarnings("restriction")
-    private void ensureAtomicsReady() {
-        if (unsafe == null) {
-            try {
-                Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-                unsafeField.setAccessible(true);
-                unsafe = (Unsafe)unsafeField.get(null);
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     @Override
     public SixModelObject cas_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
                                               String name, SixModelObject expected, SixModelObject value) {
-        ensureAtomicsReady();
+        SixModelObject result = null;
         try {
-            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
-                "field_" + resolveAttribute(class_handle, name)));
-            return unsafe.compareAndSwapObject(this, offset, expected, value)
-                ? expected
-                : (SixModelObject)unsafe.getObjectVolatile(this, offset);
+            String attribute = "field_" + resolveAttribute(class_handle, name);
+            VarHandle variable = MethodHandles.lookup().in(this.getClass())
+                .findVarHandle(this.getClass(), attribute, SixModelObject.class);
+            result = (SixModelObject)variable.compareAndExchange(this, expected, value);
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
+        return result == null ? Ops.createNull(tc) : result;
     }
 
     @Override
     public void atomic_bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
                                             String name, SixModelObject value) {
-        ensureAtomicsReady();
         try {
-            long offset = unsafe.objectFieldOffset(this.getClass().getDeclaredField(
-                "field_" + resolveAttribute(class_handle, name)));
-            unsafe.putObjectVolatile(this, offset, value);
+            String attribute = "field_" + resolveAttribute(class_handle, name);
+            VarHandle variable = MethodHandles.lookup().in(this.getClass())
+                .findVarHandle(this.getClass(), attribute, SixModelObject.class);
+            variable.setRelease(this, value);
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
+    }
+
+    @Override
+    public SixModelObject atomic_load_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name) {
+        SixModelObject result = null;
+        try {
+            String attribute = "field_" + resolveAttribute(class_handle, name);
+            VarHandle variable = MethodHandles.lookup().in(this.getClass())
+                .findVarHandle(this.getClass(), attribute, SixModelObject.class);
+            result = (SixModelObject)variable.getAcquire(this);
+        }
+        catch (Exception e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
+        return result == null ? Ops.createNull(tc) : result;
     }
 
     public SixModelObject posDelegate() {

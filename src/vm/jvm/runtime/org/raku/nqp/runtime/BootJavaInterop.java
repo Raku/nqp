@@ -232,9 +232,9 @@ public class BootJavaInterop {
 
         CompilationUnit adaptorUnit;
         try {
-            adaptorUnit = (CompilationUnit) adaptor.constructed.newInstance();
-        } catch (ReflectiveOperationException roe) {
-            throw new RuntimeException(roe);
+            adaptorUnit = (CompilationUnit) adaptor.constructed.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
         adaptorUnit.initializeCompilationUnit(tc);
 

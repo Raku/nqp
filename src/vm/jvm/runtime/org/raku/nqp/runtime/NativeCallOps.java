@@ -115,7 +115,7 @@ public final class NativeCallOps {
                     CPPStructREPRData repr_data = (CPPStructREPRData)returns.st.REPRData;
                     Class<?>    structClass     = repr_data.structureClass;
                     cppstruct                   = (CPPStructInstance)returns.st.REPR.allocate(tc, returns.st);
-                    cppstruct.storage           = (Structure)structClass.newInstance();
+                    cppstruct.storage           = (Structure)structClass.getDeclaredConstructor().newInstance();
                     cArgs[i]                    = cppstruct.storage;
                 }
                 else {
@@ -188,7 +188,9 @@ public final class NativeCallOps {
                 return toNQPType(tc, call.ret_type, returns, returned);
             }
         }
-        catch (ControlException e) { throw e; }
+        catch (ControlException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
         catch (Throwable t) {
             throw ExceptionHandling.dieInternal(tc, t);
         }

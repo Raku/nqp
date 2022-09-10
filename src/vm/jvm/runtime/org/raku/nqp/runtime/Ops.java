@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.VarHandle;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -55,6 +56,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -140,35 +142,11 @@ import org.raku.nqp.sixmodel.reprs.VMNull;
 import org.raku.nqp.sixmodel.reprs.VMNullInstance;
 import org.raku.nqp.sixmodel.reprs.VMThreadInstance;
 
-import sun.misc.Unsafe;
-
 /**
  * Contains complex operations that are more involved than the simple ops that the
  * JVM makes available.
  */
 public final class Ops {
-    /**
-     * Temporary workaround to avoid warnings about 'illegal reflective access'
-     * (taken from https://stackoverflow.com/a/46458447).
-     * Please note that this is needed for Rakudo, too.
-     * Once something else (e.g. VarHandle) is used instead
-     * of sun.misc.Unsafe this workaround can be removed.
-     */
-    public static void disableWarning() {
-        try {
-            Field theUnsafe = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            Unsafe u = (Unsafe)theUnsafe.get(null);
-
-            Class cls = Class.forName("jdk.internal.module.IllegalAccessLogger");
-            Field logger = cls.getDeclaredField("logger");
-            u.putObjectVolatile(cls, u.staticFieldOffset(logger), null);
-        }
-        catch (Exception e) {
-            // ignore (that's the raison d'être for this method)
-        }
-    }
-
     private static SixModelObject theVMNull = null;
 
     /* I/O opcodes */
@@ -3827,8 +3805,10 @@ public final class Ops {
         else if (agg.st.REPR instanceof VMHash) {
             SixModelObject iterType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashIteratorType;
             VMIterInstance iter = (VMIterInstance)iterType.st.REPR.allocate(tc, iterType.st);
+            VMHashInstance hash = (VMHashInstance)agg;
+            Map<String, ?> storage = new HashMap< >(hash.storage);
             iter.target = agg;
-            iter.hashKeyIter = ((HashMap)((VMHashInstance)agg).storage.clone()).keySet().iterator();
+            iter.hashKeyIter = storage.keySet().iterator();
             iter.iterMode = VMIterInstance.MODE_HASH;
             return iter;
         }
@@ -6062,6 +6042,10 @@ public final class Ops {
         obj.atomic_bind_attribute_boxed(tc, class_handle, name, value);
         return value;
     }
+    public static SixModelObject barrierfull(ThreadContext tc) {
+        VarHandle.fullFence();
+        return createNull(tc);
+    }
 
     /* Asynchronousy operations. */
 
@@ -7042,12 +7026,12 @@ public final class Ops {
             return Long.MIN_VALUE;
         }
         else {
-            return new Double(in).longValue();
+            return Double.valueOf(in).longValue();
         }
     }
 
     public static double coerce_i2n(long in) {
-        return new Long(in).doubleValue();
+        return Long.valueOf(in).doubleValue();
     }
 
     /* Long literal workaround. */
@@ -7406,7 +7390,7 @@ public final class Ops {
         try {
             EvalResult res = (EvalResult)obj;
             Class<?> cuClass = tc.gc.byteClassLoader.defineClass(res.jc.name, res.jc.bytes);
-            res.cu = (CompilationUnit) cuClass.newInstance();
+            res.cu = (CompilationUnit) cuClass.getDeclaredConstructor().newInstance();
             if (compileeHLL != 0)
                 usecompileehllconfig(tc);
             res.cu.initializeCompilationUnit(tc);
@@ -7415,11 +7399,8 @@ public final class Ops {
             res.jc = null;
             return obj;
         }
-        catch (ControlException e) {
-            throw e;
-        }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw ExceptionHandling.dieInternal(tc, e);
         }
     }
     public static long iscompunit(SixModelObject obj, ThreadContext tc) {

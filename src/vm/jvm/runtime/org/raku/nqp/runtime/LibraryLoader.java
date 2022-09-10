@@ -6,17 +6,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 public class LibraryLoader {
-    static HashMap<String,Class<?>> sharedClassHash = new HashMap<String,Class<?>>();
+    static Map<String,Class<?>> sharedClasses = new ConcurrentHashMap<String,Class<?>>();
 
     public void load(ThreadContext tc, String origFilename) {
         // Don't load the same thing multiple times.
-        if (tc.gc.loaded.contains(origFilename))
+        if (!tc.gc.loaded.add(origFilename))
             return;
 
         try {
@@ -42,9 +43,6 @@ public class LibraryLoader {
 
             Class<?> c = loadFile(filename, tc.gc.sharingHint);
             loadClass(tc, c);
-
-            // Note that we already loaded it.
-            tc.gc.loaded.add(origFilename);
         }
         catch (ControlException e) {
             throw e;
@@ -68,10 +66,15 @@ public class LibraryLoader {
     }
 
     private static void loadClass(ThreadContext tc, Class<?> c) throws Throwable {
-        CompilationUnit cu = (CompilationUnit)c.newInstance();
-        cu.shared = tc.gc.sharingHint;
-        cu.initializeCompilationUnit(tc);
-        cu.runLoadIfAvailable(tc);
+        try {
+            CompilationUnit cu = (CompilationUnit)c.getDeclaredConstructor().newInstance();
+            cu.shared = tc.gc.sharingHint;
+            cu.initializeCompilationUnit(tc);
+            cu.runLoadIfAvailable(tc);
+        }
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
+        }
     }
 
     private static Class<?> loadJar(byte[] buffer) throws Exception {
@@ -98,16 +101,15 @@ public class LibraryLoader {
     }
 
     public static Class<?> loadFile(String cf, boolean shared) throws Exception {
-        if (shared) {
-            synchronized(sharedClassHash) {
-                if (sharedClassHash.containsKey(cf))
-                    return sharedClassHash.get(cf);
-
-                Class<?> n = loadFile(cf, false);
-                sharedClassHash.put(cf, n);
-                return n;
-            }
-        }
+        if (shared)
+            return sharedClasses.computeIfAbsent(cf, (k) -> {
+                try {
+                    return loadFile(k, false);
+                }
+                catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
         byte[] b = Files.readAllBytes( FileSystems.getDefault().getPath(cf) );
         long sig = b.length < 4 ? 0 :

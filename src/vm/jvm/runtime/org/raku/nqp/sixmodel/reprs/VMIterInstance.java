@@ -106,7 +106,7 @@ public class VMIterInstance extends SixModelObject {
     public String key_s(ThreadContext tc) {
         switch (iterMode) {
         case MODE_ARRAY:
-            return new Long(idx).toString();
+            return Long.valueOf(idx).toString();
         case MODE_HASH:
             if (beforeStart || afterEnd)
                 throw ExceptionHandling.dieInternal(tc, "You have not advanced to the first item of the hash iterator, or have gone past the end");

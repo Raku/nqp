@@ -364,6 +364,13 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-call', -> $capture {
                     $delegate);
             }
         }
+        elsif nqp::can($callee, 'CALL-ME') {
+            my $call-me := $callee.HOW.find_method($callee, 'CALL-ME');
+            my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+                $capture, 0, $call-me);
+            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-call',
+                $delegate);
+        }
         else {
             nqp::die("Cannot invoke object of type '{$callee.HOW.name($callee)}'");
         }

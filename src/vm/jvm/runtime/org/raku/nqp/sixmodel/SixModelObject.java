@@ -33,24 +33,27 @@ public abstract class SixModelObject implements Cloneable {
     public void get_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support natively typed attributes");
     }
-    public void bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+    public void bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, long hint, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support attributes");
     }
-    public void bind_attribute_native(ThreadContext tc,SixModelObject class_handle, String name, long hint) {
+    public void bind_attribute_native(ThreadContext tc, SixModelObject class_handle, String name, long hint) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support natively typed attributes");
     }
     public long is_attribute_initialized(ThreadContext tc, SixModelObject class_handle,
             String name, long hint) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support attributes");
     }
-    public SixModelObject cas_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+    public SixModelObject cas_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, SixModelObject expected, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support cas of attributes");
     }
-    public void atomic_bind_attribute_boxed(ThreadContext tc,SixModelObject class_handle,
+    public void atomic_bind_attribute_boxed(ThreadContext tc, SixModelObject class_handle,
             String name, SixModelObject value) {
         throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support atomic binding to attributes");
+    }
+    public SixModelObject atomic_load_attribute_boxed(ThreadContext tc, SixModelObject class_handle, String name) {
+        throw ExceptionHandling.dieInternal(tc, this.st.REPR.name + " representation does not support atomic loading of attributes");
     }
 
     /**

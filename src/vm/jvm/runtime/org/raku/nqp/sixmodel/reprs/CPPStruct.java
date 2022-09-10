@@ -85,11 +85,10 @@ public class CPPStruct extends REPR {
         CPPStructREPRData repr_data = (CPPStructREPRData) st.REPRData;
         obj.st = st;
         try {
-            obj.storage = (Structure) repr_data.structureClass.newInstance();
+            obj.storage = (Structure) repr_data.structureClass.getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+        catch (ReflectiveOperationException e) {
+            throw ExceptionHandling.dieInternal(tc, e);
         }
         return obj;
     }
