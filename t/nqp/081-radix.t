@@ -62,19 +62,15 @@ test_radix_I(10,"9883481620585741369158_914214988194663201633129_269524237910230
 test_radix_both(3,"3",0,2, 0,0,-1, "no digits consumed with digit outside radix");
 test_radix_both(3,"۳",0,2, 0,0,-1, "no digits consumed with unicode digit outside radix");
 
-if nqp::getcomp('nqp').backend.name eq 'jvm' {
-    skip("radix can't yet handle fancy unicode stuff on the jvm", 4*(6 + 3));
-} else {
-    test_radix_both(10,"۳",0,2, 3,1,1, "extended arabic-indic digit three");
-    test_radix_both(10,"۳۳",0,2, 33,2,2, "extended arabic-indic digit three");
+test_radix_both(10,"۳",0,2, 3,1,1, "extended arabic-indic digit three");
+test_radix_both(10,"۳۳",0,2, 33,2,2, "extended arabic-indic digit three");
 
-    my $full_width_capital := "\c[FULLWIDTH LATIN CAPITAL LETTER C]\c[FULLWIDTH LATIN CAPITAL LETTER A]\c[FULLWIDTH LATIN CAPITAL LETTER F]\c[FULLWIDTH LATIN CAPITAL LETTER E]";
+my $full_width_capital := "\c[FULLWIDTH LATIN CAPITAL LETTER C]\c[FULLWIDTH LATIN CAPITAL LETTER A]\c[FULLWIDTH LATIN CAPITAL LETTER F]\c[FULLWIDTH LATIN CAPITAL LETTER E]";
 
-    my $full_width_small := "\c[FULLWIDTH LATIN SMALL LETTER C]\c[FULLWIDTH LATIN SMALL LETTER A]\c[FULLWIDTH LATIN SMALL LETTER F]\c[FULLWIDTH LATIN SMALL LETTER E]";
+my $full_width_small := "\c[FULLWIDTH LATIN SMALL LETTER C]\c[FULLWIDTH LATIN SMALL LETTER A]\c[FULLWIDTH LATIN SMALL LETTER F]\c[FULLWIDTH LATIN SMALL LETTER E]";
 
-    test_radix_both(16,$full_width_capital,0,2, 51966,4,4, "fullwidth capital letters");
-    test_radix_both(16,$full_width_small,0,2, 51966,4,4, "fullwidth small letters");
-}
+test_radix_both(16,$full_width_capital,0,2, 51966,4,4, "fullwidth capital letters");
+test_radix_both(16,$full_width_small,0,2, 51966,4,4, "fullwidth small letters");
 
 test_radix_both(8,"8238321",0,2, 0,0,-1, "all digits outside of radix");
 test_radix_both(8,"1838321",0,2, 1,1,1, "all but one digits outside of radix");

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.Character;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -4085,6 +4086,7 @@ public final class Ops {
         int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
+        int char_value = -2;
         boolean neg = false;
 
         if (radix > 36) {
@@ -4092,21 +4094,22 @@ public final class Ops {
         }
 
         ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
+
+        /* flag 0x02 asks for parsing a leading +/-.
+         * We allow both, "HYPHEN-MINUS" and "MINUS SIGN", for negation. */
         if ((flags & 0x02) != 0 && (ch == '+' || ch == '-' || ch == '−')) {
             neg = (ch == '-' || ch == '−');
             zpos++;
             ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
         }
+
         while (zpos < chars) {
-            if (ch >= '0' && ch <= '9') ch = (char)(ch - '0');
-            else if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 10);
-            else if (ch >= 'A' && ch <= 'Z') ch = (char)(ch - 'A' + 10);
-            else break;
-            if (ch >= radix) break;
-            zvalue = zvalue * radix + ch;
+            char_value = Character.digit(ch, (int)radix);
+            if (char_value == -1) break;
+            zvalue = zvalue * radix + char_value;
             chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
+            if (char_value != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
@@ -7324,6 +7327,7 @@ public final class Ops {
         int chars_really_converted = chars_converted;
         long pos = -1;
         char ch;
+        int char_value = -2;
         boolean neg = false;
         BigInteger radix = BigInteger.valueOf(radix_l);
 
@@ -7332,21 +7336,22 @@ public final class Ops {
         }
 
         ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
+
+        /* flag 0x02 asks for parsing a leading +/-.
+         * We allow both, "HYPHEN-MINUS" and "MINUS SIGN", for negation. */
         if ((flags & 0x02) != 0 && (ch == '+' || ch == '-' || ch == '−')) {
             neg = (ch == '-' || ch == '−');
             zpos++;
             ch = (zpos < chars) ? str.charAt((int)zpos) : 0;
         }
+
         while (zpos < chars) {
-            if (ch >= '0' && ch <= '9') ch = (char)(ch - '0');
-            else if (ch >= 'a' && ch <= 'z') ch = (char)(ch - 'a' + 10);
-            else if (ch >= 'A' && ch <= 'Z') ch = (char)(ch - 'A' + 10);
-            else break;
-            if (ch >= radix_l) break;
-            zvalue = zvalue.multiply(radix).add(BigInteger.valueOf(ch));
+            char_value = Character.digit(ch, (int)radix_l);
+            if (char_value == -1) break;
+            zvalue = zvalue.multiply(radix).add(BigInteger.valueOf(char_value));
             chars_converted++;
             zpos++; pos = zpos;
-            if (ch != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
+            if (char_value != 0 || (flags & 0x04) == 0) { value=zvalue; chars_really_converted=chars_converted; }
             if (zpos >= chars) break;
             ch = str.charAt((int)zpos);
             if (ch != '_') continue;
