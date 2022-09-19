@@ -7648,12 +7648,36 @@ public final class Ops {
         return name;
     }
 
+    private static final int UNIPROP_NUMERIC_VALUE_NUMERATOR   = 19;
+    private static final int UNIPROP_NUMERIC_VALUE_DENOMINATOR = 10;
+
+    /* TODO: Make this handle more properties. */
     public static String getuniprop_str(long codepoint, long property, ThreadContext tc) {
-        return "";
+        String res = "";
+        if (property == UNIPROP_NUMERIC_VALUE_NUMERATOR || property == UNIPROP_NUMERIC_VALUE_DENOMINATOR) {
+            /* NFKD will decompose fractions into numerator and denominator,
+             * separated by "FRACTION SLASH" (\u2044). */
+            String[] fraction = Normalizer.normalize(Character.toString((char)codepoint),
+                    Normalizer.Form.NFKD).split("\u2044");
+            if (property == UNIPROP_NUMERIC_VALUE_DENOMINATOR) {
+                res = fraction.length == 2 ? fraction[1] : "1";
+            } else {
+                res = fraction[0];
+            }
+        }
+        return res;
     }
 
+    /* TODO: Make this handle more properties. */
     public static long unipropcode(String prop, ThreadContext tc) {
-        return -1;
+        switch (prop) {
+            case "Numeric_Value_Numerator":
+                return UNIPROP_NUMERIC_VALUE_NUMERATOR;
+            case "Numeric_Value_Denominator":
+                return UNIPROP_NUMERIC_VALUE_DENOMINATOR;
+            default:
+                return -1;
+        }
     }
 
     public static SixModelObject force_gc(ThreadContext tc) {
