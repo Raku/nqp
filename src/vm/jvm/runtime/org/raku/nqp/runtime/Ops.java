@@ -5515,6 +5515,28 @@ public final class Ops {
         return a >= b ? 1 : 0;
     }
 
+    public static long cmp_u(long a, long b) {
+        return Long.compareUnsigned(a, b);
+    }
+    public static long iseq_u(long a, long b) {
+        return Long.compareUnsigned(a, b) == 0 ? 1 : 0;
+    }
+    public static long isne_u(long a, long b) {
+        return Long.compareUnsigned(a, b) != 0 ? 1 : 0;
+    }
+    public static long islt_u(long a, long b) {
+        return Long.compareUnsigned(a, b) < 0 ? 1 : 0;
+    }
+    public static long isle_u(long a, long b) {
+        return Long.compareUnsigned(a, b) <= 0 ? 1 : 0;
+    }
+    public static long isgt_u(long a, long b) {
+        return Long.compareUnsigned(a, b) > 0 ? 1 : 0;
+    }
+    public static long isge_u(long a, long b) {
+        return Long.compareUnsigned(a, b) >= 0 ? 1 : 0;
+    }
+
     public static long cmp_n(double a, double b) {
         if (a < b) {
             return -1;
