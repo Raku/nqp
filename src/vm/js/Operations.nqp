@@ -244,7 +244,7 @@ class QAST::OperationsJS {
 
     add_infix_op('concat', $T_STR, '+', $T_STR, $T_STR);
 
-    for ['_i', $T_INT, '_n', $T_NUM, '_s', $T_STR] -> $suffix, $type {
+    for ['_i', $T_INT, '_n', $T_NUM, '_s', $T_STR, '_u', $T_UINT64] -> $suffix, $type {
         add_infix_op('isle' ~ $suffix, $type, '<=', $type, $T_BOOL);
         add_infix_op('islt' ~ $suffix, $type, '<', $type, $T_BOOL);
         add_infix_op('isgt' ~ $suffix, $type, '>', $type, $T_BOOL);
@@ -433,6 +433,7 @@ class QAST::OperationsJS {
     add_cmp_op('cmp_i', $T_INT);
     add_cmp_op('cmp_n', $T_NUM);
     add_cmp_op('cmp_s', $T_STR);
+    add_cmp_op('cmp_u', $T_UINT64);
 
     for <preinc predec> -> $op {
         add_op($op, sub ($comp, $node, :$want) {

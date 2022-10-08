@@ -2543,6 +2543,14 @@ QAST::OperationsJAST.map_classlib_core_op('isle_i', $TYPE_OPS, 'isle_i', [$RT_IN
 QAST::OperationsJAST.map_classlib_core_op('isgt_i', $TYPE_OPS, 'isgt_i', [$RT_INT, $RT_INT], $RT_INT);
 QAST::OperationsJAST.map_classlib_core_op('isge_i', $TYPE_OPS, 'isge_i', [$RT_INT, $RT_INT], $RT_INT);
 
+QAST::OperationsJAST.map_classlib_core_op('cmp_u',  $TYPE_OPS, 'cmp_u',  [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('iseq_u', $TYPE_OPS, 'iseq_u', [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('isne_u', $TYPE_OPS, 'isne_u', [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('islt_u', $TYPE_OPS, 'islt_u', [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('isle_u', $TYPE_OPS, 'isle_u', [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('isgt_u', $TYPE_OPS, 'isgt_u', [$RT_UINT, $RT_UINT], $RT_INT);
+QAST::OperationsJAST.map_classlib_core_op('isge_u', $TYPE_OPS, 'isge_u', [$RT_UINT, $RT_UINT], $RT_INT);
+
 QAST::OperationsJAST.map_classlib_core_op('bool_I', $TYPE_OPS, 'bool_I', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('cmp_I', $TYPE_OPS, 'cmp_I', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('iseq_I', $TYPE_OPS, 'iseq_I', [$RT_OBJ, $RT_OBJ], $RT_INT, :tc);
