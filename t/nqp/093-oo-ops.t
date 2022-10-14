@@ -1,4 +1,4 @@
-plan(23);
+plan(29);
 class Foo {
     method foo() {
         'bar';
@@ -47,6 +47,14 @@ ok(nqp::objprimspec(num) == 2, 'nqp::objprimspec on num');
 ok(nqp::objprimspec(Foo) == 0, 'nqp::objprimspec on Foo');
 ok(nqp::objprimspec(nqp::null()) == 0, 'nqp::objprimspec on a null');
 
+ok(nqp::objprimunsigned(uint) == 1, 'uint is unsigned');
+ok(nqp::objprimunsigned(int) == 0, 'int is not unsigned');
+ok(nqp::objprimunsigned(num) == 0, 'num is not unsigned');
+ok(nqp::objprimunsigned(str) == 0, 'str is not unsigned');
+ok(nqp::objprimunsigned(nqp::null()) == 0, 'null is not unsigned');
+
+ok(nqp::objprimbits(uint64) == 64, 'sized integers are sizable');
+
 class Base {
 }
 
@@ -71,6 +79,5 @@ class Class1 {
 }
 
 dies-ok({nqp::rebless(Base.new, IntReprClass)}, 'reblessing to an incompatible type is not allowed');
-
 
 dies-ok({nqp::rebless(Extended.new, Base)}, 'can\'t rebless to an incompatible type');
