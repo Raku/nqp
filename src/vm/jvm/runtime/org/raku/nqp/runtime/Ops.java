@@ -2627,6 +2627,9 @@ public final class Ops {
     public static long objprimunsigned(SixModelObject obj, ThreadContext tc) {
         return isnull(obj) == 1 ? 0 : obj.st.REPR.get_storage_spec(tc, obj.st).is_unsigned;
     }
+    public static long objprimbits(SixModelObject obj, ThreadContext tc) {
+        return isnull(obj) == 1 ? 0 : obj.st.REPR.get_storage_spec(tc, obj.st).bits;
+    }
     public static SixModelObject setinvokespec(SixModelObject obj, SixModelObject ch,
             String name, SixModelObject invocationHandler, ThreadContext tc) {
         InvocationSpec is = new InvocationSpec();
