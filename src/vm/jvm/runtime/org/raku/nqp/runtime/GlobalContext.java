@@ -4,9 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Timer;
 import java.util.WeakHashMap;
 
