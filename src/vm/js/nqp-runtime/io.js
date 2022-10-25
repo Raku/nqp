@@ -479,6 +479,10 @@ op.chmod = function(path, mode) {
   return fs.chmodSync(path, mode);
 };
 
+op.chown = function(path, uid, gid) {
+  return fs.chownSync(path, uid, gid);
+};
+
 op.sleep = function(seconds) {
   sleep.usleep(Math.floor(seconds * 1000000));
   return seconds;

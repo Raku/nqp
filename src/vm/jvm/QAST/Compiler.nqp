@@ -2270,6 +2270,7 @@ QAST::OperationsJAST.map_classlib_core_op('filenofh', $TYPE_OPS, 'filenofh', [$R
 QAST::OperationsJAST.map_classlib_core_op('setbuffersizefh', $TYPE_OPS, 'setbuffersizefh', [$RT_OBJ, $RT_INT], $RT_OBJ, :tc);
 
 QAST::OperationsJAST.map_classlib_core_op('chmod', $TYPE_OPS, 'chmod', [$RT_STR, $RT_INT], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('chown', $TYPE_OPS, 'chown', [$RT_STR, $RT_INT, $RT_INT], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('unlink', $TYPE_OPS, 'unlink', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('rmdir', $TYPE_OPS, 'rmdir', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('cwd', $TYPE_OPS, 'cwd', [], $RT_STR);

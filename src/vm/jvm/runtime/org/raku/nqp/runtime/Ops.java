@@ -868,6 +868,19 @@ public final class Ops {
         return 0;
     }
 
+    public static long chown(String path, long uid, long gid, ThreadContext tc) {
+        Path path_o;
+        try {
+            path_o = Paths.get(path);
+            Files.setAttribute(path_o, "unix:uid", uid);
+            Files.setAttribute(path_o, "unix:gid", gid);
+        }
+        catch (Exception e) {
+            die_s(IOExceptionMessages.message(e), tc);
+        }
+        return 0;
+    }
+
     public static long unlink(String path, ThreadContext tc) {
         Path path_o = Paths.get(path);
         if (Files.isDirectory(path_o)) {
