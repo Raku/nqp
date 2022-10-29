@@ -15,6 +15,7 @@ ASMTREE = @asmtree@
 JLINE = @jline@
 JNA = @jna@
 JNAPLATFORM = @jnaplatform@
+LZ4 = @lz4@
 
 RUNTIME_JAVAS = \
   @nfp(src/vm/jvm/runtime/org/raku/nqp/io/*.java)@ \
@@ -25,13 +26,13 @@ RUNTIME_JAVAS = \
   @nfp(src/vm/jvm/runtime/org/raku/nqp/tools/*.java)@ \
 
 @bsv(RUNTIME)@ = @nfp(@bpm(RUNNER_JAR_DIR)@/nqp-runtime.@bext@)@
-THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(JNAPLATFORM)
-@bpv(RUNNER_JARS)@ = @nfplq($(ASM) $(ASMTREE) $(JLINE) $(JNA) $(JNAPLATFORM))@
+THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(JNAPLATFORM)@cpsep@$(LZ4)
+@bpv(RUNNER_JARS)@ = @nfplq($(ASM) $(ASMTREE) $(JLINE) $(JNA) $(JNAPLATFORM) $(LZ4))@
 @bpv(RUNNER_LIBS)@ = @nfplq(nqp.@bext@)@
 @bpv(EVAL_CLIENT)@ = @nfp(tools/jvm/eval-client.pl)@
 
-@bpv(STAGE0_NQP)@ = $(JAVA) -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
-@bpv(STAGE1_NQP)@ = $(JAVA) -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE0_NQP)@ = $(JAVA) -XX:+AggressiveHeap -XX:+AllowParallelDefineClass -cp @bpm(STAGE0_DIR)@ -Xbootclasspath/a:@bpm(STAGE0_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE0_DIR)@/nqp.jar)@ nqp --bootstrap
+@bpv(STAGE1_NQP)@ = $(JAVA) -XX:+AggressiveHeap -XX:+AllowParallelDefineClass -cp @bpm(STAGE1_DIR)@ -Xbootclasspath/a:@bpm(STAGE1_DIR)@@cpsep@@bsm(RUNTIME)@@cpsep@@q($(THIRDPARTY_JARS))@@cpsep@@nfp(@bpm(STAGE1_DIR)@/nqp.jar)@ nqp --bootstrap
 
 @for_stages(@bpv(@ucstage@_GEN_CAT)@ = @bpm(GEN_CAT)@ @lcstage@
 @bpv(NQP_@ucstage@_FLAGS)@ = --javaclass=nqp
@@ -62,6 +63,7 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(JN
 	$(NOECHO)$(CP) @q($(ASM))@ @q($(ASMTREE))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
 	$(NOECHO)$(CP) @q($(JLINE))@ @q($(JNA))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
 	$(NOECHO)$(CP) @q($(JNAPLATFORM))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
+	$(NOECHO)$(CP) @q($(LZ4))@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
 	$(NOECHO)$(CP) @q(@bsm(RUNTIME)@)@ @q($(DESTDIR@nop())@@bsm(NQP_LIB_DIR)@)@
 	$(NOECHO)$(CP) @q(@bpm(EVAL_CLIENT)@)@ @q($(DESTDIR)$(BIN_DIR))@
 	$(NOECHO)$(CHMOD) 0755 @nfpq($(DESTDIR)$(BIN_DIR)/eval-client.pl)@
@@ -75,7 +77,7 @@ THIRDPARTY_JARS = $(ASM)@cpsep@$(ASMTREE)@cpsep@$(JLINE)@cpsep@$(JNA)@cpsep@$(JN
 @bsm(RUNTIME)@: $(RUNTIME_JAVAS) @mkquot(@script(gen-jvm-properties.pl)@)@
 	@echo(+++ Preparing Java runtime)@
 	$(NOECHO)$(MKPATH) bin
-	$(NOECHO)$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g -d bin -encoding UTF8 $(RUNTIME_JAVAS)
+	$(NOECHO)$(JAVAC) --release 9 -cp @q($(THIRDPARTY_JARS))@ -g:none -d bin -encoding UTF8 $(RUNTIME_JAVAS)
 	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ . @nfpq($(STATIC_NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > jvmconfig.properties
 	$(NOECHO)$(PERL5) @shquot(@script(gen-jvm-properties.pl)@)@ @nfpq(@prefix@)@ @nfpq($(STATIC_NQP_HOME))@ @q($(THIRDPARTY_JARS))@ > @nfpq(bin/jvmconfig.properties)@
 	$(NOECHO)$(JAR) cf0 @bsm(RUNTIME)@ -C @nfp(bin/)@ .

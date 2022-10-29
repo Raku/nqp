@@ -38,6 +38,7 @@ public class EvalServer {
     private String cookiePath;
     private String mainPath;
 
+    private GlobalContext gc;
     private Class<?> cuType;
     private String cookie;
     private ServerSocketChannel serv;
@@ -53,12 +54,12 @@ public class EvalServer {
 
     public String run(String appPath, String[] argv) throws Exception {
         try {
-            cuType = LibraryLoader.loadFile( appPath, true );
+            cuType = LibraryLoader.loadFile(appPath, gc.byteClassLoader, true);
         } catch (ThreadDeath td) {
             throw new RuntimeException("Couldn't loadFile. Your CLASSPATH might not be set up correctly.");
         }
 
-        GlobalContext gc = new GlobalContext();
+        gc = new GlobalContext();
         gc.in = new ByteArrayInputStream(new byte[0]);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         gc.out = gc.err = new PrintStream( baos, true, "UTF-8" );
@@ -90,7 +91,7 @@ public class EvalServer {
     }
 
     private void run() throws Exception {
-        cuType = LibraryLoader.loadFile( mainPath, true );
+        cuType = LibraryLoader.loadFile(mainPath, gc.byteClassLoader, true);
 
         SecureRandom rng = new SecureRandom();
         byte[] raw = new byte[16];

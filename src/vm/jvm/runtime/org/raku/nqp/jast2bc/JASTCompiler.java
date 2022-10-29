@@ -1,5 +1,6 @@
 package org.raku.nqp.jast2bc;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 import java.lang.invoke.CallSite;
@@ -13,6 +14,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import java.util.zip.CRC32;
+import java.util.zip.ZipEntry;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Handle;
@@ -25,6 +29,9 @@ import org.raku.nqp.runtime.ThreadContext;
 
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.runtime.Ops;
+
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4CompressorWithLength;
 
 public class JASTCompiler {
     public static JavaClass buildClass(SixModelObject jast, SixModelObject jastNodes, boolean split, ThreadContext tc) {
@@ -40,6 +47,13 @@ public class JASTCompiler {
         }
     }
 
+    private static final LZ4CompressorWithLength lz4 =
+        new LZ4CompressorWithLength(LZ4Factory.fastestInstance().highCompressor(8));
+    // The lower the compression level, the faster the serialization, at the
+    // expense of deserialization and disk space; the higher the compression
+    // level, the lower the disk space, at the expense of both serialization
+    // and deserialization. 8 is a sweet spot of sorts.
+
     public static void writeClass(SixModelObject jast, SixModelObject jastNodes, String filename, ThreadContext tc) {
         JavaClass c = buildClass(jast, jastNodes, false, tc);
         try {
@@ -51,17 +65,29 @@ public class JASTCompiler {
             } else {
                 // writing a jar
                 Manifest mf = new Manifest();
-
-                mf.getMainAttributes().put( Attributes.Name.MANIFEST_VERSION, "1.0" );
+                mf.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
                 if (c.hasMain)
-                    mf.getMainAttributes().put( Attributes.Name.MAIN_CLASS, c.name );
-
+                    mf.getMainAttributes().put(Attributes.Name.MAIN_CLASS, c.name);
                 JarOutputStream jos = new JarOutputStream(fos, mf);
 
-                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".class"));
+                JarEntry jec = new JarEntry(c.name + ".class");
+                jec.setComment(c.name.replace(File.pathSeparatorChar, '.'));
+                jos.putNextEntry(jec);
                 jos.write(c.bytes);
-                jos.putNextEntry(new JarEntry(c.name.replace('.','/') + ".serialized"));
-                jos.write(c.serialized);
+                jos.closeEntry();
+
+                byte[] digest = lz4.compress(c.serialized);
+                CRC32 cipher = new CRC32();
+                cipher.update(digest, 0, digest.length);
+
+                JarEntry jes = new JarEntry(c.name + ".serialized.lz4");
+                jes.setMethod(ZipEntry.STORED);
+                jes.setSize(digest.length);
+                jes.setCompressedSize(digest.length);
+                jes.setCrc(cipher.getValue());
+                jos.putNextEntry(jes);
+                jos.write(digest);
+                jos.closeEntry();
 
                 jos.close();
             }
