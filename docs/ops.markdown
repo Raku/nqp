@@ -234,6 +234,7 @@ The opcodes are grouped into the following categories:
 
 [chdir](#chdir) |
 [chmod](#chmod) |
+[chown](#chown) |
 [closedir](#closedir) |
 [copy](#copy) |
 [cwd](#cwd) |
@@ -1518,6 +1519,12 @@ Change the working directory to the given path.
 
 Change the permissions of `$path` to the posix style permissions of `$mode`.
 Returns 0 on success, throws an exception on failure.
+
+## chown
+* `chown(str $path, int $uid, int $gid --> int)`
+
+Change the owner or group of the path.
+Throws an exception on failure.
 
 ## closedir
 * `closedir(Handle $)`

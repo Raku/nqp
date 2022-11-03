@@ -3197,6 +3197,7 @@ my constant SIMPLE_OP_MAPPINGS_RESULT_ZERO := nqp::list_s(
     'bindsock', 'bind_sk',
     'setbuffersizefh', 'setbuffersize_fh',
     'chmod', 'chmod_f',
+    'chown', 'chown_f',
     'unlink', 'delete_f',
     'rmdir', 'rmdir',
     'chdir', 'chdir',

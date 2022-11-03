@@ -576,6 +576,7 @@ class QAST::OperationsJS {
     add_simple_op('mkdir', $T_VOID, [$T_STR, $T_INT], :side_effects);
 
     add_simple_op('chmod', $T_VOID, [$T_STR, $T_INT], :side_effects);
+    add_simple_op('chown', $T_VOID, [$T_STR, $T_INT, $T_INT], :side_effects);
 
     add_simple_op('getenvhash', $T_OBJ, [], :side_effects);
     add_simple_op('getsignals', $T_OBJ, [], :side_effects, :takes_hll);
