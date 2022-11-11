@@ -1521,7 +1521,7 @@ Change the permissions of `$path` to the posix style permissions of `$mode`.
 Returns 0 on success, throws an exception on failure.
 
 ## chown
-* `chown(str $path, int $uid, int $gid --> int)`
+* `chown(str $path, uint $uid, uint $gid --> int)`
 
 Change the owner or group of the path.
 Throws an exception on failure.
