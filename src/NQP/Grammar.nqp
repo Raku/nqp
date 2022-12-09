@@ -60,7 +60,7 @@ grammar NQP::Grammar is HLL::Grammar {
         ||  <?MARKED('ws')>
         ||  <!ww>
             [ \v+
-            | '#' \N*
+            | <.comment>
             | ^^ <.pod_comment>
             | \h+
             ]*
@@ -71,9 +71,15 @@ grammar NQP::Grammar is HLL::Grammar {
         # :dba('horizontal whitespace')
         [
         | ^^ <?before \h* '=' [ \w | '\\'] > <.pod_comment>
-        | \h* '#' \N*
+        | \h* <.comment>
         | \h+
         ]
+    }
+
+    proto token comment {*}
+
+    token comment:sym<#> {
+       '#' {} \N*
     }
 
     token pod_comment {
