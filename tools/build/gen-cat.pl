@@ -21,7 +21,7 @@ END_HEAD
 
 
 foreach my $file (@files) {
-    print "# From $file\n\n";
+    print "#line 1 NQP::$file\n";
     open(my $fh, "<:utf8",  $file) or die "$file: $!";
     my $in_omit = 0;
     my @conds;
