@@ -24,7 +24,8 @@ my $args := nqp::list($cmd, $cmdargs);
 
 # expected first line output to stderr:
 #   Obsolete pod format ... , please use =begin/=end instead at line 4, near "\n"
-my $regex := /^ \h* Obsolete \h+ pod \h+ format \h+ .+ ',' \h+ please \h+ use \h+ '=begin/=end' \h+ instead \h+ /;
+my $regex := /^ '===SORRY!=== Error while compiling pod-test.nqp' \n \h*
+                Obsolete \h+ pod \h+ format \h+ .+ ',' \h+ please \h+ use \h+ '=begin/=end' \h+ instead \h+ /;
 
 # running with only stderr capture"
 my @arr := run-command($args, :stderr);
