@@ -301,6 +301,7 @@ class HLL::Compiler does HLL::Backend::Default {
                                      || %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
+        my @*comp_line_directives;
         my $result;
         my $error;
         my $has_error := 0;
