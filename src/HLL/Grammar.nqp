@@ -220,8 +220,17 @@ of the match.
     method panic(*@args) {
         my $pos := self.pos();
         my $target := self.target();
-        @args.push(' at line ');
-        @args.push(HLL::Compiler.lineof($target, $pos) + 1);
+        my $actual-file := nqp::getlexdyn('$?FILES');
+        my @line-file := HLL::Compiler.linefileof($target, $pos, :cache, :directives);
+        if $actual-file {
+            @args.unshift('===SORRY!=== Error while compiling ' ~ $actual-file ~ "\n");
+        }
+        if @line-file[1] && (!$actual-file || nqp::isne_s($actual-file, @line-file[1])) {
+            @args.push(' at ' ~ @line-file[1] ~ ':' ~ @line-file[0])
+        }
+        else {
+            @args.push(' at line ' ~ @line-file[0]);
+        }
         @args.push(', near "');
         @args.push(nqp::escape(nqp::substr($target, $pos, 10)));
         @args.push('"');
