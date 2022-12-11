@@ -1,8 +1,8 @@
 trigger:
-- master
+- main
 
 pr:
-- master
+- main
 
 variables:
   # Turn this Powershell console into a developer powershell console.
@@ -12,7 +12,7 @@ variables:
     $devShell    = &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -find **\Microsoft.VisualStudio.DevShell.dll
     Import-Module $devShell
     Enter-VsDevShell -VsInstallPath $installPath -SkipAutomaticLocation -DevCmdArguments "-arch=amd64"
-  RAKUDO_CHECKOUT_TYPE: master
+  RAKUDO_CHECKOUT_TYPE: main
   NQP_CHECKOUT_TYPE: "rev-$(Build.SourceVersion)-selfrepo"
   MOAR_CHECKOUT_TYPE: downstream
 
