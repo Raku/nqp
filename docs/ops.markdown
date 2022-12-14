@@ -2022,7 +2022,7 @@ Return 0 if the parameter has a truthy value, 1 otherwise.
 * `iseq_n(num $l, num $r --> int)`
 * `iseq_s(str $l, str $r --> int)`
 * `iseq_I(Int $l, Int $r --> int)`
-* `iseq_u(uint $l, uint $r --> int)`
+* `iseq_u(uint $l, uint $r --> int)` `moar` `jvm`
 * `iseq_snfg(str $l, str $r --> int)` `js`
 
 Return 1 if the two parameters are equal, 0 otherwise.
@@ -2034,7 +2034,7 @@ Return 1 if the two parameters are equal, 0 otherwise.
 * `isge_n(num $l, num $r --> int)`
 * `isge_s(str $l, str $r --> int)`
 * `isge_I(Int $l, Int $r --> int)`
-* `isge_u(uint $l, uint $r --> int)`
+* `isge_u(uint $l, uint $r --> int)` `moar` `jvm`
 
 Return 1 if $l is greater than or equal to $r, otherwise 0.
 
@@ -2043,7 +2043,7 @@ Return 1 if $l is greater than or equal to $r, otherwise 0.
 * `isgt_n(num $l, num $r --> int)`
 * `isgt_s(str $l, str $r --> int)`
 * `isgt_I(Int $l, Int $r --> int)`
-* `isgt_u(uint $l, uint $r --> int)`
+* `isgt_u(uint $l, uint $r --> int)` `moar` `jvm`
 
 Return 1 if the two parameters are equal if $l is greater than $r, otherwise 0.
 
@@ -2052,7 +2052,7 @@ Return 1 if the two parameters are equal if $l is greater than $r, otherwise 0.
 * `isle_n(num $l, num $r --> int)`
 * `isle_s(str $l, str $r --> int)`
 * `isle_I(Int $l, Int $r --> int)`
-* `isle_u(uint $l, uint $r --> int)`
+* `isle_u(uint $l, uint $r --> int)` `moar` `jvm`
 
 Return 1 if $l is less than or equal to $r, otherwise 0.
 
@@ -2061,7 +2061,7 @@ Return 1 if $l is less than or equal to $r, otherwise 0.
 * `islt_n(num $l, num $r --> int)`
 * `islt_s(str $l, str $r --> int)`
 * `islt_I(Int $l, Int $r --> int)`
-* `islt_u(uint $l, uint $r --> int)`
+* `islt_u(uint $l, uint $r --> int)` `moar` `jvm`
 
 Return 1 if $l is less than $r, otherwise 0.
 
@@ -2070,7 +2070,7 @@ Return 1 if $l is less than $r, otherwise 0.
 * `isne_n(num $l, num $r --> int)`
 * `isne_s(str $l, str $r --> int)`
 * `isne_I(Int $l, Int $r --> int)`
-* `isne_u(uint $l, uint $r --> int)`
+* `isne_u(uint $l, uint $r --> int)` `moar` `jvm`
 * `isne_snfg(str $l, str $r --> int)` `js`
 
 Return 1 if the two parameters are not equal, otherwise 0.
