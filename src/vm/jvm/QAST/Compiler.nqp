@@ -4462,7 +4462,7 @@ class QAST::CompilerJAST {
                     $line := $node.orig-line();
                 }
                 else {
-                    $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1), :directuves(0));
+                    $line := HLL::Compiler.lineof($node.orig(), $node.from(), :cache(1), :directives(0));
                 }
                 $il.append(JAST::Annotation.new( :line($line) ));
             }
