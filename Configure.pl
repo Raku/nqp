@@ -12,16 +12,19 @@ use File::Path;
 use FindBin;
 
 BEGIN {
-    # Download / Update submodules
-    my $set_config = !qx{git config nqp.initialized};
-    if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
-        my $code = system($^X, 'tools/build/update-submodules.pl', Cwd::cwd(), @ARGV);
-        exit 1 if $code >> 8 != 0;
-        $set_config = 1;
-    }
-    if ($set_config) {
-        system("git config submodule.recurse true");
-        system("git config nqp.initialized 1");
+    # The .git folder is typically missing in release archives.
+    if (-e '.git') {
+        # Download / Update submodules
+        my $set_config = !qx{git config nqp.initialized};
+        if ( !-e '3rdparty/nqp-configure/LICENSE' ) {
+            my $code = system($^X, 'tools/build/update-submodules.pl', Cwd::cwd(), @ARGV);
+            exit 1 if $code >> 8 != 0;
+            $set_config = 1;
+        }
+        if ($set_config) {
+            system("git config submodule.recurse true");
+            system("git config nqp.initialized 1");
+        }
     }
 }
 
