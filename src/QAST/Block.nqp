@@ -41,6 +41,15 @@ class QAST::Block is QAST::Node does QAST::Children {
 
     my int $cur_cuid := 0;
     my $cur_cuid_lock := NQPLock.new;
+    method next-cuid() {
+        nqp::lock($cur_cuid_lock);
+        $cur_cuid := $cur_cuid + 1;
+        nqp::unlock($cur_cuid_lock);
+        ~$cur_cuid
+    }
+    method set-cuid($cuid) {
+        $!cuid := $cuid;
+    }
     method cuid() {
         if $!cuid {
             # If we already have an ID, return it.
@@ -48,10 +57,7 @@ class QAST::Block is QAST::Node does QAST::Children {
         }
         else {
             # Otherwise, generate one.
-            nqp::lock($cur_cuid_lock);
-            $cur_cuid := $cur_cuid + 1;
-            nqp::unlock($cur_cuid_lock);
-            $!cuid := ~$cur_cuid;
+            self.set-cuid(self.next-cuid)
         }
     }
 
