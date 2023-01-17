@@ -478,6 +478,7 @@ class HLL::Compiler does HLL::Backend::Default {
         my %*COMPILING := nqp::clone(nqp::ifnull(nqp::getlexdyn('%*COMPILING'), nqp::hash()));
         %*COMPILING<%?OPTIONS> := %adverbs;
         my $*LINEPOSCACHE := $lineposcache;
+        my $*HLL-COMPILER := self;
 
         my $target := nqp::lc(%adverbs<target>);
         my $result := $source;
