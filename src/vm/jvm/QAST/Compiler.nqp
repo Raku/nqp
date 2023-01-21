@@ -2223,6 +2223,17 @@ my %const_map := nqp::hash(
     'SOCKET_FAMILY_INET',         1,
     'SOCKET_FAMILY_INET6',        2,
     'SOCKET_FAMILY_UNIX',         3,
+
+    'DISP_NONE',                  0,
+    'DISP_CALLSAME',              1,
+    'DISP_CALLWITH',              2,
+    'DISP_LASTCALL',              3,
+    'DISP_NEXTCALLEE',            4,
+    'DISP_ONLYSTAR',              5,
+    'DISP_DECONT',                6,
+    'DISP_BIND_SUCCESS',          7,
+    'DISP_BIND_FAILURE',          8,
+    'DISP_PROPAGATE_CALLWITH',    9,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
