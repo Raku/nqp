@@ -2744,13 +2744,13 @@ public final class Ops {
         return decont(obj, tc).get_str(tc);
     }
     public static long isint(SixModelObject obj, ThreadContext tc) {
-        return decont(obj, tc).st.REPR.getClass().equals(P6int.class) ? 1 : 0;
+        return isnull(obj) == 0 && decont(obj, tc).st.REPR.getClass().equals(P6int.class) ? 1 : 0;
     }
     public static long isnum(SixModelObject obj, ThreadContext tc) {
-        return decont(obj, tc).st.REPR.getClass().equals(P6num.class) ? 1 : 0;
+        return isnull(obj) == 0 && decont(obj, tc).st.REPR.getClass().equals(P6num.class) ? 1 : 0;
     }
     public static long isstr(SixModelObject obj, ThreadContext tc) {
-        return decont(obj, tc).st.REPR.getClass().equals(P6str.class) ? 1 : 0;
+        return isnull(obj) == 0 && decont(obj, tc).st.REPR.getClass().equals(P6str.class) ? 1 : 0;
     }
 
     /* HLL aware boxing operations */
