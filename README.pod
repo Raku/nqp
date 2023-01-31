@@ -30,7 +30,7 @@ To obtain C<NQP> directly from its repository:
     $ git clone git://github.com/Raku/nqp.git
 
 If you don't have git installed, you can get a tarball or zip of NQP from
-github by visiting http://github.com/Raku/nqp/tree/master and clicking
+github by visiting http://github.com/Raku/nqp/tree/main and clicking
 "Download".  Then unpack the tarball or zip.
 
 C<NQP> can run on three different backends: C<MoarVM>, the C<JVM>, and C<JavaScript>.
@@ -102,10 +102,10 @@ B<NOTE:> there's B<no end-user support> for NQP and the behaviour can
 change without notice. It's a tool for writing Raku compilers, not a
 low-level module for Raku programmers.
 
-The L<examples directory|https://github.com/raku/nqp/tree/master/examples> is a good place to start, with the
-L<loops|https://github.com/raku/nqp/blob/master/examples/loops.nqp> and other files. Opcodes are listed in
-L<the docs directory|https://github.com/raku/nqp/blob/master/docs/ops.markdown>. NQP also has built-in routines
-listed in L<the docs directory|https://github.com/raku/nqp/blob/master/docs/built-ins.md>. You can use NQP from this
+The L<examples directory|https://github.com/raku/nqp/tree/main/examples> is a good place to start, with the
+L<loops|https://github.com/raku/nqp/blob/main/examples/loops.nqp> and other files. Opcodes are listed in
+L<the docs directory|https://github.com/raku/nqp/blob/main/docs/ops.markdown>. NQP also has built-in routines
+listed in L<the docs directory|https://github.com/raku/nqp/blob/main/docs/built-ins.md>. You can use NQP from this
 release, it will be already installed if you have built Raku from
 scratch.
 
