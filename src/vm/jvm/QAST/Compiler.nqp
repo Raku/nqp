@@ -3072,6 +3072,7 @@ QAST::OperationsJAST.add_core_op('getcodelocation', -> $qastcomp, $op {
     ));
 });
 
+QAST::OperationsJAST.map_classlib_core_op('jvmgetunicodeversion', $TYPE_OPS, 'jvmgetunicodeversion', [], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getuniname', $TYPE_OPS, 'getuniname', [$RT_INT], $RT_STR, :tc);
 QAST::OperationsJAST.map_classlib_core_op('unipropcode', $TYPE_OPS, 'unipropcode', [$RT_STR], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('getuniprop_str', $TYPE_OPS, 'getuniprop_str', [$RT_INT, $RT_INT], $RT_STR, :tc);

@@ -472,6 +472,7 @@ The opcodes are grouped into the following categories:
 [getsignals](#getsignals) |
 [jvmclasspaths](#jvmclasspaths-jvm) |
 [jvmgetproperties](#jvmgetproperties-jvm) |
+[jvmgetunicodeversion](#jvmgetunicodeversion) |
 [totalmem](#totalmem) |
 [uname](#uname-moar-js)
 
@@ -3221,6 +3222,11 @@ Converts the JVM property `java.class.path` into a list of paths, returns it.
 
 Map the JVM's System.getProperties into a Hash usable in NQP. Normalizes some OS names
 (key: 'os.name'), returns all other data as is.
+
+## jvmgetunicodeversion `jvm`
+* `jvmgetunicodeversion(--> String)`
+
+Returns the Unicode version that is supported by the Java Runtime.
 
 ## totalmem
 * `totalmem(--> int)`
