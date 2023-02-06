@@ -7659,6 +7659,34 @@ public final class Ops {
         return res;
     }
 
+    /* Compute supported unicode version. Please update for new versions.
+     * Cmp. https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Character.html */
+    public static String jvmgetunicodeversion(ThreadContext tc) {
+        switch (System.getProperties().getProperty("java.specification.version")) {
+            case "1.9":
+            case "9":
+            case "10":
+                return "8.0";
+            case "11":
+                return "10.0";
+            case "12":
+                return "11.0";
+            case "13":
+            case "14":
+                return "12.1";
+            case "15":
+            case "16":
+            case "17":
+            case "18":
+                return "13.0";
+            case "19":
+                return "14.0";
+            /* Unicode version for Java 1.8, which we don't support anymore. */
+            default:
+                return "6.2";
+        }
+    }
+
     public static String getuniname(long codePoint, ThreadContext tc) {
         String name;
         int cp = (int) codePoint;
