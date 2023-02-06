@@ -472,7 +472,7 @@ The opcodes are grouped into the following categories:
 [getsignals](#getsignals) |
 [jvmclasspaths](#jvmclasspaths-jvm) |
 [jvmgetproperties](#jvmgetproperties-jvm) |
-[jvmgetunicodeversion](#jvmgetunicodeversion) |
+[jvmgetunicodeversion](#jvmgetunicodeversion-jvm) |
 [totalmem](#totalmem) |
 [uname](#uname-moar-js)
 
