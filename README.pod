@@ -41,12 +41,16 @@ Once you have a copy of NQP, decide which backends you want to run,
 and configure and build it as follows:
 
     $ cd nqp
-    $ perl Configure.pl --backends=moar,jvm
+    $ perl Configure.pl --with-moar=/path/to/moar --backends=moar,jvm
     $ make
 
 If you don't have an installed MoarVM, you can have
-C<Configure.pl> download and build one for you by passing the C<--gen-moar>
-option to it as well.
+C<Configure.pl> download and build one for you as well -- by passing the C<--gen-moar>
+option to it (instead of C<--with-moar>):
+
+    $ cd nqp
+    $ perl Configure.pl --gen-moar --backends=moar,jvm
+    $ make
 
 The C<make> step will create a C<nqp> or C<nqp.exe> executable in the current
 directory.  Programs can then be run from the build directory using a
@@ -55,8 +59,11 @@ command like:
     $ ./nqp hello.nqp
 
 By default, NQP searches for the MoarVM executable and installs to the
-directory C<./install>. You can change that with the C<--prefix> option to
-Configure.pl; this will point to the directory prefix where `moar` is installed, such as `/usr`; it needs to be the same one used when configuring MoarVM unless you use the option `--with-moar`. This optional argument should point to the directory prefix where `moar` is installed, in that case; for instance, `--with-moar=/usr/local`.
+directory C<./install>.  You can change that with the C<--prefix> option to
+Configure.pl; this will point to the directory prefix where `moar` is installed,
+such as `/usr`; it needs to be the same one used when configuring MoarVM unless
+you use the option `--with-moar`.  This optional argument should point to the installed
+`moar` executable; for instance, `--with-moar=/usr/local/bin/moar`.
 
 Once built, NQP's C<make install> target will install NQP and its libraries
 into the same location as the MoarVM installation
