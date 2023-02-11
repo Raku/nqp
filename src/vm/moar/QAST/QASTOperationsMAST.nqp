@@ -2076,7 +2076,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_int64, -> $qastcomp, $reg {
     op_decont($frame, $dc, $reg);
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_i($frame, $res_reg, 'nqp-intify', $callsite_id, [$dc]);
+    op_dispatch_i1($frame, $res_reg, 'nqp-intify', $callsite_id, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_int64)
 });
@@ -2089,7 +2089,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_num64, -> $qastcomp, $reg {
     op_decont($frame, $dc, $reg);
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_n($frame, $res_reg, 'nqp-numify', $callsite_id, [$dc]);
+    op_dispatch_n1($frame, $res_reg, 'nqp-numify', $callsite_id, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_num64)
 });
@@ -2102,7 +2102,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_str, -> $qastcomp, $reg {
     op_decont($frame, $dc, $reg);
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_s($frame, $res_reg, 'nqp-stringify', $callsite_id, [$dc]);
+    op_dispatch_s1($frame, $res_reg, 'nqp-stringify', $callsite_id, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_str)
 });
@@ -2115,7 +2115,7 @@ QAST::MASTOperations.add_hll_unbox('', $MVM_reg_uint64, -> $qastcomp, $reg {
     op_decont($frame, $dc, $reg);
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($dc, $MVM_reg_obj)]);
-    op_dispatch_u($frame, $res_reg, 'nqp-uintify', $callsite_id, [$dc]);
+    op_dispatch_u1($frame, $res_reg, 'nqp-uintify', $callsite_id, $dc);
     $regalloc.release_register($dc, $MVM_reg_obj);
     MAST::InstructionList.new($res_reg, $MVM_reg_uint64)
 });

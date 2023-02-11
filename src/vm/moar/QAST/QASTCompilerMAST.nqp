@@ -1,6 +1,14 @@
 # Per-compilation instance of the MAST compiler, holding state and driving the
 # compilation.
 
+my &op_dispatch_v1 := %core_op_generators<dispatch_v1>;
+#already declared in the regex compiler file
+#my &op_dispatch_i1 := %core_op_generators<dispatch_i1>;
+my &op_dispatch_u1 := %core_op_generators<dispatch_u1>;
+my &op_dispatch_n1 := %core_op_generators<dispatch_n1>;
+my &op_dispatch_s1 := %core_op_generators<dispatch_s1>;
+my &op_dispatch_o1 := %core_op_generators<dispatch_o1>;
+
 sub POS($c) {
     return $c - 65      if $c >= 65 && $c < 91;  # A..Z
     return $c - 97 + 26 if $c >= 97 && $c < 123; # a..z
@@ -1416,22 +1424,22 @@ my class MASTCompilerInstance {
             $FAKE_OBJECT_ARG,
             [MAST::InstructionList.new($code-reg, $MVM_reg_obj)]);
         if $result-kind == $MVM_reg_void {
-            op_dispatch_v($!mast_frame, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_v1($!mast_frame, $disp-name, $callsite-id, $code-reg);
         }
         elsif $result-kind == $MVM_reg_obj {
-            op_dispatch_o($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_o1($!mast_frame, $result-reg, $disp-name, $callsite-id, $code-reg);
         }
         elsif $result-kind == $MVM_reg_int64 {
-            op_dispatch_i($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_i1($!mast_frame, $result-reg, $disp-name, $callsite-id, $code-reg);
         }
         elsif $result-kind == $MVM_reg_uint64 {
-            op_dispatch_u($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_u1($!mast_frame, $result-reg, $disp-name, $callsite-id, $code-reg);
         }
         elsif $result-kind == $MVM_reg_num64 {
-            op_dispatch_n($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_n1($!mast_frame, $result-reg, $disp-name, $callsite-id, $code-reg);
         }
         elsif $result-kind == $MVM_reg_str {
-            op_dispatch_s($!mast_frame, $result-reg, $disp-name, $callsite-id, [$code-reg]);
+            op_dispatch_s1($!mast_frame, $result-reg, $disp-name, $callsite-id, $code-reg);
         }
     }
 

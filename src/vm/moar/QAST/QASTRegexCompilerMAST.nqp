@@ -60,6 +60,8 @@ my &op_dispatch_u := %core_op_generators<dispatch_u>;
 my &op_dispatch_n := %core_op_generators<dispatch_n>;
 my &op_dispatch_s := %core_op_generators<dispatch_s>;
 my &op_dispatch_o := %core_op_generators<dispatch_o>;
+
+my &op_dispatch_i1 := %core_op_generators<dispatch_i1>;
 sub emit_dispatch_instruction($qastcomp, str $dispatcher_name, uint $callsite_id,
         @arg_idxs, $returns) {
     # Emit the correct dispatch instruction, allocating a result register if
@@ -133,7 +135,7 @@ sub emit_object_boolify($qastcomp, $result_reg, $object_reg) {
     my $frame := $qastcomp.mast_frame;
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(
         $FAKE_OBJECT_ARG, [MAST::InstructionList.new($result_reg, $MVM_reg_obj)]);
-    op_dispatch_i($frame, $result_reg, 'boot-boolify', $callsite_id, [$object_reg]);
+    op_dispatch_i1($frame, $result_reg, 'boot-boolify', $callsite_id, $object_reg);
 }
 
 class QAST::MASTRegexCompiler {
