@@ -2768,6 +2768,8 @@ QAST::OperationsJAST.add_core_op('settypefinalize', -> $qastcomp, $op {
     $qastcomp.as_jast($op[0])
 });
 QAST::OperationsJAST.map_classlib_core_op('objprimspec', $TYPE_OPS, 'objprimspec', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('objprimunsigned', $TYPE_OPS, 'objprimunsigned', [$RT_OBJ], $RT_INT, :tc);
+QAST::OperationsJAST.map_classlib_core_op('objprimbits', $TYPE_OPS, 'objprimbits', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('isinvokable', $TYPE_OPS, 'isinvokable', [$RT_OBJ], $RT_INT, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setinvokespec', $TYPE_OPS, 'setinvokespec', [$RT_OBJ, $RT_OBJ, $RT_STR, $RT_OBJ], $RT_OBJ, :tc);
 QAST::OperationsJAST.map_classlib_core_op('setparameterizer', $TYPE_OPS, 'setparameterizer', [$RT_OBJ, $RT_OBJ], $RT_OBJ, :tc);
