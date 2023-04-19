@@ -779,7 +779,8 @@ role NQPMatchRole is export {
         while $n >= 0 {
             my     $cs_cur  := $!cstack[$n];
             my str $cs_name := nqp::getattr_s($cs_cur, $?CLASS, '$!name');
-            if !nqp::isnull_s($cs_name) && $cs_name eq $name {
+            if !nqp::isnull_s($cs_name) && ($cs_name eq $name ||
+                    nqp::index($cs_name, '=') > 0 && has_aliased_name($cs_name, $name)) {
                 if nqp::isconcrete($last) {
                     last unless $cs_cur.pos == $first.from;
                 }
@@ -1092,6 +1093,16 @@ role NQPMatchRole is export {
     method FAILGOAL($goal, $dba?) {
         self."!cursor_start_cur"()
     }
+}
+
+sub has_aliased_name(str $got, str $wanted) {
+    my @names := nqp::split('=', $got);
+    for @names {
+        if $_ eq $wanted {
+            return 1;
+        }
+    }
+    0
 }
 
 class NQPMatch is NQPCapture does NQPMatchRole {
