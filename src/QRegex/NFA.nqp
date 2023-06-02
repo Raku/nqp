@@ -667,16 +667,17 @@ class QRegex::NFA {
             # Copy (yes, clone) @substates[1..*] into our states.
             # We have to clone because we'll be modifying the
             # values for use in this particular NFA.
-            @substates := nqp::clone(@substates);
-            nqp::shift(@substates);
-            nqp::push(@!states, nqp::clone(nqp::shift(@substates)))
-              while nqp::elems(@substates);
+            my int $i;
+            my int $elems := nqp::elems(@substates);
+            while ++$i < $elems {  # skip 0 intentionally
+                nqp::push(@!states, nqp::clone(@substates[$i]));
+            }
             # Go through all of the newly added states, and
             #    apply $substart offset to target states
             #    adjust fate edges to be $fate
             #    append any subrules
             my int $subend := nqp::elems(@!states);
-            my int $i      := $substart;
+            $i := $substart;
             while $i < $subend {
                 my @substate := @!states[$i];
                 my int $j := 0;
