@@ -431,10 +431,9 @@ role NQPMatchRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!from', $!from);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
             nqp::bindattr_i($new, $?CLASS, '$!to', -1);
-            nqp::bindattr($new, $?CLASS, '$!cstack', $!cstack);
+            nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
             nqp::bindattr($new, $?CLASS, '$!bstack', $!bstack);
             nqp::bindattr(self, $?CLASS, '$!bstack', nqp::null());
-            nqp::bindattr(self, $?CLASS, '$!cstack', nqp::null());
             $new
         }
         else {
