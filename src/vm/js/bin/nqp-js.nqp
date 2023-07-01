@@ -23,5 +23,5 @@ sub MAIN(*@ARGS) {
         :bootstrap(1),
         :custom-regex-lib('QRegex'),
         :no-regex-lib(0),
-        :encoding('utf8'), :transcode('ascii iso-8859-1'));
+        :encoding('utf8'));
 }

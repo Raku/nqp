@@ -6,5 +6,5 @@ $p6regex.parsegrammar(QRegex::P6Regex::Grammar);
 $p6regex.parseactions(QRegex::P6Regex::Actions);
 
 sub MAIN(@ARGS) {
-    $p6regex.command_line(@ARGS, :encoding('utf8'), :transcode('ucs4'));
+    $p6regex.command_line(@ARGS, :encoding('utf8'));
 }
