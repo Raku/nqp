@@ -543,9 +543,6 @@ class HLL::Compiler does HLL::Backend::Default {
         my $s := $source;
         my $grammar;
         my $actions;
-        if %adverbs<transcode> {
-            $s := $!backend.apply_transcodings($s, %adverbs<transcode>);
-        }
         my $outer_ctx := %adverbs<outer_ctx>;
         if nqp::existskey(%adverbs, 'grammar') {
             $grammar := %adverbs<grammar>;
