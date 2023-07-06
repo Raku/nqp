@@ -4,10 +4,6 @@ use JASTNodes;
 class HLL::Backend::JVM {
     our %jvm_config   := nqp::backendconfig();
     my $compile_count := 0;
-
-    method apply_transcodings($s, $transcode) {
-        $s
-    }
     
     method config() {
         %jvm_config

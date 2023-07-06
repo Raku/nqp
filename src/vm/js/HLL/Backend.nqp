@@ -96,10 +96,6 @@ class QASTWithMatch {
 # It can be called HLL::Backend::JavaScript due to problems while merging namespaces
 class JavaScriptBackend {
     has $!compiler;
-
-    method apply_transcodings($s, $transcode) {
-        $s
-    }
     
     method config() {
         nqp::backendconfig()

@@ -90,10 +90,6 @@ class HLL::Backend::MoarVM {
         }
     }
 
-    method apply_transcodings($s, $transcode) {
-        $s
-    }
-
     method config() {
         %moar_config
     }

@@ -52,7 +52,7 @@ sub MAIN(*@ARGS) {
 sub MAIN(*@ARGS) {
 #?endif
     # Enter the compiler.
-    $nqpcomp.command_line(@ARGS, :encoding('utf8'), :transcode('ascii iso-8859-1'));
+    $nqpcomp.command_line(@ARGS, :encoding('utf8'));
 
     # Uncomment below to dump cursor usage logging (also need to uncomment two lines
     # in src/QRegex/Cursor.nqp, in !cursor_start_cur and !cursor_start_all).
