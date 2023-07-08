@@ -86,7 +86,7 @@ this includes nqp control-flow functions:
     end
 ```
 
-Rubyish does a limited amout of context sensitive parsing, E.g.
+Rubyish does a limited amount of context sensitive parsing, E.g.
 ```
    yy = 37
    puts yy -5   # parsed as an expression; output is 32
