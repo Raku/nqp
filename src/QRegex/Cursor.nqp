@@ -780,8 +780,29 @@ role NQPMatchRole is export {
         while $n >= 0 {
             my     $cs_cur  := $!cstack[$n];
             my str $cs_name := nqp::getattr_s($cs_cur, $?CLASS, '$!name');
+#?if jvm
+            # https://github.com/Raku/nqp/issues/808: Inline functionality
+            # of &has_aliased_name to avoid error "Can not invoke object".
+            my int $found_name := 0;
+            if !nqp::isnull_s($cs_name) {
+                if $cs_name eq $name {
+                    $found_name := 1;
+                } elsif nqp::index($cs_name, '=') {
+                    my @names := nqp::split('=', $cs_name);
+                    for @names {
+                        if $_ eq $name {
+                            $found_name := 1;
+                            last;
+                        }
+                    }
+                }
+            }
+            if $found_name {
+#?endif
+#?if !jvm
             if !nqp::isnull_s($cs_name) && ($cs_name eq $name ||
                     nqp::index($cs_name, '=') > 0 && has_aliased_name($cs_name, $name)) {
+#?endif
                 if nqp::isconcrete($last) {
                     last unless $cs_cur.pos == $first.from;
                 }
