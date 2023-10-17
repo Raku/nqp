@@ -2667,7 +2667,8 @@ public final class Ops {
             return 0;
 
         /* Start by considering cache. */
-        int typeCheckMode = type.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
+        int objTypeCheckMode = obj.st.ModeFlags & STable.TYPE_CHECK_CACHE_FLAG_MASK;
+        boolean typeCheckNeedsAccept = (type.st.ModeFlags & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0;
         SixModelObject[] cache = obj.st.TypeCheckCache;
         if (cache != null) {
             /* We have the cache, so just look for the type object we
@@ -2676,15 +2677,16 @@ public final class Ops {
                 if (cache[i] == type)
                     return 1;
 
-            /* If the type check cache is definitive, we're done. */
-            if ((typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) == 0 &&
-                    (typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) == 0)
+            /* If the type check cache is definitive and the flag to call
+             * .accepts_type on the target type isn't set, we're done. */
+            if ((objTypeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) == 0 &&
+                    !typeCheckNeedsAccept)
                 return 0;
         }
 
         /* If we get here, need to call .^type_check on the value we're
          * checking. */
-        if (cache == null || (typeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
+        if (cache == null || (objTypeCheckMode & STable.TYPE_CHECK_CACHE_THEN_METHOD) != 0) {
             SixModelObject tcMeth = findmethodNonFatal(obj.st.HOW, "type_check", tc);
             if (isnull(tcMeth) == 1)
                 return 0;
@@ -2702,8 +2704,8 @@ public final class Ops {
             }
         }
 
-        /* If the flag to call .accepts_type on the target value is set, do so. */
-        if ((typeCheckMode & STable.TYPE_CHECK_NEEDS_ACCEPTS) != 0) {
+        /* If the flag to call .accepts_type on the target type is set, do so. */
+        if (typeCheckNeedsAccept) {
             SixModelObject atMeth = findmethodNonFatal(type.st.HOW, "accepts_type", tc);
             if (isnull(atMeth) == 1)
                 throw ExceptionHandling.dieInternal(tc,
