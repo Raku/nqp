@@ -167,14 +167,31 @@ public class FileHandle extends SyncHandle implements IIOSeekable, IIOLockable {
              */
         }
         else {
-            try {
-                lock = fc.lock();
-            } catch (IOException e) {
-                throw ExceptionHandling.dieInternal(tc, e);
-            } catch (IllegalArgumentException e) {
-                throw ExceptionHandling.dieInternal(tc, e);
-            } catch (IllegalStateException e) {
-                throw ExceptionHandling.dieInternal(tc, e);
+            boolean shared   = ((int)flag        & 1) != 0;
+            boolean blocking = (((int)flag >> 4) & 1) == 0;
+            if (blocking) {
+                try {
+                    lock = fc.lock(0, Long.MAX_VALUE, shared);
+                } catch (IOException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                } catch (IllegalArgumentException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                } catch (IllegalStateException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                }
+            }
+            else {
+                try {
+                    lock = fc.tryLock(0, Long.MAX_VALUE, shared);
+                    if (lock == null)
+                        throw ExceptionHandling.dieInternal(tc,
+                            "Failed to lock filehandle (locked by other program");
+
+                } catch (IOException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                } catch (IllegalArgumentException e) {
+                    throw ExceptionHandling.dieInternal(tc, e);
+                }
             }
         }
     }
