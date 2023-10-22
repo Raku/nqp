@@ -3,7 +3,7 @@ package org.raku.nqp.runtime;
 import java.lang.invoke.MethodHandle;
 import org.raku.nqp.sixmodel.SixModelObject;
 
-/** Thrown by dcshift operations to cause all currently executing frames to save their state. */
+/** Thrown by continuationcontrol operations to cause all currently executing frames to save their state. */
 
 @SuppressWarnings("serial")
 public class SaveStackException extends ControlException {

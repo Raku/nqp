@@ -12,9 +12,9 @@ B<delimited continuation> (L<https://en.wikipedia.org/wiki/Delimited_continuatio
 
 =item nqp::continuationreset($tag, { ... })
 
-Executes the argument, marking the stack for a subsequent C<nqp::continuationshift>
+Executes the argument, marking the stack for a subsequent C<nqp::continuationcontrol>
 operation within the dynamic scope.  The C<$tag> is an object which can be used
-later by C<nqp::continuationshift> to find a specific reset frame.
+later by C<nqp::continuationcontrol> to find a specific reset frame.
 
 =item nqp::continuationcontrol($protect, $tag, -> $cont { ... })
 
@@ -41,7 +41,7 @@ invoking the continuation.
 =item nqp::continuationinvoke($cont, $inject)
 
 Pastes the saved call frames onto the current stack, such that
-C<nqp::continuationshift> calls C<$inject> within the restored dynamic scope
+C<nqp::continuationcontrol> calls C<$inject> within the restored dynamic scope
 and returns its return value.  Control returns to the caller when the callback
 to C<nqp::continuationreset> returns, with the same value.  This can be used
 multiple times on the same continuation.  (Actually, delimited continuations
@@ -124,7 +124,7 @@ Consider the following (Raku):
 
     my $list = [^$N];
     $list = [$list] for ^$N;
-    say flatten($list).perl;
+    say flatten($list).raku;
 
 This takes O(N^2) time on the current implementation.  Why?  Because each time
 take is invoked, we are N frames deep, so each take does O(N) work, and there
