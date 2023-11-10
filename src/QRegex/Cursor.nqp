@@ -602,7 +602,8 @@ role NQPMatchRole is export {
 
     method !reduce(str $name) {
         my $actions := self.actions;
-        my $method := nqp::isnull($actions)
+        # Only call method if the action obj is set (not Mu or Mu-like NQP types)
+        my $method := (nqp::isnull($actions) || !nqp::istype($actions, Any))
             ?? nqp::null()
             !! nqp::tryfindmethod($actions, $name);
         $method($actions, self.MATCH) unless nqp::isnull($method);
@@ -611,7 +612,8 @@ role NQPMatchRole is export {
 
     method !reduce_with_match(str $name, str $key, $match) {
         my $actions := self.actions;
-        my $method := nqp::isnull($actions)
+        # Only call method if the action obj is set (not Mu or Mu-like NQP types)
+        my $method := (nqp::isnull($actions) || !nqp::istype($actions, Any))
             ?? nqp::null()
             !! nqp::tryfindmethod($actions, $name);
         $method($actions, $match, $key) unless nqp::isnull($method);
