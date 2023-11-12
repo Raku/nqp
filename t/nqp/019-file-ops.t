@@ -475,5 +475,6 @@ my sub create_buf($type) {
     my $fh := open($test-file);
     is($fh.get(), 'line 1', 'read from spurted line 1 ok');
     is($fh.get(), 'line 2', 'read from spurted line 2 ok');
+    close($fh);
     nqp::unlink($test-file);
 }
