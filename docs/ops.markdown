@@ -206,6 +206,12 @@ The opcodes are grouped into the following categories:
 [until](#until) |
 [while](#while)
 
+## [Dispatch](#dispatch)
+[delegate](#delegate-moar) |
+[dispatch](#dispatch-moar) |
+[register](#dispatch-moar) |
+[syscall](#dispatch-moar)
+
 ## [Exception Handling](#exception-handling)
 
 [backtrace](#backtrace) |
@@ -1407,6 +1413,28 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 Enter a loop, running the `$body` only if the condition returns a non-0 value.
 
 If a `$post` block is present, run that at the end, regardless of `$condition`.
+
+# <a id="dispatch"></a> Dispatch `moar`
+
+## delegate `moar`
+* short for nqp::dispatch('boot-syscall', 'dispatcher-delegate', …)
+
+## dispatch `moar`
+* perform dispatch function as determined by its arguments.
+
+See *Jonathan Worthington*'s blog posts about the subject for now,
+while the specific arguments and their meaning are being properly
+documented.
+
+- [Towards a new general dispatch mechanism in MoarVM](https://6guts.wordpress.com/2021/03/15/towards-a-new-general-dispatch-mechanism-in-moarvm/)
+- [Raku multiple dispatch with the new MoarVM dispatcher](https://6guts.wordpress.com/2021/04/15/raku-multiple-dispatch-with-the-new-moarvm-dispatcher/)
+- [The new MoarVM dispatch mechanism is here!](https://6guts.wordpress.com/2021/09/29/the-new-moarvm-dispatch-mechanism-is-here/)
+
+## register `moar`
+* short for nqp::dispatch('boot-syscall', 'dispatcher-register', …)
+
+## syscall `moar`
+* short for nqp::dispatch('boot-syscall', …)
 
 # <a id="exception-handling"></a> Exception Handling
 
