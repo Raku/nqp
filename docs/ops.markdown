@@ -209,8 +209,8 @@ The opcodes are grouped into the following categories:
 ## [Dispatch](#dispatch)
 [delegate](#delegate-moar) |
 [dispatch](#dispatch-moar) |
-[register](#dispatch-moar) |
-[syscall](#dispatch-moar)
+[register](#register-moar) |
+[syscall](#register-moar)
 
 ## [Exception Handling](#exception-handling)
 
