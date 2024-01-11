@@ -387,42 +387,36 @@ sub add_to_sc($sc, $idx, $obj) {
         },
         'hllize_dispatcher', 'baz-hllize',
     ));
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'foo-hllize', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+    nqp::register('foo-hllize', -> $capture {
+        nqp::syscall('dispatcher-guard-type',
+            nqp::syscall('dispatcher-track-arg', $capture, 0));
         my $obj := nqp::captureposarg($capture, 0);
 
         my $role := nqp::gettypehllrole($obj);
         if ($role == 4) {
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-delegate', 'lang-call',
-                nqp::dispatch(
-                    'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    $capture, 0, -> $array { nqp::list('fooifed') },
-                )
-            )
+            nqp::delegate('lang-call', nqp::syscall(
+              'dispatcher-insert-arg-literal-obj',
+              $capture, 0, -> $array { nqp::list('fooifed') },
+            ));
         }
         else {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+            nqp::delegate('boot-value', $capture);
         }
     });
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'baz-hllize', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type',
-            nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0));
+    nqp::register('baz-hllize', -> $capture {
+        nqp::syscall('dispatcher-guard-type',
+          nqp::syscall('dispatcher-track-arg', $capture, 0));
         my $obj := nqp::captureposarg($capture, 0);
 
         my $role := nqp::gettypehllrole($obj);
         if ($role == 4) {
-            nqp::dispatch(
-                'boot-syscall', 'dispatcher-delegate', 'lang-call',
-                nqp::dispatch(
-                    'boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    $capture, 0, -> $array { Baz },
-                )
-            )
+            nqp::delegate('lang-call', nqp::syscall(
+              'dispatcher-insert-arg-literal-obj',
+              $capture, 0, -> $array { Baz },
+            ));
         }
         else {
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+            nqp::delegate('boot-value', $capture);
         }
     });
 
