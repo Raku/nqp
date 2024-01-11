@@ -1828,9 +1828,19 @@ QAST::MASTOperations.add_core_op('callmethod', -> $qastcomp, $op {
         @dispatch_arg_idxs, $op.returns)
 });
 
-QAST::MASTOperations.add_core_op('dispatch', :!inlinable, -> $qastcomp, $op {
+my sub add-dispatcher-op($qastcomp, $op, :$prefix) {
     # Ensure named/positional constraint is upheld.
     my @args := arrange_args($op.list);
+    if $prefix {
+        if $prefix eq 'boot-syscall' {
+            nqp::unshift(@args, QAST::SVal.new(:value($prefix)));
+        }
+        elsif $prefix eq 'dispatcher-register'
+           || $prefix eq 'dispatcher-delegate' {
+            nqp::unshift(@args, QAST::SVal.new(:value($prefix)));
+            nqp::unshift(@args, QAST::SVal.new(:value<boot-syscall>));
+        }
+    }
 
     # Obtain name of the dispatcher to use.
     my $name_qast := nqp::shift(@args);
@@ -1868,6 +1878,20 @@ QAST::MASTOperations.add_core_op('dispatch', :!inlinable, -> $qastcomp, $op {
         $regalloc.release_register($arg_mast.result_reg, $arg_mast.result_kind);
     }
     $res
+}
+
+# Dispatching
+QAST::MASTOperations.add_core_op('dispatch', :!inlinable, -> $qastcomp, $op {
+    add-dispatcher-op($qastcomp, $op);
+});
+QAST::MASTOperations.add_core_op('syscall', :!inlinable, -> $qastcomp, $op {
+    add-dispatcher-op($qastcomp, $op, :prefix<boot-syscall>);
+});
+QAST::MASTOperations.add_core_op('register', :!inlinable, -> $qastcomp, $op {
+    add-dispatcher-op($qastcomp, $op, :prefix<dispatcher-register>);
+});
+QAST::MASTOperations.add_core_op('delegate', :!inlinable, -> $qastcomp, $op {
+    add-dispatcher-op($qastcomp, $op, :prefix<dispatcher-delegate>);
 });
 
 # Binding

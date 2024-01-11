@@ -37,55 +37,55 @@ plan(160);
 }
 
 {
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'identity', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    nqp::register('identity', -> $capture {
+        nqp::delegate('boot-value', $capture);
     });
     ok(nqp::dispatch('identity', 42) == 42, 'Can define identity dispatch (1)');
     ok(nqp::dispatch('identity', 'foo') eq 'foo', 'Can define identity dispatch (2)');
     ok(nqp::dispatch('identity', 3.14) == 3.14, 'Can define identity dispatch (3)');
     ok(nqp::eqaddr(nqp::dispatch('identity', NQPMu), NQPMu), 'Can define identity dispatch (4)');
 
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'wrap-identity', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'identity', $capture);
+    nqp::register('wrap-identity', -> $capture {
+        nqp::delegate('identity', $capture);
     });
     ok(nqp::dispatch('wrap-identity', 101) == 101,
         'Chains of userspace dispatcher delegations work (1 deep)');
 
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'wrap-wrap-identity', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'wrap-identity', $capture);
+    nqp::register('wrap-wrap-identity', -> $capture {
+        nqp::delegate('wrap-identity', $capture);
     });
     ok(nqp::dispatch('wrap-wrap-identity', 666) == 666,
         'Chains of userspace dispatcher delegations work (2 deep)');
 }
 
 {
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first', -> $capture {
-        my $capture-derived := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-derived);
+    nqp::register('drop-first', -> $capture {
+        my $capture-derived := nqp::syscall('dispatcher-drop-arg', $capture, 0);
+        nqp::delegate('boot-value', $capture-derived);
     });
     ok(nqp::dispatch('drop-first', 'first', 'second') eq 'second',
         'dispatcher-drop-arg works');
 
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first-two', -> $capture {
-        my $capture-da := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0);
-        my $capture-db := nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture-da, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-db);
+    nqp::register('drop-first-two', -> $capture {
+        my $capture-da := nqp::syscall('dispatcher-drop-arg', $capture, 0);
+        my $capture-db := nqp::syscall('dispatcher-drop-arg', $capture-da, 0);
+        nqp::delegate('boot-value', $capture-db);
     });
     ok(nqp::dispatch('drop-first-two', 'first', 'second', 'third', 'fourth') eq 'third',
         'Multiple applications of dispatcher-drop-arg work');
 }
 
 {
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first-two', -> $capture {
-        my $capture-derived := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args', $capture, 0, 2);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-derived);
+    nqp::register('drop-first-two', -> $capture {
+        my $capture-derived := nqp::syscall('dispatcher-drop-n-args', $capture, 0, 2);
+        nqp::delegate('boot-value', $capture-derived);
     });
     ok(nqp::dispatch('drop-first-two', 'first', 'second', 'third') eq 'third',
         'dispatcher-drop-n-args works');
 
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'drop-first-three', -> $capture {
-        my $capture-derived := nqp::dispatch('boot-syscall', 'dispatcher-drop-n-args', $capture, 0, 3);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture-derived);
+    nqp::register('drop-first-three', -> $capture {
+        my $capture-derived := nqp::syscall('dispatcher-drop-n-args', $capture, 0, 3);
+        nqp::delegate('boot-value', $capture-derived);
     });
     ok(nqp::dispatch('drop-first-three', 'first', 'second', 'third', 'fourth', 'fifth') eq 'fourth',
         'dropping three arguments works');
@@ -93,10 +93,10 @@ plan(160);
 
 {
     my $target := -> $x { $x + 1 }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'call-on-target', -> $capture {
+    nqp::register('call-on-target', -> $capture {
         my $capture-derived := nqp::dispatch('boot-syscall',
                 'dispatcher-insert-arg-literal-obj', $capture, 0, $target);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+        nqp::syscall('dispatcher-delegate',
                 'boot-code-constant', $capture-derived);
     });
     sub cot() { nqp::dispatch('call-on-target', 49) }
@@ -108,10 +108,10 @@ plan(160);
 
 {
     my $target := -> $x, $y { $x ~ $y }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'insert-world', -> $capture {
+    nqp::register('insert-world', -> $capture {
         my $capture-derived := nqp::dispatch('boot-syscall',
                 'dispatcher-insert-arg-literal-str', $capture, 2, 'world');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+        nqp::syscall('dispatcher-delegate',
                 'boot-code-constant', $capture-derived);
     });
     sub insert() { nqp::dispatch('insert-world', $target, 'hello ') }
@@ -123,10 +123,10 @@ plan(160);
 
 {
     my $target := -> $x, $y { $x + $y }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'insert-answer', -> $capture {
+    nqp::register('insert-answer', -> $capture {
         my $capture-derived := nqp::dispatch('boot-syscall',
                 'dispatcher-insert-arg-literal-int', $capture, 2, 42);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+        nqp::syscall('dispatcher-delegate',
                 'boot-code-constant', $capture-derived);
     });
     sub insert() { nqp::dispatch('insert-answer', $target, 58) }
@@ -138,12 +138,12 @@ plan(160);
 
 {
     my $adder := -> $x, $y { $x * $y }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'dupe-arg', -> $capture {
+    nqp::register('dupe-arg', -> $capture {
         my $first-arg := nqp::dispatch('boot-syscall',
                 'dispatcher-track-arg', $capture, 1);
         my $capture-derived := nqp::dispatch('boot-syscall',
                 'dispatcher-insert-arg', $capture, 2, $first-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+        nqp::syscall('dispatcher-delegate',
                 'boot-code-constant', $capture-derived);
     });
     sub dupe() { nqp::dispatch('dupe-arg', $adder, 3) }
@@ -156,15 +156,15 @@ plan(160);
     my class C2 { }
     my class C3 { }
     my $count := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'type-name', -> $capture {
+    nqp::register('type-name', -> $capture {
         $count++;
-        my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
         my $arg-val := nqp::captureposarg($capture, 0);
         my str $name := $arg-val.HOW.name($arg-val);
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+        nqp::syscall('dispatcher-guard-type', $arg);
+        nqp::delegate('boot-constant',
+            nqp::syscall('dispatcher-insert-arg-literal-str',
+                nqp::syscall('dispatcher-drop-arg', $capture, 0),
                 0, $name));
     });
     sub type-name($obj) {
@@ -194,15 +194,15 @@ plan(160);
     my class C1 { }
     my class C2 { }
     my $count := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'conc', -> $capture {
+    nqp::register('conc', -> $capture {
         $count++;
-        my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
         my $arg-val := nqp::captureposarg($capture, 0);
         my str $result := nqp::isconcrete($arg-val) ?? 'conc' !! 'type';
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+        nqp::syscall('dispatcher-guard-concreteness', $arg);
+        nqp::delegate('boot-constant',
+            nqp::syscall('dispatcher-insert-arg-literal-str',
+                nqp::syscall('dispatcher-drop-arg', $capture, 0),
                 0, $result));
     });
     sub conc($obj) {
@@ -222,14 +222,14 @@ plan(160);
 {
     my class C { has $!foo; method foo() { $!foo } }
     my $count := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'literal', -> $capture {
+    nqp::register('literal', -> $capture {
         $count++;
-        my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
         my $arg-val := nqp::captureposarg($capture, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+        nqp::syscall('dispatcher-guard-literal', $arg);
+        nqp::delegate('boot-constant',
+            nqp::syscall('dispatcher-insert-arg-literal-obj',
+                nqp::syscall('dispatcher-drop-arg', $capture, 0),
                 0, $arg-val.foo));
     });
     sub literal($obj) {
@@ -251,20 +251,20 @@ plan(160);
     my class C { }
     my class D { }
     my $count := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'nil-check', -> $capture {
+    nqp::register('nil-check', -> $capture {
         $count++;
-        my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
+        my $arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
         my $arg-val := nqp::captureposarg($capture, 0);
         my $is-nil := nqp::istype($arg-val, Nil);
         if $is-nil {
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $arg);
+            nqp::syscall('dispatcher-guard-literal', $arg);
         }
         else {
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-not-literal-obj', $arg, Nil);
+            nqp::syscall('dispatcher-guard-not-literal-obj', $arg, Nil);
         }
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+        nqp::delegate('boot-constant',
+            nqp::syscall('dispatcher-insert-arg-literal-str',
+                nqp::syscall('dispatcher-drop-arg', $capture, 0),
                 0, $is-nil ?? 'nil' !! 'not nil'));
     });
     sub nil-check($obj) {
@@ -283,7 +283,7 @@ plan(160);
 }
 
 {
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'dies', -> $capture {
+    nqp::register('dies', -> $capture {
         nqp::die('my dying dispatcher')
     });
     my $message := '';
@@ -297,9 +297,9 @@ plan(160);
 }
 
 {
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'bad-dupe', -> $capture {
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    nqp::register('bad-dupe', -> $capture {
+        nqp::delegate('boot-value', $capture);
+        nqp::delegate('boot-value', $capture);
     });
     my $message := '';
     try {
@@ -318,14 +318,14 @@ plan(160);
     my class Subclass is Wrapper {
     }
     my $count := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'read-value', -> $capture {
+    nqp::register('read-value', -> $capture {
         $count++;
-        my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-        my $value := nqp::dispatch('boot-syscall', 'dispatcher-track-attr', $arg,
+        my $arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
+        my $value := nqp::syscall('dispatcher-track-attr', $arg,
             Wrapper, '$!value');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value',
-            nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
-                nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+        nqp::delegate('boot-value',
+            nqp::syscall('dispatcher-insert-arg',
+                nqp::syscall('dispatcher-drop-arg', $capture, 0),
                 0, $value));
     });
     sub rv($obj) {
@@ -340,13 +340,13 @@ plan(160);
 
 {
     my $target := -> $arg { nqp::dispatch('boot-resume', 'res-arg')  }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'basic-resumable',
+    nqp::register('basic-resumable',
         # Dispatch
         -> $capture {
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
@@ -367,20 +367,20 @@ plan(160);
 {
     my $target-a := -> { nqp::dispatch('boot-resume') }
     my $target-b := -> { 'reached'  }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'resumable-really-calls',
+    nqp::register('resumable-really-calls',
         # Dispatch
         -> $capture {
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target-a);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
         -> $capture {
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target-b);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
     ok(nqp::dispatch('resumable-really-calls') eq 'reached',
@@ -392,23 +392,23 @@ plan(160);
     my $target-b := -> $arg { 'y' ~ $arg }
     my int $disp-count;
     my int $res-count;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'resumable-using-init-args',
+    nqp::register('resumable-using-init-args',
         # Dispatch
         -> $capture {
             $disp-count++;
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target-a);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
         -> $capture {
             $res-count++;
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+            my $args := nqp::syscall('dispatcher-get-resume-init-args');
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $args, 0, $target-b);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
     sub test-call(str $arg) { nqp::dispatch('resumable-using-init-args', $arg) }
@@ -427,23 +427,23 @@ plan(160);
     my $target-b := -> $arg { 'y' ~ $arg }
     my int $disp-count;
     my int $res-count;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'resumable-conditionally-resumed',
+    nqp::register('resumable-conditionally-resumed',
         # Dispatch
         -> $capture {
             $disp-count++;
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target-a);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
         -> $capture {
             $res-count++;
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+            my $args := nqp::syscall('dispatcher-get-resume-init-args');
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $args, 0, $target-b);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
     sub test-call(str $arg) { nqp::dispatch('resumable-conditionally-resumed', $arg) }
@@ -469,14 +469,14 @@ plan(160);
     my class B2 {}
     my int $disp-count;
     my int $res-count;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'resume-guarding-init-state',
+    nqp::register('resume-guarding-init-state',
         # Dispatch
         -> $capture {
             $disp-count++;
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $target-a);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
@@ -484,14 +484,14 @@ plan(160);
             # We insert a guard on the type and use it to choose where we will
             # dispatch to, to test guarding on resume init args.
             $res-count++;
-            my $args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-            my $arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $args, 0);
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $arg);
+            my $args := nqp::syscall('dispatcher-get-resume-init-args');
+            my $arg := nqp::syscall('dispatcher-track-arg', $args, 0);
+            nqp::syscall('dispatcher-guard-type', $arg);
             my $arg-val := nqp::captureposarg($args, 0);
             my $target := nqp::istype($arg-val, B1) ?? $target-b1 !! $target-b2;
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $args, 0, $target);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
     sub test-call($arg) { nqp::dispatch('resume-guarding-init-state', $arg) }
@@ -541,18 +541,18 @@ class Exhausted {};
 
     my int $disp-count;
     my int $res-count;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'method-deferral',
+    nqp::register('method-deferral',
         # Dispatch
         -> $capture {
             $disp-count++;
             # We'll resume on the original dispatch arguments.
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
 
             # Guard on the method name and invocant type.
-            my $name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $name);
-            my $invocant := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $invocant);
+            my $name := nqp::syscall('dispatcher-track-arg', $capture, 0);
+            nqp::syscall('dispatcher-guard-literal', $name);
+            my $invocant := nqp::syscall('dispatcher-track-arg', $capture, 1);
+            nqp::syscall('dispatcher-guard-type', $invocant);
 
             # Resolve the method.
             my str $name-val := nqp::captureposarg_s($capture, 0);
@@ -568,7 +568,7 @@ class Exhausted {};
             my $with-method := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $without-name, 0,
                     nqp::getattr($meth, NQPRoutine, '$!do'));
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $with-method);
         },
         # Resume
@@ -576,19 +576,19 @@ class Exhausted {};
             $res-count++;
 
             # Check if we have an existing dispatch state.
-            my $state := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-state');
+            my $state := nqp::syscall('dispatcher-get-resume-state');
             if nqp::isnull($state) {
                 # No state, so just starting the resumption. Guard on the
                 # invocant type and name.
-                my $init := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-                my $name := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $init, 0);
-                nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $name);
-                my $invocant := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $init, 1);
-                nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $invocant);
+                my $init := nqp::syscall('dispatcher-get-resume-init-args');
+                my $name := nqp::syscall('dispatcher-track-arg', $init, 0);
+                nqp::syscall('dispatcher-guard-literal', $name);
+                my $invocant := nqp::syscall('dispatcher-track-arg', $init, 1);
+                nqp::syscall('dispatcher-guard-type', $invocant);
 
                 # Also guard on there being no dispatch state.
-                my $track-state := nqp::dispatch('boot-syscall', 'dispatcher-track-resume-state');
-                nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $track-state);
+                my $track-state := nqp::syscall('dispatcher-track-resume-state');
+                nqp::syscall('dispatcher-guard-literal', $track-state);
 
                 # Find all methods.
                 my str $name-val := nqp::captureposarg_s($init, 0);
@@ -606,7 +606,7 @@ class Exhausted {};
                 while @methods {
                     $chain := DeferralChain.new(@methods.pop, $chain);
                 }
-                nqp::dispatch('boot-syscall', 'dispatcher-set-resume-state-literal', $chain);
+                nqp::syscall('dispatcher-set-resume-state-literal', $chain);
 
                 # Invoke the immediate next method.
                 my $without-name := nqp::dispatch('boot-syscall',
@@ -614,7 +614,7 @@ class Exhausted {};
                 my $with-method := nqp::dispatch('boot-syscall',
                         'dispatcher-insert-arg-literal-obj', $without-name, 0,
                         nqp::getattr($next-method, NQPRoutine, '$!do'));
-                nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+                nqp::syscall('dispatcher-delegate',
                         'boot-code-constant', $with-method);
             }
             elsif nqp::istype($state, Exhausted) {
@@ -624,24 +624,24 @@ class Exhausted {};
                 # Already working through a chain of things to dispatch on.
                 # Obtain the tracking object for the dispatch state, and
                 # guard against the method attribute.
-                my $track-state := nqp::dispatch('boot-syscall', 'dispatcher-track-resume-state');
-                my $track-method := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+                my $track-state := nqp::syscall('dispatcher-track-resume-state');
+                my $track-method := nqp::syscall('dispatcher-track-attr',
                     $track-state, DeferralChain, '$!method');
-                nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $track-method);
+                nqp::syscall('dispatcher-guard-literal', $track-method);
 
                 # Update dispatch state to point to next method.
-                my $track-next := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+                my $track-next := nqp::syscall('dispatcher-track-attr',
                     $track-state, DeferralChain, '$!next');
-                nqp::dispatch('boot-syscall', 'dispatcher-set-resume-state', $track-next);
+                nqp::syscall('dispatcher-set-resume-state', $track-next);
 
                 # Dispatch to the method at the head of the chain.
-                my $init := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+                my $init := nqp::syscall('dispatcher-get-resume-init-args');
                 my $without-name := nqp::dispatch('boot-syscall',
                         'dispatcher-drop-arg', $init, 0);
                 my $with-method := nqp::dispatch('boot-syscall',
                         'dispatcher-insert-arg-literal-obj', $without-name, 0,
                         nqp::getattr($state.method, NQPRoutine, '$!do'));
-                nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+                nqp::syscall('dispatcher-delegate',
                         'boot-code-constant', $with-method);
             }
         });
@@ -682,12 +682,12 @@ class Exhausted {};
     my $callsame := -> {
         nqp::dispatch('boot-resume-caller')
     }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'invoke-callsame',
+    nqp::register('invoke-callsame',
         # Dispatch
         -> $capture {
             my $with-target := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $callsame);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $with-target);
         });
 
@@ -709,25 +709,25 @@ class Exhausted {};
 {
     my $first := -> $arg { $arg ~ nqp::dispatch('boot-resume') }
     my $second := -> $arg-code, $arg { (nqp::isinvokable($arg-code) ?? 'y' !! 'n') ~ $arg }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'tweaked-args-init-state',
+    nqp::register('tweaked-args-init-state',
         # Dispatch
         -> $capture {
             # Insert something to call and then use that as the resume init
             # state, before delegating to invoke it.
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $first);
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture-derived);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-set-resume-init-args', $capture-derived);
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
         -> $capture {
             # Insert second callee at the start of the resume state and call
             # with that.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $init-args, 0, $second);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
     sub test-call() {
@@ -743,56 +743,56 @@ class Exhausted {};
     my $outer := -> $arg { 'o' ~ $arg }
     my $first-inner := -> $arg { 'fi' ~ $arg ~ nqp::dispatch('boot-resume') }
     my $second-inner := -> $arg { 'si' ~ $arg ~ nqp::dispatch('boot-resume') }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-resume-outer',
+    nqp::register('test-resume-outer',
         # Dispatch
         -> $capture {
             # Save our resume init args, and then immediately delegate to the
             # inner dispatcher.
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'test-resume-inner', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
+            nqp::delegate('test-resume-inner', $capture);
         },
         # Resume
         -> $capture {
             # Invoke the outer.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $init-args, 0, $outer);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         });
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-resume-inner',
+    nqp::register('test-resume-inner',
         # Dispatch
         -> $capture {
             # Invoke the first inner.
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $capture-derived := nqp::dispatch('boot-syscall',
                     'dispatcher-insert-arg-literal-obj', $capture, 0, $first-inner);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+            nqp::syscall('dispatcher-delegate',
                     'boot-code-constant', $capture-derived);
         },
         # Resume
         -> $capture {
             # We use the resume state to indicate if we already deferred to the
             # inner candidate; if so, fall back to outer resumption.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-            my $state := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-state');
-            my $track-state := nqp::dispatch('boot-syscall', 'dispatcher-track-resume-state');
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $track-state);
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
+            my $state := nqp::syscall('dispatcher-get-resume-state');
+            my $track-state := nqp::syscall('dispatcher-track-resume-state');
+            nqp::syscall('dispatcher-guard-literal', $track-state);
             if nqp::isnull($state) {
                 # First resume. Set state and invoke second inner.
-                nqp::dispatch('boot-syscall', 'dispatcher-set-resume-state-literal', Exhausted);
+                nqp::syscall('dispatcher-set-resume-state-literal', Exhausted);
                 my $capture-derived := nqp::dispatch('boot-syscall',
                         'dispatcher-insert-arg-literal-obj', $init-args, 0, $second-inner);
-                nqp::dispatch('boot-syscall', 'dispatcher-delegate',
+                nqp::syscall('dispatcher-delegate',
                         'boot-code-constant', $capture-derived);
             }
             else {
                 # Second resume, fall back to outer dispatcher's resumption if
                 # there is one. If not, then hand back a constant.
-                unless nqp::dispatch('boot-syscall', 'dispatcher-next-resumption') {
+                unless nqp::syscall('dispatcher-next-resumption') {
                     my $capture-derived := nqp::dispatch('boot-syscall',
                             'dispatcher-insert-arg-literal-str', $init-args, 0, 'END');
-                    nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant',
+                    nqp::delegate('boot-constant',
                         $capture-derived);
                 }
             }
@@ -830,56 +830,56 @@ class Exhausted {};
     my $child := Wrappable.new(
         meth => -> $arg { 'cm' ~ $arg ~ nqp::dispatch('boot-resume') },
         wrapper => -> $arg { 'cw' ~ $arg ~ nqp::dispatch('boot-resume') });
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-wrappable-method-outer',
+    nqp::register('test-wrappable-method-outer',
         # Dispatch
         -> $capture {
             # Save our resume init args. Prepend the child wrappable to the args and
             # delegate.
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'test-wrappable-method-inner',
-                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj', $capture, 0, $child));
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
+            nqp::delegate('test-wrappable-method-inner',
+                nqp::syscall('dispatcher-insert-arg-literal-obj', $capture, 0, $child));
         },
         # Resume
         -> $capture {
             # Delegate again with the parent.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'test-wrappable-method-inner',
-                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj', $init-args, 0, $parent));
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
+            nqp::delegate('test-wrappable-method-inner',
+                nqp::syscall('dispatcher-insert-arg-literal-obj', $init-args, 0, $parent));
         });
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-wrappable-method-inner',
+    nqp::register('test-wrappable-method-inner',
         # Dispatch
         -> $capture {
             # Save our resume init args. Then obtain the first arg which is the
             # wrappable. Drop it, pull out the wrapper, and make a call to that.
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
             my $wrappable := nqp::captureposarg($capture, 0);
             my $target := $wrappable.wrapper;
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
-                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                    nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $capture, 0),
+            nqp::delegate('boot-code-constant',
+                nqp::syscall('dispatcher-insert-arg-literal-obj',
+                    nqp::syscall('dispatcher-drop-arg', $capture, 0),
                     0, $target));
         },
         # Resume
         -> $capture {
             # We use the resume state to indicate if we already deferred to the
             # wrapped thing.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-            my $state := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-state');
-            my $track-state := nqp::dispatch('boot-syscall', 'dispatcher-track-resume-state');
-            nqp::dispatch('boot-syscall', 'dispatcher-guard-literal', $track-state);
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
+            my $state := nqp::syscall('dispatcher-get-resume-state');
+            my $track-state := nqp::syscall('dispatcher-track-resume-state');
+            nqp::syscall('dispatcher-guard-literal', $track-state);
             if nqp::isnull($state) {
                 # First resume. Set state and invoke the inner thing.
-                nqp::dispatch('boot-syscall', 'dispatcher-set-resume-state-literal', Exhausted);
+                nqp::syscall('dispatcher-set-resume-state-literal', Exhausted);
                 my $wrappable := nqp::captureposarg($init-args, 0);
                 my $target := $wrappable.meth;
-                nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
-                    nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
-                        nqp::dispatch('boot-syscall', 'dispatcher-drop-arg', $init-args, 0),
+                nqp::delegate('boot-code-constant',
+                    nqp::syscall('dispatcher-insert-arg-literal-obj',
+                        nqp::syscall('dispatcher-drop-arg', $init-args, 0),
                         0, $target));
             }
             else {
                 # Second resume, fall back to outer dispatcher's resumption.
-                nqp::dispatch('boot-syscall', 'dispatcher-next-resumption') ||
+                nqp::syscall('dispatcher-next-resumption') ||
                     nqp::die('Should not be falling back at the end');
             }
         });
@@ -897,13 +897,13 @@ class Exhausted {};
 {
     sub first($x) { nqp::assertparamcheck($x == 0); "first $x" }
     sub second($x) { "second $x" }
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-resume-on-bind-fail',
+    nqp::register('test-resume-on-bind-fail',
         # Dispatch
         -> $capture {
-            nqp::dispatch('boot-syscall', 'dispatcher-set-resume-init-args', $capture);
-            nqp::dispatch('boot-syscall', 'dispatcher-resume-on-bind-failure', 42);
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
-                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+            nqp::syscall('dispatcher-set-resume-init-args', $capture);
+            nqp::syscall('dispatcher-resume-on-bind-failure', 42);
+            nqp::delegate('boot-code-constant',
+                nqp::syscall('dispatcher-insert-arg-literal-obj',
                     $capture, 0, &first));
         },
         # Resume
@@ -912,9 +912,9 @@ class Exhausted {};
             ok(nqp::captureposarg_i($capture, 0) == 42, 'Correct argument to resume');
 
             # Call second function with original args.
-            my $init-args := nqp::dispatch('boot-syscall', 'dispatcher-get-resume-init-args');
-            nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant',
-                nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+            my $init-args := nqp::syscall('dispatcher-get-resume-init-args');
+            nqp::delegate('boot-code-constant',
+                nqp::syscall('dispatcher-insert-arg-literal-obj',
                     $init-args, 0, &second));
         });
 
@@ -975,13 +975,13 @@ class Exhausted {};
 
 {
     my int $entries := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-how', -> $capture {
+    nqp::register('test-how', -> $capture {
         $entries++;
-        my $obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-        my $how := nqp::dispatch('boot-syscall', 'dispatcher-track-how', $obj);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $obj := nqp::syscall('dispatcher-track-arg', $capture, 0);
+        my $how := nqp::syscall('dispatcher-track-how', $obj);
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $capture, 0, $how);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
+        nqp::delegate('boot-value', $delegate);
     });
     sub check-it-works($obj) {
         nqp::dispatch('test-how', $obj)
@@ -1000,17 +1000,17 @@ class Exhausted {};
     my $table := nqp::create(WithHash);
     nqp::bindattr($table, WithHash, '$!the-hash', nqp::hash('a', 42, 'b', 100));
     my int $entries := 0;
-    nqp::dispatch('boot-syscall', 'dispatcher-register', 'test-lookup', -> $capture {
+    nqp::register('test-lookup', -> $capture {
         $entries++;
-        my $obj := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-        my $key := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 1);
-        my $table-attr := nqp::dispatch('boot-syscall', 'dispatcher-track-attr',
+        my $obj := nqp::syscall('dispatcher-track-arg', $capture, 0);
+        my $key := nqp::syscall('dispatcher-track-arg', $capture, 1);
+        my $table-attr := nqp::syscall('dispatcher-track-attr',
             $obj, WithHash, '$!the-hash');
-        my $result := nqp::dispatch('boot-syscall', 'dispatcher-index-tracked-lookup-table',
+        my $result := nqp::syscall('dispatcher-index-tracked-lookup-table',
             $table-attr, $key);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $capture, 0, $result);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $delegate);
+        nqp::delegate('boot-value', $delegate);
     });
     sub check-it-works(str $key) {
         nqp::dispatch('test-lookup', $table, $key)
