@@ -2,63 +2,63 @@
 # loading, and so can't have them with the others that are in the setting,
 # as the module loader is used to load the setting.
 my $get-exception-message := -> $ex { nqp::getmessage($ex) };
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-stringify', -> $capture {
+nqp::register('nqp-stringify', -> $capture {
     # Guard on the type of the argument for stringification.
-    my $track-arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-arg);
+    my $track-arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
+    nqp::syscall('dispatcher-guard-type', $track-arg);
 
     # A null argument always maps to the empty string.
     my $arg := nqp::captureposarg($capture, 0);
     if nqp::isnull($arg) {
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, '');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Anything that can unbox as a string will simply just be handed back;
     # we rely on the argument handling to do the unbox.
-    elsif nqp::isconcrete($arg) && nqp::dispatch('boot-syscall', 'can-unbox-to-str', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    elsif nqp::isconcrete($arg) && nqp::syscall('can-unbox-to-str', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        nqp::delegate('boot-value', $capture);
     }
 
     # If there's a Str method, invoke that
     elsif nqp::isconcrete(my $meth := $arg.HOW.find_method($arg, 'Str')) {
-        my $with-name := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        my $with-name := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'Str');
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $with-name, 0, $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-call', $delegate);
+        nqp::delegate('lang-meth-call', $delegate);
     }
 
     # If it's undefined, then the empty string.
     elsif !nqp::isconcrete($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, '');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Boxed int/num.
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-int', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-int', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-int-to-str');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-num', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-num', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-num-to-str');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Exception stringifies to its message
     elsif nqp::isconcrete(try { nqp::getmessage($arg) }) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-obj',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-obj',
             $capture, 0, $get-exception-message);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-code-constant', $delegate);
+        nqp::delegate('boot-code-constant', $delegate);
     }
 
     # Otherwise, don't know what to do.
@@ -66,63 +66,63 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-stringify', -> $captur
         nqp::die('Cannot stringify object of type ' ~ $arg.HOW.name($arg));
     }
 });
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-intify', -> $capture {
+nqp::register('nqp-intify', -> $capture {
     # Guard on the type of the argument for intification.
-    my $track-arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-arg);
+    my $track-arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
+    nqp::syscall('dispatcher-guard-type', $track-arg);
 
     # A null argument always maps to 0.
     my $arg := nqp::captureposarg($capture, 0);
     if nqp::isnull($arg) {
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-int',
             $capture, 0, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Anything that can unbox as an int will simply just be handed back;
     # we rely on the argument handling to do the unbox.
-    elsif nqp::isconcrete($arg) && nqp::dispatch('boot-syscall', 'can-unbox-to-int', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    elsif nqp::isconcrete($arg) && nqp::syscall('can-unbox-to-int', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        nqp::delegate('boot-value', $capture);
     }
 
     # If there's an Int method, invoke that
     elsif nqp::isconcrete(try { my $meth := $arg.HOW.find_method($arg, 'Int') }) {
-        my $with-name := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        my $with-name := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'Int');
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $with-name, 0, $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-call', $delegate);
+        nqp::delegate('lang-meth-call', $delegate);
     }
 
     # If it's undefined, then 0.
     elsif !nqp::isconcrete($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-int',
             $capture, 0, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Array or hash intifies to elems
     elsif nqp::islist($arg) || nqp::ishash($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'elems');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Boxed str/num
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-str', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-str', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-str-to-int');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-num', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-num', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-num-to-int');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Otherwise, don't know what to do.
@@ -130,63 +130,63 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-intify', -> $capture {
         nqp::die('Cannot intify object of type ' ~ $arg.HOW.name($arg));
     }
 });
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-uintify', -> $capture {
+nqp::register('nqp-uintify', -> $capture {
     # Guard on the type of the argument for intification.
-    my $track-arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-arg);
+    my $track-arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
+    nqp::syscall('dispatcher-guard-type', $track-arg);
 
     # A null argument always maps to 0.
     my $arg := nqp::captureposarg($capture, 0);
     if nqp::isnull($arg) {
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-int',
             $capture, 0, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Anything that can unbox as an int will simply just be handed back;
     # we rely on the argument handling to do the unbox.
-    elsif nqp::isconcrete($arg) && nqp::dispatch('boot-syscall', 'can-unbox-to-int', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    elsif nqp::isconcrete($arg) && nqp::syscall('can-unbox-to-int', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        nqp::delegate('boot-value', $capture);
     }
 
     # If there's an Int method, invoke that
     elsif nqp::isconcrete(try { my $meth := $arg.HOW.find_method($arg, 'UInt') }) {
-        my $with-name := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        my $with-name := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'Int');
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $with-name, 0, $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-call', $delegate);
+        nqp::delegate('lang-meth-call', $delegate);
     }
 
     # If it's undefined, then 0.
     elsif !nqp::isconcrete($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-int',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-int',
             $capture, 0, 0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Array or hash intifies to elems
     elsif nqp::islist($arg) || nqp::ishash($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'elems');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Boxed str/num
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-str', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-str', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-str-to-int');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-num', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-num', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-num-to-int');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Otherwise, don't know what to do.
@@ -194,64 +194,64 @@ nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-uintify', -> $capture 
         nqp::die('Cannot intify object of type ' ~ $arg.HOW.name($arg));
     }
 });
-nqp::dispatch('boot-syscall', 'dispatcher-register', 'nqp-numify', -> $capture {
+nqp::register('nqp-numify', -> $capture {
     # Guard on the type of the argument for numification.
-    my $track-arg := nqp::dispatch('boot-syscall', 'dispatcher-track-arg', $capture, 0);
-    nqp::dispatch('boot-syscall', 'dispatcher-guard-type', $track-arg);
+    my $track-arg := nqp::syscall('dispatcher-track-arg', $capture, 0);
+    nqp::syscall('dispatcher-guard-type', $track-arg);
 
     # A null argument always maps to 0e0.
     my $arg := nqp::captureposarg($capture, 0);
     if nqp::isnull($arg) {
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-num',
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-num',
             $capture, 0, 0e0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Anything that can unbox as a num will simply just be handed back;
     # we rely on the argument handling to do the unbox.
-    elsif nqp::isconcrete($arg) && nqp::dispatch('boot-syscall', 'can-unbox-to-num', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-value', $capture);
+    elsif nqp::isconcrete($arg) && nqp::syscall('can-unbox-to-num', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        nqp::delegate('boot-value', $capture);
     }
 
     # If there's a Num method, invoke that
     elsif nqp::isconcrete(try { my $meth := $arg.HOW.find_method($arg, 'Num') }) {
-        my $with-name := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        my $with-name := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'Num');
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg',
+        my $delegate := nqp::syscall('dispatcher-insert-arg',
             $with-name, 0, $track-arg);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'lang-meth-call', $delegate);
+        nqp::delegate('lang-meth-call', $delegate);
     }
 
     # If it's undefined, then 0e0.
     elsif !nqp::isconcrete($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-num',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-num',
             $capture, 0, 0e0);
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-constant', $delegate);
+        nqp::delegate('boot-constant', $delegate);
     }
 
     # Array or hash numifies to elems (we can leave implicit return argument
     # conversion to take care of making it into a num).
     elsif nqp::islist($arg) || nqp::ishash($arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'elems');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Boxed str/int
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-str', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-str', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-str-to-num');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
-    elsif nqp::dispatch('boot-syscall', 'can-unbox-to-int', $arg) {
-        nqp::dispatch('boot-syscall', 'dispatcher-guard-concreteness', $track-arg);
-        my $delegate := nqp::dispatch('boot-syscall', 'dispatcher-insert-arg-literal-str',
+    elsif nqp::syscall('can-unbox-to-int', $arg) {
+        nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+        my $delegate := nqp::syscall('dispatcher-insert-arg-literal-str',
             $capture, 0, 'coerce-boxed-int-to-num');
-        nqp::dispatch('boot-syscall', 'dispatcher-delegate', 'boot-syscall', $delegate);
+        nqp::delegate('boot-syscall', $delegate);
     }
 
     # Otherwise, don't know what to do.
