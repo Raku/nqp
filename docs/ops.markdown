@@ -150,6 +150,15 @@ The opcodes are grouped into the following categories:
 [bitshiftr](#bitshiftr) |
 [bitxor](#bitxor)
 
+## [Captures](#captures)
+[captureexistsnamed](#captureexistsnamed) |
+[capturehasnameds](#capturehasnameds) |
+[capturenamedshash](#capturenamedshash) |
+[captureposelems](#captureposelems) |
+[captureposprimspec](#captureposprimspec) |
+[savecapture](#savecapture) |
+[usecapture](#usecapture)
+
 ## [Coercion](#coercion)
 
 [coerce_in](#coerce_in-moar) |
@@ -177,7 +186,6 @@ The opcodes are grouped into the following categories:
 
 [bindlex](#bindlex-moar-jvm) |
 [bindlexdyn](#bindlexdyn) |
-[captureposelems](#captureposelems) |
 [ctx](#ctx) |
 [ctxcaller](#ctxcaller) |
 [ctxlexpad](#ctxlexpad) |
@@ -192,8 +200,6 @@ The opcodes are grouped into the following categories:
 [getlexrelcaller](#getlexrelcaller) |
 [getlexreldyn](#getlexreldyn) |
 [lexprimspec](#lexprimspec) |
-[savecapture](#savecapture) |
-[usecapture](#usecapture)
 
 ## [Loop/Control](#control)
 
@@ -1108,6 +1114,67 @@ Signed right shift of `$bits` by `$count`.
 XOR the bits in `$l` and `$r`.
 `_I` variant returns an object of the given type.
 
+# <a id="captures"></a> Captures
+
+## captureexistsnamed($capture, "c")
+* `captureexistsnamed($capture, str $name --> int)`
+
+Returns 1 if the capture (saved with `savecapture`) has a named argument
+with the given name.  Returns 0 if not.
+
+## capturehasnameds
+* `capturehasnameds($capture --> int)
+
+Returns 1 if the capture (saved with `savecapture`) has named arguments.
+Returns 0 if not.
+
+## capturenamedshash
+* `captureamedshash($capture --> hash)
+
+Returns a hash of the named arguments in the given capture.
+
+## captureposelems
+* `captureposelems($capture --> int)`
+
+Returns the number of positional elements in a capture that was saved with
+`savecapture`.
+
+## captureposarg
+* captureposarg($capture, int $index --> obj)
+* captureposarg_i($capture, int $index --> int)
+* captureposarg_n($capture, int $index --> num)
+* captureposarg_s($capture, int $index --> str)
+* captureposarg_u($capture, int $index --> uint)
+
+Returns the positional argument at the given index from a capture that was
+saved with `savecapture`.
+
+## captureposprimspec
+* captureposprimspec($capture, int $index --> int)
+
+Given a capture and an index, return the primitive type of the positional
+argument at that index.
+
+The primitive types are 1 for int, 2 for num, 3 for str and 10 for uint.
+0 is any object.
+
+## savecapture
+* `savecapture()`
+
+Gets hold of the argument capture passed to the current block.
+Commits to doing enough copying that the list is valid any amount of time.
+See usecapture for a version of the op that doesn't promise that.
+Used by the multi-dispatcher.
+
+## usecapture
+* `usecapture()`
+
+Gets hold of the argument capture passed to the current block.
+(a future usecapture may invalidate it)
+It's valid to implement this exactly the same way as savecapture if there's
+no performance benefit to be had in a split.
+Used by the multi-dispatcher.
+
 # <a id="coercion"></a> Coercion
 
 ## coerce_in `moar`
@@ -1228,12 +1295,6 @@ An error is thrown if it does not exist or if the type is incorrect.
 Binds $value to the contextual with the specified name, searching for it in
 the call-chain, starting at the calling frame.
 
-## captureposelems
-$ `captureposelems($capture --> int)`
-
-Returns the number of positional elements in a capture that was saved with
-`savecapture`
-
 ## ctx
 * `ctx(--> Context)`
 
@@ -1324,24 +1385,8 @@ starting at the given $context.
 
 Given a lexpad and a name, return the name's primitive type.
 
-The primitive types are 1 for int, 2 for num and 3 for str. 0 is any object.
-
-## savecapture
-* `savecapture()`
-
-Gets hold of the argument capture passed to the current block.
-Commits to doing enough copying that the list is valid any amount of time.
-See usecapture for a version of the op that doesn't promise that.
-Used by the multi-dispatcher.
-
-## usecapture
-* `usecapture()`
-
-Gets hold of the argument capture passed to the current block.
-(a future usecapture may invalidate it)
-It's valid to implement this exactly the same way as savecapture if there's
-no performance benefit to be had in a split.
-Used by the multi-dispatcher.
+The primitive types are 1 for int, 2 for num, 3 for str and 10 for uint.
+0 is any object.
 
 # <a id="control"></a> Loop/Control
 
