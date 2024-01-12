@@ -253,9 +253,10 @@ nqp::register('nqp-call', -> $capture {
         $capture, 0);
     if nqp::iscoderef($callee) {
         # VM-level code handle.
-        nqp::syscall('dispatcher-delegate',
-            $code-constant ?? 'boot-code-constant' !! 'boot-code',
-            $capture);
+        nqp::delegate(
+          $code-constant ?? 'boot-code-constant' !! 'boot-code',
+          $capture
+        );
     }
     else {
         # Normally we can go on the type objects, but due to the bootstrap,
@@ -310,8 +311,7 @@ nqp::register('nqp-call', -> $capture {
                     my $do := nqp::getattr($callee, $callee.WHAT, '$!do');
                     my $delegate := nqp::syscall('dispatcher-replace-arg-literal-obj',
                         $capture, 0, $do);
-                    nqp::syscall('dispatcher-delegate',
-                        'boot-code-constant', $delegate);
+                    nqp::delegate('boot-code-constant', $delegate);
                 }
                 else {
                     # Not a constant, so need guards and attribute tracking.
@@ -334,8 +334,7 @@ nqp::register('nqp-call', -> $capture {
                 my $do := nqp::getattr($callee, $callee.WHAT, '$!do');
                 my $delegate := nqp::syscall(
                     'dispatcher-replace-arg-literal-obj', $capture, 0, $do);
-                nqp::syscall('dispatcher-delegate',
-                    'boot-code-constant', $delegate);
+                nqp::delegate('boot-code-constant', $delegate);
             }
             else {
                 my $track-do := nqp::syscall('dispatcher-track-attr',
@@ -352,8 +351,7 @@ nqp::register('nqp-call', -> $capture {
                 my $code := nqp::getattr($callee, $NQPRegexMethod, '$!code');
                 my $delegate := nqp::syscall(
                     'dispatcher-replace-arg-literal-obj', $capture, 0, $code);
-                nqp::syscall('dispatcher-delegate',
-                    'boot-code-constant', $delegate);
+                nqp::delegate('boot-code-constant', $delegate);
             }
             else {
                 my $track-do := nqp::syscall('dispatcher-track-attr',
