@@ -388,8 +388,7 @@ sub add_to_sc($sc, $idx, $obj) {
         'hllize_dispatcher', 'baz-hllize',
     ));
     nqp::register('foo-hllize', -> $capture {
-        nqp::syscall('dispatcher-guard-type',
-            nqp::syscall('dispatcher-track-arg', $capture, 0));
+        nqp::guard('type', nqp::track('arg', $capture, 0));
         my $obj := nqp::captureposarg($capture, 0);
 
         my $role := nqp::gettypehllrole($obj);
@@ -404,8 +403,7 @@ sub add_to_sc($sc, $idx, $obj) {
         }
     });
     nqp::register('baz-hllize', -> $capture {
-        nqp::syscall('dispatcher-guard-type',
-          nqp::syscall('dispatcher-track-arg', $capture, 0));
+        nqp::guard('type', nqp::track('arg', $capture, 0));
         my $obj := nqp::captureposarg($capture, 0);
 
         my $role := nqp::gettypehllrole($obj);

@@ -215,8 +215,10 @@ The opcodes are grouped into the following categories:
 ## [Dispatch](#dispatch)
 [delegate](#delegate-moar) |
 [dispatch](#dispatch-moar) |
+[guard](#guard-moar)
 [register](#register-moar) |
-[syscall](#register-moar)
+[syscall](#syscall-moar)
+[track](#track-moar)
 
 ## [Exception Handling](#exception-handling)
 
@@ -1462,7 +1464,7 @@ If a `$post` block is present, run that at the end, regardless of `$condition`.
 # <a id="dispatch"></a> Dispatch `moar`
 
 ## delegate `moar`
-* short for nqp::dispatch('boot-syscall', 'dispatcher-delegate', …)
+* nqp::delegate(…) is short for nqp::dispatch('boot-syscall', 'dispatcher-delegate', …)
 
 ## dispatch `moar`
 * perform dispatch function as determined by its arguments.
@@ -1475,11 +1477,17 @@ documented.
 - [Raku multiple dispatch with the new MoarVM dispatcher](https://6guts.wordpress.com/2021/04/15/raku-multiple-dispatch-with-the-new-moarvm-dispatcher/)
 - [The new MoarVM dispatch mechanism is here!](https://6guts.wordpress.com/2021/09/29/the-new-moarvm-dispatch-mechanism-is-here/)
 
+## guard `moar`
+* nqp::guard('foo', …) is short for nqp::dispatch('boot-syscall', 'dispatcher-guard-foo', …)
+
 ## register `moar`
-* short for nqp::dispatch('boot-syscall', 'dispatcher-register', …)
+* nqp::register(…) is short for nqp::dispatch('boot-syscall', 'dispatcher-register', …)
 
 ## syscall `moar`
-* short for nqp::dispatch('boot-syscall', …)
+* nqp::syscall(…) is short for nqp::dispatch('boot-syscall', …)
+
+## track `moar`
+* nqp::track('foo', …) is short for nqp::dispatch('boot-syscall', 'dispatcher-track-foo', …)
 
 # <a id="exception-handling"></a> Exception Handling
 

@@ -44,8 +44,7 @@ my @transform_type := nqp::list(
     -> $code { sub ($value) {$code($value) * 10}; },
 );
 nqp::register('foobar-hllize', -> $capture {
-    nqp::syscall('dispatcher-guard-type',
-        nqp::syscall('dispatcher-track-arg', $capture, 0));
+    nqp::guard('type', nqp::track('arg', $capture, 0));
     my $obj := nqp::captureposarg($capture, 0);
 
     if (nqp::isnull($obj)) {
@@ -135,8 +134,7 @@ my @baz_transform_type := nqp::list(
     -> $code { nqp::list('CODE:' ~ $code.bazify()); },
 );
 nqp::register('baz-hllize', -> $capture {
-    nqp::syscall('dispatcher-guard-type',
-        nqp::syscall('dispatcher-track-arg', $capture, 0));
+    nqp::guard('type', nqp::track('arg', $capture, 0));
     my $obj := nqp::captureposarg($capture, 0);
 
     my $role := nqp::gettypehllrole($obj);
@@ -225,8 +223,7 @@ my @boxxy_transform_type := nqp::list(
     -> $str { nqp::box_s($str, BoxxyStr) },
 );
 nqp::register('boxxy-hllize', -> $capture {
-    nqp::syscall('dispatcher-guard-type',
-        nqp::syscall('dispatcher-track-arg', $capture, 0));
+    nqp::guard('type', nqp::track('arg', $capture, 0));
     my $spec := nqp::captureposprimspec($capture, 0);
 
     if ($spec > 0) {
