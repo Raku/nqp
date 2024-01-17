@@ -25,10 +25,8 @@ nqp::register('nqp-meth-call', -> $capture {
         if nqp::isconcrete($meth) {
             # Establish a guard on the invocant type and method name (however the name
             # may well be a literal, in which case this is free).
-            nqp::syscall('dispatcher-guard-type',
-                nqp::syscall('dispatcher-track-arg', $capture, 0));
-            nqp::syscall('dispatcher-guard-literal',
-                nqp::syscall('dispatcher-track-arg', $capture, 1));
+            nqp::guard('type', nqp::track('arg', $capture, 0));
+            nqp::guard('literal', nqp::track('arg', $capture, 1));
 
             # Drop the first two arguments, which are the decontainerized invocant
             # and the method name. Then insert the resolved method and delegate to
@@ -57,16 +55,15 @@ nqp::register('nqp-meth-call-mega-name', -> $capture {
     my str $name := nqp::captureposarg_s($capture, 1);
     if nqp::isconcrete(nqp::atkey(%lookup, $name)) {
         # Guard on the type of the invocant.
-        nqp::syscall('dispatcher-guard-type',
-            nqp::syscall('dispatcher-track-arg', $capture, 0));
+        nqp::guard('type', nqp::track('arg', $capture, 0));
 
         # Do the lookup of the method. The flat table is stored at the callsite.
         # Guard that we get a concrete value back from the lookup - that is, a
         # method was found.
-        my $track-name := nqp::syscall('dispatcher-track-arg', $capture, 1);
+        my $track-name := nqp::track('arg', $capture, 1);
         my $track-resolution := nqp::syscall('dispatcher-index-lookup-table',
             %lookup, $track-name);
-        nqp::syscall('dispatcher-guard-concreteness', $track-resolution);
+        nqp::guard('concreteness', $track-resolution);
 
         # Drop the first two arguments, which are the decontainerized invocant
         # and the method name. Then insert the resolved method and delegate to
@@ -102,17 +99,17 @@ nqp::register('nqp-meth-call-mega-type', -> $capture {
         # It exists. We'll set up a dispatch program that tracks the HOW of
         # the type, looks up the cached method table on it, and then tracks
         # the resolution of the method.
-        my $track-obj := nqp::syscall('dispatcher-track-arg', $capture, 0);
-        my $track-how := nqp::syscall('dispatcher-track-how', $track-obj);
-        my $track-table := nqp::syscall('dispatcher-track-attr', $track-how,
+        my $track-obj := nqp::track('arg', $capture, 0);
+        my $track-how := nqp::track('how', $track-obj);
+        my $track-table := nqp::track('attr', $track-how,
             $class-how, '$!cached_all_method_table');
-        my $track-name := nqp::syscall('dispatcher-track-arg', $capture, 1);
+        my $track-name := nqp::track('arg', $capture, 1);
         my $track-resolution := nqp::syscall(
             'dispatcher-index-tracked-lookup-table', $track-table, $track-name);
 
         # This is only a valid dispatch program if the method is found. (If
         # not, we'll run this again to report the error.)
-        nqp::syscall('dispatcher-guard-concreteness', $track-resolution);
+        nqp::guard('concreteness', $track-resolution);
 
         # Drop the first two arguments, which are the decontainerized invocant
         # and the method name. Then insert the resolved method and delegate to
@@ -151,10 +148,8 @@ nqp::register('nqp-find-meth', -> $capture {
     }
     else {
         # Guard on the invocant type and method name.
-        nqp::syscall('dispatcher-guard-type',
-            nqp::syscall('dispatcher-track-arg', $capture, 0));
-        nqp::syscall('dispatcher-guard-literal',
-            nqp::syscall('dispatcher-track-arg', $capture, 1));
+        nqp::guard('type', nqp::track('arg', $capture, 0));
+        nqp::guard('literal', nqp::track('arg', $capture, 1));
 
         # Try to find the method.
         my str $name := nqp::captureposarg_s($capture, 1);
@@ -170,8 +165,7 @@ nqp::register('nqp-find-meth', -> $capture {
         # Otherwise, depends on exceptional flag whether we report the missing
         # method or hand back a null.
         else {
-            nqp::syscall('dispatcher-guard-literal',
-                nqp::syscall('dispatcher-track-arg', $capture, 2));
+            nqp::guard('literal', nqp::track('arg', $capture, 2));
             if $exceptional {
                 nqp::delegate('lang-meth-not-found',
                     nqp::syscall('dispatcher-drop-arg', $capture, 0));
@@ -188,10 +182,8 @@ nqp::register('nqp-find-meth', -> $capture {
 nqp::register('nqp-find-meth-mega-name', -> $capture {
     # Always guard on the exception mode (which should always be false, since we
     # don't handle it here) and also the type.
-    nqp::syscall('dispatcher-guard-type',
-        nqp::syscall('dispatcher-track-arg', $capture, 0));
-    nqp::syscall('dispatcher-guard-literal',
-        nqp::syscall('dispatcher-track-arg', $capture, 2));
+    nqp::guard('type', nqp::track('arg', $capture, 0));
+    nqp::guard('literal', nqp::track('arg', $capture, 2));
 
     # When we have a megamorphic callsite due to loads of different method
     # names, we build a hash table of the methods.
@@ -202,7 +194,7 @@ nqp::register('nqp-find-meth-mega-name', -> $capture {
     # Do the lookup of the method; the lookup table gets stored as a constant
     # at the callsite. If it's not found, the outcome will be a null, which is
     # exactly what we want.
-    my $track-name := nqp::syscall('dispatcher-track-arg', $capture, 1);
+    my $track-name := nqp::track('arg', $capture, 1);
     my $track-resolution := nqp::syscall('dispatcher-index-lookup-table',
         %lookup, $track-name);
     my $delegate := nqp::syscall('dispatcher-insert-arg',
@@ -213,8 +205,7 @@ nqp::register('nqp-find-meth-mega-name', -> $capture {
 nqp::register('nqp-find-meth-mega-type', -> $capture {
     # Always guard on the exception mode (which should always be false, since we
     # don't handle it here).
-    nqp::syscall('dispatcher-guard-literal',
-        nqp::syscall('dispatcher-track-arg', $capture, 2));
+    nqp::guard('literal', nqp::track('arg', $capture, 2));
 
     # Make sure that we have a method table build for this type (but we don't
     # actually need the table itself).
@@ -227,14 +218,14 @@ nqp::register('nqp-find-meth-mega-type', -> $capture {
     $how.all_method_table($obj);
 
     # Track the HOW and then the attribute holding the table.
-    my $track-obj := nqp::syscall('dispatcher-track-arg', $capture, 0);
-    my $track-how := nqp::syscall('dispatcher-track-how', $track-obj);
-    my $track-table := nqp::syscall('dispatcher-track-attr', $track-how,
+    my $track-obj := nqp::track('arg', $capture, 0);
+    my $track-how := nqp::track('how', $track-obj);
+    my $track-table := nqp::track('attr', $track-how,
         $class-how, '$!cached_all_method_table');
 
     # Do the lookup of the method in the table we found in the meta-object. If
     # it's not found, the outcome will be a null, which is exactly what we want.
-    my $track-name := nqp::syscall('dispatcher-track-arg', $capture, 1);
+    my $track-name := nqp::track('arg', $capture, 1);
     my $track-resolution := nqp::syscall(
         'dispatcher-index-tracked-lookup-table', $track-table, $track-name);
     my $delegate := nqp::syscall('dispatcher-insert-arg',
@@ -244,8 +235,8 @@ nqp::register('nqp-find-meth-mega-type', -> $capture {
 
 nqp::register('nqp-call', -> $capture {
     # Guard on the type of the callee.
-    my $track-callee := nqp::syscall('dispatcher-track-arg', $capture, 0);
-    nqp::syscall('dispatcher-guard-type', $track-callee);
+    my $track-callee := nqp::track('arg', $capture, 0);
+    nqp::guard('type', $track-callee);
 
     # Go by callee type to decide how to invoke it.
     my $callee := nqp::captureposarg($capture, 0);
@@ -296,10 +287,9 @@ nqp::register('nqp-call', -> $capture {
             if nqp::isconcrete(nqp::getattr($callee, $callee.WHAT, '$!dispatchees')) {
                 # Multiple dispatch; delegate to multi dispatcher.
                 unless $code-constant {
-                    my $track-dispatchees := nqp::syscall(
-                        'dispatcher-track-attr', $track-callee, $callee.WHAT, '$!dispatchees');
-                    nqp::syscall('dispatcher-guard-literal',
-                        $track-dispatchees);
+                    my $track-dispatchees := nqp::track('attr',
+                      $track-callee, $callee.WHAT, '$!dispatchees');
+                    nqp::guard('literal', $track-dispatchees);
                 }
                 nqp::delegate('nqp-multi', $capture);
             }
@@ -315,16 +305,14 @@ nqp::register('nqp-call', -> $capture {
                 }
                 else {
                     # Not a constant, so need guards and attribute tracking.
-                    my $track-dispatchees := nqp::syscall(
-                        'dispatcher-track-attr', $track-callee, $callee.WHAT, '$!dispatchees');
-                    nqp::syscall('dispatcher-guard-concreteness',
-                        $track-dispatchees);
-                    my $track-do := nqp::syscall('dispatcher-track-attr',
+                    my $track-dispatchees := nqp::track('attr',
+                      $track-callee, $callee.WHAT, '$!dispatchees');
+                    nqp::guard('concreteness', $track-dispatchees);
+                    my $track-do := nqp::track('attr',
                         $track-callee, $callee.WHAT, '$!do');
                     my $delegate := nqp::syscall('dispatcher-replace-arg',
                         $capture, 0, $track-do);
-                    nqp::delegate('boot-code',
-                        $delegate);
+                    nqp::delegate('boot-code', $delegate);
                 }
             }
         }
@@ -337,7 +325,7 @@ nqp::register('nqp-call', -> $capture {
                 nqp::delegate('boot-code-constant', $delegate);
             }
             else {
-                my $track-do := nqp::syscall('dispatcher-track-attr',
+                my $track-do := nqp::track('attr',
                     $track-callee, $callee.WHAT, '$!do');
                 my $delegate := nqp::syscall('dispatcher-replace-arg',
                     $capture, 0, $track-do);
@@ -354,7 +342,7 @@ nqp::register('nqp-call', -> $capture {
                 nqp::delegate('boot-code-constant', $delegate);
             }
             else {
-                my $track-do := nqp::syscall('dispatcher-track-attr',
+                my $track-do := nqp::track('attr',
                     $track-callee, $NQPRegexMethod, '$!code');
                 my $delegate := nqp::syscall('dispatcher-replace-arg',
                     $capture, 0, $track-do);
@@ -385,9 +373,9 @@ nqp::register('nqp-multi',
             # We need to run the proto, which will then resume. Set up this
             # capture as the resumption init state.
             nqp::syscall('dispatcher-set-resume-init-args', $capture);
-            my $track-callee := nqp::syscall('dispatcher-track-arg',
+            my $track-callee := nqp::track('arg',
                 $capture, 0);
-            my $track-do := nqp::syscall('dispatcher-track-attr',
+            my $track-do := nqp::track('attr',
                 $track-callee, $callee.WHAT, '$!do');
             my $delegate := nqp::syscall('dispatcher-replace-arg',
                 $capture, 0, $track-do);
@@ -512,10 +500,10 @@ nqp::register('nqp-multi',
             my int $i := 0;
             while $i < $num-args {
                 if nqp::captureposprimspec($args, $i) == 0 {
-                    my $track-arg := nqp::syscall('dispatcher-track-arg',
+                    my $track-arg := nqp::track('arg',
                             $args, $i);
-                    nqp::syscall('dispatcher-guard-type', $track-arg);
-                    nqp::syscall('dispatcher-guard-concreteness', $track-arg);
+                    nqp::guard('type', $track-arg);
+                    nqp::guard('concreteness', $track-arg);
                 }
                 $i++;
             }
@@ -600,10 +588,9 @@ nqp::register('nqp-istype', -> $capture {
     }
     else {
         # Obtain and guard on the types we're checking.
-        nqp::syscall('dispatcher-guard-type',
-            nqp::syscall('dispatcher-track-arg', $capture, 0));
-        my $track-type := nqp::syscall('dispatcher-track-arg', $capture, 1);
-        nqp::syscall('dispatcher-guard-type', $track-type);
+        nqp::guard('type', nqp::track('arg', $capture, 0));
+        my $track-type := nqp::track('arg', $capture, 1);
+        nqp::guard('type', $track-type);
 
         # Go by typecheck mode.
         my $type := nqp::captureposarg($capture, 1);
@@ -671,8 +658,8 @@ nqp::register('nqp-istype', -> $capture {
 # A bit twisty thanks to bootstrapping.
 nqp::register('nqp-isinvokable', -> $capture {
     # Guard on the type of the object.
-    my $track-callee := nqp::syscall('dispatcher-track-arg', $capture, 0);
-    nqp::syscall('dispatcher-guard-type', $track-callee);
+    my $track-callee := nqp::track('arg', $capture, 0);
+    nqp::guard('type', $track-callee);
 
     # Now see if it's invokable. Note that VM code references should never make it
     # here, so long as lang-isinvokable was used, so we don't consider it. See

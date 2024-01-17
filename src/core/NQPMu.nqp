@@ -140,8 +140,7 @@ nqp::sethllconfig('nqp', nqp::hash(
 
 #?if moar
 nqp::register('nqp-hllize', -> $capture {
-    nqp::syscall('dispatcher-guard-type',
-        nqp::syscall('dispatcher-track-arg', $capture, 0));
+    nqp::guard('type', nqp::track('arg', $capture, 0));
     my $obj := nqp::captureposarg($capture, 0);
 
     if nqp::gettypehllrole($obj) == 5 && !nqp::ishash($obj) {
