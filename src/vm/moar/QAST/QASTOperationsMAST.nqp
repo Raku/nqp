@@ -1862,13 +1862,7 @@ my sub add-dispatcher-op($qastcomp, $op, :$prefix) {
         }
         elsif $prefix eq 'dispatcher-track-'
            || $prefix eq 'dispatcher-guard-' {
-            my $arg := nqp::shift(@args);
-            # Make sure this also works from Raku, as there the argument
-            # maybe wrapped in a QAST::Want
-            my str $value := $prefix ~ (nqp::istype($arg,QAST::Want)
-              ?? $arg.compile_time_value
-              !! $arg.value
-            );
+            my str $value := $prefix ~ nqp::shift(@args).value;
             nqp::unshift(@args, QAST::SVal.new(:$value));
             nqp::unshift(@args, QAST::SVal.new(:value<boot-syscall>));
         }
