@@ -1865,8 +1865,10 @@ my sub add-dispatcher-op($qastcomp, $op, :$prefix) {
             my $arg := nqp::shift(@args);
             # Make sure this also works from Raku, as there the argument
             # maybe wrapped in a QAST::Want
-            $arg := $arg.compile_time_value if nqp::istype($arg,QAST::Want);
-            my str $value := $prefix ~ $arg.value;
+            my str $value := $prefix ~ (nqp::istype($arg,QAST::Want)
+              ?? $arg.compile_time_value
+              !! $arg.value
+            );
             nqp::unshift(@args, QAST::SVal.new(:$value));
             nqp::unshift(@args, QAST::SVal.new(:value<boot-syscall>));
         }
