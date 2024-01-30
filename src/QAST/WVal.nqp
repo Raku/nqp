@@ -8,8 +8,8 @@ class QAST::WVal is QAST::Node does QAST::CompileTimeValue {
 
     method value($value = NO_VALUE) {
         $value =:= NO_VALUE
-            ?? self.compile_time_value()
-            !! self.set_compile_time_value($value)
+          ?? self.compile_time_value()
+          !! self.set_compile_time_value($value)
     }
 
     method count_inline_placeholder_usages(@usages) { }

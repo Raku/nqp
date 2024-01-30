@@ -11,10 +11,9 @@ my class NQPMu {
         # Get the build plan.
         my $build_plan := self.HOW.BUILDALLPLAN(self);
         my int $count  := nqp::elems($build_plan);
-        my int $i      := 0;
-        while $i < $count {
+        my int $i      := -1;
+        while ++$i < $count {
             my $task := nqp::atpos($build_plan, $i);
-            $i := $i + 1;
 
             # Something with data
             if nqp::islist($task) {

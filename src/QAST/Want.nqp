@@ -8,8 +8,8 @@ class QAST::Want is QAST::Node does QAST::Children {
 
     method has_compile_time_value() {
         nqp::istype(self[0], QAST::Node)
-            ?? self[0].has_compile_time_value()
-            !! 0
+          ?? self[0].has_compile_time_value()
+          !! 0
     }
 
     method compile_time_value() {

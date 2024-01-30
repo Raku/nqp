@@ -82,17 +82,15 @@ class QAST::Block is QAST::Node does QAST::Children {
     }
 
     method symtable() {
-        %!symbol := nqp::hash() if nqp::isnull(%!symbol);
-        %!symbol
+        nqp::ifnull(%!symbol, %!symbol := nqp::hash)
     }
 
     method evaluate_unquotes(@unquotes) {
         my $result := self.shallow_clone();
-        my $i := 0;
         my $elems := nqp::elems(@(self));
-        while $i < $elems {
+        my $i := -1;
+        while ++$i < $elems {
             $result[$i] := self[$i].evaluate_unquotes(@unquotes);
-            $i := $i + 1;
         }
         $result
     }

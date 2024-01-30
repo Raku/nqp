@@ -5,13 +5,15 @@ role QAST::SpecialArg {
     has int $!flat;
 
     method named($value = NO_VALUE) {
-        $!named := $value unless $value =:= NO_VALUE;
-        $!named
+        $value =:= NO_VALUE
+          ?? $!named
+          !! ($!named := $value)
     }
 
     method flat($value = NO_VALUE) {
-        $!flat := $value unless $value =:= NO_VALUE;
-        $!flat
+        $value =:= NO_VALUE
+          ?? $!flat
+          !! ($!flat := $value)
     }
 
     method dump_extra_node_info() {

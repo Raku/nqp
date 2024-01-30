@@ -9,7 +9,11 @@ class QAST::SVal is QAST::Node {
         $node
     }
 
-    method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
+    method value($value = NO_VALUE) {
+        $value =:= NO_VALUE
+          ?? $!value
+          !! ($!value := $value)
+    }
 
     method count_inline_placeholder_usages(@usages) { }
 

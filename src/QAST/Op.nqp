@@ -25,44 +25,45 @@ class QAST::Op is QAST::Node does QAST::Children {
         $!childorder := $value unless $value =:= NO_VALUE;
         nqp::isnull_s($!childorder) ?? "" !! $!childorder
     }
-    method arity($value = NO_VALUE)      { $!arity := $value unless $value =:= NO_VALUE; $!arity }
+    method arity($value = NO_VALUE) {
+        $value =:= NO_VALUE
+          ?? $!arity
+          !! ($!arity := $value)
+    }
 
     method count_inline_placeholder_usages(@usages) {
-        my int $i := 0;
         my int $elems := nqp::elems(@(self));
-        while $i < $elems {
+        my int $i := -1;
+        while ++$i < $elems {
             self[$i].count_inline_placeholder_usages(@usages);
-            ++$i;
         }
     }
 
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
-        my int $i := 0;
         my int $elems := nqp::elems(@(self));
-        while $i < $elems {
+        my int $i := -1;
+        while ++$i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers)
                 unless nqp::isstr(self[$i]);
-            ++$i;
         }
         $result
     }
 
     method evaluate_unquotes(@unquotes) {
         my $result := self.shallow_clone();
-        my $i := 0;
         my $elems := nqp::elems(@(self));
-        while $i < $elems {
+        my int $i := -1;
+        while ++$i < $elems {
             $result[$i] := self[$i].evaluate_unquotes(@unquotes)
                 unless nqp::isstr(self[$i]);
-            $i := $i + 1;
         }
         $result
     }
 
     method dump_extra_node_info() {
         !nqp::isnull_s($!name) && nqp::chars($!name)
-            ?? "$!op $!name"
-            !! $!op;
+          ?? "$!op $!name"
+          !! $!op;
     }
 }

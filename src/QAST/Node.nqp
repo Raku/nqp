@@ -21,13 +21,15 @@ class QAST::Node {
 
     method node($value = NO_VALUE) {
         $!node := $value unless $value =:= NO_VALUE;
-        $!node := NQPMu if nqp::isnull($value);
-        $!node
+        nqp::isnull($value)
+          ?? ($!node := NQPMu)
+          !! $!node
     }
 
     method returns($value = NO_VALUE) {
-        $!returns := $value unless $value =:= NO_VALUE;
-        $!returns
+        $value =:= NO_VALUE
+          ?? $!returns
+          !! ($!returns := $value)
     }
 
     method named($value = NO_VALUE) {
@@ -95,8 +97,8 @@ class QAST::Node {
 
     method ann(str $key) {
         nqp::ishash(%!annotations)
-            ?? %!annotations{$key}
-            !! NQPMu
+          ?? %!annotations{$key}
+          !! NQPMu
     }
 
     method has_ann(str $key) {
@@ -166,7 +168,7 @@ class QAST::Node {
         }
         nqp::push(@chunks, "\n");
         self.dump_children($indent + 2, @chunks);
-        return join('', @chunks);
+        join('', @chunks)
     }
 
     method dump_annotations() {

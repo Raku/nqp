@@ -17,24 +17,36 @@ class QAST::Var is QAST::Node does QAST::Children {
 
     method name($value = NO_VALUE) {
         $!name := $value unless $value =:= NO_VALUE;
-        !nqp::isnull_s($!name) ?? $!name !! ""
+        nqp::isnull_s($!name) ?? "" !! $!name
     }
     method scope($value = NO_VALUE) {
         $!scope := $value unless $value =:= NO_VALUE;
-        !nqp::isnull_s($!scope) ?? $!scope !! ""
+        nqp::isnull_s($!scope) ?? "" !! $!scope
     }
     method decl($value = NO_VALUE) {
         $!decl := $value unless $value =:= NO_VALUE;
-        !nqp::isnull_s($!decl) ?? $!decl !! ""
+        nqp::isnull_s($!decl) ?? "" !! $!decl
     }
     method decl_as($value) {
         my $clone := nqp::clone(self);
         $clone.decl: $value;
         $clone;
     }
-    method slurpy($value = NO_VALUE)  { $!slurpy := $value unless $value =:= NO_VALUE; $!slurpy }
-    method default($value = NO_VALUE) { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
-    method value($value = NO_VALUE)   { $!default_or_value := $value unless $value =:= NO_VALUE; $!default_or_value }
+    method slurpy($value = NO_VALUE)  {
+        $value =:= NO_VALUE
+          ?? $!slurpy
+          !! ($!slurpy := $value)
+    }
+    method default($value = NO_VALUE) {
+        $value =:= NO_VALUE
+          ?? $!default_or_value
+          !! ($!default_or_value := $value)
+    }
+    method value($value = NO_VALUE) {
+        $value =:= NO_VALUE
+          ?? $!default_or_value
+          !! ($!default_or_value := $value)
+    }
 
     method count_inline_placeholder_usages(@usages) { }
 
