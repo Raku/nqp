@@ -25,6 +25,11 @@ These dispatcher are provided by the NQP bootstrap.
 ### nqp-find-meth-mega-type
 ### nqp-hllize
 ### nqp-intify
+```
+nqp::dispatch('nqp-intify', $value);
+```
+Create a signed integer representation of the given value.
+
 ### nqp-isinvokable
 ### nqp-istype
 ### nqp-meth-call
@@ -33,5 +38,20 @@ These dispatcher are provided by the NQP bootstrap.
 ### nqp-multi
 ### nqp-multi-core
 ### nqp-numify
+```
+nqp::dispatch('nqp-numify', $value);
+```
+Create a num (floating point) representation of the given value.
+
 ### nqp-stringify
+```
+nqp::dispatch('nqp-stringify', $value);
+```
+Create string representation of the given value.
+
 ### nqp-uintify
+```
+nqp::dispatch('nqp-uintify', $value);
+```
+Create an unsigned integer representation of the given value.
+
