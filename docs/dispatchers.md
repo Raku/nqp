@@ -20,10 +20,24 @@ These dispatcher are provided by the NQP bootstrap.
 ---
 
 ### nqp-call
+```
+nqp::dispatch('nqp-call', &callee, …);
+```
+Call the given &callee with the rest of the arguments.
+
 ### nqp-find-meth
-### nqp-find-meth-mega-name
-### nqp-find-meth-mega-type
+```
+nqp::dispatch('nqp-find-meth', $invocant, str $name, int $throw-exception);
+```
+Produce the method object for the given method $name on the decontainerized
+$invocant, indicating whether or not to $throw-exception.
+
 ### nqp-hllize
+```
+nqp::dispatch('nqp-hllize', $object);
+```
+Make sure that the given object can function inside NQP.
+
 ### nqp-intify
 ```
 nqp::dispatch('nqp-intify', $value);
@@ -31,12 +45,24 @@ nqp::dispatch('nqp-intify', $value);
 Create a signed integer representation of the given value.
 
 ### nqp-isinvokable
+```
+nqp::dispatch('nqp-isinvokable', $object);
+```
+Return 1 if given object is directly invokable, else 0.
+
 ### nqp-istype
+```
+nqp::dispatch('nqp-istype', $object, $type);
+```
+Return 1 if the given $object matches the $type, else 0.
+
 ### nqp-meth-call
-### nqp-meth-call-mega-name
-### nqp-meth-call-mega-type
-### nqp-multi
-### nqp-multi-core
+```
+nqp::dispatch('nqp-meth-call', $invocant, str $name, …);
+```
+Dispatch the given method $name on the decontainerized $invocant with
+the given additional arguments,
+
 ### nqp-numify
 ```
 nqp::dispatch('nqp-numify', $value);
@@ -54,4 +80,3 @@ Create string representation of the given value.
 nqp::dispatch('nqp-uintify', $value);
 ```
 Create an unsigned integer representation of the given value.
-
