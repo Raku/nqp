@@ -15,29 +15,27 @@ sub sorted_keys($hash) {
       nqp::push_s(@keys,nqp::iterkey_s(nqp::shift($iter)))
     );
 
-    sub sift_down(@a, int $start, int $end) {
+    sub sift_down(int $start, int $end) {
         my int $root := $start;
         my int $child;
         my int $swap;
 
         while 2*$root + 1 <= $end {
             $child := 2*$root + 1;
-            $swap := $root;
+            $swap := nqp::atpos_s(@keys, $root) gt nqp::atpos_s(@keys, $child)
+              ?? $child
+              !! $root;
 
-            if nqp::atpos_s(@a, $swap) gt nqp::atpos_s(@a, $child) {
-                $swap := $child;
-            }
-            if $child + 1 <= $end && nqp::atpos_s(@a, $swap) ge nqp::atpos_s(@a, $child + 1) {
-                $swap := $child + 1;
-            }
-            if $swap == $root {
-                return;
-            } else {
-                my str $tmp := nqp::atpos_s(@a, $root);
-                nqp::bindpos_s(@a, $root, nqp::atpos_s(@a, $swap));
-                nqp::bindpos_s(@a, $swap, $tmp);
-                $root := $swap;
-            }
+            $swap := $child + 1
+              if $child + 1 <= $end
+              && nqp::atpos_s(@keys, $swap) ge nqp::atpos_s(@keys, $child + 1);
+
+            if $swap == $root { return }
+
+            my str $tmp := nqp::atpos_s(@keys, $root);
+            nqp::bindpos_s(@keys, $root, nqp::atpos_s(@keys, $swap));
+            nqp::bindpos_s(@keys, $swap, $tmp);
+            $root := $swap;
         }
     }
 
@@ -46,15 +44,14 @@ sub sorted_keys($hash) {
         my int $start := $count / 2;
         my int $end := $count - 1;
         while --$start >= 0 {
-            sift_down(@keys, $start, $end);
+            sift_down($start, $end);
         }
 
-        while $end > 0 {
+        while $end {
             my str $swap := nqp::atpos_s(@keys, $end);
             nqp::bindpos_s(@keys, $end, nqp::atpos_s(@keys, 0));
             nqp::bindpos_s(@keys, 0, $swap);
-            $end := $end - 1;
-            sift_down(@keys, 0, $end);
+            sift_down(0, --$end);
         }
     }
     elsif $count == 2 && nqp::atpos_s(@keys, 0) lt nqp::atpos_s(@keys, 1) {
