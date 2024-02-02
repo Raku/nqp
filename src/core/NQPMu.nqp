@@ -105,7 +105,7 @@ my class NQPArray is repr('VMArray') {
     method shift() { nqp::shift(self) }
 }
 nqp::setboolspec(NQPArray, 8, nqp::null());
-nqp::settypehllrole(NQPArray, 4);
+nqp::settypehllrole(NQPArray, nqp::const::HLL_ROLE_ARRAY);
 
 # Iterator types.
 my class NQPArrayIter is repr('VMIter') { }
@@ -142,10 +142,15 @@ nqp::register('nqp-hllize', -> $capture {
     nqp::guard('type', nqp::track('arg', $capture, 0));
     my $obj := nqp::captureposarg($capture, 0);
 
-    if nqp::gettypehllrole($obj) == 5 && !nqp::ishash($obj) {
-        my $transform-hash := nqp::how_nd($obj).find_method($obj, 'FLATTENABLE_HASH');
-        nqp::die('Could not find method FLATTENABLE_HASH on ' ~ nqp::how_nd($obj).name($obj) ~ ' object when trying to hllize')
-            unless nqp::defined($transform-hash);
+    if nqp::gettypehllrole($obj) == nqp::const::HLL_ROLE_HASH
+      && !nqp::ishash($obj) {
+        my $transform-hash :=
+          nqp::how_nd($obj).find_method($obj, 'FLATTENABLE_HASH');
+        nqp::die('Could not find method FLATTENABLE_HASH on '
+          ~ nqp::how_nd($obj).name($obj)
+          ~ ' object when trying to hllize'
+        ) unless nqp::defined($transform-hash);
+
         nqp::delegate('lang-call',
           nqp::syscall(
             'dispatcher-insert-arg-literal-obj', $capture, 0, $transform-hash
