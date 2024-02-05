@@ -425,38 +425,42 @@ role NQPMatchRole is export {
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
-        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
+        nqp::bindattr($new, $?CLASS, '$!braid', $!braid);
+        nqp::bindattr($new, $?CLASS, '$!regexsub',
+          nqp::ifnull(nqp::getcodeobj($sub), $sub)
+        );
+
         if nqp::defined($!restart) {
             nqp::bindattr_i($new, $?CLASS, '$!from', $!from);
             nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
-            nqp::bindattr_i($new, $?CLASS, '$!to', -1);
             nqp::bindattr($new, $?CLASS, '$!cstack', nqp::clone($!cstack)) if $!cstack;
             nqp::bindattr($new, $?CLASS, '$!bstack', $!bstack);
             nqp::bindattr(self, $?CLASS, '$!bstack', nqp::null());
-            $new
         }
         else {
             nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
             nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-            nqp::bindattr_i($new, $?CLASS, '$!to', -1);
             nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i());
-            $new
         }
+
+        nqp::bindattr_i($new, $?CLASS, '$!to', -1);
+        $new
     }
 
     # Starts a new cursor, returning nothing but the cursor.
     method !cursor_start_cur() {
+        nqp::die("!cursor_start_cur cannot restart a cursor")
+          if nqp::defined($!restart);
+
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
-        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(nqp::getcodeobj($sub), $sub));
-        if nqp::defined($!restart) {
-            nqp::die("!cursor_start_cur cannot restart a cursor");
-        }
+        nqp::bindattr($new, $?CLASS, '$!braid', $!braid);
+        nqp::bindattr($new, $?CLASS, '$!regexsub',
+          nqp::ifnull(nqp::getcodeobj($sub), $sub)
+        );
         nqp::bindattr_i($new, $?CLASS, '$!from', $!pos);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         nqp::bindattr_i($new, $?CLASS, '$!to', -1);
@@ -471,7 +475,7 @@ role NQPMatchRole is export {
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
         nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self) ?? $!braid !! Braid."!braid_init"());
+        nqp::bindattr($new, $?CLASS, '$!braid', $!braid);
         nqp::bindattr_i($new, $?CLASS, '$!from', $from);
         nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
         nqp::bindattr_i($new, $?CLASS, '$!to', -1);
