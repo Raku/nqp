@@ -221,9 +221,10 @@ class QRegex::NFA {
 #        my $indent := dentin();
 #        note("$indent concat $from -> $to") if $nfadeb;
         my int $n := nqp::elems($node.list) - 1;
-        my int $i := -1;
-        while $from > 0 && ++$i < $n {
+        my int $i;
+        while $from > 0 && $i < $n {
             $from := self.regex_nfa($node[$i], $from, -1);
+            ++$i;
         }
 #        note("$indent ...concat created $from, n = $n") if $nfadeb;
         my $result := $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
@@ -300,20 +301,21 @@ class QRegex::NFA {
 #        my $indent := dentin();
         my str $first  := $node[0];
         my int $litlen := nqp::chars($first) - 1;
-        my int $i      := -1;
+        my int $i;
 
         if $litlen >= 0 {
 #            note("$indent literal $from -> $to {$node[0]}") if $nfadeb;
             if $node.subtype eq 'ignorecase' {
                 my str $litconst_lc := nqp::lc($first);
                 my str $litconst_uc := nqp::uc($first);
-                while ++$i < $litlen {
+                while $i < $litlen {
                     $from := self.addedge(
                       $from,
                       -1,
                       $EDGE_CODEPOINT_I,
                       [ord-or-str($litconst_lc,$i), ord-or-str($litconst_uc,$i)]
                     );
+                    ++$i;
                 }
 #                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
 #                    [ord-or-str($litconst_lc, $i), ord-or-str($litconst_uc, $i)]));
@@ -322,13 +324,14 @@ class QRegex::NFA {
             }
 
             elsif $node.subtype eq 'ignoremark' {
-                while ++$i < $litlen {
+                while $i < $litlen {
                     $from := self.addedge(
                       $from,
                       -1,
                       $EDGE_CODEPOINT_M,
                       nqp::ordbaseat($first, $i)
                     );
+                    ++$i;
                 }
 #                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_M, nqp::ordbaseat($litconst, $i)));
                 self.addedge(
@@ -343,13 +346,14 @@ class QRegex::NFA {
             elsif $node.subtype eq 'ignorecase+ignoremark' {
                 my str $litconst_lc := nqp::lc($first);
                 my str $litconst_uc := nqp::uc($first);
-                while ++$i < $litlen {
+                while $i < $litlen {
                     $from := self.addedge(
                       $from,
                       -1,
                       $EDGE_CODEPOINT_IM,
                       [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]
                     );
+                    ++$i;
                 }
 #                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_IM,
 #                    [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]));
@@ -363,10 +367,11 @@ class QRegex::NFA {
             }
 
             else {
-                while ++$i < $litlen {
+                while $i < $litlen {
                     $from := self.addedge(
                       $from, -1, $EDGE_CODEPOINT, ord-or-str($first, $i)
                     );
+                    ++$i;
                 }
 #                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL,
 #                    ord-or-str($litconst, $i)));
@@ -509,7 +514,7 @@ class QRegex::NFA {
 #        note("$indent quant $from -> $to $min $max") if $nfadeb;
 
         if $max > 1 || $min > 1 {
-            my int $count := 0;
+            my int $count;
             my int $st := -1;
             my int $has_sep := nqp::defined($node[1]);
             while $count < $max || $count < $min {

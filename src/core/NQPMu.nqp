@@ -11,8 +11,8 @@ my class NQPMu {
         # Get the build plan.
         my $build_plan := self.HOW.BUILDALLPLAN(self);
         my int $count  := nqp::elems($build_plan);
-        my int $i      := -1;
-        while ++$i < $count {
+        my int $i;
+        while $i < $count {
             my $task := nqp::atpos($build_plan, $i);
 
             # Something with data
@@ -68,6 +68,7 @@ my class NQPMu {
             else {
                 $task(self, |%attrinit);
             }
+            ++$i;
         }
         self
     }

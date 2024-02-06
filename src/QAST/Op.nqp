@@ -33,19 +33,21 @@ class QAST::Op is QAST::Node does QAST::Children {
 
     method count_inline_placeholder_usages(@usages) {
         my int $elems := nqp::elems(@(self));
-        my int $i := -1;
-        while ++$i < $elems {
+        my int $i;
+        while $i < $elems {
             self[$i].count_inline_placeholder_usages(@usages);
+            ++$i;
         }
     }
 
     method substitute_inline_placeholders(@fillers) {
         my $result := self.shallow_clone();
         my int $elems := nqp::elems(@(self));
-        my int $i := -1;
+        my int $i;
         while ++$i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers)
                 unless nqp::isstr(self[$i]);
+            ++$i;
         }
         $result
     }
@@ -53,10 +55,11 @@ class QAST::Op is QAST::Node does QAST::Children {
     method evaluate_unquotes(@unquotes) {
         my $result := self.shallow_clone();
         my $elems := nqp::elems(@(self));
-        my int $i := -1;
-        while ++$i < $elems {
+        my int $i;
+        while $i < $elems {
             $result[$i] := self[$i].evaluate_unquotes(@unquotes)
                 unless nqp::isstr(self[$i]);
+            ++$i;
         }
         $result
     }

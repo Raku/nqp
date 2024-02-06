@@ -707,9 +707,10 @@ role NQPMatchRole is export {
     method !alt_nfa($regex, str $name) {
         my $nfa       := QRegex::NFA.new;
         my int $start := 1;
-        my int $fate  := -1;
+        my int $fate;
         for $regex.ALT_NFA($name) {
-            $nfa.mergesubstates($start, 0, ++$fate, $_, self);
+            $nfa.mergesubstates($start, 0, $fate, $_, self);
+            ++$fate;
         }
         $nfa.optimize();
         $nfa

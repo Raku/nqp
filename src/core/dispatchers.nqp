@@ -449,7 +449,7 @@ nqp::register('nqp-multi-core', -> $capture {
     my int $num-args := nqp::captureposelems($args);
 
     # Go through candidates looking for the best one, if any.
-    my int $cur-idx := 0;
+    my int $cur-idx;
     my @possibles;
     while 1 {
         my $cur-candidate := @candidates[$cur-idx];
@@ -475,8 +475,8 @@ nqp::register('nqp-multi-core', -> $capture {
           ?? $num-args
           !! $cur-candidate<num_types>;
         my int $type-ok := 1;
-        my int $i := -1;
-        while $type-ok && ++$i < $type-check-count {
+        my int $i;
+        while $type-ok && $i < $type-check-count {
             my $wanted-type := $cur-candidate<types>[$i];
             my $wanted-definedness := $cur-candidate<definednesses>[$i];
 
@@ -509,6 +509,7 @@ nqp::register('nqp-multi-core', -> $capture {
                     }
                 }
             }
+            ++$i;
         }
 
         # Add to list as an admissible candidate unless there was a
@@ -519,13 +520,14 @@ nqp::register('nqp-multi-core', -> $capture {
 
     if nqp::elems(@possibles) == 1 {
         # Found a matching candidate. Add guards on all object arguments.
-        my int $i := -1;
-        while ++$i < $num-args {
+        my int $i;
+        while $i < $num-args {
             unless nqp::captureposprimspec($args, $i) {
                 my $Targ := nqp::track('arg', $args, $i);
                 nqp::guard('type', $Targ);
                 nqp::guard('concreteness', $Targ);
             }
+            ++$i;
         }
 
         # Invoke it as if it was a routine

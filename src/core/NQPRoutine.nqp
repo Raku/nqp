@@ -74,10 +74,10 @@ my knowhow NQPRoutine {
             }
 
             # Analyse each parameter in the two candidates.
-            my int $narrower := 0;
-            my int $tied := 0;
-            my int $i := -1;
-            while ++$i < $types_to_check {
+            my int $narrower;
+            my int $tied;
+            my int $i;
+            while $i < $types_to_check {
                 my $type_obj_a := %a<types>[$i];
                 my $type_obj_b := %b<types>[$i];
                 if nqp::eqaddr($type_obj_a, $type_obj_b) {
@@ -89,6 +89,7 @@ my knowhow NQPRoutine {
                 elsif !is_narrower_type($type_obj_b, $type_obj_a) {
                     ++$tied;
                 }
+                ++$i;
             }
 
             $narrower >= 1 && $narrower + $tied == $types_to_check
@@ -107,8 +108,8 @@ my knowhow NQPRoutine {
         # Create a node for each candidate in the graph.
         my @graph;
         my int $num_candidates := nqp::elems($!dispatchees);
-        my int $i := -1;
-        while ++$i < $num_candidates {
+        my int $i;
+        while $i < $num_candidates {
             # Get hold of signature, types and definednesses.
             my $candidate := $!dispatchees[$i];
             my $multi_sig := $candidate.signature;
@@ -125,9 +126,8 @@ my knowhow NQPRoutine {
                 'max_arity',     0,
                 'num_types',     0
             );
-            my %significant_param := 0;
-            my int $j := -1;
-            while ++$j < $sig_elems {
+            my int $j;
+            while $j < $sig_elems {
                 # XXX TODO: Worry about optional and slurpy later.
                 ++%info<max_arity>;
                 ++%info<min_arity>;
@@ -136,6 +136,7 @@ my knowhow NQPRoutine {
                 nqp::push(%info<types>, @types_list[$j]);
                 nqp::push(%info<definednesses>, @definedness_list[$j]);
                 ++%info<num_types>;
+                ++$j;
             }
 
             # Add it to graph node, and initialize list of edges.
@@ -145,14 +146,15 @@ my knowhow NQPRoutine {
                 'edges_in',  0,
                 'edges_out', 0
             ));
+            ++$i;
         }
 
         # Now analyze type narrowness of the candidates relative to each other
         # and create the edges.
-        $i := -1;
-        while ++$i < $num_candidates {
-            my int $j := -1;
-            while ++$j < $num_candidates {
+        $i := 0;
+        while $i < $num_candidates {
+            my int $j;
+            while $j < $num_candidates {
                 if ($i != $j) {
                     if is_narrower(@graph[$i]<info>, @graph[$j]<info>) {
                         @graph[$i]<edges>[@graph[$i]<edges_out>] := @graph[$j];
@@ -160,7 +162,9 @@ my knowhow NQPRoutine {
                         ++@graph[$j]<edges_in>;
                     }
                 }
+                ++$j;
             }
+            ++$i;
         }
 
         # Perform the topological sort.
@@ -171,14 +175,15 @@ my knowhow NQPRoutine {
 
             # Find any nodes that have no incoming edges and add them to
             # results.
-            my int $i := -1;
-            while ++$i < $num_candidates {
+            my int $i;
+            while $i < $num_candidates {
                 if @graph[$i]<edges_in> == 0 {
                     # Add to results.
                     nqp::push(@result, @graph[$i]<info>);
                     --$candidates_to_sort;
                     @graph[$i]<edges_in> := $EDGE_REMOVAL_TODO;
                 }
+                ++$i;
             }
             if $rem_results == nqp::elems(@result) {
                 nqp::die("Circularity detected in multi sub types");
@@ -186,15 +191,17 @@ my knowhow NQPRoutine {
 
             # Now we need to decrement edges in counts for things that had
             # edges from candidates we added here.
-            $i := -1;
-            while ++$i < $num_candidates {
+            $i := 0;
+            while $i < $num_candidates {
                 if @graph[$i]<edges_in> == $EDGE_REMOVAL_TODO {
-                    my int $j := -1;
-                    while ++$j < @graph[$i]<edges_out> {
+                    my int $j;
+                    while $j < @graph[$i]<edges_out> {
                         --@graph[$i]<edges>[$j]<edges_in>;
+                        ++$j;
                     }
                     @graph[$i]<edges_in> := $EDGE_REMOVED;
                 }
+                ++$i;
             }
 
             # Add gap between groups.
@@ -259,8 +266,8 @@ my knowhow NQPRoutine {
                              ?? $num_args
                              !! $cur_candidate<num_types>;
             $type_mismatch := 0;
-            $i := -1;
-            while ++$i < $type_check_count {
+            $i := 0;
+            while $i < $type_check_count {
                 my $param := nqp::captureposarg($capture, $i);
                 my $param_type := $param.WHAT;
                 my $type_obj := $cur_candidate<types>[$i];
@@ -277,6 +284,7 @@ my knowhow NQPRoutine {
                         last;
                     }
                 }
+                ++$i;
             }
 
             if $type_mismatch {
@@ -430,10 +438,11 @@ my knowhow RegexCaptures {
         if $n > 0 {
             my $result := nqp::list();
             if nqp::bitand_i($!flags, $HAS_QUANT_LIST_CAPTURES) {
-                my int $i := -1;
-                while ++$i < $n {
+                my int $i;
+                while $i < $n {
                     nqp::bindpos($result, $i, nqp::list())
                         if nqp::atpos_i(@!pos-capture-counts, $i) >= 2;
+                    ++$i;
                 }
             }
             $result
@@ -450,13 +459,14 @@ my knowhow RegexCaptures {
         if $n > 0 {
             my $result := nqp::hash();
             if nqp::bitand_i($!flags, $HAS_QUANT_HASH_CAPTURES) {
-                my int $i := -1;
-                while ++$i < $n {
+                my int $i;
+                while $i < $n {
                     if nqp::atpos_i(@!named-capture-counts, $i) >= 2 {
                         nqp::bindkey($result,
                             nqp::atpos_s(@!named-capture-names, $i),
                             nqp::list());
                     }
+                    ++$i;
                 }
             }
             $result

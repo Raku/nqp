@@ -88,9 +88,10 @@ class QAST::Block is QAST::Node does QAST::Children {
     method evaluate_unquotes(@unquotes) {
         my $result := self.shallow_clone();
         my $elems := nqp::elems(@(self));
-        my $i := -1;
-        while ++$i < $elems {
+        my int $i;
+        while $i < $elems {
             $result[$i] := self[$i].evaluate_unquotes(@unquotes);
+            ++$i;
         }
         $result
     }
