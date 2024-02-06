@@ -44,7 +44,7 @@ class QAST::Op is QAST::Node does QAST::Children {
         my $result := self.shallow_clone();
         my int $elems := nqp::elems(@(self));
         my int $i;
-        while ++$i < $elems {
+        while $i < $elems {
             $result[$i] := self[$i].substitute_inline_placeholders(@fillers)
                 unless nqp::isstr(self[$i]);
             ++$i;
