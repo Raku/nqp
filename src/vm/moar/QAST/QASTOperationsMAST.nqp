@@ -2359,6 +2359,8 @@ my constant CONST_MAP := nqp::hash(
     'SIG_ELEM_IS_RW',               256,
     'SIG_ELEM_IS_COPY',             512,
     'SIG_ELEM_IS_RAW',              1024,
+    # IS_RW + IS_COPY + IS_RAW
+    'SIG_ELEM_IS_NOT_READONLY',     1792,
     'SIG_ELEM_IS_OPTIONAL',         2048,
     'SIG_ELEM_ARRAY_SIGIL',         4096,
     'SIG_ELEM_HASH_SIGIL',          8192,
@@ -2378,7 +2380,9 @@ my constant CONST_MAP := nqp::hash(
     'SIG_ELEM_NATIVE_VALUE',        148897792,
     'SIG_ELEM_SLURPY_ONEARG',       16777216,
     # SLURPY_POS + SLURPY_NAMED + SLURPY_LOL + SLURPY_ONEARG
-    'SIG_ELEM_SLURPY',              16777272,
+    'SIG_ELEM_IS_SLURPY',           16777272,
+    # SLURPY_POS + SLURPY_NAMED + SLURPY_LOL + SLURPY_ONEARG + IS_CAPTURE
+    'SIG_ELEM_IS_NOT_POSITIONAL',   16777272,
     'SIG_ELEM_CODE_SIGIL',          33554432,
     'SIG_ELEM_IS_COERCIVE',         67108864,
 );
