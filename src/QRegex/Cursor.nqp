@@ -1,4 +1,66 @@
 # Some things that all cursors involved in a given parse share.
+# in place sort but return anyway the ref to sorted array
+#
+sub insertion_sort(@array, &compare) {
+    my $n := nqp::elems(@array);
+    my $i := 1;
+    while $i < $n {
+        my $key := nqp::atpos(@array, $i);
+        my $j := $i - 1;
+        while $j >= 0 && &compare(nqp::atpos(@array, $j), $key) > 0 {
+            nqp::bindpos(@array, $j + 1, nqp::atpos(@array, $j));
+            $j := $j - 1;
+        }
+        nqp::bindpos(@array, $j + 1, $key);
+        $i := $i + 1;
+    }
+    @array
+}
+
+# given a match $m, returns an array [submatch key, submatch] if
+# submatch unique and has the same span as the match.
+# if so push the key to @chunks
+
+my sub match_name($m) {
+    nqp::islist($m) ?? $m[0].name !! $m.name;
+}
+
+my sub son_in_ssp($k, $m) {
+
+    my sub same_span($m, $sm) {
+        if nqp::islist($sm) {
+            return nqp::elems($sm) == 1 && $m.from == $sm[0].from && $m.to == $sm[0].to;
+        }
+        $m.from == $sm.from && $m.to == $sm.to;
+    }
+
+    my $submatch;
+    my $submatch_key;
+    my %h := $m.hash;
+    return nqp::null() unless %h; # && nqp::elems(%h) == 1;
+
+    # return if zero or more than one non null submatch
+    # otherwise set $submatch and $submatch_key to the for the unique one
+    my $i := 0;
+    my $empty_submatch_nr := 0;
+    for %h {
+        # if  $_.value ne ''{
+            $submatch := $_.value;
+            $submatch_key := $_.key;
+            # say($_.key);
+            # $i++;
+        # }
+    }
+    # return 0 if $i == 0;
+
+    # say("!! $submatch_key {match_name($submatch)}");
+    unless same_span($m, $submatch) {
+        return 1;
+    }
+    my @a := [$submatch_key, $submatch];
+    return @a;
+}
+
 my class ParseShared is export {
     has $!CUR_CLASS;           # the class of the cursor object
     has $!orig;                # the string being parsed
@@ -96,81 +158,138 @@ role NQPMatchRole is export {
     method make($made)  { $!made := $made }
     method made()       { $!made }
     method ast()        { $!made }  # for historical reasons
+    method sub()         { $!regexsub}
+    method name()  { $!name }
 
-    method dump($indent?) {
-        unless nqp::defined($indent) {
-            $indent := 0;
+    my $bundlep := 1;
+
+    method dump($_indent?) {
+        my $indent := $_indent // 0;
+        my $mainGrammarNm := self.HOW.name(self);
+        if !self.Bool() {
+            return nqp::x(" ", $indent) ~ "- NO MATCH\n";
         }
-        if self.Bool() {
-            my @chunks;
+        # string components of serialization string is pushed in @chunks
+        # and, finally, joined; avoid creating lots of temporaries strings.
+        my @chunks;
+        #
+        rec_dump('TOP', self);
+        return nqp::join('', @chunks);
 
-            my sub dump_match(@chunks, $indent, $key, $value) {
-                nqp::push(@chunks, nqp::x(' ', $indent));
-                nqp::push(@chunks, '- ');
-                nqp::push(@chunks, ~$key);
-                nqp::push(@chunks, ': ');
-                if nqp::can($value, 'Str') {
-                    nqp::push(@chunks, $value.Str());
-                }
-                elsif $value.HOW.name($value) eq 'BOOTStr' {
-                    nqp::push(@chunks, $value);
-                }
-                else {
-                    nqp::push(@chunks, '<object> isa ' ~ $value.HOW.name($value));
-                }
-                nqp::push(@chunks, "\n");
-                if nqp::can($value, 'dump') {
-                    nqp::push(@chunks, nqp::eqaddr($value, self)
-                        ?? nqp::x(' ', $indent + 2) ~ "- <self-reference>\n"
-                        !! $value.dump($indent + 2));
-                }
+        sub rec_dump($key, $m, $prefix='') {
+            if !nqp::defined($m) || $m.Str eq '' {
+                return;
             }
-
-            my sub dump_match_array(@chunks, $indent, $key, @matches) {
-                nqp::push(@chunks, nqp::x(' ', $indent));
-                nqp::push(@chunks, '- ');
-                nqp::push(@chunks, ~$key);
-                nqp::push(@chunks, ': ');
-                nqp::push(@chunks, ~+@matches);
-                nqp::push(@chunks, " matches\n");
-                for @matches {
-                    nqp::push(@chunks, $_.dump($indent + 2));
-                }
+            if $m.HOW.name($m) eq 'BOOTStr' {
+                say("BOOTStr $m");
+                exit(1);
             }
-
-            my int $i := 0;
-            if self.list() {
-                for self.list() {
-                    if $_ {
-                        nqp::islist($_)
-                            ?? dump_match_array(@chunks, $indent, $i, $_)
-                            !! dump_match(@chunks, $indent, $i, $_);
+            # say("=== $key {$m.from} {$m.to}");
+            nqp::push(@chunks, nqp::x(' ', $indent));
+            nqp::push( @chunks, "$key");
+            my $last_m := $m;
+            my $mm := $m;
+            my $v := $m;
+            my $k := $key;
+            my @ret;
+            if $bundlep {
+                # push in @chunks the composite key components
+                my $lastGrammarNm := $mainGrammarNm;
+                while 1 {
+                    @ret := son_in_ssp($k, $mm);
+                    last if !nqp::islist(@ret);
+                    $k := @ret[0];
+                    $v := @ret[1];
+                    my $separator;
+                    if nqp::islist($v) {
+                        $v := $v[0];
+                        $separator := '|';
+                    } else {
+                        $separator := '/';
                     }
-                    else {
-                        dump_match(@chunks, $indent, $i, ' isa ' ~ $_.HOW.name($_));
+                    nqp::push( @chunks, $separator);
+
+                    my $grammarNm := $m.HOW.name($m);
+                    if $grammarNm ne $lastGrammarNm {
+                        nqp::push( @chunks, $grammarNm);
+                        nqp::push( @chunks, '::');
                     }
-                    $i := $i + 1;
+                    nqp::push(@chunks, $k);
+                    $lastGrammarNm := $grammarNm;
+
+                    $last_m := $mm;
+                    $mm := $v;
                 }
+
             }
-            if self.hash() {
-                for self.hash() {
+            nqp::push( @chunks, '.');
+            nqp::push( @chunks, ~$last_m.from);
+            nqp::push( @chunks, '.');
+            nqp::push( @chunks, ~$last_m.to);
+            my $non_empty_hash := nqp::isint(@ret) && @ret != 0;
+            # nqp::push( @chunks, $last_m.hash || $last_m.list ?? ":    #  " !! ": ~  #  ");
+            nqp::push( @chunks, $non_empty_hash || $last_m.list ?? ":" !! ": ~");
+
+            # my $str := $last_m.Str;
+            # my $i := nqp::index($str, "\n");
+            # $i := $i > 20 ?? 20 !! $i;
+            # $str := nqp::substr($str, 0, $i) if $i > 0;
+            # nqp::push( @chunks, $str);
+            nqp::push( @chunks, "\n");
+
+            my %h := $v.hash;
+            my @kv;
+            if %h {
+                for %h {
                     my $k := $_.key;
+                    # say("=$key $k");
                     my $v := $_.value;
-                    if $v {
-                        nqp::islist($v)
-                            ?? dump_match_array(@chunks, $indent, $k, $v)
-                            !! dump_match(@chunks, $indent, $k, $v);
-                    }
-                    else {
-                        dump_match(@chunks, $indent, $k, ' isa ' ~ $v.HOW.name($v));
+                    if nqp::islist($v) {
+                        nqp::push(@kv, [$k, $_]) for $v;
+                    } else {
+                        nqp::push(@kv, [$k, $v]);
                     }
                 }
             }
-            nqp::join('', @chunks);
-        }
-        else {
-            nqp::x(' ', $indent) ~ "- NO MATCH\n";
-        }
+            @kv := insertion_sort(@kv, -> $a, $b { $a[1].from > $b[1].from });
+            for @kv {
+                my $k := $_[0];
+                my $v := $_[1];
+                # say("== $k {$v.from} {$v.to} # {$v.Str}");
+            }
+            # say();
+            my @bundled_kv;
+            my $last_k;
+            my $last_v;
+            my $bundled_k;
+            # bundle keys with same span, using '='
+            # for @kv {
+            #     my $k := $_[0];
+            #     my $v := $_[1];
+            #     if nqp::defined($last_k) && $last_v.from == $v.from && $last_v.to == $v.to {
+            #         $bundled_k := (nqp::defined($bundled_k) ?? $bundled_k !! $last_k) ~ "=$k";
+            #     } else {
+            #         nqp::push(@bundled_kv, [$bundled_k, $v]) if nqp::defined($bundled_k);
+            #         $bundled_k:= $k;
+            #     }
+            #     $last_k := $k;
+            #     $last_v := $v;
+            # }
+            # nqp::push(@bundled_kv, [$bundled_k, $last_v]);
+            @bundled_kv := @kv;
+
+            $indent := $indent + 2;
+            for @bundled_kv {
+                my $bk := $_[0];
+                my $v := $_[1];
+                my $i := nqp::index($bk, "=");
+                my $k :=  $i > 0 ?? nqp::substr($bk, 0, $i) !! $_[0];
+                say("== $k");
+                rec_dump($k, $v);
+            }
+
+            $indent := $indent - 2;
+       }
     }
 
     method !dump_str($key) {

@@ -47,3 +47,4 @@ MANIFEST
 /bin
 /nqp.bat
 package-lock.json
+.vscode/
