@@ -238,9 +238,9 @@ knowhow NQPClassHOW {
         my $m := nqp::elems($roles);
         my $i := 0;
         while $i < $m {
-            nqp::die("The role " ~ $role ~ " has already been added.")
-              if nqp::eqaddr(nqp::atpos($roles, $i), $role);
-            ++$i;
+            nqp::eqaddr(nqp::atpos($roles, $i), $role)
+              ?? nqp::die("The role " ~ $role ~ " has already been added.")
+              !! ++$i;
         }
 
         # Since there is no way to lock updates at this stage, we're directly
@@ -564,6 +564,7 @@ knowhow NQPClassHOW {
                 my $candidate := nqp::atpos(@old, $j);
                 nqp::push(@new, $candidate)
                   unless nqp::eqaddr($candidate, $accepted);
+                ++$j;
             }
             nqp::bindpos(@merge_list, $i, @new);
             ++$i;
@@ -703,10 +704,10 @@ knowhow NQPClassHOW {
                 ]);
                 ++$i;
             }
+            $i := 0;
         }
 
         # Check if there's any default values to put in place.
-        $i := 0;
         while $i < $m {
             my $attribute := nqp::atpos(@attributes, $i);
             if nqp::can($attribute, 'build') {
