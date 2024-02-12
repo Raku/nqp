@@ -40,7 +40,7 @@ knowhow NQPConcreteRoleHOW {
     # Creates a new instance of this meta-class.
     method new(:$name!, :$instance_of!) {
         my $obj := nqp::create(self);
-        $obj.BUILD(:name($name), :instance_of($instance_of));
+        $obj.BUILD(:$name, :$instance_of);
         $obj
     }
 
@@ -55,13 +55,14 @@ knowhow NQPConcreteRoleHOW {
         @!collisions := nqp::list();
         @!roles := nqp::list();
         @!role_typecheck_list := nqp::list();
+        nqp::isnull($instance_of) || nqp::push(@!role_typecheck_list, $instance_of);
         $!composed := 0;
     }
 
     # Create a new meta-object instance, and then a new type object
     # to go with it, and return that.
-    method new_type(:$name = '<anon>', :$instance_of!) {
-        my $metarole := self.new(:name($name), :instance_of($instance_of));
+    method new_type(:$name = '<anon>', :$instance_of = nqp::null()) {
+        my $metarole := self.new(:$name, :$instance_of);
         nqp::settypehll($metarole, 'nqp');
         nqp::setdebugtypename(nqp::newtype($metarole, 'Uninstantiable'), $name);
     }
@@ -109,23 +110,35 @@ knowhow NQPConcreteRoleHOW {
         # Incorporate roles. They're already instantiated. We need to
         # add to done list their instantiation source.
         if @!roles {
-            for @!roles {
-                nqp::push(@!role_typecheck_list, $_);
-                nqp::push(@!role_typecheck_list, $_.HOW.instance_of($_));
+            for @!roles -> $role {
+                my @role_rtl := nqp::how_nd($role).role_typecheck_list($role);
+                nqp::push(@!role_typecheck_list, $role);
+                nqp::splice(@!role_typecheck_list, @role_rtl, nqp::elems(@!role_typecheck_list), 0);
             }
             RoleToRoleApplier.apply($obj, @!roles);
         }
 
-        # Mark composed.
-        $!composed := 1;
-        nqp::settypecache($obj, [$obj.WHAT]);
+        # Publish type cache.
+        my @tc := nqp::clone(@!role_typecheck_list);
+        nqp::unshift(@tc, $obj.WHAT);
+        nqp::settypecache($obj, @tc);
+        nqp::settypecheckmode($obj,
+            nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);
+
+        # Publish method cache.
 #?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
 #?endif
+
+        # Mark composed.
+        $!composed := 1;
         $obj
     }
 
+    method is_composed($obj) {
+        $!composed
+    }
 
     ##
     ## Introspecty
@@ -164,8 +177,23 @@ knowhow NQPConcreteRoleHOW {
         @!attributes
     }
 
-    method roles($obj, :$transitive = 0) {
-        @!roles
+    my &ROLES-TRANSITIVE := nqp::getstaticcode(anon sub ROLES-TRANSITIVE(@self, $obj) {
+        @self.accept($obj).veneer($obj.HOW.roles($obj, :transitive, :!mro))
+    });
+
+    my &ROLES-MRO := nqp::getstaticcode(anon sub ROLES-MRO(@self, $obj) {
+        @self.accept(nqp::splice(nqp::list($obj), $obj.HOW.roles($obj, :transitive, :!mro), 1, 0))
+    });
+
+    method roles($obj, :$local, :$transitive = 1, :$mro = 1) {
+        my @roles := @!roles;
+        if $transitive {
+            @roles := MonicMachine.new.veneer(@roles);
+            @roles := $mro
+                ?? @roles.summon(&ROLES-MRO).beckon(nqp::list())
+                !! @roles.banish(&ROLES-TRANSITIVE, nqp::list());
+        }
+        @roles
     }
 
     method role_typecheck_list($obj) {
@@ -174,5 +202,13 @@ knowhow NQPConcreteRoleHOW {
 
     method instance_of($obj) {
         $!instance_of
+    }
+
+    method parents($obj, *%named) {
+        []
+    }
+
+    method mro($obj, *%named) {
+        [$obj]
     }
 }

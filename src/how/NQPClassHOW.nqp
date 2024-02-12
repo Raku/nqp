@@ -48,7 +48,7 @@ knowhow NQPClassHOW {
     has @!mro;
 
     # Full list of roles that we do.
-    has @!done;
+    has @!role_typecheck_list;
 
     # If needed, a cached flattened method table accounting for all methods in
     # this class and its parents. This is only needed in the sitaution that a
@@ -91,7 +91,7 @@ knowhow NQPClassHOW {
         @!parents := nqp::list();
         @!roles := nqp::list();
         @!mro := nqp::list();
-        @!done := nqp::list();
+        @!role_typecheck_list := nqp::list();
         @!BUILDALLPLAN := nqp::list();
         @!BUILDPLAN := nqp::list();
         $!is_mixin := 0;
@@ -229,11 +229,12 @@ knowhow NQPClassHOW {
         # the composer.
         if @!roles {
             my @specialized_roles;
-            for @!roles {
-                my $ins := $_.HOW.specialize($_, $obj);
+            for @!roles -> $role {
+                my $ins := nqp::how_nd($role).specialize($role, $obj);
+                my @ins_rtl := nqp::how_nd($ins).role_typecheck_list($ins);
+                nqp::push(@!role_typecheck_list, $ins);
+                nqp::splice(@!role_typecheck_list, @ins_rtl, nqp::elems(@!role_typecheck_list), 0);
                 nqp::push(@specialized_roles, $ins);
-                nqp::push(@!done, $_);
-                nqp::push(@!done, $ins);
             }
             RoleToClassApplier.apply($obj, @specialized_roles);
         }
@@ -383,94 +384,9 @@ knowhow NQPClassHOW {
     # Computes C3 MRO.
     sub compute_c3_mro($class) {
         my @immediate_parents := $class.HOW.parents($class, :local);
-
-        # Provided we have immediate parents...
-        my @result;
-        if nqp::elems(@immediate_parents) {
-            if nqp::elems(@immediate_parents) == 1 {
-                @result := compute_c3_mro(@immediate_parents[0]);
-            } else {
-                # Build merge list of linearizations of all our parents, add
-                # immediate parents and merge.
-                my @merge_list;
-                for @immediate_parents {
-                    nqp::push(@merge_list, compute_c3_mro($_));
-                }
-                nqp::push(@merge_list, @immediate_parents);
-                @result := c3_merge(@merge_list);
-            }
-        }
-
-        # Put this class on the start of the list, and we're done.
-        nqp::unshift(@result, $class);
-        return @result;
-    }
-
-    # C3 merge routine.
-    sub c3_merge(@merge_list) {
-        my @result;
-        my $accepted;
-        my $something_accepted := 0;
-        my $cand_count := 0;
-
-        # Try to find something appropriate to add to the MRO.
-        for @merge_list {
-            my @cand_list := $_;
-            if @cand_list {
-                my $rejected := 0;
-                my $cand_class := @cand_list[0];
-                $cand_count := $cand_count + 1;
-                for @merge_list {
-                    # Skip current list.
-                    unless $_ =:= @cand_list {
-                        # Is current candidate in the tail? If so, reject.
-                        my $cur_pos := 1;
-                        while $cur_pos <= nqp::elems($_) {
-                            if $_[$cur_pos] =:= $cand_class {
-                                $rejected := 1;
-                            }
-                            $cur_pos := $cur_pos + 1;
-                        }
-                    }
-                }
-
-                # If we didn't reject it, this candidate will do.
-                unless $rejected {
-                    $accepted := $cand_class;
-                    $something_accepted := 1;
-                    last;
-                }
-            }
-        }
-
-        # If we never found any candidates, return an empty list.
-        if $cand_count == 0 {
-            return @result;
-        }
-
-        # If we didn't find anything to accept, error.
-        unless $something_accepted {
-            nqp::die("Could not build C3 linearization: ambiguous hierarchy");
-        }
-
-        # Otherwise, remove what was accepted from the merge lists.
-        my $i := 0;
-        while $i < nqp::elems(@merge_list) {
-            my @new_list;
-            for @merge_list[$i] {
-                unless $_ =:= $accepted {
-                    nqp::push(@new_list, $_);
-                }
-            }
-            @merge_list[$i] := @new_list;
-            $i := $i + 1;
-        }
-
-        # Need to merge what remains of the list, then put what was accepted on
-        # the start of the list, and we're done.
-        @result := c3_merge(@merge_list);
-        nqp::unshift(@result, $accepted);
-        return @result;
+        my @hier := MonicMachine.new;
+        @hier.emboss(|$_.HOW.mro($_)) for @immediate_parents;
+        @hier.beckon(nqp::list($class))
     }
 
     method publish_type_cache($obj) {
@@ -480,17 +396,16 @@ knowhow NQPClassHOW {
             nqp::push(@tc, $_);
             if nqp::can($_.HOW, 'role_typecheck_list') {
                 for $_.HOW.role_typecheck_list($_) -> $role {
+                    my @role_rtl := nqp::how_nd($role).role_typecheck_list($role);
                     nqp::push(@tc, $role);
-                    if nqp::can($role.HOW, 'role_typecheck_list') {
-                        for $role.HOW.role_typecheck_list($role) {
-                            nqp::push(@tc, $_);
-                        }
-                    }
+                    nqp::splice(@tc, @role_rtl, nqp::elems(@tc), 0);
                 }
             }
         }
 
-        nqp::settypecache($obj, @tc)
+        nqp::settypecache($obj, @tc);
+        nqp::settypecheckmode($obj,
+            nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);
     }
 
     sub reverse(@in) {
@@ -619,20 +534,67 @@ knowhow NQPClassHOW {
     ## Introspecty
     ##
 
-    method parents($obj, :$local = 0) {
-        $local ?? @!parents !! @!mro
+    my &PARENTS-TREE := nqp::getstaticcode(
+        anon sub PARENTS-TREE(@self, $obj) {
+            (my @parents := $obj.HOW.parents($obj, :tree))
+                ?? @self.accept(nqp::list($obj, @parents))
+                !! @self.accept(nqp::list($obj))
+        });
+
+    my &PARENTS-ALL := nqp::getstaticcode(
+        anon sub PARENTS-ALL(@self, $obj) {
+            @self.emboss(|$obj.HOW.mro($obj))
+        });
+
+    method parents($obj, :$local = 0, :$tree = 0, :$excl, :$all) {
+        $local
+            ?? @!parents
+            !! $tree
+                ?? nqp::elems(my @p := MonicMachine.new.veneer(@!parents).banish(&PARENTS-TREE, nqp::list())) == 1
+                    ?? @p[0]
+                    !! @p
+                !! $!composed
+                    ?? nqp::slice(@!mro, 1, nqp::elems(@!mro) - 1)
+                    !! MonicMachine.new.veneer(@!parents).summon(&PARENTS-ALL).beckon(nqp::list())
     }
 
-    method mro($obj) {
+    method mro($obj, :$concretizations, :$roles) {
         @!mro
     }
 
-    method roles($obj, :$local!) {
-        @!roles
+    my &ROLES-REMOTE := nqp::getstaticcode(anon sub ROLES-REMOTE(@self, $obj) {
+        @self.veneer($obj.HOW.roles($obj, :local, :!transitive, :!mro))
+    });
+
+    my &ROLES-TRANSITIVE := nqp::getstaticcode(anon sub ROLES-TRANSITIVE(@self, $obj) {
+        @self.accept($obj).veneer($obj.HOW.roles($obj, :local, :transitive, :!mro))
+    });
+
+    my &ROLES-MRO := nqp::getstaticcode(anon sub ROLES-MRO(@self, $obj) {
+        @self.accept(nqp::splice(nqp::list($obj), $obj.HOW.roles($obj, :local, :transitive, :!mro), 1, 0))
+    });
+
+    method roles($obj, :$local = 0, :$transitive = 1, :$mro = 0) {
+        my @roles;
+        if $local {
+            @roles := @!roles;
+        }
+        else {
+            @roles := nqp::clone(@!roles);
+            MonicMachine.new.veneer(@!parents).banish(&ROLES-REMOTE, @roles);
+            @roles := @roles.list();
+        }
+        if $transitive {
+            @roles := MonicMachine.new.veneer(@roles);
+            @roles := $mro
+                ?? @roles.summon(&ROLES-MRO).beckon(nqp::list())
+                !! @roles.banish(&ROLES-TRANSITIVE, nqp::list());
+        }
+        @roles
     }
 
     method role_typecheck_list($obj) {
-        @!done;
+        @!role_typecheck_list
     }
 
     method methods($obj, :$local = 0, :$all) {
@@ -702,10 +664,10 @@ knowhow NQPClassHOW {
     }
 
     method does($obj, $check) {
-        my $i := nqp::elems(@!done);
+        my $i := nqp::elems(@!role_typecheck_list);
         while $i > 0 {
             $i := $i - 1;
-            if @!done[$i] =:= $check {
+            if @!role_typecheck_list[$i] =:= $check {
                 return 1;
             }
         }

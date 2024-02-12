@@ -23,7 +23,7 @@ knowhow RoleToClassApplier {
             $to_compose_meta := $to_compose.HOW;
         }
         else {
-            $to_compose := NQPConcreteRoleHOW.new_type(:instance_of(NQPMu));
+            $to_compose := NQPConcreteRoleHOW.new_type();
             $to_compose_meta := $to_compose.HOW;
             for @roles {
                 $to_compose_meta.add_role($to_compose, $_);

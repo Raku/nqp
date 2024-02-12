@@ -107,19 +107,28 @@ knowhow NQPParametricRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed.
     method compose($obj) {
-        for @!roles {
-            nqp::push(@!role_typecheck_list, $_);
-            for $_.HOW.role_typecheck_list($_) {
-                nqp::push(@!role_typecheck_list, $_);
-            }
+        # Update the role typecheck list.
+        for @!roles -> $role {
+            my @role_rtl := nqp::how_nd($role).role_typecheck_list($role);
+            nqp::push(@!role_typecheck_list, $role);
+            nqp::splice(@!role_typecheck_list, @role_rtl, nqp::elems(@!role_typecheck_list), 0);
         }
 
-        $!composed := 1;
-        nqp::settypecache($obj, [$obj.WHAT]);
+        # Publish type cache.
+        my @tc := nqp::clone(@!role_typecheck_list);
+        nqp::unshift(@tc, $obj.WHAT);
+        nqp::settypecache($obj, @tc);
+        nqp::settypecheckmode($obj,
+            nqp::const::TYPE_CHECK_CACHE_DEFINITIVE);
+
+        # Publish method cache.
 #?if !moar
         nqp::setmethcache($obj, {});
         nqp::setmethcacheauth($obj, 1);
 #?endif
+
+        # Mark composed.
+        $!composed := 1;
         $obj
     }
 
@@ -214,11 +223,34 @@ knowhow NQPParametricRoleHOW {
         @!attributes
     }
 
-    method roles($obj, :$transitive = 0) {
-        @!roles
+    my &ROLES-TRANSITIVE := nqp::getstaticcode(anon sub ROLES-TRANSITIVE(@self, $obj) {
+        @self.accept($obj).veneer($obj.HOW.roles($obj, :transitive, :!mro))
+    });
+
+    my &ROLES-MRO := nqp::getstaticcode(anon sub ROLES-MRO(@self, $obj) {
+        @self.accept(nqp::splice(nqp::list($obj), $obj.HOW.roles($obj, :transitive, :!mro), 1, 0))
+    });
+
+    method roles($obj, :$local, :$transitive = 1, :$mro = 0) {
+        my @roles := @!roles;
+        if $transitive {
+            @roles := MonicMachine.new.veneer(@roles);
+            @roles := $mro
+                ?? @roles.summon(&ROLES-MRO).beckon(nqp::list())
+                !! @roles.banish(&ROLES-TRANSITIVE, nqp::list());
+        }
+        @roles
     }
 
     method role_typecheck_list($obj) {
         @!role_typecheck_list
+    }
+
+    method parents($obj, *%named) {
+        []
+    }
+
+    method mro($obj, *%named) {
+        [$obj]
     }
 }
