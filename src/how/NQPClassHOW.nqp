@@ -580,18 +580,26 @@ knowhow NQPClassHOW {
     method publish_type_cache($obj) {
         my $mro := $!mro;
 
-        # Helper sub to recursively add type and its roles
+        # Make sure we only add unique types
+        my $seen := nqp::hash;
+
+        # Helper sub to recursively add new types and their roles
         my @tc;
         sub add_roles($type) {
-            nqp::push(@tc, $type);
+            my $key := ~nqp::objectid($type);
+            unless nqp::existskey($seen, $key) {
+                nqp::bindkey($seen, $key, 1);
 
-            if nqp::can($type.HOW, 'role_typecheck_list') {
-                my @roles := $type.HOW.role_typecheck_list($type);
-                my $m := nqp::elems(@roles);
-                my $i := 0;
-                while $i < $m {
-                    add_roles(nqp::atpos(@roles, $i));
-                    ++$i;
+                nqp::push(@tc, $type);
+                if nqp::can($type.HOW, 'role_typecheck_list') {
+                    my @roles := $type.HOW.role_typecheck_list($type);
+                    if nqp::elems(@roles) -> $m {
+                        my $i := 0;
+                        while $i < $m {
+                            add_roles(nqp::atpos(@roles, $i));
+                            ++$i;
+                        }
+                    }
                 }
             }
         }
