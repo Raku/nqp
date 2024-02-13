@@ -28,6 +28,7 @@ knowhow NQPClassHOW {
     has $!attributes;
     has $!methods;
     has $!method_order;
+    has $!tweaks;
     has $!parents;
     has $!roles;
     has $!default_parent;
@@ -83,6 +84,7 @@ knowhow NQPClassHOW {
         $!methods       := nqp::hash;
         $!attributes    := nqp::list;
         $!method_order  := nqp::list;
+        $!tweaks        := nqp::list;
         $!multi_methods := nqp::list;
         $!parents       := nqp::list;
         $!roles         := nqp::list;
@@ -110,17 +112,25 @@ knowhow NQPClassHOW {
     }
 
     method add_method($obj, $name, $code_obj) {
-        nqp::die("This class already has a method named " ~ $name)
-          if nqp::existskey($!methods, $name);
-
         nqp::die("Cannot add a null method '$name' to class '$!name'")
           if nqp::isnull($code_obj) || !nqp::defined($code_obj);
+
+        my $methods := $!methods;
+        nqp::die("This class already has a method named " ~ $name)
+          if nqp::existskey($methods, $name);
+
+        # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
+        nqp::push($!tweaks, $code_obj) if $name eq 'TWEAK';
 
 #?if !moar
         nqp::setmethcacheauth($obj, 0);
 #?endif
-        $!cached_all_method_table := nqp::null();
-        nqp::push($!method_order, nqp::bindkey($!methods, $name, $code_obj));
+        $!cached_all_method_table := nqp::null;
+        nqp::push(
+          $!method_order,
+          nqp::bindkey($methods, $name, $code_obj)
+        );
+        $!methods := $methods;  # update atomically
     }
 
     method add_multi_method($obj, $name, $code) {
@@ -729,8 +739,8 @@ knowhow NQPClassHOW {
             ++$i;
         }
 
-        my $tweak := nqp::atkey($methods, 'TWEAK');
-        nqp::push(@plan, $tweak) unless nqp::isnull($tweak);
+        # Make sure all the tweaks are run
+        append(@plan, $!tweaks);
 
         # Install plan for this class.
         $!BUILDPLAN := @plan;
