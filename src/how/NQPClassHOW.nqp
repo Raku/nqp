@@ -692,14 +692,12 @@ knowhow NQPClassHOW {
         my $i := 0;
 
         # Does it have its own BUILD?
-        my $build := $obj.HOW.method_table($obj)<BUILD>;
-        if nqp::defined($build) {
-            # We'll call the custom one.
-            nqp::push(@plan, $build);
-        }
+        my $methods := $obj.HOW.method_table($obj);
+        my $build   := nqp::atkey($methods, 'BUILD');
 
         # No custom BUILD
-        else {
+        if nqp::isnull($build) {
+
             # Rather than having an actual BUILD in Mu, we produce ops
             # here per attribute that may need initializing.
 
@@ -712,7 +710,12 @@ knowhow NQPClassHOW {
                 ]);
                 ++$i;
             }
-            $i := 0;
+            $i := 0;  # reset for attributes loop
+        }
+
+        # A custom BUILD
+        else {
+            nqp::push(@plan, $build);
         }
 
         # Check if there's any default values to put in place.
@@ -725,6 +728,9 @@ knowhow NQPClassHOW {
             }
             ++$i;
         }
+
+        my $tweak := nqp::atkey($methods, 'TWEAK');
+        nqp::push(@plan, $tweak) unless nqp::isnull($tweak);
 
         # Install plan for this class.
         $!BUILDPLAN := @plan;
