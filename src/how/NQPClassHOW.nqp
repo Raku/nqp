@@ -69,6 +69,9 @@ knowhow NQPClassHOW {
     has $!BUILDALLPLAN;
     has $!BUILDPLAN;
 
+    has $!lock;
+    method protect(&code) { code() } # Dummy protect method for now
+
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes($obj?) { $archetypes }
 
@@ -81,7 +84,10 @@ knowhow NQPClassHOW {
 
     method BUILD($name) {
         $!name          := $name;
+
         $!methods       := nqp::hash;
+        $!caches        := nqp::hash;
+
         $!attributes    := nqp::list;
         $!method_order  := nqp::list;
         $!tweaks        := nqp::list;
@@ -92,6 +98,8 @@ knowhow NQPClassHOW {
         $!done          := nqp::list;
         $!BUILDALLPLAN  := nqp::list;
         $!BUILDPLAN     := nqp::list;
+
+        $!lock := self;  # for now, until we have a real "lock: knowhow
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -111,46 +119,61 @@ knowhow NQPClassHOW {
         nqp::setdebugtypename(nqp::setwho($new_type, nqp::hash), $name)
     }
 
-    method add_method($obj, $name, $code_obj) {
+    method add_method($obj, $name, $code) {
         nqp::die("Cannot add a null method '$name' to class '$!name'")
-          if nqp::isnull($code_obj) || !nqp::defined($code_obj);
+          if nqp::isnull($code) || !nqp::defined($code);
 
-        my $methods := $!methods;
         nqp::die("This class already has a method named " ~ $name)
-          if nqp::existskey($methods, $name);
+          if nqp::existskey($!methods, $name);
 
-        # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
-        nqp::push($!tweaks, $code_obj) if $name eq 'TWEAK';
+        $!lock.protect({
 
+            # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
+            if $name eq 'TWEAK' {
+                my $tweaks := nqp::clone($!tweaks);
+                nqp::push($tweaks, $code);
+                $!tweaks := $tweaks;
+            }
+
+            my $methods      := nqp::clone($!methods);
+            my $method_order := nqp::clone($!method_order);
+            nqp::push($method_order, nqp::bindkey($methods, $name, $code));
 #?if !moar
-        nqp::setmethcacheauth($obj, 0);
+            nqp::setmethcacheauth($obj, 0);
 #?endif
-        $!cached_all_method_table := nqp::null;
-        nqp::push(
-          $!method_order,
-          nqp::bindkey($methods, $name, $code_obj)
-        );
-        $!methods := $methods;  # update atomically
+            $!cached_all_method_table := nqp::null;
+            $!methods      := $methods;
+            $!method_order := $method_order;
+        });
     }
 
     method add_multi_method($obj, $name, $code) {
-        # We can't incorporate these right away as we don't know all
-        # parents yet, maybe, which influences whether we even can
-        # have multis, need to generate a proto or worreva. So just
-        # queue them up in a todo list and we handle it at class
-        # composition time.
-        nqp::push($!multi_methods, [$name, $code]);
+
+        $!lock.protect({
+            my $multi_methods := nqp::clone($!multi_methods);
+
+            # We can't incorporate these right away as we don't know all
+            # parents yet, maybe, which influences whether we even can
+            # have multis, need to generate a proto or worry. So just
+            # queue them up in a todo list and we handle it at class
+            # composition time.
+            nqp::push($multi_methods, [$name, $code]);
+
 #?if !moar
-        nqp::setmethcacheauth($obj, 0);
+            nqp::setmethcacheauth($obj, 0);
 #?endif
-        $!cached_all_method_table := nqp::null;
+            $!cached_all_method_table := nqp::null;
+            $!multi_methods := $multi_methods;
+        });
+
         $code
     }
 
     # Add an attribute with the given meta information
     method add_attribute($obj, $attribute) {
-        my $attributes := $!attributes;
 
+        # Make sure name is unique
+        my $attributes := $!attributes;
         my $name := $attribute.name;
         my $m := nqp::elems($attributes);
         my $i := 0;
@@ -160,17 +183,23 @@ knowhow NQPClassHOW {
               !! ++$i;
         }
 
-        # Since there is no way to lock updates at this stage, we're directly
-        # pushing to the attribute as we want to make sure we don't miss any
-        # updates
-        nqp::push($!attributes, $attribute);
+        $!lock.protect({
+            $attributes := nqp::clone($!attributes);
+            nqp::push($attributes, $attribute);
+            $!attributes := $attributes;
+        });
+
+        $attribute
     }
 
     method is_array_type($obj) { $!is_array_type }
     method array_type($obj)    { $!array_type    }
     method set_array_type($obj, $type) {
-        $!is_array_type := 1;
-        $!array_type := $type;
+
+        $!lock.protect({
+            $!is_array_type := 1;
+            $!array_type := $type;
+        });
     }
 
     method add_parent($obj, $parent) {
@@ -190,13 +219,18 @@ knowhow NQPClassHOW {
               !! ++$i;
         }
 
-        # Since there is no way to lock updates at this stage, we're directly
-        # pushing to the parents as we want to make sure we don't miss any
-        # updates
-        nqp::push($!parents, $parent);
+        $!lock.protect({
+            $parents := nqp::clone($!parents);
+            nqp::push($parents, $parent);
+            $!parents := $parents;
+        });
+
+        $parent
     }
 
-    method set_default_parent($obj, $parent) { $!default_parent := $parent }
+    method set_default_parent($obj, $parent) {
+        $!default_parent := $parent  # doesn't need protecting
+    }
 
     # Helper sub: returns 1 if none of the parents of a given mro have
     # attributes, else 0
@@ -229,15 +263,17 @@ knowhow NQPClassHOW {
         nqp::die("Can only re-parent to a class with no attributes")
           unless attributeless_parents($new_parent);
 
-        # Ideally, the following should be done in a protected block,
-        # but alas, that's not possible here yet
-        nqp::bindpos($!parents, 0, $new_parent);
-        $!mro := compute_c3_mro($obj);
-        $!cached_all_method_table := nqp::null;
+        $!lock.protect({
+            $parents := nqp::clone($!parents);
+            nqp::bindpos($parents, 0, $new_parent);
+            $!parents := $parents;
+            $!mro := compute_c3_mro($obj);
+            $!cached_all_method_table := nqp::null;
 
-        self.publish_type_cache($obj);
-        self.publish_method_cache($obj);
-        self.publish_boolification_spec($obj);
+            self.publish_type_cache($obj);
+            self.publish_method_cache($obj);
+            self.publish_boolification_spec($obj);
+        });
 
         1;
     }
@@ -253,80 +289,80 @@ knowhow NQPClassHOW {
               !! ++$i;
         }
 
-        # Since there is no way to lock updates at this stage, we're directly
-        # pushing to the roles as we want to make sure we don't miss any
-        # updates
-        nqp::push($!roles, $role);
+        $!lock.protect({
+            $roles := $!roles;  # nqp::clone breaks build
+            nqp::push($!roles, $role);
+            $!roles := $roles;
+        });
     }
 
 
     # Incorporate roles
     method compose($obj) {
-        my $roles   := $!roles;
-        my $parents := $!parents;
-        my $done    := $!done;
+        $!lock.protect({
+            my $roles   := $!roles;
+            my $done    := $!done;
 
-        # All of these actions should be done in a protected block,
-        # but alas there is no way to do that here
+            # First, specialize them with the type object for this type (so
+            # their $?CLASS is correct). Then delegate to the composer
+            if nqp::elems($roles) -> $m {
+                my @specialized_roles;
+                my $i := 0;
+                while $i < $m {
+                    my $role        := nqp::atpos($roles, $i);
+                    my $specialized := $role.HOW.specialize($role, $obj);
 
-        # First, specialize them with the type object for this type (so
-        # their $?CLASS is correct). Then delegate to the composer
-        if nqp::elems($roles) -> $m {
-            my @specialized_roles;
-            my $i := 0;
-            while $i < $m {
-                my $role        := nqp::atpos($roles, $i);
-                my $specialized := $role.HOW.specialize($role, $obj);
+                    nqp::push(@specialized_roles, $specialized);
+                    nqp::push($done, $role);
+                    nqp::push($done, $specialized);
+                    ++$i;
+                }
 
-                nqp::push(@specialized_roles, $specialized);
-                nqp::push($done, $role);
-                nqp::push($done, $specialized);
-                ++$i;
+                $!done := $done;  # update atomically
+                RoleToClassApplier.apply($obj, @specialized_roles);
             }
 
-            $!done := $done;  # update atomically
-            RoleToClassApplier.apply($obj, @specialized_roles);
-        }
+            # If we have no parents and we're not called NQPMu then add the
+            # default parent.
+            $!parents := nqp::list($!default_parent)
+              if nqp::elems($!parents) == 0 && $!name ne 'NQPMu';
 
-        # If we have no parents and we're not called NQPMu then add the
-        # default parent.
-        self.add_parent($obj, $!default_parent)
-          if nqp::elems($parents) == 0 && $!name ne 'NQPMu';
+            # Compute the MRO
+            $!mro := compute_c3_mro($obj);
 
-        # Compute the MRO
-        $!mro := compute_c3_mro($obj);
+            # Incorporate any new multi candidates (needs MRO built)
+            self.incorporate_multi_candidates($obj);
 
-        # Incorporate any new multi candidates (needs MRO built)
-        self.incorporate_multi_candidates($obj);
-
-        # Compose any attributes, local or not
-        my $attributes := self.attributes($obj, :!local);
-        if nqp::elems($attributes) -> $m {
-            my $i := 0;
-            while $i < $m {
-                nqp::atpos($attributes, $i).compose($obj);
-                ++$i;
+            # Compose any attributes, local or not
+            my $attributes := self.attributes($obj, :!local);
+            if nqp::elems($attributes) -> $m {
+                my $i := 0;
+                while $i < $m {
+                    nqp::atpos($attributes, $i).compose($obj);
+                    ++$i;
+                }
             }
-        }
 
-        # Publish type and method caches and boolification spec.
-        self.publish_type_cache($obj);
-        self.publish_method_cache($obj);
-        self.publish_boolification_spec($obj);
+            # Publish type and method caches and boolification spec.
+            self.publish_type_cache($obj);
+            self.publish_method_cache($obj);
+            self.publish_boolification_spec($obj);
 
-        # Create BUILDPLAN.
-        self.create_BUILDPLAN($obj);
+            # Create BUILDPLAN.
+            self.create_BUILDPLAN($obj);
 
-        # Compose the representation and mark as composed
-        unless $!composed {
-            self.compose_repr($obj);
-            $!composed := 1;
-        }
+            # Compose the representation and mark as composed
+            unless $!composed {
+                self.compose_repr($obj);
+                $!composed := 1;
+            }
+        });
 
         $obj
     }
 
-    # Compose the representation of the given object
+    # Compose the representation of the given object.  Assumes this is
+    # called from insided a protected block
     method compose_repr($obj) {
 
         # Handle arrays differently
@@ -427,14 +463,12 @@ knowhow NQPClassHOW {
         )
     }
 
+    # Incorporate any multi methods into the methods hash.  Assumes it is
+    # being called from a protected block
     method incorporate_multi_candidates($obj) {
-
-        # Create local copies of attribute states: this should
-        # really be in a protect block, but we don't have that
-        # this early in the NQP bootstrap
         my $mro           := $!mro;
-        my $methods       := $!methods;
         my $multi_methods := $!multi_methods;
+        my $methods       := nqp::clone($!methods);  # being updated
 
         my $m := nqp::elems($multi_methods);
         my $i := 0;
@@ -468,7 +502,6 @@ knowhow NQPClassHOW {
             ++$i;
         }
 
-        # Pass back any changes atomically
         $!methods := $methods;
     }
 
@@ -587,6 +620,8 @@ knowhow NQPClassHOW {
         @result
     }
 
+    # Create and publish the type cache.  Assumes being run inside a
+    # protected block
     method publish_type_cache($obj) {
         my $mro := $!mro;
 
@@ -624,6 +659,8 @@ knowhow NQPClassHOW {
         nqp::settypecache($obj, @tc)
     }
 
+    # Create and publish the method cache.  Assumes being run inside a
+    # protected block
     method publish_method_cache($obj) {
 #?if !moar
         # Walk MRO and add methods to cache, unless another method
@@ -643,6 +680,8 @@ knowhow NQPClassHOW {
 #?endif
     }
 
+    # Return a hash with the methodes keyed on name.  Updates the table if
+    # it wasn't set yet in a thread-safe way
     method all_method_table($obj) {
         my $table := $!cached_all_method_table;
         unless nqp::isconcrete($table) {
@@ -663,6 +702,7 @@ knowhow NQPClassHOW {
         $table
     }
 
+    # Publish the way the object is supposed to be boolified
     method publish_boolification_spec($obj) {
         my $bool_meth := self.find_method($obj, 'Bool');
         nqp::defined($bool_meth)
@@ -692,7 +732,8 @@ knowhow NQPClassHOW {
     #   1100 class name attr_name = find initialization value, or set []
     #   1200 class name attr_name = find initialization value, or set {}
     # Note the numbers are a bit odd, but they are this way to conform to the
-    # HLL version of BUILDALL.
+    # HLL version of BUILDALL.  Assu.mes it is being called from a protected
+    # block.
     method create_BUILDPLAN($obj) {
 
         # First, we'll create the build plan for just this class.
@@ -757,10 +798,6 @@ knowhow NQPClassHOW {
         $!BUILDALLPLAN := @all_plan;
     }
 
-    ##
-    ## Introspecty
-    ##
-
     method parents($obj, :$local = 0) {
         $local ?? $!parents !! $!mro
     }
@@ -778,7 +815,7 @@ knowhow NQPClassHOW {
 
     method methods($obj, :$local = 0, :$all) {
         if $local {
-            $!method_order
+            nqp::clone($!method_order)
         }
         else {
             my $mro := $!mro;
@@ -822,11 +859,6 @@ knowhow NQPClassHOW {
         }
     }
 
-
-    ##
-    ## Checky
-    ##
-
     method isa($obj, $check) {
         my $check-class := $check.WHAT;
         my $mro := $!mro;
@@ -864,9 +896,6 @@ knowhow NQPClassHOW {
         0
     }
 
-    ##
-    ## Dispatchy
-    ##
     method find_method($obj, $name, :$no_fallback = 0) {
         my $mro := $!mro;
 
@@ -883,36 +912,30 @@ knowhow NQPClassHOW {
         nqp::null
     }
 
-    ##
-    ## Cache-related
-    ##
-
     method cache($obj, $key, $value_generator) {
-        my $caches := $!caches;
-        nqp::ishash($caches) && nqp::existskey($caches, $key)
-          ?? nqp::atkey($caches, $key)
-          !! self.cache_add($obj, $key, $value_generator())
+        nqp::ifnull(
+          nqp::atkey($!caches, $key),
+          self.cache_add($obj, $key, $value_generator())
+        )
     }
 
     method flush_cache($obj) {
         nqp::scwbdisable;
-        $!caches := nqp::hash unless nqp::isnull($!caches);
+        $!caches := nqp::hash;
         nqp::scwbenable;
     }
 
-    method cache_get($obj, $key) {
-        my $caches := $!caches;
-        nqp::ishash($caches) ?? nqp::atkey($caches, $key) !! nqp::null
-    }
+    method cache_get($obj, $key) { nqp::atkey($!caches, $key) }
 
     method cache_add($obj, $key, $value) {
-        my $caches  := $!caches;
-        my $updated := nqp::ishash($caches) ?? nqp::clone($caches) !! nqp::hash;
-        nqp::bindkey($updated, $key, $value);
+        $!lock.protect({
+            my $caches  := nqp::clone($!caches);
+            nqp::bindkey($caches, $key, $value);
 
-        nqp::scwbdisable();
-        $!caches := $updated;   # atomically update
-        nqp::scwbenable();
+            nqp::scwbdisable;
+            $!caches := $caches;
+            nqp::scwbenable;
+        });
 
         $value
     }
