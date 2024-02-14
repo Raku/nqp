@@ -1,90 +1,137 @@
+#- RoleToRoleApplier -----------------------------------------------------------
+# Provides the logic to have a role consume a number of given roles with the
+# the .apply class method.  No other public API is supplied.
 knowhow RoleToRoleApplier {
+
+    # Helper sub to push to a list only if the given value is not in that list
+    sub push_if_unique(@list, $value) {
+        if nqp::elems(@list) -> $m {
+            my $i := 0;
+            while $i < $m {
+                return nqp::null if nqp::eqaddr(nqp::atpos(@list, $i),$value);
+                ++$i;
+            }
+        }
+
+        nqp::push(@list, $value);
+    }
+
+    # Helper sub to return the name of a code object
+    sub name_of_code($code) {
+        nqp::can($code, 'name') ?? $code.name !! nqp::getcodename($code)
+    }
+
+    # Helper sub, returns 1 if the given attribute does not need to be added
+    # to the list of current attributes.  Dies if there is a name conflict
+    sub can_skip_attribute_by_name(@current, $that) {
+        my $skip;
+
+        my $m := nqp::elems(@current);
+        my $i := 0;
+        while $i < $m {
+            my $this := nqp::atpos(@current, $i);
+            if nqp::eqaddr($this, $that) {
+                $skip := 1;
+            }
+            elsif $this.name eq $that.name {
+                nqp::die("Attribute '" ~ $this.name ~ "' conflicts in role composition");
+            }
+        }
+
+        $skip
+    }
+
+    # Aggregate all of the methods sharing names
     method apply($target, @roles) {
-        # Aggregate all of the methods sharing names.
-        my %meth_info;
-        my @meth_names;
-        for @roles {
-            my @methods := $_.HOW.methods($_);
-            for @methods {
-                my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
-                my $meth := $_;
-                my @meth_list;
-                if nqp::defined(%meth_info{$name}) {
-                    @meth_list := %meth_info{$name};
+        my %methods_to_add;
+        my @method_names;
+
+        # Create a hash of lists with method objects, and a list of
+        # method names on the fly
+        my $m := nqp::elems(@roles);
+        my $i := 0;
+        while $i < $m {
+            my $role    := nqp::atpos(@roles, $i);
+            my @methods := $role.HOW.methods($role);
+
+            my $n := nqp::elems(@methods);
+            my $j := 0;
+            while $j < $n {
+                my $method := nqp::atpos(@methods, $j);
+
+                my $name := name_of_code($method);
+                my $list := nqp::atkey(%methods_to_add, $name);
+
+                my @method_list;
+                if nqp::isnull($list) {
+                    nqp::push(@method_names, $name);
+                    nqp::bindkey(%methods_to_add, $name, @method_list);
                 }
                 else {
-                    nqp::push(@meth_names, $name);
-                    %meth_info{$name} := @meth_list;
+                    @method_list := $list;
                 }
-                my $found := 0;
-                for @meth_list {
-                    if $meth =:= $_ {
-                        $found := 1;
-                    }
-                }
-                unless $found {
-                    nqp::push(@meth_list, $meth);
+
+                push_if_unique(@method_list, $method);
+                ++$j;
+            }
+            ++$i;
+        }
+
+        # Also need methods of target
+        my %target_methods_info;
+        my @target_methods := $target.HOW.methods($target);
+
+        $m := nqp::elems(@target_methods);
+        $i := 0;
+        while $i < $m {
+            my $method := nqp::atpos(@target_methods, $i);
+            nqp::bindkey(%target_methods_info, name_of_code($method), $method);
+            ++$i;
+        }
+
+        # Process method list
+        $m := nqp::elems(@method_names);
+        $i := 0;
+        while $i < $m {
+            my $name := nqp::atpos(@method_names, $i);
+
+            # Add method if we don't already have a method of this name
+            if nqp::isnull(nqp::atkey(%target_methods_info, $name)) {
+                my @add_methods := nqp::atkey(%methods_to_add, $name);
+
+                nqp::elems(@add_methods) == 1
+                  # No methods in the target role. If only one, it's easy
+                  ?? $target.HOW.add_method(
+                       $target, $name, nqp::atpos(@add_methods, 0)
+                     )
+                  # More than one - add to collisions list for later handling
+                  !! $target.HOW.add_collision($target, $name);
+            }
+            ++$i;
+        }
+
+        # Now do the attributes
+        $m := nqp::elems(@roles);
+        $i := 0;
+        while $i < $m {
+            my $role       := nqp::atpos(@roles, $i);
+            my @attributes := $role.HOW.attributes($role);
+
+            # Compose in any attributes, unless there's a conflict
+            if nqp::elems(@attributes) -> $n {
+                my $j := 0;
+                while $j < $n {
+                    my $attribute_to_add := nqp::atpos(@attributes, $j);
+
+                    $target.HOW.add_attribute($target, $attribute_to_add)
+                      unless can_skip_attribute_by_name(
+                        $target.HOW.attributes($target),
+                        $attribute_to_add
+                      );
+                    ++$j;
                 }
             }
+            ++$i;
         }
-
-        # Also need methods of target.
-        my %target_meth_info;
-        my @target_meths := $target.HOW.methods($target);
-        for @target_meths {
-            my $name := nqp::can($_, 'name') ?? $_.name !! nqp::getcodename($_);
-            %target_meth_info{$name} := $_;
-        }
-
-        # Process method list.
-        for @meth_names -> $name {
-            my @add_meths := %meth_info{$name};
-
-            # Do we already have a method of this name? If so, ignore all of the
-            # methods we have from elsewhere.
-            unless nqp::defined(%target_meth_info{$name}) {
-                # No methods in the target role. If only one, it's easy...
-                if nqp::elems(@add_meths) == 1 {
-                    $target.HOW.add_method($target, $name, @add_meths[0]);
-                }
-                else {
-                    # More than one - add to collisions list.
-                    $target.HOW.add_collision($target, $name);
-                }
-            }
-        }
-
-        # Now do the other bits.
-        my @all_roles;
-        for @roles {
-            my $how := $_.HOW;
-
-            # Compose is any attributes, unless there's a conflict.
-            my @attributes := $how.attributes($_);
-            for @attributes {
-                my $add_attr := $_;
-                my $skip := 0;
-                my @cur_attrs := $target.HOW.attributes($target);
-                for @cur_attrs {
-                    if $_ =:= $add_attr {
-                        $skip := 1;
-                    }
-                    else {
-                        if $_.name eq $add_attr.name {
-                            nqp::die("Attribute '" ~ $_.name ~ "' conflicts in role composition");
-                        }
-                    }
-                }
-                unless $skip {
-                    $target.HOW.add_attribute($target, $add_attr);
-                }
-            }
-
-            # Build up full list.
-            # XXX Not really right yet...
-            nqp::push(@all_roles, $_);
-        }
-
-        return @all_roles;
     }
 }
