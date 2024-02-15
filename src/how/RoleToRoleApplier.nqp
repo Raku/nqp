@@ -36,6 +36,7 @@ knowhow RoleToRoleApplier {
             elsif $this.name eq $that.name {
                 nqp::die("Attribute '" ~ $this.name ~ "' conflicts in role composition");
             }
+            ++$i;
         }
 
         $skip
