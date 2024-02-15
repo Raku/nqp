@@ -72,6 +72,30 @@ knowhow NQPClassHOW {
     has $!lock;
     method protect(&code) { code() } # Dummy protect method for now
 
+    # Helper sub to push a value on a clone of the given target list.
+    # Assumes it runs in a protected block.  Returns the clone
+    sub push_on_clone($target, $value) {
+        nqp::push((my $clone := nqp::clone($target)), $value);
+        $clone
+    }
+
+    # Helper sub to bind a value to a key in clone of the given target hash.
+    # Assumes it runs in a protected block.  Returns the clone
+    sub bindkey_on_clone($target, $key, $value) {
+        nqp::bindkey((my $clone := nqp::clone($target)), $key, $value);
+        $clone
+    }
+
+    # Helper sub to append values from an array to a given array
+    sub append(@appendee, @values) {
+        my $m := nqp::elems(@values);
+        my $i := 0;
+        while $i < $m {
+            nqp::push(@appendee, nqp::atpos(@values, $i));
+            ++$i;
+        }
+    }
+
     my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
     method archetypes($obj?) { $archetypes }
 
@@ -119,6 +143,12 @@ knowhow NQPClassHOW {
         nqp::setdebugtypename(nqp::setwho($new_type, nqp::hash), $name)
     }
 
+    # Add a TWEAK code block.  Assumes it is being run in a protected
+    # block.
+    method add_tweak($code) {
+        $!tweaks := push_on_clone($!tweaks, $code);
+    }
+
     method add_method($obj, $name, $code) {
         nqp::die("Cannot add a null method '$name' to class '$!name'")
           if nqp::isnull($code) || !nqp::defined($code);
@@ -129,41 +159,31 @@ knowhow NQPClassHOW {
         $!lock.protect({
 
             # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
-            if $name eq 'TWEAK' {
-                my $tweaks := nqp::clone($!tweaks);
-                nqp::push($tweaks, $code);
-                $!tweaks := $tweaks;
-            }
+            self.add_tweak($code) if $name eq 'TWEAK';
 
-            my $methods      := nqp::clone($!methods);
-            my $method_order := nqp::clone($!method_order);
-            nqp::push($method_order, nqp::bindkey($methods, $name, $code));
+            $!methods      := bindkey_on_clone($!methods, $name, $code);
+            $!method_order := push_on_clone($!method_order, $code);
+            $!cached_all_method_table := nqp::null;
 #?if !moar
             nqp::setmethcacheauth($obj, 0);
 #?endif
-            $!cached_all_method_table := nqp::null;
-            $!methods      := $methods;
-            $!method_order := $method_order;
         });
     }
 
     method add_multi_method($obj, $name, $code) {
 
         $!lock.protect({
-            my $multi_methods := nqp::clone($!multi_methods);
 
             # We can't incorporate these right away as we don't know all
             # parents yet, maybe, which influences whether we even can
             # have multis, need to generate a proto or worry. So just
             # queue them up in a todo list and we handle it at class
             # composition time.
-            nqp::push($multi_methods, [$name, $code]);
-
+            $!multi_methods := push_on_clone($!multi_methods, [$name, $code]);
+            $!cached_all_method_table := nqp::null;
 #?if !moar
             nqp::setmethcacheauth($obj, 0);
 #?endif
-            $!cached_all_method_table := nqp::null;
-            $!multi_methods := $multi_methods;
         });
 
         $code
@@ -184,9 +204,8 @@ knowhow NQPClassHOW {
         }
 
         $!lock.protect({
-            $attributes := nqp::clone($!attributes);
-            nqp::push($attributes, $attribute);
-            $!attributes := $attributes;
+            # Note: use previously saved for consistency in update
+            $!attributes := push_on_clone($attributes, $attribute);
         });
 
         $attribute
@@ -220,9 +239,8 @@ knowhow NQPClassHOW {
         }
 
         $!lock.protect({
-            $parents := nqp::clone($!parents);
-            nqp::push($parents, $parent);
-            $!parents := $parents;
+            # Note: use previously saved for consistency in update
+            $!parents := push_on_clone($parents, $parent);
         });
 
         $parent
@@ -280,7 +298,6 @@ knowhow NQPClassHOW {
 
     method add_role($obj, $role) {
         my $roles := $!roles;
-
         my $m := nqp::elems($roles);
         my $i := 0;
         while $i < $m {
@@ -290,7 +307,7 @@ knowhow NQPClassHOW {
         }
 
         $!lock.protect({
-            $roles := $!roles;  # nqp::clone breaks build
+            $roles := $!roles;  # XXX nqp::clone breaks build
             nqp::push($!roles, $role);
             $!roles := $roles;
         });
@@ -323,7 +340,7 @@ knowhow NQPClassHOW {
             }
 
             # If we have no parents and we're not called NQPMu then add the
-            # default parent.
+            # default parent
             $!parents := nqp::list($!default_parent)
               if nqp::elems($!parents) == 0 && $!name ne 'NQPMu';
 
@@ -407,7 +424,7 @@ knowhow NQPClassHOW {
                       'name', $attribute.name, 'type', $attribute.type
                     );
 
-                    # Merely having the key serves as a "yes".
+                    # Merely having the key serves as a "yes"
                     nqp::bindkey($info, 'box_target', 1)
                       if $attribute.box_target;
 
@@ -710,16 +727,6 @@ knowhow NQPClassHOW {
           !! nqp::setboolspec($obj, 5, nqp::null);
     }
 
-    # Helper sub to append values from an array to a given array
-    sub append(@appendee, @values) {
-        my $m := nqp::elems(@values);
-        my $i := 0;
-        while $i < $m {
-            nqp::push(@appendee, nqp::atpos(@values, $i));
-            ++$i;
-        }
-    }
-
     # Creates the plan for building up the object. This works
     # out what we'll need to do up front, so we can just zip
     # through the "todo list" each time we need to make an object.
@@ -732,7 +739,7 @@ knowhow NQPClassHOW {
     #   1100 class name attr_name = find initialization value, or set []
     #   1200 class name attr_name = find initialization value, or set {}
     # Note the numbers are a bit odd, but they are this way to conform to the
-    # HLL version of BUILDALL.  Assu.mes it is being called from a protected
+    # HLL version of BUILDALL.  Assumes it is being called from a protected
     # block.
     method create_BUILDPLAN($obj) {
 
