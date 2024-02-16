@@ -265,10 +265,9 @@ knowhow NQPParametricRoleHOW {
                 my $i := 0;
 
                 while $i < $m {
+                    my $info := nqp::atpos($multi_methods, $i);
                     $how.add_multi_method(
-                      $irole,
-                      nqp::atpos($multi_methods, 0),
-                      nqp::atpos($multi_methods, 1).clone
+                      $irole, nqp::atpos($info, 0), nqp::atpos($info, 1).clone
                     );
                     ++$i;
                 }
