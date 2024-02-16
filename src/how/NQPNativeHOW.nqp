@@ -8,14 +8,13 @@ knowhow NQPNativeHOW {
     method archetypes($obj?) { $archetypes }
 
     method new(:$name) {
-        my $obj := nqp::create(self);
-        $obj.BUILD(:name($name));
-        $obj
-    }
+        my $obj  := nqp::create(self);
+        my $what := $obj.WHAT;
 
-    method BUILD(:$name) {
-        $!name := $name;
-        $!unsigned := 0;
+        nqp::bindattr($obj, $what, '$!name',     $name);
+        nqp::bindattr($obj, $what, '$!unsigned', 0    );
+
+        $obj
     }
 
     # Create a new meta-class instance, and then a new type object
