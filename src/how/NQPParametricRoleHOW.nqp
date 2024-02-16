@@ -72,22 +72,23 @@ knowhow NQPParametricRoleHOW {
 
     # Creates a new instance of this meta-class.
     method new(:$name!) {
-        my $obj := nqp::create(self);
-        $obj.BUILD($name);
+        my $obj  := nqp::create(self);
+        my $what := $obj.WHAT;
+
+        nqp::bindattr($obj, $what, '$!name', $name);
+
+        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
+
+        nqp::bindattr($obj, $what, '$!attributes',          nqp::list);
+        nqp::bindattr($obj, $what, '$!method_order',        nqp::list);
+        nqp::bindattr($obj, $what, '$!tweaks',              nqp::list);
+        nqp::bindattr($obj, $what, '$!multi_methods',       nqp::list);
+        nqp::bindattr($obj, $what, '$!roles',               nqp::list);
+        nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
+
+        nqp::bindattr($obj,$what,'$!lock',nqp::create(NQPSpecializationLock));
+
         $obj
-    }
-
-    method BUILD($name) {
-        $!name                := $name;
-        $!methods             := nqp::hash;
-        $!attributes          := nqp::list;
-        $!method_order        := nqp::list;
-        $!tweaks              := nqp::list;
-        $!multi_methods       := nqp::list;
-        $!roles               := nqp::list;
-        $!role_typecheck_list := nqp::list;
-
-        $!lock := nqp::create(NQPSpecializationLock);
     }
 
     # Create a new meta-class instance, and then a new type object
