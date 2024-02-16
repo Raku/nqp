@@ -9,25 +9,26 @@ knowhow NQPAttribute {
     has $!positional_delegate;
     has $!associative_delegate;
 
-    method new(:$name!, :$box_target, *%extra) {
-        my $attr := nqp::create(self);
-        $attr.BUILD(
-          :$name,
-          :$box_target,
-          :has_type(nqp::existskey(%extra, 'type')),
-          :has_default(nqp::existskey(%extra, 'default')),
-          |%extra
-        );
-        $attr
-    }
+    # Helper sub to turn a value into a 1/0 flag
+    sub bool($value) { $value ?? 1 !! 0 }
 
-    method BUILD(:$name, :$type, :$has_type, :$box_target, :$default, :$has_default) {
-        $!name        := $name;
-        $!type        := $type;
-        $!has_type    := $has_type;
-        $!box_target  := $box_target;
-        $!default     := $default;
-        $!has_default := $has_default;
+    method new(:$name!, :$box_target, *%_) {
+        my $attr := nqp::create(self);
+        my $what := $attr.WHAT;
+        nqp::bindattr($attr, $what,
+          '$!name', $name);
+        nqp::bindattr($attr, $what,
+          '$!box_target', bool($box_target));
+
+        nqp::bindattr($attr, $what,
+          '$!type', nqp::atkey(%_, 'type'));
+        nqp::bindattr($attr, $what,
+          '$!default', nqp::atkey(%_, 'default'));
+        nqp::bindattr($attr, $what,
+          '$!has_type', nqp::existskey(%_, 'type'));
+        nqp::bindattr($attr, $what,
+          '$!has_default', nqp::existskey(%_, 'default'));
+        $attr
     }
 
     # Marker methods
@@ -37,38 +38,25 @@ knowhow NQPAttribute {
     method build_closure() { 0 }
 
     # Accessors
-    method name() {
-        $!name
-    }
-    method type() {
-        $!has_type ?? $!type !! nqp::null
-    }
-    method box_target() {
-        $!box_target ?? 1 !! 0
-    }
-    method auto_viv_container() {
-        $!has_default ?? $!default !! nqp::null
-    }
-    method positional_delegate() {
-        $!positional_delegate ?? 1 !! 0
-    }
-    method associative_delegate() {
-        $!associative_delegate ?? 1 !! 0
-    }
+    method name()                 { $!name                 }
+    method box_target()           { $!box_target           }
+    method positional_delegate()  { $!positional_delegate  }
+    method associative_delegate() { $!associative_delegate }
+
+    method type()                 { $!has_type    ?? $!type    !! nqp::null }
+    method auto_viv_container()   { $!has_default ?? $!default !! nqp::null }
 
     # Mutators
     method set_box_target($box_target) {
-        $!box_target := $box_target;
+        $!box_target := bool($box_target);
     }
     method set_positional_delegate($value) {
-        $!positional_delegate := $value;
+        $!positional_delegate := bool($value);
     }
     method set_associative_delegate($value) {
-        $!associative_delegate := $value;
+        $!associative_delegate := bool($value);
     }
 
     # Action methods
-    method compose($obj) {
-        $obj
-    }
+    method compose($obj) { $obj }
 }
