@@ -5,9 +5,7 @@ knowhow NQPNativeHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( :nominal(1) );
-    method archetypes($obj?) {
-        $archetypes
-    }
+    method archetypes($obj?) { $archetypes }
 
     method new(:$name) {
         my $obj := nqp::create(self);
@@ -18,17 +16,15 @@ knowhow NQPNativeHOW {
     method BUILD(:$name) {
         $!name := $name;
         $!unsigned := 0;
-        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
-    # to go with it, and return that.
-    # XXX Should check that this is an inlineable REPR.
+    # to go with it, and return that
     method new_type(:$name = '<anon>', :$repr!) {
         my $metaclass := self.new(:name($name));
         my $type := nqp::newtype($metaclass, $repr);
         nqp::settypehll($type, 'nqp');
-        nqp::setdebugtypename(nqp::setwho($type, {}), $name)
+        nqp::setdebugtypename(nqp::setwho($type, nqp::hash), $name)
     }
 
     method add_method($obj, $name, $code_obj) {
@@ -45,39 +41,29 @@ knowhow NQPNativeHOW {
 
     method compose($obj) {
         if !$!composed && ($!nativesize || $!unsigned) {
-            my $info := nqp::hash();
-            $info<integer> := nqp::hash();
-            $info<integer><unsigned> := 1 if $!unsigned;
-            $info<integer><bits> := $!nativesize;
-            $info<float> := nqp::hash();
-            $info<float><bits> := $!nativesize;
-            nqp::composetype($obj, $info);
+            nqp::composetype($obj, nqp::hash(
+              'integer',
+              nqp::hash('unsigned', $!unsigned, 'bits', $!nativesize),
+              'float',
+              nqp::hash('bits', $!nativesize)
+            ));
+            $!composed := 1;
         }
-        $!composed := 1;
     }
 
-    method name($obj) {
-        $!name
-    }
+    method name($obj) { $!name }
+    method nativesize($obj) { $!nativesize }
+    method unsigned($obj) { $!unsigned }
 
     method set_nativesize($obj, $nativesize) {
         $!nativesize := $nativesize;
     }
-
-    method nativesize($obj) {
-        $!nativesize
-    }
-
     method set_unsigned($obj, $unsigned) {
         $!unsigned := $unsigned ?? 1 !! 0
     }
 
-    method unsigned($obj) {
-        $!unsigned
-    }
-
     method shortname($obj) {
         my @parts := nqp::split('::', self.name($obj) // '');
-        @parts ?? @parts[nqp::elems(@parts) - 1] !! '<anon>'
+        @parts ?? nqp::atpos(@parts, nqp::elems(@parts) - 1) !! '<anon>'
     }
 }
