@@ -70,7 +70,6 @@ knowhow NQPClassHOW {
     has $!BUILDPLAN;
 
     has $!lock;
-    method protect(&code) { code() } # Dummy protect method for now
 
     my $archetypes := Archetypes.new( :nominal, :inheritable );
     method archetypes($obj?) { $archetypes }
@@ -95,7 +94,7 @@ knowhow NQPClassHOW {
         nqp::bindattr($obj, $what, '$!BUILDPLAN',     nqp::list);
         nqp::bindattr($obj, $what, '$!BUILDALLPLAN',  nqp::list);
 
-        nqp::bindattr($obj, $what, '$!lock', $obj); # for now, until we have a real "lock: knowhow
+        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
         $obj
     }
 

@@ -29,7 +29,6 @@ knowhow NQPConcreteRoleHOW {
     has $!composed;
 
     has $!lock;
-    method protect(&code) { code() } # Dummy protect method for now
 
     my $archetypes := Archetypes.new( :nominal, :composable );
     method archetypes($obj?) { $archetypes }
@@ -53,7 +52,7 @@ knowhow NQPConcreteRoleHOW {
         nqp::bindattr($obj, $what, '$!roles',               nqp::list);
         nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
 
-        nqp::bindattr($obj, $what, '$!lock', $obj); # for now, until we have a real "lock: knowhow
+        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
         $obj
     }
 

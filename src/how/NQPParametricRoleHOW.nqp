@@ -1,17 +1,3 @@
-#- NQPSpecializationLock -------------------------------------------------------
-knowhow NQPSpecializationLock is repr('ReentrantMutex') {
-    method protect($code) {
-        CATCH {
-            nqp::unlock(self);
-            nqp::rethrow($!);
-        }
-        nqp::lock(self);
-        my $res := $code();
-        nqp::unlock(self);
-        $res
-    }
-}
-
 #- NQPParametricRoleHOW --------------------------------------------------------
 # This implements a parametric role (that is, one that has yet to be
 # parameterized to get a concrete role that we can actually compose
@@ -62,7 +48,7 @@ knowhow NQPParametricRoleHOW {
         nqp::bindattr($obj, $what, '$!roles',               nqp::list);
         nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
 
-        nqp::bindattr($obj,$what,'$!lock',nqp::create(NQPSpecializationLock));
+        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
 
         $obj
     }
