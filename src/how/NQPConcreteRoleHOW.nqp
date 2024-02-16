@@ -50,25 +50,25 @@ knowhow NQPConcreteRoleHOW {
 
     # Creates a new instance of this meta-class.
     method new(:$name!, :$instance_of!) {
-        my $obj := nqp::create(self);
-        $obj.BUILD(:$name, :$instance_of);
+        my $obj  := nqp::create(self);
+        my $what := $obj.WHAT;
+
+        nqp::bindattr($obj, $what, '$!name',        $name       );
+        nqp::bindattr($obj, $what, '$!instance_of', $instance_of);
+
+        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
+
+        nqp::bindattr($obj, $what, '$!attributes',          nqp::list);
+        nqp::bindattr($obj, $what, '$!method_order',        nqp::list);
+        nqp::bindattr($obj, $what, '$!tweaks',              nqp::list);
+        nqp::bindattr($obj, $what, '$!method_names',        nqp::list);
+        nqp::bindattr($obj, $what, '$!multi_methods',       nqp::list);
+        nqp::bindattr($obj, $what, '$!collisions',          nqp::list);
+        nqp::bindattr($obj, $what, '$!roles',               nqp::list);
+        nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
+
+        nqp::bindattr($obj, $what, '$!lock', $obj); # for now, until we have a real "lock: knowhow
         $obj
-    }
-
-    method BUILD(:$name!, :$instance_of!) {
-        $!name          := $name;
-        $!instance_of   := $instance_of;
-        $!methods       := nqp::hash;
-        $!attributes    := nqp::list;
-        $!method_order  := nqp::list;
-        $!tweaks        := nqp::list;
-        $!method_names  := nqp::list;
-        $!multi_methods := nqp::list;
-        $!collisions    := nqp::list;
-        $!roles         := nqp::list;
-        $!role_typecheck_list := nqp::list;
-
-        $!lock := self;  # for now, until we have a real "lock: knowhow
     }
 
     # Create a new meta-object instance, and then a new type object
