@@ -96,34 +96,31 @@ knowhow NQPClassHOW {
         }
     }
 
-    my $archetypes := Archetypes.new( :nominal(1), :inheritable(1) );
+    my $archetypes := Archetypes.new( :nominal, :inheritable );
     method archetypes($obj?) { $archetypes }
 
-    # Creates a new instance of this meta-class.
+    # Creates a new instance of this meta-class
     method new(:$name = '<anon>') {
         my $obj := nqp::create(self);
-        $obj.BUILD($name);
+        my $what := $obj.WHAT;
+        nqp::bindattr($obj, $what, '$!name', $name);
+
+        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
+        nqp::bindattr($obj, $what, '$!caches',  nqp::hash);
+
+        nqp::bindattr($obj, $what, '$!attributes',    nqp::list);
+        nqp::bindattr($obj, $what, '$!method_order',  nqp::list);
+        nqp::bindattr($obj, $what, '$!tweaks',        nqp::list);
+        nqp::bindattr($obj, $what, '$!multi_methods', nqp::list);
+        nqp::bindattr($obj, $what, '$!parents',       nqp::list);
+        nqp::bindattr($obj, $what, '$!roles',         nqp::list);
+        nqp::bindattr($obj, $what, '$!mro',           nqp::list);
+        nqp::bindattr($obj, $what, '$!done',          nqp::list);
+        nqp::bindattr($obj, $what, '$!BUILDPLAN',     nqp::list);
+        nqp::bindattr($obj, $what, '$!BUILDALLPLAN',  nqp::list);
+
+        nqp::bindattr($obj, $what, '$!lock', $obj); # for now, until we have a real "lock: knowhow
         $obj
-    }
-
-    method BUILD($name) {
-        $!name          := $name;
-
-        $!methods       := nqp::hash;
-        $!caches        := nqp::hash;
-
-        $!attributes    := nqp::list;
-        $!method_order  := nqp::list;
-        $!tweaks        := nqp::list;
-        $!multi_methods := nqp::list;
-        $!parents       := nqp::list;
-        $!roles         := nqp::list;
-        $!mro           := nqp::list;
-        $!done          := nqp::list;
-        $!BUILDALLPLAN  := nqp::list;
-        $!BUILDPLAN     := nqp::list;
-
-        $!lock := self;  # for now, until we have a real "lock: knowhow
     }
 
     # Create a new meta-class instance, and then a new type object
