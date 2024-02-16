@@ -9,9 +9,6 @@ knowhow NQPAttribute {
     has $!positional_delegate;
     has $!associative_delegate;
 
-    # Helper sub to turn a value into a 1/0 flag
-    sub bool($value) { $value ?? 1 !! 0 }
-
     method new(:$name!, :$box_target, *%_) {
         my $attr := nqp::create(self);
         my $what := $attr.WHAT;

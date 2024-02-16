@@ -41,8 +41,6 @@ my knowhow Archetypes {
     # filled it before it's useful in some way.
     has $!parametric;
 
-    sub bool($value) { $value ?? 1 !! 0 }
-
     method new(
       :$nominal,
       :$nominalizable,
