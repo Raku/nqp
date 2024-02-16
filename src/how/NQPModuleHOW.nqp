@@ -1,11 +1,10 @@
+#- NQPModuleHOW ----------------------------------------------------------------
 knowhow NQPModuleHOW {
     has $!name;
     has $!composed;
 
     my $archetypes := Archetypes.new( );
-    method archetypes($obj?) {
-        $archetypes
-    }
+    method archetypes($obj?) { $archetypes }
 
     method new(:$name) {
         my $obj := nqp::create(self);
@@ -15,7 +14,6 @@ knowhow NQPModuleHOW {
 
     method BUILD(:$name) {
         $!name := $name;
-        $!composed := 0;
     }
 
     # Create a new meta-class instance, and then a new type object
@@ -27,15 +25,15 @@ knowhow NQPModuleHOW {
         nqp::setdebugtypename(nqp::setwho($type, {}), $name);
     }
 
-    method add_method($obj, $name, $code_obj) {
+    method add_method($obj, $name, $code) {
         nqp::die("Modules may not have methods");
     }
 
-    method add_multi_method($obj, $name, $code_obj) {
+    method add_multi_method($obj, $name, $code) {
         nqp::die("Modules may not have methods");
     }
 
-    method add_attribute($obj, $meta_attr) {
+    method add_attribute($obj, $attribute) {
         nqp::die("Modules may not have attributes");
     }
 
@@ -47,16 +45,11 @@ knowhow NQPModuleHOW {
         $!composed := 1;
     }
 
-    method find_method($obj, $name, *%opts) {
-        nqp::null()
-    }
-
-    method name($obj) {
-        $!name
-    }
+    method find_method($obj, $name, *%opts) { nqp::null }
+    method name($obj) { $!name }
 
     method shortname($obj) {
         my @parts := nqp::split('::', self.name($obj) // '');
-        @parts ?? @parts[nqp::elems(@parts) - 1] !! '<anon>'
+        @parts ?? nqp::atpos(@parts, nqp::elems(@parts) - 1) !! '<anon>'
     }
 }
