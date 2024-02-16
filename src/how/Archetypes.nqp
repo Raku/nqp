@@ -1,3 +1,4 @@
+#- Archetypes ------------------------------------------------------------------
 # Provides various properties of the type of type a given meta-object
 # implements. This are used in various ways by the compiler and meta-model
 # to do correct code generation or to detect illegal use of types in
@@ -40,29 +41,41 @@ my knowhow Archetypes {
     # filled it before it's useful in some way.
     has $!parametric;
 
-    method new(:$nominal, :$inheritable, :$composable, :$parametric) {
+    sub bool($value) { $value ?? 1 !! 0 }
+
+    method new(
+      :$nominal,
+      :$nominalizable,
+      :$inheritable,
+      :$inheritalizable,
+      :$composable,
+      :$composalizable,
+      :$generic,
+      :$parametric
+    ) {
         my $arch := nqp::create(self);
-        $arch.BUILD(:nominal($nominal), :inheritable($inheritable),
-            :composable($composable), :parametric($parametric));
+        my $what := $arch.WHAT;
+        nqp::bindattr($arch,$what,'$!nominal',         bool($nominal));
+        nqp::bindattr($arch,$what,'$!nominalizable',   bool($nominalizable));
+        nqp::bindattr($arch,$what,'$!inheritable',     bool($inheritable));
+        nqp::bindattr($arch,$what,'$!inheritalizable', bool($inheritalizable));
+        nqp::bindattr($arch,$what,'$!composable',      bool($composable));
+        nqp::bindattr($arch,$what,'$!composalizable',  bool($composalizable));
+        nqp::bindattr($arch,$what,'$!generic',         bool($generic));
+        nqp::bindattr($arch,$what,'$!parametric',      bool($parametric));
         $arch
     }
 
-    method BUILD(:$nominal, :$inheritable, :$composable, :$parametric) {
-        $!nominal := $nominal;
-        $!inheritable := $inheritable;
-        $!composable := $composable;
-        $!parametric := $parametric;
-    }
+    method nominal()         { $!nominal         }
+    method nominalizable()   { $!nominalizable   }
+    method inheritable()     { $!inheritable     }
+    method inheritalizable() { $!inheritalizable }
+    method composable()      { $!composable      }
+    method composalizable()  { $!composalizable  }
+    method generic()         { $!generic         }
+    method parametric()      { $!parametric      }
 
-    method nominal() { nqp::ifnull($!nominal, 0) }
-    method nominalizable() { nqp::ifnull($!nominalizable, 0) }
-    method inheritable() { nqp::ifnull($!inheritable, 0) }
-    method inheritalizable() { nqp::ifnull($!inheritalizable, 0) }
-    method composable() { nqp::ifnull($!composable, 0) }
-    method composalizable() { nqp::ifnull($!composalizable, 0) }
-    method generic() { nqp::ifnull($!generic, 0) }
-    method parametric() { nqp::ifnull($!parametric, 0) }
-    method coercive() { 0 }
-    method definite() { 0 }
+    method coercive()    { 0 }
+    method definite()    { 0 }
     method augmentable() { 0 }
 }
