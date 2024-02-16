@@ -8,12 +8,8 @@ knowhow NQPModuleHOW {
 
     method new(:$name) {
         my $obj := nqp::create(self);
-        $obj.BUILD(:name($name));
+        nqp::bindattr($obj, $obj.WHAT, '$!name', $name);
         $obj
-    }
-
-    method BUILD(:$name) {
-        $!name := $name;
     }
 
     # Create a new meta-class instance, and then a new type object
