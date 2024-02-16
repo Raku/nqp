@@ -199,7 +199,7 @@ knowhow NQPClassHOW {
         my $i := 0;
         while $i < $m {
             nqp::atpos($attributes, $i).name eq $name
-              ?? nqp::die("This class already has an attribute named " ~ $name)
+              ?? nqp::die("This class already has an attribute named '$name'")
               !! ++$i;
         }
 
