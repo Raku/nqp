@@ -18,11 +18,6 @@ knowhow RoleToClassApplier {
         0
     }
 
-    # Helper sub to return the name of a code object
-    sub name_of_code($code) {
-        nqp::can($code, 'name') ?? $code.name !! nqp::getcodename($code)
-    }
-
     method apply($target, @roles) {
         my $class;                      # resulting class object to be composed
         my $class_how;                  # HOW of the composed class object

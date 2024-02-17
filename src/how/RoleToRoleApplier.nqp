@@ -16,11 +16,6 @@ knowhow RoleToRoleApplier {
         nqp::push(@list, $value);
     }
 
-    # Helper sub to return the name of a code object
-    sub name_of_code($code) {
-        nqp::can($code, 'name') ?? $code.name !! nqp::getcodename($code)
-    }
-
     # Helper sub, returns 1 if the given attribute does not need to be added
     # to the list of current attributes.  Dies if there is a name conflict
     sub can_skip_attribute_by_name(@current, $that) {
