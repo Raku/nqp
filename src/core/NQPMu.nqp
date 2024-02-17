@@ -9,7 +9,7 @@ my class NQPMu {
 
     method BUILDALL(NQPMu:D $self: %attrinit) {
         # Get the build plan.
-        my $build_plan := self.HOW.BUILDALLPLAN(self);
+        my $build_plan := self.HOW.BUILDALLPLAN;
         my int $count  := nqp::elems($build_plan);
         my int $i;
         while $i < $count {

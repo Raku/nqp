@@ -767,8 +767,7 @@ knowhow NQPClassHOW {
         my $mro := $!mro;
         $i := nqp::elems($mro);
         while --$i >= 0 {
-            my $class := nqp::atpos($mro, $i);
-            append(@all_plan, $class.HOW.BUILDPLAN($class));
+            append(@all_plan, nqp::atpos($mro, $i).HOW.BUILDPLAN);
         }
         $!BUILDALLPLAN := @all_plan;
     }
@@ -782,8 +781,8 @@ knowhow NQPClassHOW {
     }
 
     method name($obj)                 { $!name          }
-    method BUILDPLAN($obj)            { $!BUILDPLAN     }
-    method BUILDALLPLAN($obj)         { $!BUILDALLPLAN  }
+    method BUILDPLAN($obj?)           { $!BUILDPLAN     }
+    method BUILDALLPLAN($obj?)        { $!BUILDALLPLAN  }
     method mro($obj?)                 { $!mro           }
     method role_typecheck_list($obj?) { $!done          }
     method method_table($obj?)        { $!methods       }
