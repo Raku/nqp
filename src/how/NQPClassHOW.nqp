@@ -764,7 +764,7 @@ knowhow NQPClassHOW {
         # Now create the full plan by getting the MRO, and working from
         # least derived to most derived, copying the plans.
         my @all_plan;
-        my $mro := self.mro($obj);
+        my $mro := $!mro;
         $i := nqp::elems($mro);
         while --$i >= 0 {
             my $class := nqp::atpos($mro, $i);
