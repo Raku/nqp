@@ -1,7 +1,7 @@
 knowhow RoleToClassApplier {
 
     sub has_method($target, $name) {
-        nqp::existskey($target.HOW.method_table($target), $name)
+        nqp::existskey($target.HOW.method_table, $name)
     }
 
     sub has_attribute($target, $name) {
