@@ -24,7 +24,7 @@ role QAST::SpecialArg {
             my $meth;
             my $invokable := 0;
             while ++$i < +@parents {
-                $meth := @parents[$i].HOW.method_table<dump_extra_node_info>;
+                $meth := @parents[$i].HOW.method_table(@parents[$i])<dump_extra_node_info>;
                 last if ( $invokable := nqp::isinvokable($meth) );
             }
             $invokable ?? $meth(self) !! ''

@@ -183,7 +183,10 @@ knowhow NQPClassHOW {
         $attribute
     }
 
+    method is_array_type($obj) { $!is_array_type }
+    method array_type($obj)    { $!array_type    }
     method set_array_type($obj, $type) {
+
         $!lock.protect({
             $!is_array_type := 1;
             $!array_type := $type;
@@ -222,7 +225,7 @@ knowhow NQPClassHOW {
     # Helper sub: returns 1 if none of the parents of a given mro have
     # attributes, else 0
     sub attributeless_parents($type) {
-        my $mro := $type.HOW.mro;
+        my $mro := $type.HOW.mro($type);
         my $m   := nqp::elems($mro);
         my $i   := 0;
 
@@ -353,14 +356,14 @@ knowhow NQPClassHOW {
     method compose_repr($obj) {
 
         # Handle arrays differently
-        if self.is_array_type {
+        if self.is_array_type($obj) {
             nqp::elems(self.attributes($obj))
               ?? nqp::die("Cannot have attributes on an array representation")
               !! nqp::composetype(
                    nqp::decont($obj),
                    nqp::hash(
                      'array',
-                     nqp::hash('type', nqp::decont(self.array_type))
+                     nqp::hash('type', nqp::decont(self.array_type($obj)))
                    )
                  );
         }
@@ -432,7 +435,9 @@ knowhow NQPClassHOW {
         my $i := 1;  # skip ourselves
         while $i < $m {
             my $parent     := nqp::atpos($mro, $i);
-            my $dispatcher := nqp::atkey($parent.HOW.method_table, $name);
+            my $dispatcher := nqp::atkey(
+              $parent.HOW.method_table($parent), $name
+            );
 
             # Found a possible - make sure it's a dispatcher, not an only
             unless nqp::isnull($dispatcher) {
@@ -622,7 +627,7 @@ knowhow NQPClassHOW {
 
                 nqp::push(@tc, $type);
                 if nqp::can($type.HOW, 'role_typecheck_list') {
-                    my @roles := $type.HOW.role_typecheck_list;
+                    my @roles := $type.HOW.role_typecheck_list($type);
                     if nqp::elems(@roles) -> $m {
                         my $i := 0;
                         while $i < $m {
@@ -656,7 +661,7 @@ knowhow NQPClassHOW {
         my $i := nqp::elems($mro);
         while --$i >= 0 {
             my $type := nqp::atpos($mro, $i);
-            for $type.HOW.method_table {
+            for $type.HOW.method_table($type) {
                 nqp::bindkey(%cache, nqp::iterkey_s($_), nqp::iterval($_));
             }
         }
@@ -676,7 +681,7 @@ knowhow NQPClassHOW {
             my $i := nqp::elems($mro);
             while --$i >= 0 {  # lower methods shadow methods higher up
                 my $type := nqp::atpos($mro, $i);
-                for $type.HOW.method_table {
+                for $type.HOW.method_table($type) {
                     nqp::bindkey($table, nqp::iterkey_s($_), nqp::iterval($_));
                 }
             }
@@ -718,7 +723,7 @@ knowhow NQPClassHOW {
         my $i := 0;
 
         # Does it have its own BUILD?
-        my $methods := $obj.HOW.method_table;
+        my $methods := $obj.HOW.method_table($obj);
         my $build   := nqp::atkey($methods, 'BUILD');
 
         # No custom BUILD
@@ -767,7 +772,8 @@ knowhow NQPClassHOW {
         my $mro := $!mro;
         $i := nqp::elems($mro);
         while --$i >= 0 {
-            append(@all_plan, nqp::atpos($mro, $i).HOW.BUILDPLAN);
+            my $class := nqp::atpos($mro, $i);
+            append(@all_plan, $class.HOW.BUILDPLAN($class));
         }
         $!BUILDALLPLAN := @all_plan;
     }
@@ -780,14 +786,12 @@ knowhow NQPClassHOW {
         $!roles
     }
 
-    method name($obj)                 { $!name          }
-    method BUILDPLAN($obj?)           { $!BUILDPLAN     }
-    method BUILDALLPLAN($obj?)        { $!BUILDALLPLAN  }
-    method mro($obj?)                 { $!mro           }
-    method role_typecheck_list($obj?) { $!done          }
-    method method_table($obj?)        { $!methods       }
-    method is_array_type($obj?)       { $!is_array_type }
-    method array_type($obj?)          { $!array_type    }
+    method name($obj)                { $!name         }
+    method BUILDPLAN($obj)           { $!BUILDPLAN    }
+    method BUILDALLPLAN($obj)        { $!BUILDALLPLAN }
+    method mro($obj)                 { $!mro          }
+    method role_typecheck_list($obj) { $!done         }
+    method method_table($obj)        { $!methods      }
 
     method methods($obj, :$local = 0, :$all) {
         if $local {
@@ -858,7 +862,7 @@ knowhow NQPClassHOW {
         my $i := 0;
         while $i < $m {
             my $can := nqp::atkey(
-              nqp::atpos($mro, $i).HOW.method_table, $name
+              nqp::atpos($mro, $i).HOW.method_table($obj), $name
             );
             nqp::defined($can)
               ?? (return $can)
@@ -874,7 +878,7 @@ knowhow NQPClassHOW {
         my $i := 0;
         while $i < $m {
             my $method := nqp::atkey(
-              nqp::atpos($mro, $i).HOW.method_table,$name
+              nqp::atpos($mro, $i).HOW.method_table($obj),$name
             );
             nqp::isconcrete($method)
               ?? (return $method)

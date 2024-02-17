@@ -9,7 +9,7 @@ role QAST::RegexCursorType {
     }
 
     method dump_extra_node_info() {
-        my $info := QAST::Regex.HOW.method_table<dump_extra_node_info>(self);
+        my $info := QAST::Regex.HOW.method_table(QAST::Regex)<dump_extra_node_info>(self);
         $info ~ " :cursor_type({$!cursor_type.HOW.name($!cursor_type)})"
     }
 }

@@ -141,7 +141,7 @@ knowhow NQPParametricRoleHOW {
                         my $role := nqp::atpos($roles, $i);
                         nqp::push($typecheck_list, $role);
                         append(
-                          $typecheck_list, $role.HOW.role_typecheck_list
+                          $typecheck_list, $role.HOW.role_typecheck_list($role)
                         );
                         ++$i;
                     }
@@ -269,9 +269,9 @@ knowhow NQPParametricRoleHOW {
         $!roles
     }
 
-    method method_table($obj?)        { $!methods             }
-    method name($obj)                 { $!name                }
-    method role_typecheck_list($obj?) { $!role_typecheck_list }
+    method method_table($obj) { $!methods }
+    method name($obj) { $!name }
+    method role_typecheck_list($obj) { $!role_typecheck_list }
 
     method shortname($obj) { shortened_name($obj ) }
 }
