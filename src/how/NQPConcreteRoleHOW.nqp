@@ -140,8 +140,6 @@ knowhow NQPConcreteRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed
     method compose($obj) {
-        return $obj if $!composed;
-
         # Incorporate roles. They're already instantiated. We need to
         # add to done list their instantiation source.
         $!lock.protect({

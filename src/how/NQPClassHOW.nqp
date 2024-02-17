@@ -288,8 +288,6 @@ knowhow NQPClassHOW {
 
     # Incorporate roles
     method compose($obj) {
-        return $obj if $!composed;
-
         $!lock.protect({
 
             # If not done by another thread
