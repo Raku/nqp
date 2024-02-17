@@ -222,7 +222,7 @@ knowhow NQPClassHOW {
     # Helper sub: returns 1 if none of the parents of a given mro have
     # attributes, else 0
     sub attributeless_parents($type) {
-        my $mro := $type.HOW.mro($type);
+        my $mro := $type.HOW.mro;
         my $m   := nqp::elems($mro);
         my $i   := 0;
 
@@ -784,7 +784,7 @@ knowhow NQPClassHOW {
     method name($obj)                 { $!name          }
     method BUILDPLAN($obj)            { $!BUILDPLAN     }
     method BUILDALLPLAN($obj)         { $!BUILDALLPLAN  }
-    method mro($obj)                  { $!mro           }
+    method mro($obj?)                 { $!mro           }
     method role_typecheck_list($obj?) { $!done          }
     method method_table($obj?)        { $!methods       }
     method is_array_type($obj?)       { $!is_array_type }
