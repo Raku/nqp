@@ -47,9 +47,5 @@ knowhow NQPModuleHOW {
 
     method find_method($obj, $name, *%opts) { nqp::null }
     method name($obj) { $!name }
-
-    method shortname($obj) {
-        my @parts := nqp::split('::', self.name($obj) // '');
-        @parts ?? nqp::atpos(@parts, nqp::elems(@parts) - 1) !! '<anon>'
-    }
+    method shortname($obj) { shortened_name($obj) }
 }

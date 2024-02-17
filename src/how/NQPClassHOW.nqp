@@ -813,12 +813,7 @@ knowhow NQPClassHOW {
 
     method submethod_table($obj) { nqp::hash }
 
-    method shortname($obj) {
-        my @parts := nqp::split('::', self.name($obj) // '');
-        @parts
-          ?? nqp::atpos(@parts, nqp::elems(@parts) - 1)
-          !! '<anon>'
-    }
+    method shortname($obj) { shortened_name($obj) }
 
     method attributes($obj, :$local = 0) {
         if $local {

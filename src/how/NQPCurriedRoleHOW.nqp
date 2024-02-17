@@ -32,10 +32,7 @@ knowhow NQPCurriedRoleHOW {
         $!curried_role.HOW.name($!curried_role)
     }
 
-    method shortname($obj) {
-        my @parts := nqp::split('::', self.name($obj) // '');
-        @parts ?? nap::atpos(@parts, nqp::elems(@parts) - 1) !! '<anon>'
-    }
+    method shortname($obj) { shortened_name($obj) }
 
     method curried_role($obj) { $!curried_role }
 }

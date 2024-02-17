@@ -30,3 +30,10 @@ sub append(@appendee, @values) {
 sub name_of_code($code) {
     nqp::can($code, 'name') ?? $code.name !! nqp::getcodename($code)
 }
+
+# Helper sub to return the shortened name of an object that has a
+# .HOW.name method
+sub shortened_name($obj) {
+    my $parts := nqp::split('::', $obj.HOW.name($obj) // '');
+    $parts ?? nqp::atpos($parts, nqp::elems($parts) - 1) !! '<anon>'
+}
