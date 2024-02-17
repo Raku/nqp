@@ -353,14 +353,14 @@ knowhow NQPClassHOW {
     method compose_repr($obj) {
 
         # Handle arrays differently
-        if self.is_array_type($obj) {
+        if self.is_array_type {
             nqp::elems(self.attributes($obj))
               ?? nqp::die("Cannot have attributes on an array representation")
               !! nqp::composetype(
                    nqp::decont($obj),
                    nqp::hash(
                      'array',
-                     nqp::hash('type', nqp::decont(self.array_type($obj)))
+                     nqp::hash('type', nqp::decont(self.array_type))
                    )
                  );
         }
@@ -781,14 +781,14 @@ knowhow NQPClassHOW {
         $!roles
     }
 
-    method name($obj)                { $!name         }
-    method BUILDPLAN($obj)           { $!BUILDPLAN    }
-    method BUILDALLPLAN($obj)        { $!BUILDALLPLAN }
-    method mro($obj)                 { $!mro          }
-    method role_typecheck_list($obj) { $!done         }
-    method method_table($obj?)       { $!methods      }
-    method is_array_type($obj)       { $!is_array_type }
-    method array_type($obj)          { $!array_type    }
+    method name($obj)                { $!name          }
+    method BUILDPLAN($obj)           { $!BUILDPLAN     }
+    method BUILDALLPLAN($obj)        { $!BUILDALLPLAN  }
+    method mro($obj)                 { $!mro           }
+    method role_typecheck_list($obj) { $!done          }
+    method method_table($obj?)       { $!methods       }
+    method is_array_type($obj?)      { $!is_array_type }
+    method array_type($obj?)         { $!array_type    }
 
     method methods($obj, :$local = 0, :$all) {
         if $local {
