@@ -622,7 +622,7 @@ knowhow NQPClassHOW {
 
                 nqp::push(@tc, $type);
                 if nqp::can($type.HOW, 'role_typecheck_list') {
-                    my @roles := $type.HOW.role_typecheck_list($type);
+                    my @roles := $type.HOW.role_typecheck_list;
                     if nqp::elems(@roles) -> $m {
                         my $i := 0;
                         while $i < $m {
@@ -781,14 +781,14 @@ knowhow NQPClassHOW {
         $!roles
     }
 
-    method name($obj)                { $!name          }
-    method BUILDPLAN($obj)           { $!BUILDPLAN     }
-    method BUILDALLPLAN($obj)        { $!BUILDALLPLAN  }
-    method mro($obj)                 { $!mro           }
-    method role_typecheck_list($obj) { $!done          }
-    method method_table($obj?)       { $!methods       }
-    method is_array_type($obj?)      { $!is_array_type }
-    method array_type($obj?)         { $!array_type    }
+    method name($obj)                 { $!name          }
+    method BUILDPLAN($obj)            { $!BUILDPLAN     }
+    method BUILDALLPLAN($obj)         { $!BUILDALLPLAN  }
+    method mro($obj)                  { $!mro           }
+    method role_typecheck_list($obj?) { $!done          }
+    method method_table($obj?)        { $!methods       }
+    method is_array_type($obj?)       { $!is_array_type }
+    method array_type($obj?)          { $!array_type    }
 
     method methods($obj, :$local = 0, :$all) {
         if $local {

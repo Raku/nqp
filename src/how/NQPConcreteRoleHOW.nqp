@@ -174,13 +174,13 @@ knowhow NQPConcreteRoleHOW {
     }
 
     # Simple accessors
-    method method_order($obj)        { $!method_order        }
-    method method_names($obj)        { $!method_names        }
-    method method_table($obj?)       { $!methods             }
-    method collisions($obj)          { $!collisions          }
-    method name($obj)                { $!name                }
-    method role_typecheck_list($obj) { $!role_typecheck_list }
-    method instance_of($obj)         { $!instance_of         }
+    method method_order($obj)         { $!method_order        }
+    method method_names($obj)         { $!method_names        }
+    method method_table($obj?)        { $!methods             }
+    method collisions($obj)           { $!collisions          }
+    method name($obj)                 { $!name                }
+    method role_typecheck_list($obj?) { $!role_typecheck_list }
+    method instance_of($obj)          { $!instance_of         }
 
     # Other introspection
     method methods($obj, :$local, :$all) {
