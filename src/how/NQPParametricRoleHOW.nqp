@@ -128,31 +128,35 @@ knowhow NQPParametricRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed
     method compose($obj) {
+        return $obj if $!composed;
 
         $!lock.protect({
 
-            my $roles := $!roles;
-            if nqp::elems($roles) -> $m {
-                my $role_typecheck_list := nqp::clone($!role_typecheck_list);
+            # If not done by another thread
+            unless $!composed {
+                my $roles := $!roles;
+                if nqp::elems($roles) -> $m {
+                    my $typecheck_list := nqp::clone($!role_typecheck_list);
 
-                my $i := 0;
-                while $i < $m {
-                    my $role := nqp::atpos($roles, $i);
-                    nqp::push($role_typecheck_list, $role);
-                    append(
-                      $role_typecheck_list, $role.HOW.role_typecheck_list($role)
-                    );
-                    ++$i;
+                    my $i := 0;
+                    while $i < $m {
+                        my $role := nqp::atpos($roles, $i);
+                        nqp::push($typecheck_list, $role);
+                        append(
+                          $typecheck_list, $role.HOW.role_typecheck_list($role)
+                        );
+                        ++$i;
+                    }
+                    $!role_typecheck_list := $typecheck_list;
                 }
-                $!role_typecheck_list := $role_typecheck_list;
-            }
 
-            $!composed := 1;
-            nqp::settypecache($obj, [$obj.WHAT]);
+                nqp::settypecache($obj, [$obj.WHAT]);
 #?if !moar
-            nqp::setmethcache($obj, {});
-            nqp::setmethcacheauth($obj, 1);
+                nqp::setmethcache($obj, {});
+                nqp::setmethcacheauth($obj, 1);
 #?endif
+                $!composed := 1;
+            }
         });
 
         $obj

@@ -140,30 +140,36 @@ knowhow NQPConcreteRoleHOW {
 
     # Compose the role. Beyond this point, no changes are allowed
     method compose($obj) {
+        return $obj if $!composed;
+
         # Incorporate roles. They're already instantiated. We need to
         # add to done list their instantiation source.
         $!lock.protect({
-            my $roles := $!roles;
-            if nqp::elems($roles) -> $m {
-                my $typecheck_list := nqp::clone($!role_typecheck_list);
-                my $i := 0;
-                while $i < $m {
-                    my $role := nqp::atpos($roles, $i);
-                    nqp::push($typecheck_list, $role);
-                    nqp::push($typecheck_list, $role.HOW.instance_of($role));
-                    ++$i;
-                }
-                $!role_typecheck_list := $typecheck_list;
-                RoleToRoleApplier.apply($obj, $roles);
-            }
 
-            # Mark composed.
-            $!composed := 1;
-            nqp::settypecache($obj, [$obj.WHAT]);
+            # If not done by another thread
+            unless $!composed {
+                my $roles := $!roles;
+                if nqp::elems($roles) -> $m {
+                    my $typecheck_list := nqp::clone($!role_typecheck_list);
+                    my $i := 0;
+                    while $i < $m {
+                        my $role := nqp::atpos($roles, $i);
+                        nqp::push($typecheck_list, $role);
+                        nqp::push($typecheck_list, $role.HOW.instance_of($role));
+                        ++$i;
+                    }
+                    $!role_typecheck_list := $typecheck_list;
+                    RoleToRoleApplier.apply($obj, $roles);
+                }
+
+                # Mark composed.
+                nqp::settypecache($obj, [$obj.WHAT]);
 #?if !moar
-            nqp::setmethcache($obj, {});
-            nqp::setmethcacheauth($obj, 1);
+                nqp::setmethcache($obj, {});
+                nqp::setmethcacheauth($obj, 1);
 #?endif
+                $!composed := 1;
+            }
         });
 
         $obj

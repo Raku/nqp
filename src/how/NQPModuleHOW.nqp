@@ -34,11 +34,15 @@ knowhow NQPModuleHOW {
     }
 
     method compose($obj) {
+        unless $!composed {
 #?if !moar
-        nqp::setmethcache($obj, {});
-        nqp::setmethcacheauth($obj, 1);
+            nqp::setmethcache($obj, {});
+            nqp::setmethcacheauth($obj, 1);
 #?endif
-        $!composed := 1;
+            $!composed := 1;
+        }
+
+        $obj
     }
 
     method find_method($obj, $name, *%opts) { nqp::null }

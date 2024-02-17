@@ -288,60 +288,63 @@ knowhow NQPClassHOW {
 
     # Incorporate roles
     method compose($obj) {
+        return $obj if $!composed;
+
         $!lock.protect({
-            my $roles   := $!roles;
-            my $done    := $!done;
 
-            # First, specialize them with the type object for this type (so
-            # their $?CLASS is correct). Then delegate to the composer
-            if nqp::elems($roles) -> $m {
-                my @specialized_roles;
-                my $i := 0;
-                while $i < $m {
-                    my $role        := nqp::atpos($roles, $i);
-                    my $specialized := $role.HOW.specialize($role, $obj);
-
-                    nqp::push(@specialized_roles, $specialized);
-                    nqp::push($done, $role);
-                    nqp::push($done, $specialized);
-                    ++$i;
-                }
-
-                $!done := $done;  # update atomically
-                RoleToClassApplier.apply($obj, @specialized_roles);
-            }
-
-            # If we have no parents and we're not called NQPMu then add the
-            # default parent
-            $!parents := nqp::list($!default_parent)
-              if nqp::elems($!parents) == 0 && $!name ne 'NQPMu';
-
-            # Compute the MRO
-            $!mro := compute_c3_mro($obj);
-
-            # Incorporate any new multi candidates (needs MRO built)
-            self.incorporate_multi_candidates($obj);
-
-            # Compose any attributes, local or not
-            my $attributes := self.attributes($obj, :!local);
-            if nqp::elems($attributes) -> $m {
-                my $i := 0;
-                while $i < $m {
-                    nqp::atpos($attributes, $i).compose($obj);
-                    ++$i;
-                }
-            }
-
-            # Publish type and method caches and boolification spec.
-            self.publish_type_cache($obj);
-            self.publish_method_cache($obj);
-            self.publish_boolification_spec($obj);
-
-            # Create BUILDPLAN.
-            self.create_BUILDPLAN($obj);
-
-            # Compose the representation and mark as composed
+            # If not done by another thread
             unless $!composed {
+                my $roles   := $!roles;
+                my $done    := $!done;
+
+                # First, specialize them with the type object for this type (so
+                # their $?CLASS is correct). Then delegate to the composer
+                if nqp::elems($roles) -> $m {
+                    my @specialized_roles;
+                    my $i := 0;
+                    while $i < $m {
+                        my $role        := nqp::atpos($roles, $i);
+                        my $specialized := $role.HOW.specialize($role, $obj);
+
+                        nqp::push(@specialized_roles, $specialized);
+                        nqp::push($done, $role);
+                        nqp::push($done, $specialized);
+                        ++$i;
+                    }
+
+                    $!done := $done;  # update atomically
+                    RoleToClassApplier.apply($obj, @specialized_roles);
+                }
+
+                # If we have no parents and we're not called NQPMu then add the
+                # default parent
+                $!parents := nqp::list($!default_parent)
+                  if nqp::elems($!parents) == 0 && $!name ne 'NQPMu';
+
+                # Compute the MRO
+                $!mro := compute_c3_mro($obj);
+
+                # Incorporate any new multi candidates (needs MRO built)
+                self.incorporate_multi_candidates($obj);
+
+                # Compose any attributes, local or not
+                my $attributes := self.attributes($obj, :!local);
+                if nqp::elems($attributes) -> $m {
+                    my $i := 0;
+                    while $i < $m {
+                        nqp::atpos($attributes, $i).compose($obj);
+                        ++$i;
+                    }
+                }
+
+                # Publish type and method caches and boolification spec.
+                self.publish_type_cache($obj);
+                self.publish_method_cache($obj);
+                self.publish_boolification_spec($obj);
+
+                # Create BUILDPLAN.
+                self.create_BUILDPLAN($obj);
+
                 self.compose_repr($obj);
                 $!composed := 1;
             }
