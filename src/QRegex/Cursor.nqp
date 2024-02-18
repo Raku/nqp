@@ -602,7 +602,7 @@ role NQPMatchRole is export {
         nqp::bindattr_i($new, NQPMatch,   '$!from',  nqp::getattr($term, NQPMatch,   '$!from' ));
         nqp::bindattr_i($new, NQPMatch,   '$!to',    nqp::getattr($term, NQPMatch,   '$!to' ));
         nqp::bindattr(  $new, NQPMatch,   '$!made',  nqp::getattr($term, NQPMatch,   '$!made' ));
-        nqp::bindattr(  $new, NQPCapture, '@!array', nqp::getattr($term, NQPCapture, '@!array'));
+        nqp::bindattr(  $new, NQPCapture, '@!list',  nqp::getattr($term, NQPCapture, '@!list'));
         nqp::bindattr(  $new, NQPCapture, '%!hash',  nqp::getattr($term, NQPCapture, '%!hash' ));
         nqp::bindattr(  $new, NQPMatch,   '$!match', nqp::getattr($term, NQPMatch,   '$!match'));
         $new;
@@ -1289,7 +1289,7 @@ class NQPMatch is NQPCapture does NQPMatchRole {
                     ++$csi;
                 }
             }
-            nqp::bindattr(self, NQPCapture, '@!array', nqp::defor($list, @EMPTY_LIST));
+            nqp::bindattr(self, NQPCapture, '@!list', nqp::defor($list, @EMPTY_LIST));
             nqp::bindattr(self, NQPCapture, '%!hash', nqp::defor($hash, %EMPTY_HASH));
 
             # Once we've produced the captures, and if we know we're finished and

@@ -559,7 +559,7 @@ An operator precedence parser.
 
         # Give it a fresh capture list, since we'll have assumed it has
         # no positional captures and not taken them.
-        nqp::bindattr($op, NQPCapture, '@!array', nqp::list());
+        nqp::bindattr($op, NQPCapture, '@!list', nqp::list);
         my %opOPER      := nqp::atkey($op, 'OPER');
         my %opO         := nqp::atkey(%opOPER, 'O').made;
         my str $opassoc := ~nqp::atkey(%opO, 'assoc');

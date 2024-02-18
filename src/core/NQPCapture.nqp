@@ -1,25 +1,16 @@
 my class NQPCapture {
-    has @!array is positional_delegate;
+    has @!list is positional_delegate;
     has %!hash is associative_delegate;
 
     method new() {
-        my $n := self.CREATE;
-        $n.BUILD;
-        $n
+        my $obj := nqp::create(self);
+        nqp::bindattr($obj, NQPCapture, '@!list', nqp::list);
+        nqp::bindattr($obj, NQPCapture, '%!hash', nqp::hash);
+        $obj
     }
 
-    method BUILD() {
-        @!array := nqp::list();
-        %!hash := nqp::hash();
-    }
-
-    method list() { @!array }
-
+    method list() { @!list }
     method hash() { %!hash }
 
-    method capture_prune() {
-        @!array := NQPMu;
-        %!hash := NQPMu;
-    }
-
+    method capture_prune() { @!list := %!hash := NQPMu }
 }
