@@ -32,26 +32,47 @@ perform the replacement on all matches of C<$text>.
 =end item
 
 sub subst ($text, $regex, $repl, :$global?) {
-    my @matches := $global ?? match($text, $regex, :global)
-                           !! [ $text ~~ $regex ];
-    my $is_code := nqp::isinvokable($repl);
-    my $offset  := 0;
-    my @result;
+    my @matches := $global
+      ?? match($text, $regex, :global)
+      !! nqp::list($text ~~ $regex);
 
-    for @matches -> $match {
-        if $match {
-            nqp::push(@result, nqp::substr($text, $offset, $match.from - $offset))
-                if $match.from > $offset;
-            nqp::push(@result, $is_code ?? ~$repl($match) !! ~$repl);
-            $offset := $match.to;
+    my int $offset;
+    my $result := nqp::list_s;
+
+    my int $m := nqp::elems(@matches);
+    my int $i;
+    if nqp::isinvokable($repl) {
+        while $i < $m {
+            if nqp::atpos(@matches, $i) -> $match {
+                nqp::push_s(
+                  $result,
+                  nqp::substr($text, $offset, $match.from - $offset)
+                ) if $match.from > $offset;
+
+                nqp::push_s($result, ~$repl($match));
+                $offset := $match.to;
+            }
+            ++$i;
+        }
+    }
+    else {
+        while $i < $m {
+            if nqp::atpos(@matches, $i) -> $match {
+                nqp::push_s(
+                  $result,
+                  nqp::substr($text, $offset, $match.from - $offset)
+                ) if $match.from > $offset;
+
+                nqp::push_s($result, ~$repl);
+                $offset := $match.to;
+            }
+            ++$i;
         }
     }
 
-    my $chars := nqp::chars($text);
-    nqp::push(@result, nqp::substr($text, $offset, $chars))
-        if $chars > $offset;
+    my int $chars := nqp::chars($text);
+    nqp::push_s($result, nqp::substr($text, $offset, $chars))
+      if $chars > $offset;
 
-    nqp::join("", @result);
+    nqp::join("", $result);
 }
-
-# vim: ft=perl6
