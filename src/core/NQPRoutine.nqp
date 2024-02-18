@@ -1,3 +1,4 @@
+#- NQPRoutine ------------------------------------------------------------------
 my knowhow NQPRoutine {
     has $!do;
     has $!signature;
@@ -9,17 +10,15 @@ my knowhow NQPRoutine {
 
     # Adds a multi-dispatch candidate.
     method add_dispatchee($code) {
-        nqp::scwbdisable();
-        $!dispatch_cache := nqp::null();
-        $!dispatch_order := nqp::null();
+        nqp::scwbdisable;
+        $!dispatch_cache := nqp::null;
+        $!dispatch_order := nqp::null;
         nqp::push($!dispatchees, $code);
-        nqp::scwbenable();
+        nqp::scwbenable;
     }
 
     # Checks if this code object is a dispatcher.
-    method is_dispatcher() {
-        nqp::defined($!dispatchees)
-    }
+    method is_dispatcher() { nqp::defined($!dispatchees) }
 
     # Derives a new dispatcher.
     method derive_dispatcher() {
@@ -33,9 +32,7 @@ my knowhow NQPRoutine {
         nqp::setcodeobj($do, $der);
 
         # If needed, arrange for a fixup of the cloned code-ref.
-        unless nqp::isnull($!clone_callback) {
-            $!clone_callback($!do, $do, $der);
-        }
+        $!clone_callback($!do, $do, $der) unless nqp::isnull($!clone_callback);
 
         $der
     }
@@ -44,49 +41,56 @@ my knowhow NQPRoutine {
     sub is_narrower_type($a, $b) {
         # If one of the types is null, then we know that's automatically
         # wider than anything.
-        if nqp::isnull($b) && !nqp::isnull($a) { 1 }
-        elsif nqp::isnull($a) || nqp::isnull($b) { 0 }
-        else { nqp::istype($a, $b) }
+        nqp::isnull($b) && nqp::not_i(nqp::isnull($a))
+          ?? 1
+          !! nqp::isnull($a) || nqp::isnull($b)
+            ?? 0
+            !! nqp::istype($a, $b)
     }
 
-    # Sorts the dispatchees. Puts nulls between groups that are of equal weight.
-    # The most specific group comes first.
+    # Sorts the dispatchees. Puts nulls between groups that are of equal
+    # weight.  The most specific group comes first.
     my int $SLURPY_ARITY      := nqp::bitshiftl_i(1, 30);
     my int $EDGE_REMOVAL_TODO := -1;
     my int $EDGE_REMOVED      := -2;
     my int $DEFINED_ONLY      := 1;
     my int $UNDEFINED_ONLY    := 2;
+
     method sort_dispatchees() {
-        # Takes two candidates and determines if the first one is narrower than the
-        # second. Returns a true value if they are.
+        # Takes two candidates and determines if the first one is narrower
+        # than the second. Returns a true value if they are.
         sub is_narrower(%a, %b) {
-            # Work out how many parameters to compare, factoring in slurpiness
-            # and optionals.
-            my int $types_to_check;
-            if %a<num_types> == %b<num_types> {
-                $types_to_check := %a<num_types>;
-            }
-            elsif %a<min_arity> == %b<min_arity> {
-                $types_to_check := %a<num_types> > %b<num_types> ?? %b<num_types> !! %a<num_types>;
-            }
-            else {
-                return 0;
-            }
+
+            # Work out how many parameters to compare, factoring in
+            # slurpiness and optionals.
+            my $a_num_types := nqp::atkey(%a, 'num_types');
+            my $b_num_types := nqp::atkey(%b, 'num_types');
+            my int $types_to_check := $a_num_types == $b_num_types
+                ?? $a_num_types
+                !! nqp::atkey(%a, 'min_arity') == nqp::atkey(%b, 'min_arity')
+                  ?? $a_num_types > $b_num_types
+                    ?? $b_num_types
+                    !! $a_num_types
+                  !! (return 0);
 
             # Analyse each parameter in the two candidates.
+            my $a_types := nqp::atkey(%a, 'types');
+            my $b_types := nqp::atkey(%b, 'types');
+
             my int $narrower;
             my int $tied;
             my int $i;
             while $i < $types_to_check {
-                my $type_obj_a := %a<types>[$i];
-                my $type_obj_b := %b<types>[$i];
+                my $type_obj_a := nqp::atpos($a_types, $i);
+                my $type_obj_b := nqp::atpos($b_types, $i);
+
                 if nqp::eqaddr($type_obj_a, $type_obj_b) {
                     ++$tied;
                 }
                 elsif is_narrower_type($type_obj_a, $type_obj_b) {
                     ++$narrower;
                 }
-                elsif !is_narrower_type($type_obj_b, $type_obj_a) {
+                elsif nqp::not_i(is_narrower_type($type_obj_b, $type_obj_a)) {
                     ++$tied;
                 }
                 ++$i;
@@ -101,8 +105,8 @@ my knowhow NQPRoutine {
                 # Otherwise, we see if one has a slurpy and the other not.
                 # A lack of slurpiness makes the candidate narrower.
                 # Otherwise, they're tied.
-                !! %a<max_arity> != $SLURPY_ARITY
-                     && %b<max_arity> == $SLURPY_ARITY;
+                !! nqp::atkey(%a, 'max_arity') != $SLURPY_ARITY
+                     && nqp::atkey(%b, 'max_arity') == $SLURPY_ARITY;
         }
 
         # Create a node for each candidate in the graph.
@@ -111,40 +115,37 @@ my knowhow NQPRoutine {
         my int $i;
         while $i < $num_candidates {
             # Get hold of signature, types and definednesses.
-            my $candidate := $!dispatchees[$i];
-            my $multi_sig := $candidate.signature;
-            my @types_list := $multi_sig.types;
+            my $candidate        := nqp::atpos($!dispatchees, $i);
+            my $multi_sig        := $candidate.signature;
+            my @types_list       := $multi_sig.types;
             my @definedness_list := $multi_sig.definednesses;
-            my int $sig_elems := nqp::elems(@types_list);
+            my int $sig_elems    := nqp::elems(@types_list);
 
-            # Type information.
-            my %info := nqp::hash(
-                'sub',           $candidate,
-                'types',         [],
-                'definednesses', [],
-                'min_arity',     0,
-                'max_arity',     0,
-                'num_types',     0
-            );
+            # Type information to be collected
+            my @types;
+            my @definedness;
+
             my int $j;
             while $j < $sig_elems {
-                # XXX TODO: Worry about optional and slurpy later.
-                ++%info<max_arity>;
-                ++%info<min_arity>;
-
                 # Record type info for this parameter. */
-                nqp::push(%info<types>, @types_list[$j]);
-                nqp::push(%info<definednesses>, @definedness_list[$j]);
-                ++%info<num_types>;
+                nqp::push(@types,       nqp::atpos(@types_list, $j      ));
+                nqp::push(@definedness, nqp::atpos(@definedness_list, $j));
                 ++$j;
             }
 
             # Add it to graph node, and initialize list of edges.
             nqp::push(@graph, nqp::hash(
-                'info',      %info,
-                'edges',     [],
-                'edges_in',  0,
-                'edges_out', 0
+              'info',     nqp::hash(
+                            'sub',           $candidate,
+                            'types',         @types,
+                            'definednesses', @definedness,
+                            'min_arity',     $sig_elems,
+                            'max_arity',     $sig_elems,
+                            'num_types',     $sig_elems
+              ),
+              'edges',     [],
+              'edges_in',  0,
+              'edges_out', 0
             ));
             ++$i;
         }
@@ -154,12 +155,23 @@ my knowhow NQPRoutine {
         $i := 0;
         while $i < $num_candidates {
             my int $j;
+            my $graph_i := nqp::atpos(@graph, $i);
+            my $graph_i_info := nqp::atkey($graph_i, 'info');
+
             while $j < $num_candidates {
-                if ($i != $j) {
-                    if is_narrower(@graph[$i]<info>, @graph[$j]<info>) {
-                        @graph[$i]<edges>[@graph[$i]<edges_out>] := @graph[$j];
-                        ++@graph[$i]<edges_out>;
-                        ++@graph[$j]<edges_in>;
+                if $i != $j {
+                    my $graph_j      := nqp::atpos(@graph, $j);
+                    my $graph_j_info := nqp::atkey($graph_j, 'info');
+
+                    if is_narrower($graph_i_info, $graph_j_info) {
+#                        @graph[$i]<edges>[@graph[$i]<edges_out>] := $graph_j;
+                        nqp::bindpos(
+                          nqp::atkey($graph_i, 'edges'),
+                          nqp::atkey($graph_i, 'edges_out'),
+                          $graph_j
+                        );
+                        ++$graph_i<edges_out>;
+                        ++$graph_j<edges_in>;
                     }
                 }
                 ++$j;
@@ -177,39 +189,44 @@ my knowhow NQPRoutine {
             # results.
             my int $i;
             while $i < $num_candidates {
-                if @graph[$i]<edges_in> == 0 {
+                my $graph_i := nqp::atpos(@graph, $i);
+
+                if nqp::atkey($graph_i, 'edges_in') == 0 {
                     # Add to results.
-                    nqp::push(@result, @graph[$i]<info>);
+                    nqp::push(@result, nqp::atkey($graph_i, 'info'));
                     --$candidates_to_sort;
-                    @graph[$i]<edges_in> := $EDGE_REMOVAL_TODO;
+                    nqp::bindkey($graph_i, 'edges_in', $EDGE_REMOVAL_TODO);
                 }
                 ++$i;
             }
-            if $rem_results == nqp::elems(@result) {
-                nqp::die("Circularity detected in multi sub types");
-            }
+            nqp::die("Circularity detected in multi sub types")
+              if $rem_results == nqp::elems(@result);
 
             # Now we need to decrement edges in counts for things that had
             # edges from candidates we added here.
             $i := 0;
             while $i < $num_candidates {
-                if @graph[$i]<edges_in> == $EDGE_REMOVAL_TODO {
+                my $graph_i := nqp::atpos(@graph, $i);
+
+                if nqp::atkey($graph_i, 'edges_in') == $EDGE_REMOVAL_TODO {
+                    my $edges_out := nqp::atkey($graph_i, 'edges_out');
+
                     my int $j;
-                    while $j < @graph[$i]<edges_out> {
-                        --@graph[$i]<edges>[$j]<edges_in>;
+                    while $j < $edges_out {
+                        --nqp::atpos(nqp::atkey($graph_i,'edges'),$j)<edges_in>;
                         ++$j;
                     }
-                    @graph[$i]<edges_in> := $EDGE_REMOVED;
+                    nqp::bindkey($graph_i, 'edges_in', $EDGE_REMOVED);
                 }
                 ++$i;
             }
 
             # Add gap between groups.
-            nqp::push(@result, nqp::null());
+            nqp::push(@result, nqp::null);
         }
 
         # Add final null sentinel.
-        nqp::push(@result, nqp::null());
+        nqp::push(@result, nqp::null);
         @result
     }
 
@@ -326,33 +343,24 @@ my knowhow NQPRoutine {
         nqp::setcodeobj($do, $der);
 
         # If needed, arrange for a fixup of the cloned code-ref.
-        unless nqp::isnull($!clone_callback) {
-            $!clone_callback($!do, $do, $der);
-        }
+        $!clone_callback($!do, $do, $der) unless nqp::isnull($!clone_callback);
 
         $der
     }
 
-    method !set_name($name) {
-        nqp::setcodename($!do, $name);
-    }
-
-    method name() {
-        nqp::getcodename($!do)
-    }
+    method name()      { nqp::getcodename($!do) }
+    method !set_name($name) { nqp::setcodename($!do, $name) }
 
     method signature() { $!signature }
-
-    method gist() {
-        self.name()
-    }
+    method gist()      { self.name   }
 }
 #?if !moar
 nqp::setinvokespec(NQPRoutine, NQPRoutine, '$!do', nqp::null);
 #?endif
-nqp::setboolspec(NQPRoutine, 5, nqp::null());
+nqp::setboolspec(NQPRoutine, 5, nqp::null);
 nqp::settypehll(NQPRoutine, 'nqp');
 
+#- NQPSignature ----------------------------------------------------------------
 my knowhow NQPSignature {
     has $!types;
     has $!definednesses;
@@ -361,6 +369,7 @@ my knowhow NQPSignature {
 }
 nqp::settypehll(NQPSignature, 'nqp');
 
+#- RegexCaptures ---------------------------------------------------------------
 # Data on the captures that a particular rule has.
 my knowhow RegexCaptures {
     # An integer array of positional capture counts.
@@ -376,7 +385,7 @@ my knowhow RegexCaptures {
     has str $!onlyname;
 
     # Flags to allow us to more quickly figure stuff out.
-    my int $HAS_CAPTURES := 1;
+    my int $HAS_CAPTURES            := 1;
     my int $HAS_QUANT_LIST_CAPTURES := 2;
     my int $HAS_QUANT_HASH_CAPTURES := 4;
     has int $!flags;
@@ -388,38 +397,46 @@ my knowhow RegexCaptures {
 
     method !from-capnames(%capnames) {
         # Initialize.
-        @!pos-capture-counts := nqp::list_i();
-        @!named-capture-names := nqp::list_s();
-        @!named-capture-counts := nqp::list_i();
+        @!pos-capture-counts   := nqp::list_i;
+        @!named-capture-names  := nqp::list_s;
+        @!named-capture-counts := nqp::list_i;
 
         # Go over the captures and build up the data structure.
-        my int $num-captures := 0;
+        my int $num-captures;
         my str $onlyname := '';
-        my int $quant-list-captures := 0;
-        my int $quant-hash-captures := 0;
+        my int $quant-list-captures;
+        my int $quant-hash-captures;
+
         for sorted_keys(%capnames) -> $name {
             if $name ne '' {
-                my $count := %capnames{$name};
-                if nqp::ord($name) != 36 && nqp::ord($name) < 58 {
+                my int $ord   := nqp::ord($name);
+                my int $count := nqp::atkey(%capnames, $name);
+
+                # Positional capture
+                if $ord != 36 && $ord < 58 {
                     nqp::bindpos_i(@!pos-capture-counts, +$name, $count);
-                    $quant-list-captures++ if $count >= 2;
+                    ++$quant-list-captures if $count >= 2;
                 }
+
+                # Named capture
                 else {
-                    nqp::push_s(@!named-capture-names, $name);
+                    nqp::push_s(@!named-capture-names,  $name);
                     nqp::push_i(@!named-capture-counts, $count);
-                    $quant-hash-captures++ if $count >= 2;
+                    ++$quant-hash-captures if $count >= 2;
                 }
-                $num-captures++;
-                if $count >= 2 && nqp::ord($name) != 36 {
-                    $onlyname := $name;
-                }
+
+                ++$num-captures;
+                $onlyname := $name if $count >= 2 && $ord != 36;
             }
         }
 
-        $!onlyname := $num-captures == 1 && $onlyname ne '' ?? $onlyname !! '';
-        $!flags := ($num-captures ?? $HAS_CAPTURES !! 0) +
-            ($quant-list-captures ?? $HAS_QUANT_LIST_CAPTURES !! 0) +
-            ($quant-hash-captures ?? $HAS_QUANT_HASH_CAPTURES !! 0);
+        $!onlyname := $num-captures == 1 && $onlyname ne ''
+          ?? $onlyname
+          !! '';
+
+        $!flags := ($num-captures ?? $HAS_CAPTURES !! 0)
+          + ($quant-list-captures ?? $HAS_QUANT_LIST_CAPTURES !! 0)
+          + ($quant-hash-captures ?? $HAS_QUANT_HASH_CAPTURES !! 0);
 
         self
     }
@@ -431,16 +448,17 @@ my knowhow RegexCaptures {
 
     # Build a list of positional captures, or return a shared empty list if
     # there are none. This only populates the slots which need an array.
-    my $EMPTY-LIST := nqp::list();
-    my $EMPTY-HASH := nqp::hash();
+    my $EMPTY-LIST := nqp::list;
+    my $EMPTY-HASH := nqp::hash;
+
     method prepare-list() {
         my int $n := nqp::elems(@!pos-capture-counts);
         if $n > 0 {
-            my $result := nqp::list();
+            my $result := nqp::list;
             if nqp::bitand_i($!flags, $HAS_QUANT_LIST_CAPTURES) {
                 my int $i;
                 while $i < $n {
-                    nqp::bindpos($result, $i, nqp::list())
+                    nqp::bindpos($result, $i, nqp::list)
                         if nqp::atpos_i(@!pos-capture-counts, $i) >= 2;
                     ++$i;
                 }
@@ -457,14 +475,14 @@ my knowhow RegexCaptures {
     method prepare-hash() {
         my int $n := nqp::elems(@!named-capture-counts);
         if $n > 0 {
-            my $result := nqp::hash();
+            my $result := nqp::hash;
             if nqp::bitand_i($!flags, $HAS_QUANT_HASH_CAPTURES) {
                 my int $i;
                 while $i < $n {
                     if nqp::atpos_i(@!named-capture-counts, $i) >= 2 {
                         nqp::bindkey($result,
                             nqp::atpos_s(@!named-capture-names, $i),
-                            nqp::list());
+                            nqp::list);
                     }
                     ++$i;
                 }
@@ -481,6 +499,7 @@ my knowhow RegexCaptures {
 }
 nqp::settypehll(RegexCaptures, 'nqp');
 
+#- NQPRegex --------------------------------------------------------------------
 my knowhow NQPRegex {
     has $!do;
     has $!caps;
@@ -489,6 +508,7 @@ my knowhow NQPRegex {
     has $!generic_nfa;
     has @!nested_codes;
     has $!clone_callback;
+
     method SET_CAPS(%capnames) {
         $!caps := RegexCaptures.from-capnames(%capnames);
     }
@@ -496,7 +516,7 @@ my knowhow NQPRegex {
         $!nfa := self.'!hllize_nfa'($nfa);
     }
     method SET_ALT_NFA($name, $nfa) {
-        nqp::ifnull(%!alt_nfas, %!alt_nfas := {});
+        nqp::ifnull(%!alt_nfas, %!alt_nfas := nqp::hash);
         %!alt_nfas{$name} := self.'!hllize_nfa'($nfa);
     }
     method SET_GENERIC_NFA($nfa) {
@@ -505,7 +525,7 @@ my knowhow NQPRegex {
     method !hllize_nfa($nfa) {
         sub hll_list($l) {
             if nqp::islist($l) {
-                my @h_l := nqp::list();
+                my @h_l := nqp::list;
                 for $l -> $elem {
                     nqp::push(@h_l, hll_list($elem));
                 }
@@ -518,24 +538,23 @@ my knowhow NQPRegex {
         hll_list($nfa)
     }
     method ADD_NESTED_CODE($code) {
-        nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list());
-        nqp::push(@!nested_codes, $code);
+        nqp::push(
+          nqp::ifnull(@!nested_codes, @!nested_codes := nqp::list),
+          $code
+        )
     }
-    method CAPS() {
-        $!caps
-    }
-    method NFA() {
-        $!nfa
-    }
-    method ALT_NFAS() {
-        nqp::isnull(%!alt_nfas) ?? nqp::hash() !! %!alt_nfas
-    }
+    method CAPS() { $!caps }
+    method NFA()  { $!nfa  }
+
+    method ALT_NFAS() { nqp::ifnull(%!alt_nfas, nqp::hash) }
+
     method ALT_NFA(str $name) {
-        nqp::isnull(%!alt_nfas) ?? nqp::null() !! %!alt_nfas{$name}
+        nqp::isnull(%!alt_nfas) ?? nqp::null !! nqp::atkey(%!alt_nfas, $name)
     }
     method NESTED_CODES() {
-        nqp::isnull(@!nested_codes) ?? nqp::list() !! @!nested_codes
+        nqp::ifnull(@!nested_codes, nqp::list)
     }
+
     method clone() {
         # Clone the underlying VM code ref.
         my $do  := nqp::clone($!do);
@@ -546,37 +565,31 @@ my knowhow NQPRegex {
         nqp::setcodeobj($do, $der);
 
         # If needed, arrange for a fixup of the cloned code-ref.
-        unless nqp::isnull($!clone_callback) {
-            $!clone_callback($!do, $do, $der);
-        }
+        $!clone_callback($!do, $do, $der) unless nqp::isnull($!clone_callback);
 
         $der
     }
+
     my $nfa_type;
-    method SET_NFA_TYPE($type) {
-        $nfa_type := $type;
-    }
+    method SET_NFA_TYPE($type) { $nfa_type := $type }
+
     method instantiate_generic($env) {
         if nqp::isnull($!generic_nfa) {
-            self.clone()
+            self.clone;
         }
         else {
-            my $ins := self.clone();
+            my $ins := self.clone;
             nqp::bindattr($ins, NQPRegex, '$!nfa',
-                $nfa_type.from_saved($!generic_nfa).instantiate_generic($env).save());
-            nqp::bindattr($ins, NQPRegex, '$!generic_nfa', nqp::null());
+              $nfa_type.from_saved($!generic_nfa).instantiate_generic($env).save);
+            nqp::bindattr($ins, NQPRegex, '$!generic_nfa', nqp::null);
             $ins
         }
     }
-    method name() {
-        nqp::getcodename($!do)
-    }
-    method !set_name($name) {
-        nqp::setcodename($!do, $name);
-    }
+    method !set_name($name) { nqp::setcodename($!do, $name); }
+    method name() { nqp::getcodename($!do) }
 }
 #?if !moar
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
 #?endif
-nqp::setboolspec(NQPRegex, 5, nqp::null());
+nqp::setboolspec(NQPRegex, 5, nqp::null);
 nqp::settypehll(NQPRegex, 'nqp');
