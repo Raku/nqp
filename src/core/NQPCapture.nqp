@@ -1,3 +1,4 @@
+#- NQPCapture ------------------------------------------------------------------
 my class NQPCapture {
     has @!list is positional_delegate;
     has %!hash is associative_delegate;

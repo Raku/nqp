@@ -1,10 +1,13 @@
+#- NQPMu -----------------------------------------------------------------------
 my class NQPMu {
-    method CREATE() {
-        nqp::create(self)
-    }
+    method CREATE() { nqp::create(self) }
 
+    method new(*%attributes) {
+        # Assume nobody will be overriding bless in NQP
+        nqp::create(self).BUILDALL(%attributes)
+    }
     method bless(NQPMu:U $self: *%attributes) {
-        self.CREATE().BUILDALL(%attributes)
+        nqp::create(self).BUILDALL(%attributes)
     }
 
     method BUILDALL(NQPMu:D $self: %attrinit) {
@@ -64,7 +67,7 @@ my class NQPMu {
                 }
             }
 
-            # Custom BUILD call.
+            # Custom BUILD / TWEAK call
             else {
                 $task(self, |%attrinit);
             }
@@ -73,37 +76,28 @@ my class NQPMu {
         self
     }
 
-    method new(*%attributes) {
-        # Assume nobody will be overriding bless in NQP
-        self.CREATE().BUILDALL(%attributes)
-    }
+    method defined() { nqp::isconcrete(self) }
 
-    method defined() {
-        nqp::isconcrete(self)
-    }
-
-    proto method ACCEPTS($topic) { * }
+    proto method ACCEPTS($topic) {*}
     multi method ACCEPTS(NQPMu:U $self: $topic) {
         nqp::istype($topic, self.WHAT)
     }
 
-    proto method NOT-ACCEPTS($topic) { * }
+    proto method NOT-ACCEPTS($topic) {*}
     multi method NOT-ACCEPTS(NQPMu:U $self: $topic) {
         nqp::isfalse(nqp::istype($topic, self.WHAT))
     }
 
-    method isa($type) {
-        self.HOW.isa(self, $type)
-    }
+    method isa($type) { self.HOW.isa(self, $type) }
 }
 
 # An NQP array, which is the standard array representation with a few methods
 # added.
 my class NQPArray is repr('VMArray') {
-    method push($value) { nqp::push(self, $value) }
-    method pop() { nqp::pop(self) }
+    method push($value)    { nqp::push(self, $value)    }
+    method pop()           { nqp::pop(self)             }
     method unshift($value) { nqp::unshift(self, $value) }
-    method shift() { nqp::shift(self) }
+    method shift()         { nqp::shift(self)           }
 }
 nqp::setboolspec(NQPArray, 8, nqp::null());
 nqp::settypehllrole(NQPArray, nqp::const::HLL_ROLE_ARRAY);
@@ -111,29 +105,30 @@ nqp::settypehllrole(NQPArray, nqp::const::HLL_ROLE_ARRAY);
 # Iterator types.
 my class NQPArrayIter is repr('VMIter') { }
 nqp::setboolspec(NQPArrayIter, 7, nqp::null());
+
 my class NQPHashIter is repr('VMIter') {
-    method key() { nqp::iterkey_s(self) }
-    method value() { nqp::iterval(self) }
-    method Str() { nqp::iterkey_s(self) }
+    method key()   { nqp::iterkey_s(self) }
+    method value() { nqp::iterval(self)   }
+    method Str()   { nqp::iterkey_s(self) }
 }
 nqp::setboolspec(NQPHashIter, 7, nqp::null());
 
 # NQP HLL configuration.
 nqp::sethllconfig('nqp', nqp::hash(
-    'list', NQPArray,
+    'list',         NQPArray,
     'slurpy_array', NQPArray,
-    'array_iter', NQPArrayIter,
-    'hash_iter', NQPHashIter,
+    'array_iter',   NQPArrayIter,
+    'hash_iter',    NQPHashIter,
     'foreign_transform_hash', -> $hash {
         # BOOTHashes don't actually need transformation
         nqp::ishash($hash) ?? $hash !! $hash.FLATTENABLE_HASH
     },
 #?if moar
-    'call_dispatcher', 'nqp-call',
+    'call_dispatcher',        'nqp-call',
     'method_call_dispatcher', 'nqp-meth-call',
     'find_method_dispatcher', 'nqp-find-meth',
-    'hllize_dispatcher', 'nqp-hllize',
-    'istype_dispatcher', 'nqp-istype',
+    'hllize_dispatcher',      'nqp-hllize',
+    'istype_dispatcher',      'nqp-istype',
     'isinvokable_dispatcher', 'nqp-isinvokable',
 #?endif
 ));
