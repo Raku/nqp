@@ -1076,6 +1076,8 @@ class QRegex::NFA {
             }
 #            self.mydump() if $nfadeb;
         }
+
+        self
     }
 
     method mydump() {
