@@ -810,79 +810,57 @@ class QRegex::NFA {
         @!states
     }
 
-    method mergesubrule(
-      int $start,
-      int $to,
-      int $fate,
-      $cursor,
-      $name,
-      %caller_seen?
-    ) {
-
+    method mergesubrule(int $start, int $to, int $fate, $cursor, $name, %caller_seen?) {
 #        my $indent := dentin();
-
         my %seen := nqp::clone(%caller_seen);
         my @substates;
         my $meth;
         my $n;
         if nqp::istype($name,QAST::Var) {
             $meth := $name.ann('coderef');
-            $n    := $meth.name;
-
+            $n := $meth.name;
 #            note("$indent mergesubrule $n start $start to $to fate $fate") if $nfadeb;
-
-            unless nqp::existskey(%seen, $n) {
+            if !nqp::existskey(%seen, $n) {
                 my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
-                @substates   := nqp::ifnull($nfa_meth($meth), nqp::list)
-                  if nqp::isconcrete($nfa_meth);
-                nqp::bindkey(%seen, $n, 1);
-            }
-#            else {
-#                note("$indent ...skipping $n to avoid left recursion") if $nfadeb;
-#            }
-        }
-
-        elsif nqp::isconcrete($meth := nqp::tryfindmethod($cursor, $name)) {
-
-#            note("$indent mergesubrule $name start $start to $to fate $fate") if $nfadeb;
-
-            $n := $name;
-            unless nqp::existskey(%seen, $name) {
-                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
-                @substates   := nqp::ifnull($nfa_meth($meth), nqp::list)
-                  if nqp::isconcrete($nfa_meth);
-
-                unless @substates {
-
-                    # Maybe it's a protoregex, in which case states are an
-                    # alternation of all of the possible rules.
-                    my %protorx := $cursor.HOW.cache(
-                      $cursor, "!protoregex_table",
-                      { $cursor."!protoregex_table"() }
-                    );
-                    my $nfa := QRegex::NFA.new;
-
-                    my $rxnames := nqp::atkey(%protorx, $name);
-                    unless nqp::isnull($rxnames) {
-                        my int $m := nqp::elems($rxnames);
-                        my int $i;
-                        while $i < $m {
-                            $nfa.addedge(
-                              1, 0, $EDGE_SUBRULE, nqp::atpos($rxnames, $i)
-                            );
-                            ++$i;
-                        }
-                        @substates := $nfa.states;
-                    }
+                if nqp::isconcrete($nfa_meth) {
+                    @substates := $nfa_meth($meth);
+                    @substates := [] if nqp::isnull(@substates);
                 }
-                nqp::bindkey(%seen, $name, 1);
+                %seen{$n} := 1;
             }
-
-#            else {
-#                note("$indent ...skipping $name to avoid left recursion") if $nfadeb;
-#            }
+            else {
+#                note("$indent ...skipping $n to avoid left recursion") if $nfadeb;
+            }
         }
-
+        elsif nqp::isconcrete($meth := nqp::tryfindmethod($cursor, $name)) {
+#            note("$indent mergesubrule $name start $start to $to fate $fate") if $nfadeb;
+            $n := $name;
+            if !nqp::existskey(%seen, $name) {
+                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
+                if nqp::isconcrete($nfa_meth) {
+                    @substates := $nfa_meth($meth);
+                    @substates := [] if nqp::isnull(@substates);
+                }
+                if !@substates {
+                    # Maybe it's a protoregex, in which case states are an alternation
+                    # of all of the possible rules.
+                    my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
+                    my $nfa          := QRegex::NFA.new;
+                    my int $gotmatch := 0;
+                    if nqp::existskey(%protorx, $name) {
+                        for %protorx{$name} -> $rxname {
+                            $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
+                            $gotmatch := 1;
+                        }
+                    }
+                    @substates := $nfa.states() if $gotmatch;
+                }
+                %seen{$name} := 1;
+            }
+            else {
+#                note("$indent ...skipping $name to avoid left recursion") if $nfadeb;
+            }
+        }
 #        if $nfadeb {
 #            my int $s := 1;
 #            my int $send := +@substates;
