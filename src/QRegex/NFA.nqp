@@ -204,6 +204,7 @@ class QRegex::NFA {
          ?? self."$method"($node, $from, $to)
          !! self.fate($node, $from, $to)
 
+#        ;
 #        note("$indent ...regex_nfa returns $result") if $nfadeb;
 #        dentout($result);
 #        $result
@@ -293,34 +294,53 @@ class QRegex::NFA {
         )
     }
 
-    method concat($node, $from, $to) {
+    method concat($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent concat $from -> $to") if $nfadeb;
-        my int $n := nqp::elems($node.list) - 1;
+
+        my int $m := nqp::elems($node) - 1;
         my int $i;
-        while $from > 0 && $i < $n {
-            $from := self.regex_nfa($node[$i], $from, -1);
+        while $i < $m && $from > 0 {
+            $from := self.regex_nfa(nqp::atpos($node, $i), $from, -1);
             ++$i;
         }
+
+#        my $result := 
+        $from > 0 && $m >= 0
+          ?? self.regex_nfa(nqp::atpos($node,$i), $from, $to)
+          !! $to
+
+#        ;
 #        note("$indent ...concat created $from, n = $n") if $nfadeb;
-        my $result := $from > 0 && $n >= 0 ?? self.regex_nfa($node[$i], $from, $to) !! $to;
 #        note("$indent ...concat returns $result") if $nfadeb;
 #        dentout($result);
-        $result;
+#        $result;
     }
 
-    method enumcharlist($node, $from, $to) {
+    method enumcharlist($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent enumcharlist $from -> $to") if $nfadeb;
-        my $charlist := $node[0];
+
+        my $charlist := nqp::atpos($node, 0);
         if $node.subtype eq 'zerowidth' {
-            $from := self.addedge($from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist);
+            $from := self.addedge(
+              $from, -1, $EDGE_CHARLIST + ?$node.negate, $charlist
+            );
+
 #            dentout(self.addedge($from, 0, $EDGE_FATE, 0));
-             self.addedge($from, 0, $EDGE_FATE, 0);
+
+            self.addedge($from, 0, $EDGE_FATE, 0)
         }
+
         else {
+
 #            dentout(self.addedge($from, $to, $EDGE_CHARLIST + ?$node.negate, $charlist));
-             self.addedge($from, $to, $EDGE_CHARLIST + ?$node.negate, $charlist);
+
+             self.addedge(
+               $from, $to, $EDGE_CHARLIST + ?$node.negate, $charlist
+            )
         }
     }
 
