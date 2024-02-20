@@ -416,7 +416,7 @@ class QRegex::NFA {
         nqp::chr($ord) eq $chr ?? $ord !! $chr
     }
 
-    method literal($node, $from, $to) {
+    method literal($node, int $from, int $to) {
 
 #        my $indent := dentin();
 
@@ -536,64 +536,65 @@ class QRegex::NFA {
         }
     }
 
-    method subrule($node, $from, $to) {
+    method subrule($node, int $from, int $to) {
+
 #        my $indent := dentin();
-        my str $subtype := $node.subtype;
-        my $node0       := $node[0];
-        my $node00      := $node0[0];
-        my $node01      := $node0[1];
 #        note("$indent subrule $from -> $to {$node.name}") if $nfadeb;
 
-        if $node.name eq 'before'
-          && !$node.negate
+        my str $subtype := $node.subtype;
+        my str $name    := $node.name;
+        my int $negate  := $node.negate;
+
+        my $node0       := nqp::atpos($node,  0);
+        my $node00      := nqp::atpos($node0, 0);
+        my $node01      := nqp::atpos($node0, 1);
+        my $nodetype := nqp::istype($node00, QAST::SVal)
+          ?? $node00.value
+          !! $node00;
+
+        if $name eq 'before'
+          && nqp::not_i($negate)
           && nqp::can($node01, "ann")
-          && nqp::istype($node01.ann('orig_qast'), QAST::Regex
-        ) {
+          && nqp::istype($node01.ann('orig_qast'), QAST::Regex) {
+
             my int $end := self.addstate;
             self.regex_nfa($node01.ann('orig_qast'), $from, $end);
+
 #            dentout(self.fate($node, $end, $to));
-             self.fate($node, $end, $to);
+
+             self.fate($node, $end, $to)
         }
 
         elsif $subtype ne 'zerowidth'
-          && ($node.name eq 'alpha'
-               || $subtype eq 'method'
-               && (nqp::istype($node00, QAST::SVal)
-                    ?? $node00.value
-                    !! $node00
-                  ) eq 'alpha'
-        ) {
+          && ($name eq 'alpha'
+               || $subtype  eq 'method'
+               && $nodetype eq 'alpha') {
+
             $to := self.addedge(
               $from,
               $to,
-              $EDGE_CHARCLASS + $node.negate,
+              $EDGE_CHARCLASS + $negate,
               nqp::const::CCLASS_ALPHABETIC
             );
+
 #            dentout(self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95));
-            self.addedge($from, $to, $EDGE_CODEPOINT + $node.negate, 95);
+
+            self.addedge($from, $to, $EDGE_CODEPOINT + $negate, 95)
         }
 
-        elsif !$node.negate
-          && ($node.name eq 'ws'
-               || $subtype eq 'method'
-               && (nqp::istype($node00, QAST::SVal)
-                    ?? $node00.value
-                    !! $node00
-                  ) eq 'ws'
-        ) {
+        elsif nqp::not_i($negate)
+          && ($name eq 'ws' || $subtype eq 'method' && $nodetype eq 'ws')
+        {
+
 #            dentout(self.fate($node, $from, $to));
-             self.fate($node, $from, $to);
+
+             self.fate($node, $from, $to)
         }
 
-        elsif !$node.negate
+        elsif nqp::not_i($negate)
           && $subtype ne 'zerowidth'
-          && ($node.name eq 'ident'
-               || $subtype eq 'method'
-               && (nqp::istype($node00, QAST::SVal)
-                    ?? $node00.value
-                    !! $node00
-                   ) eq 'ident'
-        ) {
+          && ($name eq 'ident' || $subtype eq 'method' && $nodetype eq 'ident')
+        {
             my int $beginstate := self.addstate;
             self.addedge($from, $beginstate, $EDGE_EPSILON, 0);
 
@@ -607,25 +608,32 @@ class QRegex::NFA {
             self.addedge($beginstate, $midstate, $EDGE_CODEPOINT, 95);
 
             my int $second := self.addstate;
-
             self.addedge(
               $midstate, $second, $EDGE_CHARCLASS, nqp::const::CCLASS_WORD
             );
+
             self.addedge($second, $midstate, $EDGE_EPSILON, 0);
-            $to := self.addedge($midstate, $to, $EDGE_EPSILON, 0);
+#            $to :=
+            self.addedge($midstate, $to, $EDGE_EPSILON, 0)
+
+#            ;
 #            dentout($to);
-            $to;
+#            $to
         }
 
         elsif $subtype eq 'zerowidth' {
-            if $node.negate {
+            if $negate {
+
 #                dentout(self.fate($node, $from, $to))
+
                  self.fate($node, $from, $to)
             }
             else {
                 my int $end := self.addstate;
-                self.addedge($from, $end, $EDGE_SUBRULE, $node.name);
+                self.addedge($from, $end, $EDGE_SUBRULE, $name);
+
 #                dentout(self.fate($node, $end, $to));
+
                  self.fate($node, $end, $to);
             }
         }
@@ -638,16 +646,20 @@ class QRegex::NFA {
           && $node01.scope eq 'lexical'
         {
             $!generic := 1;
-#            dentout(self.addedge($from, $to, $EDGE_GENERIC_VAR, $node[0][1].name));
-             self.addedge($from, $to, $EDGE_GENERIC_VAR, $node[0][1].name);
+
+#            dentout(self.addedge($from, $to, $EDGE_GENERIC_VAR, $node01.name));
+
+             self.addedge($from, $to, $EDGE_GENERIC_VAR, $node01.name)
         }
 
         else {
+
 #            dentout($subtype eq 'capture' && $node[1]
 #                ?? self.regex_nfa($node[1], $from, $to)
 #                !! self.addedge($from, $to, $EDGE_SUBRULE, $node[0][0]))
-             $subtype eq 'capture' && $node[1]
-                ?? self.regex_nfa($node[1], $from, $to)
+
+             $subtype eq 'capture' && nqp::atpos($node, 1)
+                ?? self.regex_nfa(nqp::atpos($node, 1), $from, $to)
                 !! self.addedge($from, $to, $EDGE_SUBRULE, $node00)
         }
     }
