@@ -133,30 +133,41 @@ class QRegex::NFA {
         nqp::elems(@!states) - 1
     }
 
-    method addedge($from, $to, $action, $value, :$newedge = 1) {
+    method addedge(
+      int $from, 
+      int $to,
+      $action,
+      $value,
+      :$newedge = 1
+    ) {
+
 #        my $indent := dentin();
-        my $v := nqp::istype($value, QAST::SVal) ?? $value.value !! $value;
-        my $vv := $action == $EDGE_SUBRULE ?? "" !! $v;
 #        note("$indent addedge $from -> $to {$ACTIONS[nqp::bitand_i($action,0xff)] // 'unk'}") if $nfadeb;
-        $!edges := 1 if $newedge;
-        $to := self.addstate if $to < 0;
-        my @st := @!states[$from];
+
+        $value   := $value.value  if nqp::istype($value, QAST::SVal);
+        $!edges  := 1             if $newedge;
+        $to      := self.addstate if $to < 0;
+        my @this := nqp::atpos(@!states, $from);
+
         if $action == $EDGE_FATE {
-            if $!known[$v] {
-                if !$to || $to == $!known[$v] {
+            my $known_value := nqp::atpos($!known, $value);
+            if $known_value {
+                if nqp::not_i($to) || $to == $known_value {
                     $action := $EDGE_EPSILON;
-                    $to := $!known[$v];
+                    $to     := $known_value;
                 }
             }
-            elsif +@st == 0 {
-                $!known[$v] := $from;
+            elsif nqp::elems(@this) == 0 {
+                nqp::bindpos($!known, $value, $from);
             }
         }
-        nqp::push(@st, $action);
-        nqp::push(@st, $v);
-        nqp::push(@st, $to);
+
 #        dentout($to);
-        $to
+#        $to
+
+        nqp::push(@this, $action);
+        nqp::push(@this, $value);
+        nqp::push(@this, $to)  # push returns value being pushed
     }
 
     method states() { @!states }
