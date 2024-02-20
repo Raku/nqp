@@ -134,7 +134,7 @@ class QRegex::NFA {
     }
 
     method addedge(
-      int $from, 
+      int $from,
       int $to,
       $action,
       $value,
@@ -249,36 +249,48 @@ class QRegex::NFA {
         $to
     }
 
-    method altseq($node, $from, $to) {
-        if nqp::elems(@($node)) {
+    method altseq($node, int $from, int $to) {
+        if nqp::elems($node) {
+
 #            my $indent := dentin();
-            my int $st := self.regex_nfa($node[0], $from, $to);
-            $to := $st if $to < 0 && $st > 0;
-            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
-            $to := $st if $to < 0 && $st > 0;
+
+            my int $state := self.regex_nfa(nqp::atpos($node,0), $from, $to);
+            $to := $state if $to < 0 && $state > 0;
+
+            $state := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to < 0 && $state > 0 ?? $state !! $to
+
+#            $to := $st if $to < 0 && $st > 0;
 #            note("$indent ...altseq returns $to") if $nfadeb;
 #            dentout($to);
-            $to;
+#            $to;
         }
+
         else {
-            self.fate($node, $from, $to);
+            self.fate($node, $from, $to)
         }
     }
 
-    method anchor($node, $from, $to) {
-        self.addedge($from, $to, $EDGE_EPSILON, 0);
+    method anchor($node, int $from, int $to) {
+        self.addedge($from, $to, $EDGE_EPSILON, 0)
     }
 
-    method dba($node, $from, $to) {
-        self.addedge($from, $to, $EDGE_EPSILON, 0);
+    method dba($node, int $from, int $to) {
+        self.addedge($from, $to, $EDGE_EPSILON, 0)
     }
 
-    method cclass($node, $from, $to) {
+    method cclass($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        dentout(self.addedge($from, $to, $EDGE_CHARCLASS + ?$node.negate,
 #                     %cclass_code{ $node.name }));
-         self.addedge($from, $to, $EDGE_CHARCLASS + ?$node.negate,
-                     %cclass_code{ $node.name });
+
+        self.addedge(
+          $from,
+          $to,
+          $EDGE_CHARCLASS + ?$node.negate,
+          nqp::atkey(%cclass_code, $node.name)
+        )
     }
 
     method concat($node, $from, $to) {
@@ -659,7 +671,7 @@ class QRegex::NFA {
 #            dentout($to);
              $to;
         }
-        
+
         else {
 #            note("$indent ...quant returns fate") if $nfadeb;
 #            dentout(self.fate($node, $from, $to))
