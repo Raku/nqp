@@ -417,32 +417,45 @@ class QRegex::NFA {
     }
 
     method literal($node, $from, $to) {
+
 #        my $indent := dentin();
-        my str $first  := $node[0];
+
+        my str $first  := nqp::atpos($node, 0);
         my int $litlen := nqp::chars($first) - 1;
         my int $i;
 
         if $litlen >= 0 {
+            my str $subtype := $node.subtype;
+
 #            note("$indent literal $from -> $to {$node[0]}") if $nfadeb;
-            if $node.subtype eq 'ignorecase' {
-                my str $litconst_lc := nqp::lc($first);
-                my str $litconst_uc := nqp::uc($first);
+
+            if $subtype eq 'ignorecase' {
+                my str $lc := nqp::lc($first);
+                my str $uc := nqp::uc($first);
+
                 while $i < $litlen {
                     $from := self.addedge(
                       $from,
                       -1,
                       $EDGE_CODEPOINT_I,
-                      [ord-or-str($litconst_lc,$i), ord-or-str($litconst_uc,$i)]
+                      nqp::list(ord-or-str($lc, $i), ord-or-str($uc, $i))
                     );
                     ++$i;
                 }
+
 #                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
 #                    [ord-or-str($litconst_lc, $i), ord-or-str($litconst_uc, $i)]));
-                 self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
-                   [ord-or-str($litconst_lc, $i), ord-or-str($litconst_uc, $i)]);
+
+                # Add final stage
+                self.addedge(
+                  $from,
+                  $to,
+                  $!LITEND ?? $EDGE_CODEPOINT_I !!  $EDGE_CODEPOINT_I_LL,
+                  nqp::list(ord-or-str($lc, $i), ord-or-str($uc, $i))
+                );
             }
 
-            elsif $node.subtype eq 'ignoremark' {
+            elsif $subtype eq 'ignoremark' {
                 while $i < $litlen {
                     $from := self.addedge(
                       $from,
@@ -452,61 +465,74 @@ class QRegex::NFA {
                     );
                     ++$i;
                 }
+
 #                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_M, nqp::ordbaseat($litconst, $i)));
+
                 self.addedge(
                   $from,
                   $to,
                   $EDGE_CODEPOINT_M,
                   nqp::ordbaseat($first, $i)
-                );
+                )
                 # XXX $EDGE_CODEPOINT_M_LL ?
             }
 
-            elsif $node.subtype eq 'ignorecase+ignoremark' {
-                my str $litconst_lc := nqp::lc($first);
-                my str $litconst_uc := nqp::uc($first);
+            elsif $subtype eq 'ignorecase+ignoremark' {
+                my str $lc := nqp::lc($first);
+                my str $uc := nqp::uc($first);
+
                 while $i < $litlen {
                     $from := self.addedge(
                       $from,
                       -1,
                       $EDGE_CODEPOINT_IM,
-                      [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]
+                      nqp::list(ord-or-str($lc, $i), ord-or-str($uc, $i))
                     );
                     ++$i;
                 }
+
 #                dentout(self.addedge($from, $to, $EDGE_CODEPOINT_IM,
 #                    [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]));
+
                 self.addedge(
                   $from,
                   $to,
                   $EDGE_CODEPOINT_IM,
-                  [nqp::ordbaseat($litconst_lc, $i), nqp::ordbaseat($litconst_uc, $i)]
-                 );
-                 # XXX $EDGE_CODEPOINT_IM_LL ?
+                  nqp::list(ord-or-str($lc, $i), ord-or-str($uc, $i))
+                )
+                # XXX $EDGE_CODEPOINT_IM_LL ?
             }
 
             else {
+
                 while $i < $litlen {
                     $from := self.addedge(
-                      $from, -1, $EDGE_CODEPOINT, ord-or-str($first, $i)
+                      $from,
+                      -1,
+                      $EDGE_CODEPOINT,
+                      ord-or-str($first, $i)
                     );
                     ++$i;
                 }
+
 #                dentout(self.addedge($from, $to, $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL,
 #                    ord-or-str($litconst, $i)));
+
                 self.addedge(
                   $from,
                   $to,
                   $!LITEND ?? $EDGE_CODEPOINT !!  $EDGE_CODEPOINT_LL,
                   ord-or-str($first, $i)
-                );
+                )
             }
         }
 
         else {
+
 #            note("$indent literal $from -> $to ''") if $nfadeb;
 #            dentout(self.addedge($from, $to, $EDGE_EPSILON, 0));
-             self.addedge($from, $to, $EDGE_EPSILON, 0);
+
+             self.addedge($from, $to, $EDGE_EPSILON, 0)
         }
     }
 
