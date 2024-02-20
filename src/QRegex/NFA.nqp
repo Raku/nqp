@@ -353,11 +353,13 @@ class QRegex::NFA {
         my $node1    := nqp::atpos($node, 1).value;
         my $node2    := nqp::atpos($node, 2).value;
 
-        my $base_edge;
-        my $add;
-        if $type eq 'ignoremark' || $type eq 'ignorecase+ignoremark' {
-            $base_edge := $EDGE_CHARRANGE_M;
+        my $base_edge := $type eq 'ignoremark'
+          || $type eq 'ignorecase+ignoremark'
+          ?? $EDGE_CHARRANGE_M
+          !! $EDGE_CHARRANGE;
 
+        my $add;
+        if $type eq 'ignorecase' || $type eq 'ignorecase+ignoremark' {
             $node1 := nqp::chr($node1);
             $node2 := nqp::chr($node2);
             $add := nqp::list_i(
@@ -369,7 +371,6 @@ class QRegex::NFA {
         }
 
         else {
-            $base_edge := $EDGE_CHARRANGE;
             $add := nqp::list_i($node1, $node2);
         }
 
