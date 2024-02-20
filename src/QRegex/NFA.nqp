@@ -173,58 +173,80 @@ class QRegex::NFA {
     method states() { @!states }
 
     method addnode($node, :$*vars_as_generic) {
+
 #        my $indent := dentin();
 #        note("$indent addnode") if $nfadeb;
 #        # nqp::die("HERE") if $nfadeb && $nfadeb++ == 2;
+
         self.regex_nfa($node, 1, 0);
         $!LITEND := 0;
+
 #        self.mydump() if $nfadeb;
 #        dentout(self);
+
         self
     }
 
-    method regex_nfa($node, $from, $to) {
+    method regex_nfa($node, int $from, int $to) {
+
 #        my $indent := dentin();
+
         my $method := ($node.rxtype // 'concat');
+
 #        note("$indent regex_nfa $from -> $to $method") if $nfadeb;
 
-        $!LITEND := 1 unless $method eq 'literal' || $method eq 'concat' || $method eq 'alt';
+        $!LITEND := 1 unless $method eq 'literal'
+          || $method eq 'concat'
+          || $method eq 'alt';
 
-        my $result := self.HOW.can(self, $method)
+#        my $result :=
+        self.HOW.can(self, $method)
          ?? self."$method"($node, $from, $to)
-         !! self.fate($node, $from, $to);
-#        note("$indent ...regex_nfa returns $result") if $nfadeb;
+         !! self.fate($node, $from, $to)
 
+#        note("$indent ...regex_nfa returns $result") if $nfadeb;
 #        dentout($result);
-        $result
+#        $result
     }
 
-    method fate($node, $from, $to) {
+    method fate($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent fate $from -> $to") if $nfadeb;
 #        dentout(self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0)));
+
         self.addedge($from, 0, $EDGE_FATE, 0, :newedge(0));
     }
 
-    method alt($node, $from, $to) {
+    method alt($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note($node.dump) if $nfadeb;
+
         my $litendfront := $!LITEND;
         my $litendback;
-        for $node.list {
+
+        my int $m := nqp::elems($node);
+        my int $i;
+        while $i < $m {
+
 #            note("$indent alternative") if $nfadeb;
+
             $!LITEND := $litendfront;
-
-            my int $st := self.regex_nfa($_, $from, $to);
-
+            my int $state :=
+              self.regex_nfa(nqp::atpos($node, $i), $from, $to);
             $litendback := 1 if $!LITEND;
 
-            $to := $st if $to < 0 && $st > 0;
+            $to := $state if $to < 0 && $state > 0;
+            ++$i;
         }
+
         # stop litlen at recombination unless all alts are pure literal
         $!LITEND := $litendback;
+
 #        dentout($to);
-        $to;
+
+        $to
     }
 
     method altseq($node, $from, $to) {
