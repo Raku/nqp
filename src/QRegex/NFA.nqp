@@ -306,7 +306,7 @@ class QRegex::NFA {
             ++$i;
         }
 
-#        my $result := 
+#        my $result :=
         $from > 0 && $m >= 0
           ?? self.regex_nfa(nqp::atpos($node,$i), $from, $to)
           !! $to
@@ -344,50 +344,72 @@ class QRegex::NFA {
         }
     }
 
-    method charrange($node, $from, $to) {
+    method charrange($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent charrange $from -> $to") if $nfadeb;
-        my str $type := $node[0];
-        my $node1    := $node[1].value;
-        my $node2    := $node[2].value;
 
-        my $base_edge := $type eq 'ignoremark'
-          || $type eq 'ignorecase+ignoremark'
-          ?? $EDGE_CHARRANGE_M
-          !! $EDGE_CHARRANGE;
+        my str $type := nqp::atpos($node, 0);
+        my $node1    := nqp::atpos($node, 1).value;
+        my $node2    := nqp::atpos($node, 2).value;
 
-        my @to_add;
-        if $type eq 'ignorecase' || $type eq 'ignorecase+ignoremark' {
-            nqp::push(@to_add, nqp::ord(nqp::lc(nqp::chr($node1))));
-            nqp::push(@to_add, nqp::ord(nqp::lc(nqp::chr($node2))));
-            nqp::push(@to_add, nqp::ord(nqp::uc(nqp::chr($node1))));
-            nqp::push(@to_add, nqp::ord(nqp::uc(nqp::chr($node2))));
+        my $base_edge;
+        my $add;
+        if $type eq 'ignoremark' || $type eq 'ignorecase+ignoremark' {
+            $base_edge := $EDGE_CHARRANGE_M;
+
+            $node1 := nqp::chr($node1);
+            $node2 := nqp::chr($node2);
+            $add := nqp::list_i(
+              nqp::ord(nqp::lc($node1)),
+              nqp::ord(nqp::lc($node2)),
+              nqp::ord(nqp::uc($node1)),
+              nqp::ord(nqp::uc($node2))
+            );
         }
+
         else {
-            nqp::push(@to_add, $node1);
-            nqp::push(@to_add, $node2);
+            $base_edge := $EDGE_CHARRANGE;
+            $add := nqp::list_i($node1, $node2);
         }
 
         my $result;
-        for @to_add -> $ord0, $ord1 {
-            if $node.subtype eq 'zerowidth' {
-                my $next := self.addedge($from, -1, $base_edge + ?$node.negate,
-                    [$ord0, $ord1]);
-                $result := self.addedge($next, 0, $EDGE_FATE, 0);
-            }
-            else {
-                $result := self.addedge($from, $to, $base_edge + ?$node.negate,
-                    [$ord0, $ord1]);
-                $to := $result if $to < 0 && $result > 0;
-            }
+        my int $m := nqp::elems($add);
+        my int $i;
+
+        if $node.subtype eq 'zerowidth' {
+            while $i < $m {
+                $result := self.addedge(
+                  self.addedge(
+                    $from, -1, $base_edge + ?$node.negate, nqp::list(
+                     nqp::atpos_i($add, $i), nqp::atpos_i($add, $i + 1)
+                    )
+                  ),
+                  0, $EDGE_FATE, 0
+                );
+                $i := $i + 2;
+             }
         }
+        else {
+            while $i < $m {
+                $result := self.addedge(
+                  $from, $to, $base_edge + ?$node.negate, nqp::list(
+                    nqp::atpos_i($add, $i), nqp::atpos_i($add, $i + 1)
+                  )
+                );
+                $to := $result if $to < 0 && $result > 0;
+                $i  := $i + 2;
+             }
+        }
+
 #        dentout($result)
+
         $result
     }
 
     # Synthetics must be conveyed as strings; anything else can go as an
     # integer
-    sub ord-or-str($str, $idx) {
+    sub ord-or-str(str $str, int $idx) {
         my int $ord := nqp::ord($str, $idx);
         my str $chr := nqp::substr($str, $idx, 1);
         nqp::chr($ord) eq $chr ?? $ord !! $chr
