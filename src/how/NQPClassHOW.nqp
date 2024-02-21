@@ -893,20 +893,15 @@ knowhow NQPClassHOW {
         # Not in cache
         if nqp::isnull($value) {
             $!lock.protect({
-                $value := nqp::atkey($!caches, $key);
+                nqp::bindkey(
+                  (my $caches := nqp::clone($!caches)),
+                  $key,
+                  $value := $value_generator()
+                );
 
-                # Still not in cache
-                if nqp::isnull($value) {
-                    nqp::bindkey(
-                      (my $caches := nqp::clone($!caches)),
-                      $key,
-                      $value := $value_generator()
-                    );
-
-                    nqp::scwbdisable;
-                    $!caches := $caches;
-                    nqp::scwbenable;
-                }
+                nqp::scwbdisable;
+                $!caches := $caches;
+                nqp::scwbenable;
             });
         }
 
