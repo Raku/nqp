@@ -797,86 +797,116 @@ class QRegex::NFA {
         }
     }
 
-    method qastnode($node, $from, $to) {
+    method qastnode($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent qastnode $from -> $to") if $nfadeb;
 #        dentout($node.subtype eq 'zerowidth' || $node.subtype eq 'declarative' ??
 #            self.addedge($from, $to, $EDGE_EPSILON, 0) !!
 #            self.fate($node, $from, $to));
+
          $node.subtype eq 'zerowidth' || $node.subtype eq 'declarative'
            ?? self.addedge($from, $to, $EDGE_EPSILON, 0)
            !! self.fate($node, $from, $to);
     }
 
-    method subcapture($node, $from, $to) {
+    method subcapture($node, int $from, int $to) {
+
 #        my $indent := dentin();
 #        note("$indent subcapture $from -> $to") if $nfadeb;
 #        dentout(self.regex_nfa($node[0], $from, $to));
-         self.regex_nfa($node[0], $from, $to);
+
+         self.regex_nfa(nqp::atpos($node, 0), $from, $to);
     }
 
     method save(:$non_empty) {
+
 #        my $indent := dentin();
 #        note("$indent save") if $nfadeb;
+
         unless $!edges {
-            return 0 unless $non_empty;
-            self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1))
+            $non_empty
+              ?? self.addedge(1, 0, $EDGE_FATE, 0, :newedge(1))
+              !! (return 0)
         }
+
 #        dentout(@!states)
+
         @!states
     }
 
-    method mergesubrule(int $start, int $to, int $fate, $cursor, $name, %caller_seen?) {
+    method mergesubrule(
+      int $start,
+      int $to,
+      int $fate,
+          $cursor,
+      str $rule,
+          %caller_seen?
+    ) {
+
 #        my $indent := dentin();
+
         my %seen := nqp::clone(%caller_seen);
         my @substates;
-        my $meth;
-        my $n;
-        if nqp::istype($name,QAST::Var) {
-            $meth := $name.ann('coderef');
-            $n := $meth.name;
-#            note("$indent mergesubrule $n start $start to $to fate $fate") if $nfadeb;
-            if !nqp::existskey(%seen, $n) {
-                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
-                if nqp::isconcrete($nfa_meth) {
-                    @substates := $nfa_meth($meth);
-                    @substates := nqp::list if nqp::isnull(@substates);
-                }
-                %seen{$n} := 1;
-            }
-            else {
-#                note("$indent ...skipping $n to avoid left recursion") if $nfadeb;
-            }
-        }
-        elsif nqp::isconcrete($meth := nqp::tryfindmethod($cursor, $name)) {
+        if nqp::istype($rule, QAST::Var) {
+            my $method   := $rule.ann('coderef');
+            my str $name := $method.name;
+
 #            note("$indent mergesubrule $name start $start to $to fate $fate") if $nfadeb;
-            $n := $name;
-            if !nqp::existskey(%seen, $name) {
-                my $nfa_meth := nqp::tryfindmethod($meth, 'NFA');
-                if nqp::isconcrete($nfa_meth) {
-                    @substates := $nfa_meth($meth);
-                    @substates := nqp::list if nqp::isnull(@substates);
-                }
-                if !@substates {
-                    # Maybe it's a protoregex, in which case states are an alternation
-                    # of all of the possible rules.
-                    my %protorx      := $cursor.HOW.cache($cursor, "!protoregex_table", { $cursor."!protoregex_table"() });
-                    my $nfa          := QRegex::NFA.new;
-                    my int $gotmatch := 0;
-                    if nqp::existskey(%protorx, $name) {
-                        for %protorx{$name} -> $rxname {
-                            $nfa.addedge(1, 0, $EDGE_SUBRULE, $rxname);
-                            $gotmatch := 1;
-                        }
-                    }
-                    @substates := $nfa.states() if $gotmatch;
-                }
-                %seen{$name} := 1;
+
+            unless nqp::existskey(%seen, $name) {
+                my $nfa_method := nqp::tryfindmethod($method, 'NFA');
+                @substates     := nqp::ifnull($nfa_method($method), nqp::list)
+                  if nqp::isconcrete($nfa_method);
+                nqp::bindkey(%seen, $name, 1);
             }
-            else {
+
+#            else {
 #                note("$indent ...skipping $name to avoid left recursion") if $nfadeb;
-            }
+#            }
         }
+
+        elsif nqp::isconcrete(my $method := nqp::tryfindmethod($cursor,$rule)) {
+
+#            note("$indent mergesubrule $rule start $start to $to fate $fate") if $nfadeb;
+
+            unless nqp::existskey(%seen, $rule) {
+                my $nfa_method := nqp::tryfindmethod($method, 'NFA');
+                @substates     := nqp::ifnull($nfa_method($method), nqp::list)
+                  if nqp::isconcrete($nfa_method);
+
+                unless @substates {
+
+                    # Maybe it's a protoregex, in which case states are an
+                    # alternation of all of the possible rules.
+
+                    my %protorx      := $cursor.HOW.cache(
+                      $cursor, "!protoregex_table",
+                      { $cursor."!protoregex_table"() }
+                    );
+                    my $nfa := QRegex::NFA.new;
+
+                    my $rxnames := nqp::atkey(%protorx, $rule);
+                    unless nqp::isnull($rxnames) {
+                        my int $m := nqp::elems($rxnames);
+                        my int $i;
+                        while $i < $m {
+                            $nfa.addedge(
+                              1, 0, $EDGE_SUBRULE, nqp::atpos($rxnames, $i)
+                            );
+                            ++$i;
+                        }
+                        @substates := $nfa.states;
+                    }
+                }
+                nqp::bindkey(%seen, $rule, 1);
+            }
+
+#            else {
+#                note("$indent ...skipping $rule to avoid left recursion") if $nfadeb;
+#            }
+        }
+
 #        if $nfadeb {
 #            my int $s := 1;
 #            my int $send := +@substates;
@@ -927,6 +957,7 @@ class QRegex::NFA {
 #            }
 #        }
 #        dentout(self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen));
+
         self.mergesubstates($start, $to, $fate, @substates, $cursor, %seen);
     }
 
