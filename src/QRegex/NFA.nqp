@@ -1034,74 +1034,90 @@ class QRegex::NFA {
 
     method run(str $target, int $offset) {
         unless nqp::isconcrete($!nfa_object) {
+
 #            self.mydump() if $nfadeb;
+
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
             nqp::scwbenable();
         }
-        my $result := nqp::nfarunproto($!nfa_object, $target, $offset);
-        $result;
+
+        nqp::nfarunproto($!nfa_object, $target, $offset)
     }
 
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
+
         unless nqp::isconcrete($!nfa_object) {
+
 #            self.mydump() if $nfadeb;
+
             nqp::scwbdisable();
             $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
             nqp::scwbenable();
         }
-        my $result := nqp::nfarunalt($!nfa_object, $target, $offset, $bstack, $cstack, @labels);
-        $result;
+
+        nqp::nfarunalt($!nfa_object, $target, $offset, $bstack,$cstack, @labels)
     }
 
-    method generic() {
-        $!generic
-    }
+    method generic() { $!generic }
 
     method instantiate_generic($env) {
-        # Create a copy.
-        my $copy := nqp::create(self);
-        my @copied_states;
-        for @!states -> @values {
-            nqp::push(@copied_states, nqp::clone(@values));
+
+        # Set up object
+        my $obj := nqp::create(self);
+        my @new;
+        nqp::bindattr(  $obj, QRegex::NFA, '@!states', @new);
+        nqp::bindattr_i($obj, QRegex::NFA, '$!edges',  $!edges);
+
+        # Local copy for faster access
+        my @states := @!states;
+
+        my int $m := nqp::elems(@states);  # also for @new
+        my int $i;
+
+        # Pre-populate the new object with copies of all the states
+        # to endure that $obj.literal during the checks, will actually
+        # have something to work with
+        while $i < $m {
+            nqp::push(@new, nqp::clone(nqp::atpos(@states, $i)));
+            ++$i;
         }
-        nqp::bindattr(  $copy, QRegex::NFA, '@!states', @copied_states);
-        nqp::bindattr_i($copy, QRegex::NFA, '$!edges',  $!edges);
 
         # Work out what we need to do to instantiate it by replacing any
         # generic edges.
-        my int $from := 0;
-        for @copied_states -> @values {
-            my @output_values;
-            my int $i := 0;
-            my int $n := nqp::elems(@values);
-            while $i < $n {
-                my $act := @values[$i];
-                my $arg := @values[$i + 1];
-                my $to  := @values[$i + 2];
-                if $act == $EDGE_GENERIC_VAR {
+        $i := 0;
+        while $i < $m {
+            my @values := nqp::atpos(@new, $i);
+            my int $n  := nqp::elems(@values);
+            my int $j;
+
+            while $j < $n {
+                if nqp::atpos(@values, $j) == $EDGE_GENERIC_VAR {
+                    my $arg := nqp::atpos(@values, $j + 1);
+
                     if nqp::existskey($env, $arg) {
-                        $copy.literal(
+                        $obj.literal(
                           QAST::Regex.new(
                             :rxtype('literal'), nqp::atkey($env, $arg)
                           ),
-                          $from,
-                          $to
+                          $i,
+                          nqp::atpos(@values, $j + 2)  # to
                         );
-                        @values[$i] := $EDGE_EPSILON;
+                        nqp::bindpos(@values, $j, $EDGE_EPSILON);
                     }
                     else {
-                        @values[$i] := $EDGE_FATE;
+                        nqp::bindpos(@values, $j, $EDGE_FATE);
                     }
-                    @values[$i + 1] := 0;
-                    @values[$i + 2] := 0;
+
+                    nqp::bindpos(@values, $j + 1, 0);
+                    nqp::bindpos(@values, $j + 2, 0);
                 }
-                $i := $i + 3;
+                $j := $j + 3;
             }
-            ++$from;
+            ++$i;
         }
 
-        $copy
+        $obj
     }
 
     method __dump($dumper, $label) {
