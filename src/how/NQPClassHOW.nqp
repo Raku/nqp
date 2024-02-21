@@ -888,10 +888,29 @@ knowhow NQPClassHOW {
     }
 
     method cache($obj, $key, $value_generator) {
-        nqp::ifnull(
-          nqp::atkey($!caches, $key),
-          self.cache_add($obj, $key, $value_generator())
-        )
+        my $value := nqp::atkey($!caches, $key);
+
+        # Not in cache
+        if nqp::isnull($value) {
+            $!lock.protect({
+                $value := nqp::atkey($!caches, $key);
+
+                # Still not in cache
+                if nqp::isnull($value) {
+                    nqp::bindkey(
+                      (my $caches := nqp::clone($!caches)),
+                      $key,
+                      $value := $value_generator()
+                    );
+
+                    nqp::scwbdisable;
+                    $!caches := $caches;
+                    nqp::scwbenable;
+                }
+            });
+        }
+
+        $value
     }
 
     method flush_cache($obj) {
