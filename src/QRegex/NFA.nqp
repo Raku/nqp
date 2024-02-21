@@ -675,7 +675,7 @@ class QRegex::NFA {
 
 #        note("$indent quant $from -> $to $min $max") if $nfadeb;
 
-        if $min > 1 {
+        if $max > 1 || $min > 1 {
             my int $count;
             my int $state := -1;
             my int $has_sep := nqp::defined($node1);
