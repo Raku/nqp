@@ -1069,7 +1069,7 @@ class QRegex::NFA {
         nqp::bindattr(  $obj, QRegex::NFA, '@!states', @new);
         nqp::bindattr_i($obj, QRegex::NFA, '$!edges',  $!edges);
 
-        # Local copy for faster access
+        # Local alias for faster access
         my @states := @!states;
 
         my int $m := nqp::elems(@states);  # also for @new
@@ -1133,39 +1133,51 @@ class QRegex::NFA {
     }
 
     method optimize() {
-        my int $send := nqp::elems(@!states);
+
+        # Local alias for faster access
+        my @states := @!states;
+
+        my int $send := nqp::elems(@states);
+
 #        note("------------------------------------------\n   $send states") if $nfadeb;
 #        $ind := 0 if $nfadeb;
+
         if $send > 3 {
-            my @remap := nqp::list_i();
-            nqp::setelems(@remap, $send + 1);
-            my @refs := nqp::list_i();
-            nqp::setelems(@refs, $send + 1);
+            my @remap := nqp::setelems(nqp::list_i, $send + 1);
+            my @refs  := nqp::setelems(nqp::list_i, $send + 1);
 
 #            self.mydump() if $nfadeb;
 
             # first pass, remember single-edge epsilon states
-            my int $s := 0;
-            while ++$s < $send {
-                my @edges := @!states[$s];
+            my int $s := 1;  # skip fates
+            while $s < $send {
+                my @edges := nqp::atpos(@states, $s);
                 if nqp::elems(@edges) == 3 {
-                    my int $to := @edges[2];
-                    if @edges[0] == $EDGE_EPSILON {
-                        nqp::bindpos_i(@remap,$s,$to);
+                    my int $act := nqp::atpos(@edges, 0);
+                    my int $to  := nqp::atpos(@edges, 2);
+
+                    if $act == $EDGE_EPSILON {
+                        nqp::bindpos_i(@remap, $s, $to);
                     }
-                    elsif @edges[0] == $EDGE_FATE {
-                        # is this fate pointing to same fate, possibly via remappables?
+                    elsif $act == $EDGE_FATE {
+
+                        # is this fate pointing to same fate, possibly via
+                        # remappables?
                         if $to {
-                            while nqp::atpos_i(@remap,$to) {
-                                $to := nqp::atpos_i(@remap,$to);
+                            while nqp::atpos_i(@remap, $to) {
+                                $to := nqp::atpos_i(@remap, $to);
                             }
-                            my @sedges := @!states[$to];
-                            if nqp::elems(@sedges) && @sedges[0] == $EDGE_FATE && @sedges[1] == @edges[1] {
-                                nqp::bindpos_i(@remap,$s,$to);
-                            }
+
+                            my @sedges := nqp::atpos(@states, $to);
+                            nqp::bindpos_i(@remap, $s, $to)
+                              if nqp::elems(@sedges)
+                              && nqp::atpos(@sedges, 0) == $EDGE_FATE
+                              && nqp::atpos(@sedges, 1) == nqp::atpos(@edges,1);
                         }
                     }
                 }
+
+                ++$s;
             }
 
 #            $s := 0;
@@ -1176,76 +1188,100 @@ class QRegex::NFA {
 #
 #                }
 #            }
+#            note("now $send states before unlinking empties") if $nfadeb;
 
             # unlink all the empty epsilons, count resulting refs to each state
-#            note("now $send states before unlinking empties") if $nfadeb;
-            $s := 0;
-            while ++$s < $send {
-                if nqp::atpos_i(@remap,$s) && $s > 1 {
-                    @!states[$s] := nqp::list;
+            $s := 1;  # skip fates
+            while $s < $send {
+                if $s > 1 && nqp::atpos_i(@remap,$s) {
+                    nqp::bindpos(@states, $s, nqp::list);
                 }
+
                 else {
-                    my @edges := @!states[$s];
+                    my @edges    := nqp::atpos(@states, $s);
                     my int $eend := nqp::elems(@edges);
                     my int $e := 2;
                     while $e < $eend {
-                        my int $to := @edges[$e];
+                        my int $to := nqp::atpos(@edges, $e);
+
 #                        my int $was := $to;
-                        if $to && nqp::atpos_i(@remap,$to) {
-                            while nqp::atpos_i(@remap,$to) {
-                                $to := nqp::atpos_i(@remap,$to);
+
+                        if $to {
+                            my int $valid;
+                            while ($valid := nqp::atpos_i(@remap,$to)) {
+                                $to := $valid;
+
 #                                note("  chasing $was to $to") if $nfadeb;
                             }
-                            @edges[$e] := $to;
+                            nqp::bindpos(@edges, $e, $to);
                         }
-                        nqp::bindpos_i(@refs,$to, nqp::atpos_i(@refs,$to) + 1);
+
+                        nqp::bindpos_i(@refs, $to, nqp::atpos_i(@refs,$to) + 1);
                         $e := $e + 3;
                     }
                 }
+
+                ++$s;
             }
 
 #            self.mydump() if $nfadeb;
-            # replace epsilons to single edge, single ref states
 #            note("now $send states before stealing singleton edges") if $nfadeb;
-            $s := 0;
-            while ++$s < $send {
-                my @edges := @!states[$s];
-                my int $eend := nqp::elems(@edges);
-                my int $e := 0;
-                while $e < $eend {
-                    # note that singleton epsilon states were already removed last pass
-                    # so these epsilons are part of multiple edge states.
-                    if @edges[$e] == $EDGE_EPSILON {
-                        my int $to := @edges[$e+2];
-                        if $to {
-                            my @sedges := @!states[$to];
-                            if nqp::elems(@sedges) == 3 {
-#                                note("  $s stealing $to") if $nfadeb;
-                                @edges[$e]     := @sedges[0];
-                                @edges[$e + 1] := @sedges[1];
-                                @edges[$e + 2] := @sedges[2];
+            # replace epsilons to single edge, single ref states
+            $s := 1;  # skip fates
+            while $s < $send {
+                my @edges    := nqp::atpos(@states, $s);
 
-                                my int $refcnt := nqp::atpos_i(@refs,$to) - 1;
-                                nqp::bindpos_i(@refs,$to,$refcnt);
-                                @!states[$to] := nqp::list unless $refcnt; # remove if no refs remaining
+                my int $eend := nqp::elems(@edges);
+                my int $e;
+                while $e < $eend {
+                    # note that singleton epsilon states were already
+                    # removed last pass so these epsilons are part of
+                    # multiple edge states.
+                    if nqp::atpos(@edges, $e) == $EDGE_EPSILON {
+
+                        my int $to := nqp::atpos(@edges, $e + 2);
+                        if $to {
+                            my @sedges := nqp::atpos(@states, $to);
+
+                            if nqp::elems(@sedges) == 3 {
+
+#                                note("  $s stealing $to") if $nfadeb;
+
+                                nqp::bindpos(
+                                  @edges, $e,     nqp::atpos(@sedges, 0));
+                                nqp::bindpos(
+                                  @edges, $e + 1, nqp::atpos(@sedges, 1));
+                                nqp::bindpos(
+                                  @edges, $e + 2, nqp::atpos(@sedges, 2));
+
+                                my int $refcnt := nqp::atpos_i(@refs, $to) - 1;
+                                nqp::bindpos_i(@refs, $to, $refcnt);
+
+                                # remove if no refs remaining
+                                nqp::bindpos(@states, $to, nqp::list)
+                                  unless $refcnt;
                             }
                         }
                     }
                     $e := $e + 3;
                 }
+
+                ++$s;
             }
+
 #            self.mydump() if $nfadeb;
+#            note("now $send states before calculating remap") if $nfadeb;
 
             # build resequence map for states that still have any edges
-#            note("now $send states before calculating remap") if $nfadeb;
             my int $newend := 0;
-            $s := 0;
-            while ++$s < $send {
+            $s := 1;  # skip fates
+            while $s < $send {
                 nqp::bindpos_i(
-                  @remap, $s, nqp::elems(@!states[$s])
+                  @remap, $s, nqp::elems(nqp::atpos(@states, $s))
                     ?? ++$newend
                     !! 0 # zero out entries used earlier for epsilon removal
                 );
+                ++$s;
             }
 
 #            note("now $send states");
@@ -1257,46 +1293,74 @@ class QRegex::NFA {
 #                    note("\t$s -> $newpos");
 #                }
 #            }
-
-            # now move the states and remap the edges (if, in fact, any states were removed)
 #            self.mydump() if $nfadeb;
 #            note("now $send states mapping to $newend states") if $nfadeb;
+
+            # now move the states and remap the edges (if, in fact, any
+            # states were removed)
             if $newend < $send {
-                my @newstates := nqp::list();
-                nqp::setelems(@newstates, $newend);
-                nqp::bindpos(@newstates, 0, @!states[0]);  # copy fates
-                $s := 0;
-                while ++$s < $send {
-                    if nqp::elems(@!states[$s]) {
-                        my int $newpos := nqp::atpos_i(@remap,$s);
+                my @newstates := nqp::setelems(nqp::list, $newend);
+                # copy fates
+                nqp::bindpos(@newstates, 0, nqp::atpos(@states, 0));
+
+                $s := 1;  # skip fates
+                while $s < $send {
+                    if nqp::elems(nqp::atpos(@states, $s)) {
+                        my int $newpos := nqp::atpos_i(@remap, $s);
                         note("OOPS outrageous $newpos") if $newpos > $s;
+
                         if $newpos {
-                            nqp::bindpos(@newstates, $newpos, @!states[$s]);
-                            my @edges := @newstates[$newpos];
+                            nqp::bindpos(
+                              @newstates, $newpos, nqp::atpos(@states, $s));
+                            my @edges    := nqp::atpos(@newstates, $newpos);
+
                             my int $eend := nqp::elems(@edges);
                             my int $e := 2;
                             while $e < $eend {
-                                my int $to := @edges[$e];
+                                my int $to := nqp::atpos(@edges, $e);
+
 #                                 my int $act := nqp::bitand_i(@edges[$e-2], 0xff);
-                                if $to {
-                                    my int $to2 := nqp::atpos_i(@remap,$to);
+
+#                                if $to {
+#                                    my int $to2 := nqp::atpos_i(@remap,$to);
 #                                    note("In $s -> $newpos remapping " ~ $ACTIONS[$act] ~ " $to -> $to2") if $nfadeb;
-                                    @edges[$e] := $to2;
-                                }
+#                                    nqp::bindpos(@edges, $e, $to2);
+#                                 }
+
+                                nqp::bindpos(
+                                  @edges, $e, nqp::atpos_i(@remap, $to)
+                                ) if $to;
                                 $e := $e + 3;
                             }
+
                             # a small O(N^2) dup remover
                             $e := 3;
                             while $e < $eend {
-                                my int $act := nqp::bitand_i(@edges[$e], 0xff);
+                                my int $act :=
+                                  nqp::bitand_i(nqp::atpos(@edges, $e), 0xff);
+
                                 if $act < $EDGE_CHARLIST {
-                                    my int $f := 0;
+                                    my int $f;
                                     while $f < $e {
-                                        if $act == @edges[$f] && @edges[$e+2] == @edges[$f+2] && @edges[$e+1] == @edges[$f+1] {
+                                        if $act == nqp::atpos(@edges, $f)
+                                          && nqp::atpos(
+                                               @edges, $e + 2
+                                             ) == nqp::atpos(
+                                               @edges, $f + 2
+                                             )
+                                          && nqp::atpos(
+                                               @edges, $e + 1
+                                             ) == nqp::atpos(
+                                               @edges, $f + 1)
+                                        {
+
 #                                            note("Deleting dup edge at $s $e/$f") if $nfadeb;
-                                            $f := $e;
-                                            nqp::splice(@edges,nqp::list(),$e,3);
-                                            $e := $e - 3;
+
+                                            nqp::splice(
+                                              @edges, nqp::list(), $e, 3
+                                            );
+                                            $f    := $e;
+                                            $e    := $e - 3;
                                             $eend := $eend - 3;
                                         }
                                         $f := $f + 3;
@@ -1305,16 +1369,19 @@ class QRegex::NFA {
                                 $e := $e + 3;
                             }
                         }
-                        else {
+#                        else {
 #                            note("False mapping for $s") if $nfadeb;
-                        }
+#                        }
                     }
-                    else {
+#                    else {
 #                        note("Skipping $s") if $nfadeb;
-                    }
+#                    }
+
+                    ++$s;
                 }
                 nqp::bindattr(self, QRegex::NFA, '@!states', @newstates);
             }
+
 #            self.mydump() if $nfadeb;
         }
 
