@@ -840,7 +840,7 @@ class QRegex::NFA {
       int $to,
       int $fate,
           $cursor,
-      str $rule,
+          $rule,
           %caller_seen?
     ) {
 
