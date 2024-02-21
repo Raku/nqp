@@ -664,98 +664,135 @@ class QRegex::NFA {
         }
     }
 
-    method quant($node, $from, $to) {
+    method quant($node, int $from, int $to) {
+
 #        my $indent := dentin();
-        my int $min := 0 + ($node.min // 0);
-        my int $max := 0 + ($node.max // -1); # -1 means Inf
+
+        my int $min := $node.min // 0;
+        my int $max := $node.max // -1; # -1 means Inf
+        my $node0   := nqp::atpos($node, 0);
+        my $node1   := nqp::atpos($node, 1);
+
 #        note("$indent quant $from -> $to $min $max") if $nfadeb;
 
-        if $max > 1 || $min > 1 {
+        if $min > 1 {
             my int $count;
-            my int $st := -1;
-            my int $has_sep := nqp::defined($node[1]);
+            my int $state := -1;
+            my int $has_sep := nqp::defined($node1);
+
             while $count < $max || $count < $min {
                 if $count >= $min {
-                    $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
+                    $state := self.addedge($from, $to, $EDGE_EPSILON, 0);
+
 #                    note("$indent ...quant sf = $st") if $nfadeb;
                 }
-                if $has_sep && $count > 0 {
-                    $from := self.regex_nfa($node[1], $from, -1);
-                }
-                $from := self.regex_nfa($node[0], $from, $st);
-                $count := $count + 1;
+
+                $from := self.regex_nfa($node1, $from, -1)
+                  if $has_sep && $count > 0;
+
+                $from := self.regex_nfa($node0, $from, $state);
+                ++$count;
             }
-            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
-            if $max == -1 { # actually I think this is currently unreachable
+
+            $state := self.addedge($from, $to, $EDGE_EPSILON, 0);
+
+            if $max == -1 {
                 my int $start := self.addstate;
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
                 $from := $start;
+
                 my $looper := self.addstate;
-                self.addedge($looper, $to, $EDGE_EPSILON, 0);
+                self.addedge($looper, $to,   $EDGE_EPSILON, 0);
                 self.addedge($looper, $from, $EDGE_EPSILON, 0);
-                if $has_sep && $count > 0 {
-                    $from := self.regex_nfa($node[1], $from, -1);
-                }
-                self.regex_nfa($node[0], $from, $looper);
+                $from := self.regex_nfa($node1, $from, -1)
+                  if $has_sep && $count > 0;
+
+                self.regex_nfa($node0, $from, $looper);
             }
-            $to := $st if $to < 0 && $st > 0;
+
+            $to < 0 && $state > 0 ?? $state !! $to
+
+#            $to := $st if $to < 0 && $st > 0;
 #            note("$indent ...quant returns $to with st = $st") if $nfadeb;
 #            return dentout($to);
-            return $to;
         }
-        if $max == -1 {
-            if $min == 0 { # * quantifier
-                if nqp::defined($node[1]) { # * %
-                    my int $start := self.addstate;
-                    self.addedge($from, $start, $EDGE_EPSILON, 0);
-                    my int $looper := self.addstate;
-#                    note("$indent ...in quant *%, start = $start, looper = $looper") if $nfadeb;
-                    my int $st := self.regex_nfa($node[0], $start, $looper);
-                    self.regex_nfa($node[1], $looper, $start);
-                    self.addedge($looper, $to, $EDGE_EPSILON, 0) unless $to < 0;
-                    $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
-                    $to := $st if $to < 0 && $st > 0;
-                }
-                else {
-#                    note("$indent ...in quant *") if $nfadeb;
-                    self.regex_nfa($node[0], $from, $from);
-                    my int $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
-                    $to := $st if $to < 0 && $st > 0;
-                }
-            } else { # + quantifier
+
+        elsif $max == -1 {
+            my int $state;
+
+            if $min { # + quantifier
                 my int $start := self.addstate;
                 self.addedge($from, $start, $EDGE_EPSILON, 0);
                 my int $looper := self.addstate;
+
 #                note("$indent ...in quant +, start = $start, looper = $looper") if $nfadeb;
-                my int $st := self.regex_nfa($node[0], $start, $looper);
-                if nqp::defined($node[1]) {
-                    self.regex_nfa($node[1], $looper, $start);
+
+                $state := self.regex_nfa($node0, $start, $looper);
+                if nqp::defined($node1) {
+                    self.regex_nfa($node1, $looper, $start);
                 }
                 else {
+
 #                    note("$indent ...in quant +, no node[1]") if $nfadeb;
+
                     self.addedge($looper, $start, $EDGE_EPSILON, 0);
                 }
                 self.addedge($looper, $to, $EDGE_EPSILON, 0) unless $to < 0;
-                $to := $st if $to < 0 && $st > 0;
+
             }
+
+            else { # * quantifier
+
+                if nqp::defined($node1) { # * %
+                    my int $start := self.addstate;
+                    self.addedge($from, $start, $EDGE_EPSILON, 0);
+                    my int $looper := self.addstate;
+
+#                    note("$indent ...in quant *%, start = $start, looper = $looper") if $nfadeb;
+
+                    self.regex_nfa($node0, $start, $looper);
+                    self.regex_nfa($node1, $looper, $start);
+                    self.addedge($looper, $to, $EDGE_EPSILON, 0) unless $to < 0;
+                }
+
+                else {
+
+#                    note("$indent ...in quant *") if $nfadeb;
+
+                    self.regex_nfa($node0, $from, $from);
+                }
+
+                $state := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            }
+
+#            $to := $state if $to < 0 && $state > 0;
 #            note("$indent ...quant returns $to") if $nfadeb;
 #            dentout($to);
-             $to;
+#            $to
+
+            $to < 0 && $state > 0 ?? $state !! $to
         }
 
         elsif $min == 0 && $max == 1 { # ? quantifier
-            my int $st := self.regex_nfa($node[0], $from, $to);
-            $to := $st if $to < 0 && $st > 0;
-            $st := self.addedge($from, $to, $EDGE_EPSILON, 0);
-            $to := $st if $to < 0 && $st > 0;
+
+            my int $state := self.regex_nfa($node0, $from, $to);
+            $to := $state if $to < 0 && $state > 0;
+
+            $state := self.addedge($from, $to, $EDGE_EPSILON, 0);
+            $to < 0 && $state > 0 ?? $state !! $to
+
+#            $to := $st if $to < 0 && $st > 0;
 #            note("$indent ...quant returns $to") if $nfadeb;
 #            dentout($to);
-             $to;
+#            $to
+
         }
 
         else {
+
 #            note("$indent ...quant returns fate") if $nfadeb;
 #            dentout(self.fate($node, $from, $to))
+
              self.fate($node, $from, $to)
         }
     }
