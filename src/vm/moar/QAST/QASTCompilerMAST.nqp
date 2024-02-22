@@ -1,47 +1,5 @@
 # Per-compilation instance of the MAST compiler, holding state and driving the
 # compilation.
-
-sub POS($c) {
-    return $c - 65      if $c >= 65 && $c < 91;  # A..Z
-    return $c - 97 + 26 if $c >= 97 && $c < 123; # a..z
-    return $c - 48 + 52 if $c >= 48 && $c < 58;  # 0..9
-    return 62 if $c == 43;
-    return 63 if $c == 47;
-    return -1 if $c == 61;
-    nqp::die("Invalid data in base64_decode");
-}
-sub base64_decode(str $s) {
-    my $data := MAST::Bytecode.new;
-    my @n := (-1, -1, -1, -1);
-
-    my int $len := nqp::chars($s);
-    if $len % 4 {
-        nqp::die("Length of input to base64_decode is not a multiple of 4");
-    }
-
-    my int $pos := 0;
-    while $pos < $len {
-        @n[0] := POS(nqp::getcp_s($s, $pos++));
-        @n[1] := POS(nqp::getcp_s($s, $pos++));
-        @n[2] := POS(nqp::getcp_s($s, $pos++));
-        @n[3] := POS(nqp::getcp_s($s, $pos++));
-
-        if @n[0] == -1 || @n[1] == -1 || (@n[2] == -1 && @n[3] != -1) {
-            nqp::die("Invalid data in base64_decode");
-        }
-
-        $data.write_uint8(nqp::bitshiftl_i(@n[0], 2) + nqp::bitshiftr_i(@n[1], 4));
-        if @n[2] != -1 {
-            $data.write_uint8(nqp::bitshiftl_i(@n[1] +& 15, 4) + nqp::bitshiftr_i(@n[2], 2));
-        }
-        if @n[3] != -1 {
-            $data.write_uint8(nqp::add_i(nqp::bitshiftl_i(@n[2] +& 3, 6), @n[3]));
-        }
-    }
-
-    return $data;
-}
-
 my class MASTCompilerInstance {
     # The HLL that we're compiling.
     has $!hll;
