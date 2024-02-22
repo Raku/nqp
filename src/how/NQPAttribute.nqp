@@ -11,20 +11,19 @@ knowhow NQPAttribute {
 
     method new(:$name!, :$box_target, *%_) {
         my $attr := nqp::create(self);
-        my $what := $attr.WHAT;
-        nqp::bindattr($attr, $what,
-          '$!name', $name);
-        nqp::bindattr($attr, $what,
-          '$!box_target', bool($box_target));
+        nqp::bindattr($attr, NQPAttribute, '$!name',
+          $name);
+        nqp::bindattr($attr, NQPAttribute, '$!box_target',
+          bool($box_target));
 
-        nqp::bindattr($attr, $what,
-          '$!type', nqp::atkey(%_, 'type'));
-        nqp::bindattr($attr, $what,
-          '$!default', nqp::atkey(%_, 'default'));
-        nqp::bindattr($attr, $what,
-          '$!has_type', nqp::existskey(%_, 'type'));
-        nqp::bindattr($attr, $what,
-          '$!has_default', nqp::existskey(%_, 'default'));
+        nqp::bindattr($attr, NQPAttribute, '$!type',
+          nqp::atkey(%_, 'type'));
+        nqp::bindattr($attr, NQPAttribute, '$!default',
+          nqp::atkey(%_, 'default'));
+        nqp::bindattr($attr, NQPAttribute, '$!has_type',
+          nqp::existskey(%_, 'type'));
+        nqp::bindattr($attr, NQPAttribute, '$!has_default',
+          nqp::existskey(%_, 'default'));
         $attr
     }
 

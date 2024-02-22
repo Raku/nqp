@@ -36,23 +36,29 @@ knowhow NQPConcreteRoleHOW {
     # Creates a new instance of this meta-class.
     method new(:$name!, :$instance_of!) {
         my $obj  := nqp::create(self);
-        my $what := $obj.WHAT;
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!name',        $name       );
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!instance_of', $instance_of);
 
-        nqp::bindattr($obj, $what, '$!name',        $name       );
-        nqp::bindattr($obj, $what, '$!instance_of', $instance_of);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!methods', nqp::hash);
 
-        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!attributes',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!method_order',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!tweaks',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!method_names',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!multi_methods',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!collisions',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!roles',
+          nqp::list);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!role_typecheck_list',
+          nqp::list);
 
-        nqp::bindattr($obj, $what, '$!attributes',          nqp::list);
-        nqp::bindattr($obj, $what, '$!method_order',        nqp::list);
-        nqp::bindattr($obj, $what, '$!tweaks',              nqp::list);
-        nqp::bindattr($obj, $what, '$!method_names',        nqp::list);
-        nqp::bindattr($obj, $what, '$!multi_methods',       nqp::list);
-        nqp::bindattr($obj, $what, '$!collisions',          nqp::list);
-        nqp::bindattr($obj, $what, '$!roles',               nqp::list);
-        nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
-
-        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
+        nqp::bindattr($obj, NQPConcreteRoleHOW, '$!lock', NQPHOWLock.new);
         $obj
     }
 

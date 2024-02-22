@@ -35,20 +35,25 @@ knowhow NQPParametricRoleHOW {
     # Creates a new instance of this meta-class.
     method new(:$name!) {
         my $obj  := nqp::create(self);
-        my $what := $obj.WHAT;
 
-        nqp::bindattr($obj, $what, '$!name', $name);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!name', $name);
 
-        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!methods', nqp::hash);
 
-        nqp::bindattr($obj, $what, '$!attributes',          nqp::list);
-        nqp::bindattr($obj, $what, '$!method_order',        nqp::list);
-        nqp::bindattr($obj, $what, '$!tweaks',              nqp::list);
-        nqp::bindattr($obj, $what, '$!multi_methods',       nqp::list);
-        nqp::bindattr($obj, $what, '$!roles',               nqp::list);
-        nqp::bindattr($obj, $what, '$!role_typecheck_list', nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!attributes',
+          nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!method_order',
+          nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!tweaks',
+          nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!multi_methods',
+          nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!roles',
+          nqp::list);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!role_typecheck_list',
+          nqp::list);
 
-        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
+        nqp::bindattr($obj, NQPParametricRoleHOW, '$!lock', NQPHOWLock.new);
 
         $obj
     }

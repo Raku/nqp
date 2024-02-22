@@ -8,7 +8,7 @@ knowhow NQPModuleHOW {
 
     method new(:$name) {
         my $obj := nqp::create(self);
-        nqp::bindattr($obj, $obj.WHAT, '$!name', $name);
+        nqp::bindattr($obj, NQPModuleHOW, '$!name', $name);
         $obj
     }
 

@@ -77,24 +77,23 @@ knowhow NQPClassHOW {
     # Creates a new instance of this meta-class
     method new(:$name = '<anon>') {
         my $obj := nqp::create(self);
-        my $what := $obj.WHAT;
-        nqp::bindattr($obj, $what, '$!name', $name);
+        nqp::bindattr($obj, NQPClassHOW, '$!name', $name);
 
-        nqp::bindattr($obj, $what, '$!methods', nqp::hash);
-        nqp::bindattr($obj, $what, '$!caches',  nqp::hash);
+        nqp::bindattr($obj, NQPClassHOW, '$!methods', nqp::hash);
+        nqp::bindattr($obj, NQPClassHOW, '$!caches',  nqp::hash);
 
-        nqp::bindattr($obj, $what, '$!attributes',    nqp::list);
-        nqp::bindattr($obj, $what, '$!method_order',  nqp::list);
-        nqp::bindattr($obj, $what, '$!tweaks',        nqp::list);
-        nqp::bindattr($obj, $what, '$!multi_methods', nqp::list);
-        nqp::bindattr($obj, $what, '$!parents',       nqp::list);
-        nqp::bindattr($obj, $what, '$!roles',         nqp::list);
-        nqp::bindattr($obj, $what, '$!mro',           nqp::list);
-        nqp::bindattr($obj, $what, '$!done',          nqp::list);
-        nqp::bindattr($obj, $what, '$!BUILDPLAN',     nqp::list);
-        nqp::bindattr($obj, $what, '$!BUILDALLPLAN',  nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!attributes',    nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!method_order',  nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!tweaks',        nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!multi_methods', nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!parents',       nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!roles',         nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!mro',           nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!done',          nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!BUILDPLAN',     nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!BUILDALLPLAN',  nqp::list);
 
-        nqp::bindattr($obj, $what, '$!lock', NQPHOWLock.new);
+        nqp::bindattr($obj, NQPClassHOW, '$!lock', NQPHOWLock.new);
         $obj
     }
 

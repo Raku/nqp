@@ -9,10 +9,8 @@ knowhow NQPNativeHOW {
 
     method new(:$name) {
         my $obj  := nqp::create(self);
-        my $what := $obj.WHAT;
-
-        nqp::bindattr($obj, $what, '$!name',     $name);
-        nqp::bindattr($obj, $what, '$!unsigned', 0    );
+        nqp::bindattr($obj, NQPNativeHOW, '$!name',     $name);
+        nqp::bindattr($obj, NQPNativeHOW, '$!unsigned', 0    );
 
         $obj
     }

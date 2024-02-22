@@ -52,15 +52,22 @@ my knowhow Archetypes {
       :$parametric
     ) {
         my $arch := nqp::create(self);
-        my $what := $arch.WHAT;
-        nqp::bindattr($arch,$what,'$!nominal',         bool($nominal));
-        nqp::bindattr($arch,$what,'$!nominalizable',   bool($nominalizable));
-        nqp::bindattr($arch,$what,'$!inheritable',     bool($inheritable));
-        nqp::bindattr($arch,$what,'$!inheritalizable', bool($inheritalizable));
-        nqp::bindattr($arch,$what,'$!composable',      bool($composable));
-        nqp::bindattr($arch,$what,'$!composalizable',  bool($composalizable));
-        nqp::bindattr($arch,$what,'$!generic',         bool($generic));
-        nqp::bindattr($arch,$what,'$!parametric',      bool($parametric));
+        nqp::bindattr($arch ,Archetypes, '$!nominal',
+          bool($nominal));
+        nqp::bindattr($arch ,Archetypes, '$!nominalizable',
+          bool($nominalizable));
+        nqp::bindattr($arch ,Archetypes, '$!inheritable',
+          bool($inheritable));
+        nqp::bindattr($arch ,Archetypes, '$!inheritalizable',
+          bool($inheritalizable));
+        nqp::bindattr($arch ,Archetypes, '$!composable',
+          bool($composable));
+        nqp::bindattr($arch ,Archetypes, '$!composalizable',
+          bool($composalizable));
+        nqp::bindattr($arch ,Archetypes, '$!generic',
+          bool($generic));
+        nqp::bindattr($arch ,Archetypes, '$!parametric',
+          bool($parametric));
         $arch
     }
 

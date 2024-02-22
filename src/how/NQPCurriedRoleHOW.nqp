@@ -8,11 +8,8 @@ knowhow NQPCurriedRoleHOW {
 
     method new(:$curried_role!, :@pos_args!) {
         my $obj := nqp::create(self);
-        my $what := $obj.WHAT;
-
-        nqp::bindattr($obj, $what, '$!curried_role', $curried_role);
-        nqp::bindattr($obj, $what, '$!pos_args',     @pos_args    );
-
+        nqp::bindattr($obj, NQPCurriedRoleHOW, '$!curried_role', $curried_role);
+        nqp::bindattr($obj, NQPCurriedRoleHOW, '$!pos_args',     @pos_args    );
         $obj
     }
 
