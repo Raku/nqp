@@ -1,23 +1,5 @@
 knowhow RoleToClassApplier {
 
-    sub has_method($target, $name) {
-        nqp::existskey($target.HOW.method_table($target), $name)
-    }
-
-    sub has_attribute($target, $name) {
-        my @attributes := $target.HOW.attributes($target, :local);
-        if nqp::elems(@attributes) -> $m {
-            my $i := 0;
-            while $i < $m {
-                nqp::atpos(@attributes, $i).name eq $name
-                  ?? (return 1)
-                  !! ++$i;
-            }
-        }
-
-        0
-    }
-
     method apply($target, @roles) {
         my $class;                      # resulting class object to be composed
         my $class_how;                  # HOW of the composed class object

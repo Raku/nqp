@@ -3,40 +3,6 @@
 # the .apply class method.  No other public API is supplied.
 knowhow RoleToRoleApplier {
 
-    # Helper sub to push to a list only if the given value is not in that list
-    sub push_if_unique(@list, $value) {
-        if nqp::elems(@list) -> $m {
-            my $i := 0;
-            while $i < $m {
-                return nqp::null if nqp::eqaddr(nqp::atpos(@list, $i),$value);
-                ++$i;
-            }
-        }
-
-        nqp::push(@list, $value);
-    }
-
-    # Helper sub, returns 1 if the given attribute does not need to be added
-    # to the list of current attributes.  Dies if there is a name conflict
-    sub can_skip_attribute_by_name(@current, $that) {
-        my $skip;
-
-        my $m := nqp::elems(@current);
-        my $i := 0;
-        while $i < $m {
-            my $this := nqp::atpos(@current, $i);
-            if nqp::eqaddr($this, $that) {
-                $skip := 1;
-            }
-            elsif $this.name eq $that.name {
-                nqp::die("Attribute '" ~ $this.name ~ "' conflicts in role composition");
-            }
-            ++$i;
-        }
-
-        $skip
-    }
-
     # Aggregate all of the methods sharing names
     method apply($target, @roles) {
         my %methods_to_add;

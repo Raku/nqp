@@ -37,3 +37,59 @@ sub shortened_name($obj) {
     my $parts := nqp::split('::', $obj.HOW.name($obj) // '');
     $parts ?? nqp::atpos($parts, nqp::elems($parts) - 1) !! '<anon>'
 }
+
+# Helper sub to push to a list only if the given value is not in that list
+sub push_if_unique(@list, $value) {
+    if nqp::elems(@list) -> $m {
+        my $i := 0;
+        while $i < $m {
+            return nqp::null if nqp::eqaddr(nqp::atpos(@list, $i),$value);
+            ++$i;
+        }
+    }
+
+    nqp::push(@list, $value);
+}
+
+# Helper sub, returns 1 if the given attribute does not need to be added
+# to the list of current attributes.  Dies if there is a name conflict
+sub can_skip_attribute_by_name(@current, $that) {
+    my $skip;
+
+    my $m := nqp::elems(@current);
+    my $i := 0;
+    while $i < $m {
+        my $this := nqp::atpos(@current, $i);
+        if nqp::eqaddr($this, $that) {
+            $skip := 1;
+        }
+        elsif $this.name eq $that.name {
+            nqp::die("Attribute '" ~ $this.name ~ "' conflicts in role composition");
+        }
+        ++$i;
+    }
+
+    $skip
+}
+
+# Helper sub, returns 1 if the given target has a method with the
+# given name.
+sub has_method($target, $name) {
+    nqp::existskey($target.HOW.method_table($target), $name)
+}
+
+# Helper sub, returns 1 if the given target has an attribute with
+# the given name.
+sub has_attribute($target, $name) {
+    my @attributes := $target.HOW.attributes($target, :local);
+    if nqp::elems(@attributes) -> $m {
+        my $i := 0;
+        while $i < $m {
+            nqp::atpos(@attributes, $i).name eq $name
+              ?? (return 1)
+              !! ++$i;
+        }
+    }
+
+    0
+}
