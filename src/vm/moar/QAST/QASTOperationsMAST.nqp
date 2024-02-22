@@ -2410,6 +2410,20 @@ my constant CONST_MAP := nqp::hash(
     'EDGE_CODEPOINT_IM_LL',   21,
     'EDGE_CHARRANGE_M',       22,
     'EDGE_CHARRANGE_M_NEG',   23,
+
+    'MVM_reg_void',     0, # not really a register; just a result/return marker
+    'MVM_reg_int8',     1,
+    'MVM_reg_int16',    2,
+    'MVM_reg_int32',    3,
+    'MVM_reg_int64',    4,
+    'MVM_reg_num32',    5,
+    'MVM_reg_num64',    6,
+    'MVM_reg_str',      7,
+    'MVM_reg_obj',      8,
+    'MVM_reg_uint8',   17,
+    'MVM_reg_uint16',  18,
+    'MVM_reg_uint32',  19,
+    'MVM_reg_uint64',  20,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     my str $name := $op.name;
