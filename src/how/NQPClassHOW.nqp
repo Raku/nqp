@@ -307,7 +307,10 @@ knowhow NQPClassHOW {
                         nqp::push($done, $specialized);
 
                         # Make sure we know of any additional tweaks
-                        append($tweaks, $specialized.HOW.tweaks($specialized));
+                        my $how := $specialized.HOW;
+                        if nqp::tryfindmethod($how, 'tweaks') -> $method {
+                            append($tweaks, $method($how, $specialized));
+                        }
 
                         ++$i;
                     }
