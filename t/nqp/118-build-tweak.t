@@ -1,4 +1,4 @@
-plan(31);
+plan(34);
 
 my $buildA := 0;
 my $tweakA := 0;
@@ -143,4 +143,14 @@ is(nqp::join("",@*TWEAKS), "HTSR", 'Instantiating class H works');
 is($h.h, 777, 'was H class attribute set');
 is($h.r,  42, 'was R role attribute set');
 is($h.s, 137, 'was S role attribute set');
+is($h.t, 384, 'was T role attribute set');
+
+role RT does R does T { }
+
+class I does RT { }
+
+@*TWEAKS := ();
+my $i := I.new;
+is(nqp::join("",@*TWEAKS), "RT", 'Instantiating class I works');
+is($h.r,  42, 'was R role attribute set');
 is($h.t, 384, 'was T role attribute set');
