@@ -129,9 +129,11 @@ knowhow NQPConcreteRoleHOW {
 
     # Add a name collision in a threadsafe manner
     method add_collision($obj, $name) {
-        $!lock.protect({
-            $!collisions := push_on_clone($!collisions, $name);
-        });
+        if $name ne 'TWEAK' {
+            $!lock.protect({
+                $!collisions := push_on_clone($!collisions, $name);
+            });
+        }
     }
 
     # Compose the role. Beyond this point, no changes are allowed
