@@ -137,8 +137,12 @@ knowhow NQPParametricRoleHOW {
 
             # If not done by another thread
             unless $!composed {
-                my $roles := $!roles;
+
+                # Local aliases for faster access
+                my $roles  := $!roles;
+
                 if nqp::elems($roles) -> $m {
+                    my $tweaks         := nqp::clone($!tweaks);
                     my $typecheck_list := nqp::clone($!role_typecheck_list);
 
                     my $i := 0;
@@ -148,8 +152,13 @@ knowhow NQPParametricRoleHOW {
                         append(
                           $typecheck_list, $role.HOW.role_typecheck_list($role)
                         );
+
+                        # Make sure we know of any additional tweaks
+                        append($tweaks, $role.HOW.tweaks($role));
+
                         ++$i;
                     }
+                    $!tweaks              := $tweaks;
                     $!role_typecheck_list := $typecheck_list;
                 }
 
@@ -216,8 +225,8 @@ knowhow NQPParametricRoleHOW {
                     my $name   := $method.name;
 
                     my $instance := nqp::can($method, 'instantiate_generic')
-                        ?? $method.instantiate_generic($pad)
-                        !! $method.clone;
+                      ?? $method.instantiate_generic($pad)
+                      !! $method.clone;
 
                     # Hack in the proper name if so indicated
                     if nqp::eqat($name, '!!LATENAME!!', 0) {
@@ -275,6 +284,7 @@ knowhow NQPParametricRoleHOW {
     }
 
     method method_table($obj) { $!methods }
+    method tweaks($obj) { $!tweaks }
     method name($obj) { $!name }
     method role_typecheck_list($obj) { $!role_typecheck_list }
 

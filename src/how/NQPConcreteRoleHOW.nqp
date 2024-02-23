@@ -70,12 +70,6 @@ knowhow NQPConcreteRoleHOW {
         nqp::setdebugtypename(nqp::newtype($metarole, 'Uninstantiable'), $name);
     }
 
-    # Add a TWEAK code block.  Assumes it is being run in a protected
-    # block.
-    method add_tweak($code) {
-        $!tweaks := push_on_clone($!tweaks, $code);
-    }
-
     # Add a method in a threadsafe manner
     method add_method($obj, $name, $code) {
         nqp::die("Cannot add a null method '$name' to role '$!name'")
@@ -85,10 +79,6 @@ knowhow NQPConcreteRoleHOW {
           if nqp::existskey($!methods, $name);
 
         $!lock.protect({
-
-            # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
-            self.add_tweak($code) if $name eq 'TWEAK';
-
             $!methods      := bindkey_on_clone($!methods, $name, $code);
             $!method_order := push_on_clone($!method_order, $code);
             $!method_names := push_on_clone($!method_names, $name);
@@ -152,19 +142,35 @@ knowhow NQPConcreteRoleHOW {
 
             # If not done by another thread
             unless $!composed {
-                my $roles := $!roles;
+
+                # Local aliases for faster access
+                my $roles  := $!roles;
+
+                # Set up tweaks, first the one of this role, if any
+                my $tweaks := nqp::clone($!tweaks);
+                if nqp::atkey($!methods, 'TWEAK') -> $tweak {
+                    nqp::push($tweaks, $tweak);
+                }
+
                 if nqp::elems($roles) -> $m {
                     my $typecheck_list := nqp::clone($!role_typecheck_list);
                     my $i := 0;
                     while $i < $m {
                         my $role := nqp::atpos($roles, $i);
-                        nqp::push($typecheck_list, $role);
-                        nqp::push($typecheck_list, $role.HOW.instance_of($role));
+                        nqp::push($typecheck_list,$role);
+                        nqp::push($typecheck_list,$role.HOW.instance_of($role));
+
+                        # Make sure we know of any additional tweaks
+                        append($tweaks, $role.HOW.tweaks($role));
+
                         ++$i;
                     }
                     $!role_typecheck_list := $typecheck_list;
                     RoleToRoleApplier.apply($obj, $roles);
                 }
+
+                # Make sure the updated tweaks are known
+                $!tweaks := $tweaks;
 
                 # Mark composed.
                 nqp::settypecache($obj, [$obj.WHAT]);
@@ -183,6 +189,7 @@ knowhow NQPConcreteRoleHOW {
     method method_order($obj)        { $!method_order        }
     method method_names($obj)        { $!method_names        }
     method method_table($obj)        { $!methods             }
+    method tweaks($obj)              { $!tweaks              }
     method collisions($obj)          { $!collisions          }
     method name($obj)                { $!name                }
     method role_typecheck_list($obj) { $!role_typecheck_list }

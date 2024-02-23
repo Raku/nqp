@@ -32,4 +32,5 @@ knowhow NQPCurriedRoleHOW {
     method shortname($obj) { shortened_name($obj) }
 
     method curried_role($obj) { $!curried_role }
+    method tweaks($obj) { nqp::list }
 }

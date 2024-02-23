@@ -53,7 +53,7 @@ knowhow NQPClassHOW {
     has $!done;
 
     # If needed, a cached flattened method table accounting for all methods in
-    # this class and its parents. This is only needed in the sitaution that a
+    # this class and its parents. This is only needed in the situation that a
     # megamorphic callsite involves the class, so calculated and cached on
     # demand.
     has $!cached_all_method_table;
@@ -114,12 +114,6 @@ knowhow NQPClassHOW {
         nqp::setdebugtypename(nqp::setwho($new_type, nqp::hash), $name)
     }
 
-    # Add a TWEAK code block.  Assumes it is being run in a protected
-    # block.
-    method add_tweak($code) {
-        $!tweaks := push_on_clone($!tweaks, $code);
-    }
-
     method add_method($obj, $name, $code) {
         nqp::die("Cannot add a null method '$name' to class '$!name'")
           if nqp::isnull($code) || !nqp::defined($code);
@@ -128,9 +122,6 @@ knowhow NQPClassHOW {
           if nqp::existskey($!methods, $name);
 
         $!lock.protect({
-
-            # Make sure a TWEAK will get added to the BUILD(ALL)PLAN
-            self.add_tweak($code) if $name eq 'TWEAK';
 
             $!methods      := bindkey_on_clone($!methods, $name, $code);
             $!method_order := push_on_clone($!method_order, $code);
@@ -291,8 +282,16 @@ knowhow NQPClassHOW {
 
             # If not done by another thread
             unless $!composed {
-                my $roles   := $!roles;
-                my $done    := $!done;
+
+                # Local aliases for faster access
+                my $roles  := $!roles;
+                my $done   := $!done;
+
+                # Set up tweaks, first the one of this class, if any
+                my $tweaks := nqp::clone($!tweaks);
+                if nqp::atkey($!methods, 'TWEAK') -> $tweak {
+                    nqp::push($tweaks, $tweak);
+                }
 
                 # First, specialize them with the type object for this type (so
                 # their $?CLASS is correct). Then delegate to the composer
@@ -306,12 +305,19 @@ knowhow NQPClassHOW {
                         nqp::push(@specialized_roles, $specialized);
                         nqp::push($done, $role);
                         nqp::push($done, $specialized);
+
+                        # Make sure we know of any additional tweaks
+                        append($tweaks, $specialized.HOW.tweaks($specialized));
+
                         ++$i;
                     }
 
                     $!done := $done;  # update atomically
                     RoleToClassApplier.apply($obj, @specialized_roles);
                 }
+
+                # Make sure the updated tweaks are known
+                $!tweaks := $tweaks;
 
                 # If we have no parents and we're not called NQPMu then add the
                 # default parent
@@ -791,6 +797,7 @@ knowhow NQPClassHOW {
     method mro($obj)                 { $!mro          }
     method role_typecheck_list($obj) { $!done         }
     method method_table($obj)        { $!methods      }
+    method tweaks($obj)              { $!tweaks       }
 
     method methods($obj, :$local = 0, :$all) {
         if $local {
