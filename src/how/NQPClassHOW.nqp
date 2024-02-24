@@ -657,6 +657,14 @@ knowhow NQPClassHOW {
         nqp::settypecache($obj, @tc)
     }
 
+#?if !moar
+    sub reverse(@in) {
+        my @out;
+        for @in { nqp::unshift(@out, $_) }
+        @out
+    }
+#?endif
+
     # Create and publish the method cache.  Assumes being run inside a
     # protected block
     method publish_method_cache($obj) {
