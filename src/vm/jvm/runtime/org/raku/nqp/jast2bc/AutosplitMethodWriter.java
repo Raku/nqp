@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+
 @SuppressWarnings("unchecked") /* our asm is stripped */
 class AutosplitMethodWriter extends MethodNode {
 
@@ -49,7 +52,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     /** The real instructions (not branches) in program order.  Filled out by {@link getControlFlow()}. */
     private AbstractInsnNode[] insnList;
-    private Map<AbstractInsnNode, Integer> insnMap;
+    private Object2IntOpenHashMap insnMap;
     private int[] lineNumbers;
 
     /** Array of (source, target) pairs.  Filled out by {@link getControlFlow()}.  -1 means from-outside. */
@@ -235,8 +238,8 @@ class AutosplitMethodWriter extends MethodNode {
     private void getInstructions() {
         // munge the linked list of insns we got from ASM into something saner
         ArrayList<AbstractInsnNode> tempInsnList = new ArrayList< >();
-        insnMap = new HashMap< >();
-        HashMap<AbstractInsnNode, Integer> linesMap = new HashMap< >();
+        insnMap = new Object2IntOpenHashMap();
+        Object2IntOpenHashMap linesMap = new Object2IntOpenHashMap();
 
         for (AbstractInsnNode n = instructions.getFirst(); n != null; n = n.getNext()) {
             insnMap.put(n, tempInsnList.size());
@@ -254,8 +257,8 @@ class AutosplitMethodWriter extends MethodNode {
         lineNumbers = new int[insnList.length];
 
         for (int i = 0; i < insnList.length; i++) {
-            Integer ll = linesMap.get(insnList[i]);
-            if (ll != null) curLine = ll.intValue();
+            int ll = linesMap.getOrDefault(insnList[i], -1);
+            if (ll != -1) curLine = ll;
             lineNumbers[i] = curLine;
         }
     }
@@ -277,23 +280,23 @@ class AutosplitMethodWriter extends MethodNode {
             switch (node.getType()) {
                 case AbstractInsnNode.JUMP_INSN:
                     JumpInsnNode ji = (JumpInsnNode) node;
-                    succTemp.add(new ControlEdge(insnNo, insnMap.get(ji.label), null));
+                    succTemp.add(new ControlEdge(insnNo, insnMap.getInt(ji.label), null));
                     if (node.getOpcode() != Opcodes.GOTO)
                         succTemp.add(new ControlEdge(insnNo, insnNo+1, null));
                     break;
 
                 case AbstractInsnNode.TABLESWITCH_INSN:
                     TableSwitchInsnNode tsi = (TableSwitchInsnNode) node;
-                    succTemp.add(new ControlEdge(insnNo, insnMap.get(tsi.dflt), null));
+                    succTemp.add(new ControlEdge(insnNo, insnMap.getInt(tsi.dflt), null));
                     for (int i = 0; i  < tsi.labels.size(); i++)
-                        succTemp.add(new ControlEdge(insnNo, insnMap.get(tsi.labels.get(i)), null));
+                        succTemp.add(new ControlEdge(insnNo, insnMap.getInt(tsi.labels.get(i)), null));
                     break;
 
                 case AbstractInsnNode.LOOKUPSWITCH_INSN:
                     LookupSwitchInsnNode lsi = (LookupSwitchInsnNode) node;
-                    succTemp.add(new ControlEdge(insnNo, insnMap.get(lsi.dflt), null));
+                    succTemp.add(new ControlEdge(insnNo, insnMap.getInt(lsi.dflt), null));
                     for (int i = 0; i  < lsi.labels.size(); i++)
-                        succTemp.add(new ControlEdge(insnNo, insnMap.get(lsi.labels.get(i)), null));
+                        succTemp.add(new ControlEdge(insnNo, insnMap.getInt(lsi.labels.get(i)), null));
                     break;
 
                 default:
@@ -306,9 +309,9 @@ class AutosplitMethodWriter extends MethodNode {
         }
 
         for (TryCatchBlockNode tcb : (List<TryCatchBlockNode>) tryCatchBlocks) {
-            int start = insnMap.get(tcb.start);
-            int end = insnMap.get(tcb.end);
-            int handler = insnMap.get(tcb.handler);
+            int start = insnMap.getInt(tcb.start);
+            int end = insnMap.getInt(tcb.end);
+            int handler = insnMap.getInt(tcb.handler);
             String type = tcb.type == null ? "java/lang/Throwable" : tcb.type;
 
             for (int i = start; i < end; i++)
@@ -1264,7 +1267,7 @@ class AutosplitMethodWriter extends MethodNode {
         for (int i = 0; i < entryPts.length; i++)
             entryTrampolineLabels[i] = new Label();
 
-        Map<Integer, Label> exitTrampolineLabels = new HashMap< >();
+        Int2ObjectOpenHashMap exitTrampolineLabels = new Int2ObjectOpenHashMap();
         for (int i = 0; i < exitPts.length; i++)
             exitTrampolineLabels.put(exitPts[i], new Label());
 
@@ -1289,13 +1292,13 @@ class AutosplitMethodWriter extends MethodNode {
 
         // emit salient tryblocks
         for (TryCatchBlockNode tcbn : (List<TryCatchBlockNode>) tryCatchBlocks) {
-            int nstart = Math.max(begin, insnMap.get(tcbn.start));
-            int nend   = Math.min(end, insnMap.get(tcbn.end));
-            int nhndlr = insnMap.get(tcbn.handler);
+            int nstart = Math.max(begin, insnMap.getInt(tcbn.start));
+            int nend   = Math.min(end, insnMap.getInt(tcbn.end));
+            int nhndlr = insnMap.getInt(tcbn.handler);
             if (nstart >= nend) continue;
 
             v.visitTryCatchBlock(insnLabels[nstart - begin], insnLabels[nend - begin],
-                    exitTrampolineLabels.containsKey(nhndlr) ? exitTrampolineLabels.get(nhndlr) : insnLabels[nhndlr - begin],
+                    exitTrampolineLabels.containsKey(nhndlr) ? (Label)exitTrampolineLabels.get(nhndlr) : insnLabels[nhndlr - begin],
                     tcbn.type);
         }
 
@@ -1330,7 +1333,7 @@ class AutosplitMethodWriter extends MethodNode {
         }
 
         if (fallthru)
-            v.visitJumpInsn(Opcodes.GOTO, exitTrampolineLabels.get(end));
+            v.visitJumpInsn(Opcodes.GOTO, (Label)exitTrampolineLabels.get(end));
 
         int lineno = -1;
         for (int i = begin; i < end; i++) {
@@ -1344,7 +1347,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         // uncommon exit code
         for (int pt : exitPts) {
-            v.visitLabel(exitTrampolineLabels.get(pt));
+            v.visitLabel((Label)exitTrampolineLabels.get(pt));
             Frame f = types[pt];
             for (int j = f.sp-1; j >= nlocal; j--) {
                 stackExitCode(v, stash, scratch, j, f.stack[j]);
@@ -1377,7 +1380,7 @@ class AutosplitMethodWriter extends MethodNode {
     private String[] box_types = new String[] { "java/lang/Integer", "java/lang/Long", "java/lang/Float", "java/lang/Double" };
     private String[] box_descs = new String[] { "(I)V", "(J)V", "(F)V", "(D)V" };
 
-    private void emitFragmentInsn(MethodVisitor v, int iix, int begin, Label[] insnLabels, Map<Integer,Label> exitTrampolineLabels, Set<String> spilledUTypes) {
+    private void emitFragmentInsn(MethodVisitor v, int iix, int begin, Label[] insnLabels, Int2ObjectOpenHashMap exitTrampolineLabels, Set<String> spilledUTypes) {
         v.visitLabel(insnLabels[iix - begin]);
         AbstractInsnNode ai = insnList[iix];
 
@@ -1486,10 +1489,10 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
-    private Label mapLabel(LabelNode ln, int begin, Label[] insnLabels, Map<Integer,Label> exitTrampolineLabels) {
-        int lni = insnMap.get(ln);
+    private Label mapLabel(LabelNode ln, int begin, Label[] insnLabels, Int2ObjectOpenHashMap exitTrampolineLabels) {
+        int lni = insnMap.getInt(ln);
         if (exitTrampolineLabels.containsKey(lni))
-            return exitTrampolineLabels.get(lni);
+            return (Label)exitTrampolineLabels.get(lni);
 
         return insnLabels[lni - begin];
     }
