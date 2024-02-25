@@ -1816,9 +1816,9 @@ public final class Ops {
     /* Required named parameter getting. */
     public static SixModelObject namedparam_o(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
                 return (SixModelObject)args[lookup >> 6];
@@ -1839,9 +1839,9 @@ public final class Ops {
     }
     public static long namedparam_i(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
                 return (long)args[lookup >> 6];
@@ -1862,9 +1862,9 @@ public final class Ops {
     }
     public static double namedparam_n(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
                 return (double)args[lookup >> 6];
@@ -1885,9 +1885,9 @@ public final class Ops {
     }
     public static String namedparam_s(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
                 return (String)args[lookup >> 6];
@@ -1910,9 +1910,9 @@ public final class Ops {
     /* Optional named parameter getting. */
     public static SixModelObject namedparam_opt_o(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
@@ -1936,9 +1936,9 @@ public final class Ops {
     }
     public static long namedparam_opt_i(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
@@ -1962,9 +1962,9 @@ public final class Ops {
     }
     public static double namedparam_opt_n(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
@@ -1988,9 +1988,9 @@ public final class Ops {
     }
     public static String namedparam_opt_s(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
@@ -2022,9 +2022,10 @@ public final class Ops {
 
         /* Populate it. */
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        for (String name : cf.workingNameMap.keySet()) {
-            Integer lookup = cf.workingNameMap.get(name);
+            cf.workingNameMap = new Object2IntOpenHashMap(cs.nameMap);
+        for (Object n : cf.workingNameMap.keySet()) {
+            String name = (String)n;
+            int lookup = cf.workingNameMap.getInt(name);
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
                 result.bind_key_boxed(tc, name, (SixModelObject)args[lookup >> 6]);
@@ -2268,8 +2269,9 @@ public final class Ops {
             SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
             SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
 
-            for (String name : cc.descriptor.nameMap.keySet()) {
-                Integer flagged = cc.descriptor.nameMap.get(name);
+            for (Object n : cc.descriptor.nameMap.keySet()) {
+                String name = (String)n;
+                int flagged = cc.descriptor.nameMap.getInt(name);
                 int i = flagged >> 6;
 
                 SixModelObject arg = null;

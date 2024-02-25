@@ -3,6 +3,8 @@ package org.raku.nqp.runtime;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import org.raku.nqp.sixmodel.SixModelObject;
 import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.reprs.VMHashInstance;
@@ -24,12 +26,12 @@ public class CallSiteDescriptor {
     /* Flags, one per argument that is being passed. */
     public byte[] argFlags;
 
-    /* Maps string names for named params do an Integer that has
+    /* Maps string names for named params to an int that has
      * arg index << 6 + type flag. */
-    public HashMap<String, Integer> nameMap;
+    public Object2IntOpenHashMap nameMap;
 
     /* Singleton empty name map. */
-    private static HashMap<String, Integer> emptyNameMap = new HashMap<String, Integer>();
+    private static Object2IntOpenHashMap emptyNameMap = new Object2IntOpenHashMap();
 
     /* Number of normal positional arguments. */
     public int numPositionals = 0;
@@ -43,7 +45,7 @@ public class CallSiteDescriptor {
     public CallSiteDescriptor(byte[] flags, String[] names) {
         argFlags = flags;
         if (names != null)
-            nameMap = new HashMap<String, Integer>();
+            nameMap = new Object2IntOpenHashMap();
         else
             nameMap = emptyNameMap;
         this.names = names;

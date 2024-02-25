@@ -1,6 +1,6 @@
 package org.raku.nqp.runtime;
 
-import java.util.HashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import org.raku.nqp.sixmodel.InvocationSpec;
 import org.raku.nqp.sixmodel.SerializationContext;
@@ -67,7 +67,7 @@ public class CallFrame implements Cloneable {
     /**
      * Current working copy of the named arguments data.
      */
-    public HashMap<String, Integer> workingNameMap;
+    public Object2IntOpenHashMap workingNameMap;
 
     /**
      * Serialization context this frame is associated with, if any.
