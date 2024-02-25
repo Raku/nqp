@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import org.raku.nqp.runtime.CallFrame;
 import org.raku.nqp.runtime.CodeRef;
 import org.raku.nqp.runtime.ExceptionHandling;
@@ -47,7 +49,7 @@ public class SerializationWriter {
     private ThreadContext tc;
     private SerializationContext sc;
     private ArrayList<String> sh;
-    private HashMap<String, Integer> stringMap;
+    private Object2IntOpenHashMap stringMap;
 
     private ArrayList<SerializationContext> dependentSCs;
     private ArrayList<CallFrame> contexts;
@@ -74,7 +76,7 @@ public class SerializationWriter {
         this.tc = tc;
         this.sc = sc;
         this.sh = sh;
-        this.stringMap = new HashMap<String, Integer>();
+        this.stringMap = new Object2IntOpenHashMap();
         this.dependentSCs = new ArrayList<SerializationContext>();
         this.contexts = new ArrayList<CallFrame>();
         this.outputs = new ByteBuffer[10];
@@ -123,8 +125,8 @@ public class SerializationWriter {
             return 0;
 
         /* Did we already see it? */
-        Integer idx = stringMap.get(s);
-        if (idx != null)
+        int idx = stringMap.getOrDefault(s, -1);
+        if (idx != -1)
             return idx;
 
         /* Otherwise, need to add it to the heap. */
