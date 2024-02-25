@@ -1181,8 +1181,8 @@ public final class Ops {
     public static SixModelObject getlex(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
@@ -1191,8 +1191,8 @@ public final class Ops {
     public static long getlex_i(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found];
             curFrame = curFrame.outer;
         }
@@ -1201,8 +1201,8 @@ public final class Ops {
     public static long getlex_u(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found];
             curFrame = curFrame.outer;
         }
@@ -1211,8 +1211,8 @@ public final class Ops {
     public static double getlex_n(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.nLex[found];
             curFrame = curFrame.outer;
         }
@@ -1221,8 +1221,8 @@ public final class Ops {
     public static String getlex_s(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.sLex[found];
             curFrame = curFrame.outer;
         }
@@ -1231,8 +1231,8 @@ public final class Ops {
     public static SixModelObject getlexouter(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.outer;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
@@ -1243,8 +1243,8 @@ public final class Ops {
     public static SixModelObject bindlex(String name, SixModelObject value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1253,8 +1253,8 @@ public final class Ops {
     public static long bindlex_i(String name, long value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1263,8 +1263,8 @@ public final class Ops {
     public static long bindlex_u(String name, long value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.uTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.uTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1273,8 +1273,8 @@ public final class Ops {
     public static double bindlex_n(String name, double value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.nLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1283,8 +1283,8 @@ public final class Ops {
     public static String bindlex_s(String name, String value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.sLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1395,11 +1395,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.iLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1413,11 +1413,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.iLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1431,11 +1431,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No num lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.nLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1449,11 +1449,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No str lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.sLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1465,8 +1465,8 @@ public final class Ops {
     public static SixModelObject bindlexdyn(String name, SixModelObject value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
-            Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (idx != null) {
+            int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (idx != -1) {
                 curFrame.oLex[idx] = value;
                 return value;
             }
@@ -1477,8 +1477,8 @@ public final class Ops {
     public static SixModelObject getlexdyn(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
-            Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (idx != null)
+            int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (idx != -1)
                 return curFrame.oLex[idx];
             curFrame = curFrame.caller;
         }
@@ -1489,8 +1489,8 @@ public final class Ops {
         while (curCallerFrame != null) {
             CallFrame curFrame = curCallerFrame;
             while (curFrame != null) {
-                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (found != null)
+                int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != -1)
                     return curFrame.oLex[found];
                 curFrame = curFrame.outer;
             }
@@ -1504,8 +1504,8 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame curFrame = ((ContextRefInstance)ctx).context;
             while (curFrame != null) {
-                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (found != null)
+                int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != -1)
                     return curFrame.oLex[found];
                 curFrame = curFrame.outer;
             }
@@ -1519,8 +1519,8 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame curFrame = ((ContextRefInstance)ctx).context;
             while (curFrame != null) {
-                Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (idx != null)
+                int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (idx != -1)
                     return curFrame.oLex[idx];
                 curFrame = curFrame.caller;
             }
@@ -1536,8 +1536,8 @@ public final class Ops {
             while (curCallerFrame != null) {
                 CallFrame curFrame = curCallerFrame;
                 while (curFrame != null) {
-                    Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                    if (found != null)
+                    int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                    if (found != -1)
                         return curFrame.oLex[found];
                     curFrame = curFrame.outer;
                 }
@@ -1647,11 +1647,11 @@ public final class Ops {
     public static long lexprimspec(SixModelObject pad, String key, ThreadContext tc) {
         if (pad instanceof ContextRefInstance) {
             StaticCodeInfo sci = ((ContextRefInstance)pad).context.codeRef.staticInfo;
-            if (sci.oTryGetLexicalIdx(key) != null) return StorageSpec.BP_NONE;
-            if (sci.iTryGetLexicalIdx(key) != null) return StorageSpec.BP_INT;
-            if (sci.uTryGetLexicalIdx(key) != null) return StorageSpec.BP_UINT;
-            if (sci.nTryGetLexicalIdx(key) != null) return StorageSpec.BP_NUM;
-            if (sci.sTryGetLexicalIdx(key) != null) return StorageSpec.BP_STR;
+            if (sci.oTryGetLexicalIdx(key) != -1) return StorageSpec.BP_NONE;
+            if (sci.iTryGetLexicalIdx(key) != -1) return StorageSpec.BP_INT;
+            if (sci.uTryGetLexicalIdx(key) != -1) return StorageSpec.BP_UINT;
+            if (sci.nTryGetLexicalIdx(key) != -1) return StorageSpec.BP_NUM;
+            if (sci.sTryGetLexicalIdx(key) != -1) return StorageSpec.BP_STR;
             throw ExceptionHandling.dieInternal(tc, "Invalid lexical name passed to lexprimspec");
         }
         else {

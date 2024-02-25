@@ -254,8 +254,8 @@ public abstract class CompilationUnit {
             String handle  = bits[i + 1];
             int    scIdx   = Integer.parseInt(bits[i + 2]);
             int    flags   = Integer.parseInt(bits[i + 3]);
-            Integer idx = cr.staticInfo.oTryGetLexicalIdx(lexName);
-            if (idx == null)
+            int idx = cr.staticInfo.oTryGetLexicalIdx(lexName);
+            if (idx == -1)
                 new RuntimeException("Invalid lexical name '" + lexName + "' in static lexical installation");
             cr.staticInfo.oLexStatic[idx] = tc.gc.scs.get(handle).getObject(scIdx);
             cr.staticInfo.oLexStaticFlags[idx] = (byte)flags;
