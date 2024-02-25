@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import org.raku.nqp.sixmodel.reprs.CallCaptureInstance;
 import org.raku.nqp.sixmodel.reprs.SCRefInstance;
 import org.raku.nqp.sixmodel.SixModelObject;
@@ -119,7 +121,7 @@ public class ThreadContext {
     Random random;
 
     // odds and ends for nqp
-    ArrayList<Integer> fates = new ArrayList<Integer>(), curst = new ArrayList<Integer>(), nextst = new ArrayList<Integer>();
+    IntArrayList fates = new IntArrayList(), curst = new IntArrayList(), nextst = new IntArrayList();
     long[] curlonglit = new long[200];
 
     public ThreadContext(GlobalContext gc) {
