@@ -246,6 +246,7 @@ sub configure_jars {
         {
             asm => [qw<3rdparty asm asm-4.1.jar>],
             'asm-tree' => [qw<3rdparty asm asm-tree-4.1.jar>],
+            fastutil => [qw<3rdparty fastutil fastutil-8.5.13-min.jar>],
             jline => [qw<3rdparty jline jline-1.0.jar>],
             jna => [qw<3rdparty jna jna-4.5.0.jar>],
             'jna-platform' => [qw<3rdparty jna jna-platform-4.5.0.jar>],
