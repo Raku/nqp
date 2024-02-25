@@ -67,6 +67,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntComparators;
 
 import org.raku.nqp.io.FileHandle;
 import org.raku.nqp.io.IIOBindable;
@@ -6778,9 +6781,9 @@ public final class Ops {
         long orig_pos = pos;
 
         /* Clear out other re-used arrays. */
-        ArrayList<Integer> fates = tc.fates;
-        ArrayList<Integer> curst = tc.curst;
-        ArrayList<Integer> nextst = tc.nextst;
+        IntArrayList fates = tc.fates;
+        IntArrayList curst = tc.curst;
+        IntArrayList nextst = tc.nextst;
         curst.clear();
         nextst.clear();
         fates.clear();
@@ -6794,7 +6797,7 @@ public final class Ops {
              *    my @curst := @nextst;
              *    @nextst := [];
              * But avoids an extra allocation per offset. */
-            ArrayList<Integer> temp = curst;
+            IntArrayList temp = curst;
             curst = nextst;
             temp.clear();
             nextst = temp;
@@ -6804,8 +6807,8 @@ public final class Ops {
 
             while (!curst.isEmpty()) {
                 int top = curst.size() - 1;
-                int st = curst.get(top);
-                curst.remove(top);
+                int st = curst.getInt(top);
+                curst.removeInt(top);
                 if (st <= numStates) {
                     if (done[st] == gen)
                         continue;
@@ -6829,8 +6832,8 @@ public final class Ops {
                             arg &= 0xffffff;   // can go away after reboostrap?
                             for (int j = 0; j < fates.size(); j++) {
                                 if (foundFate)
-                                    fates.set(j - 1, fates.get(j));
-                                if (fates.get(j )== arg) {
+                                    fates.set(j - 1, fates.getInt(j));
+                                if (fates.getInt(j )== arg) {
                                     foundFate = true;
                                     if (j < prevFates)
                                         prevFates--;
@@ -6960,8 +6963,8 @@ public final class Ops {
              * future, we'll want to factor in longest literal prefix too. */
             int charFates = fates.size() - prevFates;
             if (charFates > 1) {
-                List<Integer> charFateList = fates.subList(prevFates, fates.size());
-                Collections.sort(charFateList, Collections.reverseOrder());
+                IntList charFateList = fates.subList(prevFates, fates.size());
+                charFateList.sort(IntComparators.OPPOSITE_COMPARATOR);
             }
         }
 
@@ -6969,11 +6972,11 @@ public final class Ops {
         int[] result = new int[fates.size()];
         if (usedlonglit > 0) {
             for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i) & 0xffffff;
+                result[i] = fates.getInt(i) & 0xffffff;
         }
         else {
             for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i);
+                result[i] = fates.getInt(i);
         }
         return result;
     }
