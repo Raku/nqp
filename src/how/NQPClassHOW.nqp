@@ -364,14 +364,14 @@ knowhow NQPClassHOW {
     method compose_repr($target) {
 
         # Handle arrays differently
-        if self.is_array_type($target) {
+        if self.is_array_type {
             nqp::elems(self.attributes($target))
               ?? nqp::die("Cannot have attributes on an array representation")
               !! nqp::composetype(
                    nqp::decont($target),
                    nqp::hash(
                      'array',
-                     nqp::hash('type', nqp::decont(self.array_type($target)))
+                     nqp::hash('type', nqp::decont(self.array_type))
                    )
                  );
         }
