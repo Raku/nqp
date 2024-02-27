@@ -54,5 +54,5 @@ knowhow NQPAttribute {
     }
 
     # Action methods
-    method compose($targetr) { $targetr }
+    method compose($target) { $target }
 }
