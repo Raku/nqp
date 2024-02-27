@@ -75,7 +75,7 @@ sub can_skip_attribute_by_name(@current, $that) {
 # Helper sub, returns 1 if the given target has a method with the
 # given name.
 sub has_method($target, $name) {
-    nqp::existskey($target.HOW.method_table($target), $name)
+    nqp::existskey($target.HOW.method_table, $name)
 }
 
 # Helper sub, returns 1 if the given target has an attribute with

@@ -443,9 +443,7 @@ knowhow NQPClassHOW {
         my $i := 1;  # skip ourselves
         while $i < $m {
             my $parent     := nqp::atpos($mro, $i);
-            my $dispatcher := nqp::atkey(
-              $parent.HOW.method_table($parent), $name
-            );
+            my $dispatcher := nqp::atkey($parent.HOW.method_table, $name);
 
             # Found a possible - make sure it's a dispatcher, not an only
             unless nqp::isnull($dispatcher) {
@@ -677,7 +675,7 @@ knowhow NQPClassHOW {
         my $i := nqp::elems($mro);
         while --$i >= 0 {
             my $type := nqp::atpos($mro, $i);
-            for $type.HOW.method_table($type) {
+            for $type.HOW.method_table {
                 nqp::bindkey(%cache, nqp::iterkey_s($_), nqp::iterval($_));
             }
         }
@@ -697,7 +695,7 @@ knowhow NQPClassHOW {
             my $i := nqp::elems($mro);
             while --$i >= 0 {  # lower methods shadow methods higher up
                 my $type := nqp::atpos($mro, $i);
-                for $type.HOW.method_table($type) {
+                for $type.HOW.method_table {
                     nqp::bindkey($table, nqp::iterkey_s($_), nqp::iterval($_));
                 }
             }
@@ -739,7 +737,7 @@ knowhow NQPClassHOW {
         my $i := 0;
 
         # Does it have its own BUILD?
-        my $methods := $target.HOW.method_table($target);
+        my $methods := $target.HOW.method_table;
         my $build   := nqp::atkey($methods, 'BUILD');
 
         # No custom BUILD
@@ -879,7 +877,7 @@ knowhow NQPClassHOW {
         my $i := 0;
         while $i < $m {
             my $can := nqp::atkey(
-              nqp::atpos($mro, $i).HOW.method_table($target), $name
+              nqp::atpos($mro, $i).HOW.method_table, $name
             );
             nqp::defined($can)
               ?? (return $can)
@@ -895,7 +893,7 @@ knowhow NQPClassHOW {
         my $i := 0;
         while $i < $m {
             my $method := nqp::atkey(
-              nqp::atpos($mro, $i).HOW.method_table($target),$name
+              nqp::atpos($mro, $i).HOW.method_table,$name
             );
             nqp::isconcrete($method)
               ?? (return $method)
