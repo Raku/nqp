@@ -4,7 +4,7 @@ knowhow NQPModuleHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( );
-    method archetypes($obj?) { $archetypes }
+    method archetypes($XXX?) { $archetypes }
 
     method new(:$name) {
         my $obj := nqp::create(self);
@@ -21,31 +21,31 @@ knowhow NQPModuleHOW {
         nqp::setdebugtypename(nqp::setwho($type, {}), $name);
     }
 
-    method add_method($obj, $name, $code) {
+    method add_method($XXX, $name, $code) {
         nqp::die("Modules may not have methods");
     }
 
-    method add_multi_method($obj, $name, $code) {
+    method add_multi_method($XXX, $name, $code) {
         nqp::die("Modules may not have methods");
     }
 
-    method add_attribute($obj, $attribute) {
+    method add_attribute($XXX, $attribute) {
         nqp::die("Modules may not have attributes");
     }
 
-    method compose($obj) {
+    method compose($target) {
         unless $!composed {
 #?if !moar
-            nqp::setmethcache($obj, {});
-            nqp::setmethcacheauth($obj, 1);
+            nqp::setmethcache($target, {});
+            nqp::setmethcacheauth($target, 1);
 #?endif
             $!composed := 1;
         }
 
-        $obj
+        $target
     }
 
-    method find_method($obj, $name, *%opts) { nqp::null }
-    method name($obj) { $!name }
-    method shortname($obj) { shortened_name($obj) }
+    method find_method($XXX, $name, *%opts) { nqp::null }
+    method name($XXX?) { $!name }
+    method shortname($target) { shortened_name($target) }
 }

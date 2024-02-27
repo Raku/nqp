@@ -21,16 +21,16 @@ knowhow NQPCurriedRoleHOW {
         $type
     }
 
-    method specialize($obj, $class_arg) {
+    method specialize($XXX, $class_arg) {
         $!curried_role.HOW.specialize($!curried_role, $class_arg, |$!pos_args);
     }
 
-    method name($obj) {
+    method name($XXX?) {
         $!curried_role.HOW.name($!curried_role)
     }
 
-    method shortname($obj) { shortened_name($obj) }
+    method shortname($target) { shortened_name($target) }
 
-    method curried_role($obj) { $!curried_role }
-    method tweaks($obj) { nqp::list }
+    method curried_role($XXX?) { $!curried_role }
+    method tweaks($XXX?) { nqp::list }
 }

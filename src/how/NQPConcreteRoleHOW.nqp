@@ -31,7 +31,7 @@ knowhow NQPConcreteRoleHOW {
     has $!lock;
 
     my $archetypes := Archetypes.new( :nominal, :composable );
-    method archetypes($obj?) { $archetypes }
+    method archetypes($XXX?) { $archetypes }
 
     # Creates a new instance of this meta-class.
     method new(:$name!, :$instance_of!) {
@@ -71,7 +71,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     # Add a method in a threadsafe manner
-    method add_method($obj, $name, $code) {
+    method add_method($XXX, $name, $code) {
         nqp::die("Cannot add a null method '$name' to role '$!name'")
           if nqp::isnull($code) || !nqp::defined($code);
 
@@ -86,7 +86,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     # Add a multi method in a threadsafe manner
-    method add_multi_method($obj, $name, $code) {
+    method add_multi_method($XXX, $name, $code) {
         # Queue them up for composition time
         $!lock.protect({
             $!multi_methods := push_on_clone($!multi_methods, [$name, $code]);
@@ -96,7 +96,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     # Add an attribute with the given meta information in a threadsafe manner
-    method add_attribute($obj, $attribute) {
+    method add_attribute($XXX, $attribute) {
 
         # Make sure name is unique
         my $attributes := $!attributes;
@@ -116,19 +116,19 @@ knowhow NQPConcreteRoleHOW {
         $attribute
     }
 
-    method add_parent($obj, $parent) {
+    method add_parent($XXX, $parent) {
         nqp::die("A role cannot inherit from a class in NQP")
     }
 
     # Add a role in a threadsafe manner
-    method add_role($obj, $role) {
+    method add_role($XXX, $role) {
         $!lock.protect({
             $!roles := push_on_clone($!roles, $role);
         });
     }
 
     # Add a name collision in a threadsafe manner
-    method add_collision($obj, $name) {
+    method add_collision($XXX, $name) {
         if $name ne 'TWEAK' {
             $!lock.protect({
                 $!collisions := push_on_clone($!collisions, $name);
@@ -137,7 +137,7 @@ knowhow NQPConcreteRoleHOW {
     }
 
     # Compose the role. Beyond this point, no changes are allowed
-    method compose($obj) {
+    method compose($target) {
         # Incorporate roles. They're already instantiated. We need to
         # add to done list their instantiation source.
         $!lock.protect({
@@ -168,44 +168,44 @@ knowhow NQPConcreteRoleHOW {
                         ++$i;
                     }
                     $!role_typecheck_list := $typecheck_list;
-                    RoleToRoleApplier.apply($obj, $roles);
+                    RoleToRoleApplier.apply($target, $roles);
                 }
 
                 # Make sure the updated tweaks are known
                 $!tweaks := $tweaks;
 
                 # Mark composed.
-                nqp::settypecache($obj, [$obj.WHAT]);
+                nqp::settypecache($target, [$target.WHAT]);
 #?if !moar
-                nqp::setmethcache($obj, {});
-                nqp::setmethcacheauth($obj, 1);
+                nqp::setmethcache($target, {});
+                nqp::setmethcacheauth($target, 1);
 #?endif
                 $!composed := 1;
             }
         });
 
-        $obj
+        $target
     }
 
     # Simple accessors
-    method method_order($obj)        { $!method_order        }
-    method method_names($obj)        { $!method_names        }
-    method method_table($obj)        { $!methods             }
-    method tweaks($obj)              { $!tweaks              }
-    method collisions($obj)          { $!collisions          }
-    method name($obj)                { $!name                }
-    method role_typecheck_list($obj) { $!role_typecheck_list }
-    method instance_of($obj)         { $!instance_of         }
+    method method_order($XXX?)        { $!method_order        }
+    method method_names($XXX?)        { $!method_names        }
+    method method_table($XXX?)        { $!methods             }
+    method tweaks($XXX?)              { $!tweaks              }
+    method collisions($XXX?)          { $!collisions          }
+    method name($XXX?)                { $!name                }
+    method role_typecheck_list($XXX?) { $!role_typecheck_list }
+    method instance_of($XXX?)         { $!instance_of         }
 
     # Other introspection
-    method methods($obj, :$local, :$all) {
+    method methods($XXX?, :$local, :$all) {
         $!method_order
     }
-    method roles($obj, :$transitive = 0) {
+    method roles($XXX?, :$transitive = 0) {
         $!roles
     }
-    method attributes($obj, :$local) {
+    method attributes($XXX?, :$local) {
         $!attributes
     }
-    method shortname($obj) { shortened_name($obj) }
+    method shortname($target) { shortened_name($target) }
 }

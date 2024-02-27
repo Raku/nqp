@@ -30,7 +30,7 @@ knowhow NQPParametricRoleHOW {
     has $!lock;
 
     my $archetypes := Archetypes.new(:nominal, :composable, :parametric);
-    method archetypes($obj?) { $archetypes }
+    method archetypes($XXX?) { $archetypes }
 
     # Creates a new instance of this meta-class.
     method new(:$name!) {
@@ -67,7 +67,7 @@ knowhow NQPParametricRoleHOW {
         nqp::setdebugtypename(nqp::setwho($type, {}), $name);
     }
 
-    method set_body_block($obj, $body_block) {
+    method set_body_block($XXX, $body_block) {
         $!body_block := $body_block;
     }
 
@@ -77,7 +77,7 @@ knowhow NQPParametricRoleHOW {
         $!tweaks := push_on_clone($!tweaks, $code);
     }
 
-    method add_method($obj, $name, $code) {
+    method add_method($XXX, $name, $code) {
         nqp::die("This role already has a method named " ~ $name)
           if nqp::existskey($!methods, $name);
 
@@ -91,7 +91,7 @@ knowhow NQPParametricRoleHOW {
         });
     }
 
-    method add_multi_method($obj, $name, $code) {
+    method add_multi_method($XXX, $name, $code) {
 
         $!lock.protect({
             $!multi_methods := push_on_clone($!multi_methods, [$name, $code]);
@@ -100,7 +100,7 @@ knowhow NQPParametricRoleHOW {
         $code
     }
 
-    method add_attribute($obj, $attribute) {
+    method add_attribute($XXX, $attribute) {
 
         # Make sure name is unique
         my $attributes := $!attributes;
@@ -120,19 +120,19 @@ knowhow NQPParametricRoleHOW {
         $attribute
     }
 
-    method add_parent($obj, $parent) {
+    method add_parent($XXX, $parent) {
         nqp::die("A role cannot inherit from a class")
     }
 
     # Add a role in a threadsafe manner
-    method add_role($obj, $role) {
+    method add_role($XXX, $role) {
         $!lock.protect({
             $!roles := push_on_clone($!roles, $role);
         });
     }
 
     # Compose the role. Beyond this point, no changes are allowed
-    method compose($obj) {
+    method compose($target) {
         $!lock.protect({
 
             # If not done by another thread
@@ -162,29 +162,29 @@ knowhow NQPParametricRoleHOW {
                     $!role_typecheck_list := $typecheck_list;
                 }
 
-                nqp::settypecache($obj, [$obj.WHAT]);
+                nqp::settypecache($target, [$target.WHAT]);
 #?if !moar
-                nqp::setmethcache($obj, {});
-                nqp::setmethcacheauth($obj, 1);
+                nqp::setmethcache($target, {});
+                nqp::setmethcacheauth($target, 1);
 #?endif
                 $!composed := 1;
             }
         });
 
-        $obj
+        $target
     }
 
     # Method to indicate that this type is parametric.
-    method parametric($obj) { 1 }
+    method parametric($XXX?) { 1 }
 
     # Curries this parametric role with arguments
-    method curry($obj, *@args) {
-        NQPCurriedRoleHOW.new_type($obj, |@args)
+    method curry($target, *@args) {
+        NQPCurriedRoleHOW.new_type($target, |@args)
     }
 
     # This specializes the role for the given class and builds a concrete
     # role
-    method specialize($obj, $class, *@args) {
+    method specialize($target, $class, *@args) {
 
         # We only allow one specialization of a role to take place at a time,
         # since the body block captures the methods into its lexical scope,
@@ -199,7 +199,7 @@ knowhow NQPParametricRoleHOW {
 
             # Construct a new concrete role.
             my $irole := NQPConcreteRoleHOW.new_type(
-              :name($!name), :instance_of($obj)
+              :name($!name), :instance_of($target)
             );
             my $how := $irole.HOW;
 
@@ -273,20 +273,20 @@ knowhow NQPParametricRoleHOW {
         })
     }
 
-    method methods($obj, :$local, :$all) {
+    method methods($XXX?, :$local, :$all) {
         $!method_order
     }
-    method attributes($obj, :$local) {
+    method attributes($XXX?, :$local) {
         $!attributes
     }
-    method roles($obj, :$transitive = 0) {
+    method roles($XXX?, :$transitive = 0) {
         $!roles
     }
 
-    method method_table($obj) { $!methods }
-    method tweaks($obj) { $!tweaks }
-    method name($obj) { $!name }
-    method role_typecheck_list($obj) { $!role_typecheck_list }
+    method method_table(       $XXX?) { $!methods             }
+    method tweaks(             $XXX?) { $!tweaks              }
+    method name(               $XXX?) { $!name                }
+    method role_typecheck_list($XXX?) { $!role_typecheck_list }
 
-    method shortname($obj) { shortened_name($obj ) }
+    method shortname($target) { shortened_name($target ) }
 }

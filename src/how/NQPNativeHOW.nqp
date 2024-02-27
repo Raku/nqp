@@ -5,7 +5,7 @@ knowhow NQPNativeHOW {
     has $!composed;
 
     my $archetypes := Archetypes.new( :nominal(1) );
-    method archetypes($obj?) { $archetypes }
+    method archetypes($XXX?) { $archetypes }
 
     method new(:$name) {
         my $obj  := nqp::create(self);
@@ -24,21 +24,21 @@ knowhow NQPNativeHOW {
         nqp::setdebugtypename(nqp::setwho($type, nqp::hash), $name)
     }
 
-    method add_method($obj, $name, $code_obj) {
+    method add_method($XXX, $name, $code_obj) {
         nqp::die("Native types may not have methods (must be boxed to call method)");
     }
 
-    method add_multi_method($obj, $name, $code_obj) {
+    method add_multi_method($XXX, $name, $code_obj) {
         nqp::die("Native types may not have methods (must be boxed to call method)");
     }
 
-    method add_attribute($obj, $meta_attr) {
+    method add_attribute($XXX, $meta_attr) {
         nqp::die("Native types may not have attributes");
     }
 
-    method compose($obj) {
+    method compose($target) {
         if !$!composed && ($!nativesize || $!unsigned) {
-            nqp::composetype($obj, nqp::hash(
+            nqp::composetype($target, nqp::hash(
               'integer',
               nqp::hash('unsigned', $!unsigned, 'bits', $!nativesize),
               'float',
@@ -48,16 +48,16 @@ knowhow NQPNativeHOW {
         }
     }
 
-    method name($obj) { $!name }
-    method nativesize($obj) { $!nativesize }
-    method unsigned($obj) { $!unsigned }
+    method name(      $XXX?) { $!name       }
+    method nativesize($XXX?) { $!nativesize }
+    method unsigned(  $XXX?) { $!unsigned   }
 
-    method set_nativesize($obj, $nativesize) {
+    method set_nativesize($XXX, $nativesize) {
         $!nativesize := $nativesize;
     }
-    method set_unsigned($obj, $unsigned) {
+    method set_unsigned($XXX, $unsigned) {
         $!unsigned := $unsigned ?? 1 !! 0
     }
 
-    method shortname($obj) { shortened_name($obj) }
+    method shortname($target) { shortened_name($target) }
 }

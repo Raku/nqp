@@ -33,8 +33,8 @@ sub name_of_code($code) {
 
 # Helper sub to return the shortened name of an object that has a
 # .HOW.name method
-sub shortened_name($obj) {
-    my $parts := nqp::split('::', $obj.HOW.name($obj) // '');
+sub shortened_name($target) {
+    my $parts := nqp::split('::', $target.HOW.name($target) // '');
     $parts ?? nqp::atpos($parts, nqp::elems($parts) - 1) !! '<anon>'
 }
 
