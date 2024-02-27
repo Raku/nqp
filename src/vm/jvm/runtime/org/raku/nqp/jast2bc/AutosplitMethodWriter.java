@@ -36,6 +36,7 @@ import java.util.Set;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 @SuppressWarnings("unchecked") /* our asm is stripped */
 class AutosplitMethodWriter extends MethodNode {
@@ -63,7 +64,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     private int nextJumpNo;
     private int[] jumpNoMap;
-    private List<Integer> firstJump = new ArrayList< >();
+    private IntArrayList firstJump = new IntArrayList();
 
     private static class ControlEdge {
         public final int from, to;
@@ -115,7 +116,7 @@ class AutosplitMethodWriter extends MethodNode {
 
         jumpNoMap = new int[insnList.length];
         Arrays.fill(jumpNoMap, -1);
-        List<Integer> fragmentSizes = new ArrayList< >();
+        IntArrayList fragmentSizes = new IntArrayList();
         int taken = 0;
         while (taken < insnList.length) {
             if (calcFragmentSize(taken, taken+1) > MAX_FRAGMENT)
