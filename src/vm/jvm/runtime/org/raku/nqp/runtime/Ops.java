@@ -6963,8 +6963,18 @@ public final class Ops {
              * future, we'll want to factor in longest literal prefix too. */
             int charFates = fates.size() - prevFates;
             if (charFates > 1) {
-                IntList charFateList = fates.subList(prevFates, fates.size());
-                charFateList.sort(IntComparators.OPPOSITE_COMPARATOR);
+                if (charFates == 2) {
+                    int a = fates.getInt(prevFates);
+                    int b = fates.getInt(prevFates + 1);
+                    if (b > a) {
+                        fates.set(prevFates, b);
+                        fates.set(prevFates + 1, a);
+                    }
+                }
+                else {
+                    IntList charFateList = fates.subList(prevFates, fates.size());
+                    charFateList.sort(IntComparators.OPPOSITE_COMPARATOR);
+                }
             }
         }
 
