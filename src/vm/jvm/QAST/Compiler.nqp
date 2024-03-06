@@ -2309,6 +2309,12 @@ my %const_map := nqp::hash(
     # DEFINED + UNDEFINED
     'DEFCON_MASK',      3,
 
+    'TYPE_NATIVE_INT',   4,
+    'TYPE_NATIVE_NUM',   8,
+    'TYPE_NATIVE_STR',  16,
+    'TYPE_NATIVE_UINT', 32,
+    # INT + NUM + STR + UINT
+    'TYPE_NATIVE_MASK', 60,
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {

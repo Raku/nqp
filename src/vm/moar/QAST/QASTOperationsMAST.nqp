@@ -2436,6 +2436,13 @@ my constant CONST_MAP := nqp::hash(
     'DEFCON_UNDEFINED', 2,
     # DEFINED + UNDEFINED
     'DEFCON_MASK',      3,
+
+    'TYPE_NATIVE_INT',   4,
+    'TYPE_NATIVE_NUM',   8,
+    'TYPE_NATIVE_STR',  16,
+    'TYPE_NATIVE_UINT', 32,
+    # INT + NUM + STR + UINT
+    'TYPE_NATIVE_MASK', 60,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     my str $name := $op.name;
