@@ -2303,6 +2303,12 @@ my %const_map := nqp::hash(
     'EDGE_CODEPOINT_IM_LL',   21,
     'EDGE_CHARRANGE_M',       22,
     'EDGE_CHARRANGE_M_NEG',   23,
+
+    'DEFCON_DEFINED',   1,
+    'DEFCON_UNDEFINED', 2,
+    # DEFINED + UNDEFINED
+    'DEFCON_MASK',      3,
+
 );
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
