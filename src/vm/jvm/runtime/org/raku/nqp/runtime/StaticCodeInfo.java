@@ -82,10 +82,10 @@ public class StaticCodeInfo implements Cloneable {
      * Lexical name maps (produced lazily on first use). Note they are only
      * used when we do lexical lookup by name.
      */
-    public Object2IntOpenHashMap oLexicalMap;
-    public Object2IntOpenHashMap iLexicalMap;
-    public Object2IntOpenHashMap nLexicalMap;
-    public Object2IntOpenHashMap sLexicalMap;
+    public Object2IntOpenHashMap<String> oLexicalMap;
+    public Object2IntOpenHashMap<String> iLexicalMap;
+    public Object2IntOpenHashMap<String> nLexicalMap;
+    public Object2IntOpenHashMap<String> sLexicalMap;
 
     /**
      * Does this code object have a block exit handler?
