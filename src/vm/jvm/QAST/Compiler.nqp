@@ -2304,18 +2304,19 @@ my %const_map := nqp::hash(
     'EDGE_CHARRANGE_M',       22,
     'EDGE_CHARRANGE_M_NEG',   23,
 
-    'DEFCON_DEFINED',   1,
-    'DEFCON_UNDEFINED', 2,
-    # DEFINED + UNDEFINED
-    'DEFCON_MASK',      3,
-
-    'TYPE_NATIVE_INT',   4,
-    'TYPE_NATIVE_NUM',   8,
-    'TYPE_NATIVE_STR',  16,
-    'TYPE_NATIVE_UINT', 32,
-    # INT + NUM + STR + UINT
-    'TYPE_NATIVE_MASK', 60,
 );
+nqp::bindkey(%const_map, 'DEFCON_DEFINED',   1);
+nqp::bindkey(%const_map, 'DEFCON_UNDEFINED', 2);
+# DEFINED + UNDEFINED
+nqp::bindkey(%const_map, 'DEFCON_MASK',      3);
+
+nqp::bindkey(%const_map, 'TYPE_NATIVE_INT',   4);
+nqp::bindkey(%const_map, 'TYPE_NATIVE_NUM',   8);
+nqp::bindkey(%const_map, 'TYPE_NATIVE_STR',  16);
+nqp::bindkey(%const_map, 'TYPE_NATIVE_UINT', 32);
+# INT + NUM + STR + UINT
+nqp::bindkey(%const_map, 'TYPE_NATIVE_MASK', 60);
+
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
         $qastcomp.as_jast(QAST::IVal.new( :value(%const_map{$op.name}) ))
