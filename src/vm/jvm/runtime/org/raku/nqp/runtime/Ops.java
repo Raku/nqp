@@ -6806,9 +6806,7 @@ public final class Ops {
             int prevFates = fates.size();
 
             while (!curst.isEmpty()) {
-                int top = curst.size() - 1;
-                int st = curst.getInt(top);
-                curst.removeInt(top);
+                int st = curst.popInt();
                 if (st <= numStates) {
                     if (done[st] == gen)
                         continue;
@@ -6833,7 +6831,7 @@ public final class Ops {
                             for (int j = 0; j < fates.size(); j++) {
                                 if (foundFate)
                                     fates.set(j - 1, fates.getInt(j));
-                                if (fates.getInt(j )== arg) {
+                                if (fates.getInt(j) == arg) {
                                     foundFate = true;
                                     if (j < prevFates)
                                         prevFates--;
@@ -6985,8 +6983,7 @@ public final class Ops {
                 result[i] = fates.getInt(i) & 0xffffff;
         }
         else {
-            for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.getInt(i);
+            fates.getElements(0, result, 0, fates.size());
         }
         return result;
     }
