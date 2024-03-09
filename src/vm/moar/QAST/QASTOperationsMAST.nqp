@@ -2443,6 +2443,16 @@ my constant CONST_MAP := nqp::hash(
     'TYPE_NATIVE_UINT', 32,
     # INT + NUM + STR + UINT
     'TYPE_NATIVE_MASK', 60,
+
+    'BIND_RESULT_OK',       0,
+    'BIND_RESULT_FAIL',     1,
+    'BIND_RESULT_JUNCTION', 2,
+
+    'BIND_VAL_OBJ',   0,
+    'BIND_VAL_INT',   1,
+    'BIND_VAL_NUM',   2,
+    'BIND_VAL_STR',   3,
+    'BIND_VAL_UINT', 10,
 );
 QAST::MASTOperations.add_core_op('const', -> $qastcomp, $op {
     my str $name := $op.name;

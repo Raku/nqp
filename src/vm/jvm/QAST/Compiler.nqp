@@ -2317,6 +2317,16 @@ nqp::bindkey(%const_map, 'TYPE_NATIVE_UINT', 32);
 # INT + NUM + STR + UINT
 nqp::bindkey(%const_map, 'TYPE_NATIVE_MASK', 60);
 
+nqp::bindkey(%const_map, 'BIND_RESULT_OK',       0);
+nqp::bindkey(%const_map, 'BIND_RESULT_FAIL',     1);
+nqp::bindkey(%const_map, 'BIND_RESULT_JUNCTION', 2);
+
+nqp::bindkey(%const_map, 'BIND_VAL_OBJ',   0);
+nqp::bindkey(%const_map, 'BIND_VAL_INT',   1);
+nqp::bindkey(%const_map, 'BIND_VAL_NUM',   2);
+nqp::bindkey(%const_map, 'BIND_VAL_STR',   3);
+nqp::bindkey(%const_map, 'BIND_VAL_UINT', 10);
+
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
         $qastcomp.as_jast(QAST::IVal.new( :value(%const_map{$op.name}) ))
