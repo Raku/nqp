@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import org.raku.nqp.runtime.CodeRef;
 
@@ -30,7 +31,7 @@ public class SerializationContext {
     /* Repossession info. The following lists have matching indexes, each
      * representing the integer of an object in our root set along with the SC
      * that the object was originally from. */
-    public ArrayList<Integer> rep_indexes;
+    public IntArrayList rep_indexes;
     public ArrayList<SerializationContext> rep_scs;
 
     /* Some things we deserialize are not directly in an SC, root set, but
@@ -45,7 +46,7 @@ public class SerializationContext {
         this.root_objects = new ArrayList<>();
         this.root_stables = new ArrayList<>();
         this.root_codes = new ArrayList<>();
-        this.rep_indexes = new ArrayList<>();
+        this.rep_indexes = new IntArrayList();
         this.rep_scs = new ArrayList<>();
         this.owned_objects = new HashMap<>();
     }

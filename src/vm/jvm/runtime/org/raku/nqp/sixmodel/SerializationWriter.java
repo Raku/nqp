@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 import org.raku.nqp.runtime.CallFrame;
 import org.raku.nqp.runtime.CodeRef;
@@ -860,8 +861,8 @@ public class SerializationWriter {
 
         /* Make entries. */
         for (int i = 0; i < numRepos; i++) {
-            int objIdx = sc.rep_indexes.get(i) >> 1;
-            int isST = sc.rep_indexes.get(i) & 1;
+            int objIdx = sc.rep_indexes.getInt(i) >> 1;
+            int isST = sc.rep_indexes.getInt(i) & 1;
             SerializationContext origSC = sc.rep_scs.get(i);
 
             /* Work out original object's SC location. */
