@@ -28,10 +28,10 @@ public class CallSiteDescriptor {
 
     /* Maps string names for named params to an int that has
      * arg index << 6 + type flag. */
-    public Object2IntOpenHashMap nameMap;
+    public Object2IntOpenHashMap<String> nameMap;
 
     /* Singleton empty name map. */
-    private static Object2IntOpenHashMap emptyNameMap = new Object2IntOpenHashMap();
+    private static Object2IntOpenHashMap<String> emptyNameMap = new Object2IntOpenHashMap<String>();
 
     /* Number of normal positional arguments. */
     public int numPositionals = 0;
@@ -45,7 +45,7 @@ public class CallSiteDescriptor {
     public CallSiteDescriptor(byte[] flags, String[] names) {
         argFlags = flags;
         if (names != null)
-            nameMap = new Object2IntOpenHashMap();
+            nameMap = new Object2IntOpenHashMap<String>();
         else
             nameMap = emptyNameMap;
         this.names = names;
