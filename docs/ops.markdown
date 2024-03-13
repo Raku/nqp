@@ -383,8 +383,8 @@ The opcodes are grouped into the following categories:
 
 ## [Parametric Extensions](#parametric-type-extensions)
 
+[parameterizetype](#parameterizetype) |
 [setparameterizer](#setparameterizer) |
-[setparameterizetype](#setparameterizetype) |
 [typeparameterat](#typeparameterat) |
 [typeparameterized](#typeparameterized) |
 [typeparameters](#typeparameters)
@@ -2488,7 +2488,7 @@ NQP equivalent for Raku's `$obj.WHO`.
 Makes a type as being parametric, and configures the code needed to
 parameterize it.
 
-## setparameterizetype
+## parameterizetype
 * `parameterizetype(type, parameter_array)`
 
 Takes a parameterizable type and an array of parameters. Looks up and returns
