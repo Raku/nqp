@@ -4470,14 +4470,14 @@ public final class Ops {
     }
 
     /* Brute force, but not normally needed for most programs. */
-    private static volatile Object2IntOpenHashMap cpNameMap;
+    private static volatile Object2IntOpenHashMap<String> cpNameMap;
     private static volatile Boolean cpNameMapAboveBMP;
     public static long codepointfromname(String name) {
-        Object2IntOpenHashMap names = cpNameMap;
+        Object2IntOpenHashMap<String> names = cpNameMap;
         /* Gets the first half (the BMP) */
         if (names == null) {
             /* Initialize the expected max hash size as 0x10FFFF */
-            names = new Object2IntOpenHashMap(0x10FFFF);
+            names = new Object2IntOpenHashMap<String>(0x10FFFF);
             for (int i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
