@@ -50,7 +50,7 @@ public class SerializationWriter {
     private ThreadContext tc;
     private SerializationContext sc;
     private ArrayList<String> sh;
-    private Object2IntOpenHashMap stringMap;
+    private Object2IntOpenHashMap<String> stringMap;
 
     private ArrayList<SerializationContext> dependentSCs;
     private ArrayList<CallFrame> contexts;
@@ -77,7 +77,7 @@ public class SerializationWriter {
         this.tc = tc;
         this.sc = sc;
         this.sh = sh;
-        this.stringMap = new Object2IntOpenHashMap();
+        this.stringMap = new Object2IntOpenHashMap<String>();
         this.dependentSCs = new ArrayList<SerializationContext>();
         this.contexts = new ArrayList<CallFrame>();
         this.outputs = new ByteBuffer[10];
