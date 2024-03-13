@@ -53,7 +53,7 @@ class AutosplitMethodWriter extends MethodNode {
 
     /** The real instructions (not branches) in program order.  Filled out by {@link getControlFlow()}. */
     private AbstractInsnNode[] insnList;
-    private Object2IntOpenHashMap insnMap;
+    private Object2IntOpenHashMap<AbstractInsnNode> insnMap;
     private int[] lineNumbers;
 
     /** Array of (source, target) pairs.  Filled out by {@link getControlFlow()}.  -1 means from-outside. */
@@ -239,8 +239,8 @@ class AutosplitMethodWriter extends MethodNode {
     private void getInstructions() {
         // munge the linked list of insns we got from ASM into something saner
         ArrayList<AbstractInsnNode> tempInsnList = new ArrayList< >();
-        insnMap = new Object2IntOpenHashMap();
-        Object2IntOpenHashMap linesMap = new Object2IntOpenHashMap();
+        insnMap = new Object2IntOpenHashMap<AbstractInsnNode>();
+        Object2IntOpenHashMap<AbstractInsnNode> linesMap = new Object2IntOpenHashMap<AbstractInsnNode>();
 
         for (AbstractInsnNode n = instructions.getFirst(); n != null; n = n.getNext()) {
             insnMap.put(n, tempInsnList.size());
