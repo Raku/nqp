@@ -67,7 +67,7 @@ public class CallFrame implements Cloneable {
     /**
      * Current working copy of the named arguments data.
      */
-    public Object2IntOpenHashMap workingNameMap;
+    public Object2IntOpenHashMap<String> workingNameMap;
 
     /**
      * Serialization context this frame is associated with, if any.
