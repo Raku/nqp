@@ -79,7 +79,7 @@ public class SerializationContext {
         rep_scs.add(origSC);
     }
 
-    private Object2IntOpenHashMap objectIndexCache = new Object2IntOpenHashMap();
+    private Object2IntOpenHashMap<SixModelObject> objectIndexCache = new Object2IntOpenHashMap<SixModelObject>();
     public void addObject(SixModelObject obj) {
         int newIndex = root_objects.size();
         root_objects.add(obj);
@@ -108,7 +108,7 @@ public class SerializationContext {
             root_objects.add(null);
     }
 
-    private Object2IntOpenHashMap stableIndexCache = new Object2IntOpenHashMap();
+    private Object2IntOpenHashMap<STable> stableIndexCache = new Object2IntOpenHashMap<STable>();
     public void addSTable(STable stable) {
         int newIndex = root_stables.size();
         root_stables.add(stable);
@@ -133,7 +133,7 @@ public class SerializationContext {
             root_stables.add(null);
     }
 
-    private Object2IntOpenHashMap codeIndexCache = new Object2IntOpenHashMap();
+    private Object2IntOpenHashMap<CodeRef> codeIndexCache = new Object2IntOpenHashMap<CodeRef>();
     public void addCodeRef(CodeRef coderef) {
         int newIndex = root_codes.size();
         root_codes.add(coderef);
