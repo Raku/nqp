@@ -100,7 +100,7 @@ public class StaticCodeInfo implements Cloneable {
     public int oTryGetLexicalIdx(String name) {
         if (oLexicalNames != null) {
             if (oLexicalMap == null) {
-                Object2IntOpenHashMap map = new Object2IntOpenHashMap(oLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(oLexicalNames.length);
                 for (int i = 0; i < oLexicalNames.length; i++)
                     map.put(oLexicalNames[i], i);
                 oLexicalMap = map;
@@ -114,7 +114,7 @@ public class StaticCodeInfo implements Cloneable {
     public int iTryGetLexicalIdx(String name) {
         if (iLexicalNames != null) {
             if (iLexicalMap == null) {
-                Object2IntOpenHashMap map = new Object2IntOpenHashMap(iLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(iLexicalNames.length);
                 for (int i = 0; i < iLexicalNames.length; i++)
                     map.put(iLexicalNames[i], i);
                 iLexicalMap = map;
@@ -128,7 +128,7 @@ public class StaticCodeInfo implements Cloneable {
     public int uTryGetLexicalIdx(String name) {
         if (iLexicalNames != null) {
             if (iLexicalMap == null) {
-                Object2IntOpenHashMap map = new Object2IntOpenHashMap(iLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(iLexicalNames.length);
                 for (int i = 0; i < iLexicalNames.length; i++)
                     map.put(iLexicalNames[i], i);
                 iLexicalMap = map;
@@ -142,7 +142,7 @@ public class StaticCodeInfo implements Cloneable {
     public int nTryGetLexicalIdx(String name) {
         if (nLexicalNames != null) {
             if (nLexicalMap == null) {
-                Object2IntOpenHashMap map = new Object2IntOpenHashMap(nLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(nLexicalNames.length);
                 for (int i = 0; i < nLexicalNames.length; i++)
                     map.put(nLexicalNames[i], i);
                 nLexicalMap = map;
@@ -156,7 +156,7 @@ public class StaticCodeInfo implements Cloneable {
     public int sTryGetLexicalIdx(String name) {
         if (sLexicalNames != null) {
             if (sLexicalMap == null) {
-                Object2IntOpenHashMap map = new Object2IntOpenHashMap(sLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(sLexicalNames.length);
                 for (int i = 0; i < sLexicalNames.length; i++)
                     map.put(sLexicalNames[i], i);
                 sLexicalMap = map;
