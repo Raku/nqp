@@ -44,7 +44,7 @@ import org.raku.nqp.sixmodel.reprs.MultiDimArray;
 import org.raku.nqp.sixmodel.reprs.Decoder;
 
 public class REPRRegistry {
-    private static Object2IntOpenHashMap reprIdMap = new Object2IntOpenHashMap();
+    private static Object2IntOpenHashMap<String> reprIdMap = new Object2IntOpenHashMap<String>();
     private static ArrayList<REPR> reprs = new ArrayList<>();
 
     public static REPR getByName(String name) {
