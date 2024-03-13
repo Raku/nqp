@@ -778,11 +778,15 @@ for <if unless with without> -> $op_name {
             # lexical refs are expensive; try to coerce them to something cheap
             my $spec := nqp::objprimspec($op[0].returns);
             @comp_ops[0] := $qastcomp.as_mast(:want(
-                $spec == 1 ?? nqp::const::MVM_reg_int64 !!
-                $spec == 10 ?? nqp::const::MVM_reg_uint64 !!
-                $spec == 2 ?? nqp::const::MVM_reg_num64 !!
-                $spec == 3 ?? nqp::const::MVM_reg_str   !!
-                              nqp::const::MVM_reg_obj
+                $spec == nqp::const::BIND_VAL_INT
+                  ?? nqp::const::MVM_reg_int64
+                  !! $spec == nqp::const::BIND_VAL_UINT
+                    ?? nqp::const::MVM_reg_uint64
+                    !! $spec == nqp::const::BIND_VAL_NUM
+                      ?? nqp::const::MVM_reg_num64
+                      !! $spec == nqp::const::BIND_VAL_STR
+                        ?? nqp::const::MVM_reg_str
+                        !! nqp::const::MVM_reg_obj
             ), $op[0]);
         }
         else {
@@ -1712,19 +1716,19 @@ my $call_gen := sub ($qastcomp, $op) {
         }
         my $op_name := $is_nativecall ?? 'nativeinvoke_' !! 'invoke_';
         my int $primspec := nqp::objprimspec(@local_types[$index]);
-        if $primspec == 1 {
+        if $primspec == nqp::const::BIND_VAL_INT {
             $op_name := $op_name ~ 'i';
         }
-        elsif $primspec == 10 {
+        elsif $primspec == nqp::const::BIND_VAL_UINT {
             $op_name := $op_name ~ 'u';
         }
-        elsif $primspec == 2 {
+        elsif $primspec == nqp::const::BIND_VAL_NUM {
             $op_name := $op_name ~ 'n';
         }
-        elsif $primspec == 3 {
+        elsif $primspec == nqp::const::BIND_VAL_STR {
             $op_name := $op_name ~ 's';
         }
-        elsif $primspec == 0 { # object
+        elsif $primspec == nqp::const::BIND_VAL_OBJ { # object
             $op_name := $op_name ~ 'o';
         }
         else {

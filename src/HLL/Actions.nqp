@@ -58,19 +58,19 @@ class HLL::Actions {
                         unless $block.symbol($key) {
                             my $lextype := nqp::lexprimspec($pad, $key);
                             # obj
-                            if $lextype == 0 {
+                            if $lextype == nqp::const::BIND_VAL_OBJ {
                                 $block.symbol($key, :scope<lexical>, :lazy_value_from($pad));
                             }
                             # int
-                            elsif $lextype == 1 {
+                            elsif $lextype == nqp::const::BIND_VAL_INT {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_i($pad, $key)), :type(int));
                             }
                             # num
-                            elsif $lextype == 2 {
+                            elsif $lextype == nqp::const::BIND_VAL_NUM {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_n($pad, $key)), :type(num));
                             }
                             # str
-                            elsif $lextype == 3 {
+                            elsif $lextype == nqp::const::BIND_VAL_STR {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_s($pad, $key)), :type(str));
                             }
                             # int8
@@ -99,7 +99,7 @@ class HLL::Actions {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint32));
                             }
                             # uint64
-                            elsif $lextype == 10 {
+                            elsif $lextype == nqp::const::BIND_VAL_UINT {
                                 $block.symbol($key, :scope<lexical>, :value(nqp::atkey_u($pad, $key)), :type(uint64));
                             }
 #?endif

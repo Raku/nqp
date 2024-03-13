@@ -311,7 +311,7 @@ class NQP::Optimizer {
 
     method num_to_int($op, $asm) {
         sub returns_int($node) {
-            if nqp::objprimspec($node.returns) == 1 {
+            if nqp::objprimspec($node.returns) == nqp::const::BIND_VAL_INT {
                 return 1
             }
             if nqp::istype($node, QAST::Op) {

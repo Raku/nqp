@@ -2125,10 +2125,10 @@ my class MASTCompilerInstance {
         }
         else {
             my int $primspec := nqp::objprimspec($type);
-            if $primspec == 0 {
+            if $primspec == nqp::const::BIND_VAL_OBJ {
                 nqp::const::MVM_reg_obj
             }
-            elsif $primspec == 1 {
+            elsif $primspec == nqp::const::BIND_VAL_INT {
                 my int $size := nqp::objprimbits($type);
                 if nqp::objprimunsigned($type) {
                     if $size == 64    { nqp::const::MVM_reg_uint64 }
@@ -2145,13 +2145,13 @@ my class MASTCompilerInstance {
                     else { nqp::die("Unknown int size $size") }
                 }
             }
-            elsif $primspec == 2 {
+            elsif $primspec == nqp::const::BIND_VAL_NUM {
                 my int $size := nqp::objprimbits($type);
                 if $size == 64    { nqp::const::MVM_reg_num64 }
                 elsif $size == 32 { nqp::const::MVM_reg_num32 }
                 else { nqp::die("Unknown num size $size") }
             }
-            elsif $primspec == 10 {
+            elsif $primspec == nqp::const::BIND_VAL_UINT {
                 my int $size := nqp::objprimbits($type);
                 if $size == 64    { nqp::const::MVM_reg_uint64 }
                 elsif $size == 32 { nqp::const::MVM_reg_uint32 }
@@ -2159,7 +2159,7 @@ my class MASTCompilerInstance {
                 elsif $size == 8  { nqp::const::MVM_reg_uint8 }
                 else { nqp::die("Unknown uint size $size") }
             }
-            elsif $primspec == 3 {
+            elsif $primspec == nqp::const::BIND_VAL_STR {
                 nqp::const::MVM_reg_str
             }
             else {
@@ -2204,19 +2204,19 @@ my %num_map;
 %uint_map<64> := 20;
 sub type_to_local_type($t) {
     my $spec := nqp::objprimspec($t);
-    if $spec == 0 {
+    if $spec == nqp::const::BIND_VAL_OBJ {
         8
     }
-    elsif $spec == 1 {
+    elsif $spec == nqp::const::BIND_VAL_INT {
         (nqp::objprimunsigned($t) ?? %uint_map !! %int_map){nqp::objprimbits($t)}
     }
-    elsif $spec == 2 {
+    elsif $spec == nqp::const::BIND_VAL_NUM {
         %num_map{nqp::objprimbits($t)}
     }
-    elsif $spec == 3 {
+    elsif $spec == nqp::const::BIND_VAL_STR {
         7
     }
-    elsif $spec == 10 {
+    elsif $spec == nqp::const::BIND_VAL_UINT {
         %uint_map{nqp::objprimbits($t)}
     }
     else {
