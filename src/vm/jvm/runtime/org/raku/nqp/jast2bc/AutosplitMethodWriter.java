@@ -1268,7 +1268,7 @@ class AutosplitMethodWriter extends MethodNode {
         for (int i = 0; i < entryPts.length; i++)
             entryTrampolineLabels[i] = new Label();
 
-        Int2ObjectOpenHashMap exitTrampolineLabels = new Int2ObjectOpenHashMap();
+        Int2ObjectOpenHashMap<Label> exitTrampolineLabels = new Int2ObjectOpenHashMap<Label>();
         for (int i = 0; i < exitPts.length; i++)
             exitTrampolineLabels.put(exitPts[i], new Label());
 
@@ -1381,7 +1381,7 @@ class AutosplitMethodWriter extends MethodNode {
     private String[] box_types = new String[] { "java/lang/Integer", "java/lang/Long", "java/lang/Float", "java/lang/Double" };
     private String[] box_descs = new String[] { "(I)V", "(J)V", "(F)V", "(D)V" };
 
-    private void emitFragmentInsn(MethodVisitor v, int iix, int begin, Label[] insnLabels, Int2ObjectOpenHashMap exitTrampolineLabels, Set<String> spilledUTypes) {
+    private void emitFragmentInsn(MethodVisitor v, int iix, int begin, Label[] insnLabels, Int2ObjectOpenHashMap<Label> exitTrampolineLabels, Set<String> spilledUTypes) {
         v.visitLabel(insnLabels[iix - begin]);
         AbstractInsnNode ai = insnList[iix];
 
@@ -1490,7 +1490,7 @@ class AutosplitMethodWriter extends MethodNode {
         }
     }
 
-    private Label mapLabel(LabelNode ln, int begin, Label[] insnLabels, Int2ObjectOpenHashMap exitTrampolineLabels) {
+    private Label mapLabel(LabelNode ln, int begin, Label[] insnLabels, Int2ObjectOpenHashMap<Label> exitTrampolineLabels) {
         int lni = insnMap.getInt(ln);
         if (exitTrampolineLabels.containsKey(lni))
             return (Label)exitTrampolineLabels.get(lni);
