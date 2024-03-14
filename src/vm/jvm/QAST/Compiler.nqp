@@ -2327,10 +2327,6 @@ nqp::bindkey(%const_map, 'BIND_VAL_NUM',   2);
 nqp::bindkey(%const_map, 'BIND_VAL_STR',   3);
 nqp::bindkey(%const_map, 'BIND_VAL_UINT', 10);
 
-nqp::bindkey(%const_map, 'TYPE_CHECK_CACHE_DEFINITIVE',  0);
-nqp::bindkey(%const_map, 'TYPE_CHECK_CACHE_THEN_METHOD', 1);
-nqp::bindkey(%const_map, 'TYPE_CHECK_NEEDS_ACCEPTS',     2);
-
 QAST::OperationsJAST.add_core_op('const', -> $qastcomp, $op {
     if nqp::existskey(%const_map, $op.name) {
         $qastcomp.as_jast(QAST::IVal.new( :value(%const_map{$op.name}) ))
