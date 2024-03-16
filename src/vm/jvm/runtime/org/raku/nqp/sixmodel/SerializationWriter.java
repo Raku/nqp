@@ -242,7 +242,7 @@ public class SerializationWriter {
         }
     }
 
-    public void writeIntHash(HashMap<String, Integer> hash) {
+    public void writeIntHash(Object2IntOpenHashMap<String> hash) {
         growToHold(currentBuffer, 6);
         outputs[currentBuffer].putShort(REFVAR_VM_HASH_STR_VAR);
         outputs[currentBuffer].putInt(hash.size());
@@ -250,7 +250,7 @@ public class SerializationWriter {
             writeStr(key);
             growToHold(currentBuffer, 10);
             outputs[currentBuffer].putShort(REFVAR_VM_INT);
-            outputs[currentBuffer].putLong((int)hash.get(key));
+            outputs[currentBuffer].putLong(hash.getInt(key));
         }
     }
 

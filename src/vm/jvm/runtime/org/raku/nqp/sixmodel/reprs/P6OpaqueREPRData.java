@@ -1,6 +1,9 @@
 package org.raku.nqp.sixmodel.reprs;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import org.raku.nqp.sixmodel.STable;
 import org.raku.nqp.sixmodel.SixModelObject;
@@ -25,7 +28,7 @@ public class P6OpaqueREPRData {
     /**
      * Array of attribute name to hint mappings.
      */
-    public HashMap<String, Integer>[] nameToHintMap;
+    public ArrayList<Object2IntOpenHashMap<String>> nameToHintMap;
 
     /**
      * Auto-viv container types.
