@@ -137,8 +137,6 @@
 @bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bsm(NQP)@ @bpm(BUILD_RUNNER)@
 	@echo(+++ Compiling	$@)@
 	$(NOECHO@nop())@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
-	$(NOECHO@nop())@@bpv(NEWEST_P5QREGEX_SOURCES_MOD_TIME)@=`for file in $(P5QREGEX_SOURCES); do date --iso-8601=s -r $$file; done | sort -n | tail -n 1`
-	$(NOECHO@nop())@touch -m --date=@bpm(NEWEST_P5QREGEX_SOURCES_MOD_TIME)@ @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
 	$(NOECHO@nop())@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
 	    @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
 
