@@ -6741,6 +6741,7 @@ public final class Ops {
         /* Copy results into an RIA. */
         SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
         SixModelObject fateRes = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
+        fateRes.set_elems(tc, fates.length);
         for (int i = 0; i < fates.length; i++) {
             tc.native_i = fates[i];
             fateRes.bind_pos_native(tc, i);
@@ -6755,15 +6756,17 @@ public final class Ops {
 
         /* Push the results onto the bstack. */
         long caps = isnull(cstack) == 1 || cstack instanceof TypeObject ? 0 : cstack.elems(tc);
+        long curLen = bstack.elems(tc);
+        bstack.set_elems(tc, (long)(curLen + (4 * fates.length)));
         for (int i = 0; i < fates.length; i++) {
             marks.at_pos_native(tc, fates[i]);
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 0));
             tc.native_i = pos;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 1));
             tc.native_i = 0;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 2));
             tc.native_i = caps;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 3));
         }
 
         return nfa;
