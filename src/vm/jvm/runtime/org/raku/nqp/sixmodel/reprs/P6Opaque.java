@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -87,7 +89,7 @@ public class P6Opaque extends REPR {
         int curAttr = 0;
         boolean mi = false;
         List<SixModelObject> classHandles = new ArrayList<SixModelObject>();
-        List<HashMap<String, Integer>> attrIndexes = new ArrayList<HashMap<String, Integer>>();
+        ArrayList<Object2IntOpenHashMap<String>> attrIndexes = new ArrayList<Object2IntOpenHashMap<String>>();
         List<SixModelObject> autoVivs = new ArrayList<SixModelObject>();
         List<STable> flattenedSTables = new ArrayList<STable>();
         List<AttrInfo> attrInfoList = new ArrayList<AttrInfo>();
@@ -102,7 +104,7 @@ public class P6Opaque extends REPR {
              * in the list to add to the layout. */
             long numAttrs = attrs.elems(tc);
             if (numAttrs > 0) {
-                HashMap<String, Integer> indexes = new HashMap<String, Integer>();
+                Object2IntOpenHashMap<String> indexes = new Object2IntOpenHashMap<String>();
                 for (long j = 0; j < numAttrs; j++) {
                     SixModelObject attrHash = attrs.at_pos_boxed(tc, j);
                     String attrName = attrHash.at_key_boxed(tc, "name").get_str(tc);
@@ -162,7 +164,7 @@ public class P6Opaque extends REPR {
 
         /* Populate some REPR data. */
         ((P6OpaqueREPRData)st.REPRData).classHandles = classHandles.toArray(new SixModelObject[0]);
-        ((P6OpaqueREPRData)st.REPRData).nameToHintMap = attrIndexes.toArray(new HashMap[0]);
+        ((P6OpaqueREPRData)st.REPRData).nameToHintMap = attrIndexes;
         ((P6OpaqueREPRData)st.REPRData).autoVivContainers = autoVivs.toArray(new SixModelObject[0]);
         ((P6OpaqueREPRData)st.REPRData).flattenedSTables = flattenedSTables.toArray(new STable[0]);
         ((P6OpaqueREPRData)st.REPRData).mi = mi;
@@ -734,8 +736,8 @@ public class P6Opaque extends REPR {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)st.REPRData;
         for (int i = 0; i < rd.classHandles.length; i++) {
             if (rd.classHandles[i] == classHandle) {
-                Integer idx = rd.nameToHintMap[i].get(name);
-                if (idx != null)
+                int idx = rd.nameToHintMap.get(i).getOrDefault(name, -1);
+                if (idx != -1)
                     return idx;
                 else
                     break;
@@ -784,7 +786,7 @@ public class P6Opaque extends REPR {
         // Read in the name to index mapping.
         int numClasses = (int)reader.readLong();
         ArrayList<SixModelObject> classHandles = new ArrayList<SixModelObject>();
-        ArrayList<HashMap<String, Integer>> nameToHintMaps = new ArrayList<HashMap<String, Integer>>();
+        ArrayList<Object2IntOpenHashMap<String>> nameToHintMaps = new ArrayList<Object2IntOpenHashMap<String>>();
         for (int i = 0; i < numClasses; i++) {
             SixModelObject classHandle = reader.readRef();
             SixModelObject nameToHintObject = reader.readRef();
@@ -792,7 +794,7 @@ public class P6Opaque extends REPR {
                 /* Nothing to do. */
             }
             else if (nameToHintObject instanceof VMHashInstance) {
-                HashMap<String, Integer> nameToHintMap = new HashMap<String, Integer>();
+                Object2IntOpenHashMap<String> nameToHintMap = new Object2IntOpenHashMap<String>();
                 HashMap<String, SixModelObject> origMap = ((VMHashInstance)nameToHintObject).storage;
                 if (origMap.size() > 0) {
                     for (String key : origMap.keySet())
@@ -806,7 +808,7 @@ public class P6Opaque extends REPR {
             }
         }
         REPRData.classHandles = classHandles.toArray(new SixModelObject[0]);
-        REPRData.nameToHintMap = nameToHintMaps.toArray(new HashMap[0]);
+        REPRData.nameToHintMap = nameToHintMaps;
 
         // Read delegate slots.
         REPRData.posDelSlot = (int)reader.readLong();
@@ -882,7 +884,7 @@ public class P6Opaque extends REPR {
         writer.writeInt(numClasses);
         for (int i = 0; i < numClasses; i++) {
             writer.writeRef(REPRData.classHandles[i]);
-            writer.writeIntHash(REPRData.nameToHintMap[i]);
+            writer.writeIntHash(REPRData.nameToHintMap.get(i));
         }
 
         writer.writeInt(REPRData.posDelSlot);

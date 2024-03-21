@@ -14,6 +14,13 @@ import org.raku.nqp.sixmodel.StorageSpec;
 import org.raku.nqp.sixmodel.TypeObject;
 
 public class P6str extends REPR {
+    private static final StorageSpec ss = new StorageSpec();
+    static {
+        ss.inlineable = StorageSpec.INLINED;
+        ss.boxed_primitive = StorageSpec.BP_STR;
+        ss.can_box = StorageSpec.CAN_BOX_STR;
+    }
+
     @Override
     public SixModelObject type_object_for(ThreadContext tc, SixModelObject HOW) {
         STable st = new STable(this, HOW);
@@ -33,10 +40,6 @@ public class P6str extends REPR {
 
     @Override
     public StorageSpec get_storage_spec(ThreadContext tc, STable st) {
-        StorageSpec ss = new StorageSpec();
-        ss.inlineable = StorageSpec.INLINED;
-        ss.boxed_primitive = StorageSpec.BP_STR;
-        ss.can_box = StorageSpec.CAN_BOX_STR;
         return ss;
     }
 

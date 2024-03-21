@@ -5,6 +5,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.HashMap;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import org.raku.nqp.sixmodel.SixModelObject;
 
 public class StaticCodeInfo implements Cloneable {
@@ -80,10 +82,10 @@ public class StaticCodeInfo implements Cloneable {
      * Lexical name maps (produced lazily on first use). Note they are only
      * used when we do lexical lookup by name.
      */
-    public HashMap<String, Integer> oLexicalMap;
-    public HashMap<String, Integer> iLexicalMap;
-    public HashMap<String, Integer> nLexicalMap;
-    public HashMap<String, Integer> sLexicalMap;
+    public Object2IntOpenHashMap<String> oLexicalMap;
+    public Object2IntOpenHashMap<String> iLexicalMap;
+    public Object2IntOpenHashMap<String> nLexicalMap;
+    public Object2IntOpenHashMap<String> sLexicalMap;
 
     /**
      * Does this code object have a block exit handler?
@@ -95,73 +97,73 @@ public class StaticCodeInfo implements Cloneable {
      */
     public boolean isThunk;
 
-    public Integer oTryGetLexicalIdx(String name) {
+    public int oTryGetLexicalIdx(String name) {
         if (oLexicalNames != null) {
             if (oLexicalMap == null) {
-                HashMap<String, Integer> map = new HashMap<String, Integer>(oLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(oLexicalNames.length);
                 for (int i = 0; i < oLexicalNames.length; i++)
                     map.put(oLexicalNames[i], i);
                 oLexicalMap = map;
             }
-            return oLexicalMap.get(name);
+            return oLexicalMap.getOrDefault(name, -1);
         } else {
-            return null;
+            return -1;
         }
     }
 
-    public Integer iTryGetLexicalIdx(String name) {
+    public int iTryGetLexicalIdx(String name) {
         if (iLexicalNames != null) {
             if (iLexicalMap == null) {
-                HashMap<String, Integer> map = new HashMap<String, Integer>(iLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(iLexicalNames.length);
                 for (int i = 0; i < iLexicalNames.length; i++)
                     map.put(iLexicalNames[i], i);
                 iLexicalMap = map;
             }
-            return iLexicalMap.get(name);
+            return iLexicalMap.getOrDefault(name, -1);
         } else {
-            return null;
+            return -1;
         }
     }
 
-    public Integer uTryGetLexicalIdx(String name) {
+    public int uTryGetLexicalIdx(String name) {
         if (iLexicalNames != null) {
             if (iLexicalMap == null) {
-                HashMap<String, Integer> map = new HashMap<String, Integer>(iLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(iLexicalNames.length);
                 for (int i = 0; i < iLexicalNames.length; i++)
                     map.put(iLexicalNames[i], i);
                 iLexicalMap = map;
             }
-            return iLexicalMap.get(name);
+            return iLexicalMap.getOrDefault(name, -1);
         } else {
-            return null;
+            return -1;
         }
     }
 
-    public Integer nTryGetLexicalIdx(String name) {
+    public int nTryGetLexicalIdx(String name) {
         if (nLexicalNames != null) {
             if (nLexicalMap == null) {
-                HashMap<String, Integer> map = new HashMap<String, Integer>(nLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(nLexicalNames.length);
                 for (int i = 0; i < nLexicalNames.length; i++)
                     map.put(nLexicalNames[i], i);
                 nLexicalMap = map;
             }
-            return nLexicalMap.get(name);
+            return nLexicalMap.getOrDefault(name, -1);
         } else {
-            return null;
+            return -1;
         }
     }
 
-    public Integer sTryGetLexicalIdx(String name) {
+    public int sTryGetLexicalIdx(String name) {
         if (sLexicalNames != null) {
             if (sLexicalMap == null) {
-                HashMap<String, Integer> map = new HashMap<String, Integer>(sLexicalNames.length);
+                Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<String>(sLexicalNames.length);
                 for (int i = 0; i < sLexicalNames.length; i++)
                     map.put(sLexicalNames[i], i);
                 sLexicalMap = map;
             }
-            return sLexicalMap.get(name);
+            return sLexicalMap.getOrDefault(name, -1);
         } else {
-            return null;
+            return -1;
         }
     }
 

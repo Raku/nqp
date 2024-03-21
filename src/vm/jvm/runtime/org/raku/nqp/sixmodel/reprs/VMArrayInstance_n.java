@@ -1,6 +1,7 @@
 package org.raku.nqp.sixmodel.reprs;
 
 import java.lang.System;
+import java.util.Arrays;
 
 import org.raku.nqp.runtime.ExceptionHandling;
 import org.raku.nqp.runtime.ThreadContext;
@@ -95,9 +96,7 @@ public class VMArrayInstance_n extends VMArrayInstanceBase {
             slots = new double[(int)ssize];
         }
         else {
-            double[] new_slots = new double[(int)ssize];
-            System.arraycopy(slots, 0, new_slots, 0, slots.length);
-            slots = new_slots;
+            slots = Arrays.copyOf(slots, (int)ssize);
         }
 
         this.slots = slots;

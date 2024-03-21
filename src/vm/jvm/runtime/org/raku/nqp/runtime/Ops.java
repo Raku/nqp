@@ -66,6 +66,11 @@ import java.util.TimerTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntComparators;
+
 import org.raku.nqp.io.FileHandle;
 import org.raku.nqp.io.IIOBindable;
 import org.raku.nqp.io.IIOCancelable;
@@ -1181,8 +1186,8 @@ public final class Ops {
     public static SixModelObject getlex(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
@@ -1191,8 +1196,8 @@ public final class Ops {
     public static long getlex_i(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found];
             curFrame = curFrame.outer;
         }
@@ -1201,8 +1206,8 @@ public final class Ops {
     public static long getlex_u(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found];
             curFrame = curFrame.outer;
         }
@@ -1211,8 +1216,8 @@ public final class Ops {
     public static double getlex_n(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.nLex[found];
             curFrame = curFrame.outer;
         }
@@ -1221,8 +1226,8 @@ public final class Ops {
     public static String getlex_s(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.sLex[found];
             curFrame = curFrame.outer;
         }
@@ -1231,8 +1236,8 @@ public final class Ops {
     public static SixModelObject getlexouter(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.outer;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found];
             curFrame = curFrame.outer;
         }
@@ -1243,8 +1248,8 @@ public final class Ops {
     public static SixModelObject bindlex(String name, SixModelObject value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.oLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1253,8 +1258,8 @@ public final class Ops {
     public static long bindlex_i(String name, long value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1263,8 +1268,8 @@ public final class Ops {
     public static long bindlex_u(String name, long value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.uTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.uTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.iLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1273,8 +1278,8 @@ public final class Ops {
     public static double bindlex_n(String name, double value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.nLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1283,8 +1288,8 @@ public final class Ops {
     public static String bindlex_s(String name, String value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame;
         while (curFrame != null) {
-            Integer found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null)
+            int found = curFrame.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1)
                 return curFrame.sLex[found] = value;
             curFrame = curFrame.outer;
         }
@@ -1395,11 +1400,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.iLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1413,11 +1418,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No int lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.iTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceIntLex ref = (NativeRefInstanceIntLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.iLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1431,11 +1436,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No num lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.nTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceNumLex ref = (NativeRefInstanceNumLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.nLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1449,11 +1454,11 @@ public final class Ops {
             throw ExceptionHandling.dieInternal(tc,
                 "No str lexical reference type registered for current HLL");
         while (cf != null) {
-            Integer found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
-            if (found != null) {
+            int found = cf.codeRef.staticInfo.sTryGetLexicalIdx(name);
+            if (found != -1) {
                 NativeRefInstanceStrLex ref = (NativeRefInstanceStrLex)refType.st.REPR.allocate(tc, refType.st);
                 ref.lexicals = cf.sLex;
-                ref.idx = (int)found;
+                ref.idx = found;
                 return ref;
             }
             cf = cf.outer;
@@ -1465,8 +1470,8 @@ public final class Ops {
     public static SixModelObject bindlexdyn(String name, SixModelObject value, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
-            Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (idx != null) {
+            int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (idx != -1) {
                 curFrame.oLex[idx] = value;
                 return value;
             }
@@ -1477,8 +1482,8 @@ public final class Ops {
     public static SixModelObject getlexdyn(String name, ThreadContext tc) {
         CallFrame curFrame = tc.curFrame.caller;
         while (curFrame != null) {
-            Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-            if (idx != null)
+            int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+            if (idx != -1)
                 return curFrame.oLex[idx];
             curFrame = curFrame.caller;
         }
@@ -1489,8 +1494,8 @@ public final class Ops {
         while (curCallerFrame != null) {
             CallFrame curFrame = curCallerFrame;
             while (curFrame != null) {
-                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (found != null)
+                int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != -1)
                     return curFrame.oLex[found];
                 curFrame = curFrame.outer;
             }
@@ -1504,8 +1509,8 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame curFrame = ((ContextRefInstance)ctx).context;
             while (curFrame != null) {
-                Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (found != null)
+                int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (found != -1)
                     return curFrame.oLex[found];
                 curFrame = curFrame.outer;
             }
@@ -1519,8 +1524,8 @@ public final class Ops {
         if (ctx instanceof ContextRefInstance) {
             CallFrame curFrame = ((ContextRefInstance)ctx).context;
             while (curFrame != null) {
-                Integer idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                if (idx != null)
+                int idx =  curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                if (idx != -1)
                     return curFrame.oLex[idx];
                 curFrame = curFrame.caller;
             }
@@ -1536,8 +1541,8 @@ public final class Ops {
             while (curCallerFrame != null) {
                 CallFrame curFrame = curCallerFrame;
                 while (curFrame != null) {
-                    Integer found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
-                    if (found != null)
+                    int found = curFrame.codeRef.staticInfo.oTryGetLexicalIdx(name);
+                    if (found != -1)
                         return curFrame.oLex[found];
                     curFrame = curFrame.outer;
                 }
@@ -1647,11 +1652,11 @@ public final class Ops {
     public static long lexprimspec(SixModelObject pad, String key, ThreadContext tc) {
         if (pad instanceof ContextRefInstance) {
             StaticCodeInfo sci = ((ContextRefInstance)pad).context.codeRef.staticInfo;
-            if (sci.oTryGetLexicalIdx(key) != null) return StorageSpec.BP_NONE;
-            if (sci.iTryGetLexicalIdx(key) != null) return StorageSpec.BP_INT;
-            if (sci.uTryGetLexicalIdx(key) != null) return StorageSpec.BP_UINT;
-            if (sci.nTryGetLexicalIdx(key) != null) return StorageSpec.BP_NUM;
-            if (sci.sTryGetLexicalIdx(key) != null) return StorageSpec.BP_STR;
+            if (sci.oTryGetLexicalIdx(key) != -1) return StorageSpec.BP_NONE;
+            if (sci.iTryGetLexicalIdx(key) != -1) return StorageSpec.BP_INT;
+            if (sci.uTryGetLexicalIdx(key) != -1) return StorageSpec.BP_UINT;
+            if (sci.nTryGetLexicalIdx(key) != -1) return StorageSpec.BP_NUM;
+            if (sci.sTryGetLexicalIdx(key) != -1) return StorageSpec.BP_STR;
             throw ExceptionHandling.dieInternal(tc, "Invalid lexical name passed to lexprimspec");
         }
         else {
@@ -1814,9 +1819,9 @@ public final class Ops {
     /* Required named parameter getting. */
     public static SixModelObject namedparam_o(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
                 return (SixModelObject)args[lookup >> 6];
@@ -1837,9 +1842,9 @@ public final class Ops {
     }
     public static long namedparam_i(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
                 return (long)args[lookup >> 6];
@@ -1860,9 +1865,9 @@ public final class Ops {
     }
     public static double namedparam_n(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
                 return (double)args[lookup >> 6];
@@ -1883,9 +1888,9 @@ public final class Ops {
     }
     public static String namedparam_s(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
                 return (String)args[lookup >> 6];
@@ -1908,9 +1913,9 @@ public final class Ops {
     /* Optional named parameter getting. */
     public static SixModelObject namedparam_opt_o(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
@@ -1934,9 +1939,9 @@ public final class Ops {
     }
     public static long namedparam_opt_i(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_INT:
@@ -1960,9 +1965,9 @@ public final class Ops {
     }
     public static double namedparam_opt_n(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_NUM:
@@ -1986,9 +1991,9 @@ public final class Ops {
     }
     public static String namedparam_opt_s(CallFrame cf, CallSiteDescriptor cs, Object[] args, String name) {
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
-        Integer lookup = cf.workingNameMap.remove(name);
-        if (lookup != null) {
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
+        if (cf.workingNameMap.containsKey(name)) {
+            int lookup = cf.workingNameMap.removeInt(name);
             cf.tc.lastParameterExisted = 1;
             switch ((lookup & 7)) {
             case CallSiteDescriptor.ARG_STR:
@@ -2020,9 +2025,9 @@ public final class Ops {
 
         /* Populate it. */
         if (cf.workingNameMap == null)
-            cf.workingNameMap = new HashMap<String, Integer>(cs.nameMap);
+            cf.workingNameMap = new Object2IntOpenHashMap<String>(cs.nameMap);
         for (String name : cf.workingNameMap.keySet()) {
-            Integer lookup = cf.workingNameMap.get(name);
+            int lookup = cf.workingNameMap.getInt(name);
             switch (lookup & 7) {
             case CallSiteDescriptor.ARG_OBJ:
                 result.bind_key_boxed(tc, name, (SixModelObject)args[lookup >> 6]);
@@ -2266,8 +2271,9 @@ public final class Ops {
             SixModelObject hashType = tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.hashType;
             SixModelObject res = hashType.st.REPR.allocate(tc, hashType.st);
 
-            for (String name : cc.descriptor.nameMap.keySet()) {
-                Integer flagged = cc.descriptor.nameMap.get(name);
+            for (Object n : cc.descriptor.nameMap.keySet()) {
+                String name = (String)n;
+                int flagged = cc.descriptor.nameMap.getInt(name);
                 int i = flagged >> 6;
 
                 SixModelObject arg = null;
@@ -4464,43 +4470,43 @@ public final class Ops {
     }
 
     /* Brute force, but not normally needed for most programs. */
-    private static volatile HashMap<String, Integer> cpNameMap;
+    private static volatile Object2IntOpenHashMap<String> cpNameMap;
     private static volatile Boolean cpNameMapAboveBMP;
     public static long codepointfromname(String name) {
-        HashMap<String, Integer> names = cpNameMap;
+        Object2IntOpenHashMap<String> names = cpNameMap;
         /* Gets the first half (the BMP) */
         if (names == null) {
             /* Initialize the expected max hash size as 0x10FFFF */
-            names = new HashMap< >(0x10FFFF);
+            names = new Object2IntOpenHashMap<String>(0x10FFFF);
             for (int i = 0; i < Character.MAX_VALUE; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("ALERT",            (int)7);
-            names.put("BEL",              (int)7);
-            names.put("LF",               (int)10);
-            names.put("LINE FEED",        (int)10);
-            names.put("FF",               (int)12);
-            names.put("FORM FEED",        (int)12);
-            names.put("CR",               (int)13);
-            names.put("CARRIAGE RETURN",  (int)13);
-            names.put("NEL",              (int)133);
-            names.put("NEXT LINE",        (int)133);
+            names.put("ALERT",            7);
+            names.put("BEL",              7);
+            names.put("LF",               10);
+            names.put("LINE FEED",        10);
+            names.put("FF",               12);
+            names.put("FORM FEED",        12);
+            names.put("CR",               13);
+            names.put("CARRIAGE RETURN",  13);
+            names.put("NEL",              133);
+            names.put("NEXT LINE",        133);
             names.remove("BELL"); // added below as 0x1F514, cmp. RT #130542
             cpNameMap = names;
             cpNameMapAboveBMP = false;
         }
-        Integer found = names.get(name);
+        int found = names.getOrDefault(name, -1);
         /* If we have not found it yet, put all other possible codepoints into
          * the hash */
-        if (found == null && !cpNameMapAboveBMP) {
+        if (found == -1 && !cpNameMapAboveBMP) {
             for (int i = Character.MAX_VALUE; i <= 0x10FFFF; i++)
                 if (Character.isValidCodePoint(i))
                     names.put(Character.getName(i), i);
-            names.put("BELL",             (int)0x1F514);
+            names.put("BELL",             0x1F514);
             cpNameMapAboveBMP = true;
-            found = names.get(name);
+            found = names.getOrDefault(name, -1);
         }
-        return found == null ? -1 : found;
+        return found;
     }
 
     public static String strfromname(String name) {
@@ -6735,6 +6741,7 @@ public final class Ops {
         /* Copy results into an RIA. */
         SixModelObject BOOTIntArray = tc.gc.BOOTIntArray;
         SixModelObject fateRes = BOOTIntArray.st.REPR.allocate(tc, BOOTIntArray.st);
+        fateRes.set_elems(tc, fates.length);
         for (int i = 0; i < fates.length; i++) {
             tc.native_i = fates[i];
             fateRes.bind_pos_native(tc, i);
@@ -6749,15 +6756,17 @@ public final class Ops {
 
         /* Push the results onto the bstack. */
         long caps = isnull(cstack) == 1 || cstack instanceof TypeObject ? 0 : cstack.elems(tc);
+        long curLen = bstack.elems(tc);
+        bstack.set_elems(tc, (long)(curLen + (4 * fates.length)));
         for (int i = 0; i < fates.length; i++) {
             marks.at_pos_native(tc, fates[i]);
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 0));
             tc.native_i = pos;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 1));
             tc.native_i = 0;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 2));
             tc.native_i = caps;
-            bstack.push_native(tc);
+            bstack.bind_pos_native(tc, (long)(curLen + (4 * i) + 3));
         }
 
         return nfa;
@@ -6774,9 +6783,9 @@ public final class Ops {
         long orig_pos = pos;
 
         /* Clear out other re-used arrays. */
-        ArrayList<Integer> fates = tc.fates;
-        ArrayList<Integer> curst = tc.curst;
-        ArrayList<Integer> nextst = tc.nextst;
+        IntArrayList fates = tc.fates;
+        IntArrayList curst = tc.curst;
+        IntArrayList nextst = tc.nextst;
         curst.clear();
         nextst.clear();
         fates.clear();
@@ -6790,7 +6799,7 @@ public final class Ops {
              *    my @curst := @nextst;
              *    @nextst := [];
              * But avoids an extra allocation per offset. */
-            ArrayList<Integer> temp = curst;
+            IntArrayList temp = curst;
             curst = nextst;
             temp.clear();
             nextst = temp;
@@ -6799,9 +6808,7 @@ public final class Ops {
             int prevFates = fates.size();
 
             while (!curst.isEmpty()) {
-                int top = curst.size() - 1;
-                int st = curst.get(top);
-                curst.remove(top);
+                int st = curst.popInt();
                 if (st <= numStates) {
                     if (done[st] == gen)
                         continue;
@@ -6825,8 +6832,8 @@ public final class Ops {
                             arg &= 0xffffff;   // can go away after reboostrap?
                             for (int j = 0; j < fates.size(); j++) {
                                 if (foundFate)
-                                    fates.set(j - 1, fates.get(j));
-                                if (fates.get(j )== arg) {
+                                    fates.set(j - 1, fates.getInt(j));
+                                if (fates.getInt(j) == arg) {
                                     foundFate = true;
                                     if (j < prevFates)
                                         prevFates--;
@@ -6956,8 +6963,18 @@ public final class Ops {
              * future, we'll want to factor in longest literal prefix too. */
             int charFates = fates.size() - prevFates;
             if (charFates > 1) {
-                List<Integer> charFateList = fates.subList(prevFates, fates.size());
-                Collections.sort(charFateList, Collections.reverseOrder());
+                if (charFates == 2) {
+                    int a = fates.getInt(prevFates);
+                    int b = fates.getInt(prevFates + 1);
+                    if (b > a) {
+                        fates.set(prevFates, b);
+                        fates.set(prevFates + 1, a);
+                    }
+                }
+                else {
+                    IntList charFateList = fates.subList(prevFates, fates.size());
+                    charFateList.sort(IntComparators.OPPOSITE_COMPARATOR);
+                }
             }
         }
 
@@ -6965,11 +6982,10 @@ public final class Ops {
         int[] result = new int[fates.size()];
         if (usedlonglit > 0) {
             for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i) & 0xffffff;
+                result[i] = fates.getInt(i) & 0xffffff;
         }
         else {
-            for (int i = 0; i < fates.size(); i++)
-                result[i] = fates.get(i);
+            fates.getElements(0, result, 0, fates.size());
         }
         return result;
     }

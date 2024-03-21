@@ -1,7 +1,8 @@
 package org.raku.nqp.sixmodel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import org.raku.nqp.sixmodel.reprs.CallCapture;
 import org.raku.nqp.sixmodel.reprs.CodeRefREPR;
@@ -43,12 +44,12 @@ import org.raku.nqp.sixmodel.reprs.MultiDimArray;
 import org.raku.nqp.sixmodel.reprs.Decoder;
 
 public class REPRRegistry {
-    private static HashMap<String, Integer> reprIdMap = new HashMap<>();
+    private static Object2IntOpenHashMap<String> reprIdMap = new Object2IntOpenHashMap<String>();
     private static ArrayList<REPR> reprs = new ArrayList<>();
 
     public static REPR getByName(String name) {
-        Integer idx = reprIdMap.get(name);
-        if (idx == null)
+        int idx = reprIdMap.getOrDefault(name, -1);
+        if (idx == -1)
             throw new RuntimeException("No REPR " + name);
         return getById(idx);
     }
