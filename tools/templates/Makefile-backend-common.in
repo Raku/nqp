@@ -134,7 +134,7 @@
 	@echo(+++ Installing @uc(@backend@)@ stage 2 files locally)@
 	$(NOECHO)$(CP) @bpm(STAGE2_OUTPUT)@ .
 
-@bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bpm(BUILD_RUNNER_BIN)@
+@bsm(P5QREGEX)@: $(P5QREGEX_SOURCES) @bsm(NQP)@ @bpm(BUILD_RUNNER)@
 	@echo(+++ Compiling	$@)@
 	$(NOECHO@nop())@@bpm(GEN_CAT)@ stage2 $(P5QREGEX_SOURCES) > @nfpq(@bpm(STAGE2_DIR)@/$(P5QREGEX_COMBINED))@
 	$(NOECHO@nop())@@bpm(BUILD_RUNNER_BIN)@ --target=@btarget@ --output=@bsm(P5QREGEX)@ \
