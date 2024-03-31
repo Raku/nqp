@@ -288,5 +288,12 @@ knowhow NQPParametricRoleHOW {
     method name(               $XXX?) { $!name                }
     method role_typecheck_list($XXX?) { $!role_typecheck_list }
 
+    method declares_method($XXX, $name) {
+        nqp::existskey($!methods, $name)
+    }
+    method code_of_method($XXX, $name) {
+        nqp::atkey($!methods, $name)
+    }
+
     method shortname($target) { shortened_name($target ) }
 }

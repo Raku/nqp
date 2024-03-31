@@ -197,6 +197,13 @@ knowhow NQPConcreteRoleHOW {
     method role_typecheck_list($XXX?) { $!role_typecheck_list }
     method instance_of($XXX?)         { $!instance_of         }
 
+    method declares_method($XXX, $name) {
+        nqp::existskey($!methods, $name)
+    }
+    method code_of_method($XXX, $name) {
+        nqp::atkey($!methods, $name)
+    }
+
     # Other introspection
     method methods($XXX?, :$local, :$all) {
         $!method_order
