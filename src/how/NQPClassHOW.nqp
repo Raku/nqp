@@ -808,6 +808,13 @@ knowhow NQPClassHOW {
     method method_table($XXX?)        { $!methods      }
     method tweaks($XXX?)              { $!tweaks       }
 
+    method declares_method($XXX, $name) {
+        nqp::existskey($!methods, $name)
+    }
+    method code_of_method($XXX, $name) {
+        nqp::atkey($!methods, $name)
+    }
+
     method methods($XXX?, :$local = 0, :$all) {
         if $local {
             nqp::clone($!method_order)
