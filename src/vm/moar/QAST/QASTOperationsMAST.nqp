@@ -2396,6 +2396,8 @@ my constant CONST_MAP := nqp::hash(
     'SIG_ELEM_IS_NOT_POSITIONAL',   16810040,
     'SIG_ELEM_CODE_SIGIL',          33554432,
     'SIG_ELEM_IS_COERCIVE',         67108864,
+    'SIG_ELEM_IS_ITEM',             268435456,
+    'SIG_ELEM_IS_EXACT_TYPE',       536870912,
 
     'EDGE_FATE',               0,
     'EDGE_EPSILON',            1,
