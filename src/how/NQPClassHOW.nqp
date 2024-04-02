@@ -251,7 +251,9 @@ knowhow NQPClassHOW {
             $!cached_all_method_table := nqp::null;
 
             self.publish_type_cache($target);
+#?if !moar
             self.publish_method_cache($target);
+#?endif
             self.publish_boolification_spec($target);
         });
 
@@ -345,7 +347,9 @@ knowhow NQPClassHOW {
 
                 # Publish type and method caches and boolification spec.
                 self.publish_type_cache($target);
+#?if !moar
                 self.publish_method_cache($target);
+#?endif
                 self.publish_boolification_spec($target);
 
                 # Create BUILDPLAN.
@@ -661,12 +665,10 @@ knowhow NQPClassHOW {
         for @in { nqp::unshift(@out, $_) }
         @out
     }
-#?endif
 
     # Create and publish the method cache.  Assumes being run inside a
     # protected block
     method publish_method_cache($target) {
-#?if !moar
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
@@ -681,8 +683,8 @@ knowhow NQPClassHOW {
         }
         nqp::setmethcache($target, %cache);
         nqp::setmethcacheauth($target, 1);
-#?endif
     }
+#?endif
 
     # Return a hash with the methodes keyed on name.  Updates the table if
     # it wasn't set yet in a thread-safe way
