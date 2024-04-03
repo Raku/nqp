@@ -93,16 +93,16 @@ sub dd(*@_) {
             }
             '{' ~ nqp::join(", ", @parts) ~ '}'
         }
-        else {
+        elsif nqp::isconcrete($it) {
             CATCH { return $it.HOW.name($it) }
-            my str $s := ~$it;
-            nqp::chars($s) ?? $s !! $it.HOW.name($it)
+            nqp::can($it, 'Str') ?? $it.Str !! ~$it
+        }
+        else {
+            $it.HOW.name($it)
         }
     }
 
-    my int $m := nqp::elems(@_);
-    note($m == 1
-      ?? ddd(@_[0])
-      !! nqp::join("\n", ddd(@_))
-    ) if $m;
+    my @result := nqp::list_s;
+    for @_ { nqp::push_s(@result, ddd($_)) }
+    note(nqp::join("\n", @result));
 }
