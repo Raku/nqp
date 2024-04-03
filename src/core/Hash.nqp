@@ -66,7 +66,10 @@ sub dd(*@_) {
     sub ddd($it) {
 
         if nqp::isstr($it) {
-            '"' ~ $it ~ '"'
+            CATCH { return ~$! }
+            nqp::isnull_s($it)
+              ?? ''
+              !! ('"' ~ $it ~ '"')
         }
         elsif nqp::isint($it) || nqp::isnum($it) {
             ~$it;
