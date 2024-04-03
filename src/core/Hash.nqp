@@ -60,3 +60,46 @@ sub sorted_keys($hash) {
 
     @keys
 }
+
+sub dd(*@_) {
+
+    sub ddd($it) {
+
+        if nqp::isstr($it) {
+            '"' ~ $it ~ '"'
+        }
+        elsif nqp::isint($it) || nqp::isnum($it) {
+            ~$it;
+        }
+        elsif nqp::islist($it) {
+            my @parts := nqp::list_s;
+
+            for $it {
+                nqp::push_s(@parts, ddd($_));
+            }
+            '[' ~ nqp::join(", ", @parts) ~ ']'
+        }
+        elsif nqp::ishash($it) {
+            my @parts := nqp::list_s;
+
+            my @keys  := sorted_keys($it);
+            my int $i := nqp::elems(@keys);
+            while --$i >= 0 {
+                my $_ := nqp::atpos_s(@keys, $i);
+                nqp::push_s(@parts, $_ ~ " => " ~ ddd($it{$_}));
+            }
+            '{' ~ nqp::join(", ", @parts) ~ '}'
+        }
+        else {
+            CATCH { return $it.HOW.name($it) }
+            my str $s := ~$it;
+            nqp::chars($s) ?? $s !! $it.HOW.name($it)
+        }
+    }
+
+    my int $m := nqp::elems(@_);
+    note($m == 1
+      ?? ddd(@_[0])
+      !! nqp::join("\n", ddd(@_))
+    ) if $m;
+}
