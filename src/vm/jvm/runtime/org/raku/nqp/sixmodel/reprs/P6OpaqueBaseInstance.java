@@ -18,8 +18,8 @@ public class P6OpaqueBaseInstance extends SixModelObject {
         P6OpaqueREPRData rd = (P6OpaqueREPRData)this.st.REPRData;
         for (int i = 0; i < rd.classHandles.length; i++) {
             if (rd.classHandles[i] == classHandle) {
-                Integer idx = rd.nameToHintMap[i].get(name);
-                if (idx != null)
+                int idx = rd.nameToHintMap.get(i).getOrDefault(name, -1);
+                if (idx != -1)
                     return idx;
                 else
                     break;

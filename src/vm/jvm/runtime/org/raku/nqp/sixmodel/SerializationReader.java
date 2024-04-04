@@ -548,14 +548,14 @@ public class SerializationReader {
             long syms = orig.getLong();
             for (long j = 0; j < syms; j++) {
                 String sym = readStr();
-                Integer idx;
-                if ((idx = sci.oTryGetLexicalIdx(sym)) != null)
+                int idx;
+                if ((idx = sci.oTryGetLexicalIdx(sym)) != -1)
                     ctx.oLex[idx] = readRef();
-                else if ((idx = sci.iTryGetLexicalIdx(sym)) != null)
+                else if ((idx = sci.iTryGetLexicalIdx(sym)) != -1)
                     ctx.iLex[idx] = orig.getLong();
-                else if ((idx = sci.nTryGetLexicalIdx(sym)) != null)
+                else if ((idx = sci.nTryGetLexicalIdx(sym)) != -1)
                     ctx.nLex[idx] = orig.getDouble();
-                else if ((idx = sci.sTryGetLexicalIdx(sym)) != null)
+                else if ((idx = sci.sTryGetLexicalIdx(sym)) != -1)
                     ctx.sLex[idx] = readStr();
                 else
                     throw new RuntimeException("Failed to deserialize lexical " + sym);

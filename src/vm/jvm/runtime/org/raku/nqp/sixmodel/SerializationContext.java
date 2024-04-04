@@ -3,6 +3,9 @@ package org.raku.nqp.sixmodel;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import org.raku.nqp.runtime.CodeRef;
 
 /**
@@ -28,7 +31,7 @@ public class SerializationContext {
     /* Repossession info. The following lists have matching indexes, each
      * representing the integer of an object in our root set along with the SC
      * that the object was originally from. */
-    public ArrayList<Integer> rep_indexes;
+    public IntArrayList rep_indexes;
     public ArrayList<SerializationContext> rep_scs;
 
     /* Some things we deserialize are not directly in an SC, root set, but
@@ -43,7 +46,7 @@ public class SerializationContext {
         this.root_objects = new ArrayList<>();
         this.root_stables = new ArrayList<>();
         this.root_codes = new ArrayList<>();
-        this.rep_indexes = new ArrayList<>();
+        this.rep_indexes = new IntArrayList();
         this.rep_scs = new ArrayList<>();
         this.owned_objects = new HashMap<>();
     }
@@ -76,7 +79,7 @@ public class SerializationContext {
         rep_scs.add(origSC);
     }
 
-    private HashMap<SixModelObject, Integer> objectIndexCache = new HashMap<>();
+    private Object2IntOpenHashMap<SixModelObject> objectIndexCache = new Object2IntOpenHashMap<SixModelObject>();
     public void addObject(SixModelObject obj) {
         int newIndex = root_objects.size();
         root_objects.add(obj);
@@ -91,12 +94,7 @@ public class SerializationContext {
         objectIndexCache.put(obj, index);
     }
     public int getObjectIndex(SixModelObject obj) {
-        Integer cachedIndex = objectIndexCache.get(obj);
-        if (cachedIndex != null) {
-            return cachedIndex;
-        } else {
-            return -1;
-        }
+        return objectIndexCache.getInt(obj);
     }
     public SixModelObject getObject(int index) {
         return root_objects.get(index);
@@ -110,7 +108,7 @@ public class SerializationContext {
             root_objects.add(null);
     }
 
-    private HashMap<STable, Integer> stableIndexCache = new HashMap<>();
+    private Object2IntOpenHashMap<STable> stableIndexCache = new Object2IntOpenHashMap<STable>();
     public void addSTable(STable stable) {
         int newIndex = root_stables.size();
         root_stables.add(stable);
@@ -121,12 +119,7 @@ public class SerializationContext {
         stableIndexCache.put(stable, index);
     }
     public int getSTableIndex(STable stable) {
-        Integer cachedIndex = stableIndexCache.get(stable);
-        if (cachedIndex != null) {
-            return cachedIndex;
-        } else {
-            return -1;
-        }
+        return stableIndexCache.get(stable);
     }
     public STable getSTable(int index) {
         return root_stables.get(index);
@@ -140,7 +133,7 @@ public class SerializationContext {
             root_stables.add(null);
     }
 
-    private HashMap<SixModelObject, Integer> codeIndexCache = new HashMap<>();
+    private Object2IntOpenHashMap<CodeRef> codeIndexCache = new Object2IntOpenHashMap<CodeRef>();
     public void addCodeRef(CodeRef coderef) {
         int newIndex = root_codes.size();
         root_codes.add(coderef);
@@ -155,12 +148,7 @@ public class SerializationContext {
         codeIndexCache.put(obj, index);
     }
     public int getCodeIndex(SixModelObject coderef) {
-        Integer cachedIndex = codeIndexCache.get(coderef);
-        if (cachedIndex != null) {
-            return cachedIndex;
-        } else {
-            return -1;
-        }
+        return codeIndexCache.get(coderef);
     }
     public CodeRef getCodeRef(int index) {
         return root_codes.get(index);

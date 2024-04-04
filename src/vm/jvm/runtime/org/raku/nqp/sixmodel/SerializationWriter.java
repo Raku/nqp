@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+
 import org.raku.nqp.runtime.CallFrame;
 import org.raku.nqp.runtime.CodeRef;
 import org.raku.nqp.runtime.ExceptionHandling;
@@ -47,7 +50,7 @@ public class SerializationWriter {
     private ThreadContext tc;
     private SerializationContext sc;
     private ArrayList<String> sh;
-    private HashMap<String, Integer> stringMap;
+    private Object2IntOpenHashMap<String> stringMap;
 
     private ArrayList<SerializationContext> dependentSCs;
     private ArrayList<CallFrame> contexts;
@@ -74,7 +77,7 @@ public class SerializationWriter {
         this.tc = tc;
         this.sc = sc;
         this.sh = sh;
-        this.stringMap = new HashMap<String, Integer>();
+        this.stringMap = new Object2IntOpenHashMap<String>();
         this.dependentSCs = new ArrayList<SerializationContext>();
         this.contexts = new ArrayList<CallFrame>();
         this.outputs = new ByteBuffer[10];
@@ -123,8 +126,8 @@ public class SerializationWriter {
             return 0;
 
         /* Did we already see it? */
-        Integer idx = stringMap.get(s);
-        if (idx != null)
+        int idx = stringMap.getOrDefault(s, -1);
+        if (idx != -1)
             return idx;
 
         /* Otherwise, need to add it to the heap. */
@@ -239,7 +242,7 @@ public class SerializationWriter {
         }
     }
 
-    public void writeIntHash(HashMap<String, Integer> hash) {
+    public void writeIntHash(Object2IntOpenHashMap<String> hash) {
         growToHold(currentBuffer, 6);
         outputs[currentBuffer].putShort(REFVAR_VM_HASH_STR_VAR);
         outputs[currentBuffer].putInt(hash.size());
@@ -247,7 +250,7 @@ public class SerializationWriter {
             writeStr(key);
             growToHold(currentBuffer, 10);
             outputs[currentBuffer].putShort(REFVAR_VM_INT);
-            outputs[currentBuffer].putLong((int)hash.get(key));
+            outputs[currentBuffer].putLong(hash.getInt(key));
         }
     }
 
@@ -858,8 +861,8 @@ public class SerializationWriter {
 
         /* Make entries. */
         for (int i = 0; i < numRepos; i++) {
-            int objIdx = sc.rep_indexes.get(i) >> 1;
-            int isST = sc.rep_indexes.get(i) & 1;
+            int objIdx = sc.rep_indexes.getInt(i) >> 1;
+            int isST = sc.rep_indexes.getInt(i) & 1;
             SerializationContext origSC = sc.rep_scs.get(i);
 
             /* Work out original object's SC location. */
