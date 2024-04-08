@@ -672,7 +672,6 @@ knowhow NQPClassHOW {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        my @mro_reversed := reverse($!mro);
         my $mro := $!mro;
         my $i := nqp::elems($mro);
         while --$i >= 0 {
