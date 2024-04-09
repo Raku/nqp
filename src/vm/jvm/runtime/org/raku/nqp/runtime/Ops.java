@@ -2282,9 +2282,6 @@ public final class Ops {
                     arg = box_i((long)cc.args[i],
                         tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.intBoxType, tc);
                 }
-                else if ((flagged & CallSiteDescriptor.ARG_OBJ) != 0) {
-                    arg = (SixModelObject)cc.args[i];
-                }
                 else if ((flagged & CallSiteDescriptor.ARG_STR) != 0) {
                     arg = box_s((String)cc.args[i],
                         tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.strBoxType, tc);
@@ -2292,6 +2289,14 @@ public final class Ops {
                 else if ((flagged & CallSiteDescriptor.ARG_NUM) != 0) {
                     arg = box_n((double)cc.args[i],
                         tc.curFrame.codeRef.staticInfo.compUnit.hllConfig.numBoxType, tc);
+                }
+                else if (cc.args[i] != null) {
+                    try {
+                        arg = (SixModelObject)cc.args[i];
+                    } catch (Exception e) {
+                        throw ExceptionHandling.dieInternal(tc,
+                            "capturenamedshash failed due to casting failure of argument to SixModelObject");
+                    }
                 }
 
                 res.bind_key_boxed(tc, name, arg);
