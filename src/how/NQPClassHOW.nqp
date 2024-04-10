@@ -859,7 +859,7 @@ knowhow NQPClassHOW {
 
     method isa($XXX, $check) {
         my $check-class := $check.WHAT;
-        my $mro := $!mro;
+        my $mro := nqp::getattr(self, NQPClassHOW, '$!mro');
         my $i := nqp::elems($mro);
         while --$i >= 0 {
             return 1
