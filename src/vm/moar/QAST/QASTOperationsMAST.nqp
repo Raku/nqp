@@ -2715,9 +2715,9 @@ sub add_getattr_op($nqpop, $hintedop, $namedop, $want) {
         my $name := $op[2];
         $name := $name[2] if nqp::istype($name, QAST::Want) && $name[1] eq 'Ss';
         if nqp::istype($name, QAST::SVal) {
-#            if nqp::istype($op[1], QAST::WVal) {
-#                $hint := nqp::hintfor($op[1].value, $name.value);
-#            }
+            if nqp::istype($op[1], QAST::WVal) {
+                $hint := nqp::hintfor($op[1].value, $name.value);
+            }
             $hintedop($frame, $res_reg, $obj_mast.result_reg, $type_mast.result_reg,
                 $name.value, $hint);
         } else {
