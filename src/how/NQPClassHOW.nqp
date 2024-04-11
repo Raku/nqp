@@ -860,14 +860,6 @@ knowhow NQPClassHOW {
     method isa($XXX, $check) {
         my $check-class := $check.WHAT;
         my $mro := $!mro;
-
-if nqp::isnull($mro) {
-    nqp::sleep(0.1e0);
-    $mro := $!mro;
-    nqp::die("Still null after .1 second sleep")
-      if nqp::isnull($mro);
-}
-
         my $i := nqp::elems($mro);
         while --$i >= 0 {
             return 1
