@@ -47,7 +47,7 @@ knowhow NQPClassHOW {
     has $!is_mixin;
 
     # Cached MRO (list of the type objects).
-    has $!MRO;
+    has $!mro;
 
     # Full list of roles that we do.
     has $!done;
@@ -88,7 +88,7 @@ knowhow NQPClassHOW {
         nqp::bindattr($obj, NQPClassHOW, '$!multi_methods', nqp::list);
         nqp::bindattr($obj, NQPClassHOW, '$!parents',       nqp::list);
         nqp::bindattr($obj, NQPClassHOW, '$!roles',         nqp::list);
-        nqp::bindattr($obj, NQPClassHOW, '$!MRO',           nqp::list);
+        nqp::bindattr($obj, NQPClassHOW, '$!mro',           nqp::list);
         nqp::bindattr($obj, NQPClassHOW, '$!done',          nqp::list);
         nqp::bindattr($obj, NQPClassHOW, '$!BUILDPLAN',     nqp::list);
         nqp::bindattr($obj, NQPClassHOW, '$!BUILDALLPLAN',  nqp::list);
@@ -247,7 +247,7 @@ knowhow NQPClassHOW {
             $parents := nqp::clone($!parents);
             nqp::bindpos($parents, 0, $new_parent);
             $!parents := $parents;
-            $!MRO := compute_c3_mro($target);
+            $!mro := compute_c3_mro($target);
             $!cached_all_method_table := nqp::null;
 
             self.publish_type_cache($target);
@@ -330,7 +330,7 @@ knowhow NQPClassHOW {
                   if nqp::elems($!parents) == 0 && $!name ne 'NQPMu';
 
                 # Compute the MRO
-                $!MRO := compute_c3_mro($target);
+                $!mro := compute_c3_mro($target);
 
                 # Incorporate any new multi candidates (needs MRO built)
                 self.incorporate_multi_candidates($target);
@@ -387,7 +387,7 @@ knowhow NQPClassHOW {
             # data. The protocol consists of an array...
             my @repr_info;
 
-            my $mro := $!MRO;
+            my $mro := $!mro;
             my $m := nqp::elems($mro);
             my $i := 0;
             # ...which contains an array per MRO entry...
@@ -466,7 +466,7 @@ knowhow NQPClassHOW {
     # Incorporate any multi methods into the methods hash.  Assumes it is
     # being called from a protected block
     method incorporate_multi_candidates($XXX?) {
-        my $mro           := $!MRO;
+        my $mro           := $!mro;
         my $multi_methods := $!multi_methods;
         my $methods       := nqp::clone($!methods);  # being updated
 
@@ -623,7 +623,7 @@ knowhow NQPClassHOW {
     # Create and publish the type cache.  Assumes being run inside a
     # protected block
     method publish_type_cache($target) {
-        my $mro := $!MRO;
+        my $mro := $!mro;
 
         # Make sure we only add unique types
         my $seen := nqp::hash;
@@ -672,7 +672,7 @@ knowhow NQPClassHOW {
         # Walk MRO and add methods to cache, unless another method
         # lower in the class hierarchy "shadowed" it.
         my %cache;
-        my $mro := $!MRO;
+        my $mro := $!mro;
         my $i := nqp::elems($mro);
         while --$i >= 0 {
             my $type := nqp::atpos($mro, $i);
@@ -690,7 +690,7 @@ knowhow NQPClassHOW {
     method all_method_table($XXX?) {
         my $table := $!cached_all_method_table;
         unless nqp::isconcrete($table) {
-            my $mro := $!MRO;
+            my $mro := $!mro;
 
             $table := nqp::hash;
             my $i := nqp::elems($mro);
@@ -784,7 +784,7 @@ knowhow NQPClassHOW {
         # Now create the full plan by getting the MRO, and working from
         # least derived to most derived, copying the plans.
         my @all_plan;
-        my $mro := $!MRO;
+        my $mro := $!mro;
         $i := nqp::elems($mro);
         while --$i >= 0 {
             my $class := nqp::atpos($mro, $i);
@@ -794,7 +794,7 @@ knowhow NQPClassHOW {
     }
 
     method parents($XXX?, :$local = 0) {
-        $local ?? $!parents !! $!MRO
+        $local ?? $!parents !! $!mro
     }
 
     method roles($XXX?, :$local!) {
@@ -804,7 +804,7 @@ knowhow NQPClassHOW {
     method name($XXX?)                { $!name         }
     method BUILDPLAN($XXX?)           { $!BUILDPLAN    }
     method BUILDALLPLAN($XXX?)        { $!BUILDALLPLAN }
-    method mro($XXX?)                 { $!MRO          }
+    method mro($XXX?)                 { $!mro          }
     method role_typecheck_list($XXX?) { $!done         }
     method method_table($XXX?)        { $!methods      }
     method tweaks($XXX?)              { $!tweaks       }
@@ -821,7 +821,7 @@ knowhow NQPClassHOW {
             nqp::clone($!method_order)
         }
         else {
-            my $mro := $!MRO;
+            my $mro := $!mro;
             my @methods;
             my $m := nqp::elems($mro);
             my $i := 0;
@@ -845,7 +845,7 @@ knowhow NQPClassHOW {
         else {
             my @attributes;
 
-            my $mro := $!MRO;
+            my $mro := $!mro;
             my $m := nqp::elems($mro);
             my $i := 0;
             while $i < $m {
@@ -859,11 +859,10 @@ knowhow NQPClassHOW {
 
     method isa($XXX, $check) {
         my $check-class := $check.WHAT;
-        my $mro := $!MRO;
-        my $i := nqp::elems($mro);
+        my $i := nqp::elems($!mro);
         while --$i >= 0 {
             return 1
-              if nqp::eqaddr(nqp::atpos($mro,$i), $check-class);
+              if nqp::eqaddr(nqp::atpos($!mro,$i), $check-class);
         }
         0
     }
@@ -879,7 +878,7 @@ knowhow NQPClassHOW {
     }
 
     method can($target, $name) {
-        my $mro := $!MRO;
+        my $mro := $!mro;
 
         my $m := nqp::elems($mro);
         my $i := 0;
@@ -895,7 +894,7 @@ knowhow NQPClassHOW {
     }
 
     method find_method($target, $name, :$no_fallback = 0) {
-        my $mro := $!MRO;
+        my $mro := $!mro;
 
         my $m := nqp::elems($mro);
         my $i := 0;
