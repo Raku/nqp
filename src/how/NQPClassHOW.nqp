@@ -897,16 +897,6 @@ knowhow NQPClassHOW {
 
     method find_method($target, $name, :$no_fallback = 0) {
         my $mro := $!mro;
-
-if nqp::isnull($mro) {
-    nqp::sleep(0.1e0);
-    $mro := $!mro;
-    nqp::die(nqp::isnull($mro)
-      ?? "MRO is still null"
-      !! "MRO got set after waiting .1 second"
-    );
-}
-
         my $m := nqp::elems($mro);
         my $i := 0;
         while $i < $m {
