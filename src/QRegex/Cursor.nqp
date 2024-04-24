@@ -1048,7 +1048,9 @@ role NQPMatchRole is export {
     }
 
     method !DELEGATE_ACCEPTS($obj, $arg) {
-        $obj.ACCEPTS($arg) ?? 1 !! 0
+        (my $delegate-override := nqp::findmethod($?CLASS, 'DELEGATE-ACCEPTS'))
+            ?? $delegate-override($?CLASS, $obj, $arg)
+            !! $obj.ACCEPTS($arg) ?? 1 !! 0
     }
 
     method at(int $pos) {
