@@ -476,6 +476,12 @@ QAST::MASTOperations.add_core_op('stmts', -> $qastcomp, $op {
     $qastcomp.as_mast(QAST::Stmts.new( |@($op) ))
 });
 
+QAST::MASTOperations.add_core_op('getnextcuid', -> $qastcomp, $op {
+    $qastcomp.as_mast(
+        QAST::Op.new( :op<callmethod>, :name<next-cuid>,
+            QAST::WVal.new(:value(QAST::Block))));
+});
+
 my sub pre-size-array($qastcomp, $instructionlist, $array_reg, $size) {
     if $size != 1 {
         my $int_reg := $qastcomp.regalloc.fresh_i();

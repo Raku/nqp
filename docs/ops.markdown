@@ -579,7 +579,9 @@ The opcodes are grouped into the following categories:
 [locallifetime](#locallifetime) |
 [setcodename](#setcodename) |
 [setdebugtypename](#setdebugtypename) |
-[takeclosure](#takeclosure)
+[takeclosure](#takeclosure) |
+[getnextcuid](#getnextcuid)
+
 
 # <a id="arithmetic"></a> Arithmetic
 
@@ -3918,3 +3920,8 @@ Intended as a debugging tool only.
 * `takeclosure(Block $innerblock)`
 
 Creates a lexical closure from the block's outer scope.
+
+## getnextcuid
+* `getnextcuid()`
+
+Gets the next cuid by calling QAST::Block.next-cuid
