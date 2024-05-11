@@ -65,7 +65,13 @@ sub dd(*@_) {
 
     sub ddd($it) {
 
-        if nqp::isstr($it) {
+        if nqp::can($it, 'dump') {
+            $it.dump;
+        }
+        elsif nqp::can($it, 'ast') {
+            $it.ast;
+        }
+        elsif nqp::isstr($it) {
             CATCH { return ~$! }
             nqp::isnull_s($it)
               ?? ''
@@ -95,7 +101,11 @@ sub dd(*@_) {
         }
         elsif nqp::isconcrete($it) {
             CATCH { return $it.HOW.name($it) }
-            nqp::can($it, 'Str') ?? $it.Str !! ~$it
+            nqp::can($it, 'gist')
+                ?? $it.gist
+                !! nqp::can($it, 'Str')
+                    ?? $it.Str
+                    !! ~$it
         }
         else {
             $it.HOW.name($it)
