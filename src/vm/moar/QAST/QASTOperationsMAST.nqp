@@ -2245,6 +2245,10 @@ my constant CONST_MAP := nqp::hash(
     'STAT_PLATFORM_BLOCKSIZE', -6,
     'STAT_PLATFORM_BLOCKS',    -7,
 
+    'OPEN_MODE_RO',             1,
+    'OPEN_MODE_WO',             2,
+    'OPEN_MODE_RW',             3,
+
     'PIPE_INHERIT_IN',          1,
     'PIPE_IGNORE_IN',           2,
     'PIPE_CAPTURE_IN',          4,
