@@ -246,4 +246,4 @@ try {
     }
 }
 
-ok($msg eq "", 'No SEGV on a misused hash iterator');
+ok($msg eq "", 'No SEGV or exception as a result of a misused hash iterator');
