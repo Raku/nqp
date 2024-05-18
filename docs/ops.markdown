@@ -3791,6 +3791,10 @@ constants below can be used in nqp as (e.g.) `nqp::const::CCLASS_ANY`.
     * STAT_PLATFORM_BLOCKSIZE
     * STAT_PLATFORM_BLOCKS
 
+    * OPEN_MODE_RO
+    * OPEN_MODE_WO
+    * OPEN_MODE_RW
+
     * PIPE_INHERIT_IN
     * PIPE_IGNORE_IN
     * PIPE_CAPTURE_IN
