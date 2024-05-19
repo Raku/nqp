@@ -555,6 +555,13 @@ An operator precedence parser.
     }
 
     method EXPR_reduce(@termstack, @opstack) {
+        # adverb exists without an op! note: @termstack comes in with size 1 for this edge-case
+        self.panic(
+            "Cannot determine the destination for adverb: " ~
+            nqp::atpos(@termstack, 0) ~
+            "\nTry placing parentheses around the desired callsite to disambiguate."
+        ) unless nqp::elems(@opstack);
+
         my $op := nqp::pop(@opstack);
 
         # Give it a fresh capture list, since we'll have assumed it has
