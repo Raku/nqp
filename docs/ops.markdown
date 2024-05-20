@@ -3571,12 +3571,12 @@ Returns a 0 if the object has a truthy value, 1 otherwise.
 ## ishash
 * `ishash(Mu $obj --> int)`
 
-Returns a 1 if the object is a Hash, 0 otherwise.
+Returns a 1 if the object is a native Hash, 0 otherwise.
 
 ## isint
 * `isint(Mu $obj --> int)`
 
-Returns a 1 if the object is an int type, 0 otherwise.
+Returns a 1 if the object is a native int type, 0 otherwise.
 
 ## isinvokable
 * `isinvokable(Mu $obj --> int)`
@@ -3603,7 +3603,7 @@ Returns a 1 if the object is a null, 0 otherwise.
 ## isnum
 * `isnum(Mu $obj --> int)`
 
-Returns a 1 if the object is a float type, 0 otherwise.
+Returns a 1 if the object is a native float type, 0 otherwise.
 
 ## isprime
 * `isprime_I(Int $obj --> int)`
@@ -3619,7 +3619,7 @@ otherwise.
 ## isstr
 * `isstr(Mu $obj --> int)`
 
-Returns a 1 if the object is a str type, 0 otherwise.
+Returns a 1 if the object is a native str type, 0 otherwise.
 
 ## istrue
 * `istrue(Mu $obj --> int)`
