@@ -269,6 +269,7 @@ class HLL::Compiler does HLL::Backend::Default {
             %adverbs<precomp> := 1;
         }
 
+#?if js
         my $*PERL6_RUNTIME;
 
         if %adverbs<perl6-runtime> {
@@ -290,6 +291,7 @@ class HLL::Compiler does HLL::Backend::Default {
         if %adverbs<execname> {
             $*EXECNAME := %adverbs<execname>;
         }
+#?endif
 
         self.command_eval(|@a, |%adverbs);
     }
