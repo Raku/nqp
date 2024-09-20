@@ -33,7 +33,13 @@ if (-e '.git' && open(my $GIT, '-|', 'git describe --tags "--match=20*"')) {
 chomp $VERSION;
 
 my $sha = Digest::SHA->new;
-find(sub { return unless /\.nqp\z/; $sha->addfile($_) }, "src");
+find({
+  wanted => sub {
+   return unless /\.nqp\z/;
+   $sha->addfile($_);
+  },
+  preprocess => sub { sort @_ } },
+  "src");
 if ($backend eq 'moar') {
     $sha->addfile(File::Spec->catfile($libdir, 'MAST', $_)) for qw(Nodes.nqp Ops.nqp);
 }
