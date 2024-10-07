@@ -415,7 +415,7 @@ role NQPMatchRole is export {
             nqp::bindattr_i($new, $?CLASS, '$!from', nqp::unbox_i($p));
             nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($p));
         }
-        else {
+        elsif $build {
             nqp::bindattr_i($new, $?CLASS, '$!from', 0);
             nqp::bindattr_i($new, $?CLASS, '$!pos', 0);
         }
