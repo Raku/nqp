@@ -68,7 +68,7 @@ class HLL::Compiler does HLL::Backend::Default {
         $!save_ctx # XXX starting value?
     }
 
-    method interactive(*%adverbs) {
+    method interactive(*@args, *%adverbs) {
         stderr().print(self.interactive_banner);
 
         my $stdin    := stdin();
@@ -325,15 +325,15 @@ class HLL::Compiler does HLL::Backend::Default {
                         ?? 0
                         !! self.panic("Unknown REPL mode '$repl-mode'. Valid values are 'non-interactive' and 'interactive'");
                     $result := $wants-interactive
-                      ?? self.interactive(|%adverbs)
+                      ?? self.interactive(|@a, |%adverbs)
                       !! self.evalfiles('-', |%adverbs);
                 }
                 elsif !@a || (@a == 1 && @a[0] eq '-')  {
                     # Is STDIN a TTY display? If so, start the REPL, otherwise,
                     # simply assume the program to eval is given on STDIN.
                     $result := stdin().t()
-                        ?? self.interactive(|%adverbs)
-                        !! self.evalfiles('-', |%adverbs);
+                      ?? self.interactive(|@a, |%adverbs)
+                      !! self.evalfiles('-', |%adverbs);
                 }
                 elsif %adverbs<combine> { $result := self.evalfiles(@a, |%adverbs) }
                 else { $result := self.evalfiles(@a[0], |@a, |%adverbs) }
