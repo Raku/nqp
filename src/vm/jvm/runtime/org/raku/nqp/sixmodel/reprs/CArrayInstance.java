@@ -222,15 +222,15 @@ public class CArrayInstance extends SixModelObject implements Refreshable {
         case CPOINTER:
             return NativeCallOps.toNQPType(tc, NativeCall.ArgType.CPOINTER, repr_data.elem_type, ptr);
         case CSTRUCT: {
-            Class<?> structClass = ((CStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            Class<Structure> structClass = (Class<Structure>) ((CStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
             return NativeCallOps.toNQPType(tc, NativeCall.ArgType.CSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
         }
         case CPPSTRUCT: {
-            Class<?> structClass = ((CPPStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            Class<Structure> structClass = (Class<Structure>) ((CPPStructREPRData) repr_data.elem_type.st.REPRData).structureClass;
             return NativeCallOps.toNQPType(tc, NativeCall.ArgType.CPPSTRUCT, repr_data.elem_type, Structure.newInstance(structClass, ptr));
         }
         case CUNION: {
-            Class<?> structClass = ((CUnionREPRData) repr_data.elem_type.st.REPRData).structureClass;
+            Class<Union> structClass = (Class<Union>) ((CUnionREPRData) repr_data.elem_type.st.REPRData).structureClass;
             return NativeCallOps.toNQPType(tc, NativeCall.ArgType.CUNION, repr_data.elem_type, Union.newInstance(structClass, ptr));
         }
         default:
