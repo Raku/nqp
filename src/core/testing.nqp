@@ -128,8 +128,7 @@ sub run-command($command, :$stdout, :$stderr) {
     );
 
     # define the task
-    my $task := nqp::spawnprocasync(
-      $queue, $command[0], $command, nqp::cwd, nqp::getenvhash, $config);
+    my $task := nqp::spawnprocasync($queue, $command[0], $command, nqp::cwd, nqp::getenvhash, $config);
     nqp::permit($task, 1, -1);
     nqp::permit($task, 2, -1);
 
