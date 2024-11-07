@@ -10,14 +10,15 @@ my class NQPTerminal {
             "cyan", "6",
             "white", "7",
             "default", "9",
-            "bright_black", "8",
-            "bright_red", "9",
-            "bright_green", "10",
-            "bright_yellow", "11",
-            "bright_blue", "12",
-            "bright_magenta", "13",
-            "bright_cyan", "14",
-            "bright_white", "15");
+            "bright-black", "8",
+            "bright-red", "9",
+            "bright-green", "10",
+            "bright-yellow", "11",
+            "bright-blue", "12",
+            "bright-magenta", "13",
+            "bright-cyan", "14",
+            "bright-white", "15"
+        );
 
         sub invert-color-lookup() {
             my $iterator := nqp::iterator(%color-lookups);
@@ -244,7 +245,8 @@ my class NQPTerminal {
             "\e[6~" , "PageDown",
             "\e"    , "Esc",
             "\r"    , "Enter",
-            "\x[7F]", "Delete");
+            "\x[7F]", "Delete"
+        );
 
         our sub parse-input($str) {
             my $input := "";
@@ -277,4 +279,8 @@ my class NQPTerminal {
             $input
         }
     }
+
+    method parse-input($str) { Input::parse-inout($str) }
+    method color-name($sequence) { Color::color-name($sequence) }
+    method available-colors() { Color::available-colors() }
 }

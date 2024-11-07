@@ -440,7 +440,7 @@ class QAST::MASTOperations {
     # Adds a HLL box handler.
     method add_hll_box(str $hll, int $type, $handler) {
         unless $type == nqp::const::MVM_reg_int64
-            || $type == nqp::const::MVM_reg_num64 
+            || $type == nqp::const::MVM_reg_num64
             || $type == nqp::const::MVM_reg_str
             || $type == nqp::const::MVM_reg_uint64
             || $type == nqp::const::MVM_reg_void {
@@ -656,6 +656,13 @@ QAST::MASTOperations.add_core_op('hash', -> $qastcomp, $op {
         $hash.append($ensure_return_register);
     }
     $hash
+});
+
+
+QAST::MASTOperations.add_core_op('terminal', -> $qastcomp, $op {
+    $qastcomp.as_mast(
+        QAST::Op.new( :op<callmethod>, :name<new>, QAST::WVal.new(:value(NQPTerminal)) )
+    )
 });
 
 # Chaining.

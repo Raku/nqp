@@ -152,6 +152,9 @@ If `$code` dies, returns the error message.
 ## dies-ok
 * `dies-ok($code, $description, :$message)`
 
+## lives-ok
+* `lives-ok($code, $description)`
+
 ## run-command
 * `run-command($command, :$stdout, :$stderr --> @array)`
 
