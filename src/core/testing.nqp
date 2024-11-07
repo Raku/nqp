@@ -71,6 +71,10 @@ sub dies-ok($code, $description, :$message) {
     }
 }
 
+sub lives-ok($code, $description) {
+    ok(!nqp::atkey(bug-workaround($code), 'died'), $description);
+}
+
 # for testing process failures
 sub run-command($command, :$stdout, :$stderr) {
     my class Queue is repr('ConcBlockingQueue') { }
