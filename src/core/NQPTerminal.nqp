@@ -34,6 +34,21 @@ my class NQPTerminal {
             nqp::atkey(%color-lookups, $color);
         }
 
+        our sub color-name($sequence) {
+            my $color-name := "";
+            my $length := nqp::chars($sequence);
+            if nqp::iseq_i($length,9) || nqp::iseq_i($length,10) && nqp::iseq_s(nqp::substr($sequence,5,1),"5") {
+                my $span := $length - 8; # 7 for prefix, 1 for suffix
+                if !nqp::isnull(my $name := nqp::atkey(%color-names-lookup, nqp::substr($sequence,7,$span))) {
+                    $color-name := $name
+                }
+            }
+            if !nqp::chars($color-name) {
+                $color-name := "UNKNOWN"
+            }
+            $color-name
+        }
+
         my @color-names;
         #| To provide a means for an HLL to place useful guards on user input
         our sub available-colors() {
@@ -120,7 +135,11 @@ my class NQPTerminal {
             self.set-fg-color(Color::color-code($fg))
         }
         if $bg {
-            self.set-bg-color(Color::color-code($bg))
+            if nqp::iseq_s($bg, "default") || nqp::iseq_s($bg, "off") {
+                self.set-bg-default()
+            } else {
+                self.set-bg-color(Color::color-code($bg))
+            }
         }
     }
 
@@ -227,7 +246,7 @@ my class NQPTerminal {
             "\r"    , "Enter",
             "\x[7F]", "Delete");
 
-        sub parse-input($str) {
+        our sub parse-input($str) {
             my $input := "";
             if !nqp::isnull(my $key := nqp::atkey(%inputs, $str)) {
                 $input := $key
