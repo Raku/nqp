@@ -1,4 +1,4 @@
-plan(1518);
+plan(1519);
 
 {
     my $sc := nqp::createsc('exampleHandle');
@@ -134,6 +134,7 @@ sub fresh_out_sc() {
         has int $!a;
         has num $!b;
         has str $!c;
+        has     $!d;
         method new() {
             my $obj := nqp::create(self);
             $obj.BUILD();
@@ -143,10 +144,12 @@ sub fresh_out_sc() {
             $!a := 42;
             $!b := 6.9;
             $!c := 'llama';
+            $!d := nqp::null;
         }
         method a() { $!a }
         method b() { $!b }
         method c() { $!c }
+        method d() { $!d }
     }
     my $v := T4.new();
     add_to_sc($sc, 0, $v);
@@ -162,6 +165,7 @@ sub fresh_out_sc() {
     ok(nqp::scgetobj($dsc, 0).a == 42,                   'P6int attribute has correct value');
     ok(nqp::scgetobj($dsc, 0).b == 6.9,                  'P6num attribute has correct value');
     ok(nqp::scgetobj($dsc, 0).c eq 'llama',              'P6str attribute has correct value');
+    ok(nqp::isnull(nqp::scgetobj($dsc, 0).d),            'attribute with value nqp::null unchanged');
 }
 
 # Serializing an SC with P6opaues and circular references

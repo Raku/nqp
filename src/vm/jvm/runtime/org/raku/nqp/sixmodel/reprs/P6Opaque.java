@@ -826,7 +826,7 @@ public class P6Opaque extends REPR {
                     i == REPRData.unboxStrSlot || i == REPRData.unboxObjSlot;
             info.posDelegate = i == REPRData.posDelSlot;
             info.assDelegate = i == REPRData.assDelSlot;
-            info.hasAutoVivContainer = REPRData.autoVivContainers[i] != null;
+            info.hasAutoVivContainer = Ops.isnull(REPRData.autoVivContainers[i]) == 0;
             attrInfoList.add(info);
         }
         if (numAttributes > 0) {

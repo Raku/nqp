@@ -598,8 +598,9 @@ public class SerializationReader {
         int elems;
         switch (discrim) {
         case REFVAR_NULL:
-        case REFVAR_VM_NULL:
             return null;
+        case REFVAR_VM_NULL:
+            return Ops.createNull(tc);
         case REFVAR_OBJECT:
             return readObjRef();
         case REFVAR_VM_INT:
