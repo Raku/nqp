@@ -298,21 +298,25 @@ public class SerializationWriter {
     public void writeRef(SixModelObject ref) {
         /* Work out what kind of thing we have and determine the discriminator. */
         short discrim = 0;
-        if (Ops.isnull(ref) == 1) {
+        if (ref == null) {
+            discrim = REFVAR_NULL;
+        }
+        else if (Ops.isnull(ref) == 1) {
+            /* A real VMNull. */
             discrim = REFVAR_VM_NULL;
         }
         else if (ref.st.REPR instanceof IOHandle) {
             /* Can't serialize handles. */
-            discrim = REFVAR_VM_NULL;
+            discrim = REFVAR_NULL;
         }
         else if (ref.st.REPR instanceof CallCapture) {
             /* This is a hack for Rakudo's sake; it keeps a CallCapture around in
              * the lexpad, for no really good reason. */
-            discrim = REFVAR_VM_NULL;
+            discrim = REFVAR_NULL;
         }
         else if (ref.st.REPR instanceof MultiCache) {
             /* These are re-computed each time. */
-            discrim = REFVAR_VM_NULL;
+            discrim = REFVAR_NULL;
         }
         else if (ref.st.WHAT == tc.gc.BOOTInt) {
             discrim = REFVAR_VM_INT;
@@ -606,7 +610,7 @@ public class SerializationWriter {
             writeHash(st.MethodCache);
         }
         else {
-            outputs[currentBuffer].putShort(REFVAR_VM_NULL);
+            outputs[currentBuffer].putShort(REFVAR_NULL);
         }
         int vtl = st.VTable == null ? 0 : st.VTable.length;
         writeInt(vtl);
