@@ -122,7 +122,7 @@ public class ThreadContext {
 
     // odds and ends for nqp
     IntArrayList fates = new IntArrayList(), curst = new IntArrayList(), nextst = new IntArrayList();
-    long[] curlonglit = new long[100];
+    long[] curlonglit = new long[200];
 
     public ThreadContext(GlobalContext gc) {
         this.gc = gc;
