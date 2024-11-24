@@ -13,6 +13,7 @@ class HLL::Compiler does HLL::Backend::Default {
     has %!cli-options;
     has $!backend;
     has $!save_ctx;
+    has $!repl-mode;
 
     method BUILD() {
         # Backend is set to the default one, by default.
@@ -319,12 +320,13 @@ class HLL::Compiler does HLL::Backend::Default {
                     }
                 }
                 elsif %adverbs<repl-mode> -> $repl-mode {
-                    my $wants-interactive := $repl-mode eq 'interactive'
+                    my $!repl-mode := $repl-mode;
+                    my $is-interactive := ($repl-mode eq 'interactive' || $repl-mode eq 'process' || $repl-mode eq 'tty')
                       ?? 1
-                      !! $repl-mode eq 'non-interactive'
+                      !! ($repl-mode eq 'non-interactive' || $repl-mode eq 'disabled')
                         ?? 0
-                        !! self.panic("Unknown REPL mode '$repl-mode'. Valid values are 'non-interactive' and 'interactive'");
-                    $result := $wants-interactive
+                        !! self.panic("Unknown REPL mode '$repl-mode'. Valid values are 'tty', 'process', and 'disabled'");
+                    $result := $is-interactive
                       ?? self.interactive(|@a, |%adverbs)
                       !! self.evalfiles('-', |%adverbs);
                 }
@@ -814,6 +816,11 @@ class HLL::Compiler does HLL::Backend::Default {
 
     method supports-op($opname) {
         self.backend.supports-op($opname)
+    }
+
+    method repl-mode() {
+        # defaults to tty
+        $!repl-mode // 'tty'
     }
 }
 
