@@ -498,7 +498,7 @@ sub fresh_out_sc() {
     ok(nqp::atpos_i($matching, 0) == 11,"...and we get the right fate");
 }
 
-# nqp::attrinitied works after serialization
+# nqp::attrinited works after serialization
 {
     my $sc := nqp::createsc(fresh_in_sc());
     my $sh := nqp::list_s();
@@ -531,16 +531,9 @@ sub fresh_out_sc() {
     nqp::deserialize($serialized, $dsc, $sh, nqp::list(), nqp::null());
 
     ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!written'), 'nqp::attrinited on an attribute that has been written to');
-    ok(!nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!not_inited'), 'nqp::attinitied on an attribute that has not be initialized');
+    ok(!nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!not_inited'), 'nqp::attrinited on an attribute that has not be initialized');
     ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!read'), 'nqp::attrinited on an attribute that has been autovivified');
-
-    if nqp::getcomp('nqp').backend.name eq 'jvm' {
-        skip('null handling is broken on the jvm', 1);
-    }
-    else {
-        ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!null'), 'nqp::attrinited on an attribute that has been set with null');
-    }
-
+    ok(nqp::attrinited(nqp::scgetobj($dsc, 0), TestAttrinitied, '$!null'), 'nqp::attrinited on an attribute that has been set with null');
 }
 
 # Serializing an SC with a VMArray
