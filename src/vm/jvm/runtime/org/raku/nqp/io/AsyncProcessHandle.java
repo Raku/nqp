@@ -82,8 +82,9 @@ public class AsyncProcessHandle implements IIOClosable {
                 SixModelObject message = boxError(t.toString());
 
                 SixModelObject error = config.get("error");
+                /* Return exception message and hard-coded exit code -1. */
                 if (Ops.isnull(error) == 0)
-                    send(error, message);
+                    send(error, message, boxInt(-1 << 8));
 
                 SixModelObject stdoutBytes = config.get("stdout_bytes");
                 if (Ops.isnull(stdoutBytes) == 0)
