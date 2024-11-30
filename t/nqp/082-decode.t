@@ -1,6 +1,6 @@
 use nqpmo;
 
-plan(30);
+plan(46);
 
 my sub create_buf($type) {
     my $buf := nqp::newtype(nqp::null(), 'VMArray');
@@ -10,6 +10,8 @@ my sub create_buf($type) {
 
 my $buf8 := create_buf(uint8);
 my $buf16 := create_buf(uint16);
+my $buf32 := create_buf(uint32);
+my $buf64 := create_buf(uint64);
 
 my $buf := nqp::encode('', 'utf8', nqp::create($buf8));
 
@@ -152,4 +154,73 @@ else {
         nqp::encode($original, 'windows-932', nqp::create($buf8));
       }, 'encode dies with missing character');
     }
+}
+
+$buf := nqp::encode('abc', 'utf16', nqp::create($buf8));
+is(buf_dump($buf), '97,0,98,0,99,0', 'nqp::encode 3-chars ascii string with utf16 using buffer of type uint8');
+is(nqp::decode($buf, "utf16"), 'abc', 'nqp::decode gives original string back');
+
+$buf := nqp::encode('abc', 'utf16', nqp::create($buf16));
+is(buf_dump($buf), '97,98,99', 'nqp::encode 3-chars ascii string with utf16 using buffer of type uint16');
+is(nqp::decode($buf, "utf16"), 'abc', 'nqp::decode gives original string back');
+
+$buf := nqp::encode('abc', 'utf16', nqp::create($buf32));
+if nqp::getcomp('nqp').backend.name eq 'moar' {
+    todo('trailing character is dropped, https://github.com/MoarVM/MoarVM/issues/1606', 1);
+    ok(0);
+}
+else {
+    is(buf_dump($buf), ~(97 + 98 * 2**16) ~ ',99', 'nqp::encode 3-chars ascii string with utf16 using buffer of type uint32');
+    ## TODO This returns "abc\0". Maybe that's just correct?
+    #is(nqp::decode($buf, "utf16"), 'abc', 'nqp::decode gives original string back');
+}
+
+$buf := nqp::encode('abcd', 'utf16', nqp::create($buf64));
+is(buf_dump($buf), (97 + 98 * 2**16 + 99 * 2**32 + 100 * 2**48), 'nqp::encode 4-chars ascii string with utf16 using buffer of type uint64');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    todo('Unknown buf type in nqp::decode', 1);
+    ok(0);
+}
+else {
+    is(nqp::decode($buf, "utf16"), 'abcd', 'nqp::decode gives original string back');
+}
+
+## "\x1F63E" 'POUNTING CAT FACE' is a code point from supplemantary planes and requires two 16-bit code units (0xD83D,0xDE3E)
+$buf := nqp::encode("\x1F63E", 'utf16', nqp::create($buf8));
+is(buf_dump($buf), '61,216,62,222', 'nqp::encode 1-char surrogate pair with utf16 using buffer of type uint8');
+is(nqp::decode($buf, "utf16"), "\x1F63E", 'nqp::decode gives original string back');
+
+$buf := nqp::encode("\x1F63E", 'utf16', nqp::create($buf16));
+is(buf_dump($buf), '55357,56894', 'nqp::encode 1-char surrogate pair with utf16 using buffer of type uint16');
+is(nqp::decode($buf, "utf16"), "\x1F63E", 'nqp::decode gives original string back');
+
+$buf := nqp::encode("\x1F63E", 'utf16', nqp::create($buf32));
+is(buf_dump($buf), ~(55357 + 56894 * 2**16), 'nqp::encode 1-char surrogate pair with utf16 using buffer of type uint32');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    todo('java.lang.IllegalArgumentException: Not a valid Unicode code point: 0xFFFFDE3E', 1);
+    ok(0);
+}
+else {
+    is(nqp::decode($buf, "utf16"), "\x1F63E", 'nqp::decode gives original string back');
+}
+
+$buf := nqp::encode('a' ~ "\x1F63E" ~ 'bcd', 'utf16', nqp::create($buf32));
+is(buf_dump($buf), (97 + 55357 * 2**16) ~ ',' ~ (56894 + 98 * 2**16) ~ ',' ~ (99 + 100 * 2**16),
+    'nqp::encode mixed string with ascii and surrogate pair with utf16 using buffer of type uint32');
+if nqp::getcomp('nqp').backend.name eq 'jvm' {
+    todo('java.lang.IllegalArgumentException: Not a valid Unicode code point: 0xFFFFD83D', 1);
+    ok(0);
+}
+else {
+    is(nqp::decode($buf, "utf16"), 'a' ~ "\x1F63E" ~ 'bcd', 'nqp::decode gives original string back');
+}
+
+$buf := nqp::encode('a' ~ "\x1F63E" ~ 'bcd', 'utf16', nqp::create($buf64));
+if nqp::getcomp('nqp').backend.name eq 'moar' {
+    todo('trailing character is dropped, https://github.com/MoarVM/MoarVM/issues/1606', 1);
+    ok(0);
+}
+else {
+    is(buf_dump($buf), (97 + 55357 * 2**16 + 56894 * 2**32 + 98 * 2**48) ~ ',' ~ (99 + 100 * 2**16),
+        'nqp::encode mixed string with ascii and surrogate pair with utf16 using buffer of type uint64');
 }
