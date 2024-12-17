@@ -314,6 +314,9 @@ class HLL::Compiler does HLL::Backend::Default {
                 if nqp::defined(%adverbs<e>) {
                     $!user_progname := '-e';
                     my $?FILES := '-e';
+                    if ! %adverbs<repl-mode> {
+                        %adverbs<repl-mode> := 'disabled';
+                    }
                     $result := self.eval(%adverbs<e>, '-e', |@a, |%adverbs);
                     unless $target eq '' || $!backend.is_textual_stage($target) || %adverbs<output> || %adverbs<o> {
                         self.dumper($result, $target, |%adverbs);
