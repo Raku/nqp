@@ -819,8 +819,8 @@ class HLL::Compiler does HLL::Backend::Default {
     }
 
     method repl-mode() {
-        # defaults to tty
-        $!repl-mode // 'tty'
+        my $default := stdin().t() ?? 'tty' !! 'process';
+        $!repl-mode // $default
     }
 }
 
