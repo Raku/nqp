@@ -2509,30 +2509,37 @@ class MoarVM::BytecodeWriter {
         $!mbc.write_uint32($offset); # Offset of SC dependencies table
         $!mbc.write_uint32(my uint $num_sc_handles := nqp::elems(@sc_handles)); # Number of entries in SC dependencies table
         $offset := $offset + $sc_deps_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $sc_deps_size;
 
         $!mbc.write_uint32($offset); # Offset of extension ops table
         $!mbc.write_uint32($num_extops); # Number of entries in extension ops table
         $offset := $offset + $extops_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $extops_size;
 
         $!mbc.write_uint32($offset); # Offset of frames segment
         $!mbc.write_uint32(my uint $num_frames := nqp::elems(@!frames)); # Number of frames
         $offset := $offset + $frames_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $frames_size;
 
         $!mbc.write_uint32($offset); # Offset of callsites segment
         $!mbc.write_uint32(my uint $num_callsites := $!callsites.elems); # Number of callsites
         $offset := $offset + $callsites_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $callsites_size;
 
         $!mbc.write_uint32($offset); # Offset of strings heap
         $!mbc.write_uint32(my uint $num_strings := $!string-heap.elems); # Number of strings in heap
         $offset := $offset + $string_heap_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $string_heap_size;
 
         $!mbc.write_uint32($offset); # Offset of SC data segment
         $!mbc.write_uint32($serialized_size); # Number of entries in SC data segment
         $offset := $offset + $serialized_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $serialized_size;
 
         $!mbc.write_uint32($offset); # Offset of bytecode segment
         $!mbc.write_uint32(my uint $num_bytecode := ($!bytecode_size || nqp::elems($!bytecode))); # Length of bytecode segment
         $offset := $offset + $bytecode_size;
+        nqp::die("MAST::CompUnit file size limit reached!") if $offset < $bytecode_size;
 
         $!mbc.write_uint32($offset); # Offset of annotation segment
         $!mbc.write_uint32($annotations_size); # Length of annotation segment
@@ -2608,6 +2615,13 @@ class MoarVM::BytecodeWriter {
         add_uint32((my $num_lexical_types := nqp::elems(@lexical_types))); # Number of lexicals
         add_uint32($f.cuuid-idx); # Compilation unit unique ID (string heap index)
         add_uint32($f.name-idx); # Name (string heap index)
+
+        if nqp::elems(@local_types) >= 0xffff {
+            nqp::die("Too many local variables in MAST::Frame. Up to 65534 are allowed. This frame (" ~ $f.name ~ ") has " ~ nqp::elems(@local_types));
+        }
+        if $num_lexical_types >= 0xffff {
+            nqp::die("Too many lexical variables in MAST::Frame. Up to 65534 are allowed. This frame (" ~ $f.name ~ ") has " ~ $num_lexical_types);
+        }
 
         my $outer := $f.outer;
         if nqp::defined($outer) {
@@ -2761,6 +2775,10 @@ class MoarVM::BytecodeWriter {
         self.align;
         self.write_extops;
         self.align;
+
+        nqp::die("Too many MAST::Frames in CompUnit. Up to 65534 are allowed, but this CU has has " ~ nqp::elems(@!frames))
+            if nqp::elems(@!frames) >= 0xffff;
+
         my uint $idx := 0;
         for @!frames {
             self.write_frame($_, $idx++);
