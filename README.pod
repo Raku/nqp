@@ -2,7 +2,7 @@
 
 =head1 NQP - Not Quite Perl
 
-NQP is Copyright (C) 2009-2020 by The Perl Foundation.  See F<LICENSE>
+NQP is Copyright (C) 2009-2025 by The Raku Foundation.  See F<LICENSE>
 for licensing details.
 
 This is "Not Quite Perl" -- a lightweight Raku-like environment for
