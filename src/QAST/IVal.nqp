@@ -11,6 +11,14 @@ class QAST::IVal is QAST::Node {
 
     method value($value = NO_VALUE) { $!value := $value unless $value =:= NO_VALUE; $!value }
 
+    method has_compile_time_value() {
+        1
+    }
+
+    method compile_time_value() {
+        $!value
+    }
+
     method count_inline_placeholder_usages(@usages) { }
 
     method substitute_inline_placeholders(@fillers) {

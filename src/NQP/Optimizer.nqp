@@ -175,6 +175,7 @@ class NQP::Optimizer {
     method visit_op($op) {
         # Handle op needs special handling.
         my str $opname := $op.op;
+
         if $opname eq 'handle' {
             return self.visit_handle($op);
         }
@@ -306,7 +307,38 @@ class NQP::Optimizer {
             $op.returns(num)
         }
 
+        $op := self.constant_folder($opname, $op);
+
         $op;
+    }
+
+    method constant_folder($opname, $op) {
+        if  nqp::istype($op[0], QAST::Node)
+            && nqp::istype($op[1], QAST::Node)
+            && $op[0].has_compile_time_value
+            && $op[1].has_compile_time_value
+            {
+                my $val;
+                if ($opname eq 'add_i') {
+                    $val := $op[0].compile_time_value + $op[1].compile_time_value;
+                    $op := QAST::IVal.new(:value($val));
+                }
+                elsif($opname eq 'sub_i') {
+                    $val := $op[0].compile_time_value - $op[1].compile_time_value;
+                    $op := QAST::IVal.new(:value($val));
+
+                }
+                elsif($opname eq 'mul_i') {
+                    $val := $op[0].compile_time_value * $op[1].compile_time_value;
+                    $op := QAST::IVal.new(:value($val));
+                }
+                elsif($opname eq 'div_i') {
+                    $val := $op[0].compile_time_value / $op[1].compile_time_value;
+                    $op := QAST::IVal.new(:value($val));
+                }
+            }
+
+        return $op;
     }
 
     method num_to_int($op, $asm) {
