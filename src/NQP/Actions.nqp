@@ -1029,7 +1029,7 @@ class NQP::Actions is HLL::Actions {
         # Otherwise, build method block QAST.
         my $ast;
         my int $onlystar;
-	my $package := $/.package;
+        my $package := $/.package;
         if $<onlystar> {
             $ast := only_star_block();
             $onlystar := 1;
@@ -1062,40 +1062,42 @@ class NQP::Actions is HLL::Actions {
             }
             $name := "!!LATENAME!!" ~ ~$<latename>;
         }
-        if $name ne "" {
+        if $name {
             # Set name.
             $ast.name($name);
+        }
 
-            # Insert it into the method table.
-            my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
-            my $is_dispatcher := $*MULTINESS eq 'proto';
-            my $code := $*W.create_code($ast, $name, $is_dispatcher, :$onlystar);
-            if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
+        # Insert it into the method table.
+        my $meta_meth := $*MULTINESS eq 'multi' ?? 'add_multi_method' !! 'add_method';
+        my $is_dispatcher := $*MULTINESS eq 'proto';
+        my $code := $*W.create_code($ast, $name, $is_dispatcher, :$onlystar);
+        if $*MULTINESS eq 'multi' { attach_multi_signature($code, $ast); }
+        if $*SCOPE eq 'our' {
+            # Install it in the package's stash.
+            $*W.install_package_routine($package, $name, $ast);
+        }
+        unless $*SCOPE eq 'anon' {
+            # Install it in the method table.
             $*W.pkg_add_method($package, $meta_meth, $name, $code);
-            $ast.annotate('code_obj', $code);
-
-            # Install it in the package also if needed.
-            if $*SCOPE eq 'our' {
-                $*W.install_package_routine($package, $name, $ast);
-            }
+        }
+        $ast.annotate('code_obj', $code);
 
 #?if !moar
-            # If it's a proto, also stash the current lexical dispatcher, for the {*}
-            # to resolve.
-            if $is_dispatcher {
-                $ast[0].push(QAST::Op.new(
-                    :op('bind'),
-                    QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical'), :decl('var') ),
-                    QAST::Op.new( :op('savecapture') )
-                ));
-                $ast[0].push(QAST::Op.new(
-                    :op('bind'),
-                    QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
-                    QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
-                ));
-            }
-#?endif
+        # If it's a proto, also stash the current lexical dispatcher, for the {*}
+        # to resolve.
+        if $is_dispatcher {
+            $ast[0].push(QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('CURRENT_DISPATCH_CAPTURE'), :scope('lexical'), :decl('var') ),
+                QAST::Op.new( :op('savecapture') )
+            ));
+            $ast[0].push(QAST::Op.new(
+                :op('bind'),
+                QAST::Var.new( :name('&*CURRENT_DISPATCHER'), :scope('lexical'), :decl('var') ),
+                QAST::Op.new( :op('getcodeobj'), QAST::Op.new( :op('curcode') ) )
+            ));
         }
+#?endif
 
         # Install AST node in match object, then apply traits.
         make QAST::Op.new( :op('takeclosure'), $ast ).annotate_self(
