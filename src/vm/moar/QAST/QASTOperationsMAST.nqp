@@ -1121,9 +1121,9 @@ sub loop_body($res_reg, $repness, $cond_temp, $redo_lbl, $test_lbl, @children, $
     if $repness {
         # It's a repeat_ variant, need to go straight into the
         # loop body unconditionally.
-        #if $cond_temp {
-        #    op_null($frame, $*BLOCK.local($cond_temp));
-        #}
+        if $cond_temp {
+            op_null($frame, $*BLOCK.local($cond_temp));
+        }
         op_goto($frame, $redo_lbl);
     }
     $frame.add-label($test_lbl);
@@ -1233,6 +1233,7 @@ for ('', 'repeat_') -> $repness {
             my $orig_type;
             my $label_wval;
             my $cond_temp;
+            my $regalloc := $qastcomp.regalloc;
             for $op.list {
                 if $_.named eq 'nohandler' { $handler := 0; }
                 elsif $_.named eq 'label' { $label_wval := $_; }
@@ -1240,9 +1241,11 @@ for ('', 'repeat_') -> $repness {
             }
             if needs_cond_passed(@children[1]) {
                 $cond_temp := $qastcomp.unique('__im_cond_');
+                my $var := QAST::Var.new( :name($cond_temp), :scope('local') );
+                $*BLOCK.register_local($var);
                 @children[0] := QAST::Op.new(
                     :op('bind'),
-                    QAST::Var.new( :name($cond_temp), :scope('local'), :decl('var') ),
+                    $var,
                     @children[0]);
                 $orig_type := @children[1].blocktype;
                 @children[1].blocktype('declaration');
@@ -1253,7 +1256,6 @@ for ('', 'repeat_') -> $repness {
             }
 
             # Allocate result register if needed.
-            my $regalloc := $qastcomp.regalloc;
             my $frame    := $qastcomp.mast_frame;
             my int $res_kind := nqp::const::MVM_reg_obj;
             my $res_reg;
