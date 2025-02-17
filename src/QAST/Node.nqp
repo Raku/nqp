@@ -96,8 +96,9 @@ class QAST::Node {
     }
 
     method ann(str $key) {
-        nqp::ishash(%!annotations)
-          ?? %!annotations{$key}
+        my %annotations := %!annotations;
+        nqp::ishash(%annotations)
+          ?? %annotations{$key}
           !! NQPMu
     }
 
