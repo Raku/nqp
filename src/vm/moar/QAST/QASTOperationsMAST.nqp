@@ -168,9 +168,10 @@ class QAST::MASTOperations {
                 ?? $qastcomp.as_mast($_, :$want-decont)
                 !! $qastcomp.as_mast($_, :want(nqp::bitshiftr_i($operand_kind, 3)), :$want-decont);
             my int $arg_kind := nqp::unbox_i($arg.result_kind);
+            my $arg_result_reg := $arg.result_reg;
 
             if $arg_num == 0 && nqp::eqat($op, 'return_', 0) {
-                $*BLOCK.return_kind(nqp::unbox_i($arg.result_kind));
+                $*BLOCK.return_kind($arg_kind);
             }
 
             # args cannot be void
@@ -203,14 +204,14 @@ class QAST::MASTOperations {
             if ($operand +& $MVM_operand_rw_mask) == $MVM_operand_write_reg
                 || ($operand +& $MVM_operand_rw_mask) == $MVM_operand_write_lex
                 || $returnarg != -1 && $returnarg == $arg_num {
-                $result_reg := $arg.result_reg;
+                $result_reg := $arg_result_reg;
                 $result_kind := $arg_kind;
             }
             # otherwise it's a read register, so it can be released if it's an
             # intermediate value
             else {
                 # if it's not a write register, queue it to be released it to the allocator
-                nqp::push(@release_regs, $arg.result_reg);
+                nqp::push(@release_regs, $arg_result_reg);
                 nqp::push(@release_kinds, $arg_kind);
             }
 
@@ -218,7 +219,7 @@ class QAST::MASTOperations {
             if @deconts[$arg_num] &&
                     (!$_.has_compile_time_value || nqp::iscont($_.compile_time_value)) {
                 my $dc_reg := $regalloc.fresh_register(nqp::const::MVM_reg_obj);
-                MAST::Op.new( :$frame, :op('decont'), $dc_reg, $arg.result_reg );
+                MAST::Op.new( :$frame, :op('decont'), $dc_reg, $arg_result_reg );
                 nqp::push(@arg_regs, $dc_reg);
                 nqp::push(@release_regs, $dc_reg);
                 nqp::push(@release_kinds, nqp::const::MVM_reg_obj);
@@ -226,7 +227,7 @@ class QAST::MASTOperations {
             else {
                 nqp::push(@arg_regs, $constant_operand
                     ?? $qastcomp.as_mast_constant($_)
-                    !! $arg.result_reg);
+                    !! $arg_result_reg);
             }
 
             $arg_num++;
