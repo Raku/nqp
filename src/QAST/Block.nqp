@@ -63,21 +63,22 @@ class QAST::Block is QAST::Node does QAST::Children {
 
     my %NOSYMS := nqp::hash();
     method symbol(str $name, *%attrs) {
-        %!symbol := nqp::hash() if nqp::isnull(%!symbol);
+        my %symbol := %!symbol;
+        %symbol := %!symbol := nqp::hash() if nqp::isnull(%symbol);
         if nqp::isconcrete(%attrs) && nqp::elems(%attrs) {
-            my %syms := %!symbol{$name};
+            my %syms := %symbol{$name};
             if nqp::ishash(%syms) && nqp::elems(%syms) {
                 for %attrs {
                     %syms{$_.key} := $_.value;
                 }
             }
             else {
-                %!symbol{$name} := %syms := %attrs;
+                %symbol{$name} := %syms := %attrs;
             }
             %syms
         }
         else {
-            nqp::ifnull(nqp::atkey(%!symbol, $name), %NOSYMS)
+            nqp::ifnull(nqp::atkey(%symbol, $name), %NOSYMS)
         }
     }
 
