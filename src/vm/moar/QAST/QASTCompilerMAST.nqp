@@ -1453,6 +1453,7 @@ my class MASTCompilerInstance {
         my $final_stmt_idx := +@stmts - 1;
         my $WANT := $*WANT;
         my $all_void := nqp::defined($WANT) && $WANT == nqp::const::MVM_reg_void;
+        my $regalloc := $!regalloc;
         for @stmts {
             my int $use_result := 0;
             # Compile this child to MAST, and add its instructions to the end
@@ -1481,12 +1482,13 @@ my class MASTCompilerInstance {
             }
             else {
                 # release top-level results (since they can't be used by anything anyway)
-                $!regalloc.release_register($last_stmt.result_reg, nqp::unbox_i($last_stmt.result_kind));
+                $regalloc.release_register($last_stmt.result_reg, nqp::unbox_i($last_stmt.result_kind));
             }
             $result_count++;
         }
-        if $result_stmt && nqp::unbox_i($result_stmt.result_kind) != nqp::const::MVM_reg_void {
-            MAST::InstructionList.new($result_stmt.result_reg, nqp::unbox_i($result_stmt.result_kind));
+        my int $result_kind;
+        if $result_stmt && ($result_kind := nqp::unbox_i($result_stmt.result_kind)) != nqp::const::MVM_reg_void {
+            MAST::InstructionList.new($result_stmt.result_reg, $result_kind);
         }
         else {
             MAST::InstructionList.new(MAST::VOID, nqp::const::MVM_reg_void);
@@ -2338,25 +2340,27 @@ class MoarVM::Callsites {
 
         $!latin1decoder.add-bytes($identifier); # just turn the buf into a str without real interpretation
         my str $identifier_s := $!latin1decoder.consume-all-chars;
-        if nqp::existskey(%!callsites, $identifier_s) {
-            return %!callsites{$identifier_s};
+        my %callsites := %!callsites;
+        if nqp::existskey(%callsites, $identifier_s) {
+            return %callsites{$identifier_s};
         }
 
-        my $callsite-idx := nqp::elems(%!callsites);
-        %!callsites{$identifier_s} := $callsite-idx;
-        my uint $callsites_offset := nqp::elems($!callsites);
-        nqp::writeuint($!callsites, $callsites_offset, $elems, 5);
+        my $callsite-idx := nqp::elems(%callsites);
+        %callsites{$identifier_s} := $callsite-idx;
+        my $callsites := $!callsites;
+        my uint $callsites_offset := nqp::elems($callsites);
+        nqp::writeuint($callsites, $callsites_offset, $elems, 5);
         $callsites_offset := $callsites_offset + 2;
         my $iter := nqp::iterator(@flags);
         while $iter {
-            nqp::writeuint($!callsites, $callsites_offset++, nqp::shift_i($iter), 1);
+            nqp::writeuint($callsites, $callsites_offset++, nqp::shift_i($iter), 1);
         }
         if $elems +& 1 {
-            nqp::writeuint($!callsites, $callsites_offset++, 0, 1);
+            nqp::writeuint($callsites, $callsites_offset++, 0, 1);
         }
         $iter := nqp::iterator(@named_idxs);
         while $iter {
-            nqp::writeuint($!callsites, $callsites_offset, nqp::shift_i($iter), 9);
+            nqp::writeuint($callsites, $callsites_offset, nqp::shift_i($iter), 9);
             $callsites_offset := $callsites_offset + 4;
         }
         $callsite-idx
