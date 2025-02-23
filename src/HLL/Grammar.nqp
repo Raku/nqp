@@ -635,12 +635,13 @@ An operator precedence parser.
     }
 
     method MARKED(str $markname) {
+        my $shared := nqp::getattr(self, NQPMatch, '$!shared');
         my %markhash := nqp::getattr(
-            nqp::getattr(self, NQPMatch, '$!shared'),
+            $shared,
             ParseShared, '%!marks');
         my $cur := nqp::atkey(%markhash, $markname);
         unless nqp::istype($cur, NQPMatch) && $cur.pos() == self.pos() {
-            $cur := self.'!cursor_start_fail'();
+            $cur := nqp::getattr($shared, ParseShared, '$!fail_cursor')
         }
         $cur
     }
