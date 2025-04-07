@@ -2851,8 +2851,8 @@ class MoarVM::BytecodeWriter {
     }
     method get_frame_index(MAST::Frame $f) {
         my int $idx := 0;
-        if nqp::getattr_i($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
-            return nqp::getattr_i($f, MAST::Frame, '$!frame_idx');
+        if nqp::getattr($f, MAST::Frame, '$!flags') +& 32768 { # FRAME_FLAG_HAS_INDEX
+            return nqp::getattr($f, MAST::Frame, '$!frame_idx');
         }
         my str $fid := nqp::objectid($f);
         for nqp::getattr($!compunit, MAST::CompUnit, '@!frames') {
