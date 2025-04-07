@@ -374,6 +374,12 @@ my class MASTCompilerInstance {
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
 
+        # Blocks we've seen while compiling.
+        my %*BLOCKS_DONE;
+
+        # Make sure $*BLOCK is clear.
+        my $*BLOCK;
+
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
 
@@ -795,11 +801,7 @@ my class MASTCompilerInstance {
             $!sc := $cu.sc;
         }
 
-        # Blocks we've seen while compiling.
-        my %*BLOCKS_DONE;
-
-        # Compile the block; make sure $*BLOCK is clear.
-        my $*BLOCK;
+        # Compile the block
         self.as_mast($cu[0]);
 
         # If we are in compilation mode, or have pre-deserialization or
