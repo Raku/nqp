@@ -688,11 +688,11 @@ role NQPMatchRole is export {
         nqp::bindattr_i($new, NQPMatch,   '$!pos',
           $pos);
         nqp::bindattr_i($new, NQPMatch,   '$!from',
-          nqp::getattr($term, NQPMatch,   '$!from' ));
+          nqp::getattr_i($term, NQPMatch, '$!from'));
         nqp::bindattr_i($new, NQPMatch,   '$!to',
-          nqp::getattr($term, NQPMatch,   '$!to' ));
+          nqp::getattr_i($term, NQPMatch, '$!to' ));
         nqp::bindattr(  $new, NQPMatch,   '$!made',
-          nqp::getattr($term, NQPMatch,   '$!made' ));
+          nqp::getattr($term, NQPMatch,   '$!made'));
         nqp::bindattr(  $new, NQPCapture, '@!list',
           nqp::getattr($term, NQPCapture, '@!list'));
         nqp::bindattr(  $new, NQPCapture, '%!hash',
