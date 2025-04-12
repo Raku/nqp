@@ -460,6 +460,29 @@ class HLL::Backend::MoarVM {
             my $pieces := nqp::list_s();
             my $empty-array := nqp::list_s();
 
+            sub maybe_flush_to_output() {
+                if nqp::elems($pieces) > 500 {
+                    $profile_fh.print(nqp::join("", $pieces));
+                    nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
+                }
+            }
+
+            sub push_tuple_inserts_chunked($tablename, $the_pieces) {
+                my $insertstmt := "INSERT INTO $tablename VALUES (";
+                while nqp::elems($the_pieces) {
+                    my int $pos := 1000;
+                    if nqp::elems($the_pieces) < 1000 {
+                        $pos := nqp::elems($the_pieces);
+                    }
+                    my $first_bit := nqp::slice($the_pieces, 0, $pos - 1);
+                    nqp::splice($the_pieces, $empty-array, 0, $pos);
+                    nqp::push_s($pieces, $insertstmt);
+                    nqp::push_s($pieces, nqp::join('), (', $first_bit));
+                    nqp::push_s($pieces, ");\n");
+                }
+                maybe_flush_to_output();
+            }
+
             nqp::push_s($pieces, "INSERT INTO routines VALUES ('");
 
             my $is-first := 1;
@@ -487,36 +510,25 @@ class HLL::Backend::MoarVM {
             }
             nqp::push_s($pieces, ";\n");
 
-            $is-first := 1;
-
-            nqp::push_s($pieces, "INSERT INTO types VALUES ('");
+            my $types_pieces := nqp::list_s();
 
             for $mapping -> $k {
                 my $v := $mapping{$k};
-                if !nqp::ishash($v) {
-                    if !$is-first {
-                        nqp::push_s($pieces, ", ('");
+                if nqp::isconcrete($v) {
+                    if !nqp::ishash($v) {
+                        my $type-info := %type-info{nqp::iterkey_s($k)};
+                        nqp::push_s($types_pieces,
+                            nqp::join("','",
+                                nqp::list_s(
+                                    $k,
+                                    literal_subst(~$v, "'", "''"),
+                                ))
+                            ~ "',"
+                            ~ to_sql_json($type-info[1]));
                     }
-                    else { $is-first := 0 }
-                    my $type-info := %type-info{nqp::iterkey_s($k)};
-                    nqp::push_s($pieces,
-                        nqp::join("','",
-                            nqp::list_s(
-                                $k,
-                                literal_subst(~$v, "'", "''"),
-                            ))
-                        ~ "',"
-                        ~ to_sql_json($type-info[1])
-                        ~ ","
-                        ~ "json_object()"
-                        ~ ")");
-                }
-                if nqp::elems($pieces) > 500 {
-                    $profile_fh.print(nqp::join("", $pieces));
-                    nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
                 }
             }
-            nqp::push_s($pieces, ";\n");
+            push_tuple_inserts_chunked("types", $types_pieces);
 
             for $obj -> $thread {
                 my $thisprof := nqp::list;
@@ -535,59 +547,46 @@ class HLL::Backend::MoarVM {
                     }
                     elsif $k eq 'gcs' {
                         my str $thread_id := $thread<thread>;
-                        if nqp::elems($v) > 0 {
-                            nqp::push_s($pieces, "INSERT INTO gcs VALUES (");
-                        }
 
-                        my $any-deallocs := 0;
-
-                        my $is-first := 1;
+                        my $gc_pieces := nqp::list_s();
+                        my $dealloc_pieces := nqp::list_s();
+                        my @g := nqp::list_s();
 
                         for $v -> $gc {
-                            if !$is-first {
-                                nqp::push_s($pieces, ", (");
-                            }
-                            else { $is-first := 0 }
-                            my @g := nqp::list_s();
+                            nqp::splice(@g, $empty-array, 0, nqp::elems(@g));
+
                             for <time retained_bytes promoted_bytes gen2_roots stolen_gen2_roots full responsible cleared_bytes start_time sequence> -> $f {
                                 nqp::push_s(@g, ~($gc{$f} // '0'));
                             }
                             nqp::push_s(@g, $thread_id);
-                            nqp::push_s($pieces, nqp::join(',', @g) ~ ")");
+                            nqp::push_s($gc_pieces, nqp::join(',', @g));
 
-                            if $any-deallocs == 0 && nqp::existskey($gc, 'deallocs') {
-                                $any-deallocs := 1
+                            if nqp::elems($gc_pieces) > 1000 {
+                                push_tuple_inserts_chunked('gcs', $gc_pieces);
                             }
-                        }
-                        if nqp::elems($v) > 0 {
-                            nqp::push_s($pieces, ";\n");
-                        }
 
-                        if $any-deallocs {
-                            nqp::push_s($pieces, "INSERT INTO deallocations VALUES (");
-                            $is-first := 1;
+                            if nqp::existskey($gc, 'deallocs') {
+                                my $deallocs := $gc<deallocs>;
+                                nqp::splice(@g, $empty-array, 0, nqp::elems(@g));
+                                nqp::push_s(@g, $gc<sequence>);
+                                nqp::push_s(@g, $thread_id);
 
-                            for $v -> $gc {
-                                if nqp::existskey($gc, 'deallocs') {
-                                    my @g;
-                                    my $deallocs := $gc<deallocs>;
-
-                                    for $deallocs -> $entry {
-                                        if !$is-first {
-                                            nqp::push_s($pieces, ", (");
-                                        }
-                                        else { $is-first := 0 }
-                                        @g := nqp::list_s($gc<sequence>, $thread_id);
-                                        for <id nursery_fresh nursery_seen gen2> -> $f {
-                                            nqp::push_s(@g, ~($entry{$f} // '0'));
-                                        }
-
-                                        nqp::push_s($pieces, nqp::join(',', @g) ~ ')');
+                                for $deallocs -> $entry {
+                                    # keep the first two entries for insane speedups!
+                                    nqp::splice(@g, $empty-array, 2, nqp::elems(@g));
+                                    for <id nursery_fresh nursery_seen gen2> -> $f {
+                                        nqp::push_s(@g, ~($entry{$f} // '0'));
                                     }
+                                    nqp::push_s($dealloc_pieces, nqp::join(',', @g));
+                                }
+                                if nqp::elems($dealloc_pieces) > 1000 {
+                                    push_tuple_inserts_chunked('deallocs', $dealloc_pieces);
                                 }
                             }
-                            nqp::push_s($pieces, ";\n");
                         }
+
+                        push_tuple_inserts_chunked('gcs', $gc_pieces);
+                        push_tuple_inserts_chunked('deallocations', $dealloc_pieces);
                     }
                     elsif $k eq 'parent' {
                         $thisprof[3] := ~$v;
@@ -599,40 +598,42 @@ class HLL::Backend::MoarVM {
                         $thisprof[4] := ~$node_id;
 
                         my $allocation_pieces := nqp::list_s;
-                        nqp::push_s($allocation_pieces, 'INSERT INTO allocations VALUES (');
+
+                        my @call := nqp::list_s();
+                        my $calls_pieces := nqp::list_s();
 
                         sub collect_calls(str $parent_id, %call_graph) {
                             my str $call_id := ~$node_id;
                             $node_id++;
-                            my @call := nqp::list_s($call_id, $parent_id);
+                            nqp::splice(@call, $empty-array, 0, nqp::elems(@call));
+                            nqp::push_s(@call, $call_id);
+                            nqp::push_s(@call, $parent_id);
                             for <id osr spesh_entries jit_entries inlined_entries inclusive_time exclusive_time entries deopt_one deopt_all> -> $f {
                                 nqp::push_s(@call, ~(%call_graph{$f} // '0'));
                             }
-                            if $is_first {
-                                $is_first := 0;
-                                nqp::push_s($pieces, 'INSERT INTO calls VALUES ');
-                            }
-                            else {
-                                nqp::push_s($pieces, "), ");
-                            }
+
                             my str $routine_id := ~%call_graph<id>;
                             %call_rec_depth{$routine_id} := 0 unless %call_rec_depth{$routine_id};
                             nqp::push_s(@call, ~%call_rec_depth{$routine_id});
                             nqp::push_s(@call, ~%call_graph<first_entry_time>);
                             nqp::push_s(@call, ~%call_graph<highest_child_id>);
-                            nqp::push_s($pieces, "(" ~ nqp::join(',', @call));
+                            nqp::push_s($calls_pieces, nqp::join(',', @call));
+
                             if %call_graph<allocations> {
+                                my @a := nqp::list_s($call_id);
                                 for %call_graph<allocations> -> $a {
-                                    my @a := nqp::list_s($call_id);
+                                    nqp::splice(@a, $empty-array, 1, nqp::elems(@a));
                                     for <id spesh jit count replaced> -> $f {
                                         nqp::push_s(@a, ~($a{$f} // '0'));
                                     }
-                                    if nqp::elems($allocation_pieces) > 1 {
-                                        nqp::push_s($allocation_pieces, ", (");
-                                    }
-                                    nqp::push_s($allocation_pieces, nqp::join(',', @a) ~ ")");
+                                    nqp::push_s($allocation_pieces, nqp::join(',', @a));
                                 }
                             }
+
+                            if nqp::elems($allocation_pieces) > 1000 {
+                                push_tuple_inserts_chunked('allocations', $allocation_pieces);
+                            }
+
                             if %call_graph<callees> {
                                 %call_rec_depth{$routine_id}++;
                                 for %call_graph<callees> -> $c {
@@ -640,20 +641,12 @@ class HLL::Backend::MoarVM {
                                 }
                                 %call_rec_depth{$routine_id}--;
                             }
-                            if nqp::elems($pieces) > 500 {
-                                $profile_fh.print(nqp::join("", $pieces));
-                                nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
-                                nqp::push_s($pieces, ");\n");
-                                $is_first := 1;
-                            }
+
                         }
+
                         collect_calls(~$node_id, $v);
-                        if $is_first == 0 { # there are actual records we have to close
-                            nqp::push_s($pieces, ");\n");
-                        }
-                        if nqp::elems($allocation_pieces) > 1 {
-                            nqp::push_s($pieces, nqp::join('', $allocation_pieces) ~ ";\n");
-                        }
+
+                        push_tuple_inserts_chunked('allocations', $allocation_pieces);
                     }
                 }
                 nqp::push_s($pieces, 'INSERT INTO profile VALUES (');
