@@ -1299,7 +1299,7 @@ class NQP::Actions is HLL::Actions {
 
     method regex_declarator($/, $key?) {
         my $name;
-	my $package := $/.package;
+        my $package := $/.package;
         if $<deflongname> {
             $name := ~$<deflongname>.ast;
         }
@@ -1311,6 +1311,116 @@ class NQP::Actions is HLL::Actions {
         }
         my $ast;
         if $<proto> {
+
+#?if moar
+            my $NQPMatch := $*W.find_sym(["NQPMatch"]);
+
+            $ast := QAST::Block.new(
+                :name($name),
+                :blocktype('declaration_static'),
+                :node($/),
+                QAST::Stmts.new(
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name('nfa'), :scope<local>, :decl<var> ),
+                        QAST::Op.new(:op<dispatch>,
+                            QAST::SVal.new( :value('nqp-ensure-how-cached-protoregex-nfa') ),
+                            QAST::Var.new( :name<self>, :scope<local>, :decl<param> ),
+                            QAST::SVal.new( :value($name) ))),
+
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name<sharedtype>, :scope<local>, :decl<var> ),
+                        QAST::Op.new( :op<callmethod>, :name<!shared_type>,
+                            QAST::Var.new( :name<self>, :scope<local> ))),
+
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name<shared>, :scope<local>, :decl<var> ),
+                        QAST::Var.new( :name<$!shared>, :scope<attribute>,
+                            QAST::Var.new( :name<self>, :scope<local> ),
+                            QAST::WVal.new( :value($NQPMatch) ))),
+
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name<pos>, :scope<local>, :decl<var>, :returns(int) ),
+                        QAST::Var.new( :name<$!pos>, :scope<attribute>, :returns(int),
+                            QAST::Var.new( :name<self>, :scope<local> ),
+                            QAST::WVal.new( :value($NQPMatch) ) )),
+
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name('fates'), :scope<local>, :decl<var> ),
+                        QAST::Op.new(:op<dispatch>,
+                            QAST::SVal.new( :value('nqp-ensure-nfa-and-run') ),
+                            QAST::Var.new( :name<nfa>, :scope<local> ),
+                            QAST::SVal.new( :value('run') ),
+                            QAST::Var.new( :name<nfa>, :scope<local> ),
+                            QAST::Var.new( :name<$!target>, :scope<attribute>, :returns(str),
+                                QAST::Var.new( :name<shared>, :scope<local> ),
+                                QAST::Var.new( :name<sharedtype>, :scope<local> )),
+                            QAST::Var.new( :name<pos>, :scope<local>, :returns(int) ),
+                        )),
+
+                    QAST::Op.new(:op<if>,
+                        QAST::Op.new(:op<isgt_i>,
+                            QAST::Var.new( :name<pos>, :scope<local>, :returns(int) ),
+                            QAST::Var.new( :name<$!highwater>, :scope<attribute>, :returns(int),
+                                QAST::Var.new( :name<shared>, :scope<local> ),
+                                QAST::Var.new( :name<sharedtype>, :scope<local> ))),
+                        QAST::Op.new(:op<bind>,
+                            QAST::Var.new( :name<$!highwater>, :scope<attribute>, :returns(int),
+                                QAST::Var.new( :name<shared>, :scope<local> ),
+                                QAST::Var.new( :name<sharedtype>, :scope<local> )),
+                            QAST::Var.new( :name<pos>, :scope<local>, :returns(int) ))),
+
+                    QAST::Op.new(:op<bind>,
+                        QAST::Var.new( :name<rxfate>, :scope<local>, :decl<var> ),
+                        QAST::Op.new(:op<atpos>,
+                            QAST::Op.new( :op<callmethod>, :name<states>,
+                                QAST::Var.new( :name<nfa>, :scope<local> )),
+                            QAST::IVal.new( :value(0) ))
+                    ),
+
+                    QAST::Op.new(:op<while>,
+                        QAST::Op.new(:op<elems>, QAST::Var.new( :name<fates>, :scope<local>, :returns(int) )),
+                        QAST::Stmts.new(
+                            QAST::Op.new( :op<bind>,
+                                QAST::Var.new( :name<cur>, :scope<local>, :decl<var> ),
+                                QAST::Op.new( :op<callmethod>,
+                                    QAST::Var.new( :name<self>, :scope<local> ),
+                                    QAST::Op.new( :op<atpos>,
+                                        QAST::Var.new( :name<rxfate>, :scope<local> ),
+                                        QAST::Op.new( :op<pop_i>, QAST::Var.new( :name<fates>, :scope<local> ) )
+                                    )
+                                )
+                            ),
+                            QAST::Op.new(:op<if>,
+                                QAST::Op.new(:op<isge_i>,
+                                    QAST::Var.new( :name<$!pos>, :scope<attribute>, :returns(int),
+                                        QAST::Var.new( :name<cur>, :scope<local> ),
+                                        QAST::WVal.new( :value($NQPMatch) )
+                                    ),
+                                    QAST::IVal.new( :value(0) )
+                                ),
+                                QAST::Op.new(:op<setelems>, QAST::Var.new( :name<fates>, :scope<local> ), QAST::IVal.new( :value(0) ))
+                            )
+                        )
+                    ),
+
+                    QAST::Op.new(:op<if>,
+                        QAST::Var.new( :name<cur>, :scope<local> ),
+                        QAST::Var.new( :name<cur>, :scope<local> ),
+                        QAST::Var.new( :name<$!fail_cursor>, :scope<attribute>,
+                            QAST::Var.new( :name<shared>, :scope<local> ),
+                            QAST::Var.new( :name<sharedtype>, :scope<local> )),
+                    ),
+
+                    #QAST::Op.new( :op<callmethod>, :name<!protoregex_run_fates>,
+                    #    QAST::Var.new( :name<self>, :scope<local> ),
+                    #    QAST::Var.new( :name<shared>, :scope<local> ),
+                    #    QAST::Var.new( :name<nfa>, :scope<local> ),
+                    #    QAST::Var.new( :name('fates'), :scope<local> ))
+                )
+            );
+#?endif
+
+#?if !moar
             $ast := QAST::Block.new(
                     :name($name),
                     QAST::Op.new(
@@ -1322,8 +1432,9 @@ class NQP::Actions is HLL::Actions {
                     :blocktype('declaration_static'),
                     :node($/)
                 );
-                $*W.pkg_add_method($package, 'add_method', $name,
-                    $*W.create_code($ast, $name, 0, :code_type_name<NQPRegex>));
+#?endif
+            $*W.pkg_add_method($package, 'add_method', $name,
+                $*W.create_code($ast, $name, 0, :code_type_name<NQPRegex>));
         }
         else {
             my $block := $*W.pop_lexpad();

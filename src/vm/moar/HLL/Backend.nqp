@@ -17,7 +17,7 @@ class HLL::Backend::MoarVM {
     our $Callsites;
 
     our %moar_config := nqp::backendconfig();
-    
+
     my sub read_ui32($fh, $buf?) {
         unless $buf { $buf := nqp::create($NQPBuf) }
         nqp::readfh($fh, $buf, 4);

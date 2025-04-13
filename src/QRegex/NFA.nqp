@@ -1028,6 +1028,17 @@ class QRegex::NFA {
     # NFA type.
     my knowhow NFAType is repr('NFA') { }
 
+    method create-nfa-object() {
+        $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
+    }
+
+    method run-nocheck($nfa_object, str $target, int $offset) {
+        nqp::nfarunproto($nfa_object, $target, $offset)
+    }
+    method run_alt-nocheck($nfa_object, str $target, int $offset, $bstack, $cstack, @labels) {
+        nqp::nfarunalt($nfa_object, $target, $offset, $bstack,$cstack, @labels)
+    }
+
     method run(str $target, int $offset) {
         unless nqp::isconcrete($!nfa_object) {
 

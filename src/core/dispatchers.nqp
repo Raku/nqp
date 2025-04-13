@@ -711,4 +711,57 @@ nqp::register('nqp-isinvokable', -> $capture {
       )
     );
 });
+
+# Ensure the cache in self.HOW has an nfa already for the given name
+# and return it as a constant guarded on type and name.
+
+nqp::register('nqp-ensure-how-cached-protoregex-nfa', -> $capture {
+    # guard on type of "self"
+    nqp::guard('type',    nqp::track('arg', $capture, 0));
+    # guard on name of protoregex
+    nqp::guard('literal', nqp::track('arg', $capture, 1));
+
+    my $self := nqp::captureposarg($capture, 0);
+    my str $protoregex-name := nqp::captureposarg_s($capture, 1);
+
+    my $nfa := $self.HOW.cache_get($self, $protoregex-name);
+
+    if nqp::isnull($nfa) {
+        $nfa := $self.'!protoregex_nfa'($protoregex-name);
+        $self.HOW.cache_add($self, $protoregex-name, $nfa);
+    }
+
+    nqp::delegate('boot-constant', nqp::syscall('dispatcher-insert-arg-literal-obj', $capture, 0, $nfa));
+});
+
+# Ensure a QRegex::NFA has its $!nfa_object created from its statelist,
+# then delegate to invoking the run-nocheck or run_alt-nocheck method
+# to use the known-constant nfa object.
+nqp::register('nqp-ensure-nfa-and-run', -> $capture {
+    nqp::guard('literal', my $first-arg-tracked := nqp::track('arg', $capture, 0));
+    nqp::guard('type', $first-arg-tracked);
+
+    #my $nfa_obj := nqp::getattr(
+    #    (my $nfa_cont := nqp::captureposarg($capture, 0)),
+    #    nqp::gethllsym('default', 'NQPRegex').NFA_TYPE,
+    #    '$!nfa_object');
+    my $nfa_obj := nqp::getattr(
+        (my $nfa_cont := nqp::captureposarg($capture, 0)),
+        NQPRegex.NFA_TYPE,
+        '$!nfa_object');
+    unless nqp::isconcrete($nfa_obj) {
+        nqp::scwbdisable();
+        $nfa_obj := $nfa_cont.create-nfa-object();
+        nqp::scwbenable();
+    }
+
+    nqp::guard('literal', nqp::track('arg', $capture, 1));
+
+    $capture := nqp::syscall('dispatcher-insert-arg-literal-obj', $capture, 3, $nfa_obj);
+    my str $methname := nqp::captureposarg_s($capture, 1);
+    $capture := nqp::syscall('dispatcher-insert-arg-literal-str', $capture, 1, $methname ~ '-nocheck');
+    $capture := nqp::syscall('dispatcher-drop-arg', $capture, 2);
+
+    nqp::delegate('nqp-meth-call', $capture);
+});
 #?endif

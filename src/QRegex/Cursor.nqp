@@ -214,7 +214,7 @@ role NQPMatchRole is export {
         for self.hash {
             dump_array($key ~ '<' ~ $_.key ~ '>', $_.value);
         }
-        
+
         nqp::join("", $chunks)
     }
 
@@ -730,6 +730,15 @@ role NQPMatchRole is export {
         # Obtain and run NFA.
         my $shared  := $!shared;
         my int $pos := $!pos;
+
+        # #?if moar
+        #my $nfa := nqp::dispatch('nqp-ensure-how-cached-protoregex-nfa', self, $name);
+
+        #my @fates := nqp::dispatch('nqp-ensure-nfa-and-run',
+        #    nqp::decont($nfa), 'run', nqp::decont($nfa), nqp::getattr_s($shared, ParseShared, '$!target'), $pos
+        #);
+        # #?endif
+        # #?if !moar
         my $nfa     := self.HOW.cache_get(self, $name);
 
         if nqp::isnull($nfa) {
@@ -740,13 +749,17 @@ role NQPMatchRole is export {
         my @fates := $nfa.run(
           nqp::getattr_s($shared, ParseShared, '$!target'), $pos
         );
+        # #?endif
 
         # Update highwater mark.
         nqp::bindattr_i($shared, ParseShared, '$!highwater', $pos)
           if $pos > nqp::getattr_i($shared, ParseShared, '$!highwater');
 
+        self.'!protoregex_run_fates'($shared, nqp::atpos($nfa.states, 0), @fates)
+    }
+
+    method !protoregex_run_fates($shared, @rxfate, @fates) {
         # Visit rules in fate order.
-        my @rxfate := nqp::atpos($nfa.states, 0);
         my $cur;
         my $rxname;
 

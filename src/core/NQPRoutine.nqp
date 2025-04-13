@@ -572,6 +572,7 @@ my knowhow NQPRegex {
 
     my $nfa_type;
     method SET_NFA_TYPE($type) { $nfa_type := $type }
+    method NFA_TYPE() { $nfa_type }
 
     method instantiate_generic($env) {
         if nqp::isnull($!generic_nfa) {
@@ -590,6 +591,7 @@ my knowhow NQPRegex {
 }
 #?if !moar
 nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
+nqp::bindhllsym('default', 'NQPRegex', NQPRegex);
 #?endif
 nqp::setboolspec(NQPRegex, 5, nqp::null);
 nqp::settypehll(NQPRegex, 'nqp');
