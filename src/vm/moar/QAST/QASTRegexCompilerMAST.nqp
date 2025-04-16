@@ -170,17 +170,27 @@ class QAST::MASTRegexCompiler {
 
     my $FAKE-POS-NODE := QAST::Op.new( :op('null') );
     method call-meth(str $name, $invocant-reg, :@arg-regs, :@arg-types, :@arg-qasts,
-            :$result-reg, :$int-result) {
+            :$result-reg, :$int-result, :$has-method-name) {
         # Form pieces to generate callsite and dispatch op.
-        my $name-reg := $!regalloc.fresh_s();
         my $frame := $!qastcomp.mast_frame;
-        op($frame, 'const_s', $name-reg, $name);
+        my $name-reg;
+  
+        if ($has-method-name) {
+            $name-reg := nqp::shift(@arg-regs);
+        } else {
+            $name-reg := $!regalloc.fresh_s();
+            op($frame, 'const_s', $name-reg, $name);
+            $!regalloc.release_register($name-reg, nqp::const::MVM_reg_str);
+        }
+
         my @all-arg-regs := [$invocant-reg, $name-reg, $invocant-reg];
         my @all-arg-masts := [
             MAST::InstructionList.new($invocant-reg, nqp::const::MVM_reg_obj),
             MAST::InstructionList.new($name-reg, nqp::const::MVM_reg_str),
             MAST::InstructionList.new($invocant-reg, nqp::const::MVM_reg_obj)
         ];
+
+
         my @all-arg-qasts := [$FAKE-POS-NODE, $FAKE-POS-NODE, $FAKE-POS-NODE];
         if @arg-regs {
             my int $i;
@@ -1226,11 +1236,12 @@ class QAST::MASTRegexCompiler {
         if nqp::istype($node[0][0], QAST::SVal) {
             # Method call. Shift the method name from the compiled bits
             # before doing the call.
-            nqp::shift(@arg-regs);
+            # nqp::shift(@arg-regs);
             nqp::shift(@arg-types);
             nqp::shift(@arg-qasts);
+
             self.call-meth($node[0][0].value, %!reg<cur>, :result-reg($p11),
-                :@arg-regs, :@arg-types, :@arg-qasts);
+                :@arg-regs, :@arg-types, :@arg-qasts, :has-method-name);
             for @arg-masts {
                 $!regalloc.release_register($_.result_reg, $_.result_kind);
             }
@@ -1337,7 +1348,6 @@ class QAST::MASTRegexCompiler {
         my $caps := $!regalloc.fresh_i();
         my $haselemslabel := label();
         my $haselemsendlabel := label();
-        op($frame, 'const_i64', $mark, $label_index);
         op($frame, 'elems', $elems, $bstack);
         op($frame, 'gt_i', $caps, $elems, %!reg<zero>);
         op($frame, 'if_i', $caps, $haselemslabel);
@@ -1347,6 +1357,7 @@ class QAST::MASTRegexCompiler {
         op($frame, 'dec_i', $elems);
         op($frame, 'atpos_i', $caps, $bstack, $elems);
         $frame.add-label($haselemsendlabel);
+        op($frame, 'const_i64', $mark, $label_index);
         op($frame, 'push_i', $bstack, $mark);
         op($frame, 'push_i', $bstack, $pos);
         op($frame, 'push_i', $bstack, $rep);
