@@ -1408,10 +1408,11 @@ my class MASTCompilerInstance {
         self.compile_annotation($node);
         my %stmt_temps := nqp::clone(%*STMTTEMPS); # guaranteed to be initialized
         my $result     := self.compile_with_stmt_temps($node, %stmt_temps);
+        my $block      := $*BLOCK;
         for sorted_keys(%stmt_temps) -> $temp_key {
-            if !nqp::existskey(%*STMTTEMPS, $temp_key) &&
-                    !nqp::eqaddr($*BLOCK.local($temp_key), $result.result_reg) {
-                $*BLOCK.release_temp($temp_key);
+            unless nqp::existskey(%stmt_temps, $temp_key)
+              || nqp::eqaddr($block.local($temp_key), $result.result_reg) {
+                $block.release_temp($temp_key);
             }
         }
         $result
