@@ -792,6 +792,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                     QAST::Regex.new( :rxtype<alt>, |@alts );
         }
+
+        if $qast.rxtype ne 'cclass' && +@($qast) == 0 {
+            $/.panic('Cannot have an empty character class. If you intended to include '
+                ~ 'whitespace within this character class, escape it with \\'
+            );
+        }
+
         make $qast;
     }
 
