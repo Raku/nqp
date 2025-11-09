@@ -304,7 +304,7 @@ class HLL::Compiler does HLL::Backend::Default {
                                      || %adverbs<show-config>;
         self.nqpevent(%adverbs<nqpevent>) if %adverbs<nqpevent>;
 
-        my @*comp_line_directives;
+        my @*comp_line_directives := [nqp::list_i(), nqp::list_i(), nqp::list_s()];
         my $result;
         my $error;
         my $has_error := 0;
@@ -762,16 +762,17 @@ class HLL::Compiler does HLL::Backend::Default {
         my str $file := '';
         if $directives {
             my @clds := @*comp_line_directives;
-            my int $i := nqp::elems(@clds);
+            my $cld_linenos := @clds[0];
+            my int $i := nqp::elems($cld_linenos);
             if $i {
                 while $i > 0 {
                     $i := $i - 1;
-                    last if $line > @clds[$i][0];
+                    last if $line > nqp::atpos_i($cld_linenos, $i);
                 }
-                if $line > @clds[$i][0] {
-                    my @directive := @clds[$i];
-                    $line := $line - @directive[0] + @directive[1] - 1;
-                    $file := @directive[2];
+
+                if $line > nqp::atpos_i($cld_linenos, $i) {
+                    $line := $line - nqp::atpos_i(@clds[0], $i) + nqp::atpos_i(@clds[1], $i) - 1;
+                    $file := nqp::atpos_s(@clds[2], $i);
                 }
             }
         }
