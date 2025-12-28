@@ -20,7 +20,6 @@ $nqpcomp.addstage('optimize', :after<ast>);
 
 # Add extra command line options.
 my @clo := $nqpcomp.commandline_options();
-@clo.push('parsetrace');
 @clo.push('setting=s');
 @clo.push('setting-path=s');
 @clo.push('custom-regex-lib=s');
