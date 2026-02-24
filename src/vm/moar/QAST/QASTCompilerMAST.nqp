@@ -1844,7 +1844,6 @@ my class MASTCompilerInstance {
             $!regalloc.release_register($name_reg, nqp::const::MVM_reg_str);
         }
         elsif $scope eq 'contextual' {
-            my $name_const := self.const_s($name);
             my $lex := $*BLOCK.lexical($name);
             if $lex {
                 # In current frame; do as lexical does.
@@ -1865,6 +1864,7 @@ my class MASTCompilerInstance {
                 }
             }
             else {
+                my $name_const := self.const_s($name);
                 # Need lookup.
                 if $*BINDVAL {
                     my $valmast := self.as_mast_clear_bindval($*BINDVAL, :want(nqp::const::MVM_reg_obj));
@@ -1875,8 +1875,8 @@ my class MASTCompilerInstance {
                     $res_reg := $!regalloc.fresh_register(nqp::const::MVM_reg_obj);
                     %core_op_generators{'getdynlex'}($!mast_frame, $res_reg, $name_const.result_reg);
                 }
+                $!regalloc.release_register($name_const.result_reg, nqp::const::MVM_reg_str);
             }
-            $!regalloc.release_register($name_const.result_reg, nqp::const::MVM_reg_str);
             $res_kind := nqp::const::MVM_reg_obj;
         }
         elsif $scope eq 'attribute' {
