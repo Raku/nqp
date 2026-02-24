@@ -1,4 +1,4 @@
-plan(28);
+plan(348);
 
 my sub isnan($n) {
     nqp::isnanorinf($n) && nqp::isne_n($n, nqp::inf()) && nqp::isne_n($n, nqp::neginf());
@@ -65,4 +65,45 @@ is($int32_30, 30, 'num to int32 conversion');
   my int $int32 := 30;
   my str $str := $int32;
   is($str, '30', 'int32 to str conversion');
+}
+
+my @all_ws;
+for "\t", "\n", nqp::chr(11), "\f", "\r", " " -> $ws {
+    nqp::push(@all_ws , $ws);
+    my $ord := nqp::ord($ws);
+    is(nqp::coerce_si($ws), 0, "coerce_si(chr $ord) is 0");
+    my $str := $ws ~ '42';
+    is(nqp::coerce_si($str), 42, "coerce_si treats chr $ord as whitespace");
+    my $str2 := $ws ~ $ws ~ '42';
+    is(nqp::coerce_si($str2), 42, "coerce_si treats 2 chr $ord as whitespace");
+}
+is(nqp::coerce_si(nqp::join("", @all_ws) ~ '54'), 54, "All whitespace is ignored");
+
+for '6', ' 6', '  6', '  6 ', '  6a', ' 6 9' -> $six {
+    is(nqp::coerce_si($six), 6, "coerce_si('$six')");
+}
+
+for '-6', ' -6', '  -6', '  -6 ', '  -6a', ' -6 9' -> $six {
+    is(nqp::coerce_si($six), -6, "coerce_si('$six')");
+}
+
+for '+6', ' +6', '  +6', '  +6 ', '  +6a', ' +6 9' -> $six {
+    is(nqp::coerce_si($six), 6, "coerce_si('$six')");
+}
+
+for '+', '-', '+ 9', '- 9', '++', '+-', '-+', '--', '++9', '+-9', '-+9', '--9' -> $str {
+    for "", " ", "  " -> $spaces {
+        my $input := $spaces ~ $str;
+        is(nqp::coerce_si($input), 0, "coerce_si('$input') is 0");
+    }
+}
+
+my $ord := 0;
+
+while ($ord < 257) {
+    my $chr := nqp::chr($ord);
+    if nqp::islt_s($chr, '0') || nqp::isgt_s($chr, '9') {
+        is(nqp::coerce_si($chr), 0, "coerce_si(chr $ord) is 0");
+    }
+    ++$ord;
 }
