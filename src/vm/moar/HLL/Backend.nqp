@@ -483,32 +483,25 @@ class HLL::Backend::MoarVM {
                 maybe_flush_to_output();
             }
 
-            nqp::push_s($pieces, "INSERT INTO routines VALUES ('");
-
-            my $is-first := 1;
+            my $routines_pieces := nqp::list_s();
 
             for $mapping -> $k {
                 my $v := $mapping{$k};
                 if nqp::ishash($v) {
-                    if !$is-first {
-                        nqp::push_s($pieces, ", ('");
-                    }
-                    else { $is-first := 0 }
-                    nqp::push_s($pieces,
-                        nqp::join("','",
+                    nqp::push_s($routines_pieces,
+                        "'"
+                        ~ nqp::join("','",
                                   nqp::list(
                                       nqp::iterkey_s($k),
                                       literal_subst(~$v<name>, "'", "''"),
                                       ~$v<line>,
                                       ~$v<file>))
-                                  ~ "')");
-                }
-                if nqp::elems($pieces) > 500 {
-                    $profile_fh.print(nqp::join("", $pieces));
-                    nqp::splice($pieces, $empty-array, 0, nqp::elems($pieces));
+                        ~ "'"
+                    );
                 }
             }
-            nqp::push_s($pieces, ";\n");
+            push_tuple_inserts_chunked("routines", $routines_pieces);
+            $routines_pieces := nqp::null;
 
             my $types_pieces := nqp::list_s();
 
@@ -531,6 +524,7 @@ class HLL::Backend::MoarVM {
                 }
             }
             push_tuple_inserts_chunked("types", $types_pieces);
+            $types_pieces := nqp::null;
 
             for $obj -> $thread {
                 my $thisprof := nqp::list;
@@ -621,8 +615,6 @@ class HLL::Backend::MoarVM {
                             nqp::push_s(@call, ~%call_graph<highest_child_id>);
                             nqp::push_s($calls_pieces, nqp::join(',', @call));
 
-                            push_tuple_inserts_chunked('calls', $calls_pieces);
-
                             if %call_graph<allocations> {
                                 my @a := nqp::list_s($call_id);
                                 for %call_graph<allocations> -> $a {
@@ -637,6 +629,9 @@ class HLL::Backend::MoarVM {
                             if nqp::elems($allocation_pieces) > 1000 {
                                 push_tuple_inserts_chunked('allocations', $allocation_pieces);
                             }
+                            if nqp::elems($calls_pieces) > 500 {
+                                push_tuple_inserts_chunked('calls', $calls_pieces);
+                            }
 
                             if %call_graph<callees> {
                                 %call_rec_depth{$routine_id}++;
@@ -645,7 +640,6 @@ class HLL::Backend::MoarVM {
                                 }
                                 %call_rec_depth{$routine_id}--;
                             }
-
                         }
 
                         collect_calls(~$node_id, $v);
