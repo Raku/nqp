@@ -358,6 +358,10 @@ my class MASTCompilerInstance {
             $annotations := %moar<annotations> := MAST::Bytecode.new;
         }
 
+        # Pops the entry HLL::Backend::MoarVM.start pushed for this
+        # compile. HLL::Compiler.compile runs compile_cleanup on the
+        # backend as a safety net for stages loops that exit before
+        # reaching us.
         my @frames := nqp::pop(%moar<frames>);
         $!writer := MoarVM::BytecodeWriter.new(:$string-heap, :$callsites, :$annotations);
         $!mast_compunit := MAST::CompUnit.new(

@@ -761,6 +761,10 @@ class HLL::Backend::MoarVM {
         0
     }
 
+    # Push a fresh entry onto %COMPILING<moar><frames>. The matching pop
+    # lives in QASTCompilerMAST.to_mast at the 'mast' stage. The safety
+    # net for a stages loop that exits before 'mast' lives in
+    # compile_snapshot / compile_cleanup below.
     method start($source, *%adverbs) {
         if nqp::existskey(%*COMPILING, 'moar') {
             nqp::push(%*COMPILING<moar><frames>, nqp::list);
@@ -778,6 +782,24 @@ class HLL::Backend::MoarVM {
             %moar<frames>      := [ nqp::list ];
         }
         $source
+    }
+
+    # compile_snapshot records the depth of %COMPILING<moar><frames>
+    # before the stages loop runs. compile_cleanup pops anything still
+    # above that mark, restoring the depth so an early-exit 'target' or
+    # in-flight exception cannot leave a partial frame entry behind for
+    # the next nested compile. Pairs with `start` above (the push) and
+    # QASTCompilerMAST.to_mast (the pop).
+    method compile_snapshot() {
+        nqp::existskey(%*COMPILING, 'moar')
+            ?? nqp::elems(nqp::atkey(nqp::atkey(%*COMPILING, 'moar'), 'frames'))
+            !! 0
+    }
+
+    method compile_cleanup($snapshot) {
+        return 0 unless nqp::existskey(%*COMPILING, 'moar');
+        my $frames := nqp::atkey(nqp::atkey(%*COMPILING, 'moar'), 'frames');
+        nqp::pop($frames) while nqp::elems($frames) > $snapshot;
     }
 
     method mast($qast, *%adverbs) {

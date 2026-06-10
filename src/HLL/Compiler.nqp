@@ -503,6 +503,17 @@ class HLL::Compiler does HLL::Backend::Default {
             nqp::unshift(@stages, 'start');
         }
 
+        # Backends may keep per-compile state on %*COMPILING (e.g. a frame
+        # list that the 'start' stage pushes for the 'mast' stage to pop).
+        # Snapshot that state so compile_cleanup can rebalance it if the
+        # stages loop exits before the consuming stage runs, whether via a
+        # 'target' adverb shorter than the final stage or an in-flight
+        # exception.
+        my $compile_snapshot := nqp::can($!backend, 'compile_snapshot')
+            ?? $!backend.compile_snapshot
+            !! NQPMu;
+
+        my $caught := nqp::null;
         for @stages {
             $stderr.print(nqp::sprintf("Stage %-11s: ", [$_])) if nqp::defined($stagestats) && $_ ne "parse";
             my int $timestamp := nqp::time();
@@ -511,9 +522,22 @@ class HLL::Compiler does HLL::Backend::Default {
                 self.execute_stage($_, $result, %adverbs)
             }
 
-            $result := %adverbs<profile-stage> eq $_
-                ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>)
-                !! run();
+            # Only the stage call can throw something the cleanup below
+            # needs to run for. Wrap just that call so stagestats output
+            # and other bookkeeping stay outside the handler scope.
+            # The bare CATCH also matches CONTROL-category exceptions.
+            # Rakudo's resumable warnings (CX::Warn and friends) are
+            # absorbed by HLL-level handlers installed deeper in the
+            # call chain before they reach the stage call site, so they
+            # never bubble into this CATCH at runtime. If that ever
+            # changes, this scope would have to filter the category.
+            try {
+                $result := %adverbs<profile-stage> eq $_
+                    ?? $!backend.run_profiled(&run, %adverbs<profile-filename> || %adverbs<profile-compile>, %adverbs<profile-kind>)
+                    !! run();
+                CATCH { $caught := $_ }
+            }
+            last if !nqp::isnull($caught);
 
             my num $diff := nqp::div_n(nqp::time() - $timestamp,1000000000e0);
             if nqp::defined($stagestats) {
@@ -531,6 +555,11 @@ class HLL::Compiler does HLL::Backend::Default {
             }
             last if $_ eq $target;
         }
+
+        nqp::can($!backend, 'compile_cleanup')
+            && $!backend.compile_cleanup($compile_snapshot);
+
+        nqp::rethrow($caught) if !nqp::isnull($caught);
 
         if %adverbs<compunit_ok> {
             return $result
