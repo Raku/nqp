@@ -265,6 +265,6 @@ class HLL::Actions {
 
     method comment:sym<line_directive>($/) {
         my $orig_line := HLL::Compiler.lineof($/.orig(), $/.from(), :cache(1), :directives(0));
-        $*W.add_comp_line_directive([$orig_line, nqp::radix(10, $<line>, 0, 0)[0], $<filename>]);
+        $*W.add_comp_line_directive($orig_line, nqp::radix(10, $<line>, 0, 0)[0], ~$<filename>);
     }
 }
