@@ -1888,7 +1888,6 @@ my sub add-dispatcher-op($qastcomp, $op, :$prefix) {
     # Compile arguments and form callsite.
     my @arg_mast;
     my @arg_idxs;
-    my @arg_kinds := nqp::list_i;
     my $regalloc := $qastcomp.regalloc;
     my $frame := $qastcomp.mast_frame;
     for @args -> $arg {
@@ -1905,17 +1904,20 @@ my sub add-dispatcher-op($qastcomp, $op, :$prefix) {
         }
         nqp::push(@arg_mast, $arg_mast);
         nqp::push(@arg_idxs, $arg_mast.result_reg);
-        nqp::push_i(@arg_kinds, $arg_mast_kind);
     }
     my uint $callsite_id := $frame.callsites.get_callsite_id_from_args(@args, @arg_mast);
 
-    # Emit dispatch, then free argument registers.
+    # Emit dispatch, then free argument registers. Release with the kind the
+    # register has after any coercion above; releasing under the pre-coercion
+    # kind puts it on the wrong free-list, and a later allocation of that kind
+    # would produce a register of the wrong type.
     my $res := emit_dispatch_instruction($qastcomp, $dispatcher_name, $callsite_id,
             @arg_idxs, $op.returns);
     my int $i := 0;
     my int $args := nqp::elems(@arg_mast);
     while $i < $args {
-        $regalloc.release_register(@arg_idxs[$i], nqp::atpos_i(@arg_kinds, $i));
+        $regalloc.release_register(@arg_idxs[$i],
+            nqp::unbox_i(nqp::atpos(@arg_mast, $i).result_kind));
         $i++;
     }
     $res
