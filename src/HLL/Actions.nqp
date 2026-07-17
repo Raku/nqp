@@ -135,8 +135,9 @@ class HLL::Actions {
         }
         if $key eq 'POSTFIX' {
             $ast.unshift($/[0].ast);
-        }
-        else {
+        } elsif nqp::isinvokable($ast) {
+            $ast := $ast($/.list);
+        } else {
             for $/.list { if nqp::defined($_.ast) { $ast.push($_.ast); } }
         }
         make $ast;
