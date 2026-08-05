@@ -25,19 +25,19 @@ stages:
       strategy:
        matrix:
          Win_MVM:
-           IMAGE_NAME: 'windows-2019'
+           IMAGE_NAME: 'windows-2025'
            RAKUDO_OPTIONS: ''
            NQP_OPTIONS: '--backends=moar'
            MOAR_OPTIONS: ''
          Win_JVM:
-           IMAGE_NAME: 'windows-2019'
+           IMAGE_NAME: 'windows-2025'
            BACKEND: 'JVM'
            MOAR_CHECKOUT_TYPE: 'none'
            RAKUDO_OPTIONS: ''
            NQP_OPTIONS: '--backends=jvm'
            MOAR_OPTIONS: ''
          Win_MVM_relocatable:
-           IMAGE_NAME: 'windows-2019'
+           IMAGE_NAME: 'windows-2025'
            RELOCATABLE: 'yes'
            RAKUDO_OPTIONS: '--relocatable'
            NQP_OPTIONS: '--backends=moar --relocatable'
