@@ -24,6 +24,7 @@ my module sprintf {
         }
 
         proto token directive { <...> }
+        token directive:sym<a> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[aA]> }
         token directive:sym<b> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[bB]> }
         token directive:sym<c> { '%' <idx>? <flags>* <size>? <sym> }
         token directive:sym<d> { '%' <idx>? <flags>* <size>? [ '.' <precision=.size> ]? $<sym>=<[di]> }
@@ -150,7 +151,8 @@ my module sprintf {
         sub padding_char($st) {
             my $padding_char := ' ';
             if !$st<precision> && !is_minus($st)
-            || $st<sym> ~~ /<[eEfFgG]>/ {
+            || $st<sym> ~~ /<[eEfFgG]>/
+            || !is_minus($st) && $st<sym> ~~ /<[aA]>/ {
                 $padding_char := '0' if $_<zero> for $st<flags>;
             }
             $padding_char
@@ -504,6 +506,87 @@ my module sprintf {
             }
         }
 
+        sub hex-float(num $float, int $has-prec, int $precision, $size, $pad, $/) {
+            # if we have zero; handle its sign: 1/0e0 == +Inf, 1/-0e0 == -Inf
+            my $sign := nqp::islt_n($float, 0.0)
+                || ( nqp::iseq_n($float, 0.0) && nqp::islt_n(nqp::div_n(1.0, $float), 0.0) )
+                ?? '-'
+                     !! has_flag($/, 'plus') ?? '+'
+                     !! has_flag($/, 'space') ?? ' '
+                     !! '';
+            $float := nqp::abs_n($float);
+
+            return pad-with-sign($sign, ~$float, $size, $pad) if nqp::isnanorinf($float);
+
+            my int $e := 0;
+            my str $lead;
+            my str $frac;
+            if nqp::iseq_n($float, 0.0) {
+                $lead := '0';
+                $frac := $has-prec ?? infix_x('0', $precision) !! '';
+            }
+            else {
+                # scale into [1, 2) by exact powers of two, so that
+                # $m * 2**52 is an exact 53-bit integer whose hex digits
+                # are the leading '1' plus 13 hex fraction digits
+                my num $m := $float;
+                while nqp::isge_n($m, 65536.0)          { $m := nqp::div_n($m, 65536.0); $e := $e + 16 }
+                while nqp::islt_n($m, 1.52587890625e-5) { $m := nqp::mul_n($m, 65536.0); $e := $e - 16 }
+                while nqp::isge_n($m, 2.0)              { $m := nqp::div_n($m, 2.0);     $e := $e + 1  }
+                while nqp::islt_n($m, 1.0)              { $m := nqp::mul_n($m, 2.0);     $e := $e - 1  }
+
+                my $M := nqp::fromnum_I(nqp::mul_n($m, 4503599627370496.0), $knowhow);
+                my $hex;
+                if $has-prec && $precision < 13 {
+                    # round to $precision hex fraction digits, ties-to-even
+                    my $D  := nqp::pow_I(nqp::box_i(16, $knowhow), nqp::box_i(13 - $precision, $knowhow), $knowhow, $knowhow);
+                    my $q  := nqp::div_I($M, $D, $knowhow);
+                    my $r2 := nqp::mul_I(nqp::mod_I($M, $D, $knowhow), nqp::box_i(2, $knowhow), $knowhow);
+                    my $cmp := nqp::cmp_I($r2, $D);
+                    $q := nqp::add_I($q, nqp::box_i(1, $knowhow), $knowhow)
+                        if $cmp > 0 || $cmp == 0 && nqp::bool_I(nqp::mod_I($q, nqp::box_i(2, $knowhow), $knowhow));
+                    $hex := nqp::base_I($q, 16);
+                }
+                else {
+                    $hex := nqp::base_I($M, 16);
+                }
+                $lead := nqp::substr($hex, 0, 1);
+                $frac := nqp::substr($hex, 1);
+                if $has-prec {
+                    $frac := $frac ~ infix_x('0', $precision - nqp::chars($frac));
+                }
+                else {  # exact representation: drop trailing zeroes
+                    my int $n := nqp::chars($frac);
+                    $n := $n - 1 while $n > 0 && nqp::eqat($frac, '0', $n - 1);
+                    $frac := nqp::substr($frac, 0, $n);
+                }
+            }
+
+            my $mantissa := $frac ne '' || has_flag($/, 'hash') ?? $lead ~ '.' ~ $frac !! $lead;
+            my $body := 'x' ~ $mantissa ~ 'p' ~ ($e < 0 ?? '-' ~ (0 - $e) !! '+' ~ $e);
+            $body := '0' ~ ($<sym> eq 'a' ?? nqp::lc($body) !! nqp::uc($body));
+
+            # zero padding goes between the '0x' prefix and the mantissa
+            if $pad eq '0' && $size > nqp::chars($sign) + nqp::chars($body) {
+                $body := nqp::substr($body, 0, 2)
+                       ~ infix_x('0', $size - nqp::chars($sign) - nqp::chars($body))
+                       ~ nqp::substr($body, 2);
+            }
+            $sign ~ $body
+        }
+
+        method directive:sym<a>($/) {
+            my $next := next_argument($/);
+            CATCH {
+                bad-type-for-directive($next, 'a', @*ARGS_HAVE);
+            }
+            my num $float := floatify($next);
+            my int $has-prec := $<precision> ?? 1 !! 0;
+            my int $precision := $has-prec ?? $<precision>.made !! 0;
+            my $pad := padding_char($/);
+            my $size := $<size> ?? $<size>.made !! 0;
+            make hex-float($float, $has-prec, $precision, $size, $pad, $/);
+        }
         method directive:sym<e>($/) {
             my $next := next_argument($/);
             CATCH {
