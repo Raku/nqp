@@ -1132,16 +1132,70 @@ role NQPMatchRole is export {
         ) if nqp::isnull_s($flipped);
 
         # Set up cursor with  updated shared info with flipped string
-        my $cursor := self."!cursor_start_cur"();
+        my $flipped_cursor := self."!cursor_start_cur"();
         my $cursor_shared := nqp::clone($shared);
         nqp::bindattr_s($cursor_shared,ParseShared,'$!target', $flipped);
-        nqp::bindattr($cursor, $?CLASS, '$!shared', $cursor_shared);
+        nqp::bindattr($flipped_cursor, $?CLASS, '$!shared', $cursor_shared);
 
         # Update positions to match flipped
         my int $cursor_pos := nqp::chars($flipped) - $pos;
-        nqp::bindattr_i($cursor, $?CLASS, '$!from', $cursor_pos);
-        nqp::bindattr_i($cursor, $?CLASS, '$!pos',  $cursor_pos);
-        nqp::getattr_i($regex($cursor), $?CLASS, '$!pos') >= 0
+        nqp::bindattr_i($flipped_cursor, $?CLASS, '$!from', $cursor_pos);
+        nqp::bindattr_i($flipped_cursor, $?CLASS, '$!pos',  $cursor_pos);
+
+        # Pass or fail on a cursor of our own, not the one the regex ran
+        # on: that one holds the flipped target and flipped positions.
+        my $cursor := self."!cursor_start_cur"();
+        nqp::getattr_i($regex($flipped_cursor), $?CLASS, '$!pos') >= 0
+          ?? $cursor."!cursor_pass"($pos, 'after')
+          !! nqp::bindattr_i($cursor, $?CLASS, '$!pos', -3);
+
+        # Restore expectations
+        nqp::bindattr_i($shared, ParseShared, '$!highwater',  $orig_highwater);
+        nqp::bindattr(  $shared, ParseShared, '@!highexpect', $orig_highexpect);
+
+        $cursor
+    }
+
+    # Lookbehind for patterns that cannot be matched on the flipped
+    # target, such as subrule calls, whose compiled bodies match
+    # left-to-right no matter what called them.  Matches the unmodified
+    # pattern forward from each position at or before the current one,
+    # succeeding if any such match ends exactly at the current position.
+    method after_scan($regex) {
+        my $*SUPPOSING         := 1;
+
+        my $shared  := $!shared;
+        my int $pos := $!pos;
+
+        # Save and clear current expectations
+        my int $orig_highwater :=
+          nqp::getattr_i($shared, ParseShared, '$!highwater');
+        my $orig_highexpect :=
+          nqp::getattr($shared, ParseShared, '@!highexpect');
+        nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s);
+
+        my $cursor := self."!cursor_start_cur"();
+
+        my int $found := 0;
+        my int $start := $pos;
+        while $start >= 0 && !$found {
+            my $try := self."!cursor_start_cur"();
+            nqp::bindattr_i($try, $?CLASS, '$!from', $start);
+            nqp::bindattr_i($try, $?CLASS, '$!pos',  $start);
+            my $match   := $regex($try);
+            my int $end := nqp::getattr_i($match, $?CLASS, '$!pos');
+
+            # A match that ends elsewhere is backtracked into, in case
+            # another way it can match does end at the right position.
+            while $end >= 0 && $end != $pos {
+                $match := $match."!cursor_next"();
+                $end   := nqp::getattr_i($match, $?CLASS, '$!pos');
+            }
+            $found := 1 if $end == $pos;
+            $start := $start - 1;
+        }
+
+        $found
           ?? $cursor."!cursor_pass"($pos, 'after')
           !! nqp::bindattr_i($cursor, $?CLASS, '$!pos', -3);
 

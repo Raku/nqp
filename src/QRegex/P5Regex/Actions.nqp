@@ -270,12 +270,16 @@ class QRegex::P5Regex::Actions is HLL::Actions {
 
     method p5assertion:sym«<»($/) {
         if $<nibbler> {
+            my $lookbehind := self.can_flip_ast($<nibbler>.ast)
+                ?? QAST::NodeList.new(
+                       QAST::SVal.new( :value('after') ),
+                       self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)))
+                !! QAST::NodeList.new(
+                       QAST::SVal.new( :value('after_scan') ),
+                       self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
             make QAST::Regex.new(
                 :rxtype<subrule>, :subtype<zerowidth>, :negate($<neg> eq '!'), :node($/),
-                QAST::NodeList.new(
-                    QAST::SVal.new( :value('after') ),
-                    self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))
-                ));
+                $lookbehind);
         }
         else {
             make 0;
@@ -447,6 +451,32 @@ class QRegex::P5Regex::Actions is HLL::Actions {
         nqp::deletekey(%capnames, '$!from');
         nqp::deletekey(%capnames, '$!to');
         %capnames;
+    }
+
+    # Whether flip_ast can turn this syntax tree into one that, matched
+    # against the flipped target, is equivalent to matching the original
+    # right-to-left.  It only reverses literals and concat order, so
+    # anything else that is direction-sensitive (subrule calls such as
+    # backreferences, zero-width checks, and anchors, which it does not
+    # swap) forces the lookbehind to scan instead.
+    method can_flip_ast($qast) {
+        return 1 unless nqp::istype($qast, QAST::Regex);
+        return 0 if $qast.subtype eq 'zerowidth';
+        my $rxtype := $qast.rxtype;
+        if $rxtype eq 'literal' || $rxtype eq 'cclass'
+          || $rxtype eq 'enumcharlist' || $rxtype eq 'charrange' {
+            1
+        }
+        elsif $rxtype eq 'concat' || $rxtype eq 'alt' || $rxtype eq 'altseq'
+          || $rxtype eq 'quant' {
+            for @($qast) {
+                return 0 unless self.can_flip_ast($_);
+            }
+            1
+        }
+        else {
+            0
+        }
     }
 
     method flip_ast($qast) {
@@ -647,9 +677,18 @@ class QRegex::P5Regex::Actions is HLL::Actions {
                 for $<arglist>.ast.list { $qast[0].push( $_ ) }
             }
             elsif $<nibbler> {
-                $name eq 'after' ??
-                    $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1))) !!
+                if $name eq 'after' {
+                    if self.can_flip_ast($<nibbler>.ast) {
+                        $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)));
+                    }
+                    else {
+                        $qast[0][0].value('after_scan');
+                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                    }
+                }
+                else {
                     $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
+                }
             }
         }
         make $qast;

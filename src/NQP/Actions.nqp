@@ -1925,8 +1925,12 @@ class NQP::RegexActions is QRegex::P6Regex::Actions {
                         $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
                         $qast[0].push(QAST::IVal.new( :value($litlen) ));  # optional offset to before
                     }
-                    else {
+                    elsif self.can_flip_ast($<nibbler>.ast) {
                         $qast[0].push(self.qbuildsub(self.flip_ast($<nibbler>.ast), :anon(1), :addself(1)));
+                    }
+                    else {
+                        $qast[0][0].value('after_scan');
+                        $qast[0].push(self.qbuildsub($<nibbler>.ast, :anon(1), :addself(1)));
                     }
                 }
                 else {
