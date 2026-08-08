@@ -187,11 +187,13 @@ class HLL::World {
         $!context.fixup_tasks
     }
 
-    method add_comp_line_directive(@directive) {
+    method add_comp_line_directive(int $orig-line, int $mapped-line, str $filename) {
         my @clds := @*comp_line_directives;
-        my int $elems := nqp::elems(@clds);
-        if $elems == 0 || !(@clds[$elems - 1][0] eq @directive[0]) {
-            nqp::push(@clds, @directive);
+        my int $elems := nqp::elems(@clds[0]);
+        if $elems == 0 || !(nqp::atpos_i(@clds[0], $elems - 1) != $orig-line) {
+            nqp::push_i(@clds[0], $orig-line);
+            nqp::push_i(@clds[1], $mapped-line);
+            nqp::push_s(@clds[2], $filename);
         }
     }
 
