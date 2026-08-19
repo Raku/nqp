@@ -797,7 +797,7 @@ knowhow NQPClassHOW {
         $local ?? $!parents !! $!mro
     }
 
-    method roles($XXX?, :$local!) {
+    method roles($XXX?, :$local) {
         $!roles
     }
 
