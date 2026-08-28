@@ -849,7 +849,7 @@ role NQPMatchRole is export {
           self, "!protoregex_table", { self."!protoregex_table"() }
         );
         for %protorx {
-            self.HOW.cache(self, $_.key, { self.'!protoregex_nfa'($_.key) });
+            self.HOW.cache(self, $_.key, { self.'!protoregex_nfa'($_.key).precompute });
         }
 
         # Pre-compute all the alternation NFAs.
@@ -857,7 +857,7 @@ role NQPMatchRole is export {
             if nqp::can($method, 'ALT_NFAS') {
                 for $method.ALT_NFAS -> $name {
                     self.HOW.cache(
-                       self, ~$name, { self.'!alt_nfa'($method, $name.key) }
+                       self, ~$name, { self.'!alt_nfa'($method, $name.key).precompute }
                     );
                 }
             }
