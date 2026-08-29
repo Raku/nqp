@@ -1028,31 +1028,42 @@ class QRegex::NFA {
     # NFA type.
     my knowhow NFAType is repr('NFA') { }
 
+    # A precomputed NFA carries only its fates list, so reaching here
+    # without a VM-level NFA means it was lost, not never built.
+    method !build_nfa_object() {
+        nqp::die('Precomputed NFA lost its VM-level NFA object')
+          if nqp::elems(@!states) < 2;
+
+#        self.mydump() if $nfadeb;
+
+        nqp::scwbdisable();
+        $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
+        nqp::scwbenable();
+    }
+
     method run(str $target, int $offset) {
-        unless nqp::isconcrete($!nfa_object) {
-
-#            self.mydump() if $nfadeb;
-
-            nqp::scwbdisable();
-            $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
-            nqp::scwbenable();
-        }
+        self.'!build_nfa_object'() unless nqp::isconcrete($!nfa_object);
 
         nqp::nfarunproto($!nfa_object, $target, $offset)
     }
 
     method run_alt(str $target, int $offset, $bstack, $cstack, @labels) {
-
-        unless nqp::isconcrete($!nfa_object) {
-
-#            self.mydump() if $nfadeb;
-
-            nqp::scwbdisable();
-            $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
-            nqp::scwbenable();
-        }
+        self.'!build_nfa_object'() unless nqp::isconcrete($!nfa_object);
 
         nqp::nfarunalt($!nfa_object, $target, $offset, $bstack,$cstack, @labels)
+    }
+
+    # Build the VM-level NFA eagerly and keep only element zero of the
+    # build-time state graph, which !protoregex reads to map a fate back
+    # to its rule name. !precompute_nfas calls this while a grammar is
+    # being compiled, so the compact form is what gets serialized.
+    method precompute() {
+        unless nqp::isconcrete($!nfa_object) {
+            $!nfa_object := nqp::nfafromstatelist(@!states, NFAType);
+        }
+        @!states := nqp::list(nqp::atpos(@!states, 0));
+        $!known  := nqp::null;
+        self
     }
 
     method generic() { $!generic }
