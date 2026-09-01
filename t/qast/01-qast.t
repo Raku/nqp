@@ -1,6 +1,6 @@
 use QAST;
 
-plan(181);
+plan(184);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -122,6 +122,88 @@ is_qast(
     ok($error ne '', 'a BVal for a block the unit never compiles fails to compile');
     ok(nqp::index($error, 'has not appeared') >= 0,
         'the missing block error says the block has not appeared');
+}
+
+{
+    # A compilation run while a unit is being compiled writes its frames
+    # back into that unit's frame list. Code the unit adds after its own
+    # tree may reference such a block. start opens the frame list a unit
+    # compile would, so the compile that follows writes its frames into
+    # the unit compiled from it.
+    my $backend := nqp::getcomp('nqp').backend;
+    my %*COMPILING := nqp::hash();
+    $backend.start(NQPMu);
+    my $shared := QAST::Block.new( :name('shared'), QAST::IVal.new( :value(777) ) );
+    compile_qast(QAST::Block.new(
+        QAST::Op.new( :op('call'), QAST::BVal.new( :value($shared) ) ),
+        $shared
+    ));
+    my $unit := QAST::CompUnit.new(
+        :hll('nqp'),
+        :post_deserialize([
+            QAST::Op.new(
+                :op('bindcurhllsym'),
+                QAST::SVal.new( :value('written-back-block') ),
+                QAST::Op.new( :op('call'), QAST::BVal.new( :value($shared) ) )
+            )
+        ]),
+        QAST::Block.new( QAST::IVal.new( :value(1) ) )
+    );
+    nqp::getcomp('nqp').compile($backend.mast($unit), :from('mast'));
+    is(nqp::getcurhllsym('written-back-block'), 777,
+        'a BVal after the unit tree resolves to a block another compilation wrote back');
+}
+
+{
+    # The same reference inside the unit's tree waits on the unit's own
+    # compilation of the block, which never comes.
+    my $backend := nqp::getcomp('nqp').backend;
+    my %*COMPILING := nqp::hash();
+    $backend.start(NQPMu);
+    my $shared := QAST::Block.new( :name('shared'), QAST::IVal.new( :value(777) ) );
+    compile_qast(QAST::Block.new(
+        QAST::Op.new( :op('call'), QAST::BVal.new( :value($shared) ) ),
+        $shared
+    ));
+    my $error := '';
+    try {
+        $backend.mast(QAST::CompUnit.new(
+            :hll('nqp'),
+            QAST::Block.new( QAST::Op.new( :op('call'), QAST::BVal.new( :value($shared) ) ) )
+        ));
+        CATCH { $error := nqp::getmessage($_) }
+    }
+    ok(nqp::index($error, "'shared' has not appeared") >= 0,
+        'a BVal inside the unit tree for a block only another compilation compiled fails to compile');
+}
+
+{
+    # A frame another compilation made that is not in this unit's frame
+    # list does not serve after the tree either. The second start opens a
+    # fresh frame list for the unit, so the first compile's frames stay in
+    # the shared table but out of the unit's list.
+    my $backend := nqp::getcomp('nqp').backend;
+    my %*COMPILING := nqp::hash();
+    $backend.start(NQPMu);
+    my $foreign := QAST::Block.new( :name('foreign'), QAST::IVal.new( :value(888) ) );
+    compile_qast(QAST::Block.new(
+        QAST::Op.new( :op('call'), QAST::BVal.new( :value($foreign) ) ),
+        $foreign
+    ));
+    $backend.start(NQPMu);
+    my $error := '';
+    try {
+        $backend.mast(QAST::CompUnit.new(
+            :hll('nqp'),
+            :post_deserialize([
+                QAST::Op.new( :op('call'), QAST::BVal.new( :value($foreign) ) )
+            ]),
+            QAST::Block.new( QAST::IVal.new( :value(1) ) )
+        ));
+        CATCH { $error := nqp::getmessage($_) }
+    }
+    ok(nqp::index($error, "'foreign' referenced from") >= 0 && nqp::index($error, 'has not appeared') >= 0,
+        'a BVal after the unit tree for a frame this unit does not hold fails to compile');
 }
 
 is_qast(
