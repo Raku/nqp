@@ -1,6 +1,6 @@
 use QAST;
 
-plan(178);
+plan(181);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -92,6 +92,37 @@ is_qast(
     ),
     666,
     'BVal node');
+
+my $late_block := QAST::Block.new( QAST::IVal.new( :value(555) ) );
+is_qast(
+    QAST::Block.new(
+        QAST::Stmts.new( :resultchild(0),
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($late_block) )
+            ),
+            $late_block
+        )
+    ),
+    555,
+    'BVal node preceding its block');
+
+{
+    my $orphan := QAST::Block.new( QAST::IVal.new( :value(1) ) );
+    my $error := '';
+    try {
+        compile_qast(QAST::Block.new(
+            QAST::Op.new(
+                :op('call'),
+                QAST::BVal.new( :value($orphan) )
+            )
+        ));
+        CATCH { $error := nqp::getmessage($_) }
+    }
+    ok($error ne '', 'a BVal for a block the unit never compiles fails to compile');
+    ok(nqp::index($error, 'has not appeared') >= 0,
+        'the missing block error says the block has not appeared');
+}
 
 is_qast(
     QAST::Block.new(

@@ -10,6 +10,10 @@ my class MASTCompilerInstance {
     # MAST frames lookup hash.
     has %!mast_frames;
 
+    # Frames a block reference created ahead of the block's own
+    # compilation, keyed by cuid, until that compilation fills them in.
+    has %!pending_frames;
+
     # The filename we're compiling.
     has $!file;
 
@@ -375,6 +379,7 @@ my class MASTCompilerInstance {
         );
         $!writer.set-compunit($!mast_compunit);
         %!mast_frames := %moar<mast_frames>;
+        %!pending_frames := nqp::hash();
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
 
@@ -386,6 +391,22 @@ my class MASTCompilerInstance {
 
         # Compile, and evaluate to compilation unit.
         self.as_mast($qast);
+
+        # A reference to a block this unit never compiled would leave an
+        # empty frame standing in for the block.
+        if nqp::elems(%!pending_frames) {
+            my @missing;
+            for sorted_keys(%!pending_frames) -> $cuid {
+                my $name := %!pending_frames{$cuid}[0].name;
+                my $from := %!pending_frames{$cuid}[1];
+                my $desc := "cuid " ~ $cuid;
+                $desc := $desc ~ " '" ~ $name ~ "'" if $name;
+                $desc := $desc ~ " referenced from '" ~ $from ~ "'" if $from;
+                nqp::push(@missing, $desc);
+            }
+            nqp::die("QAST::Block with " ~ nqp::join(", ", @missing)
+                ~ " has not appeared in " ~ $!file);
+        }
 
         # write back our frames to the outer compiler
         if nqp::elems(%moar<frames>) {
@@ -974,14 +995,22 @@ my class MASTCompilerInstance {
         else {
             my $outer_frame := $!mast_frame;
 
-            # Create an empty frame and add it to the compilation unit.
-            my $frame := MAST::Frame.new(
-                :name($node.name),
-                :cuuid($cuid),
-                :writer($!writer),
-                :compunit($!mast_compunit));
-
-            $!mast_compunit.add_frame($frame);
+            # Take the empty frame a reference to this block created
+            # ahead of it, or create one and add it to the compilation
+            # unit.
+            my $frame;
+            if nqp::existskey(%!pending_frames, $cuid) {
+                $frame := %!pending_frames{$cuid}[0];
+                nqp::deletekey(%!pending_frames, $cuid);
+            }
+            else {
+                $frame := MAST::Frame.new(
+                    :name($node.name),
+                    :cuuid($cuid),
+                    :writer($!writer),
+                    :compunit($!mast_compunit));
+                $!mast_compunit.add_frame($frame);
+            }
             $outer := $*BLOCK;
             $block := BlockInfo.new($node, (nqp::defined($outer) ?? $outer !! NQPMu), self);
             %*BLOCKS_DONE{$cuid} := [$block, $outer];
@@ -2067,12 +2096,37 @@ my class MASTCompilerInstance {
         self.const_s($sv.value)
     }
 
-    multi method compile_node(QAST::BVal $bv, :$want) {
-        my $block := $bv.value;
+    # The frame of this compilation unit for a block. A reference that
+    # precedes the block's own compilation gets an empty frame, which
+    # that compilation fills in. The frame table is shared with the
+    # compilations this one nests and the one it nests in, so an entry
+    # another unit made does not count, and the replacement goes back
+    # into the table. Frames written back from a nested compilation
+    # keep that compilation as their compunit even when they land in
+    # this unit's frame list, so a reference to such a block mints a
+    # replacement too. The replacement dies as never appearing, which
+    # holds as long as code another compilation compiled is bound at
+    # load time instead of referenced by block value.
+    method frame_for_block($block) {
         my $cuid  := $block.cuid();
         my $frame := %!mast_frames{$cuid};
-        nqp::die("QAST::Block with cuid $cuid has not appeared")
-            unless $frame && $frame ~~ MAST::Frame;
+        unless $frame && $frame ~~ MAST::Frame
+                && nqp::eqaddr($frame.compunit, $!mast_compunit) {
+            $frame := MAST::Frame.new(
+                :name($block.name),
+                :cuuid($cuid),
+                :writer($!writer),
+                :compunit($!mast_compunit));
+            $!mast_compunit.add_frame($frame);
+            %!mast_frames{$cuid} := $frame;
+            %!pending_frames{$cuid} :=
+                [$frame, $!mast_frame ?? $!mast_frame.name !! ''];
+        }
+        $frame
+    }
+
+    multi method compile_node(QAST::BVal $bv, :$want) {
+        my $frame := self.frame_for_block($bv.value);
 
         my $reg := $!regalloc.fresh_o();
         MAST::Op.new(:frame($!mast_frame),
