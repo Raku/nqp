@@ -14,6 +14,16 @@ my class MASTCompilerInstance {
     # compilation, keyed by cuid, until that compilation fills them in.
     has %!pending_frames;
 
+    # Set once the unit's own tree is compiled, after which no block of
+    # that tree is still to be compiled by this unit. A frame table entry
+    # another compilation made for a referenced block then no longer
+    # waits on this unit compiling the block itself.
+    has int $!tree_compiled;
+
+    # The frames this unit's frame list held before its own compilation
+    # added any, keyed by object id, built on first use.
+    has %!held_frames;
+
     # The filename we're compiling.
     has $!file;
 
@@ -380,6 +390,8 @@ my class MASTCompilerInstance {
         $!writer.set-compunit($!mast_compunit);
         %!mast_frames := %moar<mast_frames>;
         %!pending_frames := nqp::hash();
+        $!tree_compiled := 0;
+        %!held_frames := nqp::null();
         $!file := nqp::ifnull(nqp::getlexdyn('$?FILES'), "<unknown file>");
         $!sc := NQPMu;
 
@@ -828,6 +840,7 @@ my class MASTCompilerInstance {
 
         # Compile the block
         self.as_mast($cu[0]);
+        $!tree_compiled := 1;
 
         # If we are in compilation mode, or have pre-deserialization or
         # post-deserialization tasks, handle those. Overall, the process
@@ -2099,19 +2112,23 @@ my class MASTCompilerInstance {
     # The frame of this compilation unit for a block. A reference that
     # precedes the block's own compilation gets an empty frame, which
     # that compilation fills in. The frame table is shared with the
-    # compilations this one nests and the one it nests in, so an entry
-    # another unit made does not count, and the replacement goes back
-    # into the table. Frames written back from a nested compilation
-    # keep that compilation as their compunit even when they land in
-    # this unit's frame list, so a reference to such a block mints a
-    # replacement too. The replacement dies as never appearing, which
-    # holds as long as code another compilation compiled is bound at
-    # load time instead of referenced by block value.
+    # compilations this one nests and the one it nests in. While this
+    # unit may still compile the block itself, an entry another unit
+    # made does not stand in for that, and the replacement goes back
+    # into the table. Once the unit's tree is compiled no such
+    # compilation is left to come, and the entry serves if the other
+    # compilation wrote the frame back into this unit's frame list,
+    # which is how code compiled while the unit was being compiled gets
+    # into its bytecode. Such a frame keeps the frame indexes its own
+    # compilation gave its bytecode, so what it references at run time
+    # is only right where those line up with this unit's. A replacement
+    # nothing fills dies as never appearing.
     method frame_for_block($block) {
         my $cuid  := $block.cuid();
         my $frame := %!mast_frames{$cuid};
         unless $frame && $frame ~~ MAST::Frame
-                && nqp::eqaddr($frame.compunit, $!mast_compunit) {
+                && (nqp::eqaddr($frame.compunit, $!mast_compunit)
+                    || $!tree_compiled && self.holds_frame($frame)) {
             $frame := MAST::Frame.new(
                 :name($block.name),
                 :cuuid($cuid),
@@ -2123,6 +2140,19 @@ my class MASTCompilerInstance {
                 [$frame, $!mast_frame ?? $!mast_frame.name !! ''];
         }
         $frame
+    }
+
+    # Whether the frame is in this unit's frame list. Only a frame from
+    # another compilation is asked about, and every such frame was in the
+    # list before this unit added its own, so the index is built once.
+    method holds_frame($frame) {
+        if nqp::isnull(%!held_frames) {
+            %!held_frames := nqp::hash();
+            for nqp::getattr($!mast_compunit, MAST::CompUnit, '@!frames') {
+                %!held_frames{nqp::objectid($_)} := 1;
+            }
+        }
+        nqp::existskey(%!held_frames, nqp::objectid($frame))
     }
 
     multi method compile_node(QAST::BVal $bv, :$want) {

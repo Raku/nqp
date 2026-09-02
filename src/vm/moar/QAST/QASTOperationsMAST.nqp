@@ -614,9 +614,7 @@ QAST::MASTOperations.add_core_op('list_b', -> $qastcomp, $op {
         for $op.list {
             nqp::die("The 'list_b' op needs a list of blocks, got " ~ $_.HOW.name($_))
                 unless nqp::istype($_, QAST::Block);
-            my $cuid  := $_.cuid();
-            my $frame := $qastcomp.mast_frames{$cuid};
-            getcode_op($mast_frame, $item_reg, $frame);
+            getcode_op($mast_frame, $item_reg, $qastcomp.frame_for_block($_));
             push_o_op($mast_frame, $arr_reg, $item_reg);
         }
         $regalloc.release_register($item_reg, nqp::const::MVM_reg_obj);
