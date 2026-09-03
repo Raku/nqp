@@ -144,6 +144,11 @@ class QAST::MASTRegexCompiler {
     # Jump table.
     has @!rxjumps;
 
+    # One register per dynquant, set once the regex frame has computed
+    # that quantifier's limits. Collected so the restart label can clear
+    # them all rather than relying on a fresh frame starting zeroed.
+    has @!limits_done_regs;
+
     # Do we use the cursor stack?
     has int $!cstack_used;
 
@@ -264,6 +269,7 @@ class QAST::MASTRegexCompiler {
         );
 
         @!rxjumps := nqp::list($donelabel);
+        @!limits_done_regs := nqp::list();
 
         my $shared := $!regalloc.fresh_o();
         my $itmp := $!regalloc.fresh_i();
@@ -323,6 +329,9 @@ class QAST::MASTRegexCompiler {
         $itmp := $!regalloc.fresh_i();
         my $i18 := $!regalloc.fresh_i();
         $frame.add-label($restartlabel);
+        for @!limits_done_regs {
+            op($frame, 'set', $_, $zero);
+        }
         if $!cstack_used {
             op($frame, 'getattr_o', $cstack, $cur, $curclass, sval('$!cstack'),
                 ival(nqp::hintfor($!cursor_type, '$!cstack')));
@@ -926,10 +935,23 @@ class QAST::MASTRegexCompiler {
         my $min_reg    := $!regalloc.fresh_i();
         my $max_reg    := $!regalloc.fresh_i();
 
+        # The limits come from running code, so a backtrack landing in a
+        # restarted frame finds them unset. Such a landing jumps back to
+        # $limitslabel to compute them and then returns to $landlabel.
+        my $limits_done  := $!regalloc.fresh_i();
+        my $from_landing := $!regalloc.fresh_i();
+        my $limitslabel  := label();
+        my $landlabel    := label();
+        nqp::push(@!limits_done_regs, $limits_done);
+
+        op($frame, 'set', $from_landing, %!reg<zero>);
+        $frame.add-label($limitslabel);
         my $minmax_mast := $!qastcomp.as_mast($minmax, :want(nqp::const::MVM_reg_obj));
         my $res_reg     := $minmax_mast.result_reg;
         op($frame, 'atpos_i', $min_reg, $res_reg, %!reg<zero>);
         op($frame, 'atpos_i', $max_reg, $res_reg, %!reg<one>);
+        op($frame, 'set', $limits_done, %!reg<one>);
+        op($frame, 'if_i', $from_landing, $landlabel);
 
         # return if $min == 0 && $max == 0;
         op($frame, 'if_i', $min_reg, $skip8label);
@@ -962,6 +984,10 @@ class QAST::MASTRegexCompiler {
 
             op($frame, 'goto', $seplabel) if $sep;
             $frame.add-label($looplabel);
+            op($frame, 'if_i', $limits_done, $landlabel);
+            op($frame, 'set', $from_landing, %!reg<one>);
+            op($frame, 'goto', $limitslabel);
+            $frame.add-label($landlabel);
             op($frame, 'set', $ireg, $rep);
             if $sep {
                 self.regex_mast($sep);
@@ -1022,6 +1048,10 @@ class QAST::MASTRegexCompiler {
             op($frame, 'goto', $looplabel);
             $frame.add-label($skip5label);         # }
             $frame.add-label($donelabel);
+            op($frame, 'if_i', $limits_done, $landlabel);
+            op($frame, 'set', $from_landing, %!reg<one>);
+            op($frame, 'goto', $limitslabel);
+            $frame.add-label($landlabel);
 
             op($frame, 'le_i', $ireg, $min_reg, %!reg<one>); # if $min > 1 {
             op($frame, 'if_i', $ireg, $skip6label);
