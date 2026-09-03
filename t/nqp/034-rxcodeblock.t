@@ -1,4 +1,4 @@
-plan(21);
+plan(23);
 
 grammar ABC {
     token TOP { { ok(1, 'basic code assertion'); } }
@@ -53,6 +53,8 @@ grammar DynQuant {
     regex frugal3 { (a **? {[1,3]}) c }
     regex two     { (x ** {2} . ** {2})+ n }
     regex sep     { (<[a..z]> ** {2} % ',') ',b' }
+    regex sepex   { (a **? {2} % ',') $ }
+    regex seprng  { (a **? {[1,3]} % ',') ',c' }
 }
 sub caps($m) {
     return 'no match' unless $m;
@@ -63,7 +65,7 @@ sub caps($m) {
     nqp::join(",", @s)
 }
 if nqp::getcomp('nqp').backend.name ne 'moar' {
-    skip('block quantifier limits are lost on restart', 8);
+    skip('block quantifier limits are lost on restart', 10);
 }
 else {
     ok( !DynQuant.parse('burden'),
@@ -82,4 +84,8 @@ else {
         'backtracking into a capture keeps the limits of each block quantifier in it');
     ok( !DynQuant.parse('a,b', :rule<sep>),
         'backtracking into a capture keeps the block quantifier count with a separator');
+    is( caps(DynQuant.parse('a,a', :rule<sepex>)), 'a,a',
+        'frugal block quantifier with a separator counts its first repetition once');
+    is( caps(DynQuant.parse('a,a,a,c', :rule<seprng>)), 'a,a,a',
+        'frugal block quantifier with a separator grows to its maximum when backtracked into');
 }

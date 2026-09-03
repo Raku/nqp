@@ -976,11 +976,13 @@ class QAST::MASTRegexCompiler {
             my $seplabel := label();
             op($frame, 'set', $rep, %!reg<zero>);
 
-            op($frame, 'ge_i', $ireg, $min_reg, %!reg<one>); # if $min < 1 {
-            op($frame, 'if_i', $ireg, $skip1label);
+            my $hasmin := $!regalloc.fresh_i();
+            op($frame, 'ge_i', $hasmin, $min_reg, %!reg<one>); # if $min < 1 {
+            op($frame, 'if_i', $hasmin, $skip1label);
             self.regex_mark($looplabel_index, $pos, $rep);
             op($frame, 'goto', $donelabel);
             $frame.add-label($skip1label);                      # }
+            $!regalloc.release_register($hasmin, nqp::const::MVM_reg_int64);
 
             op($frame, 'goto', $seplabel) if $sep;
             $frame.add-label($looplabel);
