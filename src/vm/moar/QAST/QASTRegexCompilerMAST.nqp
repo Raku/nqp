@@ -1494,7 +1494,52 @@ class QAST::MASTRegexCompiler {
             return $mast.instructions;
         }
         my $rxtype := $node.rxtype() || 'concat';
+        # A conjunction already puts the position back itself, so it is
+        # wrapped only when negated.
+        if $node.subtype eq 'zerowidth' && is_group($rxtype)
+            && ($node.negate || $rxtype ne 'conj' && $rxtype ne 'conjseq') {
+            return self.zerowidth_group($node, $rxtype);
+        }
         self."$rxtype"($node) # expects to return an nqp::list of instructions
+    }
+
+    # Node types that combine other nodes rather than match input
+    # themselves, and whose own code ignores the negate flag. Only a
+    # conjunction among them acts on zerowidth.
+    sub is_group($rxtype) {
+        $rxtype eq 'alt' || $rxtype eq 'altseq' || $rxtype eq 'concat'
+            || $rxtype eq 'conj' || $rxtype eq 'conjseq'
+    }
+
+    # Compiles a group as an assertion: the position is put back whether
+    # the group matched or not, a negated group succeeds exactly when it
+    # did not match, and either way nothing later can backtrack into it.
+    # The mark carries the position and repetition count to restore, and
+    # gives the marks pushed by the group's contents something to be cut
+    # back to.
+    method zerowidth_group($node, $rxtype) {
+        my $frame := $!qastcomp.mast_frame;
+        my $label_index := self.rxjump();
+        my $label := @!rxjumps[$label_index];
+        self.regex_mark($label_index, %!reg<pos>, %!reg<rep>);
+        self."$rxtype"($node);
+        if $node.negate {
+            self.regex_commit($label_index);
+            op($frame, 'goto', %!reg<fail>);
+            $frame.add-label($label);
+        }
+        else {
+            my $start := $!regalloc.fresh_i();
+            my $donelabel := label();
+            self.regex_peek($label_index, $start);
+            self.regex_commit($label_index);
+            op($frame, 'set', %!reg<pos>, $start);
+            op($frame, 'goto', $donelabel);
+            $frame.add-label($label);
+            op($frame, 'goto', %!reg<fail>);
+            $frame.add-label($donelabel);
+            $!regalloc.release_register($start, nqp::const::MVM_reg_int64);
+        }
     }
 
     method uniprop($node) {

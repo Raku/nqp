@@ -175,6 +175,21 @@ class QRegex::NFA {
           || $method eq 'concat'
           || $method eq 'alt';
 
+        # A group used as an assertion ends the literal prefix and ends
+        # in a fate. A negated group gets the fate straight away, since
+        # the NFA has no negation of a group of states, and so does one
+        # the NFA has no method for. A positive group gets it after its
+        # contents, when they leave a state to attach it to.
+        if $node.subtype eq 'zerowidth'
+          && ($method eq 'alt' || $method eq 'altseq' || $method eq 'concat'
+              || $method eq 'conj' || $method eq 'conjseq') {
+            $!LITEND := 1;
+            return self.fate($node, $from, $to)
+              if $node.negate || !self.HOW.can(self, $method);
+            $from := self."$method"($node, $from, -1);
+            return $from > 0 ?? self.addedge($from, 0, nqp::const::EDGE_FATE, 0) !! 0;
+        }
+
 #        my $result :=
         self.HOW.can(self, $method)
          ?? self."$method"($node, $from, $to)

@@ -57,9 +57,11 @@ class QRegex::Optimizer {
     }
 
     method visit_concat($node) {
-        # a single-child concat can become the child itself
+        # a single-child concat can become the child itself, unless it is
+        # the concat that carries the zerowidth or negate flag
         self.visit_children($node);
-        if nqp::elems(@($node)) == 1 && $!level >= 1 {
+        if nqp::elems(@($node)) == 1 && $!level >= 1
+          && $node.subtype ne 'zerowidth' && !$node.negate {
             return $node[0];
         } elsif nqp::istype($node[0], QAST::Regex)
         && nqp::elems(@($node)) >= 2 && $!level >= 2 {
