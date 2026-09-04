@@ -1,6 +1,15 @@
 # todo :jvm<ignorecase+ignoremark doesn't work on jvm>
 :i:m ﬆ			st	y	ignorecase ignoremark with ligature ﬆ (:i:m)
 :i:m "All hell is breaking loose"			"All is fine, I am sure of it" 	n	RT128875 :i:m combined matches whole string when a single character match is found
+# todo 7 :jvm<ignoremark charclass needs NFG>
+# todo 7 :js<ignoremark charclass needs NFG>
+:m <[a \n]>	a\x0300	y	ignoremark charclass with newline escape matches marked character
+:m <[a \n]>	x	n	ignoremark charclass with newline escape rejects other character
+:m [\n | <[a]>]	a\x0300	y	ignoremark charclass after alternation matches marked character
+:m [<[a]> | \n]	a\x0300	y	ignoremark charclass before alternation matches marked character
+:m [\n | <[b a]>]	a\x0300	y	ignoremark charclass in alternation matches on its second entry
+:m [\n | <[b a]>]	c\x0300	n	ignoremark charclass in alternation rejects marked character not in list
+:m <-[a \n]>	a\x0300	n	negated ignoremark charclass with newline escape rejects marked character
 ##  modifiers
 # todo 6 :jvm<ligature problem>
 :i ﬆ			st	y	ignorecase with ligature ﬆ (:i)
