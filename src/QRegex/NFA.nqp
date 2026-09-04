@@ -660,46 +660,44 @@ class QRegex::NFA {
 
         if $max > 1 || $min > 1 {
             my int $count;
-            my int $state := -1;
+            my int $state;
             my int $has_sep := nqp::defined($node1);
 
+            # Land each repetition on its own state. Landing on $to would
+            # start the next repetition from the caller's exit, and for the
+            # last atom of a regex that exit is state 0, the fate list.
             while $count < $max || $count < $min {
                 if $count >= $min {
                     $state := self.addedge(
                       $from, $to, nqp::const::EDGE_EPSILON, 0);
-
-#                    note("$indent ...quant sf = $st") if $nfadeb;
+                    $to    := $state if $to < 0;
                 }
 
                 $from := self.regex_nfa($node1, $from, -1)
                   if $has_sep && $count > 0;
 
-                $from := self.regex_nfa($node0, $from, $state);
+                $from := self.regex_nfa($node0, $from, -1);
                 ++$count;
             }
 
             $state := self.addedge($from, $to, nqp::const::EDGE_EPSILON, 0);
+            $to    := $state if $to < 0;
 
             if $max == -1 {
                 my int $start := self.addstate;
                 self.addedge($from, $start, nqp::const::EDGE_EPSILON, 0);
-                $from := $start;
 
-                my $looper := self.addstate;
-                self.addedge($looper, $to,   nqp::const::EDGE_EPSILON, 0);
-                self.addedge($looper, $from, nqp::const::EDGE_EPSILON, 0);
+                my int $looper := self.addstate;
+                self.addedge($looper, $to,    nqp::const::EDGE_EPSILON, 0);
+                self.addedge($looper, $start, nqp::const::EDGE_EPSILON, 0);
 
-                $from := self.regex_nfa($node1, $from, -1)
-                  if $has_sep && $count > 0;
-
-                self.regex_nfa($node0, $from, $looper);
+                my int $atom := $has_sep
+                  ?? self.regex_nfa($node1, $start, -1)
+                  !! $start;
+                self.regex_nfa($node0, $atom, $looper);
             }
 
-            $to < 0 && $state > 0 ?? $state !! $to
-
-#            $to := $st if $to < 0 && $st > 0;
-#            note("$indent ...quant returns $to with st = $st") if $nfadeb;
-#            return dentout($to);
+            $to
         }
 
         elsif $max == -1 {
