@@ -1,4 +1,4 @@
-plan(27);
+plan(30);
 
 grammar ABC {
     token TOP { { ok(1, 'basic code assertion'); } }
@@ -116,4 +116,33 @@ else {
     Trimmed.parse('ab', :rule<alt>);
     is( nqp::join(',', @alt), '1,0',
         'a code block sees no capture after backtracking into another alternative');
+}
+
+# A subrule argument and a quantifier limits block run in the middle of
+# the regex, so they must see the position the regex has reached.
+my @args;
+my @limits;
+grammar SeesPos {
+    token probe($p) { <?{ nqp::push(@args, ~$p); 1 }> }
+    token TOP       { a <probe($¢.pos)> b <probe($¢.pos)> c }
+    regex back      { \w+ <probe($¢.pos)> c }
+    token limits    {
+        a ** { nqp::push(@limits, ~$¢.pos); 1 }
+        b ** { nqp::push(@limits, ~$¢.pos); 1 }
+    }
+}
+SeesPos.parse('abc');
+is( nqp::join(',', @args), '1,2',
+    'a subrule argument sees the current position');
+@args := [];
+SeesPos.parse('abc', :rule<back>);
+is( nqp::join(',', @args), '3,2',
+    'a subrule argument sees the position restored by backtracking');
+if nqp::getcomp('nqp').backend.name ne 'moar' {
+    skip('a quantifier limits block sees the current position', 1);
+}
+else {
+    SeesPos.parse('ab', :rule<limits>);
+    is( nqp::join(',', @limits), '0,1',
+        'a quantifier limits block sees the current position');
 }

@@ -956,6 +956,7 @@ class QAST::MASTRegexCompiler {
 
         op($frame, 'set', $from_landing, %!reg<zero>);
         $frame.add-label($limitslabel);
+        op($frame, 'bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'), $pos, ival(-1));
         my $minmax_mast := $!qastcomp.as_mast($minmax, :want(nqp::const::MVM_reg_obj));
         my $res_reg     := $minmax_mast.result_reg;
         op($frame, 'atpos_i', $min_reg, $res_reg, %!reg<zero>);
@@ -1249,6 +1250,9 @@ class QAST::MASTRegexCompiler {
         my $testop   := $node.negate ?? 'ge_i' !! 'lt_i';
         my $captured := 0;
 
+        op($frame, 'bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
+            %!reg<pos>, ival(-1));
+
         # Compile all the children.
         my @arg-regs;
         my @arg-masts;
@@ -1265,8 +1269,6 @@ class QAST::MASTRegexCompiler {
         # Emit the call.
         my $p11 := %!reg<back_cur>;
         my $itmp := $!regalloc.fresh_i();
-        op($frame, 'bindattr_i', %!reg<cur>, %!reg<curclass>, sval('$!pos'),
-            %!reg<pos>, ival(-1));
         if nqp::istype($node[0][0], QAST::SVal) {
             # Method call. Shift the method name from the compiled bits
             # before doing the call.
