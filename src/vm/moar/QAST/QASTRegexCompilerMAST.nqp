@@ -235,6 +235,7 @@ class QAST::MASTRegexCompiler {
         my $back_cur := $!regalloc.fresh_o();
         my $method   := $!regalloc.fresh_o();
         my $tmp      := $!regalloc.fresh_o();
+        my $nullreg  := $!regalloc.fresh_o();
 
         # create our labels
         my $startlabel   := label();
@@ -376,7 +377,16 @@ class QAST::MASTRegexCompiler {
             op($frame, 'dec_i', $i18);
             op($frame, 'atpos_i', $i18, $bstack, $i18);
             $frame.add-label($cutlabel);
+            # When the trim shortens the stack, a MATCH built before it
+            # describes captures that are no longer there, so drop the
+            # cursor's cached one.
+            op($frame, 'elems', $i0, $cstack);
+            op($frame, 'le_i', $i0, $i0, $i18);
+            op($frame, 'if_i', $i0, $jumplabel);
             op($frame, 'setelemspos', $cstack, $i18);
+            op($frame, 'null', $nullreg);
+            op($frame, 'bindattr_o', $cur, $curclass, sval('$!match'), $nullreg,
+                ival(nqp::hintfor($!cursor_type, '$!match')));
         }
         $frame.add-label($jumplabel);
         op($frame, 'jumplist', ival(+@!rxjumps), $itmp);

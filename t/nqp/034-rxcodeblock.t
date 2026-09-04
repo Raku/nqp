@@ -1,4 +1,4 @@
-plan(23);
+plan(27);
 
 grammar ABC {
     token TOP { { ok(1, 'basic code assertion'); } }
@@ -88,4 +88,32 @@ else {
         'frugal block quantifier with a separator counts its first repetition once');
     is( caps(DynQuant.parse('a,a,a,c', :rule<seprng>)), 'a,a,a',
         'frugal block quantifier with a separator grows to its maximum when backtracked into');
+}
+
+# Backtracking drops captures from the stack, and a code block that runs
+# afterwards must see only the captures that remain.
+my @seen;
+my @empty;
+my @alt;
+grammar Trimmed {
+    regex TOP   { (\w)+ { nqp::push(@seen, ~nqp::elems($/[0])) } bc }
+    regex tail  { (\w)+ <?{ my @c := $/[0]; ~@c[nqp::elems(@c) - 1] eq 'b' }> }
+    regex empty { (\w)* { nqp::push(@empty, ~nqp::elems($/[0])) } a }
+    regex alt   { [ (a) b | a ] { nqp::push(@alt, ~nqp::defined($/[0])) } b }
+}
+if nqp::getcomp('nqp').backend.name ne 'moar' {
+    skip('captures stay in the match after backtracking', 4);
+}
+else {
+    Trimmed.parse('abc');
+    is( nqp::join(',', @seen), '3,2,1',
+        'a code block sees only the captures left after backtracking');
+    is( ~Trimmed.parse('abc', :rule<tail>), 'ab',
+        'an assertion sees only the captures left after backtracking');
+    Trimmed.parse('ab', :rule<empty>);
+    is( nqp::join(',', @empty), '2,1,0',
+        'a code block sees no captures after backtracking drops them all');
+    Trimmed.parse('ab', :rule<alt>);
+    is( nqp::join(',', @alt), '1,0',
+        'a code block sees no capture after backtracking into another alternative');
 }
