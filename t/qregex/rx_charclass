@@ -98,4 +98,36 @@ abc <![d]>		abc		y	negated charclass at end of string (issue 9)
 
 <[\«]>			«		y		test for regression introduced with parrot 6.9.0
 
+## Lookarounds over character classes
+<?[\s a]> .		aa		<mob: a @ 0>	lookahead over a mixed character class does not consume
+<?[\N a]>		ab		<mob:  @ 0>		lookahead over a mixed character class is zero width
+<![\s a]> .		bb		<mob: b @ 0>	negated lookahead over a mixed character class matches when neither part does
+<![\s a]> .		aa		n				negated lookahead over a mixed character class fails on the character part
+<![\s a]> .		\x0020a	n				negated lookahead over a mixed character class fails on the backslash part
+<![\s a]>		''		y				negated lookahead over a mixed character class matches at the end of the string
+<![a \s]> .		ab		<mob: b @ 1>	negated lookahead over a mixed character class whose first part matches moves on
+<?[a] - [b]> .	aa		<mob: a @ 0>	lookahead over a character class subtraction does not consume
+<![a] - [b]> .	bb		<mob: b @ 0>	negated lookahead over a character class subtraction matches a subtracted character
+<![a] - [b]> .	aa		n				negated lookahead over a character class subtraction fails on a remaining character
+<?[a] - [\s b]> .	aa		<mob: a @ 0>	lookahead over a subtraction of a mixed character class does not consume
+<![\w] - [\d _]> .	\x0020	<mob:   @ 0>	negated lookahead over a subtraction of a mixed character class matches an excluded character
+<?[a 1] - digit> .	aa		<mob: a @ 0>	lookahead over a subtraction of a named character class does not consume
+<?-[\s a]> .	bb		<mob: b @ 0>	lookahead over a negated mixed character class does not consume
+<!-[\s a]> .	aa		<mob: a @ 0>	negated lookahead over a negated mixed character class matches an excluded character
+[<![\s a]> .]+	xyz a	<mob: xyz @ 0>	negated lookahead over a mixed character class inside a quantifier
+[<![\s a]> .] ** 2	xyz		<mob: xy @ 0>	negated lookahead over a mixed character class inside a bounded quantifier
+[<?[\s a]> (.)]+ a	aaa		<mob[0][1]: a @ 1>	quantified lookahead group backtracks by whole iterations
+[<?[\s a]> b | a]	ab		<mob: a @ 0>	failing atom after a lookahead group backtracks into the next alternative
+[<?[\s a]> b || a]	ab		<mob: a @ 0>	failing atom after a lookahead group backtracks into the next sequential alternative
+a [<![\s a]> . | a]	aab		<mob: aa @ 0>	failing negated lookahead group backtracks into the next alternative
+$<x>=[<?[\s a]> .] | $<y>=[..]	ab	<mob<y>: ab @ 0>	longest token matching counts a lookahead group as one character
+(<?[\s a]>) (.)	aa		<mob[0]:  @ 0>	capture around a lookahead group is empty
+<[a] + [\S]>	b		y				plus sign keeps a negated backslash sequence as a union
+<[a] - []>		a		y				subtracting an empty enumeration leaves the class alone
+<?[a] - []> a	a		y				lookahead over a class subtracting an empty enumeration leaves the class alone
+<![a] - []> .	bb		<mob: b @ 0>	negated lookahead over a class subtracting an empty enumeration matches an excluded character
+<?[]>			a		n				lookahead over an empty enumeration never matches
+<![]> a			a		y				negated lookahead over an empty enumeration always matches
+$<x>=[<?[a] - [b]> . 'b'] | $<y>=[. 'bb']	ab	<mob<x>: ab @ 0>	longest token matching falls through to a lookahead over a subtraction
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4

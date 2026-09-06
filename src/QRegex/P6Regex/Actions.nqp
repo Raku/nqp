@@ -513,7 +513,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         if $<assertion> {
             $qast := $<assertion>.ast;
-            $qast.subtype('zerowidth');
+            # An anchor is already zero width, and changing its subtype
+            # would turn a failing one into a check that always passes.
+            $qast.subtype('zerowidth') unless $qast.rxtype eq 'anchor';
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<pass>, :node($/) );
@@ -525,8 +527,13 @@ class QRegex::P6Regex::Actions is HLL::Actions {
         my $qast;
         if $<assertion> {
             $qast := $<assertion>.ast;
-            $qast.negate( !$qast.negate );
-            $qast.subtype('zerowidth');
+            if $qast.rxtype eq 'anchor' {
+                $qast.subtype($qast.subtype eq 'fail' ?? 'pass' !! 'fail');
+            }
+            else {
+                $qast.negate( !$qast.negate );
+                $qast.subtype('zerowidth');
+            }
         }
         else {
             $qast := QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) );
@@ -643,14 +650,26 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             $curse.panic('Missing + or - between character class elements')
         }
             my $ast := $clist[$i].ast;
-            if $ast.negate || $ast.rxtype eq 'cclass' && ~$ast.node le 'Z' {
-                $ast.subtype('zerowidth');
-                $qast := QAST::Regex.new( :rxtype<concat>, :node($/), :subtype<zerowidth>, :negate(1),
-                        QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast ),
-                        $qast );
-            }
-            else {
+            if ~$clist[$i]<sign> ne '-' {
                 $qast := QAST::Regex.new( $qast, $ast, :rxtype<alt>, :node($/));
+            }
+            # An enumeration with nothing in it compiles to an anchor that
+            # fails, and subtracting nothing leaves the class alone.
+            elsif $ast.rxtype ne 'anchor' {
+                # A subtracted element compiles negated, so a zerowidth
+                # check of it ahead of the class built so far excludes its
+                # characters. A subtracted enumeration with more than one
+                # part already compiles to that check, ahead of the `.`
+                # that consumes the character.
+                my $check;
+                if $ast.rxtype eq 'concat' {
+                    $check := $ast[0];
+                }
+                else {
+                    $ast.subtype('zerowidth');
+                    $check := QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, $ast );
+                }
+                $qast := QAST::Regex.new( :rxtype<concat>, :node($/), $check, $qast );
             }
             ++$i;
         }
@@ -790,8 +809,9 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                                         :subtype($RXm ?? 'ignoremark' !! '') ))
                 if nqp::chars($str);
             $qast := ( my $num := nqp::elems(@alts) ) == 1 ?? @alts[0] !!
-                0 < $num && $<sign> eq '-' ??
-                    QAST::Regex.new( :rxtype<concat>, :node($/), :negate(1),
+                $num == 0 ?? QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) ) !!
+                $<sign> eq '-' ??
+                    QAST::Regex.new( :rxtype<concat>, :node($/),
                         QAST::Regex.new( :rxtype<conj>, :subtype<zerowidth>, |@alts ),
                         QAST::Regex.new( :rxtype<cclass>, :name<.> ) ) !!
                     QAST::Regex.new( :rxtype<alt>, |@alts );
