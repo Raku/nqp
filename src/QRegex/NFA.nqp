@@ -689,7 +689,7 @@ class QRegex::NFA {
             # Land each repetition on its own state. Landing on $to would
             # start the next repetition from the caller's exit, and for the
             # last atom of a regex that exit is state 0, the fate list.
-            while $count < $max || $count < $min {
+            while ($count < $max || $count < $min) && $from > 0 {
                 if $count >= $min {
                     $state := self.addedge(
                       $from, $to, nqp::const::EDGE_EPSILON, 0);
@@ -702,6 +702,9 @@ class QRegex::NFA {
                 $from := self.regex_nfa($node0, $from, -1);
                 ++$count;
             }
+
+            # Only the paths that skipped this repetition remain.
+            return $to > 0 ?? $to !! 0 unless $from > 0;
 
             $state := self.addedge($from, $to, nqp::const::EDGE_EPSILON, 0);
             $to    := $state if $to < 0;
