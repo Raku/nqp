@@ -711,6 +711,47 @@ class QRegex::P6Regex::Actions is HLL::Actions {
             my $RXi := %*RX<i>;
             my $RXm := %*RX<m>;
             my $RXim := $RXi && $RXm;
+            sub enumcharlist(str $chars) {
+                QAST::Regex.new( $chars, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
+                                 :subtype($RXm ?? 'ignoremark' !! '') )
+            }
+            # Fold after assembly since adjacent entries can form one grapheme.
+            # A folded entry that would form one with the entry before it
+            # becomes a list of its own. A case form that is not a single
+            # character cannot be an entry and is left out.
+            sub fold_entries(str $entries) {
+                my str $folded := '';
+                sub add_entry(str $c) {
+                    my str $joined := $folded ~ $c;
+                    if nqp::index($folded, $c) >= 0 {
+                    }
+                    elsif nqp::chars($joined) == nqp::chars($folded) + 1 {
+                        $folded := $joined;
+                    }
+                    else {
+                        @alts.push(enumcharlist($c));
+                    }
+                }
+                sub add_case_form(str $form, str $c) {
+                    add_entry($form) if nqp::chars($form) == 1 && $form ne $c;
+                }
+                my int $n := nqp::chars($entries);
+                my int $i;
+                while $i < $n {
+                    my str $c := $RXm
+                        ?? nqp::chr(nqp::ordbaseat($entries, $i))
+                        !! nqp::substr($entries, $i, 1);
+                    add_entry($c);
+                    if $RXi {
+                        add_case_form(nqp::fc($c), $c);
+                        add_case_form(nqp::uc($c), $c);
+                        add_case_form(nqp::lc($c), $c);
+                        add_case_form(nqp::tc($c), $c);
+                    }
+                    ++$i;
+                }
+                $folded
+            }
             for $<charspec> {
                 if $_[1] {
                     my $node;
@@ -790,24 +831,12 @@ class QRegex::P6Regex::Actions is HLL::Actions {
                         @alts.push($bs);
                     }
                 }
-                elsif $RXim {
-                    my $c := nqp::chr(nqp::ordbaseat(~$_[0], 0));
-                    $str := $str ~ nqp::fc($c) ~ nqp::uc($c);
-                }
-                elsif $RXi {
-                    my $c := ~$_[0];
-                    $str := $str ~ nqp::fc($c) ~ nqp::uc($c);
-                }
-                elsif $RXm {
-                    $str := $str ~ nqp::chr(nqp::ordbaseat(~$_[0], 0));
-                }
                 else {
                     $str := $str ~ ~$_[0];
                 }
             }
-            @alts.push(QAST::Regex.new( $str, :rxtype<enumcharlist>, :node($/), :negate( $<sign> eq '-' ),
-                                        :subtype($RXm ?? 'ignoremark' !! '') ))
-                if nqp::chars($str);
+            $str := fold_entries($str) if $RXi || $RXm;
+            @alts.push(enumcharlist($str)) if nqp::chars($str);
             $qast := ( my $num := nqp::elems(@alts) ) == 1 ?? @alts[0] !!
                 $num == 0 ?? QAST::Regex.new( :rxtype<anchor>, :subtype<fail>, :node($/) ) !!
                 $<sign> eq '-' ??

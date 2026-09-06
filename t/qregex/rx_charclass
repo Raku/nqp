@@ -130,4 +130,8 @@ $<x>=[<?[\s a]> .] | $<y>=[..]	ab	<mob<y>: ab @ 0>	longest token matching counts
 <![]> a			a		y				negated lookahead over an empty enumeration always matches
 $<x>=[<?[a] - [b]> . 'b'] | $<y>=[. 'bb']	ab	<mob<x>: ab @ 0>	longest token matching falls through to a lookahead over a subtraction
 
+# todo 2 :jvm<combining characters need NFG>
+<[b\x[308]]>	b\x0308	y	base character and adjacent combining escape form one entry
+<[b\x[308]]>	b	n	base character that forms one entry with a combining escape is not an entry on its own
+
 ## vim: noexpandtab tabstop=4 shiftwidth=4

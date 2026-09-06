@@ -1,6 +1,40 @@
 # todo :jvm<ignorecase+ignoremark doesn't work on jvm>
 :i:m ﬆ			st	y	ignorecase ignoremark with ligature ﬆ (:i:m)
 :i:m "All hell is breaking loose"			"All is fine, I am sure of it" 	n	RT128875 :i:m combined matches whole string when a single character match is found
+# todo 7 :jvm<ignoremark charclass needs NFG>
+:m <[a \n]>	a\x0300	y	ignoremark charclass with newline escape matches marked character
+:m <[a \n]>	x	n	ignoremark charclass with newline escape rejects other character
+:m [\n | <[a]>]	a\x0300	y	ignoremark charclass after alternation matches marked character
+:m [<[a]> | \n]	a\x0300	y	ignoremark charclass before alternation matches marked character
+:m [\n | <[b a]>]	a\x0300	y	ignoremark charclass in alternation matches on its second entry
+:m [\n | <[b a]>]	c\x0300	n	ignoremark charclass in alternation rejects marked character not in list
+:m <-[a \n]>	a\x0300	n	negated ignoremark charclass with newline escape rejects marked character
+# todo 6 :jvm<ignoremark charclass needs NFG>
+:m <[\x[E0]]>	a	y	hex escape in ignoremark charclass ignores its mark
+:m <[a \x[300]]>	a\x0300	y	ignoremark charclass entry formed by a base character and combining escape matches marked character
+:m <[\x[300]]>	\x0300	y	ignoremark charclass that is only a combining escape matches that mark
+:m <-[a \x[300]]>	a\x0300	n	negated ignoremark charclass entry formed by a base character and combining escape rejects marked character
+:m <-[a \x[300]]>	b\x0300	y	negated ignoremark charclass entry formed by a base character and combining escape accepts other marked character
+:i:m [\n | <[\x[61]]>]	A\x0300	y	hex escape in ignorecase ignoremark charclass in alternation ignores case and mark
+:i <[\x[4D]]>	m	y	hex escape in ignorecase charclass ignores case
+:i <[\c[LATIN CAPITAL LETTER M]]>	m	y	named escape in ignorecase charclass ignores case
+:i <[\x[DF]]>	\x00DF	y	escape that folds to two characters still matches itself in ignorecase charclass
+:i <[\x[DF]]>	s	n	escape that folds to two characters does not match part of the fold
+:i <[\x[300]]>	\x0300	y	lone combining escape in ignorecase charclass matches itself
+:i <[\c[LATIN SMALL LIGATURE FF]]>	f	n	ligature escape in ignorecase charclass does not match part of the fold
+:i <[ß]>	\x00DF	y	plain character that folds to two characters still matches itself in ignorecase charclass
+:i <[ﬀ]>	\xFB00	y	plain ligature still matches itself in ignorecase charclass
+:i <-[\x[4D]]>	m	n	negated ignorecase charclass with hex escape rejects the other case
+:i <-[\x[4D]]>	n	y	negated ignorecase charclass with hex escape accepts other characters
+:i <[ǆ]>	ǅ	y	ignorecase charclass matches the titlecase form of its entry
+# todo 7 :jvm<combining characters need NFG>
+:i:m <[\x[C0]]>	a	y	hex escape with a mark in ignorecase ignoremark charclass matches the bare base character
+:m [\n | <-[a]>]	b\x0300	y	negated ignoremark charclass in alternation accepts other marked character
+:m [\n | <-[a]>]	a\x0300	n	negated ignoremark charclass in alternation rejects marked character
+:i <[a \x[308]]>	\x00E4	y	ignorecase charclass entry formed by a base character and combining escape matches itself
+:i <[a \x[308]]>	a	n	ignorecase charclass entry formed by a base character and combining escape does not match the bare base character
+:m <[\x[D]\x[A] \x[A]]>	\n	y	folded entries that would form one grapheme stay separate entries
+:m <[\x[D]\x[A] \x[A]]>	\r	y	folded carriage return newline entry matches a carriage return
 ##  modifiers
 # todo 6 :jvm<ligature problem>
 :i ﬆ			st	y	ignorecase with ligature ﬆ (:i)

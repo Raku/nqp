@@ -315,7 +315,8 @@ class QRegex::NFA {
 #        note("$indent enumcharlist $from -> $to") if $nfadeb;
 
         my $charlist := nqp::atpos($node, 0);
-        if $node.subtype eq 'zerowidth' {
+        my str $subtype := $node.subtype;
+        if $subtype eq 'zerowidth' {
             $from := self.addedge(
               $from, -1, nqp::const::EDGE_CHARLIST + ?$node.negate, $charlist
             );
@@ -323,6 +324,23 @@ class QRegex::NFA {
 #            dentout(self.addedge($from, 0, nqp::const::EDGE_FATE, 0));
 
             self.addedge($from, 0, nqp::const::EDGE_FATE, 0)
+        }
+
+        # A charlist edge compares whole graphemes, so an ignoremark list gets
+        # one base character edge per entry. A negated list keeps the charlist
+        # edge, which only ever lets more branches through.
+        elsif !$node.negate && nqp::chars($charlist)
+          && ($subtype eq 'ignoremark' || $subtype eq 'ignorecase+ignoremark') {
+            my int $n := nqp::chars($charlist);
+            my int $i;
+            while $i < $n {
+                $to := self.addedge(
+                  $from, $to, nqp::const::EDGE_CODEPOINT_M,
+                  nqp::ordbaseat($charlist, $i)
+                );
+                ++$i;
+            }
+            $to
         }
 
         else {
