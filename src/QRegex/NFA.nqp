@@ -241,26 +241,16 @@ class QRegex::NFA {
         $to
     }
 
+    # Only the first branch is visible to longest token matching. The
+    # rest of the group and whatever follows it may match anything, so
+    # the prefix also ends here with nothing matched.
     method altseq($node, int $from, int $to) {
         if nqp::elems($node) {
-
-#            my $indent := dentin();
-
-            my int $state := self.regex_nfa(nqp::atpos($node,0), $from, $to);
-            $to := $state if $to < 0 && $state > 0;
-
-            $state := self.addedge($from, $to, nqp::const::EDGE_EPSILON, 0);
-            $to < 0 && $state > 0 ?? $state !! $to
-
-#            $to := $st if $to < 0 && $st > 0;
-#            note("$indent ...altseq returns $to") if $nfadeb;
-#            dentout($to);
-#            $to;
+            my int $state := self.regex_nfa(nqp::atpos($node,0), $from, -1);
+            self.fate($node, $state, 0) if $state > 0;
         }
-
-        else {
-            self.fate($node, $from, $to)
-        }
+        self.fate($node, $from, 0);
+        0
     }
 
     method anchor($node, int $from, int $to) {
