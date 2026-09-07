@@ -241,26 +241,16 @@ class QRegex::NFA {
         $to
     }
 
+    # Only the first branch is visible to longest token matching. The
+    # rest of the group and whatever follows it may match anything, so
+    # the prefix also ends here with nothing matched.
     method altseq($node, int $from, int $to) {
         if nqp::elems($node) {
-
-#            my $indent := dentin();
-
-            my int $state := self.regex_nfa(nqp::atpos($node,0), $from, $to);
-            $to := $state if $to < 0 && $state > 0;
-
-            $state := self.addedge($from, $to, nqp::const::EDGE_EPSILON, 0);
-            $to < 0 && $state > 0 ?? $state !! $to
-
-#            $to := $st if $to < 0 && $st > 0;
-#            note("$indent ...altseq returns $to") if $nfadeb;
-#            dentout($to);
-#            $to;
+            my int $state := self.regex_nfa(nqp::atpos($node,0), $from, -1);
+            self.fate($node, $state, 0) if $state > 0;
         }
-
-        else {
-            self.fate($node, $from, $to)
-        }
+        self.fate($node, $from, 0);
+        0
     }
 
     method anchor($node, int $from, int $to) {
@@ -699,7 +689,7 @@ class QRegex::NFA {
             # Land each repetition on its own state. Landing on $to would
             # start the next repetition from the caller's exit, and for the
             # last atom of a regex that exit is state 0, the fate list.
-            while $count < $max || $count < $min {
+            while ($count < $max || $count < $min) && $from > 0 {
                 if $count >= $min {
                     $state := self.addedge(
                       $from, $to, nqp::const::EDGE_EPSILON, 0);
@@ -712,6 +702,9 @@ class QRegex::NFA {
                 $from := self.regex_nfa($node0, $from, -1);
                 ++$count;
             }
+
+            # Only the paths that skipped this repetition remain.
+            return $to > 0 ?? $to !! 0 unless $from > 0;
 
             $state := self.addedge($from, $to, nqp::const::EDGE_EPSILON, 0);
             $to    := $state if $to < 0;
