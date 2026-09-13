@@ -310,7 +310,7 @@ else {
 }
 
 my $backend := nqp::getcomp('nqp').backend.name;
-my $crlf-conversion := $backend eq 'moar' || $backend eq 'js';
+my $crlf-conversion := $backend eq 'moar';
 if $crlf-conversion {
     my $wfh := open($test-file, :w);
     $wfh.print("abc\ndef\r\nghi");
