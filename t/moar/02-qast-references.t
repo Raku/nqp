@@ -1,7 +1,7 @@
 use QAST;
 use nqpmo;
 
-plan(54);
+plan(60);
 
 # Following a test infrastructure.
 sub compile_qast($qast) {
@@ -124,6 +124,45 @@ nqp::sethllconfig('boxedStr-owner', $hllconfig_boxing_str_owner);
 nqp::settypehll($hllconfig_boxing_str<str_lex_ref>, 'boxedStr-owner');
 
 # Tests for lexicalref
+
+for (
+    ['unless', int, QAST::IVal.new( :value(7) ), 'iscont_i'],
+    ['if', int, QAST::IVal.new( :value(0) ), 'iscont_i'],
+    ['unless', num, QAST::NVal.new( :value(1.5) ), 'iscont_n'],
+    ['if', num, QAST::NVal.new( :value(0.0) ), 'iscont_n'],
+    ['unless', str, QAST::SVal.new( :value('a') ), 'iscont_s'],
+    ['if', str, QAST::SVal.new( :value('') ), 'iscont_s'],
+) -> @case {
+    my $op := @case[0];
+    my $type := @case[1];
+    is_qast(
+        QAST::CompUnit.new( :hll<nqp>,
+            QAST::Block.new(
+                QAST::Var.new( :name<loc>, :scope<lexical>, :decl<var>, :returns($type) ),
+                QAST::Op.new(
+                    :op<bind>,
+                    QAST::Var.new( :name<loc>, :scope<lexical> ),
+                    @case[2]
+                ),
+                QAST::Op.new(
+                    :op<call>,
+                    QAST::Block.new(
+                        :blocktype<declaration>,
+                        QAST::Var.new( :name<arg>, :scope<local>, :decl<param> ),
+                        QAST::Op.new( :op(@case[3]), QAST::Var.new( :name<arg>, :scope<local> ) )
+                    ),
+                    QAST::Op.new(
+                        :op($op),
+                        QAST::Var.new( :name<loc>, :scope<lexicalref>, :returns($type) ),
+                        @case[2]
+                    )
+                )
+            )
+        ),
+        1,
+        "a two operand $op passes its " ~ $type.HOW.name($type) ~ " lexicalref condition to a call as the reference"
+    );
+}
 
 is_qast(
     QAST::CompUnit.new( :hll<nqp>,

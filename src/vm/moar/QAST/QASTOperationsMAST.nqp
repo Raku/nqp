@@ -773,8 +773,10 @@ for <if unless with without> -> $op_name {
             }
         }
         elsif nqp::istype($op[0], QAST::Var) && $op[0].scope eq 'lexicalref'
-                && (!$*WANT || $operands == 3) {
+                && ($is_void || $operands == 3) {
             # lexical refs are expensive; try to coerce them to something cheap
+            # A two operand form yields the condition when its branch does not
+            # run. It coerces only when the result is unused.
             my $spec := nqp::objprimspec($op[0].returns);
             @comp_ops[0] := $qastcomp.as_mast(:want(
                 $spec == nqp::const::BIND_VAL_INT
