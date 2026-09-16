@@ -656,19 +656,6 @@ sub round_trip_int_array($desc, @a) {
 
     while ($i < 63) {
         my $backend := nqp::getcomp('nqp').backend.name;
-        if $i >= 31 &&  $backend eq 'js'
-            && nqp::backendconfig(){"intvalsize"} < 8 {
-            todo("native NQP ints are only 32 bit on js :-(", 1);
-            # Sadly this also means that the rest of the tests for these sizes
-            # are (effectively) meaningless, because $b is 0, and 0 + 0 is still
-            # 0. However, they don't fail, because 0 - 4 to 0 + 2 serialise just
-            # fine. So marking them as TODO would give false positive TODO
-            # passes, which prove would alert us to.
-            # It's not clear *what* size guarantees NQP gives (and therefore
-            # expects from the underlying VM). This may need to be revisited
-            # for JS, because JS won't really cope with integers larger than
-            # 2**53
-        }
         ok(nqp::isgt_i($b, 511), '$b is positive for 2 ** ' ~ $i);
         my @a;
         my int $j := -4;
