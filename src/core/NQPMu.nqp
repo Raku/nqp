@@ -6,11 +6,11 @@ my class NQPMu {
         # Assume nobody will be overriding bless in NQP
         nqp::create(self).BUILDALL(%attributes)
     }
-    method bless(NQPMu:U $self: *%attributes) {
+    method bless(*%attributes) {
         nqp::create(self).BUILDALL(%attributes)
     }
 
-    method BUILDALL(NQPMu:D $self: %attrinit) {
+    method BUILDALL(%attrinit) {
         # Get the build plan.
         my $build_plan := self.HOW.BUILDALLPLAN(self);
         my int $count  := nqp::elems($build_plan);

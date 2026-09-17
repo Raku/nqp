@@ -608,6 +608,7 @@ grammar NQP::Grammar is HLL::Grammar {
         | $<quant>=['*'] <param_var>
         | [ <param_var> | <named_param> ] $<quant>=['?'|'!'|<?>]
         ]
+        [ <.ws> 'is' <.ws> $<raw>=['raw'] ]?
         <.ws> <default_value>**0..1
     }
 
