@@ -1183,7 +1183,71 @@ class NQP::Actions is HLL::Actions {
         if $<parameter> {
             for $<parameter> { $BLOCKINIT.push($_.ast); }
         }
+        if $<invocant> {
+            for parameter_type_checks($<invocant>.ast) { $BLOCKINIT.push($_) }
+        }
+        for $<parameter> {
+            for parameter_type_checks($_.ast) { $BLOCKINIT.push($_) }
+        }
         $/.prune;
+    }
+
+    # An object type on a parameter is checked once the argument is bound.
+    # The argument is deconted first unless the parameter is raw, and a
+    # failure calls the hook an HLL may rebind to throw its own exception.
+    sub parameter_type_checks($param) {
+        my @checks;
+        return @checks unless $param.has_ann('typecheck');
+        my $type := $param.ann('typecheck');
+        my $name := $param.name;
+        unless $param.ann('raw') {
+            @checks.push(QAST::Op.new( :op('bind'),
+                QAST::Var.new( :name($name), :scope('lexical') ),
+                QAST::Op.new( :op('decont'),
+                    QAST::Var.new( :name($name), :scope('lexical') ) ) ));
+        }
+        # NQPMu passed for an optional parameter that has no default of its
+        # own counts as not passing it. A raw parameter is left as passed.
+        if $param.ann('typed-default') && !$param.ann('raw') {
+            @checks.push(QAST::Op.new( :op('if'),
+                QAST::Op.new( :op('eqaddr'),
+                    QAST::Var.new( :name($name), :scope('lexical') ),
+                    QAST::WVal.new( :value(NQPMu) ) ),
+                QAST::Op.new( :op('bind'),
+                    QAST::Var.new( :name($name), :scope('lexical') ),
+                    QAST::WVal.new( :value($type) ) ) ));
+        }
+        my $ok := QAST::Op.new( :op('istype'),
+            QAST::Var.new( :name($name), :scope('lexical') ),
+            QAST::WVal.new( :value($type) ) );
+        my $definedness := $param.ann('definedness');
+        my str $smiley := $definedness eq 'D' ?? 'D' !! $definedness eq 'U' ?? 'U' !! '';
+        if $definedness eq 'D' {
+            $ok := QAST::Op.new( :op('if'), $ok,
+                QAST::Op.new( :op('isconcrete'),
+                    QAST::Var.new( :name($name), :scope('lexical') ) ) );
+        }
+        elsif $definedness eq 'U' {
+            $ok := QAST::Op.new( :op('if'), $ok,
+                QAST::Op.new( :op('not_i'), QAST::Op.new( :op('isconcrete'),
+                    QAST::Var.new( :name($name), :scope('lexical') ) ) ) );
+        }
+        # The hook is expected to throw, so a bad argument is refused even
+        # when it returns.
+        @checks.push(QAST::Op.new( :op('unless'), $ok,
+            QAST::Stmts.new(
+                QAST::Op.new( :op('call'),
+                    QAST::Op.new( :op('gethllsym'),
+                        QAST::SVal.new( :value('nqp') ),
+                        QAST::SVal.new( :value('parameter-type-check-failure') ) ),
+                    QAST::Var.new( :name($name), :scope('lexical') ),
+                    QAST::WVal.new( :value($type) ),
+                    QAST::SVal.new( :value($name) ),
+                    QAST::Op.new( :op('curcode') ),
+                    QAST::SVal.new( :value($smiley) ) ),
+                QAST::Op.new( :op('die'),
+                    QAST::SVal.new( :value("Type check failed in binding to parameter '$name'") ) ) ) ));
+        @checks
     }
 
     method parameter($/) {
@@ -1226,6 +1290,19 @@ class NQP::Actions is HLL::Actions {
                     $ast.default(default_value_for_prim($prim));
                 }
             }
+            elsif $quant ne '*'
+              && ($<named_param> ?? $<named_param><param_var><sigil> !! $<param_var><sigil>) eq '$' {
+                $ast.annotate('typecheck', $type);
+                # An omitted optional of an object type holds the type object,
+                # and so does one passed NQPMu.
+                if $ast.default && !$<default_value> {
+                    $ast.default(QAST::WVal.new( :value($type) ));
+                    $ast.annotate('typed-default', 1);
+                }
+            }
+        }
+        if $<raw> {
+            $ast.annotate('raw', 1);
         }
 
         # Set definedness flag (XXX want a better way to do this).

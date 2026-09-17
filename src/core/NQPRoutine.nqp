@@ -593,3 +593,14 @@ nqp::setinvokespec(NQPRegex, NQPRegex, '$!do', nqp::null);
 #?endif
 nqp::setboolspec(NQPRegex, 5, nqp::null);
 nqp::settypehll(NQPRegex, 'nqp');
+
+# Called with the argument, the declared type, the parameter name, the code
+# object and the D or U of a definedness constraint when an argument does not
+# satisfy a parameter's object type. An HLL may rebind it to throw its own
+# exception.
+nqp::bindhllsym('nqp', 'parameter-type-check-failure', sub ($value, $type, $name, $code, $definedness?) {
+    nqp::die("Type check failed in binding to parameter '" ~ $name ~ "' of '"
+      ~ nqp::getcodename($code) ~ "'; expected " ~ $type.HOW.name($type)
+      ~ ($definedness ?? ':' ~ $definedness !! '')
+      ~ " but got " ~ (nqp::isnull($value) ?? 'null' !! $value.HOW.name($value)));
+});
