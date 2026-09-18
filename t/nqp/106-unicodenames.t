@@ -1,4 +1,4 @@
-plan(40);
+plan(42);
 is(nqp::strfromname('FULL STOP'), '.', 'strfromname works');
 is(nqp::codepointfromname('FULL STOP'), nqp::ord('.'), 'codepointfromname works');
 is(nqp::strfromname('super fake not real name'), '',
@@ -84,6 +84,8 @@ else {
     "nqp::getuniname for U+20001 CJK UNIFIED IDEOGRAPH");
   is(nqp::getuniname(0x17000), "TANGUT IDEOGRAPH-17000", "Tangut ideograph nqp::uniname");
   is(nqp::getuniname(0x1B170), "NUSHU CHARACTER-1B170", "Nushu character nqp::uniname");
+  is(nqp::getuniname(0x18E11), "JURCHEN CHARACTER-18E11", "Jurchen character nqp::uniname");
+  is(nqp::getuniname(0x3F245), "SMALL SEAL CHARACTER-3F245", "Small Seal character nqp::uniname");
 }
 if nqp::getcomp('nqp').backend.name eq 'jvm' {
   skip("Hangul Syllables give incorrect result", 1);
