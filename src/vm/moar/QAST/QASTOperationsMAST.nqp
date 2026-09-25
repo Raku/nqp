@@ -2883,10 +2883,6 @@ sub push_op($frame, str $op, *@args) {
     MAST::Op.new_with_operand_array(:$frame, :$op, @args );
 }
 
-QAST::MASTOperations.add_core_op('js', -> $qastcomp, $op {
-    $qastcomp.as_mast(QAST::Op.new( :op('die'), QAST::SVal.new( :value('Running JS NYI on MoarVM') )))
-});
-
 # Basic op mappings; to avoid having a load of different callsites to build at
 # startup, we initialize these from constants in a loop, except for a handful
 # that have unusual setup (combinations of result and decont).

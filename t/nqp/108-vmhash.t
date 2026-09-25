@@ -38,9 +38,6 @@ is(nqp::elems(@kv), 1, 'just one kv when iteratring');
 
 my $iter := nqp::iterator($clone);
 
-todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    if $backend eq 'js';
-
 my $msg;
 try {
     my $key := nqp::iterkey_s($iter);
@@ -79,13 +76,8 @@ try {
     }
 }
 
-todo('Exceptions for iterators NYI on js', 2)
-    if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
-
-todo('Exceptions for iterators after end NYI on ' ~ $backend, 4)
-    if $backend eq 'js';
 
 $msg := "";
 try {
@@ -114,9 +106,6 @@ is(nqp::index($msg, 'You have not advanced to the first item of the hash iterato
 # And now delete while iterating:
 
 $iter := nqp::iterator($clone);
-
-todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    if $backend eq 'js';
 
 $msg := "";
 try {
@@ -159,8 +148,6 @@ try {
     }
 }
 
-todo('Exceptions for iterators NYI on js', 2)
-    if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
 
@@ -202,9 +189,6 @@ try {
         $msg := nqp::getmessage($_);
     }
 }
-
-todo('Exceptions for iterators before start NYI on ' ~ $backend, 4)
-    if $backend eq 'js';
 ok($msg ne "", 'iterkey on empty hash throws before start');
 is(nqp::index($msg, 'You have not advanced to the first item of the hash iterator'), 0, 'iterkey throws correct exception before start');
 
@@ -229,8 +213,5 @@ try {
       $msg := nqp::getmessage($_);
     }
 }
-
-todo('Exceptions for iterators NYI on js', 2)
-    if $backend eq 'js';
 ok($msg ne "", 'iterator throws after end');
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
