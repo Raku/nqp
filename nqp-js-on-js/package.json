@@ -15,6 +15,6 @@
     }
   ],
   "dependencies": {
-    "nqp-runtime": "0.30.0"
+    "nqp-runtime": "0.43.0"
   }
 }
