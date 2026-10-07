@@ -40,11 +40,6 @@ sub configure_backends {
                   . "Please use --backends or --gen-moar" );
         }
     }
-    if ( $self->active_backend('js') and !$self->active_backend('moar') ) {
-        $self->sorry(
-                "When building the js backend you must also build moar\n"
-              . "Please build with --backends=moar,js\n" );
-    }
 }
 
 sub configure_refine_vars {
@@ -163,44 +158,6 @@ sub configure_moar_backend {
             : $moar_config->{'moar::ldusr'}
         ),
         $moar_config->{'moar::name'}
-    );
-}
-
-sub configure_js_backend {
-    my $self      = shift;
-    my $config    = $self->{config};
-    my $options   = $self->{options};
-    my $ijs       = $self->{impls}{js};
-    my $js_config = $ijs->{config};
-
-    $ijs->{ok} = 1;
-
-    $js_config->{link} = $options->{link};
-    my $node = $self->probe_node;
-    unless ($node) {
-        $self->sorry("No node.js found. Please, install it first.");
-        $ijs->{ok} = 0;
-    }
-    if ( $node eq 'nodejs' ) {
-        $self->sorry( 'You have a broken node.js.'
-              . ' Please install node.js as node instead of nodejs.' );
-        $ijs->{ok} = 0;
-    }
-    $js_config->{node} = $node;
-
-    my $node_version = run_or_die( [ $node, q<--version> ] );
-    my ( $major, $minor, $path ) = $node_version =~ /v(\d+)\.(\d+)\.(\d+)/;
-    unless ( $major > 10 || $major == 10 && $minor >= 10 ) {
-        chomp($node_version);
-        $self->sorry("Need at least node.js v10.10.0 (got $node_version)");
-        $ijs->{ok} = 0;
-    }
-
-    $self->backend_config(
-        'js',
-        js_build_dir =>
-          $self->nfp( "$config->{base_dir}/gen/js", no_quote => 1 ),
-        js_blib => "node_modules",
     );
 }
 
