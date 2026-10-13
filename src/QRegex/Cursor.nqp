@@ -392,7 +392,7 @@ role NQPMatchRole is export {
             $shared := nqp::create(ParseShared);
             nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
             nqp::bindattr($shared, ParseShared, '$!orig', nqp::decont($orig));
-            nqp::bindattr_s($shared, ParseShared, '$!target', nqp::indexingoptimized($orig));
+            nqp::bindattr_s($shared, ParseShared, '$!target', $orig);
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
             nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s);
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash);
