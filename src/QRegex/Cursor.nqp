@@ -388,17 +388,19 @@ role NQPMatchRole is export {
       *%ignore
     ) {
         my $new := $build ?? self !! nqp::create(self);
+        my $CLASS := $?CLASS;
+
         unless $shared {
             $shared := nqp::create(ParseShared);
-            nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $?CLASS);
+            nqp::bindattr($shared, ParseShared, '$!CUR_CLASS', $CLASS);
             nqp::bindattr($shared, ParseShared, '$!orig', nqp::decont($orig));
             nqp::bindattr_s($shared, ParseShared, '$!target', nqp::indexingoptimized($orig));
             nqp::bindattr_i($shared, ParseShared, '$!highwater', 0);
             nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s);
             nqp::bindattr($shared, ParseShared, '%!marks', nqp::hash);
         }
-        nqp::bindattr($new, $?CLASS, '$!shared', $shared);
-        nqp::bindattr($new, $?CLASS, '$!braid',
+        nqp::bindattr($new, $CLASS, '$!shared', $shared);
+        nqp::bindattr($new, $CLASS, '$!braid',
           $braid
             ?? $braid
             !! nqp::isconcrete(self) && $!braid
@@ -408,20 +410,20 @@ role NQPMatchRole is export {
         );
 
         if nqp::isconcrete($c) {
-            nqp::bindattr_i($new, $?CLASS, '$!from', -1);
-            nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($c));
+            nqp::bindattr_i($new, $CLASS, '$!from', -1);
+            nqp::bindattr_i($new, $CLASS, '$!pos', nqp::unbox_i($c));
         }
         elsif nqp::isconcrete($p) {
-            nqp::bindattr_i($new, $?CLASS, '$!from', nqp::unbox_i($p));
-            nqp::bindattr_i($new, $?CLASS, '$!pos', nqp::unbox_i($p));
+            nqp::bindattr_i($new, $CLASS, '$!from', nqp::unbox_i($p));
+            nqp::bindattr_i($new, $CLASS, '$!pos', nqp::unbox_i($p));
         }
         elsif $build {
-            nqp::bindattr_i($new, $?CLASS, '$!from', 0);
-            nqp::bindattr_i($new, $?CLASS, '$!pos', 0);
+            nqp::bindattr_i($new, $CLASS, '$!from', 0);
+            nqp::bindattr_i($new, $CLASS, '$!pos', 0);
         }
 
         # delegates to $!pos if negative
-        nqp::bindattr_i($new, $?CLASS, '$!to', -1);
+        nqp::bindattr_i($new, $CLASS, '$!to', -1);
 
         nqp::bindattr($shared, ParseShared, '$!fail_cursor',
           nqp::isconcrete($fail_cursor)
@@ -440,46 +442,47 @@ role NQPMatchRole is export {
     method !cursor_start_all() {
         my $new := nqp::create(self);
         my $sub := nqp::callercode;
+        my $CLASS := $?CLASS;
 
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
-        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $CLASS, '$!shared', $!shared);
 
-        nqp::bindattr($new, $?CLASS, '$!braid', nqp::isconcrete(self)
+        nqp::bindattr($new, $CLASS, '$!braid', nqp::isconcrete(self)
           ?? $!braid
           !! Braid."!braid_init"()
         );
-        nqp::bindattr($new, $?CLASS, '$!regexsub', nqp::ifnull(
+        nqp::bindattr($new, $CLASS, '$!regexsub', nqp::ifnull(
           nqp::getcodeobj($sub),
           $sub
         ));
 
         if nqp::defined($!restart) {
-            nqp::bindattr_i($new, $?CLASS, '$!pos', $!pos);
-            nqp::bindattr_i($new, $?CLASS, '$!to', -1);
-            nqp::bindattr(  $new, $?CLASS, '$!cstack', nqp::clone($!cstack))
+            nqp::bindattr_i($new, $CLASS, '$!pos', $!pos);
+            nqp::bindattr_i($new, $CLASS, '$!to', -1);
+            nqp::bindattr(  $new, $CLASS, '$!cstack', nqp::clone($!cstack))
               if $!cstack;
 
             nqp::list(
               $new,
               nqp::getattr_s($!shared, ParseShared, '$!target'),
-              nqp::bindattr_i($new, $?CLASS, '$!from', $!from),
-              $?CLASS,
-              nqp::bindattr($new, $?CLASS, '$!bstack', nqp::clone($!bstack)),
+              nqp::bindattr_i($new, $CLASS, '$!from', $!from),
+              $CLASS,
+              nqp::bindattr($new, $CLASS, '$!bstack', nqp::clone($!bstack)),
               $RESTART
             )
         }
 
         else {
-            nqp::bindattr_i($new, $?CLASS, '$!pos', -3);
-            nqp::bindattr_i($new, $?CLASS, '$!to', -1);
+            nqp::bindattr_i($new, $CLASS, '$!pos', -3);
+            nqp::bindattr_i($new, $CLASS, '$!to', -1);
 
             nqp::list(
               $new,
               nqp::getattr_s($!shared, ParseShared, '$!target'),
-              nqp::bindattr_i($new, $?CLASS, '$!from', $!pos),
-              $?CLASS,
-              nqp::bindattr($new, $?CLASS, '$!bstack', nqp::list_i),
+              nqp::bindattr_i($new, $CLASS, '$!from', $!pos),
+              $CLASS,
+              nqp::bindattr($new, $CLASS, '$!bstack', nqp::list_i),
               $NO_RESTART
             )
         }
@@ -527,19 +530,20 @@ role NQPMatchRole is export {
 
         my $new := nqp::create(self);
         my $sub := nqp::callercode();
+        my $CLASS := $?CLASS;
 
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
 
-        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!braid',  $!braid);
-        nqp::bindattr($new, $?CLASS, '$!regexsub',
+        nqp::bindattr($new, $CLASS, '$!shared', $!shared);
+        nqp::bindattr($new, $CLASS, '$!braid',  $!braid);
+        nqp::bindattr($new, $CLASS, '$!regexsub',
           nqp::ifnull(nqp::getcodeobj($sub), $sub)
         );
-        nqp::bindattr_i($new, $?CLASS, '$!from',   $!pos);
-        nqp::bindattr_i($new, $?CLASS, '$!pos',    -3);
-        nqp::bindattr_i($new, $?CLASS, '$!to',     -1);
-        nqp::bindattr(  $new, $?CLASS, '$!bstack', nqp::list_i);
+        nqp::bindattr_i($new, $CLASS, '$!from',   $!pos);
+        nqp::bindattr_i($new, $CLASS, '$!pos',    -3);
+        nqp::bindattr_i($new, $CLASS, '$!to',     -1);
+        nqp::bindattr(  $new, $CLASS, '$!bstack', nqp::list_i);
         $new
     }
 
@@ -549,11 +553,13 @@ role NQPMatchRole is export {
 
     method !cursor_start_subcapture($from) {
         my $new := nqp::create(self);
-        nqp::bindattr(  $new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr(  $new, $?CLASS, '$!braid',  $!braid);
-        nqp::bindattr_i($new, $?CLASS, '$!from',   $from);
-        nqp::bindattr_i($new, $?CLASS, '$!pos',    -3);
-        nqp::bindattr_i($new, $?CLASS, '$!to',     -1);
+        my $CLASS := $?CLASS;
+
+        nqp::bindattr(  $new, $CLASS, '$!shared', $!shared);
+        nqp::bindattr(  $new, $CLASS, '$!braid',  $!braid);
+        nqp::bindattr_i($new, $CLASS, '$!from',   $from);
+        nqp::bindattr_i($new, $CLASS, '$!pos',    -3);
+        nqp::bindattr_i($new, $CLASS, '$!to',     -1);
         $new;
     }
 
@@ -669,15 +675,17 @@ role NQPMatchRole is export {
         }
         else {
             my $new := self.CREATE();
-            nqp::bindattr(  $new, $?CLASS, '$!shared', $!shared);
-            nqp::bindattr(  $new, $?CLASS, '$!braid',  $!braid);
-            nqp::bindattr_i($new, $?CLASS, '$!from',   -1);
-            nqp::bindattr_i($new, $?CLASS, '$!pos',
+            my $CLASS := $?CLASS;
+
+            nqp::bindattr(  $new, $CLASS, '$!shared', $!shared);
+            nqp::bindattr(  $new, $CLASS, '$!braid',  $!braid);
+            nqp::bindattr_i($new, $CLASS, '$!from',   -1);
+            nqp::bindattr_i($new, $CLASS, '$!pos',
               nqp::atkey(%opts, 'ov') || $!from >= $!pos
                 ?? $!from + 1
                 !! $!pos
             );
-            nqp::bindattr_i($new, $?CLASS, '$!to', -1);
+            nqp::bindattr_i($new, $CLASS, '$!to', -1);
             $!regexsub($new)
         }
     }
@@ -752,11 +760,12 @@ role NQPMatchRole is export {
         my $rxname;
 
         # Check all the fates
+        my $CLASS := $?CLASS;
         while nqp::elems(@fates) {
             $rxname := nqp::atpos(@rxfate, nqp::pop_i(@fates));
             # note("invoking $rxname");
             $cur    := self."$rxname"();
-            @fates  := $EMPTY if nqp::getattr_i($cur, $?CLASS, '$!pos') >= 0;
+            @fates  := $EMPTY if nqp::getattr_i($cur, $CLASS, '$!pos') >= 0;
         }
 
         $cur // nqp::getattr($shared, ParseShared, '$!fail_cursor');
@@ -1092,12 +1101,13 @@ role NQPMatchRole is export {
         nqp::bindattr($shared, ParseShared, '@!highexpect', nqp::list_s);
 
         my $cursor  := self."!cursor_start_cur"();
-        nqp::bindattr_i($cursor, $?CLASS, '$!pos', $pos - $off);
+        my $CLASS   := $?CLASS;
+        nqp::bindattr_i($cursor, $CLASS, '$!pos', $pos - $off);
 
         $pos >= $off
-          && nqp::getattr_i($regex($cursor), $?CLASS, '$!pos') >= 0
+          && nqp::getattr_i($regex($cursor), $CLASS, '$!pos') >= 0
           ?? $cursor."!cursor_pass"($pos, 'before')
-          !! nqp::bindattr_i($cursor, $?CLASS, '$!pos', -3);
+          !! nqp::bindattr_i($cursor, $CLASS, '$!pos', -3);
 
         # Restore expectations
         nqp::bindattr_i($shared, ParseShared, '$!highwater',  $orig_highwater);
@@ -1132,20 +1142,21 @@ role NQPMatchRole is export {
         # Set up cursor with  updated shared info with flipped string
         my $flipped_cursor := self."!cursor_start_cur"();
         my $cursor_shared := nqp::clone($shared);
+        my $CLASS := $?CLASS;
         nqp::bindattr_s($cursor_shared,ParseShared,'$!target', $flipped);
-        nqp::bindattr($flipped_cursor, $?CLASS, '$!shared', $cursor_shared);
+        nqp::bindattr($flipped_cursor, $CLASS, '$!shared', $cursor_shared);
 
         # Update positions to match flipped
         my int $cursor_pos := nqp::chars($flipped) - $pos;
-        nqp::bindattr_i($flipped_cursor, $?CLASS, '$!from', $cursor_pos);
-        nqp::bindattr_i($flipped_cursor, $?CLASS, '$!pos',  $cursor_pos);
+        nqp::bindattr_i($flipped_cursor, $CLASS, '$!from', $cursor_pos);
+        nqp::bindattr_i($flipped_cursor, $CLASS, '$!pos',  $cursor_pos);
 
         # Pass or fail on a cursor of our own, not the one the regex ran
         # on: that one holds the flipped target and flipped positions.
         my $cursor := self."!cursor_start_cur"();
-        nqp::getattr_i($regex($flipped_cursor), $?CLASS, '$!pos') >= 0
+        nqp::getattr_i($regex($flipped_cursor), $CLASS, '$!pos') >= 0
           ?? $cursor."!cursor_pass"($pos, 'after')
-          !! nqp::bindattr_i($cursor, $?CLASS, '$!pos', -3);
+          !! nqp::bindattr_i($cursor, $CLASS, '$!pos', -3);
 
         # Restore expectations
         nqp::bindattr_i($shared, ParseShared, '$!highwater',  $orig_highwater);
@@ -1176,18 +1187,19 @@ role NQPMatchRole is export {
 
         my int $found := 0;
         my int $start := $pos;
+        my $CLASS := $?CLASS;
         while $start >= 0 && !$found {
             my $try := self."!cursor_start_cur"();
-            nqp::bindattr_i($try, $?CLASS, '$!from', $start);
-            nqp::bindattr_i($try, $?CLASS, '$!pos',  $start);
+            nqp::bindattr_i($try, $CLASS, '$!from', $start);
+            nqp::bindattr_i($try, $CLASS, '$!pos',  $start);
             my $match   := $regex($try);
-            my int $end := nqp::getattr_i($match, $?CLASS, '$!pos');
+            my int $end := nqp::getattr_i($match, $CLASS, '$!pos');
 
             # A match that ends elsewhere is backtracked into, in case
             # another way it can match does end at the right position.
             while $end >= 0 && $end != $pos {
                 $match := $match."!cursor_next"();
-                $end   := nqp::getattr_i($match, $?CLASS, '$!pos');
+                $end   := nqp::getattr_i($match, $CLASS, '$!pos');
             }
             $found := 1 if $end == $pos;
             $start := $start - 1;
@@ -1195,7 +1207,7 @@ role NQPMatchRole is export {
 
         $found
           ?? $cursor."!cursor_pass"($pos, 'after')
-          !! nqp::bindattr_i($cursor, $?CLASS, '$!pos', -3);
+          !! nqp::bindattr_i($cursor, $CLASS, '$!pos', -3);
 
         # Restore expectations
         nqp::bindattr_i($shared, ParseShared, '$!highwater',  $orig_highwater);
@@ -1476,10 +1488,11 @@ class NQPMatch is NQPCapture does NQPMatchRole {
               ?? nqp::atpos($list, $onlyname)  # positional
               !! nqp::atkey($hash, $onlyname); # named
 
+            my $CLASS := $?CLASS;
             while $i < $m {
                 my $subcursor := nqp::atpos($cstack, $i);
                 nqp::push($dest,$subcursor.MATCH) unless nqp::isnull_s(
-                  nqp::getattr_s($subcursor, $?CLASS, '$!name')
+                  nqp::getattr_s($subcursor, $CLASS, '$!name')
                 );
                 ++$i;
             }
@@ -1489,9 +1502,10 @@ class NQPMatch is NQPCapture does NQPMatchRole {
         elsif $hascaps {
             my int $m := nqp::elems($cstack);
             my int $i;
+            my $CLASS := $?CLASS;
             while $i < $m {
                 my $subcursor := nqp::atpos($cstack, $i);
-                my str $name  := nqp::getattr_s($subcursor, $?CLASS, '$!name');
+                my str $name  := nqp::getattr_s($subcursor, $CLASS, '$!name');
 
                 if $name {
                     $subcursor.MATCH;  # setup match info
