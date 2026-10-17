@@ -494,28 +494,29 @@ role NQPMatchRole is export {
         # Uncomment following to log cursor creation.
         #$!shared.log_cc(nqp::getcodename($sub));
 
-        nqp::bindattr($new, $?CLASS, '$!shared', $!shared);
-        nqp::bindattr($new, $?CLASS, '$!braid',  $!braid);
-        nqp::bindattr($new, $?CLASS, '$!regexsub',
+        my $class := $?CLASS;
+        nqp::bindattr($new, $class, '$!shared', $!shared);
+        nqp::bindattr($new, $class, '$!braid',  $!braid);
+        nqp::bindattr($new, $class, '$!regexsub',
           nqp::ifnull(nqp::getcodeobj($sub), $sub)
         );
 
         if nqp::defined($!restart) {
-            nqp::bindattr_i($new, $?CLASS, '$!from',   $!from);
-            nqp::bindattr_i($new, $?CLASS, '$!pos',    $!pos);
-            nqp::bindattr(  $new, $?CLASS, '$!bstack', $!bstack);
-            nqp::bindattr(  $new, $?CLASS, '$!cstack', nqp::clone($!cstack))
+            nqp::bindattr_i($new, $class, '$!from',   $!from);
+            nqp::bindattr_i($new, $class, '$!pos',    $!pos);
+            nqp::bindattr(  $new, $class, '$!bstack', $!bstack);
+            nqp::bindattr(  $new, $class, '$!cstack', nqp::clone($!cstack))
               if $!cstack;
 
-            nqp::bindattr(  self, $?CLASS, '$!bstack', nqp::null);
+            nqp::bindattr(  self, $class, '$!bstack', nqp::null);
         }
         else {
-            nqp::bindattr_i($new, $?CLASS, '$!from',   $!pos      );
-            nqp::bindattr_i($new, $?CLASS, '$!pos',    -3         );
-            nqp::bindattr(  $new, $?CLASS, '$!bstack', nqp::list_i);
+            nqp::bindattr_i($new, $class, '$!from',   $!pos      );
+            nqp::bindattr_i($new, $class, '$!pos',    -3         );
+            nqp::bindattr(  $new, $class, '$!bstack', nqp::list_i);
         }
 
-        nqp::bindattr_i($new, $?CLASS, '$!to', -1);
+        nqp::bindattr_i($new, $class, '$!to', -1);
         $new
     }
 
