@@ -100,8 +100,7 @@ class NQP::World is HLL::World {
                             :op('loadbytecode'),
                             QAST::VM.new(
                                 :jvm(QAST::SVal.new( :value('ModuleLoader.class') )),
-                                :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') )),
-                                :js(QAST::SVal.new( :value('ModuleLoader') ))
+                                :moar(QAST::SVal.new( :value('ModuleLoader.moarvm') ))
                             )
                         ),
                     ),
@@ -490,9 +489,6 @@ class NQP::World is HLL::World {
     # Adds libraries that NQP code depends on.
     method libs() {
 #?if jvm
-        QAST::Op.new( :op('null') )
-#?endif
-#?if js
         QAST::Op.new( :op('null') )
 #?endif
 #?if moar

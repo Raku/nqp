@@ -36,18 +36,12 @@ $nqpcomp.addstage('classname', :after<start>);
 @clo.push('vmlibs=s');
 @clo.push('bootstrap');
 #?endif
-#?if js
-@clo.push('nyi=s');
-#?endif
 
 #?if moar
 # XXX FIX ME
 sub MAIN(@ARGS) {
 #?endif
 #?if jvm
-sub MAIN(*@ARGS) {
-#?endif
-#?if js
 sub MAIN(*@ARGS) {
 #?endif
     # Enter the compiler.

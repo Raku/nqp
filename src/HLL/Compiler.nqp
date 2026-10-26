@@ -24,9 +24,6 @@ class HLL::Compiler does HLL::Backend::Default {
 
         # Command options and usage.
         @!cmdoptions := nqp::split(' ', 'e=s help|h target=s trace|t=s encoding=s output|o=s source-name=s combine version|v show-config verbose-config|V stagestats=s? ll-exception nqpevent=s profile=s? profile-compile=s? profile-filename=s profile-kind=s profile-stage=s repl-mode=s rakudo-home'
-#?if js
-        ~ ' substagestats beautify nqp-runtime=s perl6-runtime=s libpath=s shebang execname=s source-map'
-#?endif
 #?if moar
         ~ ' confprog=s full-cleanup debug-suspend debug-port=s tracing'
 #?endif
@@ -269,30 +266,6 @@ class HLL::Compiler does HLL::Backend::Default {
         if $!backend.is_precomp_stage(%adverbs<target>) {
             %adverbs<precomp> := 1;
         }
-
-#?if js
-        my $*PERL6_RUNTIME;
-
-        if %adverbs<perl6-runtime> {
-            $*PERL6_RUNTIME := %adverbs<perl6-runtime>;
-        }
-
-        my $*LIBPATH;
-        if %adverbs<libpath> {
-            my $split := nqp::split('|||', %adverbs<libpath>);
-            $*LIBPATH := nqp::list_s();
-            for $split -> $str {
-                my $absolute := nqp::getcomp('JavaScript').eval('return (function(path) {return require("path").resolve(process.cwd(), path)})')(~$str);
-                nqp::push_s($*LIBPATH, $absolute);
-            }
-            nqp::getcomp('JavaScript').eval('return (function(paths) {nqp.libpath(paths)})')($*LIBPATH);
-        }
-
-        my $*EXECNAME := '';
-        if %adverbs<execname> {
-            $*EXECNAME := %adverbs<execname>;
-        }
-#?endif
 
         self.command_eval(|@a, |%adverbs);
     }
