@@ -1030,9 +1030,6 @@ role NQPMatchRole is export {
 #?if jvm
                 ($i ?? nqp::lc(nqp::substr($target, $pos, $litlen)) eq nqp::lc($str)
 #?endif
-#?if js
-                ($i ?? nqp::lc(nqp::substr($target, $pos, $litlen)) eq nqp::lc($str)
-#?endif
 #?if moar
                 ($i ?? nqp::eqatic($target, $str, $pos)
 #?endif

@@ -134,12 +134,12 @@ The opcodes are grouped into the following categories:
 
 ## [Binary Data](#binarydata)
 
-[readint](#readint-moar-js) |
-[readnum](#readnum-moar-js) |
-[readuint](#readuint-moar-js) |
-[writeint](#writeint-moar-js) |
-[writenum](#writenum-moar-js) |
-[writeuint](#writeuint-moar-js)
+[readint](#readint-moar) |
+[readnum](#readnum-moar) |
+[readuint](#readuint-moar) |
+[writeint](#writeint-moar) |
+[writenum](#writenum-moar) |
+[writeuint](#writeuint-moar)
 
 ## [Bit](#bit)
 
@@ -319,8 +319,8 @@ The opcodes are grouped into the following categories:
 [cmp](#cmp) |
 [eqat](#eqat) |
 [eqatic](#eqatic) |
-[eqaticim](#eqaticim-moar-js) |
-[eqatim](#eqatim-moar-js) |
+[eqaticim](#eqaticim-moar) |
+[eqatim](#eqatim-moar) |
 [falsey](#falsey) |
 [iseq](#iseq) |
 [isge](#isge) |
@@ -473,7 +473,7 @@ The opcodes are grouped into the following categories:
 [tc](#tc) |
 [tclc](#tclc) |
 [uc](#uc) |
-[unicmp_s](#unicmp_s-moar-js) |
+[unicmp_s](#unicmp_s-moar) |
 [x](#x)
 
 ## [System Introspection](#system)
@@ -488,7 +488,7 @@ The opcodes are grouped into the following categories:
 [jvmgetproperties](#jvmgetproperties-jvm) |
 [jvmgetunicodeversion](#jvmgetunicodeversion-jvm) |
 [totalmem](#totalmem) |
-[uname](#uname-moar-js)
+[uname](#uname-moar)
 
 ## [Threads](#threads)
 
@@ -575,7 +575,7 @@ The opcodes are grouped into the following categories:
 [const](#const) |
 [debugnoop](#debugnoop-jvm) |
 [getcodename](#getcodename) |
-[js](#js-moar-js) |
+[js](#js-moar) |
 [locallifetime](#locallifetime) |
 [setcodename](#setcodename) |
 [setdebugtypename](#setdebugtypename) |
@@ -595,7 +595,6 @@ Return the absolute value of a number.
 * `add_i(int $l, int $r --> int)`
 * `add_n(num $l, num $r --> num)`
 * `add_I(Int $l, Int $r, Mu:T $type --> Int)`
-* `add_i64(Int $l, Int $r, Mu:T $type --> Int)` `js`
 
 Add two numbers together, returning the result.
 Typed variants return an object of the given type.
@@ -653,7 +652,6 @@ Return the negative of a number.
 * `sub_i(int $l, int $r --> int)`
 * `sub_n(num $l, num $r --> num)`
 * `sub_I(Int $l, Int $r, Mu:T $type --> Int)`
-* `sub_i64(Int $l, Int $r, Mu:T $type --> Int)` `js`
 
 Subtract $r from $l, returning the result.
 Typed variants return an object of the given type.
@@ -694,7 +692,6 @@ Return whatever is bound to the n-dimensional array @arr at @indices,
 where @indices is a 1-dimensional integer array of index values.
 
 ## atposref
-* `atposref(@arr, int $idx --> Mu)` `js`
 * `atposref_i(@arr, int $idx --> int)`
 * `atposref_n(@arr, int $idx --> num)`
 * `atposref_s(@arr, int $idx --> str)`
@@ -1033,37 +1030,37 @@ see if the operation was a success).
 
 # <a id="binarydata"></a> Binary Data
 
-## readint `moar` `js`
+## readint `moar`
 * `readint(buffer $source, int $offset, int $flags --> int)`
 
 Reads a signed integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit int.
 
-## readnum `moar` `js`
+## readnum `moar`
 * `readnum(buffer $source, int $offset, int $flags --> num)`
 
 Reads a floating point number at offset `$offset` from `$source` with the
 size specified by `$flags`. Returns that value, widened to a 64-bit num.
 
-## readuint `moar` `js`
+## readuint `moar`
 * `readuint(buffer $source, int $offset, int $flags --> uint)`
 
 Reads an unsigned integer at offset `$offset` from `$source` with size and
 endianness specified by `$flags`. Returns that value, widened to a 64-bit uint.
 
-## writeint `moar` `js`
+## writeint `moar`
 * `writeint(buffer $target, int $offset, int $value, int $flags)`
 
 Writes the signed integer `$value` at `$offset` into the buffer `$target`,
 with the size and endianness specified by `$flags`.
 
-## writenum `moar` `js`
+## writenum `moar`
 * `writenum(buffer $target, int $offset, num $value, int $flags)`
 
 Writes the floating point `$value` at `$offset` into the buffer `$target`.
 Only 32-bit and 64-bit sizes are supported.
 
-## writeuint `moar` `js`
+## writeuint `moar`
 * `writeuint(buffer $target, int $offset, uint $value, int $flags)`
 
 Writes the unsigned integer `$value` at `$offset` into the buffer `$target`,
@@ -2084,11 +2081,11 @@ otherwise return 0.
 * `eqatic(str haystack, str $needle, int $pos --> int)`
 Case-insensitive `eqat`
 
-## eqaticim `moar` `js`
+## eqaticim `moar`
 * `eqaticim(str haystack, str $needle, int $pos --> int)`
 Case-insensitive and ignore-mark `eqat`
 
-## eqatim `moar` `js`
+## eqatim `moar`
 * `eqatim(str haystack, str $needle, int $pos --> int)`
 Ignore-mark `eqat`, NFD decomposes and matches the base codepoint
 
@@ -2105,11 +2102,8 @@ Return 0 if the parameter has a truthy value, 1 otherwise.
 * `iseq_s(str $l, str $r --> int)`
 * `iseq_I(Int $l, Int $r --> int)`
 * `iseq_u(uint $l, uint $r --> int)` `moar` `jvm`
-* `iseq_snfg(str $l, str $r --> int)` `js`
 
 Return 1 if the two parameters are equal, 0 otherwise.
-
-`iseq_snfg` is a JS specific opcode that first normalizes string arguments to NFC.
 
 ## isge
 * `isge_i(int $l, int $r --> int)`
@@ -2153,11 +2147,8 @@ Return 1 if $l is less than $r, otherwise 0.
 * `isne_s(str $l, str $r --> int)`
 * `isne_I(Int $l, Int $r --> int)`
 * `isne_u(uint $l, uint $r --> int)` `moar` `jvm`
-* `isne_snfg(str $l, str $r --> int)` `js`
 
 Return 1 if the two parameters are not equal, otherwise 0.
-
-`isne_snfg` is a JS specific opcode that first normalizes string arguments to NFC.
 
 ## not
 * `not_i(int $val --> int)`
@@ -2786,7 +2777,6 @@ resulting string.
 
 ## chars
 * `chars(str $str --> int)`
-* `charsnfg(str $str --> int)` `js`
 
 Return the number of characters in the string.
 
@@ -2925,7 +2915,6 @@ Intended for strings that will be indexed into often, for example, when evaluati
 
 ## iscclass
 * `iscclass(int $class, str $str, int $i --> int)`
-* `iscclassnfg(int $class, str $str, int $i --> int)` `js`
 
 Return 1 if the `$i`th character of $str is of the specified class,
 (`nqp::const::CCLASS_*`), 0 otherwise.
@@ -3102,8 +3091,6 @@ not allowed.
 * `substr_s(str $str, int $position, int $length --> str)` `moar`
 * `substr2(str $str, int $position)` `jvm` _Internal_
 * `substr3(str $str, int $position, int $length)` `jvm` _Internal_
-* `substrnfg(str $str, int $position --> str)` `js`
-* `substrnfg(str $str, int $position, int $length --> str)` `js`
 
 Return the portion of the string starting at the given position.
 If `$length` is specified, only return that many characters. The
@@ -3126,7 +3113,7 @@ characters lowercased.
 
 Return uppercase copy of string.
 
-## unicmp_s `moar` `js`
+## unicmp_s `moar`
 * `unicmp_s(str $str1, str Str2, int $mode, int $iso639, int $iso3166 --> int)`
 
 Compares strings using the [Unicode Collation Algorithm][UCA] (UCA).
@@ -3314,7 +3301,7 @@ Returns the Unicode version that is supported by the Java Runtime.
 
 Returns the number of bytes of memory in use by the VM.
 
-## uname `moar` `js`
+## uname `moar`
 * `uname(--> Mu)`
 
 Returns a string array and fills it with uname data, of which the following
@@ -3889,13 +3876,6 @@ for debugging.
 Returns the name of the given concrete code object.
 Throws an exception if an object of the wrong type is passed.
 
-## js `moar` `js`
-* `js(str)`
-
-Execute the string of JavaScript code passed in.
-
-While this opcode exists in moar, it throws an exception declaring it is not implemented.
-
 ## locallifetime
 * `QAST::Op.new(:op<locallifetime>, :node($/), QAST::Stmt.new(...))`
 
@@ -3914,7 +3894,7 @@ Throws an exception if an object of the wrong type is passed.
 In all backends, sets an attribute field on the object's STable, an internal
 low level representation of a type.
 
-In MoarVM, uses the debug_name field. In JVM/JS, uses the debugName field.
+In MoarVM, uses the debug_name field. In JVM, uses the debugName field.
 
 Intended as a debugging tool only.
 
