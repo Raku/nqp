@@ -6,7 +6,7 @@ class QAST::InlinePlaceholder is QAST::Node {
     method new(:$position, *%options) {
         my $node := nqp::create(self);
         nqp::bindattr_i($node, QAST::InlinePlaceholder, '$!position', $position);
-        $node.set(%options) if %options;
+        $node.set(%options) if nqp::elems(%options);
         $node
     }
 
