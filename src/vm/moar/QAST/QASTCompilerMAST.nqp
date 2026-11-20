@@ -2892,7 +2892,13 @@ class MoarVM::BytecodeWriter {
     }
     method assemble_to_file($filename) {
         $!hll := self.add-string($!compunit.hll || '');
-        my $file := nqp::open($filename, 'w');
+
+        # Write to a temporary file and rename it into place. Truncating
+        # $filename and rewriting it would pull the pages from under any
+        # running process that has the old file mapped, which then dies of
+        # SIGBUS; after a rename it keeps the old file until it exits.
+        my $tmp  := $filename ~ '.tmp-' ~ nqp::getpid();
+        my $file := nqp::open($tmp, 'w');
 
         # skip the header since we don't have all the info yet, we'll go back and write it later
         nqp::seekfh($file, 96, 0);
@@ -2939,6 +2945,7 @@ class MoarVM::BytecodeWriter {
         self.align_and_write($file);
 
         nqp::closefh($file);
+        nqp::rename($tmp, $filename);
     }
     method get_frame_index(MAST::Frame $f) {
         my int $idx := 0;
