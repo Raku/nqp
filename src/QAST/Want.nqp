@@ -2,7 +2,7 @@ class QAST::Want is QAST::Node does QAST::Children {
     method new(*@children, *%options) {
         my $node := nqp::create(self);
         nqp::bindattr($node, QAST::Want, '@!children', @children);
-        $node.set(%options) if %options;
+        $node.set(%options) if nqp::elems(%options);
         $node
     }
 

@@ -16,7 +16,7 @@ class QAST::Block is QAST::Node does QAST::Children {
         nqp::bindattr($node, QAST::Block, '@!children', @children);
         nqp::bindattr_s($node, QAST::Block, '$!name', $name);
         nqp::bindattr_s($node, QAST::Block, '$!blocktype', $blocktype);
-        $node.set(%options) if nqp::isconcrete(%options) && nqp::elems(%options);
+        $node.set(%options) if nqp::elems(%options);
         $node
     }
 
@@ -65,7 +65,7 @@ class QAST::Block is QAST::Node does QAST::Children {
     method symbol(str $name, *%attrs) {
         my %symbol := %!symbol;
         %symbol := %!symbol := nqp::hash() if nqp::isnull(%symbol);
-        if nqp::isconcrete(%attrs) && nqp::elems(%attrs) {
+        if nqp::elems(%attrs) {
             my %syms := %symbol{$name};
             if nqp::ishash(%syms) && nqp::elems(%syms) {
                 for %attrs {

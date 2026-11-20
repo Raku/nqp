@@ -28,7 +28,7 @@ class QAST::Regex is QAST::Node does QAST::Children {
         nqp::bindattr($node, QAST::Regex, '@!children', @children);
         nqp::bindattr_s($node, QAST::Regex, '$!rxtype', $rxtype);
         nqp::bindattr_s($node, QAST::Regex, '$!subtype', $subtype);
-        $node.set(%options) if %options;
+        $node.set(%options) if nqp::elems(%options);
         $node
     }
 

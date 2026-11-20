@@ -9,7 +9,7 @@ class QAST::Op is QAST::Node does QAST::Children {
         nqp::bindattr($node, QAST::Op, '@!children', @children);
         nqp::bindattr_s($node, QAST::Op, '$!name', $name);
         nqp::bindattr_s($node, QAST::Op, '$!op', $op);
-        $node.set(%options) if nqp::isconcrete(%options) && nqp::elems(%options);
+        $node.set(%options) if nqp::elems(%options);
         $node
     }
 
