@@ -2897,7 +2897,7 @@ class MoarVM::BytecodeWriter {
         # $filename and rewriting it would pull the pages from under any
         # running process that has the old file mapped, which then dies of
         # SIGBUS; after a rename it keeps the old file until it exits.
-        my $tmp  := $filename ~ '.tmp-' ~ nqp::getpid();
+        my $tmp  := $filename ~ '.tmp-' ~ nqp::time();
         my $file := nqp::open($tmp, 'w');
 
         # skip the header since we don't have all the info yet, we'll go back and write it later
