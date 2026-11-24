@@ -343,7 +343,7 @@ knowhow ModuleLoader {
         nqp::push(@search_paths, $explicit)
           if !nqp::isnull($explicit) && nqp::defined($explicit);
 
-        my $nqp_lib := nqp::getenvhash()<NQP_LIB>;
+        my $nqp_lib := nqp::atkey(nqp::getenvhash,'NQP_LIB');
         nqp::push(@search_paths, $nqp_lib) unless nqp::isnull($nqp_lib);
 
         @search_paths
