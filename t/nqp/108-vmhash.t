@@ -1,4 +1,4 @@
-plan(54);
+plan(55);
 
 my $backend := nqp::getcomp('nqp').backend.name;
 
@@ -215,3 +215,16 @@ try {
 }
 ok($msg ne "", 'iterator throws after end');
 is($msg, 'Iteration past end of iterator', 'iterator throws correct exception after end');
+
+$msg := "";
+try {
+    my $h := nqp::hash("a", 42);
+    my $i := nqp::iterator($h);
+    nqp::deletekey($h, "a");
+    nqp::shift($i);
+    CATCH {
+        $msg := nqp::getmessage($_);
+    }
+}
+
+ok($msg eq "", 'No SEGV or exception as a result of a misused hash iterator');
