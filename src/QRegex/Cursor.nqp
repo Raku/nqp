@@ -652,6 +652,7 @@ role NQPMatchRole is export {
         $!cstack   :=
         $!regexsub := nqp::null;
         $!pos      := -3;
+        self;
     }
 
     method !cursor_pos(int $pos) {
